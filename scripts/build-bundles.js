@@ -74,23 +74,48 @@ function buildCssBundle() {
 }
 
 // ── Gradients Bundle ──
+// Recursively scans gradients/{still,animated}/{linear,radial,mesh}/
+function collectGradients(dir, category) {
+  const results = [];
+  if (!fs.existsSync(dir)) return results;
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      const subCat = category ? `${category}/${entry.name}` : entry.name;
+      results.push(...collectGradients(fullPath, subCat));
+    } else if (entry.name.endsWith('.json')) {
+      const data = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
+      results.push({ ...data, _category: category || 'uncategorized' });
+    }
+  }
+  return results;
+}
+
 function buildGradientBundle() {
   const baseDir = path.join(ROOT, 'gradients');
   if (!fs.existsSync(baseDir)) return;
 
-  const files = fs.readdirSync(baseDir).filter(f => f.endsWith('.json'));
-  if (files.length === 0) {
+  const all = collectGradients(baseDir, '');
+  if (all.length === 0) {
     console.log('  ⏭  No gradient presets found, skipping bundle');
     return;
   }
 
-  const presets = files.map(f =>
-    JSON.parse(fs.readFileSync(path.join(baseDir, f), 'utf8'))
-  );
-
+  // Combined bundle
   const outPath = path.join(BUNDLES_DIR, 'gradients-all.json');
-  fs.writeFileSync(outPath, JSON.stringify(presets, null, 2));
-  console.log(`  ✓ gradients-all.json — ${presets.length} presets`);
+  fs.writeFileSync(outPath, JSON.stringify(all, null, 2));
+  console.log(`  ✓ gradients-all.json — ${all.length} presets`);
+
+  // Per-group bundles (still, animated)
+  for (const group of ['still', 'animated']) {
+    const groupPresets = all.filter(p => p._category.startsWith(group));
+    if (groupPresets.length > 0) {
+      const gPath = path.join(BUNDLES_DIR, `gradients-${group}.json`);
+      fs.writeFileSync(gPath, JSON.stringify(groupPresets, null, 2));
+      console.log(`  ✓ gradients-${group}.json — ${groupPresets.length} presets`);
+    }
+  }
 }
 
 // ── Themes Bundle ──

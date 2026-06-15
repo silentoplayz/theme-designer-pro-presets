@@ -14,6 +14,14 @@ theme-designer-pro-presets/
 ├── themes/                  # Complete theme presets (.json)
 ├── css-presets/              # CSS-only styling presets
 ├── gradients/                # Gradient preset packs
+│   ├── still/               #   Non-animated gradients
+│   │   ├── linear/          #     Linear gradients
+│   │   ├── radial/          #     Radial gradients
+│   │   └── mesh/            #     Mesh gradients
+│   └── animated/            #   Animated/transitioning gradients
+│       ├── linear/          #     Animated linear gradients
+│       ├── radial/          #     Animated radial gradients
+│       └── mesh/            #     Animated mesh gradients
 ├── bundles/                  # Combined import-ready JSON files
 ├── schemas/                  # JSON schemas for validation
 ├── scripts/                  # Build tooling
@@ -63,7 +71,16 @@ CSS-only styling overrides — fonts, colors, spacing, component styles. No Canv
 
 ### 🌈 Gradients (`gradients/`)
 
-Gradient preset packs for backgrounds, panels, and UI elements.
+Gradient preset packs for backgrounds, panels, and UI elements. Organized by motion and type:
+
+| Path | Description |
+|---|---|
+| `gradients/still/linear/` | Static linear gradients |
+| `gradients/still/radial/` | Static radial gradients |
+| `gradients/still/mesh/` | Static mesh gradients |
+| `gradients/animated/linear/` | Animated linear gradients (shifting, pulsing) |
+| `gradients/animated/radial/` | Animated radial gradients |
+| `gradients/animated/mesh/` | Animated mesh gradients |
 
 ### 📦 Bundles (`bundles/`)
 
