@@ -10,21 +10,22 @@ A curated collection of themes, Canvas FX animations, CSS presets, and gradient 
 
 ```
 theme-designer-pro-presets/
+├── bundles/                 # Combined import-ready JSON files
 ├── canvas-fx/               # Canvas FX animation scripts (.js)
 ├── css-presets/              # CSS-only styling presets (.css)
-├── themes/                  # Complete theme presets (.json)
 ├── gradients/               # Gradient preset packs (.json)
-│   ├── still/               #   Non-animated gradients
+│   ├── animated/            #   Animated/transitioning gradients
 │   │   ├── linear/
 │   │   ├── radial/
 │   │   └── mesh/
-│   └── animated/            #   Animated/transitioning gradients
+│   └── still/               #   Non-animated gradients
 │       ├── linear/
 │       ├── radial/
 │       └── mesh/
-├── bundles/                 # Combined import-ready JSON files
 ├── schemas/                 # JSON schemas for validation
 ├── scripts/                 # Build and extraction tooling
+├── themes/                  # Complete theme presets (.json)
+├── .gitignore
 ├── CONTRIBUTING.md
 ├── LICENSE
 └── README.md
