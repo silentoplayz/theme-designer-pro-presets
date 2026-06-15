@@ -1,0 +1,51 @@
+{
+  "name": "Neon Cyberpunk (Animated)",
+  "dark": {
+    "h": 320,
+    "c": 45,
+    "l": 15,
+    "overrides": {},
+    "locks": {},
+    "customCSS": "/* --- CYBERPUNK BASE --- */\n:root {\n  --cyber-pink: #ff00ff;\n  --cyber-blue: #00ffff;\n  --cyber-green: #00ff00;\n}\n\n/* --- KEYFRAMES --- */\n@keyframes cyber-shift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n@keyframes cyber-scan {\n  0% { top: -10%; opacity: 0; }\n  10% { opacity: 1; }\n  90% { opacity: 1; }\n  100% { top: 110%; opacity: 0; }\n}\n\n@keyframes glitch-text {\n  0% { text-shadow: 1px 0 var(--cyber-pink), -1px 0 var(--cyber-blue); }\n  50% { text-shadow: -1px 0 var(--cyber-pink), 1px 0 var(--cyber-blue); }\n  100% { text-shadow: 1px 0 var(--cyber-pink), -1px 0 var(--cyber-blue); }\n}\n\n/* --- ANIMATED ELEMENTS --- */\n#sidebar {\n  position: relative;\n  overflow: hidden;\n  border-right: 1px solid rgba(255, 0, 255, 0.3) !important;\n}\n\n#sidebar::after {\n  content: '';\n  position: absolute;\n  left: 0;\n  right: 0;\n  height: 3px;\n  background: rgba(0, 255, 255, 0.6);\n  box-shadow: 0 0 15px rgba(0, 255, 255, 1);\n  animation: cyber-scan 3.5s linear infinite;\n  pointer-events: none;\n  z-index: 9999;\n}\n\n.user-message {\n  background: linear-gradient(90deg, rgba(255, 0, 255, 0.05), rgba(0, 255, 255, 0.05), rgba(255, 0, 255, 0.05)) !important;\n  background-size: 200% 200% !important;\n  animation: cyber-shift 4s ease infinite !important;\n  border: 1px solid rgba(0, 255, 255, 0.3) !important;\n  box-shadow: 0 0 15px rgba(0, 255, 255, 0.1) !important;\n}\n\nh1 {\n  animation: glitch-text 3s infinite !important;\n}\n\n/* Add a breathing glow to the send button */\nbutton[type=\"submit\"] {\n  animation: cyber-shift 2s infinite !important;\n  background: linear-gradient(90deg, var(--cyber-pink), var(--cyber-blue), var(--cyber-pink)) !important;\n  background-size: 200% 200% !important;\n  border: none !important;\n  color: white !important;\n}",
+    "customCssEnabled": true,
+    "autoScope": true,
+    "canvasEnabled": false,
+    "canvasScript": ""
+  },
+  "oled": {
+    "h": 320,
+    "c": 45,
+    "l": 0,
+    "overrides": {},
+    "locks": {},
+    "customCSS": "/* --- CYBERPUNK BASE --- */\n:root {\n  --cyber-pink: #ff00ff;\n  --cyber-blue: #00ffff;\n  --cyber-green: #00ff00;\n}\n\n/* --- KEYFRAMES --- */\n@keyframes cyber-shift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n@keyframes cyber-scan {\n  0% { top: -10%; opacity: 0; }\n  10% { opacity: 1; }\n  90% { opacity: 1; }\n  100% { top: 110%; opacity: 0; }\n}\n\n@keyframes glitch-text {\n  0% { text-shadow: 1px 0 var(--cyber-pink), -1px 0 var(--cyber-blue); }\n  50% { text-shadow: -1px 0 var(--cyber-pink), 1px 0 var(--cyber-blue); }\n  100% { text-shadow: 1px 0 var(--cyber-pink), -1px 0 var(--cyber-blue); }\n}\n\n/* --- ANIMATED ELEMENTS --- */\n#sidebar {\n  position: relative;\n  overflow: hidden;\n  border-right: 1px solid rgba(255, 0, 255, 0.3) !important;\n}\n\n#sidebar::after {\n  content: '';\n  position: absolute;\n  left: 0;\n  right: 0;\n  height: 3px;\n  background: rgba(0, 255, 255, 0.6);\n  box-shadow: 0 0 15px rgba(0, 255, 255, 1);\n  animation: cyber-scan 3.5s linear infinite;\n  pointer-events: none;\n  z-index: 9999;\n}\n\n.user-message {\n  background: linear-gradient(90deg, rgba(255, 0, 255, 0.05), rgba(0, 255, 255, 0.05), rgba(255, 0, 255, 0.05)) !important;\n  background-size: 200% 200% !important;\n  animation: cyber-shift 4s ease infinite !important;\n  border: 1px solid rgba(0, 255, 255, 0.3) !important;\n  box-shadow: 0 0 15px rgba(0, 255, 255, 0.1) !important;\n}\n\nh1 {\n  animation: glitch-text 3s infinite !important;\n}\n\n/* Add a breathing glow to the send button */\nbutton[type=\"submit\"] {\n  animation: cyber-shift 2s infinite !important;\n  background: linear-gradient(90deg, var(--cyber-pink), var(--cyber-blue), var(--cyber-pink)) !important;\n  background-size: 200% 200% !important;\n  border: none !important;\n  color: white !important;\n}",
+    "customCssEnabled": true,
+    "autoScope": true,
+    "canvasEnabled": false,
+    "canvasScript": ""
+  },
+  "light": {
+    "h": 320,
+    "c": 45,
+    "l": 95,
+    "overrides": {},
+    "locks": {},
+    "customCSS": "/* --- CYBERPUNK BASE --- */\n:root {\n  --cyber-pink: #ff00ff;\n  --cyber-blue: #00ffff;\n  --cyber-green: #00ff00;\n}\n\n/* --- KEYFRAMES --- */\n@keyframes cyber-shift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n@keyframes cyber-scan {\n  0% { top: -10%; opacity: 0; }\n  10% { opacity: 1; }\n  90% { opacity: 1; }\n  100% { top: 110%; opacity: 0; }\n}\n\n@keyframes glitch-text {\n  0% { text-shadow: 1px 0 var(--cyber-pink), -1px 0 var(--cyber-blue); }\n  50% { text-shadow: -1px 0 var(--cyber-pink), 1px 0 var(--cyber-blue); }\n  100% { text-shadow: 1px 0 var(--cyber-pink), -1px 0 var(--cyber-blue); }\n}\n\n/* --- ANIMATED ELEMENTS --- */\n#sidebar {\n  position: relative;\n  overflow: hidden;\n  border-right: 1px solid rgba(255, 0, 255, 0.3) !important;\n}\n\n#sidebar::after {\n  content: '';\n  position: absolute;\n  left: 0;\n  right: 0;\n  height: 3px;\n  background: rgba(0, 255, 255, 0.6);\n  box-shadow: 0 0 15px rgba(0, 255, 255, 1);\n  animation: cyber-scan 3.5s linear infinite;\n  pointer-events: none;\n  z-index: 9999;\n}\n\n.user-message {\n  background: linear-gradient(90deg, rgba(255, 0, 255, 0.05), rgba(0, 255, 255, 0.05), rgba(255, 0, 255, 0.05)) !important;\n  background-size: 200% 200% !important;\n  animation: cyber-shift 4s ease infinite !important;\n  border: 1px solid rgba(0, 255, 255, 0.3) !important;\n  box-shadow: 0 0 15px rgba(0, 255, 255, 0.1) !important;\n}\n\nh1 {\n  animation: glitch-text 3s infinite !important;\n}\n\n/* Add a breathing glow to the send button */\nbutton[type=\"submit\"] {\n  animation: cyber-shift 2s infinite !important;\n  background: linear-gradient(90deg, var(--cyber-pink), var(--cyber-blue), var(--cyber-pink)) !important;\n  background-size: 200% 200% !important;\n  border: none !important;\n  color: white !important;\n}",
+    "customCssEnabled": true,
+    "autoScope": true,
+    "canvasEnabled": false,
+    "canvasScript": ""
+  },
+  "her": {
+    "h": 320,
+    "c": 45,
+    "l": 95,
+    "overrides": {},
+    "locks": {},
+    "customCSS": "/* --- CYBERPUNK BASE --- */\n:root {\n  --cyber-pink: #ff00ff;\n  --cyber-blue: #00ffff;\n  --cyber-green: #00ff00;\n}\n\n/* --- KEYFRAMES --- */\n@keyframes cyber-shift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n@keyframes cyber-scan {\n  0% { top: -10%; opacity: 0; }\n  10% { opacity: 1; }\n  90% { opacity: 1; }\n  100% { top: 110%; opacity: 0; }\n}\n\n@keyframes glitch-text {\n  0% { text-shadow: 1px 0 var(--cyber-pink), -1px 0 var(--cyber-blue); }\n  50% { text-shadow: -1px 0 var(--cyber-pink), 1px 0 var(--cyber-blue); }\n  100% { text-shadow: 1px 0 var(--cyber-pink), -1px 0 var(--cyber-blue); }\n}\n\n/* --- ANIMATED ELEMENTS --- */\n#sidebar {\n  position: relative;\n  overflow: hidden;\n  border-right: 1px solid rgba(255, 0, 255, 0.3) !important;\n}\n\n#sidebar::after {\n  content: '';\n  position: absolute;\n  left: 0;\n  right: 0;\n  height: 3px;\n  background: rgba(0, 255, 255, 0.6);\n  box-shadow: 0 0 15px rgba(0, 255, 255, 1);\n  animation: cyber-scan 3.5s linear infinite;\n  pointer-events: none;\n  z-index: 9999;\n}\n\n.user-message {\n  background: linear-gradient(90deg, rgba(255, 0, 255, 0.05), rgba(0, 255, 255, 0.05), rgba(255, 0, 255, 0.05)) !important;\n  background-size: 200% 200% !important;\n  animation: cyber-shift 4s ease infinite !important;\n  border: 1px solid rgba(0, 255, 255, 0.3) !important;\n  box-shadow: 0 0 15px rgba(0, 255, 255, 0.1) !important;\n}\n\nh1 {\n  animation: glitch-text 3s infinite !important;\n}\n\n/* Add a breathing glow to the send button */\nbutton[type=\"submit\"] {\n  animation: cyber-shift 2s infinite !important;\n  background: linear-gradient(90deg, var(--cyber-pink), var(--cyber-blue), var(--cyber-pink)) !important;\n  background-size: 200% 200% !important;\n  border: none !important;\n  color: white !important;\n}",
+    "customCssEnabled": true,
+    "autoScope": true,
+    "canvasEnabled": false,
+    "canvasScript": ""
+  }
+}
