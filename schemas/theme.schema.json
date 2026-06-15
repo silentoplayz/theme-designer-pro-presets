@@ -1,33 +1,110 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Theme Preset",
-  "description": "Complete theme configuration for Theme Designer Pro, including CSS, Canvas FX, and settings",
+  "description": "A complete Theme Designer Pro theme with per-mode configurations (dark, light, OLED, her)",
   "type": "object",
-  "required": ["name"],
+  "required": ["name", "dark", "light"],
   "properties": {
     "name": {
       "type": "string",
       "description": "Display name of the theme"
     },
-    "css": {
+    "description": {
       "type": "string",
-      "description": "CSS stylesheet overrides"
+      "description": "Optional description of the theme"
     },
-    "canvas_script": {
+    "author": {
       "type": "string",
-      "description": "Canvas FX animation script (Web Worker JS)"
+      "description": "Theme author name or handle"
     },
-    "canvas_enabled": {
-      "type": "boolean",
-      "description": "Whether Canvas FX is active in this theme"
+    "version": {
+      "type": "string",
+      "description": "Semantic version of this theme (e.g. '1.0.0')"
     },
-    "settings": {
+    "targetVersion": {
+      "type": "string",
+      "description": "Theme Designer Pro version this was built for"
+    },
+    "repositoryUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to the theme's source repository"
+    },
+    "updateUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to fetch theme updates from (raw JSON)"
+    },
+    "dark": { "$ref": "#/$defs/themeMode" },
+    "light": { "$ref": "#/$defs/themeMode" },
+    "oled": { "$ref": "#/$defs/themeMode" },
+    "her": { "$ref": "#/$defs/themeMode" }
+  },
+  "$defs": {
+    "themeMode": {
       "type": "object",
-      "description": "Theme Designer Pro settings snapshot",
+      "description": "Configuration for a single theme mode",
+      "required": ["h", "c", "l"],
       "properties": {
-        "canvas_opacity": { "type": "number", "minimum": 0, "maximum": 1 },
-        "canvas_blend_mode": { "type": "string" },
-        "canvas_position": { "type": "string", "enum": ["background", "foreground"] }
+        "h": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 360,
+          "description": "OKLCH hue angle (0–360)"
+        },
+        "c": {
+          "type": "number",
+          "minimum": 0,
+          "description": "OKLCH chroma value"
+        },
+        "l": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "OKLCH lightness percentage (0–100)"
+        },
+        "overrides": {
+          "type": "object",
+          "description": "CSS custom property overrides (e.g. '--color-gray-50': '#f8f9ff')",
+          "additionalProperties": { "type": "string" }
+        },
+        "locks": {
+          "type": "object",
+          "description": "Map of locked CSS custom properties (true = locked from auto-generation)",
+          "additionalProperties": { "type": "boolean" }
+        },
+        "customCSS": {
+          "type": "string",
+          "description": "Custom CSS stylesheet for this mode"
+        },
+        "customCssEnabled": {
+          "type": "boolean",
+          "description": "Whether custom CSS is active"
+        },
+        "autoScope": {
+          "type": "boolean",
+          "description": "Whether to auto-scope custom CSS to the active theme mode"
+        },
+        "canvasEnabled": {
+          "type": "boolean",
+          "description": "Whether the Canvas FX animation is active"
+        },
+        "canvasScript": {
+          "type": "string",
+          "description": "Canvas FX animation script (Web Worker JS)"
+        },
+        "canvasShowAuth": {
+          "type": "boolean",
+          "description": "Show Canvas FX on auth/login pages"
+        },
+        "themeShowAuth": {
+          "type": "boolean",
+          "description": "Show theme colors on auth/login pages"
+        },
+        "customCssShowAuth": {
+          "type": "boolean",
+          "description": "Show custom CSS on auth/login pages"
+        }
       }
     }
   }
