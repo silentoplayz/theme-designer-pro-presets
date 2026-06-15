@@ -51,5 +51,6 @@
   "version": "1.0.0",
   "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/rose_pine.json",
   "author": "silentoplayz (G30)",
-  "description": "Adaptation of the Rosé Pine color scheme with muted lavender, rose, and pine tones. CSS-only — no Canvas FX."
+  "description": "Adaptation of the Rosé Pine color scheme with muted lavender, rose, and pine tones. CSS-only — no Canvas FX.",
+  "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets"
 }

@@ -1,6 +1,6 @@
 {
   "manifestVersion": "1.0",
-  "generated": "2026-06-15T21:43:09.856Z",
+  "generated": "2026-06-15T21:47:19.690Z",
   "manifestUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/manifest.json",
   "themes": {
     "aether_nebula_flow": {
@@ -119,7 +119,7 @@
       "name": "Neon Overdrive",
       "version": "1.0.0",
       "author": "silentoplayz (G30)",
-      "description": "A curated Cyberpunk theme",
+      "description": "High-octane cyberpunk UI with intense neon magenta and electric blue accents, glitch-styled animations, and Neon Pulse Canvas FX on a deep midnight backdrop.",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/neon_overdrive.json",
       "file": "themes/neon_overdrive.json"
     },

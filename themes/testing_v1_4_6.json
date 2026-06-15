@@ -231,5 +231,6 @@
   "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/testing_v1_4_6.json",
   "version": "1.0.0",
   "author": "silentoplayz (G30)",
-  "description": "Experimental tech-demo theme with sharp zero-radius corners, monospace typography, and Bit-Stream Corruption Canvas FX."
+  "description": "Experimental tech-demo theme with sharp zero-radius corners, monospace typography, and Bit-Stream Corruption Canvas FX.",
+  "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets"
 }

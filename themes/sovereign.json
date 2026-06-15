@@ -167,5 +167,6 @@
   "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/sovereign.json",
   "version": "1.0.0",
   "author": "silentoplayz (G30)",
-  "description": "Architectural material design with Prismatic Caustics Canvas FX, premium glassmorphism panels, and deep navy-indigo tones."
+  "description": "Architectural material design with Prismatic Caustics Canvas FX, premium glassmorphism panels, and deep navy-indigo tones.",
+  "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets"
 }

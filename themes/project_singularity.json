@@ -115,5 +115,6 @@
   "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/project_singularity.json",
   "version": "1.0.0",
   "author": "silentoplayz (G30)",
-  "description": "Void interface with gravitational distortion effects, Accretion Canvas FX, and deep violet-black tones with phase-shift animations."
+  "description": "Void interface with gravitational distortion effects, Accretion Canvas FX, and deep violet-black tones with phase-shift animations.",
+  "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets"
 }

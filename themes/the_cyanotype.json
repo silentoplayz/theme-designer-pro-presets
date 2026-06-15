@@ -103,5 +103,6 @@
   "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/the_cyanotype.json",
   "version": "1.0.0",
   "author": "silentoplayz (G30)",
-  "description": "Blueprint-inspired design with architectural grid overlay, deep navy tones, and technical drawing aesthetics. CSS-only — no Canvas FX."
+  "description": "Blueprint-inspired design with architectural grid overlay, deep navy tones, and technical drawing aesthetics. CSS-only — no Canvas FX.",
+  "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets"
 }

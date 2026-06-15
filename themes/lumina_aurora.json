@@ -167,5 +167,6 @@
   "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/lumina_aurora.json",
   "version": "1.0.0",
   "author": "silentoplayz (G30)",
-  "description": "Premium glassmorphism with layered frosted panels, Fluid Aurora Borealis Canvas FX, and deep indigo-violet tones."
+  "description": "Premium glassmorphism with layered frosted panels, Fluid Aurora Borealis Canvas FX, and deep indigo-violet tones.",
+  "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets"
 }

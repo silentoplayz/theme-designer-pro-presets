@@ -51,5 +51,6 @@
   "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/pink_hues.json",
   "version": "1.0.0",
   "author": "silentoplayz (G30)",
-  "description": "Soft pink and rose color palette with warm pastel accents. A clean, minimal design with no Canvas FX."
+  "description": "Soft pink and rose color palette with warm pastel accents. A clean, minimal design with no Canvas FX.",
+  "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets"
 }

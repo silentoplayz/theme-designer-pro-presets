@@ -250,3 +250,6 @@ self.addEventListener('message', (e) => {
         mouseTimeout = setTimeout(() => { targetMouse.active = false; }, 2000);
     }
 });
+
+// Heartbeat — prevents host from terminating idle workers
+setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);

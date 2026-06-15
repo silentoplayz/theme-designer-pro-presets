@@ -38,3 +38,6 @@ function animate(){
   }
   requestAnimationFrame(animate);
 }
+
+// Heartbeat — prevents host from terminating idle workers
+setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);

@@ -113,5 +113,6 @@
   "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/entropy_data_storm.json",
   "version": "1.0.0",
   "author": "silentoplayz (G30)",
-  "description": "Industrial containment UI with corroded amber warning tones, Bit-Stream Corruption Canvas FX, and JetBrains Mono typography."
+  "description": "Industrial containment UI with corroded amber warning tones, Bit-Stream Corruption Canvas FX, and JetBrains Mono typography.",
+  "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets"
 }

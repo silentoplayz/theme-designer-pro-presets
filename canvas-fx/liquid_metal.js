@@ -74,3 +74,6 @@ function draw() {
   ctx.fillStyle = g;
   ctx.fill();
 }
+
+// Heartbeat — prevents host from terminating idle workers
+setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);
