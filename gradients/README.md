@@ -6,14 +6,14 @@ Gradient presets for backgrounds, panels, and UI elements. Each `.json` file def
 
 ```
 gradients/
-├── still/              # Non-animated gradients
+├── animated/           # Animated/transitioning gradients
 │   ├── linear/
-│   ├── radial/
-│   └── mesh/
-└── animated/           # Animated/transitioning gradients
+│   ├── mesh/
+│   └── radial/
+└── still/              # Non-animated gradients
     ├── linear/
-    ├── radial/
-    └── mesh/
+    ├── mesh/
+    └── radial/
 ```
 
 ## Importing

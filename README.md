@@ -16,12 +16,12 @@ theme-designer-pro-presets/
 ├── gradients/               # Gradient preset packs (.json)
 │   ├── animated/            #   Animated/transitioning gradients
 │   │   ├── linear/
-│   │   ├── radial/
-│   │   └── mesh/
+│   │   ├── mesh/
+│   │   └── radial/
 │   └── still/               #   Non-animated gradients
 │       ├── linear/
-│       ├── radial/
-│       └── mesh/
+│       ├── mesh/
+│       └── radial/
 ├── schemas/                 # JSON schemas for validation
 ├── scripts/                 # Build and extraction tooling
 ├── themes/                  # Complete theme presets (.json)
