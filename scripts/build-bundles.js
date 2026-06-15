@@ -142,9 +142,16 @@ function buildThemesBundle() {
     JSON.parse(fs.readFileSync(path.join(baseDir, f), 'utf8'))
   );
 
+  const bundle = {
+    themes: presets,
+    isLibraryBackup: true,
+    version: '1.0.0',
+    _meta: { generated: new Date().toISOString(), count: presets.length },
+  };
+
   const outPath = path.join(BUNDLES_DIR, 'themes-all.json');
-  fs.writeFileSync(outPath, JSON.stringify(presets, null, 2));
-  console.log(`  ✓ themes-all.json — ${presets.length} themes`);
+  fs.writeFileSync(outPath, JSON.stringify(bundle, null, 2));
+  console.log(`  ✓ themes-all.json — ${presets.length} themes (${(fs.statSync(outPath).size / 1024).toFixed(0)} KB)`);
 }
 
 // ── Run ──
