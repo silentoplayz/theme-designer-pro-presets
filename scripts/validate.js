@@ -121,6 +121,17 @@ function validateThemes() {
 
     if (!requireKeys(data, ['name'], f)) continue;
 
+    // Must have updateUrl pointing to raw GitHub
+    if (!data.updateUrl) {
+      fail(f, 'missing required "updateUrl" field');
+      continue;
+    }
+    const expectedUrl = `https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/${f}`;
+    if (data.updateUrl !== expectedUrl) {
+      fail(f, `updateUrl does not match expected raw GitHub URL`);
+      continue;
+    }
+
     // Must have at least dark and light
     if (!data.dark && !data.light) {
       fail(f, 'missing both "dark" and "light" mode configurations');

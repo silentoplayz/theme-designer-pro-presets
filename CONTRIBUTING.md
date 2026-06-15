@@ -31,6 +31,10 @@ Before submitting a PR, ensure your preset meets these requirements:
 
 - [ ] Exported as valid JSON from Theme Designer Pro
 - [ ] Includes a descriptive `name` field
+- [ ] Includes an `updateUrl` field set to the raw GitHub URL for the file:
+  ```
+  https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/your_theme.json
+  ```
 - [ ] Contains at least `dark` and `light` mode configurations
 - [ ] Tested on both desktop and mobile viewports
 - [ ] No hardcoded pixel values that break on different screen sizes

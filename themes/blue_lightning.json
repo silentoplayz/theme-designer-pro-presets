@@ -323,5 +323,6 @@
     "gradientMeshPoints": [],
     "gradientMeshBgColor": "#0a0a12",
     "paletteEnabled": true
-  }
+  },
+  "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/blue_lightning.json"
 }

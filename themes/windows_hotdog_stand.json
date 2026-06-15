@@ -151,5 +151,6 @@
     },
     "canvasEnabled": false,
     "canvasScript": ""
-  }
+  },
+  "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/windows_hotdog_stand.json"
 }

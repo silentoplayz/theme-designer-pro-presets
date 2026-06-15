@@ -109,5 +109,6 @@
     "canvasShowAuth": true,
     "themeShowAuth": true,
     "customCssShowAuth": true
-  }
+  },
+  "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/entropy_data_storm.json"
 }

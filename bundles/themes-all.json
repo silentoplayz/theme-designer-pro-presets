@@ -113,7 +113,8 @@
         "canvasShowAuth": true,
         "themeShowAuth": true,
         "customCssShowAuth": true
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/aether_nebula_flow.json"
     },
     {
       "name": "Amber Command: 1979",
@@ -254,7 +255,8 @@
         "canvasShowAuth": true,
         "themeShowAuth": true,
         "customCssShowAuth": true
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/amber_command_1979.json"
     },
     {
       "name": "Apollo // Analogue Futurism",
@@ -383,7 +385,8 @@
         "canvasShowAuth": true,
         "themeShowAuth": true,
         "customCssShowAuth": true
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/apollo_analogue_futurism.json"
     },
     {
       "name": "Astral Projection",
@@ -550,7 +553,8 @@
         "canvasShowAuth": true,
         "themeShowAuth": true,
         "customCssShowAuth": true
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/astral_projection.json"
     },
     {
       "name": "Bio-Digital Synthesis",
@@ -691,7 +695,8 @@
         "canvasShowAuth": true,
         "themeShowAuth": true,
         "customCssShowAuth": true
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/bio_digital_synthesis.json"
     },
     {
       "name": "Bioluminescence",
@@ -832,7 +837,8 @@
         "canvasShowAuth": true,
         "themeShowAuth": true,
         "customCssShowAuth": true
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/bioluminescence.json"
     },
     {
       "name": "Blue Lightning",
@@ -1159,7 +1165,8 @@
         "gradientMeshPoints": [],
         "gradientMeshBgColor": "#0a0a12",
         "paletteEnabled": true
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/blue_lightning.json"
     },
     {
       "name": "ENTROPY // DATA-STORM",
@@ -1272,7 +1279,8 @@
         "canvasShowAuth": true,
         "themeShowAuth": true,
         "customCssShowAuth": true
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/entropy_data_storm.json"
     },
     {
       "name": "Four Seasons (Desynced)",
@@ -1281,7 +1289,7 @@
       "version": "1.1",
       "targetVersion": "",
       "repositoryUrl": "",
-      "updateUrl": "",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/four_seasons_desynced.json",
       "dark": {
         "h": 145,
         "c": 0.15,
@@ -1656,7 +1664,8 @@
         "autoScope": true,
         "canvasEnabled": false,
         "canvasScript": ""
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/h4nn1b4l_custom_css.json"
     },
     {
       "name": "Kinetic Thermal // Plasma Core",
@@ -1757,7 +1766,8 @@
         "canvasShowAuth": true,
         "themeShowAuth": true,
         "customCssShowAuth": true
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/kinetic_thermal_plasma_core.json"
     },
     {
       "name": "LUMINA // AURORA",
@@ -1924,7 +1934,8 @@
         "canvasShowAuth": true,
         "themeShowAuth": true,
         "customCssShowAuth": true
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/lumina_aurora.json"
     },
     {
       "name": "Matrix Rain",
@@ -2089,7 +2100,8 @@
         "canvasScript": "/**\n * Title: The Architect\n * Description: Optimized Matrix-style digital rain. Best used with dark themes.\n */\n\nconst CONFIG = {\n    fontSize: 16,\n    fontFamily: 'monospace',\n    textColor: '#0f0',           // Classic Matrix Green\n    headColor: '#fff',           // Color of the leading character\n    fadeAmount: 0.08,            // Alpha for erasing trails to transparency\n    dropSpeed: 1,\n    chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+'\n};\n\nlet canvas, ctx, width, height;\nlet columns = 0;\nlet drops =[];\n\nself.onmessage = (e) => {\n    switch (e.data.type) {\n        case 'init':\n            canvas = e.data.canvas;\n            ctx = canvas.getContext('2d');\n            resize(e.data.width, e.data.height);\n            startAnimation();\n            break;\n        case 'resize': resize(e.data.width, e.data.height); break;\n    }\n};\n\nfunction resize(w, h) {\n    width = w; height = h;\n    if (canvas) { canvas.width = width; canvas.height = height; }\n    \n    // Recalculate columns based on new width\n    columns = Math.floor(width / CONFIG.fontSize);\n    drops =[];\n    for (let i = 0; i < columns; i++) {\n        // Start them offscreen randomly to prevent uniform falling\n        drops[i] = Math.random() * -100; \n    }\n}\n\nfunction startAnimation() {\n    function render() {\n        if (!ctx) return;\n\n        // Use destination-out to erase previous frames into transparency for the trail effect\n        ctx.globalCompositeOperation = 'destination-out';\n        ctx.fillStyle = `rgba(0, 0, 0, ${CONFIG.fadeAmount})`;\n        ctx.fillRect(0, 0, width, height);\n\n        // Switch back to normal drawing for the text\n        ctx.globalCompositeOperation = 'source-over';\n        ctx.font = `${CONFIG.fontSize}px ${CONFIG.fontFamily}`;\n\n        for (let i = 0; i < drops.length; i++) {\n            const text = CONFIG.chars.charAt(Math.floor(Math.random() * CONFIG.chars.length));\n            const x = i * CONFIG.fontSize;\n            const y = drops[i] * CONFIG.fontSize;\n\n            // Draw the \"tail\" text\n            ctx.fillStyle = CONFIG.textColor;\n            ctx.fillText(text, x, y);\n\n            // Send the drop back to the top randomly after it crosses the bottom\n            if (y > height && Math.random() > 0.975) {\n                drops[i] = 0;\n            }\n\n            drops[i] += CONFIG.dropSpeed;\n        }\n        \n        // Slightly slow down the rain loop to make it readable\n        setTimeout(() => requestAnimationFrame(render), 30);\n    }\n    requestAnimationFrame(render);\n}",
         "canvasShowAuth": true,
         "themeShowAuth": true
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/matrix_rain.json"
     },
     {
       "name": "NEO-TACTICAL // ARCHIVE 01",
@@ -2190,7 +2202,8 @@
         "canvasShowAuth": true,
         "themeShowAuth": true,
         "customCssShowAuth": true
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neo_tactical_archive_01.json"
     },
     {
       "name": "Neon Cyberpunk (Animated)",
@@ -2241,7 +2254,8 @@
         "autoScope": true,
         "canvasEnabled": false,
         "canvasScript": ""
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neon_cyberpunk_animated.json"
     },
     {
       "name": "Neon Overdrive",
@@ -2574,7 +2588,7 @@
       "version": "1.0.0",
       "targetVersion": "0.9.5",
       "repositoryUrl": "",
-      "updateUrl": ""
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neon_overdrive.json"
     },
     {
       "name": "Persona",
@@ -2625,7 +2639,8 @@
         "autoScope": true,
         "canvasEnabled": false,
         "canvasScript": ""
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/persona.json"
     },
     {
       "name": "Persona Inspired (Admiral_Falco)",
@@ -2676,7 +2691,8 @@
         "locks": {},
         "canvasEnabled": false,
         "canvasScript": ""
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/persona_inspired_admiral_falco.json"
     },
     {
       "name": "Pink Hues",
@@ -2727,7 +2743,8 @@
         "autoScope": true,
         "canvasEnabled": false,
         "canvasScript": ""
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/pink_hues.json"
     },
     {
       "name": "Project Singularity",
@@ -2842,7 +2859,8 @@
         "canvasShowAuth": true,
         "themeShowAuth": true,
         "customCssShowAuth": true
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/project_singularity.json"
     },
     {
       "name": "Retro Terminal (CRT)",
@@ -3039,7 +3057,8 @@
         "gradientMeshPoints": [],
         "gradientMeshBgColor": "#0a0a12",
         "paletteEnabled": true
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/retro_terminal_crt.json"
     },
     {
       "name": "Rosé Pine",
@@ -3091,7 +3110,8 @@
         "canvasEnabled": false,
         "canvasScript": ""
       },
-      "version": "1.4.6"
+      "version": "1.4.6",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/rose_pine.json"
     },
     {
       "name": "Solar Flare",
@@ -3258,7 +3278,8 @@
         "canvasShowAuth": true,
         "themeShowAuth": true,
         "customCssShowAuth": true
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/solar_flare.json"
     },
     {
       "name": "Sovereign",
@@ -3425,7 +3446,8 @@
         "canvasShowAuth": true,
         "themeShowAuth": true,
         "customCssShowAuth": true
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/sovereign.json"
     },
     {
       "name": "Synthwave 1984",
@@ -3592,7 +3614,8 @@
         "canvasShowAuth": true,
         "themeShowAuth": true,
         "customCssShowAuth": true
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/synthwave_1984.json"
     },
     {
       "name": "Testing v1.4.6",
@@ -3823,7 +3846,8 @@
         "gradientMeshPoints": [],
         "gradientMeshBgColor": "#0a0a12",
         "paletteEnabled": true
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/testing_v1_4_6.json"
     },
     {
       "name": "The Cyanotype",
@@ -3926,7 +3950,8 @@
         "autoScope": true,
         "canvasEnabled": false,
         "canvasScript": ""
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/the_cyanotype.json"
     },
     {
       "name": "Toxic Nebula // Smog-Core",
@@ -4027,7 +4052,8 @@
         "canvasShowAuth": true,
         "themeShowAuth": true,
         "customCssShowAuth": true
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/toxic_nebula_smog_core.json"
     },
     {
       "name": "Wasteland Uplink (Amber)",
@@ -4354,7 +4380,8 @@
         "gradientMeshPoints": [],
         "gradientMeshBgColor": "#0a0a12",
         "paletteEnabled": true
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/wasteland_uplink_amber.json"
     },
     {
       "name": "Windows Hotdog Stand",
@@ -4509,13 +4536,14 @@
         },
         "canvasEnabled": false,
         "canvasScript": ""
-      }
+      },
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/windows_hotdog_stand.json"
     }
   ],
   "isLibraryBackup": true,
   "version": "1.0.0",
   "_meta": {
-    "generated": "2026-06-15T20:42:55.219Z",
+    "generated": "2026-06-15T20:46:45.149Z",
     "count": 30
   }
 }
