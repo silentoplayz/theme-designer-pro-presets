@@ -30,35 +30,55 @@ Before submitting a PR, ensure your preset meets these requirements:
 ### Themes
 
 - [ ] Exported as valid JSON from Theme Designer Pro
-- [ ] Includes a descriptive name
+- [ ] Includes a descriptive `name` field
+- [ ] Contains at least `dark` and `light` mode configurations
 - [ ] Tested on both desktop and mobile viewports
 - [ ] No hardcoded pixel values that break on different screen sizes
 
 ### CSS Presets
 
-- [ ] Valid CSS
+- [ ] Valid CSS stored as a raw `.css` file
 - [ ] Uses CSS custom properties where appropriate for easy customization
 - [ ] Doesn't break core Open WebUI layout or functionality
 
+### Gradient Presets
+
+- [ ] Exported as valid JSON from Theme Designer Pro
+- [ ] Includes a descriptive `name` field
+- [ ] Has a valid `type` (`linear`, `radial`, or `mesh`)
+- [ ] Placed in the correct subdirectory based on motion and type
+
 ---
 
-## 📁 File Naming Convention
+## 📁 File Placement
 
 ```
-lowercase_with_underscores.js     # Canvas FX scripts
-lowercase_with_underscores.json   # Themes, CSS presets, gradients
+canvas-fx/your_animation.js              # Canvas FX scripts
+css-presets/your_preset.css               # CSS presets (raw CSS)
+themes/your_theme.json                    # Theme presets
+gradients/still/linear/your_gradient.json # Still linear gradient
+gradients/animated/mesh/your_gradient.json # Animated mesh gradient
 ```
 
-Examples: `starfield_warp.js`, `neon_dreamscape.js`, `midnight_ocean.json`
+### Naming Convention
 
-All presets go directly into their respective top-level directory — no subdirectories:
+Use `lowercase_with_underscores` for all filenames:
 
-| Preset type | Directory |
-|---|---|
-| Canvas FX animation script | `canvas-fx/` |
-| Complete theme | `themes/` |
-| CSS-only preset | `css-presets/` |
-| Gradient pack | `gradients/` |
+```
+starfield_warp.js
+neon_dreamscape.css
+midnight_ocean.json
+```
+
+### Where Files Go
+
+| Preset type | Directory | Format |
+|---|---|---|
+| Canvas FX animation | `canvas-fx/` | `.js` |
+| CSS styling preset | `css-presets/` | `.css` |
+| Complete theme | `themes/` | `.json` |
+| Still gradient | `gradients/still/{linear,mesh,radial}/` | `.json` |
+| Animated gradient | `gradients/animated/{linear,mesh,radial}/` | `.json` |
 
 ---
 
@@ -91,7 +111,7 @@ All presets go directly into their respective top-level directory — no subdire
 1. **Submit a PR** with your preset(s) in the correct directory
 2. **Maintainer review** — checked for quality, performance, API compliance, and visual polish
 3. **Testing** — verified in Theme Designer Pro on the latest Open WebUI version
-4. **Merge** — accepted presets are added and the relevant bundle JSON is regenerated
+4. **Merge** — accepted presets are added and bundles are regenerated automatically
 
 ### What Gets Rejected
 
@@ -111,7 +131,7 @@ After adding new presets, regenerate the combined bundle files:
 node scripts/build-bundles.js
 ```
 
-This scans all preset directories and produces the combined JSON files in `bundles/`.
+This scans all preset directories and produces the combined JSON files in `bundles/`, including the `everything.json` mega-bundle.
 
 ---
 
