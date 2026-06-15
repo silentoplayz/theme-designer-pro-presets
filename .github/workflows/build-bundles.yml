@@ -1,4 +1,4 @@
-name: Build Bundles
+name: Validate & Build Bundles
 
 on:
   push:
@@ -8,9 +8,31 @@ on:
       - 'css-presets/**'
       - 'themes/**'
       - 'gradients/**'
+      - 'schemas/**'
+      - 'scripts/**'
+  pull_request:
+    paths:
+      - 'canvas-fx/**'
+      - 'css-presets/**'
+      - 'themes/**'
+      - 'gradients/**'
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate presets
+        run: node scripts/validate.js
+
   build:
+    needs: validate
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
