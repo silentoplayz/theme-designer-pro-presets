@@ -1,5 +1,75 @@
 [
   {
+    "name": "Neon Drift",
+    "type": "linear",
+    "stops": [
+      {
+        "color": "#0a001a",
+        "position": 0
+      },
+      {
+        "color": "#1a0040",
+        "position": 25
+      },
+      {
+        "color": "#00c8ff",
+        "position": 50
+      },
+      {
+        "color": "#ff00aa",
+        "position": 75
+      },
+      {
+        "color": "#0a001a",
+        "position": 100
+      }
+    ],
+    "angle": 135,
+    "intensity": 75,
+    "animation": true,
+    "speed": 6,
+    "radialPosX": 50,
+    "radialPosY": 50,
+    "radialShape": "ellipse",
+    "radialSize": "farthest-corner",
+    "_category": "animated/linear"
+  },
+  {
+    "name": "Sunset Tide",
+    "type": "linear",
+    "stops": [
+      {
+        "color": "#1a0a1e",
+        "position": 0
+      },
+      {
+        "color": "#4a1942",
+        "position": 25
+      },
+      {
+        "color": "#c0392b",
+        "position": 45
+      },
+      {
+        "color": "#e67e22",
+        "position": 65
+      },
+      {
+        "color": "#1a0a1e",
+        "position": 100
+      }
+    ],
+    "angle": 180,
+    "intensity": 80,
+    "animation": true,
+    "speed": 4,
+    "radialPosX": 50,
+    "radialPosY": 50,
+    "radialShape": "ellipse",
+    "radialSize": "farthest-corner",
+    "_category": "animated/linear"
+  },
+  {
     "name": "Electric Aurora",
     "type": "mesh",
     "stops": [
@@ -52,5 +122,121 @@
     ],
     "meshBgColor": "#006ee0",
     "_category": "animated/mesh"
+  },
+  {
+    "name": "Plasma Field",
+    "type": "mesh",
+    "stops": [
+      {
+        "color": "#e11d48",
+        "position": 0
+      },
+      {
+        "color": "#7c3aed",
+        "position": 50
+      },
+      {
+        "color": "#0f172a",
+        "position": 100
+      }
+    ],
+    "angle": 0,
+    "intensity": 80,
+    "animation": true,
+    "speed": 5,
+    "radialPosX": 50,
+    "radialPosY": 50,
+    "radialShape": "circle",
+    "radialSize": "farthest-side",
+    "meshPoints": [
+      {
+        "color": "#f43f5e",
+        "x": 10,
+        "y": 20,
+        "spread": 55
+      },
+      {
+        "color": "#8b5cf6",
+        "x": 90,
+        "y": 10,
+        "spread": 50
+      },
+      {
+        "color": "#06b6d4",
+        "x": 20,
+        "y": 85,
+        "spread": 48
+      },
+      {
+        "color": "#f97316",
+        "x": 80,
+        "y": 80,
+        "spread": 52
+      }
+    ],
+    "meshBgColor": "#0f0720",
+    "_category": "animated/mesh"
+  },
+  {
+    "name": "Breathing Nebula",
+    "type": "radial",
+    "stops": [
+      {
+        "color": "#6b21a8",
+        "position": 0
+      },
+      {
+        "color": "#3730a3",
+        "position": 30
+      },
+      {
+        "color": "#1e1b4b",
+        "position": 60
+      },
+      {
+        "color": "#0a0a1a",
+        "position": 100
+      }
+    ],
+    "angle": 0,
+    "intensity": 90,
+    "animation": true,
+    "speed": 3,
+    "radialPosX": 50,
+    "radialPosY": 50,
+    "radialShape": "circle",
+    "radialSize": "farthest-side",
+    "_category": "animated/radial"
+  },
+  {
+    "name": "Cosmic Ripple",
+    "type": "radial",
+    "stops": [
+      {
+        "color": "#0ea5e9",
+        "position": 0
+      },
+      {
+        "color": "#0369a1",
+        "position": 25
+      },
+      {
+        "color": "#1e1b4b",
+        "position": 55
+      },
+      {
+        "color": "#020617",
+        "position": 100
+      }
+    ],
+    "angle": 0,
+    "intensity": 85,
+    "animation": true,
+    "speed": 5,
+    "radialPosX": 65,
+    "radialPosY": 35,
+    "radialShape": "ellipse",
+    "radialSize": "farthest-corner",
+    "_category": "animated/radial"
   }
 ]

@@ -1,0 +1,19 @@
+{
+  "name": "Neon Drift",
+  "type": "linear",
+  "stops": [
+    { "color": "#0a001a", "position": 0 },
+    { "color": "#1a0040", "position": 25 },
+    { "color": "#00c8ff", "position": 50 },
+    { "color": "#ff00aa", "position": 75 },
+    { "color": "#0a001a", "position": 100 }
+  ],
+  "angle": 135,
+  "intensity": 75,
+  "animation": true,
+  "speed": 6,
+  "radialPosX": 50,
+  "radialPosY": 50,
+  "radialShape": "ellipse",
+  "radialSize": "farthest-corner"
+}
