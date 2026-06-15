@@ -6,7 +6,7 @@
 ![Themes](https://img.shields.io/badge/Themes-30_themes-green)
 ![Gradients](https://img.shields.io/badge/Gradients-12_presets-orange)
 
-A curated collection of themes, Canvas FX animations, CSS presets, and gradient packs for [Theme Designer Pro](https://openwebui.com/t/silentoplayz/theme_designer_pro) — the native theming tool for [Open WebUI](https://github.com/open-webui/open-webui).
+A curated collection of themes, Canvas FX animations, CSS presets, and gradient packs for [Theme Designer Pro](https://openwebui.com/posts/49fac49a-7cc3-4b9f-8f75-b3916abbfa5f) — the native theming tool for [Open WebUI](https://github.com/open-webui/open-webui).
 
 > **Import any preset** directly into Theme Designer Pro using the built-in Import button, URL import, or drag-and-drop.
 
