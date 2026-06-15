@@ -130,6 +130,34 @@ setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);
 
 ---
 
+## ⚙️ CI/CD
+
+This repository uses a [GitHub Actions workflow](.github/workflows/build-bundles.yml) to automatically validate and rebuild bundles.
+
+### What Happens on Push to `main`
+
+1. **Validate** — `scripts/validate.js` runs against all preset files:
+   - Canvas FX: checks for `onmessage` handler, forbidden DOM access, heartbeat (warning)
+   - CSS: verifies non-empty files with valid syntax
+   - Themes: validates required `name`, mode objects, and OKLCH color fields
+   - Gradients: checks type, stops, correct subdirectory placement
+   - Bundles: verifies backup flags match their content arrays
+2. **Build** — if validation passes, `scripts/build-bundles.js` regenerates all bundles
+3. **Auto-commit** — if any bundles changed, the bot commits and pushes the updated files
+
+### What Happens on Pull Requests
+
+Only the **Validate** step runs — bundles are not rebuilt or committed. This gives contributors immediate feedback on whether their presets are correctly formatted before merge.
+
+### Running Locally
+
+```bash
+node scripts/validate.js       # Check all presets
+node scripts/build-bundles.js  # Regenerate bundles
+```
+
+---
+
 ## 📜 License
 
 [MIT](LICENSE) — free to use, modify, and redistribute.
