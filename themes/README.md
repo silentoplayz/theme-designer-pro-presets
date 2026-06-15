@@ -18,7 +18,7 @@ Each theme JSON contains:
 | `name` | Display name |
 | `dark`, `light`, `oled`, `her` | Per-mode configurations |
 | `description`, `author`, `version` | Optional metadata |
-| `updateUrl` | Optional URL for automatic theme updates |
+| `updateUrl` | **Required** — raw GitHub URL for automatic theme updates |
 
 Each mode object includes OKLCH color values (`h`, `c`, `l`), CSS custom property `overrides`, `customCSS`, `canvasScript`, and various toggle flags.
 

@@ -11,6 +11,7 @@ JSON Schema definitions (draft-07) describing the data formats used by Theme Des
 | `css-preset.schema.json` | CSS preset backup bundle (`isCssBackup` format) |
 | `gradient-preset.schema.json` | Individual gradient preset — linear, radial, and mesh types |
 | `everything.schema.json` | Combined bundle with all preset types in a single file |
+| `manifest.schema.json` | Centralized theme update manifest for bulk version checking |
 
 ## Usage
 

@@ -1,6 +1,14 @@
 # Scripts
 
-Build and extraction tooling for the Theme Designer Pro Preset Gallery.
+Build, validation, and manifest tooling for the Theme Designer Pro Preset Gallery.
+
+| Script | Purpose |
+|---|---|
+| `extract-presets.js` | Split bulk export files into individual preset files |
+| `build-bundles.js` | Regenerate all import-ready bundles from individual presets |
+| `build-manifest.js` | Generate `manifest.json` for bulk theme update checking |
+| `validate.js` | Validate all preset files against quality and schema rules |
+| `update-badges.js` | Update shields.io badge counts in `README.md` |
 
 ---
 

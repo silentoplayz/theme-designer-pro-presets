@@ -16,6 +16,11 @@ A curated collection of themes, Canvas FX animations, CSS presets, and gradient 
 
 ```
 theme-designer-pro-presets/
+├── .github/
+│   ├── ISSUE_TEMPLATE/      # Bug report & preset submission forms
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   └── workflows/
+│       └── build-bundles.yml  # CI: validate → build → commit
 ├── bundles/                 # Combined import-ready JSON files
 ├── canvas-fx/               # Canvas FX animation scripts (.js)
 ├── css-presets/              # CSS-only styling presets (.css)
@@ -29,11 +34,12 @@ theme-designer-pro-presets/
 │       ├── mesh/
 │       └── radial/
 ├── schemas/                 # JSON schemas for validation
-├── scripts/                 # Build and extraction tooling
+├── scripts/                 # Build, validation, and manifest tooling
 ├── themes/                  # Complete theme presets (.json)
 ├── .gitignore
 ├── CONTRIBUTING.md
 ├── LICENSE
+├── manifest.json            # Centralized theme update manifest
 └── README.md
 ```
 
@@ -61,6 +67,8 @@ Download or URL-import any bundle from [`bundles/`](bundles/):
 | `css-presets-all.json` | All CSS presets |
 | `themes-all.json` | All themes |
 | `gradients-all.json` | All gradient presets |
+| `gradients-still.json` | Static (non-animated) gradients only |
+| `gradients-animated.json` | Animated gradients only |
 
 ### Import Individual Presets
 
@@ -87,7 +95,7 @@ JavaScript animation scripts that run behind the Open WebUI interface via Offscr
 
 ### 🎭 Themes ([`themes/`](themes/))
 
-Complete theme configurations including OKLCH color tokens, CSS overrides, Canvas FX selection, and per-mode settings (dark, light, OLED, her). Exported as `.json` files.
+Complete theme configurations including OKLCH color tokens, CSS overrides, Canvas FX selection, and per-mode settings (dark, light, OLED, her). Exported as `.json` files. Every theme includes an `updateUrl` for automatic update checking.
 
 ### 🖌️ CSS Presets ([`css-presets/`](css-presets/))
 
@@ -103,7 +111,11 @@ Combined JSON files for one-click bulk import. See [`bundles/README.md`](bundles
 
 ### 📐 Schemas ([`schemas/`](schemas/))
 
-JSON Schema definitions documenting the data formats for themes, Canvas FX, CSS, and gradient presets.
+JSON Schema definitions documenting the data formats for themes, Canvas FX, CSS, gradient presets, and the update manifest.
+
+### 📋 Manifest ([`manifest.json`](manifest.json))
+
+Centralized theme update manifest listing every theme with its current version and raw GitHub `updateUrl`. Theme Designer Pro fetches this in a single request to check all themes for updates at once.
 
 ---
 
@@ -132,28 +144,32 @@ setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);
 
 ## ⚙️ CI/CD
 
-This repository uses a [GitHub Actions workflow](.github/workflows/build-bundles.yml) to automatically validate and rebuild bundles.
+This repository uses a [GitHub Actions workflow](.github/workflows/build-bundles.yml) to automatically validate, rebuild, and keep metadata in sync.
 
 ### What Happens on Push to `main`
 
 1. **Validate** — `scripts/validate.js` runs against all preset files:
    - Canvas FX: checks for `onmessage` handler, forbidden DOM access, heartbeat (warning)
    - CSS: verifies non-empty files with valid syntax
-   - Themes: validates required `name`, mode objects, and OKLCH color fields
+   - Themes: validates required `name`, `updateUrl`, mode objects, and OKLCH color fields
    - Gradients: checks type, stops, correct subdirectory placement
    - Bundles: verifies backup flags match their content arrays
-2. **Build** — if validation passes, `scripts/build-bundles.js` regenerates all bundles
-3. **Auto-commit** — if any bundles changed, the bot commits and pushes the updated files
+2. **Build bundles** — `scripts/build-bundles.js` regenerates all bundles
+3. **Build manifest** — `scripts/build-manifest.js` regenerates `manifest.json` with current theme versions
+4. **Update badges** — `scripts/update-badges.js` recalculates preset counts in README badge URLs
+5. **Auto-commit** — if any generated files changed, the bot commits and pushes them
 
 ### What Happens on Pull Requests
 
-Only the **Validate** step runs — bundles are not rebuilt or committed. This gives contributors immediate feedback on whether their presets are correctly formatted before merge.
+Only the **Validate** step runs — bundles, manifest, and badges are not rebuilt. This gives contributors immediate feedback on whether their presets are correctly formatted before merge.
 
 ### Running Locally
 
 ```bash
 node scripts/validate.js       # Check all presets
 node scripts/build-bundles.js  # Regenerate bundles
+node scripts/build-manifest.js # Regenerate manifest.json
+node scripts/update-badges.js  # Update README badge counts
 ```
 
 ---

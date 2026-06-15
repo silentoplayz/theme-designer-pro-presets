@@ -127,15 +127,17 @@ midnight_ocean.json
 
 ---
 
-## 🛠️ Regenerating Bundles
+## 🛠️ Regenerating Build Artifacts
 
-After adding new presets, regenerate the combined bundle files:
+After adding new presets, regenerate the build artifacts locally:
 
 ```bash
-node scripts/build-bundles.js
+node scripts/build-bundles.js   # Regenerate all import bundles
+node scripts/build-manifest.js  # Regenerate manifest.json (theme versions)
+node scripts/update-badges.js   # Update README badge counts
 ```
 
-This scans all preset directories and produces the combined JSON files in `bundles/`, including the `everything.json` mega-bundle.
+> **Note**: CI runs all three automatically on push to `main`. You don't need to commit the generated files — the bot handles it.
 
 ---
 
