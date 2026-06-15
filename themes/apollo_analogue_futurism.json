@@ -130,5 +130,6 @@
   "version": "1.0.0",
   "author": "silentoplayz (G30)",
   "description": "NASA-era analogue hardware interface with industrial chassis textures, Vector Telemetry Canvas FX, and muted steel-blue tones.",
-  "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets"
+  "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
+  "targetVersion": "0.9.0"
 }

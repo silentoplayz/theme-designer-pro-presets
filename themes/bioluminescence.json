@@ -142,5 +142,6 @@
   "version": "1.0.0",
   "author": "silentoplayz (G30)",
   "description": "Deep ocean bioluminescent aesthetic with glowing cyan accents, jellyfish-inspired Canvas FX, and frosted glass panels.",
-  "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets"
+  "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
+  "targetVersion": "0.9.0"
 }

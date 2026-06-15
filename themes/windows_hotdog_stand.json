@@ -156,5 +156,6 @@
   "version": "1.0.0",
   "author": "silentoplayz (G30)",
   "description": "Faithful recreation of the infamous Windows 3.1 Hot Dog Stand color scheme — bold red and yellow with sharp pixel aesthetics.",
-  "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets"
+  "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
+  "targetVersion": "0.9.0"
 }

@@ -168,5 +168,6 @@
   "version": "1.0.0",
   "author": "silentoplayz (G30)",
   "description": "Deep space glassmorphism with ethereal violet-blue tones, Hyperspace Warp Drive Canvas FX, and luminous translucent panels.",
-  "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets"
+  "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
+  "targetVersion": "0.9.0"
 }
