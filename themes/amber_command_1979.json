@@ -139,5 +139,6 @@
     "customCssShowAuth": true
   },
   "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/amber_command_1979.json",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "author": "silentoplayz (G30)"
 }

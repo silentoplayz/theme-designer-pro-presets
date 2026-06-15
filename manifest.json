@@ -1,102 +1,110 @@
 {
   "manifestVersion": "1.0",
-  "generated": "2026-06-15T21:25:35.460Z",
+  "generated": "2026-06-15T21:34:41.063Z",
   "manifestUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/manifest.json",
   "themes": {
     "aether_nebula_flow": {
       "name": "AETHER // NEBULA FLOW",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/aether_nebula_flow.json",
       "file": "themes/aether_nebula_flow.json"
     },
     "amber_command_1979": {
       "name": "Amber Command: 1979",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/amber_command_1979.json",
       "file": "themes/amber_command_1979.json"
     },
     "apollo_analogue_futurism": {
       "name": "Apollo // Analogue Futurism",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/apollo_analogue_futurism.json",
       "file": "themes/apollo_analogue_futurism.json"
     },
     "astral_projection": {
       "name": "Astral Projection",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/astral_projection.json",
       "file": "themes/astral_projection.json"
     },
     "bio_digital_synthesis": {
       "name": "Bio-Digital Synthesis",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/bio_digital_synthesis.json",
       "file": "themes/bio_digital_synthesis.json"
     },
     "bioluminescence": {
       "name": "Bioluminescence",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/bioluminescence.json",
       "file": "themes/bioluminescence.json"
     },
     "blue_lightning": {
       "name": "Blue Lightning",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/blue_lightning.json",
       "file": "themes/blue_lightning.json"
     },
     "entropy_data_storm": {
       "name": "ENTROPY // DATA-STORM",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/entropy_data_storm.json",
       "file": "themes/entropy_data_storm.json"
     },
     "four_seasons_desynced": {
       "name": "Four Seasons (Desynced)",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/four_seasons_desynced.json",
       "file": "themes/four_seasons_desynced.json"
-    },
-    "h4nn1b4l_custom_css": {
-      "name": "@h4nn1b4l Custom CSS",
-      "version": "1.0.0",
-      "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/h4nn1b4l_custom_css.json",
-      "file": "themes/h4nn1b4l_custom_css.json"
     },
     "kinetic_thermal_plasma_core": {
       "name": "Kinetic Thermal // Plasma Core",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/kinetic_thermal_plasma_core.json",
       "file": "themes/kinetic_thermal_plasma_core.json"
     },
     "lumina_aurora": {
       "name": "LUMINA // AURORA",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/lumina_aurora.json",
       "file": "themes/lumina_aurora.json"
     },
     "matrix_rain": {
       "name": "Matrix Rain",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/matrix_rain.json",
       "file": "themes/matrix_rain.json"
     },
     "neo_tactical_archive_01": {
       "name": "NEO-TACTICAL // ARCHIVE 01",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/neo_tactical_archive_01.json",
       "file": "themes/neo_tactical_archive_01.json"
     },
     "neon_cyberpunk_animated": {
       "name": "Neon Cyberpunk (Animated)",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/neon_cyberpunk_animated.json",
       "file": "themes/neon_cyberpunk_animated.json"
     },
     "neon_overdrive": {
       "name": "Neon Overdrive",
       "version": "1.0.0",
-      "author": "G30",
+      "author": "silentoplayz (G30)",
       "description": "A curated Cyberpunk theme",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/neon_overdrive.json",
       "file": "themes/neon_overdrive.json"
@@ -104,72 +112,84 @@
     "pink_hues": {
       "name": "Pink Hues",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/pink_hues.json",
       "file": "themes/pink_hues.json"
     },
     "project_singularity": {
       "name": "Project Singularity",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/project_singularity.json",
       "file": "themes/project_singularity.json"
     },
     "retro_terminal_crt": {
       "name": "Retro Terminal (CRT)",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/retro_terminal_crt.json",
       "file": "themes/retro_terminal_crt.json"
     },
     "rose_pine": {
       "name": "Rosé Pine",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/rose_pine.json",
       "file": "themes/rose_pine.json"
     },
     "solar_flare": {
       "name": "Solar Flare",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/solar_flare.json",
       "file": "themes/solar_flare.json"
     },
     "sovereign": {
       "name": "Sovereign",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/sovereign.json",
       "file": "themes/sovereign.json"
     },
     "synthwave_1984": {
       "name": "Synthwave 1984",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/synthwave_1984.json",
       "file": "themes/synthwave_1984.json"
     },
     "testing_v1_4_6": {
       "name": "Testing v1.4.6",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/testing_v1_4_6.json",
       "file": "themes/testing_v1_4_6.json"
     },
     "the_cyanotype": {
       "name": "The Cyanotype",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/the_cyanotype.json",
       "file": "themes/the_cyanotype.json"
     },
     "toxic_nebula_smog_core": {
       "name": "Toxic Nebula // Smog-Core",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/toxic_nebula_smog_core.json",
       "file": "themes/toxic_nebula_smog_core.json"
     },
     "wasteland_uplink_amber": {
       "name": "Wasteland Uplink (Amber)",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/wasteland_uplink_amber.json",
       "file": "themes/wasteland_uplink_amber.json"
     },
     "windows_hotdog_stand": {
       "name": "Windows Hotdog Stand",
       "version": "1.0.0",
+      "author": "silentoplayz (G30)",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/windows_hotdog_stand.json",
       "file": "themes/windows_hotdog_stand.json"
     }

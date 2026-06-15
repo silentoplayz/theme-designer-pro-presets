@@ -229,5 +229,6 @@
     "paletteEnabled": true
   },
   "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/testing_v1_4_6.json",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "author": "silentoplayz (G30)"
 }
