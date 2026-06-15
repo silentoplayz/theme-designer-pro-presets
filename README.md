@@ -1,7 +1,7 @@
 # Theme Designer Pro — Preset Gallery
 
 [![Build Bundles](https://github.com/silentoplayz/theme-designer-pro-presets/actions/workflows/build-bundles.yml/badge.svg)](https://github.com/silentoplayz/theme-designer-pro-presets/actions/workflows/build-bundles.yml)
-![Canvas FX](https://img.shields.io/badge/Canvas_FX-77_animations-blue)
+![Canvas FX](https://img.shields.io/badge/Canvas_FX-61_animations-blue)
 ![CSS Presets](https://img.shields.io/badge/CSS-14_presets-purple)
 ![Themes](https://img.shields.io/badge/Themes-27_themes-green)
 ![Gradients](https://img.shields.io/badge/Gradients-13_presets-orange)
