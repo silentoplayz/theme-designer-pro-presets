@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Theme Preset",
+  "description": "Complete theme configuration for Theme Designer Pro, including CSS, Canvas FX, and settings",
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Display name of the theme"
+    },
+    "css": {
+      "type": "string",
+      "description": "CSS stylesheet overrides"
+    },
+    "canvas_script": {
+      "type": "string",
+      "description": "Canvas FX animation script (Web Worker JS)"
+    },
+    "canvas_enabled": {
+      "type": "boolean",
+      "description": "Whether Canvas FX is active in this theme"
+    },
+    "settings": {
+      "type": "object",
+      "description": "Theme Designer Pro settings snapshot",
+      "properties": {
+        "canvas_opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "canvas_blend_mode": { "type": "string" },
+        "canvas_position": { "type": "string", "enum": ["background", "foreground"] }
+      }
+    }
+  }
+}
