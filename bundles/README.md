@@ -1,15 +1,17 @@
 # Bundles
 
-Pre-built import-ready JSON files generated from the individual presets in this repository.
+Pre-built import-ready JSON files generated from the individual presets in this repository. Download any bundle and import it directly into Theme Designer Pro for one-click bulk loading.
 
 ## Available Bundles
 
-| Bundle | Description |
-|---|---|
-| `canvas-fx-all.json` | All Canvas FX animations combined |
-| `canvas-fx-{category}.json` | Per-category Canvas FX bundles (cosmic, nature, etc.) |
-| `css-presets-all.json` | All CSS presets combined |
-| `gradients-all.json` | All gradient presets combined |
+| Bundle | Contents | Description |
+|---|---|---|
+| `canvas-fx-all.json` | 77 animations | All Canvas FX scripts combined |
+| `css-presets-all.json` | 14 presets | All CSS presets combined |
+| `themes-all.json` | 31 themes | All themes combined |
+| `gradients-all.json` | 2 presets | All gradient presets combined |
+| `gradients-still.json` | 1 preset | Static (non-animated) gradients only |
+| `gradients-animated.json` | 1 preset | Animated gradients only |
 
 ## Usage
 
@@ -17,6 +19,8 @@ Pre-built import-ready JSON files generated from the individual presets in this 
 2. Open **Theme Designer Pro** in Open WebUI
 3. Click **Import** and select the file
 4. All presets from the bundle are loaded at once
+
+You can also paste a bundle's raw GitHub URL directly into the import modal's URL field — Theme Designer Pro will auto-convert it.
 
 ## Regenerating
 
