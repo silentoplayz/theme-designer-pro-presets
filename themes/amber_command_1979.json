@@ -140,5 +140,6 @@
   },
   "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/amber_command_1979.json",
   "version": "1.0.0",
-  "author": "silentoplayz (G30)"
+  "author": "silentoplayz (G30)",
+  "description": "Vintage CRT terminal aesthetic with amber monochrome tones, scan-line flicker effects, and Geometric Mainframe Canvas FX."
 }

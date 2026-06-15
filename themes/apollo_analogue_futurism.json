@@ -128,5 +128,6 @@
   },
   "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/apollo_analogue_futurism.json",
   "version": "1.0.0",
-  "author": "silentoplayz (G30)"
+  "author": "silentoplayz (G30)",
+  "description": "NASA-era analogue hardware interface with industrial chassis textures, Vector Telemetry Canvas FX, and muted steel-blue tones."
 }

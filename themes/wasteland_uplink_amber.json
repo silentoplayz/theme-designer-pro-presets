@@ -326,5 +326,6 @@
   },
   "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/wasteland_uplink_amber.json",
   "version": "1.0.0",
-  "author": "silentoplayz (G30)"
+  "author": "silentoplayz (G30)",
+  "description": "Post-apocalyptic terminal with Radiation Dust Canvas FX, VT323 monospace font, amber phosphor glow, and weathered UI elements."
 }

@@ -50,5 +50,6 @@
   },
   "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neon_cyberpunk_animated.json",
   "version": "1.0.0",
-  "author": "silentoplayz (G30)"
+  "author": "silentoplayz (G30)",
+  "description": "Neon-drenched cyberpunk UI with animated magenta and cyan glitch accents. Pure CSS effects — no Canvas FX."
 }

@@ -116,7 +116,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/aether_nebula_flow.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Atmospheric translucent UI with gaseous nebula Canvas FX and holographic shimmer accents. Cool blue tones with frosted glass panels."
     },
     {
       "name": "Amber Command: 1979",
@@ -260,7 +261,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/amber_command_1979.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Vintage CRT terminal aesthetic with amber monochrome tones, scan-line flicker effects, and Geometric Mainframe Canvas FX."
     },
     {
       "name": "Apollo // Analogue Futurism",
@@ -392,7 +394,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/apollo_analogue_futurism.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "NASA-era analogue hardware interface with industrial chassis textures, Vector Telemetry Canvas FX, and muted steel-blue tones."
     },
     {
       "name": "Astral Projection",
@@ -562,7 +565,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/astral_projection.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Deep space glassmorphism with ethereal violet-blue tones, Hyperspace Warp Drive Canvas FX, and luminous translucent panels."
     },
     {
       "name": "Bio-Digital Synthesis",
@@ -706,7 +710,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/bio_digital_synthesis.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Living bio-organic UI with pulsing borders, Synaptic Network Canvas FX, and vibrant magenta-purple neural tones."
     },
     {
       "name": "Bioluminescence",
@@ -850,7 +855,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/bioluminescence.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Deep ocean bioluminescent aesthetic with glowing cyan accents, jellyfish-inspired Canvas FX, and frosted glass panels."
     },
     {
       "name": "Blue Lightning",
@@ -1180,7 +1186,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/blue_lightning.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Electric aurora borealis gradients with Blue Lightning Twinkle Canvas FX and vibrant cerulean-teal tones."
     },
     {
       "name": "ENTROPY // DATA-STORM",
@@ -1296,11 +1303,12 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/entropy_data_storm.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Industrial containment UI with corroded amber warning tones, Bit-Stream Corruption Canvas FX, and JetBrains Mono typography."
     },
     {
       "name": "Four Seasons (Desynced)",
-      "description": "",
+      "description": "Nature-inspired seasonal palette with emerald canopy tones, Fireflies Canvas FX, and soft rounded corners.",
       "author": "silentoplayz (G30)",
       "version": "1.0.0",
       "targetVersion": "",
@@ -1733,7 +1741,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/kinetic_thermal_plasma_core.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Fusion reactor control interface with industrial plating, Plasma Arc Discharge Canvas FX, and cool blue containment tones."
     },
     {
       "name": "LUMINA // AURORA",
@@ -1903,7 +1912,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/lumina_aurora.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Premium glassmorphism with layered frosted panels, Fluid Aurora Borealis Canvas FX, and deep indigo-violet tones."
     },
     {
       "name": "Matrix Rain",
@@ -2071,7 +2081,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/matrix_rain.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Hacker terminal aesthetic with phosphor-green grid lines, Matrix code rain Canvas FX, and monochrome dark palette."
     },
     {
       "name": "NEO-TACTICAL // ARCHIVE 01",
@@ -2175,7 +2186,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neo_tactical_archive_01.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Military console interface with Lidar Topographical Scan Canvas FX, monospace typography, and stealth blue-gray tones."
     },
     {
       "name": "Neon Cyberpunk (Animated)",
@@ -2229,7 +2241,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neon_cyberpunk_animated.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Neon-drenched cyberpunk UI with animated magenta and cyan glitch accents. Pure CSS effects — no Canvas FX."
     },
     {
       "name": "Neon Overdrive",
@@ -2616,7 +2629,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/pink_hues.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Soft pink and rose color palette with warm pastel accents. A clean, minimal design with no Canvas FX."
     },
     {
       "name": "Project Singularity",
@@ -2734,7 +2748,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/project_singularity.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Void interface with gravitational distortion effects, Accretion Canvas FX, and deep violet-black tones with phase-shift animations."
     },
     {
       "name": "Retro Terminal (CRT)",
@@ -2934,7 +2949,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/retro_terminal_crt.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Classic green phosphor CRT terminal with VT323 font, scan-line overlay, Matrix code Canvas FX, and authentic retro glow."
     },
     {
       "name": "Rosé Pine",
@@ -2988,7 +3004,8 @@
       },
       "version": "1.0.0",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/rose_pine.json",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Adaptation of the Rosé Pine color scheme with muted lavender, rose, and pine tones. CSS-only — no Canvas FX."
     },
     {
       "name": "Solar Flare",
@@ -3158,7 +3175,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/solar_flare.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Luxury golden UI with warm amber accents, Solar Wind Embers Canvas FX, and rich copper-toned glassmorphism."
     },
     {
       "name": "Sovereign",
@@ -3328,7 +3346,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/sovereign.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Architectural material design with Prismatic Caustics Canvas FX, premium glassmorphism panels, and deep navy-indigo tones."
     },
     {
       "name": "Synthwave 1984",
@@ -3498,7 +3517,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/synthwave_1984.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Retro-futuristic synthwave aesthetic with neon magenta glow, Perspective Grid Canvas FX, and chrome-styled accents."
     },
     {
       "name": "Testing v1.4.6",
@@ -3732,7 +3752,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/testing_v1_4_6.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Experimental tech-demo theme with sharp zero-radius corners, monospace typography, and Bit-Stream Corruption Canvas FX."
     },
     {
       "name": "The Cyanotype",
@@ -3838,7 +3859,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/the_cyanotype.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Blueprint-inspired design with architectural grid overlay, deep navy tones, and technical drawing aesthetics. CSS-only — no Canvas FX."
     },
     {
       "name": "Toxic Nebula // Smog-Core",
@@ -3942,7 +3964,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/toxic_nebula_smog_core.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Hazardous atmosphere UI with corrosive green accents, Smog particle Canvas FX, and toxic purple-violet tones with liquid pulse animations."
     },
     {
       "name": "Wasteland Uplink (Amber)",
@@ -4272,7 +4295,8 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/wasteland_uplink_amber.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Post-apocalyptic terminal with Radiation Dust Canvas FX, VT323 monospace font, amber phosphor glow, and weathered UI elements."
     },
     {
       "name": "Windows Hotdog Stand",
@@ -4430,13 +4454,14 @@
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/windows_hotdog_stand.json",
       "version": "1.0.0",
-      "author": "silentoplayz (G30)"
+      "author": "silentoplayz (G30)",
+      "description": "Faithful recreation of the infamous Windows 3.1 Hot Dog Stand color scheme — bold red and yellow with sharp pixel aesthetics."
     }
   ],
   "isLibraryBackup": true,
   "version": "1.0.0",
   "_meta": {
-    "generated": "2026-06-15T21:35:17.418Z",
+    "generated": "2026-06-15T21:42:37.080Z",
     "count": 27
   }
 }
