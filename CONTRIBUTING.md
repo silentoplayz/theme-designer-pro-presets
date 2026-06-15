@@ -24,7 +24,7 @@ Before submitting a PR, ensure your preset meets these requirements:
   - Avoid allocations in the render loop (no `new Array()`, no object literals in hot paths)
   - Precompute values at init, not per-frame
   - Use typed arrays (`Float32Array`) for large datasets
-- [ ] **Mouse interaction** is responsive and satisfying
+- [ ] **Mouse interaction** is responsive and satisfying (if applicable)
 - [ ] **File is self-contained** — no external imports or dependencies
 
 ### Themes
@@ -42,33 +42,23 @@ Before submitting a PR, ensure your preset meets these requirements:
 
 ---
 
-## 📁 File Organization
-
-### Canvas FX Naming Convention
+## 📁 File Naming Convention
 
 ```
-lowercase_with_underscores.js
+lowercase_with_underscores.js     # Canvas FX scripts
+lowercase_with_underscores.json   # Themes, CSS presets, gradients
 ```
 
-Examples: `starfield_warp.js`, `neon_dreamscape.js`, `fluid_dye.js`
+Examples: `starfield_warp.js`, `neon_dreamscape.js`, `midnight_ocean.json`
 
-### Category Placement
+All presets go directly into their respective top-level directory — no subdirectories:
 
-Place files in the most fitting category folder:
-
-| If the animation is about... | Put it in... |
+| Preset type | Directory |
 |---|---|
-| Stars, galaxies, space | `canvas-fx/cosmic/` |
-| Weather, water, plants, animals | `canvas-fx/nature/` |
-| 80s/90s nostalgia, CRT, pixel art | `canvas-fx/retro/` |
-| Code, circuits, data, HUDs | `canvas-fx/tech/` |
-| Cells, DNA, organisms | `canvas-fx/bio/` |
-| Gravity, waves, magnetics | `canvas-fx/physics/` |
-| Heavy mouse interaction focus | `canvas-fx/interactive/` |
-| Geometric shapes, tessellation | `canvas-fx/geometric/` |
-| Artistic, abstract, fluid | `canvas-fx/abstract/` |
-
-If a script fits multiple categories, choose the **primary** one.
+| Canvas FX animation script | `canvas-fx/` |
+| Complete theme | `themes/` |
+| CSS-only preset | `css-presets/` |
+| Gradient pack | `gradients/` |
 
 ---
 
@@ -77,7 +67,7 @@ If a script fits multiple categories, choose the **primary** one.
 ### Visual
 
 - **First impression matters** — the animation should look polished and intentional, not like a tech demo
-- **Subtle is often better** — these run behind a chat UI, so overwhelming animations are distracting
+- **Subtle is often better** — these run behind a chat UI, so overwhelming animations can be distracting
 - **Color palette should be harmonious** — avoid clashing colors; prefer curated palettes
 - **Smooth motion** — no jitter, no stuttering, organic easing
 
@@ -98,7 +88,7 @@ If a script fits multiple categories, choose the **primary** one.
 
 ## 🔄 Curation Process
 
-1. **Submit a PR** with your preset(s) in the correct category folder
+1. **Submit a PR** with your preset(s) in the correct directory
 2. **Maintainer review** — checked for quality, performance, API compliance, and visual polish
 3. **Testing** — verified in Theme Designer Pro on the latest Open WebUI version
 4. **Merge** — accepted presets are added and the relevant bundle JSON is regenerated
@@ -118,11 +108,10 @@ If a script fits multiple categories, choose the **primary** one.
 After adding new presets, regenerate the combined bundle files:
 
 ```bash
-# From the repository root
 node scripts/build-bundles.js
 ```
 
-This scans all category folders and produces the combined JSON files in `bundles/`.
+This scans all preset directories and produces the combined JSON files in `bundles/`.
 
 ---
 

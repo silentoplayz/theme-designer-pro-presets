@@ -11,29 +11,15 @@ A curated collection of themes, Canvas FX animations, CSS presets, and gradient 
 ```
 theme-designer-pro-presets/
 ├── canvas-fx/               # Canvas FX animation scripts (.js)
-│   ├── cosmic/              # Space, stars, nebulae
-│   ├── nature/              # Weather, water, organic
-│   ├── retro/               # Synthwave, CRT, pixel art
-│   ├── tech/                # Matrix, circuits, data
-│   ├── bio/                 # DNA, cells, mycelium
-│   ├── physics/             # Gravity, magnetics, waves
-│   ├── interactive/         # High mouse interactivity
-│   ├── geometric/           # Shapes, patterns, tessellation
-│   └── abstract/            # Artistic, fluid, freeform
-├── themes/                  # Complete theme presets (full config)
-│   ├── dark/                # Dark themes
-│   ├── light/               # Light themes
-│   └── special/             # Seasonal, novelty, experimental
-├── css-presets/             # CSS-only styling presets
-├── gradients/               # Gradient preset packs
-├── bundles/                 # Combined import-ready JSON files
-│   └── README.md
-├── schemas/                 # JSON schemas for validation
-│   ├── canvas-preset.schema.json
-│   └── theme.schema.json
-├── CONTRIBUTING.md          # How to contribute & curate
+├── themes/                  # Complete theme presets (.json)
+├── css-presets/              # CSS-only styling presets
+├── gradients/                # Gradient preset packs
+├── bundles/                  # Combined import-ready JSON files
+├── schemas/                  # JSON schemas for validation
+├── scripts/                  # Build tooling
+├── CONTRIBUTING.md
 ├── LICENSE
-└── README.md                # This file
+└── README.md
 ```
 
 ---
@@ -65,24 +51,11 @@ Drag any `.js` or `.json` file directly onto the Theme Designer Pro interface.
 
 JavaScript animation scripts that run behind the Open WebUI interface via OffscreenCanvas in a Web Worker. Each script is a standalone `.js` file.
 
-**Configurable scripts** (marked with ⚙️) include a `CONFIG` block at the top of the file with tunable properties — colors, speeds, particle counts, physics constants, and more. Edit the values directly in the Canvas FX editor and click Apply.
-
-**Categories:**
-| Folder | Description | Examples |
-|---|---|---|
-| `cosmic/` | Space and celestial | Starfield Warp, Nebula Clouds, Galaxy Forge |
-| `nature/` | Weather and organic | Rain on Glass, Firefly Meadow, Snow Globe |
-| `retro/` | Vintage and nostalgic | Synthwave Grid, CRT Monitor, VHS Static |
-| `tech/` | Digital and cyber | Matrix Rain, Circuit Board, Blueprint Grid |
-| `bio/` | Biological systems | DNA Helix, Cell Division, Coral Growth |
-| `physics/` | Simulations | Gravity Wells, Magnetic Sand, Cymatics |
-| `interactive/` | Mouse-driven | Neon Dreamscape, Electric Tendrils, Fluid Dye |
-| `geometric/` | Shapes and patterns | Kaleidoscope, Voronoi Cells, Stained Glass |
-| `abstract/` | Artistic and fluid | Lava Lamp, Ink Bloom, Plasma Field |
+Scripts marked with ⚙️ include a `CONFIG` block at the top with tunable properties — colors, speeds, particle counts, physics constants, and more. Edit the values directly in the Canvas FX editor and click Apply.
 
 ### 🎭 Themes (`themes/`)
 
-Complete theme configurations including CSS overrides, Canvas FX selection, color tokens, and layout settings. Exported as `.json` files.
+Complete theme configurations including CSS overrides, Canvas FX selection, color tokens, and layout settings. A single theme file can cover multiple or all theme modes (dark, light, etc.). Exported as `.json` files.
 
 ### 🖌️ CSS Presets (`css-presets/`)
 
@@ -94,7 +67,7 @@ Gradient preset packs for backgrounds, panels, and UI elements.
 
 ### 📦 Bundles (`bundles/`)
 
-Combined JSON files containing multiple presets for one-click bulk import.
+Combined JSON files containing multiple presets for one-click bulk import. See [`bundles/README.md`](bundles/README.md) for details.
 
 ---
 
