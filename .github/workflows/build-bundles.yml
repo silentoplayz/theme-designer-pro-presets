@@ -46,16 +46,19 @@ jobs:
       - name: Build bundles
         run: node scripts/build-bundles.js
 
+      - name: Update badge counts
+        run: node scripts/update-badges.js
+
       - name: Check for changes
         id: diff
         run: |
-          git diff --quiet bundles/ && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
+          git diff --quiet bundles/ README.md && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
 
-      - name: Commit updated bundles
+      - name: Commit updated bundles and badges
         if: steps.diff.outputs.changed == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add bundles/
-          git commit -m "chore: auto-regenerate bundles [skip ci]"
+          git add bundles/ README.md
+          git commit -m "chore: auto-update bundles and badges [skip ci]"
           git push
