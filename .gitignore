@@ -4,3 +4,6 @@ Thumbs.db
 *.log
 *.tmp
 .env
+
+# Staging folder for unsorted/raw theme files
+_inbox/
