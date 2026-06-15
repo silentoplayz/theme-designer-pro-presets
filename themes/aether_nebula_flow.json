@@ -112,5 +112,6 @@
     "themeShowAuth": true,
     "customCssShowAuth": true
   },
-  "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/aether_nebula_flow.json"
+  "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/aether_nebula_flow.json",
+  "version": "1.0.0"
 }

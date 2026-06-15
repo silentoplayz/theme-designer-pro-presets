@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "generated": "2026-06-15T20:58:09.910Z",
+    "generated": "2026-06-15T21:15:26.438Z",
     "description": "Combined bundle — all preset types"
   },
   "version": "1.0.0",
@@ -929,7 +929,8 @@
         "themeShowAuth": true,
         "customCssShowAuth": true
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/aether_nebula_flow.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/aether_nebula_flow.json",
+      "version": "1.0.0"
     },
     {
       "name": "Amber Command: 1979",
@@ -1071,7 +1072,8 @@
         "themeShowAuth": true,
         "customCssShowAuth": true
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/amber_command_1979.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/amber_command_1979.json",
+      "version": "1.0.0"
     },
     {
       "name": "Apollo // Analogue Futurism",
@@ -1201,7 +1203,8 @@
         "themeShowAuth": true,
         "customCssShowAuth": true
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/apollo_analogue_futurism.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/apollo_analogue_futurism.json",
+      "version": "1.0.0"
     },
     {
       "name": "Astral Projection",
@@ -1369,7 +1372,8 @@
         "themeShowAuth": true,
         "customCssShowAuth": true
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/astral_projection.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/astral_projection.json",
+      "version": "1.0.0"
     },
     {
       "name": "Bio-Digital Synthesis",
@@ -1511,7 +1515,8 @@
         "themeShowAuth": true,
         "customCssShowAuth": true
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/bio_digital_synthesis.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/bio_digital_synthesis.json",
+      "version": "1.0.0"
     },
     {
       "name": "Bioluminescence",
@@ -1653,7 +1658,8 @@
         "themeShowAuth": true,
         "customCssShowAuth": true
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/bioluminescence.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/bioluminescence.json",
+      "version": "1.0.0"
     },
     {
       "name": "Blue Lightning",
@@ -1981,7 +1987,8 @@
         "gradientMeshBgColor": "#0a0a12",
         "paletteEnabled": true
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/blue_lightning.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/blue_lightning.json",
+      "version": "1.0.0"
     },
     {
       "name": "ENTROPY // DATA-STORM",
@@ -2095,13 +2102,14 @@
         "themeShowAuth": true,
         "customCssShowAuth": true
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/entropy_data_storm.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/entropy_data_storm.json",
+      "version": "1.0.0"
     },
     {
       "name": "Four Seasons (Desynced)",
       "description": "",
       "author": "",
-      "version": "1.1",
+      "version": "1.0.0",
       "targetVersion": "",
       "repositoryUrl": "",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/four_seasons_desynced.json",
@@ -2480,7 +2488,8 @@
         "canvasEnabled": false,
         "canvasScript": ""
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/h4nn1b4l_custom_css.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/h4nn1b4l_custom_css.json",
+      "version": "1.0.0"
     },
     {
       "name": "Kinetic Thermal // Plasma Core",
@@ -2582,7 +2591,8 @@
         "themeShowAuth": true,
         "customCssShowAuth": true
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/kinetic_thermal_plasma_core.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/kinetic_thermal_plasma_core.json",
+      "version": "1.0.0"
     },
     {
       "name": "LUMINA // AURORA",
@@ -2750,7 +2760,8 @@
         "themeShowAuth": true,
         "customCssShowAuth": true
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/lumina_aurora.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/lumina_aurora.json",
+      "version": "1.0.0"
     },
     {
       "name": "Matrix Rain",
@@ -2916,7 +2927,8 @@
         "canvasShowAuth": true,
         "themeShowAuth": true
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/matrix_rain.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/matrix_rain.json",
+      "version": "1.0.0"
     },
     {
       "name": "NEO-TACTICAL // ARCHIVE 01",
@@ -3018,7 +3030,8 @@
         "themeShowAuth": true,
         "customCssShowAuth": true
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neo_tactical_archive_01.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neo_tactical_archive_01.json",
+      "version": "1.0.0"
     },
     {
       "name": "Neon Cyberpunk (Animated)",
@@ -3070,7 +3083,8 @@
         "canvasEnabled": false,
         "canvasScript": ""
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neon_cyberpunk_animated.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neon_cyberpunk_animated.json",
+      "version": "1.0.0"
     },
     {
       "name": "Neon Overdrive",
@@ -3455,7 +3469,8 @@
         "canvasEnabled": false,
         "canvasScript": ""
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/persona.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/persona.json",
+      "version": "1.0.0"
     },
     {
       "name": "Persona Inspired (Admiral_Falco)",
@@ -3507,7 +3522,8 @@
         "canvasEnabled": false,
         "canvasScript": ""
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/persona_inspired_admiral_falco.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/persona_inspired_admiral_falco.json",
+      "version": "1.0.0"
     },
     {
       "name": "Pink Hues",
@@ -3559,7 +3575,8 @@
         "canvasEnabled": false,
         "canvasScript": ""
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/pink_hues.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/pink_hues.json",
+      "version": "1.0.0"
     },
     {
       "name": "Project Singularity",
@@ -3675,7 +3692,8 @@
         "themeShowAuth": true,
         "customCssShowAuth": true
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/project_singularity.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/project_singularity.json",
+      "version": "1.0.0"
     },
     {
       "name": "Retro Terminal (CRT)",
@@ -3873,7 +3891,8 @@
         "gradientMeshBgColor": "#0a0a12",
         "paletteEnabled": true
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/retro_terminal_crt.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/retro_terminal_crt.json",
+      "version": "1.0.0"
     },
     {
       "name": "Rosé Pine",
@@ -3925,7 +3944,7 @@
         "canvasEnabled": false,
         "canvasScript": ""
       },
-      "version": "1.4.6",
+      "version": "1.0.0",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/rose_pine.json"
     },
     {
@@ -4094,7 +4113,8 @@
         "themeShowAuth": true,
         "customCssShowAuth": true
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/solar_flare.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/solar_flare.json",
+      "version": "1.0.0"
     },
     {
       "name": "Sovereign",
@@ -4262,7 +4282,8 @@
         "themeShowAuth": true,
         "customCssShowAuth": true
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/sovereign.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/sovereign.json",
+      "version": "1.0.0"
     },
     {
       "name": "Synthwave 1984",
@@ -4430,7 +4451,8 @@
         "themeShowAuth": true,
         "customCssShowAuth": true
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/synthwave_1984.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/synthwave_1984.json",
+      "version": "1.0.0"
     },
     {
       "name": "Testing v1.4.6",
@@ -4662,7 +4684,8 @@
         "gradientMeshBgColor": "#0a0a12",
         "paletteEnabled": true
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/testing_v1_4_6.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/testing_v1_4_6.json",
+      "version": "1.0.0"
     },
     {
       "name": "The Cyanotype",
@@ -4766,7 +4789,8 @@
         "canvasEnabled": false,
         "canvasScript": ""
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/the_cyanotype.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/the_cyanotype.json",
+      "version": "1.0.0"
     },
     {
       "name": "Toxic Nebula // Smog-Core",
@@ -4868,7 +4892,8 @@
         "themeShowAuth": true,
         "customCssShowAuth": true
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/toxic_nebula_smog_core.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/toxic_nebula_smog_core.json",
+      "version": "1.0.0"
     },
     {
       "name": "Wasteland Uplink (Amber)",
@@ -5196,7 +5221,8 @@
         "gradientMeshBgColor": "#0a0a12",
         "paletteEnabled": true
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/wasteland_uplink_amber.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/wasteland_uplink_amber.json",
+      "version": "1.0.0"
     },
     {
       "name": "Windows Hotdog Stand",
@@ -5352,7 +5378,8 @@
         "canvasEnabled": false,
         "canvasScript": ""
       },
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/windows_hotdog_stand.json"
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/windows_hotdog_stand.json",
+      "version": "1.0.0"
     }
   ],
   "isLibraryBackup": true

@@ -98,5 +98,6 @@
     "themeShowAuth": true,
     "customCssShowAuth": true
   },
-  "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neo_tactical_archive_01.json"
+  "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neo_tactical_archive_01.json",
+  "version": "1.0.0"
 }

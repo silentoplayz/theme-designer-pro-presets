@@ -164,5 +164,6 @@
     "themeShowAuth": true,
     "customCssShowAuth": true
   },
-  "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/astral_projection.json"
+  "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/astral_projection.json",
+  "version": "1.0.0"
 }

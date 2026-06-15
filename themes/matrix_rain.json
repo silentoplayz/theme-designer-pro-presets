@@ -162,5 +162,6 @@
     "canvasShowAuth": true,
     "themeShowAuth": true
   },
-  "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/matrix_rain.json"
+  "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/matrix_rain.json",
+  "version": "1.0.0"
 }

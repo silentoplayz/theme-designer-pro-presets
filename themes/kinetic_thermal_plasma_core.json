@@ -98,5 +98,6 @@
     "themeShowAuth": true,
     "customCssShowAuth": true
   },
-  "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/kinetic_thermal_plasma_core.json"
+  "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/kinetic_thermal_plasma_core.json",
+  "version": "1.0.0"
 }

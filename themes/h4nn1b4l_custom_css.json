@@ -48,5 +48,6 @@
     "canvasEnabled": false,
     "canvasScript": ""
   },
-  "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/h4nn1b4l_custom_css.json"
+  "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/h4nn1b4l_custom_css.json",
+  "version": "1.0.0"
 }
