@@ -1,0 +1,48 @@
+:root {
+  --primary-text: #8b1538;
+  --primary-pink: #ff69b4;
+  --primary-bg: #ffe0ec;
+  --hover-bg: #ffc0db;
+}
+
+* {
+  color: var(--primary-text) !important;
+}
+
+#send-message-button {
+  background-color: var(--primary-pink) !important;
+}
+
+#sidebar {
+  background-color: var(--primary-bg) !important;
+}
+
+#sidebar > div *:hover {
+  background-color: var(--hover-bg) !important;
+}
+
+[aria-label="Voice mode"] {
+  background-color: var(--primary-pink) !important;
+}
+
+.tippy-content {
+  background-color: var(--primary-pink) !important;
+  border-color: var(--primary-pink) !important;
+}
+
+.tippy-box {
+  background-color: var(--primary-pink) !important;
+  border-color: var(--primary-pink) !important;
+}
+
+button[type="submit"] {
+  background-color: var(--primary-pink) !important;
+}
+
+[role="switch"][aria-checked="true"] {
+  background-color: var(--primary-pink) !important;
+}
+
+button.px-3\.5.py-1\.5.text-sm.font-medium.bg-black.hover\:bg-gray-900.text-white.dark\:bg-white.dark\:text-black.dark\:hover\:bg-gray-100.transition.rounded-full {
+  background-color: var(--primary-pink) !important;
+}

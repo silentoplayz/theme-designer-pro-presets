@@ -1,0 +1,1352 @@
+/* ============================================
+   PERSONA THEME - Open WebUI
+   Version: 2.2 — UNIFIED + EFFECTS
+   ============================================ */
+/* ============================================
+   1. DESIGN TOKENS
+   ============================================ */
+:root {
+/* --- Core Colors --- */
+--persona-red: #ff003c;
+--persona-red-50: rgba(255, 0, 60, 0.5);
+--persona-red-dark: #cc002f;
+--persona-red-light: #ff3366;
+--persona-cyan: #00e0ff;
+--persona-black: #0a0a0a;
+--persona-white: #ffffff;
+--persona-off-white: #f0f0f0;
+/* --- Surfaces --- */
+--persona-bg: #0a0a0a;
+--persona-surface: #1a1a1a;
+--persona-surface-elevated: #2a2a2a;
+/* --- Text --- */
+--persona-text: #ffffff;
+--persona-text-muted: #a0a0a0;
+--persona-text-black: #000000;
+/* --- Angles --- */
+--persona-angle: -0.5deg;
+--persona-angle-strong: -1deg;
+--persona-angle-subtle: -0.25deg;
+--persona-angle-positive: 0.5deg;
+--persona-angle-positive2: 1deg;
+--persona-angle-positive-subtle: 0.25deg;
+/* --- Trapezoid skew values (skewY slants left/right edges) --- */
+--persona-skew-amount: -2deg;
+--persona-skew-amount-neg: 2deg;
+/* --- Shadows & Glows --- */
+--persona-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
+--persona-shadow-hover: 6px 6px 0 rgba(0, 0, 0, 0.4);
+--persona-glow: 0 0 10px rgba(255, 0, 60, 0.5);
+--persona-glow-hover: 0 0 20px rgba(255, 255, 255, 0.7);
+--persona-glow-white: 0 0 10px rgba(255, 255, 255, 0.3);
+--persona-glow-white-hover: 0 0 20px rgba(255, 255, 255, 0.5);
+/* --- Transition --- */
+--persona-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* --- DEBUG --- */
+--persona-debug: #51ff00;
+/* --- Open WebUI Overrides --- */
+--sidebar-bg: var(--persona-surface);
+--sidebar-border: var(--persona-red);
+--chat-bg: var(--persona-bg);
+--message-bg: var(--persona-surface);
+}
+/* ============================================
+   2. THE UNIFIED COMPONENT — The One Pattern
+   ============================================ */
+/* --- RED variant (default button action) --- */
+button, .btn, [role="button"],
+#sidebar-new-chat-button,
+#sidebar button, .sidebar button {
+background: linear-gradient(135deg, var(--persona-red), var(--persona-red-dark)) !important;
+color: var(--persona-white) !important;
+border: 2px solid var(--persona-red) !important;
+border-radius: 2px !important;
+padding: 4px !important;
+font-weight: bold !important;
+text-transform: uppercase !important;
+letter-spacing: 0.1px !important;
+cursor: pointer !important;
+transition: box-shadow var(--persona-transition), border-color var(--persona-transition), color var(--persona-transition), background var(--persona-transition) !important;
+box-shadow: var(--persona-shadow), var(--persona-glow) !important;
+position: relative !important;
+margin: 2px 0 !important;
+text-decoration: none !important;
+display: inline-block !important;
+}
+/* --- WHITE variant (sidebar links, secondary actions) --- */
+#sidebar a:not([href="/"]), .sidebar a:not([href="/"]),
+.secondary, [class*="secondary"] {
+background: linear-gradient(135deg, var(--persona-white), var(--persona-off-white)) !important;
+color: var(--persona-text-black) !important;
+border: 2px solid rgba(0, 0, 0, 0.4) !important;
+border-radius: 2px !important;
+padding: 12px 24px !important;
+font-weight: bold !important;
+letter-spacing: 1px !important;
+cursor: pointer !important;
+transition: box-shadow var(--persona-transition), border-color var(--persona-transition), color var(--persona-transition), background var(--persona-transition) !important;
+box-shadow: var(--persona-shadow), var(--persona-glow-white) !important;
+position: relative !important;
+margin: 2px 0 !important;
+text-decoration: none !important;
+display: block !important;
+}
+/* --- Shared Hover — RED variant --- */
+button:hover, .btn:hover, [role="button"]:hover,
+#sidebar-new-chat-button:hover,
+#sidebar button:hover, .sidebar button:hover {
+animation: persona-button-lift-shake 0.5s ease-in-out forwards !important;
+box-shadow: var(--persona-shadow-hover), var(--persona-glow-hover) !important;
+border-color: var(--persona-red-light) !important;
+color: var(--persona-white) !important;
+}
+/* --- Shared Hover — WHITE variant --- */
+#sidebar a:not([href="/"]):hover, .sidebar a:not([href="/"]):hover,
+.secondary:hover, [class*="secondary"]:hover {
+animation: persona-button-lift-shake-white 0.5s ease-in-out forwards !important;
+box-shadow: var(--persona-shadow-hover), var(--persona-glow-hover) !important;
+border-color: var(--persona-red) !important;
+color: var(--persona-red) !important;
+}
+/* --- Shared ::after overlap border --- */
+button::after, .btn::after, [role="button"]::after,
+#sidebar-new-chat-button::after,
+#sidebar button::after, .sidebar button::after,
+#sidebar a:not([href="/"])::after, .sidebar a:not([href="/"])::after,
+.secondary::after, [class*="secondary"]::after {
+content: '' !important;
+position: absolute !important;
+top: 2px; left: 2px; right: 2px; bottom: 2px;
+border: 2px solid rgba(255, 255, 255, 0.3) !important;
+border-radius: 2px !important;
+pointer-events: none !important;
+transition: box-shadow var(--persona-transition), border-color var(--persona-transition), color var(--persona-transition), background var(--persona-transition) !important;
+}
+/* --- ::after hover — RED variant --- */
+button:hover::after, .btn:hover::after, [role="button"]:hover::after,
+#sidebar-new-chat-button:hover::after,
+#sidebar button:hover::after, .sidebar button:hover::after {
+border-color: rgba(255, 255, 255, 0.6) !important;
+border-width: 3px !important;
+}
+/* --- ::after hover — WHITE variant --- */
+#sidebar a:not([href="/"]):hover::after, .sidebar a:not([href="/"]):hover::after,
+.secondary:hover::after, [class*="secondary"]:hover::after {
+border-color: rgba(255, 0, 60, 0.5) !important;
+border-width: 3px !important;
+}
+/* Toggle switches — small exception */
+button[class*="toggle"], button[class*="switch"],
+[role="switch"], .toggle, .switch {
+margin-top: 0 !important;
+border-radius: 2px !important;
+padding: 2px !important;
+background: linear-gradient(135deg, var(--persona-red), var(--persona-red-dark)) !important;
+}
+/* ============================================
+   3. BOXES (cards, panels, messages, modals)
+   ============================================ */
+.card, .panel, [class*="card-"], [class*="panel-"],
+[class*="message-"], .modal-backdrop + div,
+[role="dialog"] > div:first-child,
+.modal-wrapper, .dialog-container {
+background: linear-gradient(135deg, var(--persona-white), var(--persona-off-white)) !important;
+color: var(--persona-text-black) !important;
+border: 3px solid var(--persona-red) !important;
+border-radius: 2px !important;
+padding: 4px !important;
+margin: 4px !important;
+position: relative !important;
+transform: rotate(var(--persona-angle-subtle)) !important;
+transition: box-shadow var(--persona-transition), border-color var(--persona-transition), color var(--persona-transition), background var(--persona-transition) !important;
+box-shadow: var(--persona-shadow), var(--persona-glow) !important;
+}
+/* ============================================
+   3B. USER MESSAGE BOXES
+   ============================================ */
+.user-message {
+background: linear-gradient(135deg, var(--persona-red-dark), var(--persona-red-light)) !important;
+border: 3px solid var(--persona-off-white) !important;
+border-radius: 2px !important;
+padding: 24px !important;
+margin: 16px !important;
+position: relative !important;
+transform: rotate(var(--persona-angle-subtle)) skewY(var(--persona-skew-amount)) !important;
+transition: box-shadow var(--persona-transition), border-color var(--persona-transition), color var(--persona-transition), background var(--persona-transition) !important;
+box-shadow: var(--persona-shadow), var(--persona-glow) !important;
+}
+/* Counter-skew content inside user messages */
+.user-message > * {
+transform: skewY(var(--persona-skew-amount-neg));
+}
+.user-message:hover {
+animation: persona-lift-flat-skew 0.3s ease-in-out forwards !important;
+box-shadow: var(--persona-shadow-hover), var(--persona-glow-hover) !important;
+}
+.user-message::before {
+content: '' !important;
+position: absolute !important;
+top: 0; left: 0; right: 0;
+height: 4px !important;
+background: linear-gradient(90deg, transparent, var(--persona-red), transparent) !important;
+transform: skewX(-30deg) !important;
+transform-origin: top left !important;
+}
+.user-message .rounded-3xl,
+.user-message [class*="rounded-3xl"] {
+background: transparent !important;
+border: none !important;
+border-radius: 0 !important;
+box-shadow: none !important;
+padding: 0 !important;
+margin: 0 !important;
+max-width: 100% !important;
+transform: none !important;
+}
+/* --- Assistant/side messages — skew opposite direction --- */
+.assistant, [class*="message-"]:not(.user-message) {
+transform: rotate(var(--persona-angle-subtle)) skewY(var(--persona-skew-amount-neg)) !important;
+}
+/* Counter-skew content inside assistant messages */
+.assistant > *, [class*="message-"]:not(.user-message) > * {
+transform: skewY(var(--persona-skew-amount));
+}
+/* --- Hover for cards, panels — no skew involved --- */
+.card:hover, .panel:hover {
+animation: persona-lift-flat 0.3s ease-in-out forwards !important;
+box-shadow: var(--persona-shadow-hover), var(--persona-glow-hover) !important;
+}
+.card::before, .panel::before, [class*="message-"]::before,
+.modal-backdrop + div::before, [role="dialog"] > div:first-child::before {
+content: '' !important;
+position: absolute !important;
+top: 0; left: 0; right: 0;
+height: 4px !important;
+background: linear-gradient(90deg, transparent, var(--persona-red), transparent) !important;
+transform: skewX(-30deg) !important;
+transform-origin: top left !important;
+}
+/* --- Chat message staggered rotations via custom properties --- */
+.chat-message {
+--message-rotation: var(--persona-angle);
+}
+.chat-message:nth-child(even) {
+--message-rotation: var(--persona-angle-positive);
+}
+.message.user, .user-message {
+--message-rotation: var(--persona-angle-strong);
+}
+.message.assistant {
+--message-rotation: var(--persona-angle-positive2);
+}
+/* --- Message hover: tilt animation --- */
+[class*="message-"]:hover {
+animation: persona-message-tilt 0.3s ease-in-out forwards !important;
+}
+/* --- Card staggered rotations --- */
+.card:nth-child(3n+1), .panel:nth-child(3n+1) {
+--card-index: -2;
+}
+.card:nth-child(3n+2), .panel:nth-child(3n+2) {
+--card-index: 0;
+}
+.card:nth-child(3n+3), .panel:nth-child(3n+3) {
+--card-index: 2;
+}
+.card, .panel {
+transform: rotate(calc(var(--card-index, 0) * 1deg + var(--persona-angle))) !important;
+}
+.modal-backdrop + div, [role="dialog"] > div:first-child,
+.modal-wrapper, .dialog-container {
+transform: rotate(var(--persona-angle-strong)) !important;
+}
+.modal-backdrop, [role="dialog"] + div {
+background: rgba(0, 0, 0, 0.8) !important;
+backdrop-filter: blur(5px) !important;
+}
+
+
+/* ============================================
+   3C. PERSONA 5 EFFECTS — Static styling only
+   Animation declarations moved to section 8
+   ============================================ */
+
+
+/* Active item — emphasized border */
+#sidebar a.active, .sidebar a.active,
+#sidebar [class*="active"], .sidebar [class*="active"],
+[aria-current="page"] {
+border-color: var(--persona-red) !important;
+border-width: 3px !important;
+}
+
+
+/* User message — slightly sharper bottom-right corner for speech effect */
+.user-message {
+border-bottom-right-radius: 2px !important;
+}
+
+
+/* Assistant message — slightly sharper bottom-left corner */
+.assistant, [class*="message-"]:not(.user-message) {
+border-bottom-left-radius: 2px !important;
+}
+
+
+/* ============================================
+   4. SIDEBAR (container only)
+   ============================================ */
+#sidebar, .sidebar, [data-testid="sidebar"] {
+background:
+/* Scanline layer */
+repeating-linear-gradient(
+0deg,
+transparent,
+transparent 2px,
+rgba(255, 0, 60, 0.03) 3px,
+transparent 4px
+    ),
+/* Base surface */
+var(--persona-surface) !important;
+border-right: 3px solid var(--persona-red) !important;
+transform: perspective(800px) rotateY(var(--persona-angle-strong)) !important;
+transform-origin: left center !important;
+box-shadow: 10px 0 30px rgba(255, 0, 60, 0.2),
+inset -5px 0 10px rgba(0, 0, 0, 0.3) !important;
+clip-path: polygon(0 0, 100% 0, 98% 100%, 0 100%) !important;
+}
+#sidebar > _:not(.absolute), .sidebar >_ :not(.absolute) {
+transform: rotateY(3deg) !important;
+transform-origin: left center !important;
+}
+#sidebar-chat-item-menu {
+background: none !important;
+background-image: none !important;
+--tw-gradient-from: transparent !important;
+--tw-gradient-to: transparent !important;
+--tw-gradient-stops: none !important;
+}
+/* ============================================
+   4B. RIGHT FILE BROWSER PANEL
+   ============================================ */
+div:has(> #controls-container) {
+background: var(--persona-surface) !important;
+border-left: 3px solid var(--persona-red) !important;
+}
+#controls-container {
+background: var(--persona-surface) !important;
+}
+#controls-container button.px-2\.5 {
+background: var(--persona-surface-elevated) !important;
+border: 1px solid var(--persona-red) !important;
+color: var(--persona-text) !important;
+transform: rotate(var(--persona-angle)) !important;
+}
+#controls-container button.bg-gray-100,
+#controls-container button.dark\:bg-gray-800 {
+background: linear-gradient(135deg, var(--persona-red), var(--persona-red-dark)) !important;
+color: white !important;
+}
+#controls-container li.group {
+background: transparent !important;
+border-bottom: 1px solid rgba(255, 0, 60, 0.1) !important;
+}
+#controls-container li.group:hover {
+background: rgba(255, 0, 60, 0.1) !important;
+}
+#controls-container span.truncate {
+color: var(--persona-text) !important;
+}
+#controls-container span.text-xs.text-gray-400 {
+color: var(--persona-text-muted) !important;
+}
+#controls-container .text-blue-400,
+#controls-container .text-blue-300 {
+color: var(--persona-red-light) !important;
+}
+#controls-container .text-gray-400 {
+color: var(--persona-text-muted) !important;
+}
+#controls-container .shrink-0.p-1 {
+background: transparent !important;
+border: 1px solid var(--persona-red) !important;
+color: var(--persona-text) !important;
+transform: rotate(var(--persona-angle)) !important;
+}
+#controls-container .shrink-0.p-1:hover {
+background: rgba(255, 0, 60, 0.2) !important;
+box-shadow: 0 0 10px rgba(255, 0, 60, 0.3) !important;
+}
+#controls-container button.text-xs {
+color: var(--persona-text-muted) !important;
+transform: rotate(var(--persona-angle-subtle)) !important;
+}
+#controls-container button.text-xs:hover {
+color: var(--persona-primary) !important;
+}
+#controls-container .shrink-0.border-t {
+border-color: var(--persona-red) !important;
+}
+#controls-container button[aria-label="New Folder"],
+#controls-container button[aria-label="New File"],
+#controls-container button[aria-label="Upload"],
+#controls-container button[aria-label="Download"] {
+background: var(--persona-surface-elevated) !important;
+border: 1px solid var(--persona-red) !important;
+color: var(--persona-text) !important;
+}
+#controls-container button[aria-label="New Folder"]:hover,
+#controls-container button[aria-label="New File"]:hover,
+#controls-container button[aria-label="Upload"]:hover,
+#controls-container button[aria-label="Download"]:hover {
+background: rgba(255, 0, 60, 0.2) !important;
+box-shadow: 0 0 10px rgba(255, 0, 60, 0.3) !important;
+}
+#controls-container button[aria-label="Close"] {
+color: var(--persona-primary) !important;
+border: 1px solid var(--persona-primary) !important;
+}
+#controls-container button[aria-label="Close"]:hover {
+background: rgba(255, 0, 60, 0.2) !important;
+box-shadow: 0 0 15px rgba(255, 0, 60, 0.4) !important;
+}
+#controls-container button[aria-label="More"] {
+color: var(--persona-text-muted) !important;
+}
+#controls-container button[aria-label="More"]:hover {
+color: var(--persona-primary) !important;
+background: rgba(255, 0, 60, 0.1) !important;
+}
+#controls-container .flex.items-center.gap-2 {
+color: var(--persona-text) !important;
+}
+#controls-container .cursor-default {
+opacity: 0.4 !important;
+}
+/* ============================================
+   5. INPUTS
+   ============================================ */
+#chat-input {
+background: var(--persona-surface) !important;
+border: 2px solid var(--persona-red) !important;
+border-radius: 8px !important;
+color: var(--persona-text) !important;
+padding: 12px 16px !important;
+position: relative !important;
+}
+
+
+#chat-input::before {
+content: '' !important;
+position: absolute !important;
+top: 0; left: 0; right: 0;
+height: 100% !important;
+background: linear-gradient(90deg, transparent, var(--persona-red-50), transparent) !important;
+transform: skewX(-45deg);
+transform-origin: top left !important;
+pointer-events: none !important;
+}
+
+
+#chat-input:focus, [class*="input-"]:focus, textarea:focus {
+animation: persona-input-focus 0.3s ease-in-out forwards !important;
+box-shadow: 0 0 20px rgba(255, 0, 60, 0.3), 5px 5px 0 rgba(0, 0, 0, 0.2) !important;
+outline: none !important;
+}
+/* ============================================
+   6. TYPOGRAPHY
+   ============================================ */
+h1, h2, h3, h4, h5, h6 {
+transform: rotate(var(--persona-angle-subtle)) !important;
+transform-origin: top left !important;
+display: inline-block !important;
+margin-bottom: 15px !important;
+position: relative !important;
+}
+h1 {
+color: var(--persona-red) !important;
+text-shadow: 0 0 10px rgba(255, 0, 60, 0.5) !important;
+}
+h2 {
+border-bottom: 3px solid var(--persona-red) !important;
+padding-bottom: 5px !important;
+transform: rotate(var(--persona-angle)) !important;
+}
+pre, code, .code-block {
+background: #000 !important;
+color: var(--persona-red) !important;
+border: 1px solid var(--persona-red) !important;
+border-radius: 6px !important;
+font-family: 'Courier New', monospace !important;
+position: relative !important;
+overflow: hidden !important;
+}
+pre::before, code::before, .code-block::before {
+content: '' !important;
+position: absolute !important;
+top: 0; left: 0; right: 0; bottom: 0;
+background-image:
+linear-gradient(45deg, transparent 49%, rgba(255, 0, 60, 0.1) 50%, transparent 51%),
+linear-gradient(-45deg, transparent 49%, rgba(255, 0, 60, 0.1) 50%, transparent 51%) !important;
+background-size: 20px 20px !important;
+pointer-events: none !important;
+z-index: 1 !important;
+}
+/* ============================================
+   7. SCROLLBARS
+   ============================================ */
+::-webkit-scrollbar { width: 12px; background: var(--persona-surface); }
+::-webkit-scrollbar-track {
+background: linear-gradient(45deg, transparent 49%, rgba(255, 0, 60, 0.1) 50%, transparent 51%);
+border-radius: 6px;
+}
+::-webkit-scrollbar-thumb {
+background: linear-gradient(45deg, var(--persona-red), var(--persona-red-dark));
+border-radius: 6px;
+border: 2px solid var(--persona-surface);
+transform: skewX(-10deg);
+}
+::-webkit-scrollbar-thumb:hover {
+background: linear-gradient(45deg, var(--persona-red-light), var(--persona-red));
+transform: skewX(-15deg);
+}
+/* ============================================
+   8. ANIMATIONS — ALL keyframes and animation calls
+   ============================================ */
+
+/* --- Button hover: lift + shake combined for RED variant --- */
+@keyframes persona-button-lift-shake {
+  0%   { transform: rotate(var(--persona-angle)) translateY(0px); }
+  10%  { transform: rotate(calc(var(--persona-angle) + 1deg)) translateY(-2px) translateX(1px); }
+  25%  { transform: rotate(calc(var(--persona-angle) - 1deg)) translateY(-2px) translateX(-1px); }
+  40%  { transform: rotate(calc(var(--persona-angle) + 0.5deg)) translateY(-2px) translateX(0.5px); }
+  55%  { transform: rotate(calc(var(--persona-angle) - 0.5deg)) translateY(-2px) translateX(-0.5px); }
+  70%  { transform: rotate(0deg) translateY(-2px); }
+  100% { transform: rotate(0deg) translateY(-2px); }
+}
+
+/* --- Button hover: lift + shake combined for WHITE variant --- */
+@keyframes persona-button-lift-shake-white {
+  0%   { transform: rotate(var(--persona-angle)) translateY(0px); }
+  10%  { transform: rotate(calc(var(--persona-angle) + 1deg)) translateY(-2px) translateX(1px); }
+  25%  { transform: rotate(calc(var(--persona-angle) - 1deg)) translateY(-2px) translateX(-1px); }
+  40%  { transform: rotate(calc(var(--persona-angle) + 0.5deg)) translateY(-2px) translateX(0.5px); }
+  55%  { transform: rotate(calc(var(--persona-angle) - 0.5deg)) translateY(-2px) translateX(-0.5px); }
+  70%  { transform: rotate(0deg) translateY(-2px); }
+  100% { transform: rotate(0deg) translateY(-2px); }
+}
+
+/* --- Generic hover: lift to flat + slight rise --- */
+@keyframes persona-lift-flat {
+  0%   { transform: rotate(var(--persona-angle-subtle)) translateY(0px); }
+  100% { transform: rotate(0deg) translateY(-2px); }
+}
+
+/* --- User/assistant hover: lift to flat + rise, keeping skew --- */
+@keyframes persona-lift-flat-skew {
+  0%   { transform: rotate(var(--persona-angle-subtle)) skewY(var(--persona-skew-amount)) translateY(0px); }
+  100% { transform: rotate(0deg) skewY(var(--persona-skew-amount)) translateY(-2px); }
+}
+
+/* --- Chat message hover: tilt from flat to staggered angle --- */
+@keyframes persona-message-tilt {
+  0%   { transform: rotate(0deg) scale(1); }
+  100% { transform: rotate(var(--message-rotation, var(--persona-angle))); }
+}
+
+/* --- Chat input focus: subtle tilt + slight scale down --- */
+@keyframes persona-input-focus {
+  0%   { transform: rotate(0deg) scale(1); }
+  100% { transform: rotate(var(--persona-angle-subtle)) scale(0.99); }
+}
+
+@keyframes persona-pulse {
+  0%, 100% { opacity: 0.7; }
+  50%      { opacity: 1; }
+}
+
+
+@keyframes persona-active-glow {
+  0%, 100% {
+box-shadow:
+var(--persona-shadow),
+0 0 10px rgba(255, 0, 60, 0.5),
+0 0 20px rgba(255, 0, 0, 0.3);
+  }
+  50% {
+box-shadow:
+var(--persona-shadow),
+0 0 20px rgba(255, 0, 60, 0.8),
+0 0 40px rgba(255, 0, 60, 0.5);
+  }
+}
+
+
+@keyframes persona-hover-alert {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.3); }
+}
+
+
+/* --- Animation Calls --- */
+
+
+/* Sidebar pulse */
+#sidebar { animation: persona-pulse 6s ease-in-out infinite !important; }
+  
+
+/* Active item glow */
+#sidebar a.active, .sidebar a.active,
+#sidebar [class*="active"], .sidebar [class*="active"],
+[aria-current="page"] {
+animation: persona-active-glow 2s ease-in-out infinite !important;
+}
+
+
+/* Hover brightness pulse */
+#sidebar a:hover, .sidebar a:hover,
+#sidebar button:hover, .sidebar button:hover {
+animation: persona-hover-alert 1.5s ease-in-out infinite !important;
+}
+
+
+/* ============================================
+   9. UTILITY CLASSES
+   ============================================ */
+.persona-red   { background: var(--persona-red) !important; color: white !important; }
+.persona-white { background: var(--persona-white) !important; color: var(--persona-text-black) !important; }
+.persona-glow  { box-shadow: 0 0 25px var(--persona-glow-color) !important; }
+.persona-angle-1  { transform: rotate(var(--persona-angle)) !important; }
+.persona-angle-2  { transform: rotate(var(--persona-angle-strong)) !important; }
+.persona-angle-r1 { transform: rotate(var(--persona-angle-positive)) !important; }
+.persona-angle-r2 { transform: rotate(var(--persona-angle-positive2)) !important; }
+.persona-skew-1  { transform: skewX(-1deg) !important; }
+.persona-skew-2  { transform: skewX(-2deg) !important; }
+.persona-overlap       { margin-left: -10px; position: relative; z-index: 2; }
+.persona-overlap-strong { margin-left: -20px; z-index: 3; }
+/* ============================================
+   10. RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+#sidebar, .sidebar {
+transform: none !important;
+clip-path: none !important;
+  }
+.chat-message, .message, [class*="message-"],
+button, .btn, h1, h2, h3 {
+transform: none !important;
+  }
+.modal-backdrop + div, [role="dialog"] > div:first-child {
+transform: none !important;
+  }
+}
+/* ============================================
+   11. DEBUG
+   ============================================ */
+.debug-persona * { outline: 1px solid rgba(255, 0, 60, 0.2) !important; }
+.debug-persona .chat-message::after {
+content: 'rotate(' attr(style) ')' !important;
+position: absolute !important;
+top: -20px; left: 0;
+background: rgba(255, 0, 60, 0.8);
+color: white;
+padding: 2px 5px;
+font-size: 10px;
+border-radius: 2px;
+}
+/* Force light mode text on white-panel messages */
+[class*="message-"]:not(.user-message) p,
+[class*="message-"]:not(.user-message) li,
+[class*="message-"]:not(.user-message) span,
+[class*="message-"]:not(.user-message) strong,
+[class*="message-"]:not(.user-message) em,
+[class*="message-"]:not(.user-message) b,
+[class*="message-"]:not(.user-message) i,
+[class*="message-"]:not(.user-message) del,
+[class*="message-"]:not(.user-message) s,
+[class*="message-"]:not(.user-message) u,
+[class*="message-"]:not(.user-message) mark,
+[class*="message-"]:not(.user-message) small,
+[class*="message-"]:not(.user-message) sub,
+[class*="message-"]:not(.user-message) sup {
+color: var(--persona-text-black) !important;
+}
+/* ============================================
+   PERSONA THEME - Open WebUI
+   Version: 2.2 — UNIFIED + EFFECTS
+   ============================================ */
+/* ============================================
+   1. DESIGN TOKENS
+   ============================================ */
+:root {
+/* --- Core Colors --- */
+--persona-red: #ff003c;
+--persona-red-50: rgba(255, 0, 60, 0.5);
+--persona-red-dark: #cc002f;
+--persona-red-light: #ff3366;
+--persona-cyan: #00e0ff;
+--persona-black: #0a0a0a;
+--persona-white: #ffffff;
+--persona-off-white: #f0f0f0;
+/* --- Surfaces --- */
+--persona-bg: #0a0a0a;
+--persona-surface: #1a1a1a;
+--persona-surface-elevated: #2a2a2a;
+/* --- Text --- */
+--persona-text: #ffffff;
+--persona-text-muted: #a0a0a0;
+--persona-text-black: #000000;
+/* --- Angles --- */
+--persona-angle: -0.5deg;
+--persona-angle-strong: -1deg;
+--persona-angle-subtle: -0.25deg;
+--persona-angle-positive: 0.5deg;
+--persona-angle-positive2: 1deg;
+--persona-angle-positive-subtle: 0.25deg;
+/* --- Trapezoid skew values (skewY slants left/right edges) --- */
+--persona-skew-amount: -2deg;
+--persona-skew-amount-neg: 2deg;
+/* --- Shadows & Glows --- */
+--persona-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
+--persona-shadow-hover: 6px 6px 0 rgba(0, 0, 0, 0.4);
+--persona-glow: 0 0 10px rgba(255, 0, 60, 0.5);
+--persona-glow-hover: 0 0 20px rgba(255, 255, 255, 0.7);
+--persona-glow-white: 0 0 10px rgba(255, 255, 255, 0.3);
+--persona-glow-white-hover: 0 0 20px rgba(255, 255, 255, 0.5);
+/* --- Transition --- */
+--persona-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* --- DEBUG --- */
+--persona-debug: #51ff00;
+/* --- Open WebUI Overrides --- */
+--sidebar-bg: var(--persona-surface);
+--sidebar-border: var(--persona-red);
+--chat-bg: var(--persona-bg);
+--message-bg: var(--persona-surface);
+}
+/* ============================================
+   2. THE UNIFIED COMPONENT — The One Pattern
+   ============================================ */
+/* --- RED variant (default button action) --- */
+button, .btn, [role="button"],
+#sidebar-new-chat-button,
+#sidebar button, .sidebar button {
+background: linear-gradient(135deg, var(--persona-red), var(--persona-red-dark)) !important;
+color: var(--persona-white) !important;
+border: 2px solid var(--persona-red) !important;
+border-radius: 2px !important;
+padding: 4px !important;
+font-weight: bold !important;
+text-transform: uppercase !important;
+letter-spacing: 0.1px !important;
+cursor: pointer !important;
+transition: box-shadow var(--persona-transition), border-color var(--persona-transition), color var(--persona-transition), background var(--persona-transition) !important;
+box-shadow: var(--persona-shadow), var(--persona-glow) !important;
+position: relative !important;
+margin: 2px 0 !important;
+text-decoration: none !important;
+display: inline-block !important;
+}
+/* --- WHITE variant (sidebar links, secondary actions) --- */
+#sidebar a:not([href="/"]), .sidebar a:not([href="/"]),
+.secondary, [class*="secondary"] {
+background: linear-gradient(135deg, var(--persona-white), var(--persona-off-white)) !important;
+color: var(--persona-text-black) !important;
+border: 2px solid rgba(0, 0, 0, 0.4) !important;
+border-radius: 2px !important;
+padding: 12px 24px !important;
+font-weight: bold !important;
+letter-spacing: 1px !important;
+cursor: pointer !important;
+transition: box-shadow var(--persona-transition), border-color var(--persona-transition), color var(--persona-transition), background var(--persona-transition) !important;
+box-shadow: var(--persona-shadow), var(--persona-glow-white) !important;
+position: relative !important;
+margin: 2px 0 !important;
+text-decoration: none !important;
+display: block !important;
+}
+/* --- Shared Hover — RED variant --- */
+button:hover, .btn:hover, [role="button"]:hover,
+#sidebar-new-chat-button:hover,
+#sidebar button:hover, .sidebar button:hover {
+animation: persona-button-lift-shake 0.5s ease-in-out forwards !important;
+box-shadow: var(--persona-shadow-hover), var(--persona-glow-hover) !important;
+border-color: var(--persona-red-light) !important;
+color: var(--persona-white) !important;
+}
+/* --- Shared Hover — WHITE variant --- */
+#sidebar a:not([href="/"]):hover, .sidebar a:not([href="/"]):hover,
+.secondary:hover, [class*="secondary"]:hover {
+animation: persona-button-lift-shake-white 0.5s ease-in-out forwards !important;
+box-shadow: var(--persona-shadow-hover), var(--persona-glow-hover) !important;
+border-color: var(--persona-red) !important;
+color: var(--persona-red) !important;
+}
+/* --- Shared ::after overlap border --- */
+button::after, .btn::after, [role="button"]::after,
+#sidebar-new-chat-button::after,
+#sidebar button::after, .sidebar button::after,
+#sidebar a:not([href="/"])::after, .sidebar a:not([href="/"])::after,
+.secondary::after, [class*="secondary"]::after {
+content: '' !important;
+position: absolute !important;
+top: 2px; left: 2px; right: 2px; bottom: 2px;
+border: 2px solid rgba(255, 255, 255, 0.3) !important;
+border-radius: 2px !important;
+pointer-events: none !important;
+transition: box-shadow var(--persona-transition), border-color var(--persona-transition), color var(--persona-transition), background var(--persona-transition) !important;
+}
+/* --- ::after hover — RED variant --- */
+button:hover::after, .btn:hover::after, [role="button"]:hover::after,
+#sidebar-new-chat-button:hover::after,
+#sidebar button:hover::after, .sidebar button:hover::after {
+border-color: rgba(255, 255, 255, 0.6) !important;
+border-width: 3px !important;
+}
+/* --- ::after hover — WHITE variant --- */
+#sidebar a:not([href="/"]):hover::after, .sidebar a:not([href="/"]):hover::after,
+.secondary:hover::after, [class*="secondary"]:hover::after {
+border-color: rgba(255, 0, 60, 0.5) !important;
+border-width: 3px !important;
+}
+/* Toggle switches — small exception */
+button[class*="toggle"], button[class*="switch"],
+[role="switch"], .toggle, .switch {
+margin-top: 0 !important;
+border-radius: 2px !important;
+padding: 2px !important;
+background: linear-gradient(135deg, var(--persona-red), var(--persona-red-dark)) !important;
+}
+/* ============================================
+   3. BOXES (cards, panels, messages, modals)
+   ============================================ */
+.card, .panel, [class*="card-"], [class*="panel-"],
+[class*="message-"], .modal-backdrop + div,
+[role="dialog"] > div:first-child,
+.modal-wrapper, .dialog-container {
+background: linear-gradient(135deg, var(--persona-white), var(--persona-off-white)) !important;
+color: var(--persona-text-black) !important;
+border: 3px solid var(--persona-red) !important;
+border-radius: 2px !important;
+padding: 4px !important;
+margin: 4px !important;
+position: relative !important;
+transform: rotate(var(--persona-angle-subtle)) !important;
+transition: box-shadow var(--persona-transition), border-color var(--persona-transition), color var(--persona-transition), background var(--persona-transition) !important;
+box-shadow: var(--persona-shadow), var(--persona-glow) !important;
+}
+/* ============================================
+   3B. USER MESSAGE BOXES
+   ============================================ */
+.user-message {
+background: linear-gradient(135deg, var(--persona-red-dark), var(--persona-red-light)) !important;
+border: 3px solid var(--persona-off-white) !important;
+border-radius: 2px !important;
+padding: 24px !important;
+margin: 16px !important;
+position: relative !important;
+transform: rotate(var(--persona-angle-subtle)) skewY(var(--persona-skew-amount)) !important;
+transition: box-shadow var(--persona-transition), border-color var(--persona-transition), color var(--persona-transition), background var(--persona-transition) !important;
+box-shadow: var(--persona-shadow), var(--persona-glow) !important;
+}
+/* Counter-skew content inside user messages */
+.user-message > * {
+transform: skewY(var(--persona-skew-amount-neg));
+}
+.user-message:hover {
+animation: persona-lift-flat-skew 0.3s ease-in-out forwards !important;
+box-shadow: var(--persona-shadow-hover), var(--persona-glow-hover) !important;
+}
+.user-message::before {
+content: '' !important;
+position: absolute !important;
+top: 0; left: 0; right: 0;
+height: 4px !important;
+background: linear-gradient(90deg, transparent, var(--persona-red), transparent) !important;
+transform: skewX(-30deg) !important;
+transform-origin: top left !important;
+}
+.user-message .rounded-3xl,
+.user-message [class*="rounded-3xl"] {
+background: transparent !important;
+border: none !important;
+border-radius: 0 !important;
+box-shadow: none !important;
+padding: 0 !important;
+margin: 0 !important;
+max-width: 100% !important;
+transform: none !important;
+}
+/* --- Assistant/side messages — skew opposite direction --- */
+.assistant, [class*="message-"]:not(.user-message) {
+transform: rotate(var(--persona-angle-subtle)) skewY(var(--persona-skew-amount-neg)) !important;
+}
+/* Counter-skew content inside assistant messages */
+.assistant > *, [class*="message-"]:not(.user-message) > * {
+transform: skewY(var(--persona-skew-amount));
+}
+/* --- Hover for cards, panels — no skew involved --- */
+.card:hover, .panel:hover {
+animation: persona-lift-flat 0.3s ease-in-out forwards !important;
+box-shadow: var(--persona-shadow-hover), var(--persona-glow-hover) !important;
+}
+.card::before, .panel::before, [class*="message-"]::before,
+.modal-backdrop + div::before, [role="dialog"] > div:first-child::before {
+content: '' !important;
+position: absolute !important;
+top: 0; left: 0; right: 0;
+height: 4px !important;
+background: linear-gradient(90deg, transparent, var(--persona-red), transparent) !important;
+transform: skewX(-30deg) !important;
+transform-origin: top left !important;
+}
+/* --- Chat message staggered rotations via custom properties --- */
+.chat-message {
+--message-rotation: var(--persona-angle);
+}
+.chat-message:nth-child(even) {
+--message-rotation: var(--persona-angle-positive);
+}
+.message.user, .user-message {
+--message-rotation: var(--persona-angle-strong);
+}
+.message.assistant {
+--message-rotation: var(--persona-angle-positive2);
+}
+/* --- Message hover: tilt animation --- */
+[class*="message-"]:hover {
+animation: persona-message-tilt 0.3s ease-in-out forwards !important;
+}
+/* --- Card staggered rotations --- */
+.card:nth-child(3n+1), .panel:nth-child(3n+1) {
+--card-index: -2;
+}
+.card:nth-child(3n+2), .panel:nth-child(3n+2) {
+--card-index: 0;
+}
+.card:nth-child(3n+3), .panel:nth-child(3n+3) {
+--card-index: 2;
+}
+.card, .panel {
+transform: rotate(calc(var(--card-index, 0) * 1deg + var(--persona-angle))) !important;
+}
+.modal-backdrop + div, [role="dialog"] > div:first-child,
+.modal-wrapper, .dialog-container {
+transform: rotate(var(--persona-angle-strong)) !important;
+}
+.modal-backdrop, [role="dialog"] + div {
+background: rgba(0, 0, 0, 0.8) !important;
+backdrop-filter: blur(5px) !important;
+}
+
+
+/* ============================================
+   3C. PERSONA 5 EFFECTS — Static styling only
+   Animation declarations moved to section 8
+   ============================================ */
+
+
+/* Active item — emphasized border */
+#sidebar a.active, .sidebar a.active,
+#sidebar [class*="active"], .sidebar [class*="active"],
+[aria-current="page"] {
+border-color: var(--persona-red) !important;
+border-width: 3px !important;
+}
+
+
+/* User message — slightly sharper bottom-right corner for speech effect */
+.user-message {
+border-bottom-right-radius: 2px !important;
+}
+
+
+/* Assistant message — slightly sharper bottom-left corner */
+.assistant, [class*="message-"]:not(.user-message) {
+border-bottom-left-radius: 2px !important;
+}
+
+
+/* ============================================
+   4. SIDEBAR (container only)
+   ============================================ */
+#sidebar, .sidebar, [data-testid="sidebar"] {
+background:
+/* Scanline layer */
+repeating-linear-gradient(
+0deg,
+transparent,
+transparent 2px,
+rgba(255, 0, 60, 0.03) 3px,
+transparent 4px
+    ),
+/* Base surface */
+var(--persona-surface) !important;
+border-right: 3px solid var(--persona-red) !important;
+transform: perspective(800px) rotateY(var(--persona-angle-strong)) !important;
+transform-origin: left center !important;
+box-shadow: 10px 0 30px rgba(255, 0, 60, 0.2),
+inset -5px 0 10px rgba(0, 0, 0, 0.3) !important;
+clip-path: polygon(0 0, 100% 0, 98% 100%, 0 100%) !important;
+}
+#sidebar > _:not(.absolute), .sidebar >_ :not(.absolute) {
+transform: rotateY(3deg) !important;
+transform-origin: left center !important;
+}
+#sidebar-chat-item-menu {
+background: none !important;
+background-image: none !important;
+--tw-gradient-from: transparent !important;
+--tw-gradient-to: transparent !important;
+--tw-gradient-stops: none !important;
+}
+/* ============================================
+   4B. RIGHT FILE BROWSER PANEL
+   ============================================ */
+div:has(> #controls-container) {
+background: var(--persona-surface) !important;
+border-left: 3px solid var(--persona-red) !important;
+}
+#controls-container {
+background: var(--persona-surface) !important;
+}
+#controls-container button.px-2\.5 {
+background: var(--persona-surface-elevated) !important;
+border: 1px solid var(--persona-red) !important;
+color: var(--persona-text) !important;
+transform: rotate(var(--persona-angle)) !important;
+}
+#controls-container button.bg-gray-100,
+#controls-container button.dark\:bg-gray-800 {
+background: linear-gradient(135deg, var(--persona-red), var(--persona-red-dark)) !important;
+color: white !important;
+}
+#controls-container li.group {
+background: transparent !important;
+border-bottom: 1px solid rgba(255, 0, 60, 0.1) !important;
+}
+#controls-container li.group:hover {
+background: rgba(255, 0, 60, 0.1) !important;
+}
+#controls-container span.truncate {
+color: var(--persona-text) !important;
+}
+#controls-container span.text-xs.text-gray-400 {
+color: var(--persona-text-muted) !important;
+}
+#controls-container .text-blue-400,
+#controls-container .text-blue-300 {
+color: var(--persona-red-light) !important;
+}
+#controls-container .text-gray-400 {
+color: var(--persona-text-muted) !important;
+}
+#controls-container .shrink-0.p-1 {
+background: transparent !important;
+border: 1px solid var(--persona-red) !important;
+color: var(--persona-text) !important;
+transform: rotate(var(--persona-angle)) !important;
+}
+#controls-container .shrink-0.p-1:hover {
+background: rgba(255, 0, 60, 0.2) !important;
+box-shadow: 0 0 10px rgba(255, 0, 60, 0.3) !important;
+}
+#controls-container button.text-xs {
+color: var(--persona-text-muted) !important;
+transform: rotate(var(--persona-angle-subtle)) !important;
+}
+#controls-container button.text-xs:hover {
+color: var(--persona-primary) !important;
+}
+#controls-container .shrink-0.border-t {
+border-color: var(--persona-red) !important;
+}
+#controls-container button[aria-label="New Folder"],
+#controls-container button[aria-label="New File"],
+#controls-container button[aria-label="Upload"],
+#controls-container button[aria-label="Download"] {
+background: var(--persona-surface-elevated) !important;
+border: 1px solid var(--persona-red) !important;
+color: var(--persona-text) !important;
+}
+#controls-container button[aria-label="New Folder"]:hover,
+#controls-container button[aria-label="New File"]:hover,
+#controls-container button[aria-label="Upload"]:hover,
+#controls-container button[aria-label="Download"]:hover {
+background: rgba(255, 0, 60, 0.2) !important;
+box-shadow: 0 0 10px rgba(255, 0, 60, 0.3) !important;
+}
+#controls-container button[aria-label="Close"] {
+color: var(--persona-primary) !important;
+border: 1px solid var(--persona-primary) !important;
+}
+#controls-container button[aria-label="Close"]:hover {
+background: rgba(255, 0, 60, 0.2) !important;
+box-shadow: 0 0 15px rgba(255, 0, 60, 0.4) !important;
+}
+#controls-container button[aria-label="More"] {
+color: var(--persona-text-muted) !important;
+}
+#controls-container button[aria-label="More"]:hover {
+color: var(--persona-primary) !important;
+background: rgba(255, 0, 60, 0.1) !important;
+}
+#controls-container .flex.items-center.gap-2 {
+color: var(--persona-text) !important;
+}
+#controls-container .cursor-default {
+opacity: 0.4 !important;
+}
+/* ============================================
+   5. INPUTS
+   ============================================ */
+#chat-input {
+background: var(--persona-surface) !important;
+border: 2px solid var(--persona-red) !important;
+border-radius: 8px !important;
+color: var(--persona-text) !important;
+padding: 12px 16px !important;
+position: relative !important;
+}
+
+
+#chat-input::before {
+content: '' !important;
+position: absolute !important;
+top: 0; left: 0; right: 0;
+height: 100% !important;
+background: linear-gradient(90deg, transparent, var(--persona-red-50), transparent) !important;
+transform: skewX(-45deg);
+transform-origin: top left !important;
+pointer-events: none !important;
+}
+
+
+#chat-input:focus, [class*="input-"]:focus, textarea:focus {
+animation: persona-input-focus 0.3s ease-in-out forwards !important;
+box-shadow: 0 0 20px rgba(255, 0, 60, 0.3), 5px 5px 0 rgba(0, 0, 0, 0.2) !important;
+outline: none !important;
+}
+/* ============================================
+   6. TYPOGRAPHY
+   ============================================ */
+h1, h2, h3, h4, h5, h6 {
+transform: rotate(var(--persona-angle-subtle)) !important;
+transform-origin: top left !important;
+display: inline-block !important;
+margin-bottom: 15px !important;
+position: relative !important;
+}
+h1 {
+color: var(--persona-red) !important;
+text-shadow: 0 0 10px rgba(255, 0, 60, 0.5) !important;
+}
+h2 {
+border-bottom: 3px solid var(--persona-red) !important;
+padding-bottom: 5px !important;
+transform: rotate(var(--persona-angle)) !important;
+}
+pre, code, .code-block {
+background: #000 !important;
+color: var(--persona-red) !important;
+border: 1px solid var(--persona-red) !important;
+border-radius: 6px !important;
+font-family: 'Courier New', monospace !important;
+position: relative !important;
+overflow: hidden !important;
+}
+pre::before, code::before, .code-block::before {
+content: '' !important;
+position: absolute !important;
+top: 0; left: 0; right: 0; bottom: 0;
+background-image:
+linear-gradient(45deg, transparent 49%, rgba(255, 0, 60, 0.1) 50%, transparent 51%),
+linear-gradient(-45deg, transparent 49%, rgba(255, 0, 60, 0.1) 50%, transparent 51%) !important;
+background-size: 20px 20px !important;
+pointer-events: none !important;
+z-index: 1 !important;
+}
+/* ============================================
+   7. SCROLLBARS
+   ============================================ */
+::-webkit-scrollbar { width: 12px; background: var(--persona-surface); }
+::-webkit-scrollbar-track {
+background: linear-gradient(45deg, transparent 49%, rgba(255, 0, 60, 0.1) 50%, transparent 51%);
+border-radius: 6px;
+}
+::-webkit-scrollbar-thumb {
+background: linear-gradient(45deg, var(--persona-red), var(--persona-red-dark));
+border-radius: 6px;
+border: 2px solid var(--persona-surface);
+transform: skewX(-10deg);
+}
+::-webkit-scrollbar-thumb:hover {
+background: linear-gradient(45deg, var(--persona-red-light), var(--persona-red));
+transform: skewX(-15deg);
+}
+/* ============================================
+   8. ANIMATIONS — ALL keyframes and animation calls
+   ============================================ */
+
+/* --- Button hover: lift + shake combined for RED variant --- */
+@keyframes persona-button-lift-shake {
+  0%   { transform: rotate(var(--persona-angle)) translateY(0px); }
+  10%  { transform: rotate(calc(var(--persona-angle) + 1deg)) translateY(-2px) translateX(1px); }
+  25%  { transform: rotate(calc(var(--persona-angle) - 1deg)) translateY(-2px) translateX(-1px); }
+  40%  { transform: rotate(calc(var(--persona-angle) + 0.5deg)) translateY(-2px) translateX(0.5px); }
+  55%  { transform: rotate(calc(var(--persona-angle) - 0.5deg)) translateY(-2px) translateX(-0.5px); }
+  70%  { transform: rotate(0deg) translateY(-2px); }
+  100% { transform: rotate(0deg) translateY(-2px); }
+}
+
+/* --- Button hover: lift + shake combined for WHITE variant --- */
+@keyframes persona-button-lift-shake-white {
+  0%   { transform: rotate(var(--persona-angle)) translateY(0px); }
+  10%  { transform: rotate(calc(var(--persona-angle) + 1deg)) translateY(-2px) translateX(1px); }
+  25%  { transform: rotate(calc(var(--persona-angle) - 1deg)) translateY(-2px) translateX(-1px); }
+  40%  { transform: rotate(calc(var(--persona-angle) + 0.5deg)) translateY(-2px) translateX(0.5px); }
+  55%  { transform: rotate(calc(var(--persona-angle) - 0.5deg)) translateY(-2px) translateX(-0.5px); }
+  70%  { transform: rotate(0deg) translateY(-2px); }
+  100% { transform: rotate(0deg) translateY(-2px); }
+}
+
+/* --- Generic hover: lift to flat + slight rise --- */
+@keyframes persona-lift-flat {
+  0%   { transform: rotate(var(--persona-angle-subtle)) translateY(0px); }
+  100% { transform: rotate(0deg) translateY(-2px); }
+}
+
+/* --- User/assistant hover: lift to flat + rise, keeping skew --- */
+@keyframes persona-lift-flat-skew {
+  0%   { transform: rotate(var(--persona-angle-subtle)) skewY(var(--persona-skew-amount)) translateY(0px); }
+  100% { transform: rotate(0deg) skewY(var(--persona-skew-amount)) translateY(-2px); }
+}
+
+/* --- Chat message hover: tilt from flat to staggered angle --- */
+@keyframes persona-message-tilt {
+  0%   { transform: rotate(0deg) scale(1); }
+  100% { transform: rotate(var(--message-rotation, var(--persona-angle))); }
+}
+
+/* --- Chat input focus: subtle tilt + slight scale down --- */
+@keyframes persona-input-focus {
+  0%   { transform: rotate(0deg) scale(1); }
+  100% { transform: rotate(var(--persona-angle-subtle)) scale(0.99); }
+}
+
+@keyframes persona-pulse {
+  0%, 100% { opacity: 0.7; }
+  50%      { opacity: 1; }
+}
+
+
+@keyframes persona-active-glow {
+  0%, 100% {
+box-shadow:
+var(--persona-shadow),
+0 0 10px rgba(255, 0, 60, 0.5),
+0 0 20px rgba(255, 0, 0, 0.3);
+  }
+  50% {
+box-shadow:
+var(--persona-shadow),
+0 0 20px rgba(255, 0, 60, 0.8),
+0 0 40px rgba(255, 0, 60, 0.5);
+  }
+}
+
+
+@keyframes persona-hover-alert {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.3); }
+}
+
+
+/* --- Animation Calls --- */
+
+
+/* Sidebar pulse */
+#sidebar { animation: persona-pulse 6s ease-in-out infinite !important; }
+  
+
+/* Active item glow */
+#sidebar a.active, .sidebar a.active,
+#sidebar [class*="active"], .sidebar [class*="active"],
+[aria-current="page"] {
+animation: persona-active-glow 2s ease-in-out infinite !important;
+}
+
+
+/* Hover brightness pulse */
+#sidebar a:hover, .sidebar a:hover,
+#sidebar button:hover, .sidebar button:hover {
+animation: persona-hover-alert 1.5s ease-in-out infinite !important;
+}
+
+
+/* ============================================
+   9. UTILITY CLASSES
+   ============================================ */
+.persona-red   { background: var(--persona-red) !important; color: white !important; }
+.persona-white { background: var(--persona-white) !important; color: var(--persona-text-black) !important; }
+.persona-glow  { box-shadow: 0 0 25px var(--persona-glow-color) !important; }
+.persona-angle-1  { transform: rotate(var(--persona-angle)) !important; }
+.persona-angle-2  { transform: rotate(var(--persona-angle-strong)) !important; }
+.persona-angle-r1 { transform: rotate(var(--persona-angle-positive)) !important; }
+.persona-angle-r2 { transform: rotate(var(--persona-angle-positive2)) !important; }
+.persona-skew-1  { transform: skewX(-1deg) !important; }
+.persona-skew-2  { transform: skewX(-2deg) !important; }
+.persona-overlap       { margin-left: -10px; position: relative; z-index: 2; }
+.persona-overlap-strong { margin-left: -20px; z-index: 3; }
+/* ============================================
+   10. RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+#sidebar, .sidebar {
+transform: none !important;
+clip-path: none !important;
+  }
+.chat-message, .message, [class*="message-"],
+button, .btn, h1, h2, h3 {
+transform: none !important;
+  }
+.modal-backdrop + div, [role="dialog"] > div:first-child {
+transform: none !important;
+  }
+}
+/* ============================================
+   11. DEBUG
+   ============================================ */
+.debug-persona * { outline: 1px solid rgba(255, 0, 60, 0.2) !important; }
+.debug-persona .chat-message::after {
+content: 'rotate(' attr(style) ')' !important;
+position: absolute !important;
+top: -20px; left: 0;
+background: rgba(255, 0, 60, 0.8);
+color: white;
+padding: 2px 5px;
+font-size: 10px;
+border-radius: 2px;
+}
+
+
+/* Force light mode text on white-panel messages */
+[class*="message-"]:not(.user-message) p,
+[class*="message-"]:not(.user-message) li,
+[class*="message-"]:not(.user-message) strong,
+[class*="message-"]:not(.user-message) em,
+[class*="message-"]:not(.user-message) b,
+[class*="message-"]:not(.user-message) i,
+[class*="message-"]:not(.user-message) del,
+[class*="message-"]:not(.user-message) s,
+[class*="message-"]:not(.user-message) u,
+[class*="message-"]:not(.user-message) mark,
+[class*="message-"]:not(.user-message) small,
+[class*="message-"]:not(.user-message) sub,
+[class*="message-"]:not(.user-message) sup {
+color: var(--persona-text-black) !important;
+}
+[class*="message-"]:not(.user-message) code,
+[class*="message-"]:not(.user-message) pre,
+[class*="message-"]:not(.user-message) span {
+  color: var(--persona-red) !important;
+}

@@ -1,0 +1,536 @@
+/* ============================================
+   PERSONA THEME FOR OPEN WEBUI
+   Practical, working CSS with off-angles & overlaps
+   ============================================ */
+
+/* --- BASE OVERRIDES --- */
+:root {
+  /* Persona 5 Colors */
+  --persona-primary: #ff003c;
+  --persona-secondary: #0a0a0a;
+  --persona-accent: #ffffff;
+  --persona-bg: #0a0a0a;
+  --persona-surface: #1a1a1a;
+  --persona-border: #2a2a2a;
+  
+  /* Override Open WebUI variables */
+  --sidebar-bg: var(--persona-surface);
+  --sidebar-border: var(--persona-primary);
+  --chat-bg: var(--persona-bg);
+  --message-bg: var(--persona-surface);
+}
+
+/* --- SIDEBAR - Off-Angle Implementation --- */
+#sidebar, .sidebar, [data-testid="sidebar"] {
+  /* Base styling */
+  background: var(--persona-surface) !important;
+  border-right: 3px solid var(--persona-primary) !important;
+  
+  /* Persona off-angle effect */
+  transform: perspective(800px) rotateY(-3deg) !important;
+  transform-origin: left center !important;
+  
+  /* Depth and shadow */
+  box-shadow: 
+    10px 0 30px rgba(255, 0, 60, 0.2),
+    inset -5px 0 10px rgba(0, 0, 0, 0.3) !important;
+  
+  /* Clip for angled edge */
+  clip-path: polygon(0 0, 100% 0, 98% 100%, 0 100%) !important;
+}
+
+/* Fix sidebar content alignment */
+#sidebar > *:not(.absolute), 
+.sidebar > *:not(.absolute) {
+  transform: rotateY(3deg) !important;
+  transform-origin: left center !important;
+}
+
+/* Sidebar items with slight individual rotations */
+#sidebar button, 
+.sidebar button,
+#sidebar a,
+.sidebar a {
+  transform: rotate(-1deg) !important;
+  transition: transform 0.3s ease !important;
+  margin: 5px 0 !important;
+}
+
+#sidebar button:hover,
+.sidebar button:hover,
+#sidebar a:hover,
+.sidebar a:hover {
+  transform: rotate(0deg) scale(1.05) !important;
+}
+
+/* Exact button style but inverted colors */
+#sidebar a:not([href="/"]),
+.sidebar a:not([href="/"]) {
+  /* Copy ALL button styles but invert colors */
+  background: linear-gradient(
+    135deg,
+    #ffffff,      /* White instead of red */
+    #f0f0f0       /* Light gray instead of dark red */
+  ) !important;
+  
+  color: #000000 !important; /* Black instead of white */
+  border: 2px solid rgba(0, 0, 0, 0.4) !important; /* Dark border */
+  
+  /* Keep all other button properties */
+  border-radius: 4px !important;
+  padding: 10px 20px !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  cursor: pointer !important;
+  transform: rotate(-1deg) !important;
+  transition: all 0.3s ease !important;
+  box-shadow:
+    4px 4px 0 rgba(0, 0, 0, 0.3),           /* Dark offset shadow */
+    0 0 10px rgba(255, 255, 255, 0.3) !important; /* White glow instead of red */
+  
+  position: relative !important;
+  display: block !important;
+  margin: 8px 0 !important;
+  width: calc(100% - 10px) !important;
+  text-decoration: none !important;
+}
+
+#sidebar-chat-item-menu {
+  background: none !important;
+  background-image: none !important;
+  --tw-gradient-from: transparent !important;
+  --tw-gradient-to: transparent !important;
+  --tw-gradient-stops: none !important;
+}
+
+
+/* Inverted hover effect */
+#sidebar a:hover,
+.sidebar a:hover {
+  transform: rotate(0deg) translateY(-2px) !important;
+  box-shadow:
+    6px 6px 0 rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(255, 255, 255, 0.5) !important;
+  border-color: var(--persona-primary) !important; /* Red border on hover */
+  color: var(--persona-primary) !important; /* Red text on hover */
+}
+
+/* --- CHAT INTERFACE - Overlap System --- */
+
+/* Chat container */
+.chat-container, [class*="chat-container"] {
+  position: relative !important;
+  overflow: visible !important;
+}
+
+/* Message bubbles with overlaps */
+/* Message bubbles with modal-like styling */
+[class*="message-"] {
+  /* Modal styling */
+  background: var(--persona-surface) !important;
+  border: 3px solid var(--persona-primary) !important;
+  border-radius: 12px !important;
+  transform: scale(0.95) rotate(var(--message-rotation, -1deg)) !important;
+  transform-origin: center !important;
+  box-shadow: 
+    0 0 40px rgba(255, 0, 60, 0.3),
+    12px 12px 0 rgba(0, 0, 0, 0.2),
+    inset 0 0 20px rgba(255, 255, 255, 0.1) !important;
+  margin: 20px 15px !important;
+  padding: 20px !important;
+}
+
+/* Message bubbles with modal-like styling */
+.user-message {
+  /* Modal styling */
+  background: var(--persona-surface) !important;
+  border: 3px solid #F0F0F0 !important;
+  border-radius: 12px !important;
+  transform: scale(0.95) rotate(var(--message-rotation, 1deg)) !important;
+  transform-origin: center !important;
+  box-shadow: 
+    0 0 40px rgba(255, 255, 255, 0.3),
+    12px 12px 0 rgba(0, 0, 0, 0.2),
+    inset 0 0 20px rgba(255, 255, 255, 0.1) !important;
+  margin: 20px 15px !important;
+  padding: 20px !important;
+}
+/* --- INPUT AREA - Diagonal Elements --- */
+
+/* Input container */
+.chat-input, [class*="input-"], textarea {
+  background: var(--persona-surface) !important;
+  border: 2px solid var(--persona-primary) !important;
+  border-radius: 8px !important;
+  color: var(--persona-accent) !important;
+  padding: 12px 16px !important;
+  
+  /* Diagonal accent line */
+  position: relative !important;
+}
+
+.chat-input::before, 
+[class*="input-"]::before,
+textarea::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important  right: 0 !important;
+  height: 3px !important;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--persona-primary),
+    transparent
+  ) !important;
+  transform: skewX(-45deg) !important;
+  transform-origin: top left !important;
+}
+
+/* Focus state with stronger angle */
+.chat-input:focus,
+[class*="input-"]:focus,
+textarea:focus {
+  transform: rotate(-1deg) scale(1.01) !important;
+  box-shadow: 
+    0 0 20px rgba(255, 0, 60, 0.3),
+    5px 5px 0 rgba(0, 0, 0, 0.2) !important;
+  outline: none !important;
+}
+
+/* --- BUTTONS - Persona Style --- */
+
+/* All buttons get Persona treatment */
+button, .btn, [role="button"] {
+  margin-top: 8px !important;
+}  
+
+button:not([class*="toggle"]):not([class*="switch"]):not([role="switch"]),
+.btn:not([class*="toggle"]):not([class*="switch"]):not([role="switch"]) {
+  background: linear-gradient(
+    135deg,
+    var(--persona-primary),
+    #cc002f
+  ) !important;
+  
+  color: white !important;
+  border: none !important;
+  border-radius: 4px !important;
+  padding: 10px 20px !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  cursor: pointer !important;
+  
+  /* Off-angle default */
+  transform: rotate(-1deg) !important;
+  transition: all 0.3s ease !important;
+  
+  /* Overlap shadow */
+  box-shadow: 
+    4px 4px 0 rgba(0, 0, 0, 0.3),
+    0 0 10px rgba(255, 0, 60, 0.5) !important;
+  
+  position: relative !important;
+}
+
+/* Then add specific toggle styles */
+button[class*="toggle"],
+button[class*="switch"],
+[role="switch"],
+.toggle,
+.switch {
+  transform: none !important;
+  margin-top: 0 !important;
+  /* Optional: Add Persona styling without rotation */
+  background: linear-gradient(
+    135deg,
+    var(--persona-primary),
+    #cc002f
+  ) !important;
+  border-radius: 20px !important; /* Toggle switches are usually pill-shaped */
+  padding: 2px !important; /* Different padding for toggles */
+}
+
+/* Button hover - straightens and lifts */
+button:hover, .btn:hover {
+  transform: rotate(0deg) translateY(-2px) !important;
+  box-shadow: 
+    6px 6px 0 rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(255, 0, 60, 0.7) !important;
+}
+
+/* Button overlap effect */
+button::after, .btn::after {
+  content: '' !important;
+  position: absolute !important;
+  top: 2px !important;
+  left: 2px !important;
+  right: 2px !important;
+  bottom: 2px !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 2px !important;
+  transform: rotate(0deg) !important;
+  pointer-events: none !important;
+}
+
+/* --- MODALS & DIALOGS - Layered Overlaps --- */
+
+/* Modal backdrop */
+.modal-backdrop, [role="dialog"] + div {
+  background: rgba(0, 0, 0, 0.8) !important;
+  backdrop-filter: blur(5px) !important;
+}
+
+/* Modal content - add scale to fit rotated modal */
+.modal-backdrop + div, 
+[role="dialog"] > div:first-child,
+.modal-wrapper,
+.dialog-container {
+  /* Your Persona modal styling here */
+  background: var(--persona-surface) !important;
+  border: 3px solid var(--persona-primary) !important;
+  border-radius: 12px !important;
+  
+  /* Scale down THEN rotate to fit */
+  transform: rotate(-2deg) !important;
+  
+  /* Adjust shadow to match scaled size */
+  box-shadow: 
+    0 0 40px rgba(255, 0, 60, 0.3), /* Slightly reduced glow */
+    12px 12px 0 rgba(0, 0, 0, 0.2), /* Reduced offset */
+    inset 0 0 20px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* --- CARDS & PANELS - Broken Grid --- */
+
+/* Any card-like element */
+.card, .panel, [class*="card-"], [class*="panel-"] {
+  background: var(--persona-surface) !important;
+  border: 2px solid var(--persona-primary) !important;
+  border-radius: 8px !important;
+  padding: 20px !important;
+  margin: 15px !important;
+  position: relative !important;
+  
+  /* Variable rotation based on position */
+  transform: rotate(calc(var(--card-index, 0) * 1deg - 1deg)) !important;
+  transition: transform 0.3s ease !important;
+}
+
+/* Create staggered rotation */
+.card:nth-child(3n+1), .panel:nth-child(3n+1) {
+  --card-index: -2;
+}
+
+.card:nth-child(3n+2), .panel:nth-child(3n+2) {
+  --card-index: 0;
+}
+
+.card:nth-child(3n+3), .panel:nth-child(3n+3) {
+  --card-index: 2;
+}
+
+/* Hover straightens card */
+.card:hover, .panel:hover {
+  transform: rotate(0deg) scale(1.02) !important;
+  z-index: 10 !important;
+  box-shadow: 
+    0 0 30px rgba(255, 0, 60, 0.4),
+    8px 8px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Card diagonal accent */
+.card::before, .panel::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 4px !important;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--persona-primary),
+    transparent
+  ) !important;
+  transform: skewX(-30deg) !important;
+  transform-origin: top left !important;
+}
+
+/* --- TYPOGRAPHY - Off-Angle Text --- */
+
+/* Headings with slight rotations */
+h1, h2, h3, h4, h5, h6 {
+  transform: rotate(-0.5deg) !important;
+  transform-origin: top left !important;
+  display: inline-block !important;
+  margin-bottom: 15px !important;
+  position: relative !important;
+}
+
+h1 {
+  color: var(--persona-primary) !important;
+  text-shadow: 0 0 10px rgba(255, 0, 60, 0.5) !important;
+}
+
+h2 {
+  border-bottom: 3px solid var(--persona-primary) !important;
+  padding-bottom: 5px !important;
+  transform: rotate(-1deg) !important;
+}
+
+/* Code blocks with diagonal grid */
+pre, code, .code-block {
+  background: #000 !important;
+  color: var(--persona-primary) !important;
+  border: 1px solid var(--persona-primary) !important;
+  border-radius: 6px !important;
+  font-family: 'Courier New', monospace !important;
+  
+  /* Diagonal line overlay */
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+pre::before, code::before, .code-block::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background-image: 
+    linear-gradient(45deg, transparent 49%, rgba(255, 0, 60, 0.1) 50%, transparent 51%),
+    linear-gradient(-45deg, transparent 49%, rgba(255, 0, 60, 0.1) 50%, transparent 51%) !important;
+  background-size: 20px 20px !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+
+/* --- SCROLLBARS - Diagonal Elements --- */
+
+::-webkit-scrollbar {
+  width: 12px !important;
+  background: var(--persona-surface) !important;
+}
+
+::-webkit-scrollbar-track {
+  background: linear-gradient(
+    45deg,
+    transparent 49%,
+    rgba(255, 0, 60, 0.1) 50%,
+    transparent 51%
+  ) !important;
+  border-radius: 6px !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    45deg,
+    var(--persona-primary),
+    #cc002f
+  ) !important;
+  border-radius: 6px !important;
+  border: 2px solid var(--persona-surface) !important;
+  transform: skewX(-10deg) !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    45deg,
+    #ff3366,
+    var(--persona-primary)
+  ) !important;
+  transform: skewX(-15deg) !important;
+}
+
+/* --- ANIMATIONS --- */
+
+@keyframes persona-scan {
+  0% {
+    transform: translateX(-100%) skewX(-45deg);
+  }
+  100% {
+    transform: translateX(100%) skewX(-45deg);
+  }
+}
+
+@keyframes persona-pulse {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Apply animations */
+#sidebar {
+  animation: persona-pulse 6s ease-in-out infinite !important;
+}
+
+.chat-input::before {
+  animation: persona-scan 3s linear infinite !important;
+}
+
+/* --- UTILITY CLASSES (can be added to elements) --- */
+
+.persona-angle-1 { transform: rotate(-1deg) !important; }
+.persona-angle-2 { transform: rotate(-2deg) !important; }
+.persona-angle-3 { transform: rotate(-3deg) !important; }
+.persona-angle-r1 { transform: rotate(1deg) !important; }
+.persona-angle-r2 { transform: rotate(2deg) !important; }
+.persona-angle-r3 { transform: rotate(3deg) !important; }
+
+.persona-skew-1 { transform: skewX(-1deg) !important; }
+.persona-skew-2 { transform: skewX(-2deg) !important; }
+.persona-skew-r1 { transform: skewX(1deg) !important; }
+.persona-skew-r2 { transform: skewX(2deg) !important; }
+
+.persona-overlap { margin-left: -10px !important; position: relative !important; z-index: 2 !important; }
+.persona-overlap-strong { margin-left: -20px !important; z-index: 3 !important; }
+
+/* --- RESPONSIVE FIXES --- */
+
+@media (max-width: 768px) {
+  /* Remove angles on mobile for usability */
+  #sidebar, .sidebar {
+    transform: none !important;
+    clip-path: none !important;
+  }
+  
+  .chat-message, .message {
+    transform: none !important;
+    margin: 10px 5px !important;
+  }
+  
+  button, .btn {
+    transform: none !important;
+  }
+  
+  .modal-content, [role="dialog"] {
+    transform: none !important;
+    > * {
+      transform: none !important;
+    }
+  }
+}
+
+/* --- DEBUG MODE (add class="debug-persona" to body) --- */
+.debug-persona * {
+  outline: 1px solid rgba(255, 0, 60, 0.2) !important;
+}
+
+.debug-persona .chat-message::after {
+  content: 'rotate(' attr(style) ')' !important;
+  position: absolute !important;
+  top: -20px !important;
+  left: 0 !important;
+  background: rgba(255, 0, 60, 0.8) !important;
+  color: white !important;
+  padding: 2px 5px !important;
+  font-size: 10px !important;
+  border-radius: 3px !important;
+}

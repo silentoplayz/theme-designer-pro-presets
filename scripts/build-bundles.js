@@ -58,19 +58,28 @@ function buildCssBundle() {
   const baseDir = path.join(ROOT, 'css-presets');
   if (!fs.existsSync(baseDir)) return;
 
-  const files = fs.readdirSync(baseDir).filter(f => f.endsWith('.json'));
+  const files = fs.readdirSync(baseDir).filter(f => f.endsWith('.css')).sort();
   if (files.length === 0) {
     console.log('  ⏭  No CSS presets found, skipping bundle');
     return;
   }
 
-  const presets = files.map(f =>
-    JSON.parse(fs.readFileSync(path.join(baseDir, f), 'utf8'))
-  );
+  const presets = files.map(f => {
+    const code = fs.readFileSync(path.join(baseDir, f), 'utf8');
+    const name = f.replace('.css', '').split('_').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+    return { name, code };
+  });
+
+  const bundle = {
+    css_presets: presets,
+    isCssBackup: true,
+    version: '1.0.0',
+    _meta: { generated: new Date().toISOString(), count: presets.length },
+  };
 
   const outPath = path.join(BUNDLES_DIR, 'css-presets-all.json');
-  fs.writeFileSync(outPath, JSON.stringify(presets, null, 2));
-  console.log(`  ✓ css-presets-all.json — ${presets.length} presets`);
+  fs.writeFileSync(outPath, JSON.stringify(bundle, null, 2));
+  console.log(`  ✓ css-presets-all.json — ${presets.length} presets (${(fs.statSync(outPath).size / 1024).toFixed(0)} KB)`);
 }
 
 // ── Gradients Bundle ──

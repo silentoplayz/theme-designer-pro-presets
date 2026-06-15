@@ -22,7 +22,7 @@
  * Filename generation:
  *   "NEO-TACTICAL // ARCHIVE 01"  →  neo_tactical_archive_01.js
  *   "01: The Architect (Matrix)"  →  01_the_architect_matrix.js
- *   "@h4nn1b4l Custom CSS"        →  h4nn1b4l_custom_css.json
+ *   "@h4nn1b4l Custom CSS"        →  h4nn1b4l_custom_css.css
  */
 
 const fs = require('fs');
@@ -127,10 +127,9 @@ if (cssFile) {
     }
     usedNames.add(filename);
 
-    // Write as individual JSON with name + code
-    const individual = { name: preset.name, code: preset.code };
-    const outPath = path.join(ROOT, 'css-presets', `${filename}.json`);
-    if (writeFile(outPath, JSON.stringify(individual, null, 2), preset.name)) totalExtracted++;
+    // Write raw CSS (matches Theme Designer Pro's .css export format)
+    const outPath = path.join(ROOT, 'css-presets', `${filename}.css`);
+    if (writeFile(outPath, preset.code, preset.name)) totalExtracted++;
     else totalSkipped++;
   }
 } else {
@@ -179,7 +178,7 @@ if (canvasFile) {
 if (cssFile) {
   const data = JSON.parse(fs.readFileSync(path.join(resolvedDir, cssFile), 'utf8'));
   (data.css_presets || []).forEach(p => {
-    console.log(`  "${p.name}" → css-presets/${nameToFilename(p.name)}.json`);
+    console.log(`  "${p.name}" → css-presets/${nameToFilename(p.name)}.css`);
   });
 }
 if (themesFile) {
