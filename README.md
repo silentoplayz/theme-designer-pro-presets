@@ -166,11 +166,10 @@ Only the **Validate** step runs — bundles, manifest, and badges are not rebuil
 ### Running Locally
 
 ```bash
-node scripts/validate.js       # Check all presets
-node scripts/build-bundles.js  # Regenerate bundles
-node scripts/build-manifest.js # Regenerate manifest.json
-node scripts/update-badges.js  # Update README badge counts
+node scripts/validate.js       # Check all presets (run before pushing)
 ```
+
+> **Note**: Do **not** run the build scripts locally before committing — CI handles bundles, manifest, and badges automatically. Rebuilding locally causes merge conflicts on the next push. If you need to test build output, run the scripts but discard the generated file changes before committing.
 
 ---
 

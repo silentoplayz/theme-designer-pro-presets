@@ -17,6 +17,11 @@ on:
       - 'themes/**'
       - 'gradients/**'
 
+# Cancel in-flight builds when a new push arrives — only the latest matters
+concurrency:
+  group: build-bundles-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -38,6 +43,9 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Fetch full history so rebase works if remote moved
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -57,11 +65,13 @@ jobs:
         run: |
           git diff --quiet bundles/ manifest.json README.md && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
 
-      - name: Commit updated bundles, manifest, and badges
+      - name: Commit and push updated artifacts
         if: steps.diff.outputs.changed == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add bundles/ manifest.json README.md
           git commit -m "chore: auto-update bundles, manifest, and badges [skip ci]"
+          # Rebase onto latest remote in case another push landed while we built
+          git pull --rebase origin main
           git push

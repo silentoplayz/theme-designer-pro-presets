@@ -127,17 +127,15 @@ midnight_ocean.json
 
 ---
 
-## 🛠️ Regenerating Build Artifacts
+## 🛠️ Before You Push
 
-After adding new presets, regenerate the build artifacts locally:
+Run validation locally to catch errors before CI:
 
 ```bash
-node scripts/build-bundles.js   # Regenerate all import bundles
-node scripts/build-manifest.js  # Regenerate manifest.json (theme versions)
-node scripts/update-badges.js   # Update README badge counts
+node scripts/validate.js
 ```
 
-> **Note**: CI runs all three automatically on push to `main`. You don't need to commit the generated files — the bot handles it.
+> **Important**: Do **not** rebuild bundles, manifest, or badges locally — CI handles all generated files automatically on push to `main`. Committing generated files locally causes merge conflicts.
 
 ---
 
