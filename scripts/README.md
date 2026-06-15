@@ -32,7 +32,7 @@ The script scans the given directory for these filename patterns:
 | File Pattern | Extracts To | Format |
 |---|---|---|
 | `owui-canvas-backup-*.json` | `canvas-fx/*.js` | Raw JavaScript (the script source code) |
-| `owui-css-backup-*.json` | `css-presets/*.json` | JSON with `name` and `code` fields |
+| `owui-css-backup-*.json` | `css-presets/*.css` | Raw CSS stylesheets |
 | `owui-themes-backup-*.json` | `themes/*.json` | JSON with full theme config (all modes) |
 
 ### Filename Generation
@@ -109,8 +109,9 @@ node scripts/build-bundles.js
 
 | Bundle | Source | Description |
 |---|---|---|
+| `everything.json` | All directories | All preset types in one import |
 | `canvas-fx-all.json` | `canvas-fx/*.js` | All Canvas FX animations |
-| `css-presets-all.json` | `css-presets/*.json` | All CSS presets |
+| `css-presets-all.json` | `css-presets/*.css` | All CSS presets |
 | `gradients-all.json` | `gradients/**/*.json` | All gradients (recursive) |
 | `gradients-still.json` | `gradients/still/**/*.json` | Static gradients only |
 | `gradients-animated.json` | `gradients/animated/**/*.json` | Animated gradients only |
@@ -120,4 +121,28 @@ Bundles are checked into git so users can download them directly from GitHub wit
 
 ### When To Run
 
-Run this after any changes to preset files — adding, removing, or modifying presets in any directory.
+Run this after any changes to preset files — adding, removing, or modifying presets in any directory. Note: the [CI workflow](../.github/workflows/build-bundles.yml) runs this automatically on push to `main`.
+
+---
+
+## `validate.js`
+
+Validates all preset files against the repository's quality and schema rules. Used by CI to gate merges.
+
+### Usage
+
+```bash
+node scripts/validate.js
+```
+
+### What It Checks
+
+| Category | Hard Errors | Warnings |
+|---|---|---|
+| Canvas FX | Missing `onmessage` handler, forbidden DOM access (`document`, `window`, `localStorage`, `alert`) | Missing heartbeat |
+| CSS Presets | Empty file, no CSS syntax detected | — |
+| Themes | Invalid JSON, missing `name`, missing `dark`/`light` modes, missing OKLCH `h`/`c`/`l` fields | — |
+| Gradients | Invalid JSON, missing `name`/`type`, invalid type, wrong subdirectory, missing stops/meshPoints | — |
+| Bundles | Invalid JSON, backup flag without matching array | — |
+
+Exits with code `1` if any hard errors are found. Warnings are printed but don't fail the build.
