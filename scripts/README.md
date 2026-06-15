@@ -146,3 +146,51 @@ node scripts/validate.js
 | Bundles | Invalid JSON, backup flag without matching array | — |
 
 Exits with code `1` if any hard errors are found. Warnings are printed but don't fail the build.
+
+---
+
+## `build-manifest.js`
+
+Generates a centralized `manifest.json` listing every theme with its version, author, and update URL. Used by Theme Designer Pro's bulk update checker to compare versions in a single fetch.
+
+### Usage
+
+```bash
+node scripts/build-manifest.js
+```
+
+### What It Generates
+
+A `manifest.json` at the repo root with this structure:
+
+```json
+{
+  "manifestVersion": "1.0",
+  "generated": "2026-06-15T20:00:00Z",
+  "manifestUrl": "https://github.com/silentoplayz/.../manifest.json",
+  "themes": {
+    "sovereign": {
+      "name": "Sovereign",
+      "version": "1.0.0",
+      "updateUrl": "https://github.com/silentoplayz/.../themes/sovereign.json",
+      "file": "themes/sovereign.json"
+    }
+  }
+}
+```
+
+Themes without a `version` field default to `"0.0.0"`. Empty `author` and `description` fields are omitted for cleaner output.
+
+---
+
+## `update-badges.js`
+
+Counts all presets and updates the shields.io badge URLs in `README.md` with current numbers.
+
+### Usage
+
+```bash
+node scripts/update-badges.js
+```
+
+No output if badges are already correct. Prints `✅ README badges updated` when changes are made.
