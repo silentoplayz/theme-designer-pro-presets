@@ -1,0 +1,19 @@
+{
+  "name": "Aurora Shimmer",
+  "type": "radial",
+  "stops": [
+    { "color": "#0d1b2a", "position": 0 },
+    { "color": "#1b4965", "position": 25 },
+    { "color": "#5fa8d3", "position": 50 },
+    { "color": "#bee9e8", "position": 75 },
+    { "color": "#62b6cb", "position": 100 }
+  ],
+  "angle": 0,
+  "intensity": 75,
+  "animation": true,
+  "speed": 4,
+  "radialPosX": 50,
+  "radialPosY": 50,
+  "radialShape": "ellipse",
+  "radialSize": "farthest-corner"
+}

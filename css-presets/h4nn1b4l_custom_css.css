@@ -1,0 +1,114 @@
+div.flex.flex-col.justify-between.px-5.mb-3.w-full.max-w-5xl.mx-auto.rounded-lg.group {
+  line-height: 36px;
+  margin-top: 20px;
+  background-color: #262626;
+  padding-bottom: 15px;
+  padding-top: 10px;
+  border-radius: 30px !important;
+  overflow: hidden !important;
+   -webkit-mask-image: -webkit-radial-gradient(white, black);
+  clip-path: inset(0 round 20px) !important;
+  border: 2px solid #404040 !important;
+}
+span.line-clamp-1 {
+  color: #29b6f6;
+}
+ol li p {
+  font-weight: 100;
+  font-style: normal;
+}
+li p strong {
+  font-weight: 300;
+  font-style: normal;
+  color: #29b6f6;
+}
+div div p {
+  font-weight: 300;
+  font-style: normal;
+}
+ol li strong {
+  font-weight: 300;
+  font-style: normal;
+}
+div div h3 {
+  font-weight: 300;
+  font-style: normal;
+  color: #29b6f6;
+}
+code.codespan.cursor-pointer {
+  color: #29b6f6;
+}
+span.ml-2.self-center {
+  color: #29b6f6;
+}
+div.w-full.font-medium.flex.items-center.justify-between.gap-2 {
+  color: #29b6f6;
+}
+div.flex.items-center.justify-between.dark:text-gray-100.mb-2 {
+  text-decoration: underline;
+}
+div.relative.flex.flex-col.flex-1.overflow-y-auto.scrollbar-hidden.pt-3.pb-3 {
+  color: #fafafa;
+  font-weight: 300;
+  font-style: normal;
+}
+a.group.grow.flex.items-center.space-x-3.rounded-2xl.px-2.5.py-2.hover:bg-gray-100.dark:hover:bg-gray-900.transition.outline-none {
+  text-decoration: underline;
+  font-weight: 300;
+  font-style: normal;
+}
+div.self-center {
+  font-weight: 300;
+  font-style: normal;
+}
+div.line-clamp-1.text-sm {
+  color: #4fc3f7;
+}
+div.flex.gap-1.scrollbar-none.overflow-x-auto.w-fit.text-center.text-sm.font-medium.rounded-full.bg-transparent.pt-1 {
+  color: #4fc3f7;
+}
+div.font-medium {
+  color: #4fc3f7;
+}
+div.text-left.self-center.overflow-hidden.w-full.h-[20px].truncate {
+  text-decoration: underline;
+}
+div.w-full.relative.group {
+  font-weight: 300;
+  font-style: normal;
+  color: #bdbdbd;
+}
+div.self-center.text-xs.font-medium {
+  color: #fafafa;
+}
+div.rounded-3xl.max-w-[90%].px-4.py-1.5.bg-gray-50.dark:bg-gray-800 {
+  background-color: #333333 !important;
+  
+}
+div.w-full.bg-gray-50.dark:bg-gray-800.rounded-3xl.px-5.py-3.mb-2 {
+  border-style: none;
+}
+input.w-full.h-2.rounded-lg.appearance-none.cursor-pointer.dark:bg-gray-700 {
+  color: #0288d1;
+}
+div.shrink-0.break-normal {
+  color: #4fc3f7;
+}
+div p strong {
+  color: #4fc3f7;
+  line-height: 48px;
+}
+ul li strong {
+  color: #4fc3f7;
+  font-weight: 400;
+  font-style: normal;
+}
+li.text-start {
+  font-weight: 300;
+  font-style: normal;
+}
+ul li a {
+  text-decoration: underline;
+  font-weight: 300;
+  font-style: normal;
+}

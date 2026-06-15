@@ -1,0 +1,107 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Gradient Preset",
+  "description": "A single gradient preset for Theme Designer Pro, supporting linear, radial, and mesh gradient types",
+  "type": "object",
+  "required": ["name", "type"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Display name of the gradient preset"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["linear", "radial", "mesh"],
+      "description": "Gradient type"
+    },
+    "stops": {
+      "type": "array",
+      "description": "Color stops for linear/radial gradients",
+      "items": {
+        "type": "object",
+        "required": ["color", "position"],
+        "properties": {
+          "color": {
+            "type": "string",
+            "description": "CSS color value (hex, rgb, etc.)"
+          },
+          "position": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Stop position as percentage (0–100)"
+          }
+        }
+      }
+    },
+    "angle": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 360,
+      "description": "Gradient angle in degrees (linear gradients)"
+    },
+    "intensity": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Gradient intensity/opacity percentage"
+    },
+    "animation": {
+      "type": "boolean",
+      "description": "Whether the gradient animates"
+    },
+    "speed": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Animation speed (higher = faster)"
+    },
+    "radialPosX": {
+      "type": "number",
+      "description": "Radial gradient center X position (%)"
+    },
+    "radialPosY": {
+      "type": "number",
+      "description": "Radial gradient center Y position (%)"
+    },
+    "radialShape": {
+      "type": "string",
+      "enum": ["circle", "ellipse"],
+      "description": "Radial gradient shape"
+    },
+    "radialSize": {
+      "type": "string",
+      "enum": ["closest-side", "closest-corner", "farthest-side", "farthest-corner"],
+      "description": "Radial gradient size keyword"
+    },
+    "meshPoints": {
+      "type": "array",
+      "description": "Control points for mesh gradients",
+      "items": {
+        "type": "object",
+        "required": ["color", "x", "y", "spread"],
+        "properties": {
+          "color": {
+            "type": "string",
+            "description": "CSS color value"
+          },
+          "x": {
+            "type": "number",
+            "description": "X position (%)"
+          },
+          "y": {
+            "type": "number",
+            "description": "Y position (%)"
+          },
+          "spread": {
+            "type": "number",
+            "description": "Color spread radius"
+          }
+        }
+      }
+    },
+    "meshBgColor": {
+      "type": "string",
+      "description": "Background fill color for mesh gradients"
+    }
+  }
+}

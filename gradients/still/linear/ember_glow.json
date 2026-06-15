@@ -1,0 +1,18 @@
+{
+  "name": "Ember Glow",
+  "type": "linear",
+  "stops": [
+    { "color": "#1a0a00", "position": 0 },
+    { "color": "#3d1503", "position": 30 },
+    { "color": "#8b2500", "position": 60 },
+    { "color": "#2a0e00", "position": 100 }
+  ],
+  "angle": 160,
+  "intensity": 90,
+  "animation": false,
+  "speed": 8,
+  "radialPosX": 50,
+  "radialPosY": 50,
+  "radialShape": "ellipse",
+  "radialSize": "farthest-corner"
+}

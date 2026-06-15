@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CSS Preset Bundle",
+  "description": "Import-ready JSON bundle containing CSS snippet presets for Theme Designer Pro",
+  "type": "object",
+  "required": ["css_presets", "isCssBackup"],
+  "properties": {
+    "css_presets": {
+      "type": "array",
+      "description": "Array of CSS snippet presets",
+      "items": {
+        "type": "object",
+        "required": ["name", "code"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name of the CSS snippet"
+          },
+          "code": {
+            "type": "string",
+            "description": "Raw CSS stylesheet code"
+          }
+        }
+      }
+    },
+    "isCssBackup": {
+      "type": "boolean",
+      "const": true,
+      "description": "Must be true — identifies this as a CSS preset backup file"
+    },
+    "version": {
+      "type": "string",
+      "description": "Schema version identifier"
+    }
+  }
+}

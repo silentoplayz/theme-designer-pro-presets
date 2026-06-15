@@ -1,0 +1,57 @@
+{
+  "name": "Rosé Pine",
+  "dark": {
+    "h": 250,
+    "c": 0,
+    "l": 20,
+    "overrides": {},
+    "locks": {},
+    "customCSS": "* {\n    color: #e0def4 !important;\n    stroke: #907aa9 !important;\n}\n\n.app > * {\n    background-color: #1f1d2e !important;\n}\n\n#nav {\n    background-color: #191724;\n}\n\n.py-2\\.5.my-auto.flex.flex-col.justify-between.h-screen {\n    background: #191724;\n}\n\n.bg-white.dark\\:bg-gray-800 {\n    background: #26233a;\n}\n\n.w-4.h-4 {\n    fill: #c4a7e7;\n}\n\n\n#chat-textarea {\n    background: #393552;\n    margin: 0.3rem;\n    padding: 0.5rem;\n}\n\n.bg-gradient-to-t.from-white.dark\\:from-gray-800.from-40\\%.pb-2 {\n    background: #26233a !important;\n    padding-top: 0.6rem;\n}\n\n.text-white.bg-gray-100.dark\\:text-gray-800.dark\\:bg-gray-600.disabled.transition.rounded-lg.p-1.mr-0\\.5.w-7.h-7.self-center {\n    background-color: #6e6a86;\n    transition: background 0.2s ease-out linear;\n}\n\n.bg-black.text-white.hover\\:bg-gray-900.dark\\:bg-white.dark\\:text-black.dark\\:hover\\:bg-gray-100.transition.rounded-lg.p-1.mr-0\\.5.w-7.h-7.self-center {\n    background-color: #286983;\n    transition: background 0.2s ease-out linear;\n}\n\n.bg-black.text-white.hover\\:bg-gray-900.dark\\:bg-white.dark\\:text-black.dark\\:hover\\:bg-gray-100.transition.rounded-lg.p-1.mr-0\\.5.w-7.h-7.self-center > * {\n    fill: #9ccfd8 !important;\n    transition: fill 0.2s ease-out linear;\n}\n\n.w-full.flex.justify-between.rounded-md.px-3.py-2.hover\\:bg-gray-900.bg-gray-900.transition.whitespace-nowrap.text-ellipsis {\n    background-color: #56526e;\n    font-weight: bold;\n}\n\n.hover\\:bg-gray-900:hover {\n    --tw-bg-opacity: 1;\n    background-color: rgb(57 53 82 / var(--tw-bg-opacity));\n}\n\n.text-xs.text-gray-700.uppercase.bg-gray-50.dark\\:bg-gray-700.dark\\:text-gray-400 {\n    background-color: #403d52;\n}\n\n.scrollbar-hidden.relative.overflow-x-auto.whitespace-nowrap.svelte-3g4avz {\n    border-radius: 16px 16px 0 0;\n}\n\n.base.enter.svelte-ug60r4 {\n    background-color: #393552;\n}\n\n.message.svelte-1nauejd {\n    color: #e0def4 !important;\n}\n\n.svelte-1ee93ns {\n    --primary: #eb6f92 !important;\n    --secondary: #e0def4 !important;\n}\n\n.svelte-11kvm4p {\n    --primary: #9ccfd8 !important;\n    --secondary: #1f1d2e !important;\n}\n",
+    "customCssEnabled": true,
+    "autoScope": true,
+    "canvasEnabled": false,
+    "canvasScript": ""
+  },
+  "light": {
+    "h": 250,
+    "c": 0,
+    "l": 0,
+    "overrides": {},
+    "locks": {},
+    "customCSS": "* {\n    color: #e0def4 !important;\n    stroke: #907aa9 !important;\n}\n\n.app > * {\n    background-color: #1f1d2e !important;\n}\n\n#nav {\n    background-color: #191724;\n}\n\n.py-2\\.5.my-auto.flex.flex-col.justify-between.h-screen {\n    background: #191724;\n}\n\n.bg-white.dark\\:bg-gray-800 {\n    background: #26233a;\n}\n\n.w-4.h-4 {\n    fill: #c4a7e7;\n}\n\n\n#chat-textarea {\n    background: #393552;\n    margin: 0.3rem;\n    padding: 0.5rem;\n}\n\n.bg-gradient-to-t.from-white.dark\\:from-gray-800.from-40\\%.pb-2 {\n    background: #26233a !important;\n    padding-top: 0.6rem;\n}\n\n.text-white.bg-gray-100.dark\\:text-gray-800.dark\\:bg-gray-600.disabled.transition.rounded-lg.p-1.mr-0\\.5.w-7.h-7.self-center {\n    background-color: #6e6a86;\n    transition: background 0.2s ease-out linear;\n}\n\n.bg-black.text-white.hover\\:bg-gray-900.dark\\:bg-white.dark\\:text-black.dark\\:hover\\:bg-gray-100.transition.rounded-lg.p-1.mr-0\\.5.w-7.h-7.self-center {\n    background-color: #286983;\n    transition: background 0.2s ease-out linear;\n}\n\n.bg-black.text-white.hover\\:bg-gray-900.dark\\:bg-white.dark\\:text-black.dark\\:hover\\:bg-gray-100.transition.rounded-lg.p-1.mr-0\\.5.w-7.h-7.self-center > * {\n    fill: #9ccfd8 !important;\n    transition: fill 0.2s ease-out linear;\n}\n\n.w-full.flex.justify-between.rounded-md.px-3.py-2.hover\\:bg-gray-900.bg-gray-900.transition.whitespace-nowrap.text-ellipsis {\n    background-color: #56526e;\n    font-weight: bold;\n}\n\n.hover\\:bg-gray-900:hover {\n    --tw-bg-opacity: 1;\n    background-color: rgb(57 53 82 / var(--tw-bg-opacity));\n}\n\n.text-xs.text-gray-700.uppercase.bg-gray-50.dark\\:bg-gray-700.dark\\:text-gray-400 {\n    background-color: #403d52;\n}\n\n.scrollbar-hidden.relative.overflow-x-auto.whitespace-nowrap.svelte-3g4avz {\n    border-radius: 16px 16px 0 0;\n}\n\n.base.enter.svelte-ug60r4 {\n    background-color: #393552;\n}\n\n.message.svelte-1nauejd {\n    color: #e0def4 !important;\n}\n\n.svelte-1ee93ns {\n    --primary: #eb6f92 !important;\n    --secondary: #e0def4 !important;\n}\n\n.svelte-11kvm4p {\n    --primary: #9ccfd8 !important;\n    --secondary: #1f1d2e !important;\n}\n",
+    "customCssEnabled": true,
+    "autoScope": true,
+    "canvasEnabled": false,
+    "canvasScript": ""
+  },
+  "oled": {
+    "h": 250,
+    "c": 0,
+    "l": 0,
+    "overrides": {},
+    "locks": {},
+    "customCSS": "* {\n    color: #e0def4 !important;\n    stroke: #907aa9 !important;\n}\n\n.app > * {\n    background-color: #1f1d2e !important;\n}\n\n#nav {\n    background-color: #191724;\n}\n\n.py-2\\.5.my-auto.flex.flex-col.justify-between.h-screen {\n    background: #191724;\n}\n\n.bg-white.dark\\:bg-gray-800 {\n    background: #26233a;\n}\n\n.w-4.h-4 {\n    fill: #c4a7e7;\n}\n\n\n#chat-textarea {\n    background: #393552;\n    margin: 0.3rem;\n    padding: 0.5rem;\n}\n\n.bg-gradient-to-t.from-white.dark\\:from-gray-800.from-40\\%.pb-2 {\n    background: #26233a !important;\n    padding-top: 0.6rem;\n}\n\n.text-white.bg-gray-100.dark\\:text-gray-800.dark\\:bg-gray-600.disabled.transition.rounded-lg.p-1.mr-0\\.5.w-7.h-7.self-center {\n    background-color: #6e6a86;\n    transition: background 0.2s ease-out linear;\n}\n\n.bg-black.text-white.hover\\:bg-gray-900.dark\\:bg-white.dark\\:text-black.dark\\:hover\\:bg-gray-100.transition.rounded-lg.p-1.mr-0\\.5.w-7.h-7.self-center {\n    background-color: #286983;\n    transition: background 0.2s ease-out linear;\n}\n\n.bg-black.text-white.hover\\:bg-gray-900.dark\\:bg-white.dark\\:text-black.dark\\:hover\\:bg-gray-100.transition.rounded-lg.p-1.mr-0\\.5.w-7.h-7.self-center > * {\n    fill: #9ccfd8 !important;\n    transition: fill 0.2s ease-out linear;\n}\n\n.w-full.flex.justify-between.rounded-md.px-3.py-2.hover\\:bg-gray-900.bg-gray-900.transition.whitespace-nowrap.text-ellipsis {\n    background-color: #56526e;\n    font-weight: bold;\n}\n\n.hover\\:bg-gray-900:hover {\n    --tw-bg-opacity: 1;\n    background-color: rgb(57 53 82 / var(--tw-bg-opacity));\n}\n\n.text-xs.text-gray-700.uppercase.bg-gray-50.dark\\:bg-gray-700.dark\\:text-gray-400 {\n    background-color: #403d52;\n}\n\n.scrollbar-hidden.relative.overflow-x-auto.whitespace-nowrap.svelte-3g4avz {\n    border-radius: 16px 16px 0 0;\n}\n\n.base.enter.svelte-ug60r4 {\n    background-color: #393552;\n}\n\n.message.svelte-1nauejd {\n    color: #e0def4 !important;\n}\n\n.svelte-1ee93ns {\n    --primary: #eb6f92 !important;\n    --secondary: #e0def4 !important;\n}\n\n.svelte-11kvm4p {\n    --primary: #9ccfd8 !important;\n    --secondary: #1f1d2e !important;\n}\n",
+    "customCssEnabled": true,
+    "autoScope": true,
+    "canvasEnabled": false,
+    "canvasScript": ""
+  },
+  "her": {
+    "h": 250,
+    "c": 0,
+    "l": 0,
+    "overrides": {},
+    "locks": {},
+    "customCSS": "* {\n    color: #e0def4 !important;\n    stroke: #907aa9 !important;\n}\n\n.app > * {\n    background-color: #1f1d2e !important;\n}\n\n#nav {\n    background-color: #191724;\n}\n\n.py-2\\.5.my-auto.flex.flex-col.justify-between.h-screen {\n    background: #191724;\n}\n\n.bg-white.dark\\:bg-gray-800 {\n    background: #26233a;\n}\n\n.w-4.h-4 {\n    fill: #c4a7e7;\n}\n\n\n#chat-textarea {\n    background: #393552;\n    margin: 0.3rem;\n    padding: 0.5rem;\n}\n\n.bg-gradient-to-t.from-white.dark\\:from-gray-800.from-40\\%.pb-2 {\n    background: #26233a !important;\n    padding-top: 0.6rem;\n}\n\n.text-white.bg-gray-100.dark\\:text-gray-800.dark\\:bg-gray-600.disabled.transition.rounded-lg.p-1.mr-0\\.5.w-7.h-7.self-center {\n    background-color: #6e6a86;\n    transition: background 0.2s ease-out linear;\n}\n\n.bg-black.text-white.hover\\:bg-gray-900.dark\\:bg-white.dark\\:text-black.dark\\:hover\\:bg-gray-100.transition.rounded-lg.p-1.mr-0\\.5.w-7.h-7.self-center {\n    background-color: #286983;\n    transition: background 0.2s ease-out linear;\n}\n\n.bg-black.text-white.hover\\:bg-gray-900.dark\\:bg-white.dark\\:text-black.dark\\:hover\\:bg-gray-100.transition.rounded-lg.p-1.mr-0\\.5.w-7.h-7.self-center > * {\n    fill: #9ccfd8 !important;\n    transition: fill 0.2s ease-out linear;\n}\n\n.w-full.flex.justify-between.rounded-md.px-3.py-2.hover\\:bg-gray-900.bg-gray-900.transition.whitespace-nowrap.text-ellipsis {\n    background-color: #56526e;\n    font-weight: bold;\n}\n\n.hover\\:bg-gray-900:hover {\n    --tw-bg-opacity: 1;\n    background-color: rgb(57 53 82 / var(--tw-bg-opacity));\n}\n\n.text-xs.text-gray-700.uppercase.bg-gray-50.dark\\:bg-gray-700.dark\\:text-gray-400 {\n    background-color: #403d52;\n}\n\n.scrollbar-hidden.relative.overflow-x-auto.whitespace-nowrap.svelte-3g4avz {\n    border-radius: 16px 16px 0 0;\n}\n\n.base.enter.svelte-ug60r4 {\n    background-color: #393552;\n}\n\n.message.svelte-1nauejd {\n    color: #e0def4 !important;\n}\n\n.svelte-1ee93ns {\n    --primary: #eb6f92 !important;\n    --secondary: #e0def4 !important;\n}\n\n.svelte-11kvm4p {\n    --primary: #9ccfd8 !important;\n    --secondary: #1f1d2e !important;\n}\n",
+    "customCssEnabled": true,
+    "autoScope": true,
+    "canvasEnabled": false,
+    "canvasScript": ""
+  },
+  "version": "1.0.0",
+  "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/rose_pine.json",
+  "author": "silentoplayz (G30)",
+  "description": "Adaptation of the Rosé Pine color scheme with muted lavender, rose, and pine tones. CSS-only — no Canvas FX.",
+  "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
+  "targetVersion": "0.9.0"
+}

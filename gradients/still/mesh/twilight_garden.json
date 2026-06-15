@@ -1,0 +1,24 @@
+{
+  "name": "Twilight Garden",
+  "type": "mesh",
+  "stops": [
+    { "color": "#2d1b4e", "position": 0 },
+    { "color": "#1a3a4a", "position": 50 },
+    { "color": "#0f1a2e", "position": 100 }
+  ],
+  "angle": 0,
+  "intensity": 80,
+  "animation": false,
+  "speed": 8,
+  "radialPosX": 50,
+  "radialPosY": 50,
+  "radialShape": "ellipse",
+  "radialSize": "farthest-corner",
+  "meshPoints": [
+    { "color": "#6b3fa0", "x": 20, "y": 20, "spread": 45 },
+    { "color": "#2d8a7a", "x": 80, "y": 25, "spread": 50 },
+    { "color": "#4a2080", "x": 25, "y": 80, "spread": 42 },
+    { "color": "#1a6b5a", "x": 75, "y": 75, "spread": 48 }
+  ],
+  "meshBgColor": "#0f0f1e"
+}

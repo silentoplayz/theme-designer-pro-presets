@@ -1,0 +1,211 @@
+[
+  {
+    "name": "Arctic Frost",
+    "type": "linear",
+    "stops": [
+      {
+        "color": "#0a1628",
+        "position": 0
+      },
+      {
+        "color": "#1a3a5c",
+        "position": 35
+      },
+      {
+        "color": "#2e6b8a",
+        "position": 65
+      },
+      {
+        "color": "#0d1f33",
+        "position": 100
+      }
+    ],
+    "angle": 200,
+    "intensity": 85,
+    "animation": false,
+    "speed": 8,
+    "radialPosX": 50,
+    "radialPosY": 50,
+    "radialShape": "ellipse",
+    "radialSize": "farthest-corner",
+    "_category": "still/linear"
+  },
+  {
+    "name": "Ember Glow",
+    "type": "linear",
+    "stops": [
+      {
+        "color": "#1a0a00",
+        "position": 0
+      },
+      {
+        "color": "#3d1503",
+        "position": 30
+      },
+      {
+        "color": "#8b2500",
+        "position": 60
+      },
+      {
+        "color": "#2a0e00",
+        "position": 100
+      }
+    ],
+    "angle": 160,
+    "intensity": 90,
+    "animation": false,
+    "speed": 8,
+    "radialPosX": 50,
+    "radialPosY": 50,
+    "radialShape": "ellipse",
+    "radialSize": "farthest-corner",
+    "_category": "still/linear"
+  },
+  {
+    "name": "Midnight Indigo",
+    "type": "linear",
+    "stops": [
+      {
+        "color": "#0a0a2e",
+        "position": 0
+      },
+      {
+        "color": "#1a1a4e",
+        "position": 33
+      },
+      {
+        "color": "#0d1b3e",
+        "position": 66
+      },
+      {
+        "color": "#0a0a2e",
+        "position": 100
+      }
+    ],
+    "angle": 135,
+    "intensity": 100,
+    "animation": false,
+    "speed": 8,
+    "radialPosX": 50,
+    "radialPosY": 50,
+    "radialShape": "ellipse",
+    "radialSize": "farthest-corner",
+    "_category": "still/linear"
+  },
+  {
+    "name": "Twilight Garden",
+    "type": "mesh",
+    "stops": [
+      {
+        "color": "#2d1b4e",
+        "position": 0
+      },
+      {
+        "color": "#1a3a4a",
+        "position": 50
+      },
+      {
+        "color": "#0f1a2e",
+        "position": 100
+      }
+    ],
+    "angle": 0,
+    "intensity": 80,
+    "animation": false,
+    "speed": 8,
+    "radialPosX": 50,
+    "radialPosY": 50,
+    "radialShape": "ellipse",
+    "radialSize": "farthest-corner",
+    "meshPoints": [
+      {
+        "color": "#6b3fa0",
+        "x": 20,
+        "y": 20,
+        "spread": 45
+      },
+      {
+        "color": "#2d8a7a",
+        "x": 80,
+        "y": 25,
+        "spread": 50
+      },
+      {
+        "color": "#4a2080",
+        "x": 25,
+        "y": 80,
+        "spread": 42
+      },
+      {
+        "color": "#1a6b5a",
+        "x": 75,
+        "y": 75,
+        "spread": 48
+      }
+    ],
+    "meshBgColor": "#0f0f1e",
+    "_category": "still/mesh"
+  },
+  {
+    "name": "Deep Ocean",
+    "type": "radial",
+    "stops": [
+      {
+        "color": "#1e4d6e",
+        "position": 0
+      },
+      {
+        "color": "#0e2a3f",
+        "position": 40
+      },
+      {
+        "color": "#071520",
+        "position": 75
+      },
+      {
+        "color": "#030a0f",
+        "position": 100
+      }
+    ],
+    "angle": 0,
+    "intensity": 100,
+    "animation": false,
+    "speed": 8,
+    "radialPosX": 35,
+    "radialPosY": 30,
+    "radialShape": "ellipse",
+    "radialSize": "farthest-corner",
+    "_category": "still/radial"
+  },
+  {
+    "name": "Solar Flare",
+    "type": "radial",
+    "stops": [
+      {
+        "color": "#ffb347",
+        "position": 0
+      },
+      {
+        "color": "#c2441e",
+        "position": 35
+      },
+      {
+        "color": "#5c1a0a",
+        "position": 65
+      },
+      {
+        "color": "#0f0503",
+        "position": 100
+      }
+    ],
+    "angle": 0,
+    "intensity": 95,
+    "animation": false,
+    "speed": 8,
+    "radialPosX": 50,
+    "radialPosY": 40,
+    "radialShape": "ellipse",
+    "radialSize": "farthest-corner",
+    "_category": "still/radial"
+  }
+]
