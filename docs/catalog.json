@@ -1,0 +1,2355 @@
+{
+  "repo": "https://github.com/silentoplayz/theme-designer-pro-presets",
+  "rawBase": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main",
+  "themes": [
+    {
+      "name": "AETHER // NEBULA FLOW",
+      "file": "aether_nebula_flow.json",
+      "description": "Atmospheric translucent UI with gaseous nebula Canvas FX and holographic shimmer accents. Cool blue tones with frosted glass panels.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 225,
+          "c": 20,
+          "l": 14,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 210,
+          "c": 5,
+          "l": 98,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 225,
+          "c": 20,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 340,
+          "c": 20,
+          "l": 12,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/aether_nebula_flow.json"
+    },
+    {
+      "name": "Amber",
+      "file": "amber.json",
+      "description": "Warm golden-olive palette reminiscent of polished amber, with a subtle gradient glow.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 75,
+          "c": 20,
+          "l": 20,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "light": {
+          "h": 75,
+          "c": 20,
+          "l": 20,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "oled": {
+          "h": 75,
+          "c": 20,
+          "l": 0,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "her": {
+          "h": 75,
+          "c": 20,
+          "l": 20,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/amber.json"
+    },
+    {
+      "name": "Amber Command: 1979",
+      "file": "amber_command_1979.json",
+      "description": "Vintage CRT terminal aesthetic with amber monochrome tones, scan-line flicker effects, and Geometric Mainframe Canvas FX.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 45,
+          "c": 40,
+          "l": 12,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 45,
+          "c": 5,
+          "l": 95,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 120,
+          "c": 50,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 320,
+          "c": 30,
+          "l": 95,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/amber_command_1979.json"
+    },
+    {
+      "name": "Amethyst",
+      "file": "amethyst.json",
+      "description": "Vibrant purple tones inspired by amethyst crystals, with a deep violet gradient.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 290,
+          "c": 25,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "light": {
+          "h": 290,
+          "c": 25,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "oled": {
+          "h": 290,
+          "c": 25,
+          "l": 0,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "her": {
+          "h": 290,
+          "c": 25,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/amethyst.json"
+    },
+    {
+      "name": "Apollo // Analogue Futurism",
+      "file": "apollo_analogue_futurism.json",
+      "description": "NASA-era analogue hardware interface with industrial chassis textures, Vector Telemetry Canvas FX, and muted steel-blue tones.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 210,
+          "c": 10,
+          "l": 15,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 40,
+          "c": 5,
+          "l": 92,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 210,
+          "c": 10,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 340,
+          "c": 12,
+          "l": 92,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/apollo_analogue_futurism.json"
+    },
+    {
+      "name": "Astral Projection",
+      "file": "astral_projection.json",
+      "description": "Deep space glassmorphism with ethereal violet-blue tones, Hyperspace Warp Drive Canvas FX, and luminous translucent panels.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 240,
+          "c": 30,
+          "l": 15,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 220,
+          "c": 20,
+          "l": 95,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 240,
+          "c": 30,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 340,
+          "c": 30,
+          "l": 95,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/astral_projection.json"
+    },
+    {
+      "name": "Bio-Digital Synthesis",
+      "file": "bio_digital_synthesis.json",
+      "description": "Living bio-organic UI with pulsing borders, Synaptic Network Canvas FX, and vibrant magenta-purple neural tones.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 285,
+          "c": 35,
+          "l": 12,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 190,
+          "c": 20,
+          "l": 98,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 285,
+          "c": 35,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 330,
+          "c": 25,
+          "l": 15,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/bio_digital_synthesis.json"
+    },
+    {
+      "name": "Bioluminescence",
+      "file": "bioluminescence.json",
+      "description": "Deep ocean bioluminescent aesthetic with glowing cyan accents, jellyfish-inspired Canvas FX, and frosted glass panels.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 195,
+          "c": 35,
+          "l": 15,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 195,
+          "c": 20,
+          "l": 97,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 195,
+          "c": 35,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 340,
+          "c": 20,
+          "l": 95,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/bioluminescence.json"
+    },
+    {
+      "name": "Blue Lightning",
+      "file": "blue_lightning.json",
+      "description": "Electric aurora borealis gradients with Blue Lightning Twinkle Canvas FX and vibrant cerulean-teal tones.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 215,
+          "c": 50,
+          "l": 20,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 215,
+          "c": 50,
+          "l": 20,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 215,
+          "c": 50,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 215,
+          "c": 50,
+          "l": 20,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/blue_lightning.json"
+    },
+    {
+      "name": "Emerald",
+      "file": "emerald.json",
+      "description": "Rich green hues evoking a dense, jewel-toned forest with matching gradient.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 155,
+          "c": 15,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "light": {
+          "h": 155,
+          "c": 15,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "oled": {
+          "h": 155,
+          "c": 15,
+          "l": 0,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "her": {
+          "h": 155,
+          "c": 15,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/emerald.json"
+    },
+    {
+      "name": "ENTROPY // DATA-STORM",
+      "file": "entropy_data_storm.json",
+      "description": "Industrial containment UI with corroded amber warning tones, Bit-Stream Corruption Canvas FX, and JetBrains Mono typography.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 55,
+          "c": 45,
+          "l": 10,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 0,
+          "c": 100,
+          "l": 50,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 0,
+          "c": 0,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 340,
+          "c": 30,
+          "l": 93,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/entropy_data_storm.json"
+    },
+    {
+      "name": "Four Seasons (Desynced)",
+      "file": "four_seasons_desynced.json",
+      "description": "Nature-inspired seasonal palette with emerald canopy tones, Fireflies Canvas FX, and soft rounded corners.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 145,
+          "c": 0.15,
+          "l": 18,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 210,
+          "c": 0.08,
+          "l": 92,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 270,
+          "c": 0.1,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 350,
+          "c": 0.12,
+          "l": 25,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/four_seasons_desynced.json"
+    },
+    {
+      "name": "Kinetic Thermal // Plasma Core",
+      "file": "kinetic_thermal_plasma_core.json",
+      "description": "Fusion reactor control interface with industrial plating, Plasma Arc Discharge Canvas FX, and cool blue containment tones.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 215,
+          "c": 25,
+          "l": 10,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 20,
+          "c": 5,
+          "l": 98,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 215,
+          "c": 25,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 350,
+          "c": 25,
+          "l": 12,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/kinetic_thermal_plasma_core.json"
+    },
+    {
+      "name": "LUMINA // AURORA",
+      "file": "lumina_aurora.json",
+      "description": "Premium glassmorphism with layered frosted panels, Fluid Aurora Borealis Canvas FX, and deep indigo-violet tones.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 240,
+          "c": 15,
+          "l": 15,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 220,
+          "c": 5,
+          "l": 98,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 240,
+          "c": 15,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 340,
+          "c": 20,
+          "l": 15,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/lumina_aurora.json"
+    },
+    {
+      "name": "Matrix Rain",
+      "file": "matrix_rain.json",
+      "description": "Hacker terminal aesthetic with phosphor-green grid lines, Matrix code rain Canvas FX, and monochrome dark palette.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 250,
+          "c": 0,
+          "l": 20,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 250,
+          "c": 0,
+          "l": 20,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 250,
+          "c": 0,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 250,
+          "c": 0,
+          "l": 20,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/matrix_rain.json"
+    },
+    {
+      "name": "Midnight",
+      "file": "midnight.json",
+      "description": "Deep indigo tones with a dark linear gradient backdrop. A refined nocturnal palette.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 250,
+          "c": 20,
+          "l": 15,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "light": {
+          "h": 250,
+          "c": 20,
+          "l": 15,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "oled": {
+          "h": 250,
+          "c": 20,
+          "l": 0,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "her": {
+          "h": 250,
+          "c": 20,
+          "l": 15,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/midnight.json"
+    },
+    {
+      "name": "NEO-TACTICAL // ARCHIVE 01",
+      "file": "neo_tactical_archive_01.json",
+      "description": "Military console interface with Lidar Topographical Scan Canvas FX, monospace typography, and stealth blue-gray tones.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 220,
+          "c": 10,
+          "l": 12,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 40,
+          "c": 5,
+          "l": 95,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 220,
+          "c": 10,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 35,
+          "c": 40,
+          "l": 12,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neo_tactical_archive_01.json"
+    },
+    {
+      "name": "Neon Cyberpunk (Animated)",
+      "file": "neon_cyberpunk_animated.json",
+      "description": "Neon-drenched cyberpunk UI with animated magenta and cyan glitch accents, matrix data rain Canvas FX, and full color overrides.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 320,
+          "c": 45,
+          "l": 15,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 320,
+          "c": 45,
+          "l": 95,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 320,
+          "c": 45,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 320,
+          "c": 45,
+          "l": 95,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neon_cyberpunk_animated.json"
+    },
+    {
+      "name": "Neon Overdrive",
+      "file": "neon_overdrive.json",
+      "description": "High-octane cyberpunk UI with intense neon magenta and electric blue accents, glitch-styled animations, and Neon Pulse Canvas FX on a deep midnight backdrop.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 285,
+          "c": 0.35,
+          "l": 15,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 285,
+          "c": 0.2,
+          "l": 90,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 285,
+          "c": 0.35,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 285,
+          "c": 0.35,
+          "l": 15,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neon_overdrive.json"
+    },
+    {
+      "name": "Obsidian",
+      "file": "obsidian.json",
+      "description": "Pure achromatic darkness with a subtle charcoal-to-navy gradient.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 0,
+          "c": 0,
+          "l": 10,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "light": {
+          "h": 0,
+          "c": 0,
+          "l": 10,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "oled": {
+          "h": 0,
+          "c": 0,
+          "l": 0,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "her": {
+          "h": 0,
+          "c": 0,
+          "l": 10,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/obsidian.json"
+    },
+    {
+      "name": "Pink Hues",
+      "file": "pink_hues.json",
+      "description": "Soft pink and rose color palette with warm pastel accents, gentle floating bokeh Canvas FX, and full color overrides.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 354,
+          "c": 41,
+          "l": 20,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 354,
+          "c": 41,
+          "l": 20,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 354,
+          "c": 41,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 354,
+          "c": 41,
+          "l": 20,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/pink_hues.json"
+    },
+    {
+      "name": "Project Singularity",
+      "file": "project_singularity.json",
+      "description": "Void interface with gravitational distortion effects, Accretion Canvas FX, and deep violet-black tones with phase-shift animations.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 265,
+          "c": 40,
+          "l": 10,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 265,
+          "c": 5,
+          "l": 95,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 265,
+          "c": 40,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 320,
+          "c": 30,
+          "l": 95,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/project_singularity.json"
+    },
+    {
+      "name": "Retro Terminal (CRT)",
+      "file": "retro_terminal_crt.json",
+      "description": "Classic green phosphor CRT terminal with VT323 font, scan-line overlay, Matrix code Canvas FX, and authentic retro glow.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 120,
+          "c": 50,
+          "l": 20,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 120,
+          "c": 50,
+          "l": 90,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 120,
+          "c": 50,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 120,
+          "c": 50,
+          "l": 20,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/retro_terminal_crt.json"
+    },
+    {
+      "name": "Rosé Pine",
+      "file": "rose_pine.json",
+      "description": "Adaptation of the Rosé Pine color scheme with muted lavender, rose, and pine tones, firefly constellation Canvas FX, and full color overrides.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 250,
+          "c": 0,
+          "l": 20,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 250,
+          "c": 0,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 250,
+          "c": 0,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 250,
+          "c": 0,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/rose_pine.json"
+    },
+    {
+      "name": "Ruby",
+      "file": "ruby.json",
+      "description": "Deep crimson and rose tones with a rich red gradient backdrop.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 350,
+          "c": 25,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "light": {
+          "h": 350,
+          "c": 25,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "oled": {
+          "h": 350,
+          "c": 25,
+          "l": 0,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "her": {
+          "h": 350,
+          "c": 25,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/ruby.json"
+    },
+    {
+      "name": "Sapphire",
+      "file": "sapphire.json",
+      "description": "Cool blue tones reminiscent of a deep sapphire, with a matching ocean-depth gradient.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 210,
+          "c": 25,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "light": {
+          "h": 210,
+          "c": 25,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "oled": {
+          "h": 210,
+          "c": 25,
+          "l": 0,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "her": {
+          "h": 210,
+          "c": 25,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/sapphire.json"
+    },
+    {
+      "name": "Solar Flare",
+      "file": "solar_flare.json",
+      "description": "Luxury golden UI with warm amber accents, Solar Wind Embers Canvas FX, and rich copper-toned glassmorphism.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 40,
+          "c": 25,
+          "l": 15,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 35,
+          "c": 15,
+          "l": 97,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 40,
+          "c": 25,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 35,
+          "c": 20,
+          "l": 95,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/solar_flare.json"
+    },
+    {
+      "name": "Sovereign",
+      "file": "sovereign.json",
+      "description": "Architectural material design with Prismatic Caustics Canvas FX, premium glassmorphism panels, and deep navy-indigo tones.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 260,
+          "c": 12,
+          "l": 16,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 35,
+          "c": 5,
+          "l": 98,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 260,
+          "c": 12,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 340,
+          "c": 15,
+          "l": 16,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/sovereign.json"
+    },
+    {
+      "name": "Synthwave 1984",
+      "file": "synthwave_1984.json",
+      "description": "Retro-futuristic synthwave aesthetic with neon magenta glow, Perspective Grid Canvas FX, and chrome-styled accents.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 300,
+          "c": 45,
+          "l": 15,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 35,
+          "c": 40,
+          "l": 95,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 300,
+          "c": 45,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 35,
+          "c": 40,
+          "l": 95,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/synthwave_1984.json"
+    },
+    {
+      "name": "The Cyanotype",
+      "file": "the_cyanotype.json",
+      "description": "Blueprint-inspired design with architectural grid overlay, deep navy tones, and technical drawing aesthetics. CSS-only — no Canvas FX.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 239,
+          "c": 28.863393201570325,
+          "l": 18,
+          "hasCSS": true,
+          "hasFX": false,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 239,
+          "c": 28.863393201570325,
+          "l": 18,
+          "hasCSS": true,
+          "hasFX": false,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 239,
+          "c": 28.863393201570325,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": false,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 239,
+          "c": 28.863393201570325,
+          "l": 18,
+          "hasCSS": true,
+          "hasFX": false,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/the_cyanotype.json"
+    },
+    {
+      "name": "Topaz",
+      "file": "topaz.json",
+      "description": "Warm bronze and sienna tones with an earthy gradient backdrop.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 40,
+          "c": 20,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "light": {
+          "h": 40,
+          "c": 20,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "oled": {
+          "h": 40,
+          "c": 20,
+          "l": 0,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "her": {
+          "h": 40,
+          "c": 20,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/topaz.json"
+    },
+    {
+      "name": "Toxic Nebula // Smog-Core",
+      "file": "toxic_nebula_smog_core.json",
+      "description": "Hazardous atmosphere UI with corrosive green accents, Smog particle Canvas FX, and toxic purple-violet tones with liquid pulse animations.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 285,
+          "c": 30,
+          "l": 12,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 285,
+          "c": 10,
+          "l": 98,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 285,
+          "c": 35,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 330,
+          "c": 25,
+          "l": 15,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/toxic_nebula_smog_core.json"
+    },
+    {
+      "name": "Wasteland Uplink (Amber)",
+      "file": "wasteland_uplink_amber.json",
+      "description": "Post-apocalyptic terminal with Radiation Dust Canvas FX, VT323 monospace font, amber phosphor glow, and weathered UI elements.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 75,
+          "c": 0.18,
+          "l": 20,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 75,
+          "c": 0.12,
+          "l": 85,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 75,
+          "c": 0.18,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 75,
+          "c": 0.18,
+          "l": 20,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/wasteland_uplink_amber.json"
+    },
+    {
+      "name": "Windows Hotdog Stand",
+      "file": "windows_hotdog_stand.json",
+      "description": "Faithful recreation of the infamous Windows 3.1 Hot Dog Stand color scheme with retro pixel rain Canvas FX.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 354,
+          "c": 85,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 250,
+          "c": 0,
+          "l": 20,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 354,
+          "c": 85,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 250,
+          "c": 0,
+          "l": 20,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/windows_hotdog_stand.json"
+    }
+  ],
+  "canvasFx": [
+    {
+      "name": "The Architect (Transparency Optimized)",
+      "file": "01_the_architect_matrix.js",
+      "description": "Matrix-style digital rain.",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/01_the_architect_matrix.js"
+    },
+    {
+      "name": "Aetheric Flow",
+      "file": "02_aetheric_flow_vector.js",
+      "description": "2,000+ energy filaments in a dynamic noise field.",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/02_aetheric_flow_vector.js"
+    },
+    {
+      "name": "Geometric Singularity",
+      "file": "03_geometric_singularity.js",
+      "description": "Recursive 3D wireframe lattice warping toward the mouse.",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/03_geometric_singularity.js"
+    },
+    {
+      "name": "Aurora Borealis",
+      "file": "aurora_borealis.js",
+      "description": "Flowing, undulating aurora-like ribbons of light with green, teal, and purple hues.",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/aurora_borealis.js"
+    },
+    {
+      "name": "Bioluminescence",
+      "file": "bioluminescence.js",
+      "description": "Deep sea bioluminescent flashes and drifting organisms. Soft glowing",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/bioluminescence.js"
+    },
+    {
+      "name": "Bit-Stream Corruption",
+      "file": "bit_stream_corruption.js",
+      "description": "A chaotic storm of digital artifacts and ASCII bits that scramble near the cursor.",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/bit_stream_corruption.js"
+    },
+    {
+      "name": "Blueprint Grid",
+      "file": "blueprint_grid.js",
+      "description": "Animated technical blueprint with dimension lines, measurement",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/blueprint_grid.js"
+    },
+    {
+      "name": "Cell Division",
+      "file": "cell_division.js",
+      "description": "Mitosis-like cells that grow, develop a cleavage furrow, and divide",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/cell_division.js"
+    },
+    {
+      "name": "Chroma RGB Liquid Grid – Cyber-Neon Edition",
+      "file": "chroma_rgb_liquid_grid.js",
+      "description": "Elastic neon lattice that breathes, ripples and explodes into RGB when touched.",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/chroma_rgb_liquid_grid.js"
+    },
+    {
+      "name": "Circuit Board",
+      "file": "circuit_board.js",
+      "description": "Animated circuit board traces drawn in real-time. Lines travel horizontally",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/circuit_board.js"
+    },
+    {
+      "name": "Comet Shower",
+      "file": "comet_shower.js",
+      "description": "Comets streak diagonally across the sky with glowing heads and",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/comet_shower.js"
+    },
+    {
+      "name": "Constellation Map",
+      "file": "constellation_map.js",
+      "description": "Randomly placed stars that form connection lines (like constellation patterns)",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/constellation_map.js"
+    },
+    {
+      "name": "Cymatics",
+      "file": "cymatics.js",
+      "description": "Chladni plate vibration pattern simulator. Mouse position controls",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/cymatics.js"
+    },
+    {
+      "name": "Data Stream",
+      "file": "data_stream.js",
+      "description": "Horizontal streams of flowing data represented as small rectangles of varying",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/data_stream.js"
+    },
+    {
+      "name": "Digital Fishtank V2",
+      "file": "digital_fishtank.js",
+      "description": "A living aquarium with hungry fish that chase and eat food you",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/digital_fishtank.js"
+    },
+    {
+      "name": "DNA Double Helix",
+      "file": "dna_helix.js",
+      "description": "A rotating double-helix DNA strand rendered in 3D perspective with",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/dna_helix.js"
+    },
+    {
+      "name": "Electric Tendrils",
+      "file": "electric_tendrils.js",
+      "description": "Branching electric arcs reach from screen edge anchors toward your",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/electric_tendrils.js"
+    },
+    {
+      "name": "Falling Leaves",
+      "file": "falling_leaves.js",
+      "description": "Leaves of various sizes and muted autumn colors (amber, rust, gold, olive)",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/falling_leaves.js"
+    },
+    {
+      "name": "Firefly Meadow",
+      "file": "firefly_meadow.js",
+      "description": "Softly glowing firefly particles drifting with organic, non-linear",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/firefly_meadow.js"
+    },
+    {
+      "name": "Fluid Ribbons",
+      "file": "fluid_ribbons.js",
+      "description": "Graceful, flowing silk-like ribbons that trail across the screen in smooth",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/fluid_ribbons.js"
+    },
+    {
+      "name": "Galaxy Forge",
+      "file": "galaxy_forge.js",
+      "description": "A spiral galaxy with thousands of orbiting stars. Mouse creates a",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/galaxy_forge.js"
+    },
+    {
+      "name": "Glitch Grid",
+      "file": "glitch_grid.js",
+      "description": "A subtle grid overlay that occasionally glitches — random cells flash,",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/glitch_grid.js"
+    },
+    {
+      "name": "Hexagonal Pulse",
+      "file": "hexagonal_pulse.js",
+      "description": "A grid of hexagons that pulse with a ripple effect emanating from",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/hexagonal_pulse.js"
+    },
+    {
+      "name": "Hyperspace Warp Drive",
+      "file": "hyperspace_warp_drive.js",
+      "description": "A 3D starfield with speed lines. Move the mouse to steer the warp tunnel!",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/hyperspace_warp_drive.js"
+    },
+    {
+      "name": "Hypno Spiral",
+      "file": "hypno_spiral.js",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/hypno_spiral.js"
+    },
+    {
+      "name": "Ice Crystals",
+      "file": "ice_crystals.js",
+      "description": "Hexagonal crystal growth with 6-fold symmetry, prismatic highlights, and mouse-warmth melting.",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/ice_crystals.js"
+    },
+    {
+      "name": "Ink Bloom",
+      "file": "ink_bloom.js",
+      "description": "Ink-drop-like blooms that slowly expand and diffuse at random",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/ink_bloom.js"
+    },
+    {
+      "name": "Isometric Terrain",
+      "file": "isometric_terrain.js",
+      "description": "An isometric grid of diamond-shaped tiles that undulate like rolling",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/isometric_terrain.js"
+    },
+    {
+      "name": "Kaleido Spiral Vortex",
+      "file": "kaleido_spiral_vortex.js",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/kaleido_spiral_vortex.js"
+    },
+    {
+      "name": "Kaleidoscope",
+      "file": "kaleidoscope.js",
+      "description": "Mesmerizing kaleidoscope pattern with mirrored segments and",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/kaleidoscope.js"
+    },
+    {
+      "name": "Lava Lamp",
+      "file": "lava_lamp.js",
+      "description": "Large, soft, amorphous blobs that slowly rise, merge, split,",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/lava_lamp.js"
+    },
+    {
+      "name": "Liquid Metal",
+      "file": "liquid_metal.js",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/liquid_metal.js"
+    },
+    {
+      "name": "Magnetic Field",
+      "file": "magnetic_field.js",
+      "description": "Magnetic field line visualization with multiple dipoles. Field lines are traced",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/magnetic_field.js"
+    },
+    {
+      "name": "Matrix Rain",
+      "file": "matrix_rain.js",
+      "description": "Classic Matrix digital rain with columns of falling katakana, numbers,",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/matrix_rain.js"
+    },
+    {
+      "name": "Matrix Rain Japanese",
+      "file": "matrix_rain_japanese.js",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/matrix_rain_japanese.js"
+    },
+    {
+      "name": "Morphing Polygons",
+      "file": "morphing_polygons.js",
+      "description": "Several large semi-transparent polygons that slowly morph between",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/morphing_polygons.js"
+    },
+    {
+      "name": "Mycelium Network",
+      "file": "mycelium_network.js",
+      "description": "An organic fungal mycelium that grows outward from seed points,",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/mycelium_network.js"
+    },
+    {
+      "name": "Nebula Clouds",
+      "file": "nebula_clouds.js",
+      "description": "Soft, slowly drifting colored cloud formations using layered circles with very low",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/nebula_clouds.js"
+    },
+    {
+      "name": "Neural Network",
+      "file": "neural_network.js",
+      "description": "Visualization of connected nodes in layers with pulses of light traveling",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/neural_network.js"
+    },
+    {
+      "name": "Northern Lights Curtain",
+      "file": "northern_lights_curtain.js",
+      "description": "Vertical curtains of shimmering aurora light that sway horizontally.",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/northern_lights_curtain.js"
+    },
+    {
+      "name": "Ocean Waves",
+      "file": "ocean_waves.js",
+      "description": "Layered horizontal wave patterns at different depths, creating an",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/ocean_waves.js"
+    },
+    {
+      "name": "Pixel Rain",
+      "file": "pixel_rain.js",
+      "description": "Pixel-art style rain with blocky, grid-snapped drops, optional",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/pixel_rain.js"
+    },
+    {
+      "name": "Quantum Foam",
+      "file": "quantum_foam.js",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/quantum_foam.js"
+    },
+    {
+      "name": "Quantum Particle Tunnel",
+      "file": "quantum_particle_tunnel.js",
+      "description": "A mesmerizing particle system that simulates quantum tunneling with probabilistic paths,",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/quantum_particle_tunnel.js"
+    },
+    {
+      "name": "Rain on Glass",
+      "file": "rain_on_glass.js",
+      "description": "Raindrops falling with realistic physics — acceleration, subtle streaks,",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/rain_on_glass.js"
+    },
+    {
+      "name": "Retro Sun",
+      "file": "retro_sun.js",
+      "description": "Synthwave sunset with a glowing semi-circle sun, animated horizontal",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/retro_sun.js"
+    },
+    {
+      "name": "Ripple Pond",
+      "file": "ripple_pond.js",
+      "description": "Water ripple interference simulation using a 2D wave equation.",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/ripple_pond.js"
+    },
+    {
+      "name": "Sacred Geometry",
+      "file": "sacred_geometry.js",
+      "description": "Slowly rotating, nested geometric shapes — circles inscribed in",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/sacred_geometry.js"
+    },
+    {
+      "name": "Sandstorm",
+      "file": "sandstorm.js",
+      "description": "Desert sandstorm with particles blowing horizontally through",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/sandstorm.js"
+    },
+    {
+      "name": "Snow Globe",
+      "file": "snow_globe.js",
+      "description": "Gentle snowfall with drifting flakes, shimmer sparkles,",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/snow_globe.js"
+    },
+    {
+      "name": "Solar Wind Embers",
+      "file": "solar_wind_embers.js",
+      "description": "Floating amber particles that drift upward and react to the sun (mouse).",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/solar_wind_embers.js"
+    },
+    {
+      "name": "Starfall Pulse",
+      "file": "starfall_pulse.js",
+      "description": "Interactive floating embers that react to the user.",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/starfall_pulse.js"
+    },
+    {
+      "name": "Starfield Warp",
+      "file": "starfield_warp.js",
+      "description": "A classic starfield effect where stars fly toward the viewer from the center.",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/starfield_warp.js"
+    },
+    {
+      "name": "Tactical Liquid Grid",
+      "file": "tactical_liquid_grid.js",
+      "description": "An interactive grid of crosshairs that behaves like an elastic fabric.",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/tactical_liquid_grid.js"
+    },
+    {
+      "name": "The Genesis Lattice",
+      "file": "the_genesis_lattice.js",
+      "description": "An emergent cellular automaton rendered as a breathing, 3D interconnected fabric.",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/the_genesis_lattice.js"
+    },
+    {
+      "name": "Thunderstorm",
+      "file": "thunderstorm.js",
+      "description": "Dramatic lightning bolts that fork and flash against a dark sky.",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/thunderstorm.js"
+    },
+    {
+      "name": "Topographic Map",
+      "file": "topographic_map.js",
+      "description": "Smooth, flowing topographic contour lines over a continuously",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/topographic_map.js"
+    },
+    {
+      "name": "VHS Static",
+      "file": "vhs_static.js",
+      "description": "Authentic VHS tracking effect with rolling tracking bars, random static",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/vhs_static.js"
+    },
+    {
+      "name": "Voronoi Cells",
+      "file": "voronoi_cells.js",
+      "description": "Animated Voronoi diagram where seed points drift slowly. Cell edges",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/voronoi_cells.js"
+    },
+    {
+      "name": "Wave Interference",
+      "file": "wave_interference.js",
+      "description": "Multiple circular wave sources creating beautiful constructive",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/wave_interference.js"
+    },
+    {
+      "name": "Wireframe City",
+      "file": "wireframe_city.js",
+      "description": "A procedurally generated wireframe cityscape rendered in slight",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/wireframe_city.js"
+    }
+  ],
+  "cssPresets": [
+    {
+      "name": "Astral Glassmorphism",
+      "file": "astral_glassmorphism.css",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/astral_glassmorphism.css"
+    },
+    {
+      "name": "Gradient Background",
+      "file": "gradient_background.css",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/gradient_background.css"
+    },
+    {
+      "name": "Matrix Colors",
+      "file": "matrix_colors.css",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/matrix_colors.css"
+    },
+    {
+      "name": "Neon Cyberpunk Animated",
+      "file": "neon_cyberpunk_animated.css",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/neon_cyberpunk_animated.css"
+    },
+    {
+      "name": "Pink Hues",
+      "file": "pink_hues.css",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/pink_hues.css"
+    },
+    {
+      "name": "Retro Terminal Crt",
+      "file": "retro_terminal_crt.css",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/retro_terminal_crt.css"
+    },
+    {
+      "name": "Rose Pine",
+      "file": "rose_pine.css",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/rose_pine.css"
+    },
+    {
+      "name": "Solar Flare",
+      "file": "solar_flare.css",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/solar_flare.css"
+    },
+    {
+      "name": "Tactical Hud",
+      "file": "tactical_hud.css",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/tactical_hud.css"
+    },
+    {
+      "name": "The Cyanotype",
+      "file": "the_cyanotype.css",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/the_cyanotype.css"
+    },
+    {
+      "name": "Windows Hotdog Stand",
+      "file": "windows_hotdog_stand.css",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/windows_hotdog_stand.css"
+    }
+  ],
+  "gradients": [
+    {
+      "name": "Neon Drift",
+      "file": "neon_drift.json",
+      "type": "linear",
+      "animated": true,
+      "stops": [
+        {
+          "color": "#0a001a",
+          "position": 0
+        },
+        {
+          "color": "#1a0040",
+          "position": 25
+        },
+        {
+          "color": "#00c8ff",
+          "position": 50
+        },
+        {
+          "color": "#ff00aa",
+          "position": 75
+        },
+        {
+          "color": "#0a001a",
+          "position": 100
+        }
+      ],
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/animated/linear/neon_drift.json"
+    },
+    {
+      "name": "Sunset Tide",
+      "file": "sunset_tide.json",
+      "type": "linear",
+      "animated": true,
+      "stops": [
+        {
+          "color": "#1a0a1e",
+          "position": 0
+        },
+        {
+          "color": "#4a1942",
+          "position": 25
+        },
+        {
+          "color": "#c0392b",
+          "position": 45
+        },
+        {
+          "color": "#e67e22",
+          "position": 65
+        },
+        {
+          "color": "#1a0a1e",
+          "position": 100
+        }
+      ],
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/animated/linear/sunset_tide.json"
+    },
+    {
+      "name": "Electric Aurora",
+      "file": "electric_aurora.json",
+      "type": "mesh",
+      "animated": true,
+      "stops": [
+        {
+          "color": "#8c0ebe",
+          "position": 0
+        },
+        {
+          "color": "#4614db",
+          "position": 50
+        },
+        {
+          "color": "#170a38",
+          "position": 100
+        }
+      ],
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/animated/mesh/electric_aurora.json"
+    },
+    {
+      "name": "Plasma Field",
+      "file": "plasma_field.json",
+      "type": "mesh",
+      "animated": true,
+      "stops": [
+        {
+          "color": "#e11d48",
+          "position": 0
+        },
+        {
+          "color": "#7c3aed",
+          "position": 50
+        },
+        {
+          "color": "#0f172a",
+          "position": 100
+        }
+      ],
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/animated/mesh/plasma_field.json"
+    },
+    {
+      "name": "Aurora Shimmer",
+      "file": "aurora_shimmer.json",
+      "type": "radial",
+      "animated": true,
+      "stops": [
+        {
+          "color": "#0d1b2a",
+          "position": 0
+        },
+        {
+          "color": "#1b4965",
+          "position": 25
+        },
+        {
+          "color": "#5fa8d3",
+          "position": 50
+        },
+        {
+          "color": "#bee9e8",
+          "position": 75
+        },
+        {
+          "color": "#62b6cb",
+          "position": 100
+        }
+      ],
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/animated/radial/aurora_shimmer.json"
+    },
+    {
+      "name": "Breathing Nebula",
+      "file": "breathing_nebula.json",
+      "type": "radial",
+      "animated": true,
+      "stops": [
+        {
+          "color": "#6b21a8",
+          "position": 0
+        },
+        {
+          "color": "#3730a3",
+          "position": 30
+        },
+        {
+          "color": "#1e1b4b",
+          "position": 60
+        },
+        {
+          "color": "#0a0a1a",
+          "position": 100
+        }
+      ],
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/animated/radial/breathing_nebula.json"
+    },
+    {
+      "name": "Cosmic Ripple",
+      "file": "cosmic_ripple.json",
+      "type": "radial",
+      "animated": true,
+      "stops": [
+        {
+          "color": "#0ea5e9",
+          "position": 0
+        },
+        {
+          "color": "#0369a1",
+          "position": 25
+        },
+        {
+          "color": "#1e1b4b",
+          "position": 55
+        },
+        {
+          "color": "#020617",
+          "position": 100
+        }
+      ],
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/animated/radial/cosmic_ripple.json"
+    },
+    {
+      "name": "Arctic Frost",
+      "file": "arctic_frost.json",
+      "type": "linear",
+      "animated": false,
+      "stops": [
+        {
+          "color": "#0a1628",
+          "position": 0
+        },
+        {
+          "color": "#1a3a5c",
+          "position": 35
+        },
+        {
+          "color": "#2e6b8a",
+          "position": 65
+        },
+        {
+          "color": "#0d1f33",
+          "position": 100
+        }
+      ],
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/still/linear/arctic_frost.json"
+    },
+    {
+      "name": "Ember Glow",
+      "file": "ember_glow.json",
+      "type": "linear",
+      "animated": false,
+      "stops": [
+        {
+          "color": "#1a0a00",
+          "position": 0
+        },
+        {
+          "color": "#3d1503",
+          "position": 30
+        },
+        {
+          "color": "#8b2500",
+          "position": 60
+        },
+        {
+          "color": "#2a0e00",
+          "position": 100
+        }
+      ],
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/still/linear/ember_glow.json"
+    },
+    {
+      "name": "Midnight Indigo",
+      "file": "midnight_indigo.json",
+      "type": "linear",
+      "animated": false,
+      "stops": [
+        {
+          "color": "#0a0a2e",
+          "position": 0
+        },
+        {
+          "color": "#1a1a4e",
+          "position": 33
+        },
+        {
+          "color": "#0d1b3e",
+          "position": 66
+        },
+        {
+          "color": "#0a0a2e",
+          "position": 100
+        }
+      ],
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/still/linear/midnight_indigo.json"
+    },
+    {
+      "name": "Twilight Garden",
+      "file": "twilight_garden.json",
+      "type": "mesh",
+      "animated": false,
+      "stops": [
+        {
+          "color": "#2d1b4e",
+          "position": 0
+        },
+        {
+          "color": "#1a3a4a",
+          "position": 50
+        },
+        {
+          "color": "#0f1a2e",
+          "position": 100
+        }
+      ],
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/still/mesh/twilight_garden.json"
+    },
+    {
+      "name": "Deep Ocean",
+      "file": "deep_ocean.json",
+      "type": "radial",
+      "animated": false,
+      "stops": [
+        {
+          "color": "#1e4d6e",
+          "position": 0
+        },
+        {
+          "color": "#0e2a3f",
+          "position": 40
+        },
+        {
+          "color": "#071520",
+          "position": 75
+        },
+        {
+          "color": "#030a0f",
+          "position": 100
+        }
+      ],
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/still/radial/deep_ocean.json"
+    },
+    {
+      "name": "Solar Flare",
+      "file": "solar_flare.json",
+      "type": "radial",
+      "animated": false,
+      "stops": [
+        {
+          "color": "#ffb347",
+          "position": 0
+        },
+        {
+          "color": "#c2441e",
+          "position": 35
+        },
+        {
+          "color": "#5c1a0a",
+          "position": 65
+        },
+        {
+          "color": "#0f0503",
+          "position": 100
+        }
+      ],
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/still/radial/solar_flare.json"
+    }
+  ],
+  "bundles": [
+    {
+      "name": "All Canvas FX",
+      "file": "canvas-fx-all.json",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/canvas-fx-all.json"
+    },
+    {
+      "name": "All CSS Presets",
+      "file": "css-presets-all.json",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/css-presets-all.json"
+    },
+    {
+      "name": "Everything",
+      "file": "everything.json",
+      "description": "Combined bundle — all preset types",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/everything.json"
+    },
+    {
+      "name": "All Gradients",
+      "file": "gradients-all.json",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/gradients-all.json"
+    },
+    {
+      "name": "Animated Gradients",
+      "file": "gradients-animated.json",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/gradients-animated.json"
+    },
+    {
+      "name": "Still Gradients",
+      "file": "gradients-still.json",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/gradients-still.json"
+    },
+    {
+      "name": "All Themes",
+      "file": "themes-all.json",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/themes-all.json"
+    }
+  ]
+}

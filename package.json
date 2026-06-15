@@ -1,0 +1,20 @@
+{
+  "name": "theme-designer-pro-presets",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Community preset gallery for Open WebUI Theme Designer Pro",
+  "license": "MIT",
+  "scripts": {
+    "test": "node scripts/validate.js",
+    "validate": "node scripts/validate.js",
+    "build": "node scripts/build-bundles.js",
+    "build:manifest": "node scripts/build-manifest.js",
+    "build:catalog": "node scripts/build-catalog.js",
+    "build:badges": "node scripts/update-badges.js",
+    "build:all": "npm run build && npm run build:manifest && npm run build:badges && npm run build:catalog"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Everything Bundle",
+  "description": "Combined import bundle containing all preset types for Theme Designer Pro — Canvas FX, CSS, gradients, and themes in a single file",
+  "type": "object",
+  "properties": {
+    "canvas_presets": {
+      "type": "array",
+      "description": "Canvas FX animation presets",
+      "items": {
+        "type": "object",
+        "required": ["name", "script"],
+        "properties": {
+          "name": { "type": "string" },
+          "script": { "type": "string" }
+        }
+      }
+    },
+    "isCanvasBackup": {
+      "type": "boolean",
+      "const": true,
+      "description": "Enables Canvas FX import routing"
+    },
+    "css_presets": {
+      "type": "array",
+      "description": "CSS snippet presets",
+      "items": {
+        "type": "object",
+        "required": ["name", "code"],
+        "properties": {
+          "name": { "type": "string" },
+          "code": { "type": "string" }
+        }
+      }
+    },
+    "isCssBackup": {
+      "type": "boolean",
+      "const": true,
+      "description": "Enables CSS preset import routing"
+    },
+    "gradient_presets": {
+      "type": "array",
+      "description": "Gradient presets",
+      "items": { "$ref": "gradient-preset.schema.json" }
+    },
+    "isGradientBackup": {
+      "type": "boolean",
+      "const": true,
+      "description": "Enables gradient import routing"
+    },
+    "themes": {
+      "type": "array",
+      "description": "Theme presets",
+      "items": { "$ref": "theme.schema.json" }
+    },
+    "isLibraryBackup": {
+      "type": "boolean",
+      "const": true,
+      "description": "Enables theme library import routing"
+    },
+    "version": {
+      "type": "string",
+      "description": "Schema version identifier"
+    }
+  }
+}

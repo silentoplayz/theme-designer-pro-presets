@@ -1,0 +1,28 @@
+/* Green-line grid */ body {
+	background-image: linear-gradient(rgba(26, 255, 26, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(26, 255, 26, 0.05) 1px, transparent 1px) !important;
+	background-size: 20px 20px !important;
+	background-position: center top !important;
+	font-family: 'JetBrains Mono', 'Monaco', monospace !important;
+}
+/* Phosphor borders */ * {
+	border-color: rgba(26, 255, 26, 0.25) !important;
+}
+input, textarea, .prose {
+	background-color: rgba(10, 26, 10, 0.85) !important;
+	border: 1px solid rgba(26, 255, 26, 0.35) !important;
+}
+/* Green accent buttons */ button.bg-blue-500, button.bg-blue-600 {
+	background-color: #1aff1a !important;
+	border: 1px solid #eaffea !important;
+	color: #020402 !important;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	font-weight: bold;
+}
+/* Scrollbar */ ::-webkit-scrollbar-thumb {
+	background: #1aff1a !important;
+	border-radius: 0;
+}
+::-webkit-scrollbar-track {
+	background: #0a1a0a;
+}

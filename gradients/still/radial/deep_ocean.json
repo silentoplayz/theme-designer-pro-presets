@@ -1,0 +1,18 @@
+{
+  "name": "Deep Ocean",
+  "type": "radial",
+  "stops": [
+    { "color": "#1e4d6e", "position": 0 },
+    { "color": "#0e2a3f", "position": 40 },
+    { "color": "#071520", "position": 75 },
+    { "color": "#030a0f", "position": 100 }
+  ],
+  "angle": 0,
+  "intensity": 100,
+  "animation": false,
+  "speed": 8,
+  "radialPosX": 35,
+  "radialPosY": 30,
+  "radialShape": "ellipse",
+  "radialSize": "farthest-corner"
+}

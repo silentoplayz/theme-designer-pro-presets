@@ -1,0 +1,18 @@
+{
+  "name": "Cosmic Ripple",
+  "type": "radial",
+  "stops": [
+    { "color": "#0ea5e9", "position": 0 },
+    { "color": "#0369a1", "position": 25 },
+    { "color": "#1e1b4b", "position": 55 },
+    { "color": "#020617", "position": 100 }
+  ],
+  "angle": 0,
+  "intensity": 85,
+  "animation": true,
+  "speed": 5,
+  "radialPosX": 65,
+  "radialPosY": 35,
+  "radialShape": "ellipse",
+  "radialSize": "farthest-corner"
+}

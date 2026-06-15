@@ -1,0 +1,67 @@
+/* --- CYBERPUNK BASE --- */
+:root {
+  --cyber-pink: #ff00ff;
+  --cyber-blue: #00ffff;
+  --cyber-green: #00ff00;
+}
+
+/* --- KEYFRAMES --- */
+@keyframes cyber-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes cyber-scan {
+  0% { top: -10%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 110%; opacity: 0; }
+}
+
+@keyframes glitch-text {
+  0% { text-shadow: 1px 0 var(--cyber-pink), -1px 0 var(--cyber-blue); }
+  50% { text-shadow: -1px 0 var(--cyber-pink), 1px 0 var(--cyber-blue); }
+  100% { text-shadow: 1px 0 var(--cyber-pink), -1px 0 var(--cyber-blue); }
+}
+
+/* --- ANIMATED ELEMENTS --- */
+#sidebar {
+  position: relative;
+  overflow: hidden;
+  border-right: 1px solid rgba(255, 0, 255, 0.3) !important;
+}
+
+#sidebar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(0, 255, 255, 0.6);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 1);
+  animation: cyber-scan 3.5s linear infinite;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.user-message {
+  background: linear-gradient(90deg, rgba(255, 0, 255, 0.05), rgba(0, 255, 255, 0.05), rgba(255, 0, 255, 0.05)) !important;
+  background-size: 200% 200% !important;
+  animation: cyber-shift 4s ease infinite !important;
+  border: 1px solid rgba(0, 255, 255, 0.3) !important;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.1) !important;
+}
+
+h1 {
+  animation: glitch-text 3s infinite !important;
+}
+
+/* Add a breathing glow to the send button */
+button[type="submit"] {
+  animation: cyber-shift 2s infinite !important;
+  background: linear-gradient(90deg, var(--cyber-pink), var(--cyber-blue), var(--cyber-pink)) !important;
+  background-size: 200% 200% !important;
+  border: none !important;
+  color: white !important;
+}

@@ -1,0 +1,19 @@
+{
+  "name": "Sunset Tide",
+  "type": "linear",
+  "stops": [
+    { "color": "#1a0a1e", "position": 0 },
+    { "color": "#4a1942", "position": 25 },
+    { "color": "#c0392b", "position": 45 },
+    { "color": "#e67e22", "position": 65 },
+    { "color": "#1a0a1e", "position": 100 }
+  ],
+  "angle": 180,
+  "intensity": 80,
+  "animation": true,
+  "speed": 4,
+  "radialPosX": 50,
+  "radialPosY": 50,
+  "radialShape": "ellipse",
+  "radialSize": "farthest-corner"
+}
