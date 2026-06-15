@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Theme Update Manifest",
+  "description": "Centralized manifest listing all themes with version information for bulk update checking.",
+  "type": "object",
+  "required": ["manifestVersion", "generated", "manifestUrl", "themes"],
+  "properties": {
+    "manifestVersion": {
+      "type": "string",
+      "description": "Schema version of the manifest format.",
+      "const": "1.0"
+    },
+    "generated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of when this manifest was generated."
+    },
+    "manifestUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "Self-referencing URL where this manifest is hosted."
+    },
+    "themes": {
+      "type": "object",
+      "description": "Map of theme filename stems to their metadata.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["name", "version", "updateUrl", "file"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name of the theme."
+          },
+          "version": {
+            "type": "string",
+            "description": "Semantic version string (e.g. '1.0.0').",
+            "pattern": "^\\d+\\.\\d+(\\.\\d+)?$"
+          },
+          "author": {
+            "type": "string",
+            "description": "Theme author name."
+          },
+          "description": {
+            "type": "string",
+            "description": "Brief description of the theme."
+          },
+          "updateUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "GitHub URL to the theme JSON file (auto-converted to raw by the tool)."
+          },
+          "file": {
+            "type": "string",
+            "description": "Relative path to the theme file within the repository."
+          }
+        }
+      }
+    }
+  }
+}
