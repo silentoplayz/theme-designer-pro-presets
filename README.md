@@ -2,7 +2,7 @@
 
 A curated collection of themes, Canvas FX animations, CSS presets, and gradient packs for [Theme Designer Pro](https://openwebui.com/t/silentoplayz/theme_designer_pro) — the native theming tool for [Open WebUI](https://github.com/open-webui/open-webui).
 
-> **Import any preset** directly into Theme Designer Pro using the built-in Import button or drag-and-drop.
+> **Import any preset** directly into Theme Designer Pro using the built-in Import button, URL import, or drag-and-drop.
 
 ---
 
@@ -11,20 +11,20 @@ A curated collection of themes, Canvas FX animations, CSS presets, and gradient 
 ```
 theme-designer-pro-presets/
 ├── canvas-fx/               # Canvas FX animation scripts (.js)
+├── css-presets/              # CSS-only styling presets (.css)
 ├── themes/                  # Complete theme presets (.json)
-├── css-presets/              # CSS-only styling presets
-├── gradients/                # Gradient preset packs
+├── gradients/               # Gradient preset packs (.json)
 │   ├── still/               #   Non-animated gradients
-│   │   ├── linear/          #     Linear gradients
-│   │   ├── radial/          #     Radial gradients
-│   │   └── mesh/            #     Mesh gradients
+│   │   ├── linear/
+│   │   ├── radial/
+│   │   └── mesh/
 │   └── animated/            #   Animated/transitioning gradients
-│       ├── linear/          #     Animated linear gradients
-│       ├── radial/          #     Animated radial gradients
-│       └── mesh/            #     Animated mesh gradients
-├── bundles/                  # Combined import-ready JSON files
-├── schemas/                  # JSON schemas for validation
-├── scripts/                  # Build tooling
+│       ├── linear/
+│       ├── radial/
+│       └── mesh/
+├── bundles/                 # Combined import-ready JSON files
+├── schemas/                 # JSON schemas for validation
+├── scripts/                 # Build and extraction tooling
 ├── CONTRIBUTING.md
 ├── LICENSE
 └── README.md
@@ -34,57 +34,69 @@ theme-designer-pro-presets/
 
 ## 🚀 Quick Start
 
-### Import a Bundle (All-in-One)
+### Import Everything at Once
 
-1. Download a JSON bundle from [`bundles/`](bundles/)
-2. Open **Theme Designer Pro** in Open WebUI
-3. Click **Import** → select the `.json` file
-4. All presets from the bundle are loaded instantly
+1. Open **Theme Designer Pro** in Open WebUI
+2. Go to any Import modal → paste this URL:
+   ```
+   https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/bundles/everything.json
+   ```
+3. Click **Load URL** — all animations, CSS, themes, and gradients are imported in one shot
+
+### Import a Category Bundle
+
+Download or URL-import any bundle from [`bundles/`](bundles/):
+
+| Bundle | Description |
+|---|---|
+| **`everything.json`** | **All presets in one import** |
+| `canvas-fx-all.json` | All Canvas FX scripts |
+| `css-presets-all.json` | All CSS presets |
+| `themes-all.json` | All themes |
+| `gradients-all.json` | All gradient presets |
 
 ### Import Individual Presets
 
-- **Canvas FX**: Open the **Canvas FX** tab → Import → select any `.js` file from `canvas-fx/`
-- **CSS**: Open the **CSS** tab → Import → select any `.json` from `css-presets/`
-- **Themes**: Use the **Theme Import** button → select a `.json` from `themes/`
+- **Canvas FX**: Canvas FX tab → Import → select a `.js` file from [`canvas-fx/`](canvas-fx/)
+- **CSS**: Style Overrides tab → Import → select a `.css` file from [`css-presets/`](css-presets/)
+- **Themes**: Theme Library → Import → select a `.json` from [`themes/`](themes/)
+- **Gradients**: Gradient tab → Import → select a `.json` from [`gradients/`](gradients/)
 
 ### Drag & Drop
 
-Drag any `.js` or `.json` file directly onto the Theme Designer Pro interface.
+Drag any `.js`, `.css`, or `.json` file directly onto the Theme Designer Pro interface.
+
+### URL Import
+
+Paste any GitHub file URL into an import modal's URL field — Theme Designer Pro automatically converts `github.com` blob URLs to raw content URLs.
 
 ---
 
 ## 📁 Preset Types
 
-### 🎨 Canvas FX (`canvas-fx/`)
+### 🎨 Canvas FX ([`canvas-fx/`](canvas-fx/))
 
-JavaScript animation scripts that run behind the Open WebUI interface via OffscreenCanvas in a Web Worker. Each script is a standalone `.js` file.
+JavaScript animation scripts that run behind the Open WebUI interface via OffscreenCanvas in a Web Worker. Each script is a standalone `.js` file. Many include a `CONFIG` block with tunable properties.
 
-Scripts marked with ⚙️ include a `CONFIG` block at the top with tunable properties — colors, speeds, particle counts, physics constants, and more. Edit the values directly in the Canvas FX editor and click Apply.
+### 🎭 Themes ([`themes/`](themes/))
 
-### 🎭 Themes (`themes/`)
+Complete theme configurations including OKLCH color tokens, CSS overrides, Canvas FX selection, and per-mode settings (dark, light, OLED, her). Exported as `.json` files.
 
-Complete theme configurations including CSS overrides, Canvas FX selection, color tokens, and layout settings. A single theme file can cover multiple or all theme modes (dark, light, etc.). Exported as `.json` files.
+### 🖌️ CSS Presets ([`css-presets/`](css-presets/))
 
-### 🖌️ CSS Presets (`css-presets/`)
+CSS-only styling overrides — fonts, colors, spacing, component styles, and visual effects. Stored as raw `.css` files.
 
-CSS-only styling overrides — fonts, colors, spacing, component styles. No Canvas FX included.
+### 🌈 Gradients ([`gradients/`](gradients/))
 
-### 🌈 Gradients (`gradients/`)
+Gradient presets for backgrounds, panels, and UI elements. Organized by motion (`still`/`animated`) and type (`linear`/`radial`/`mesh`).
 
-Gradient preset packs for backgrounds, panels, and UI elements. Organized by motion and type:
+### 📦 Bundles ([`bundles/`](bundles/))
 
-| Path | Description |
-|---|---|
-| `gradients/still/linear/` | Static linear gradients |
-| `gradients/still/radial/` | Static radial gradients |
-| `gradients/still/mesh/` | Static mesh gradients |
-| `gradients/animated/linear/` | Animated linear gradients (shifting, pulsing) |
-| `gradients/animated/radial/` | Animated radial gradients |
-| `gradients/animated/mesh/` | Animated mesh gradients |
+Combined JSON files for one-click bulk import. See [`bundles/README.md`](bundles/README.md).
 
-### 📦 Bundles (`bundles/`)
+### 📐 Schemas ([`schemas/`](schemas/))
 
-Combined JSON files containing multiple presets for one-click bulk import. See [`bundles/README.md`](bundles/README.md) for details.
+JSON Schema definitions documenting the data formats for themes, Canvas FX, CSS, and gradient presets.
 
 ---
 
