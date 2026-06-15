@@ -1,0 +1,87 @@
+[
+  {
+    "name": "Gradient 2:39:33 AM",
+    "type": "mesh",
+    "stops": [
+      {
+        "color": "#8c0ebe",
+        "position": 0
+      },
+      {
+        "color": "#4614db",
+        "position": 50
+      },
+      {
+        "color": "#170a38",
+        "position": 100
+      }
+    ],
+    "angle": 252,
+    "intensity": 85,
+    "animation": true,
+    "speed": 8,
+    "radialPosX": 26,
+    "radialPosY": 23,
+    "radialShape": "circle",
+    "radialSize": "farthest-side",
+    "meshPoints": [
+      {
+        "color": "#cbe82c",
+        "x": 15,
+        "y": 15,
+        "spread": 53
+      },
+      {
+        "color": "#40f2a5",
+        "x": 85,
+        "y": 15,
+        "spread": 56
+      },
+      {
+        "color": "#c5b80d",
+        "x": 15,
+        "y": 85,
+        "spread": 40
+      },
+      {
+        "color": "#81f33f",
+        "x": 85,
+        "y": 85,
+        "spread": 57
+      }
+    ],
+    "meshBgColor": "#006ee0",
+    "_category": "animated/mesh"
+  },
+  {
+    "name": "Gradient 5:43:42 PM",
+    "type": "linear",
+    "stops": [
+      {
+        "color": "#0a0a2e",
+        "position": 0
+      },
+      {
+        "color": "#1a1a4e",
+        "position": 33
+      },
+      {
+        "color": "#0d1b3e",
+        "position": 66
+      },
+      {
+        "color": "#0a0a2e",
+        "position": 100
+      }
+    ],
+    "angle": 135,
+    "intensity": 100,
+    "animation": false,
+    "speed": 8,
+    "radialPosX": 50,
+    "radialPosY": 50,
+    "radialShape": "ellipse",
+    "radialSize": "farthest-corner",
+    "_category": "still/linear"
+  }
+]

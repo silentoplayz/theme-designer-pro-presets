@@ -1,0 +1,33 @@
+[
+  {
+    "name": "Gradient 5:43:42 PM",
+    "type": "linear",
+    "stops": [
+      {
+        "color": "#0a0a2e",
+        "position": 0
+      },
+      {
+        "color": "#1a1a4e",
+        "position": 33
+      },
+      {
+        "color": "#0d1b3e",
+        "position": 66
+      },
+      {
+        "color": "#0a0a2e",
+        "position": 100
+      }
+    ],
+    "angle": 135,
+    "intensity": 100,
+    "animation": false,
+    "speed": 8,
+    "radialPosX": 50,
+    "radialPosY": 50,
+    "radialShape": "ellipse",
+    "radialSize": "farthest-corner",
+    "_category": "still/linear"
+  }
+]

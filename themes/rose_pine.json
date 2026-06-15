@@ -47,5 +47,6 @@
     "autoScope": true,
     "canvasEnabled": false,
     "canvasScript": ""
-  }
+  },
+  "version": "1.4.6"
 }
