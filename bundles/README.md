@@ -4,14 +4,14 @@ Pre-built import-ready JSON files generated from the individual presets in this 
 
 ## Available Bundles
 
-| Bundle | Contents | Description |
-|---|---|---|
-| `canvas-fx-all.json` | 77 animations | All Canvas FX scripts combined |
-| `css-presets-all.json` | 14 presets | All CSS presets combined |
-| `themes-all.json` | 31 themes | All themes combined |
-| `gradients-all.json` | 2 presets | All gradient presets combined |
-| `gradients-still.json` | 1 preset | Static (non-animated) gradients only |
-| `gradients-animated.json` | 1 preset | Animated gradients only |
+| Bundle | Description |
+|---|---|
+| `canvas-fx-all.json` | All Canvas FX scripts combined |
+| `css-presets-all.json` | All CSS presets combined |
+| `themes-all.json` | All themes combined |
+| `gradients-all.json` | All gradient presets combined |
+| `gradients-still.json` | Static (non-animated) gradients only |
+| `gradients-animated.json` | Animated gradients only |
 
 ## Usage
 
