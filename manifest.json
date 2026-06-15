@@ -1,6 +1,6 @@
 {
   "manifestVersion": "1.0",
-  "generated": "2026-06-15T21:16:29.689Z",
+  "generated": "2026-06-15T21:24:52.038Z",
   "manifestUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/manifest.json",
   "themes": {
     "aether_nebula_flow": {
@@ -100,18 +100,6 @@
       "description": "A curated Cyberpunk theme",
       "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/neon_overdrive.json",
       "file": "themes/neon_overdrive.json"
-    },
-    "persona": {
-      "name": "Persona",
-      "version": "1.0.0",
-      "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/persona.json",
-      "file": "themes/persona.json"
-    },
-    "persona_inspired_admiral_falco": {
-      "name": "Persona Inspired (Admiral_Falco)",
-      "version": "1.0.0",
-      "updateUrl": "https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/themes/persona_inspired_admiral_falco.json",
-      "file": "themes/persona_inspired_admiral_falco.json"
     },
     "pink_hues": {
       "name": "Pink Hues",
