@@ -154,10 +154,90 @@ function buildThemesBundle() {
   console.log(`  ✓ themes-all.json — ${presets.length} themes (${(fs.statSync(outPath).size / 1024).toFixed(0)} KB)`);
 }
 
+// ── Everything Bundle ──
+function buildEverythingBundle() {
+  const bundle = {
+    _meta: { generated: new Date().toISOString(), description: 'Combined bundle — all preset types' },
+    version: '1.0.0',
+  };
+  let parts = [];
+
+  // Canvas FX
+  const fxDir = path.join(ROOT, 'canvas-fx');
+  if (fs.existsSync(fxDir)) {
+    const files = fs.readdirSync(fxDir).filter(f => f.endsWith('.js')).sort();
+    if (files.length > 0) {
+      bundle.canvas_presets = files.map(f => ({
+        name: f.replace('.js', ''),
+        script: fs.readFileSync(path.join(fxDir, f), 'utf8'),
+      }));
+      bundle.isCanvasBackup = true;
+      parts.push(`${files.length} animations`);
+    }
+  }
+
+  // CSS Presets
+  const cssDir = path.join(ROOT, 'css-presets');
+  if (fs.existsSync(cssDir)) {
+    const files = fs.readdirSync(cssDir).filter(f => f.endsWith('.css')).sort();
+    if (files.length > 0) {
+      bundle.css_presets = files.map(f => ({
+        name: f.replace('.css', '').split('_').map(w => w[0].toUpperCase() + w.slice(1)).join(' '),
+        code: fs.readFileSync(path.join(cssDir, f), 'utf8'),
+      }));
+      bundle.isCssBackup = true;
+      parts.push(`${files.length} CSS`);
+    }
+  }
+
+  // Gradients
+  const gradDir = path.join(ROOT, 'gradients');
+  if (fs.existsSync(gradDir)) {
+    const gradFiles = [];
+    const walk = (dir) => {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        if (entry.isDirectory()) walk(path.join(dir, entry.name));
+        else if (entry.name.endsWith('.json')) {
+          gradFiles.push(JSON.parse(fs.readFileSync(path.join(dir, entry.name), 'utf8')));
+        }
+      }
+    };
+    walk(gradDir);
+    if (gradFiles.length > 0) {
+      bundle.gradient_presets = gradFiles;
+      bundle.isGradientBackup = true;
+      parts.push(`${gradFiles.length} gradients`);
+    }
+  }
+
+  // Themes
+  const themesDir = path.join(ROOT, 'themes');
+  if (fs.existsSync(themesDir)) {
+    const files = fs.readdirSync(themesDir).filter(f => f.endsWith('.json')).sort();
+    if (files.length > 0) {
+      bundle.themes = files.map(f =>
+        JSON.parse(fs.readFileSync(path.join(themesDir, f), 'utf8'))
+      );
+      bundle.isLibraryBackup = true;
+      parts.push(`${files.length} themes`);
+    }
+  }
+
+  if (parts.length === 0) {
+    console.log('  ⏭  No presets found for everything bundle');
+    return;
+  }
+
+  const outPath = path.join(BUNDLES_DIR, 'everything.json');
+  fs.writeFileSync(outPath, JSON.stringify(bundle, null, 2));
+  console.log(`  ✓ everything.json — ${parts.join(', ')} (${(fs.statSync(outPath).size / 1024).toFixed(0)} KB)`);
+}
+
 // ── Run ──
 console.log('Building bundles...\n');
 buildCanvasFxBundle();
 buildCssBundle();
 buildGradientBundle();
 buildThemesBundle();
+buildEverythingBundle();
 console.log('\nDone!');
