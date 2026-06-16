@@ -49,6 +49,52 @@
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/aether_nebula_flow.json"
     },
     {
+      "name": "Amber",
+      "file": "amber.json",
+      "description": "Warm golden-olive palette reminiscent of polished amber, with a subtle gradient glow.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 75,
+          "c": 20,
+          "l": 20,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "light": {
+          "h": 75,
+          "c": 20,
+          "l": 20,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "oled": {
+          "h": 75,
+          "c": 20,
+          "l": 0,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "her": {
+          "h": 75,
+          "c": 20,
+          "l": 20,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/amber.json"
+    },
+    {
       "name": "Amber Command: 1979",
       "file": "amber_command_1979.json",
       "description": "Vintage CRT terminal aesthetic with amber monochrome tones, scan-line flicker effects, and Geometric Mainframe Canvas FX.",
@@ -93,6 +139,52 @@
         }
       },
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/amber_command_1979.json"
+    },
+    {
+      "name": "Amethyst",
+      "file": "amethyst.json",
+      "description": "Vibrant purple tones inspired by amethyst crystals, with a deep violet gradient.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 290,
+          "c": 25,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "light": {
+          "h": 290,
+          "c": 25,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "oled": {
+          "h": 290,
+          "c": 25,
+          "l": 0,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "her": {
+          "h": 290,
+          "c": 25,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/amethyst.json"
     },
     {
       "name": "Apollo // Analogue Futurism",
@@ -325,6 +417,52 @@
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/blue_lightning.json"
     },
     {
+      "name": "Emerald",
+      "file": "emerald.json",
+      "description": "Rich green hues evoking a dense, jewel-toned forest with matching gradient.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 155,
+          "c": 15,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "light": {
+          "h": 155,
+          "c": 15,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "oled": {
+          "h": 155,
+          "c": 15,
+          "l": 0,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "her": {
+          "h": 155,
+          "c": 15,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/emerald.json"
+    },
+    {
       "name": "ENTROPY // DATA-STORM",
       "file": "entropy_data_storm.json",
       "description": "Industrial containment UI with corroded amber warning tones, Bit-Stream Corruption Canvas FX, and JetBrains Mono typography.",
@@ -555,6 +693,52 @@
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/matrix_rain.json"
     },
     {
+      "name": "Midnight",
+      "file": "midnight.json",
+      "description": "Deep indigo tones with a dark linear gradient backdrop. A refined nocturnal palette.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 250,
+          "c": 20,
+          "l": 15,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "light": {
+          "h": 250,
+          "c": 20,
+          "l": 15,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "oled": {
+          "h": 250,
+          "c": 20,
+          "l": 0,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "her": {
+          "h": 250,
+          "c": 20,
+          "l": 15,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/midnight.json"
+    },
+    {
       "name": "NEO-TACTICAL // ARCHIVE 01",
       "file": "neo_tactical_archive_01.json",
       "description": "Military console interface with Lidar Topographical Scan Canvas FX, monospace typography, and stealth blue-gray tones.",
@@ -691,6 +875,52 @@
         }
       },
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neon_overdrive.json"
+    },
+    {
+      "name": "Obsidian",
+      "file": "obsidian.json",
+      "description": "Pure achromatic darkness with a subtle charcoal-to-navy gradient.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 0,
+          "c": 0,
+          "l": 10,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "light": {
+          "h": 0,
+          "c": 0,
+          "l": 10,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "oled": {
+          "h": 0,
+          "c": 0,
+          "l": 0,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "her": {
+          "h": 0,
+          "c": 0,
+          "l": 10,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/obsidian.json"
     },
     {
       "name": "Pink Hues",
@@ -877,6 +1107,98 @@
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/rose_pine.json"
     },
     {
+      "name": "Ruby",
+      "file": "ruby.json",
+      "description": "Deep crimson and rose tones with a rich red gradient backdrop.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 350,
+          "c": 25,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "light": {
+          "h": 350,
+          "c": 25,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "oled": {
+          "h": 350,
+          "c": 25,
+          "l": 0,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "her": {
+          "h": 350,
+          "c": 25,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/ruby.json"
+    },
+    {
+      "name": "Sapphire",
+      "file": "sapphire.json",
+      "description": "Cool blue tones reminiscent of a deep sapphire, with a matching ocean-depth gradient.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 210,
+          "c": 25,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "light": {
+          "h": 210,
+          "c": 25,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "oled": {
+          "h": 210,
+          "c": 25,
+          "l": 0,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "her": {
+          "h": 210,
+          "c": 25,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/sapphire.json"
+    },
+    {
       "name": "Solar Flare",
       "file": "solar_flare.json",
       "description": "Luxury golden UI with warm amber accents, Solar Wind Embers Canvas FX, and rich copper-toned glassmorphism.",
@@ -1059,6 +1381,52 @@
         }
       },
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/the_cyanotype.json"
+    },
+    {
+      "name": "Topaz",
+      "file": "topaz.json",
+      "description": "Warm bronze and sienna tones with an earthy gradient backdrop.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "modes": {
+        "dark": {
+          "h": 40,
+          "c": 20,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "light": {
+          "h": 40,
+          "c": 20,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "oled": {
+          "h": 40,
+          "c": 20,
+          "l": 0,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        },
+        "her": {
+          "h": 40,
+          "c": 20,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": false
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/topaz.json"
     },
     {
       "name": "Toxic Nebula // Smog-Core",
