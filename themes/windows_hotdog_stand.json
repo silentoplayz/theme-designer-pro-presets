@@ -35,8 +35,8 @@
       "--color-gray-900": true,
       "--color-gray-950": true
     },
-    "canvasEnabled": false,
-    "canvasScript": ""
+    "canvasEnabled": true,
+    "canvasScript": "let canvas, ctx, W, H;\nconst drops = [];\nconst MAX = 100;\n\nfunction createDrop() {\n  return {\n    x: Math.random() * W,\n    y: Math.random() * -H,\n    w: 2 + (Math.random() * 2 | 0) * 2,\n    h: 4 + (Math.random() * 4 | 0) * 2,\n    speed: 1 + Math.random() * 3,\n    color: [\"#ffff00\", \"#ff0000\", \"#ffffff\", \"#ff4400\"][Math.random() * 4 | 0],\n    alpha: 0.3 + Math.random() * 0.4\n  };\n}\n\nfunction init(c, w, h) {\n  canvas = c; ctx = c.getContext('2d'); W = w; H = h;\n  drops.length = 0;\n  for (let i = 0; i < MAX; i++) {\n    const d = createDrop();\n    d.y = Math.random() * H;\n    drops.push(d);\n  }\n}\n\nfunction draw() {\n  ctx.fillStyle = 'rgba(100, 0, 0, 0.06)';\n  ctx.fillRect(0, 0, W, H);\n  for (let i = 0; i < drops.length; i++) {\n    const d = drops[i];\n    d.y += d.speed;\n    if (d.y > H) {\n      drops[i] = createDrop();\n      continue;\n    }\n    ctx.fillStyle = d.color;\n    ctx.globalAlpha = d.alpha;\n    ctx.fillRect(d.x | 0, d.y | 0, d.w, d.h);\n    ctx.globalAlpha = 1;\n  }\n  requestAnimationFrame(draw);\n}\n\nsetInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);\n\nself.onmessage = function(e) {\n  const { type, canvas: c, width, height } = e.data;\n  switch (type) {\n    case 'init': init(c, width, height); draw(); break;\n    case 'resize': W = width; H = height; if (canvas) { canvas.width = W; canvas.height = H; } break;\n    case 'mousemove': break;\n  }\n};"
   },
   "oled": {
     "h": 354,
@@ -73,8 +73,8 @@
       "--color-gray-900": true,
       "--color-gray-950": true
     },
-    "canvasEnabled": false,
-    "canvasScript": ""
+    "canvasEnabled": true,
+    "canvasScript": "let canvas, ctx, W, H;\nconst drops = [];\nconst MAX = 100;\n\nfunction createDrop() {\n  return {\n    x: Math.random() * W,\n    y: Math.random() * -H,\n    w: 2 + (Math.random() * 2 | 0) * 2,\n    h: 4 + (Math.random() * 4 | 0) * 2,\n    speed: 1 + Math.random() * 3,\n    color: [\"#ffff00\", \"#ff0000\", \"#ffffff\", \"#ff4400\"][Math.random() * 4 | 0],\n    alpha: 0.35 + Math.random() * 0.4\n  };\n}\n\nfunction init(c, w, h) {\n  canvas = c; ctx = c.getContext('2d'); W = w; H = h;\n  drops.length = 0;\n  for (let i = 0; i < MAX; i++) {\n    const d = createDrop();\n    d.y = Math.random() * H;\n    drops.push(d);\n  }\n}\n\nfunction draw() {\n  ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';\n  ctx.fillRect(0, 0, W, H);\n  for (let i = 0; i < drops.length; i++) {\n    const d = drops[i];\n    d.y += d.speed;\n    if (d.y > H) {\n      drops[i] = createDrop();\n      continue;\n    }\n    ctx.fillStyle = d.color;\n    ctx.globalAlpha = d.alpha;\n    ctx.fillRect(d.x | 0, d.y | 0, d.w, d.h);\n    ctx.globalAlpha = 1;\n  }\n  requestAnimationFrame(draw);\n}\n\nsetInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);\n\nself.onmessage = function(e) {\n  const { type, canvas: c, width, height } = e.data;\n  switch (type) {\n    case 'init': init(c, width, height); draw(); break;\n    case 'resize': W = width; H = height; if (canvas) { canvas.width = W; canvas.height = H; } break;\n    case 'mousemove': break;\n  }\n};"
   },
   "light": {
     "h": 250,
@@ -111,8 +111,8 @@
       "--color-gray-900": true,
       "--color-gray-950": true
     },
-    "canvasEnabled": false,
-    "canvasScript": ""
+    "canvasEnabled": true,
+    "canvasScript": "let canvas, ctx, W, H;\nconst drops = [];\nconst MAX = 100;\n\nfunction createDrop() {\n  return {\n    x: Math.random() * W,\n    y: Math.random() * -H,\n    w: 2 + (Math.random() * 2 | 0) * 2,\n    h: 4 + (Math.random() * 4 | 0) * 2,\n    speed: 1 + Math.random() * 3,\n    color: [\"#ff0000\", \"#aa0000\", \"#ffff00\", \"#cc4400\"][Math.random() * 4 | 0],\n    alpha: 0.2 + Math.random() * 0.3\n  };\n}\n\nfunction init(c, w, h) {\n  canvas = c; ctx = c.getContext('2d'); W = w; H = h;\n  drops.length = 0;\n  for (let i = 0; i < MAX; i++) {\n    const d = createDrop();\n    d.y = Math.random() * H;\n    drops.push(d);\n  }\n}\n\nfunction draw() {\n  ctx.fillStyle = 'rgba(255, 255, 200, 0.06)';\n  ctx.fillRect(0, 0, W, H);\n  for (let i = 0; i < drops.length; i++) {\n    const d = drops[i];\n    d.y += d.speed;\n    if (d.y > H) {\n      drops[i] = createDrop();\n      continue;\n    }\n    ctx.fillStyle = d.color;\n    ctx.globalAlpha = d.alpha;\n    ctx.fillRect(d.x | 0, d.y | 0, d.w, d.h);\n    ctx.globalAlpha = 1;\n  }\n  requestAnimationFrame(draw);\n}\n\nsetInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);\n\nself.onmessage = function(e) {\n  const { type, canvas: c, width, height } = e.data;\n  switch (type) {\n    case 'init': init(c, width, height); draw(); break;\n    case 'resize': W = width; H = height; if (canvas) { canvas.width = W; canvas.height = H; } break;\n    case 'mousemove': break;\n  }\n};"
   },
   "her": {
     "h": 250,
@@ -149,13 +149,13 @@
       "--color-gray-900": true,
       "--color-gray-950": true
     },
-    "canvasEnabled": false,
-    "canvasScript": ""
+    "canvasEnabled": true,
+    "canvasScript": "let canvas, ctx, W, H;\nconst drops = [];\nconst MAX = 100;\n\nfunction createDrop() {\n  return {\n    x: Math.random() * W,\n    y: Math.random() * -H,\n    w: 2 + (Math.random() * 2 | 0) * 2,\n    h: 4 + (Math.random() * 4 | 0) * 2,\n    speed: 1 + Math.random() * 3,\n    color: [\"#ff4466\", \"#ffaa00\", \"#ff6688\", \"#ffcc44\"][Math.random() * 4 | 0],\n    alpha: 0.25 + Math.random() * 0.3\n  };\n}\n\nfunction init(c, w, h) {\n  canvas = c; ctx = c.getContext('2d'); W = w; H = h;\n  drops.length = 0;\n  for (let i = 0; i < MAX; i++) {\n    const d = createDrop();\n    d.y = Math.random() * H;\n    drops.push(d);\n  }\n}\n\nfunction draw() {\n  ctx.fillStyle = 'rgba(255, 240, 240, 0.06)';\n  ctx.fillRect(0, 0, W, H);\n  for (let i = 0; i < drops.length; i++) {\n    const d = drops[i];\n    d.y += d.speed;\n    if (d.y > H) {\n      drops[i] = createDrop();\n      continue;\n    }\n    ctx.fillStyle = d.color;\n    ctx.globalAlpha = d.alpha;\n    ctx.fillRect(d.x | 0, d.y | 0, d.w, d.h);\n    ctx.globalAlpha = 1;\n  }\n  requestAnimationFrame(draw);\n}\n\nsetInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);\n\nself.onmessage = function(e) {\n  const { type, canvas: c, width, height } = e.data;\n  switch (type) {\n    case 'init': init(c, width, height); draw(); break;\n    case 'resize': W = width; H = height; if (canvas) { canvas.width = W; canvas.height = H; } break;\n    case 'mousemove': break;\n  }\n};"
   },
   "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/windows_hotdog_stand.json",
   "version": "1.0.0",
   "author": "silentoplayz (G30)",
-  "description": "Faithful recreation of the infamous Windows 3.1 Hot Dog Stand color scheme — bold red and yellow with sharp pixel aesthetics.",
+  "description": "Faithful recreation of the infamous Windows 3.1 Hot Dog Stand color scheme with retro pixel rain Canvas FX.",
   "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
   "targetVersion": "0.9.0"
 }
