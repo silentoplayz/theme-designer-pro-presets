@@ -3,7 +3,7 @@ title: Theme Designer Pro
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.6.4
+version: 1.6.5
 license: MIT
 required_open_webui_version: 0.9.0
 """
@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 import logging
 import os
 
-VERSION = "1.6.4"
+VERSION = "1.6.5"
 
 
 class Tools:
