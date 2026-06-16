@@ -926,6 +926,203 @@ input, select {
   }
 }
 
+/* --- Detail modal (matches TDP modal pattern) --- */
+.detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s var(--ease-out), visibility 0.3s;
+  padding: 24px;
+}
+
+.detail-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.detail-panel {
+  position: relative;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  max-width: 580px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  transform: translateY(30px) scale(0.96);
+  transition: transform 0.4s var(--ease-smooth);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.detail-overlay.open .detail-panel {
+  transform: translateY(0) scale(1);
+}
+
+.detail-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out);
+  z-index: 1;
+}
+
+.detail-close:hover {
+  color: var(--text-main);
+  border-color: var(--text-muted);
+  transform: scale(1.1);
+}
+
+/* Detail inner layout */
+.detail-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  padding-right: 44px;
+  margin-bottom: 4px;
+}
+
+.detail-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.detail-version {
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+}
+
+.detail-author {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.detail-author::before {
+  content: '';
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #93c5fd);
+  flex-shrink: 0;
+}
+
+.detail-description {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.detail-section-label {
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.detail-palette {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.detail-mode-card {
+  background: var(--bg-deep);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-mode-swatch {
+  width: 100%;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.detail-mode-name {
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.detail-mode-values {
+  font-size: 0.62rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  text-align: center;
+  opacity: 0.7;
+}
+
+.detail-mode-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+
+.detail-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.detail-import-url {
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  background: var(--bg-deep);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  word-break: break-all;
+  line-height: 1.5;
+  user-select: all;
+}
+
 /* --- Responsive --- */
 @media (max-width: 768px) {
   .hero {
@@ -1015,6 +1212,15 @@ input, select {
   .card-grid {
     grid-template-columns: 1fr;
     gap: 12px;
+  }
+
+  .detail-overlay {
+    padding: 12px;
+  }
+
+  .detail-panel {
+    padding: 24px;
+    max-height: 90vh;
   }
 }
 

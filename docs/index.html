@@ -127,6 +127,16 @@
     <p>Made with care for the <a href="https://openwebui.com" target="_blank" rel="noopener noreferrer">Open WebUI</a> community</p>
   </footer>
 
+  <!-- Detail modal -->
+  <div id="detail-modal" class="detail-overlay" aria-hidden="true">
+    <div class="detail-panel" role="dialog" aria-modal="true">
+      <button class="detail-close" id="detail-close-btn" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+      <div id="detail-content"></div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div id="toast" class="toast" aria-live="polite"></div>
 

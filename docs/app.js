@@ -1,6 +1,7 @@
 /* ========================================
    Theme Designer Pro — Preset Gallery
-   Application logic: fetch, render, search
+   Application logic: fetch, render, search,
+   detail modal, shareable URL state
    Aligned with TDP visual language
    ======================================== */
 
@@ -32,12 +33,23 @@
     check: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
   };
 
+  const FEATURE_BADGE_MAP = {
+    CSS: 'css',
+    FX: 'fx',
+    Gradient: 'gradient',
+    Overrides: 'overrides',
+  };
+
+  const MODE_ORDER = ['dark', 'light', 'oled', 'her'];
+  const VALID_CATEGORIES = ['themes', 'canvasFx', 'cssPresets', 'gradients', 'bundles'];
+
   // ---- State ----
   let catalog = null;
   let activeCategory = 'themes';
   let searchQuery = '';
   let activeFilter = 'all';
   let activeSort = 'name-asc';
+  let suppressHashUpdate = false;
 
   // ---- DOM refs ----
   const grid = document.getElementById('card-grid');
@@ -48,16 +60,238 @@
   const toolbar = document.getElementById('toolbar');
   const sortSelect = document.getElementById('sort-select');
   const filterChips = document.getElementById('filter-chips');
+  const detailModal = document.getElementById('detail-modal');
+  const detailContent = document.getElementById('detail-content');
+  const detailCloseBtn = document.getElementById('detail-close-btn');
 
-  // ---- Fetch catalog ----
+  // ============================================================
+  //  URL STATE — read/write hash for shareable links
+  //  Format: #category?q=search&filter=value&sort=value
+  // ============================================================
+
+  function readHashState() {
+    const hash = window.location.hash.replace(/^#/, '');
+    if (!hash) return;
+
+    const [cat, queryStr] = hash.split('?');
+
+    if (cat && VALID_CATEGORIES.includes(cat)) {
+      activeCategory = cat;
+    }
+
+    if (queryStr) {
+      const params = new URLSearchParams(queryStr);
+      if (params.has('q')) searchQuery = params.get('q');
+      if (params.has('filter')) activeFilter = params.get('filter');
+      if (params.has('sort')) activeSort = params.get('sort');
+    }
+  }
+
+  function writeHashState() {
+    if (suppressHashUpdate) return;
+
+    const params = new URLSearchParams();
+    if (searchQuery) params.set('q', searchQuery);
+    if (activeFilter !== 'all') params.set('filter', activeFilter);
+    if (activeSort !== 'name-asc') params.set('sort', activeSort);
+
+    const qs = params.toString();
+    const hash = '#' + activeCategory + (qs ? '?' + qs : '');
+
+    // Replace state silently (no scroll jump, no history spam)
+    history.replaceState(null, '', hash);
+  }
+
+  function syncUIFromState() {
+    // Sync tabs
+    document.querySelectorAll('.tab').forEach((t) => {
+      const isCurrent = t.getAttribute('data-category') === activeCategory;
+      t.classList.toggle('active', isCurrent);
+      t.setAttribute('aria-selected', isCurrent ? 'true' : 'false');
+    });
+
+    // Sync toolbar visibility
+    toolbar.classList.toggle('hidden', activeCategory !== 'themes');
+
+    // Sync search
+    searchInput.value = searchQuery;
+
+    // Sync filter chips
+    filterChips.querySelectorAll('.chip').forEach((c) => {
+      c.classList.toggle('active', c.getAttribute('data-filter') === activeFilter);
+    });
+
+    // Sync sort
+    sortSelect.value = activeSort;
+  }
+
+  // ============================================================
+  //  DETAIL MODAL
+  // ============================================================
+
+  function openDetail(item, category) {
+    let html = '';
+    switch (category) {
+      case 'themes':
+        html = buildThemeDetail(item);
+        break;
+      case 'canvasFx':
+        html = buildSimpleDetail(item, 'Canvas FX Animation');
+        break;
+      case 'cssPresets':
+        html = buildSimpleDetail(item, 'CSS Preset');
+        break;
+      case 'gradients':
+        html = buildGradientDetail(item);
+        break;
+      case 'bundles':
+        html = buildSimpleDetail(item, 'Import Bundle');
+        break;
+    }
+
+    detailContent.innerHTML = html;
+    detailModal.classList.add('open');
+    detailModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDetail() {
+    detailModal.classList.remove('open');
+    detailModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  // Close on backdrop click
+  detailModal.addEventListener('click', (e) => {
+    if (e.target === detailModal) closeDetail();
+  });
+
+  // Close button
+  detailCloseBtn.addEventListener('click', closeDetail);
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && detailModal.classList.contains('open')) {
+      closeDetail();
+    }
+  });
+
+  // Expose for inline onclick
+  window.openThemeDetail = function (index) {
+    if (!catalog) return;
+    const items = getFilteredItems();
+    if (items[index]) openDetail(items[index], activeCategory);
+  };
+
+  function buildThemeDetail(t) {
+    const modes = t.modes || {};
+    const presentModes = MODE_ORDER.filter((m) => modes[m]);
+    const features = collectFeatures(modes, presentModes);
+
+    // Mode palette cards
+    const modesHTML = presentModes
+      .map((m) => {
+        const mode = modes[m];
+        const color = oklchToCSS(mode.h, mode.c, mode.l);
+
+        // Per-mode feature mini-badges
+        const modeFeatures = [];
+        if (mode.hasCSS) modeFeatures.push('<span class="badge badge--css" style="font-size:0.55rem;padding:2px 6px">CSS</span>');
+        if (mode.hasFX) modeFeatures.push('<span class="badge badge--fx" style="font-size:0.55rem;padding:2px 6px">FX</span>');
+        if (mode.hasGradient) modeFeatures.push('<span class="badge badge--gradient" style="font-size:0.55rem;padding:2px 6px">Gradient</span>');
+        if (mode.hasOverrides) modeFeatures.push('<span class="badge badge--overrides" style="font-size:0.55rem;padding:2px 6px">Overrides</span>');
+
+        return `<div class="detail-mode-card">
+          <div class="detail-mode-swatch" style="background:${color}"></div>
+          <div class="detail-mode-name">${m}</div>
+          <div class="detail-mode-values">H${mode.h} C${(mode.c / 100).toFixed(2)} L${mode.l}%</div>
+          ${modeFeatures.length ? `<div class="detail-mode-features">${modeFeatures.join('')}</div>` : ''}
+        </div>`;
+      })
+      .join('');
+
+    // Feature badges
+    const badgesHTML = [...features]
+      .map((f) => {
+        const cls = FEATURE_BADGE_MAP[f] || f.toLowerCase();
+        return `<span class="badge badge--${cls}">${escapeHTML(f)}</span>`;
+      })
+      .join('');
+
+    return `
+      <h2 class="detail-title">${escapeHTML(t.name)}</h2>
+      <div class="detail-meta">
+        ${t.version ? `<span class="detail-version">v${escapeHTML(t.version)}</span>` : ''}
+        ${t.author ? `<span class="detail-author">${escapeHTML(t.author)}</span>` : ''}
+      </div>
+      ${t.description ? `<p class="detail-description">${escapeHTML(t.description)}</p>` : ''}
+      ${badgesHTML ? `<div class="detail-section-label">Features</div><div class="detail-badges">${badgesHTML}</div>` : ''}
+      <div class="detail-section-label">Mode Palettes</div>
+      <div class="detail-palette">${modesHTML}</div>
+      <div class="detail-section-label">Import URL</div>
+      <div class="detail-import-url">${escapeHTML(t.importUrl)}</div>
+      <button class="copy-btn" data-url="${escapeHTML(t.importUrl)}" onclick="copyUrl(this)">
+        ${ICONS.copy}
+        <span>Copy Import URL</span>
+      </button>
+    `;
+  }
+
+  function buildGradientDetail(g) {
+    const gradientCSS = buildGradientCSS(g);
+    const typeLabel = (g.type || 'linear').charAt(0).toUpperCase() + (g.type || 'linear').slice(1);
+    const typeBadgeClass =
+      g.type === 'radial' ? 'badge--radial' : g.type === 'mesh' ? 'badge--mesh' : 'badge--linear';
+
+    return `
+      <h2 class="detail-title">${escapeHTML(g.name)}</h2>
+      <div class="detail-meta">
+        <span class="badge ${typeBadgeClass}">${escapeHTML(typeLabel)}</span>
+        ${g.animated ? '<span class="badge badge--animated">Animated</span>' : ''}
+      </div>
+      <div class="gradient-preview" style="background:${gradientCSS};height:80px;margin-bottom:20px;border-radius:var(--radius-sm)" aria-label="Gradient preview"></div>
+      <div class="detail-section-label">Import URL</div>
+      <div class="detail-import-url">${escapeHTML(g.importUrl)}</div>
+      <button class="copy-btn" data-url="${escapeHTML(g.importUrl)}" onclick="copyUrl(this)">
+        ${ICONS.copy}
+        <span>Copy Import URL</span>
+      </button>
+    `;
+  }
+
+  function buildSimpleDetail(item, typeLabel) {
+    const displayName = item.name || titleCase(item.file || '');
+    return `
+      <h2 class="detail-title">${escapeHTML(displayName)}</h2>
+      <div class="detail-meta">
+        <span class="detail-version">${escapeHTML(typeLabel)}</span>
+        ${item.author ? `<span class="detail-author">${escapeHTML(item.author)}</span>` : ''}
+      </div>
+      ${item.description ? `<p class="detail-description">${escapeHTML(item.description)}</p>` : ''}
+      <div class="detail-section-label">Import URL</div>
+      <div class="detail-import-url">${escapeHTML(item.importUrl)}</div>
+      <button class="copy-btn" data-url="${escapeHTML(item.importUrl)}" onclick="copyUrl(this)">
+        ${ICONS.copy}
+        <span>Copy Import URL</span>
+      </button>
+    `;
+  }
+
+  // ============================================================
+  //  FETCH & RENDER
+  // ============================================================
+
   async function fetchCatalog() {
     try {
       const res = await fetch('catalog.json');
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       catalog = await res.json();
       updateCounts();
-      // Themes is the default tab — show toolbar
-      toolbar.classList.remove('hidden');
+
+      // Read URL state before first render
+      readHashState();
+      syncUIFromState();
+
       render();
     } catch (err) {
       loadingState.innerHTML = `
@@ -81,7 +315,6 @@
     if (el) el.textContent = val;
   }
 
-  // ---- Render ----
   function render() {
     if (!catalog) return;
 
@@ -91,11 +324,13 @@
     if (items.length === 0) {
       grid.innerHTML = '';
       emptyState.classList.remove('hidden');
+      writeHashState();
       return;
     }
 
     emptyState.classList.add('hidden');
-    grid.innerHTML = items.map((item) => renderCard(item, activeCategory)).join('');
+    grid.innerHTML = items.map((item, i) => renderCard(item, activeCategory, i)).join('');
+    writeHashState();
   }
 
   function getFilteredItems() {
@@ -143,30 +378,7 @@
     return list;
   }
 
-  function renderCard(item, category) {
-    switch (category) {
-      case 'themes':
-        return renderThemeCard(item);
-      case 'canvasFx':
-        return renderFxCard(item);
-      case 'cssPresets':
-        return renderCssCard(item);
-      case 'gradients':
-        return renderGradientCard(item);
-      case 'bundles':
-        return renderBundleCard(item);
-      default:
-        return '';
-    }
-  }
-
-  // ---- Theme card ----
-  function renderThemeCard(t) {
-    const modes = t.modes || {};
-    const modeOrder = ['dark', 'light', 'oled', 'her'];
-    const presentModes = modeOrder.filter((m) => modes[m]);
-
-    // Collect features across all modes
+  function collectFeatures(modes, presentModes) {
     const features = new Set();
     for (const m of presentModes) {
       const mode = modes[m];
@@ -175,8 +387,36 @@
       if (mode.hasGradient) features.add('Gradient');
       if (mode.hasOverrides) features.add('Overrides');
     }
+    return features;
+  }
 
-    // Palette strip — shows color for each mode
+  // ============================================================
+  //  CARD RENDERERS
+  // ============================================================
+
+  function renderCard(item, category, index) {
+    switch (category) {
+      case 'themes':
+        return renderThemeCard(item, index);
+      case 'canvasFx':
+        return renderFxCard(item, index);
+      case 'cssPresets':
+        return renderCssCard(item, index);
+      case 'gradients':
+        return renderGradientCard(item, index);
+      case 'bundles':
+        return renderBundleCard(item, index);
+      default:
+        return '';
+    }
+  }
+
+  function renderThemeCard(t, index) {
+    const modes = t.modes || {};
+    const presentModes = MODE_ORDER.filter((m) => modes[m]);
+    const features = collectFeatures(modes, presentModes);
+
+    // Palette strip
     const paletteHTML = presentModes.length
       ? `<div class="palette-strip">
           ${presentModes
@@ -192,27 +432,18 @@
         </div>`
       : '';
 
-    // Feature badges with TDP color mapping
-    const featureBadgeMap = {
-      CSS: 'css',
-      FX: 'fx',
-      Gradient: 'gradient',
-      Overrides: 'overrides',
-    };
-
-    const badgesHTML = [];
-
     // Feature badges
-    for (const f of features) {
-      const cls = featureBadgeMap[f] || f.toLowerCase();
-      badgesHTML.push(`<span class="badge badge--${cls}">${escapeHTML(f)}</span>`);
-    }
+    const badgesHTML = [...features]
+      .map((f) => {
+        const cls = FEATURE_BADGE_MAP[f] || f.toLowerCase();
+        return `<span class="badge badge--${cls}">${escapeHTML(f)}</span>`;
+      });
 
     const badgeRowHTML = badgesHTML.length
       ? `<div class="badge-row">${badgesHTML.join('')}</div>`
       : '';
 
-    return `<article class="card">
+    return `<article class="card" onclick="openThemeDetail(${index})" style="cursor:pointer">
       <div class="card-header">
         <h2 class="card-name">${escapeHTML(t.name)}</h2>
         <div class="card-meta">
@@ -223,43 +454,40 @@
       ${t.author ? `<span class="card-author">${escapeHTML(t.author)}</span>` : ''}
       ${paletteHTML}
       ${badgeRowHTML}
-      <button class="copy-btn" data-url="${escapeHTML(t.importUrl)}" onclick="copyUrl(this)">
+      <button class="copy-btn" data-url="${escapeHTML(t.importUrl)}" onclick="event.stopPropagation(); copyUrl(this)">
         ${ICONS.copy}
         <span>Copy Import URL</span>
       </button>
     </article>`;
   }
 
-  // ---- Canvas FX card ----
-  function renderFxCard(fx) {
-    return `<article class="card">
+  function renderFxCard(fx, index) {
+    return `<article class="card" onclick="openThemeDetail(${index})" style="cursor:pointer">
       <div class="card-header">
         <h2 class="card-name">${escapeHTML(fx.name)}</h2>
       </div>
       ${fx.description ? `<p class="card-description">${escapeHTML(fx.description)}</p>` : ''}
-      <button class="copy-btn" data-url="${escapeHTML(fx.importUrl)}" onclick="copyUrl(this)">
+      <button class="copy-btn" data-url="${escapeHTML(fx.importUrl)}" onclick="event.stopPropagation(); copyUrl(this)">
         ${ICONS.copy}
         <span>Copy Import URL</span>
       </button>
     </article>`;
   }
 
-  // ---- CSS Preset card ----
-  function renderCssCard(css) {
+  function renderCssCard(css, index) {
     const displayName = css.name || titleCase(css.file || '');
-    return `<article class="card">
+    return `<article class="card" onclick="openThemeDetail(${index})" style="cursor:pointer">
       <div class="card-header">
         <h2 class="card-name">${escapeHTML(displayName)}</h2>
       </div>
-      <button class="copy-btn" data-url="${escapeHTML(css.importUrl)}" onclick="copyUrl(this)">
+      <button class="copy-btn" data-url="${escapeHTML(css.importUrl)}" onclick="event.stopPropagation(); copyUrl(this)">
         ${ICONS.copy}
         <span>Copy Import URL</span>
       </button>
     </article>`;
   }
 
-  // ---- Gradient card ----
-  function renderGradientCard(g) {
+  function renderGradientCard(g, index) {
     const gradientCSS = buildGradientCSS(g);
     const typeBadgeClass =
       g.type === 'radial'
@@ -270,7 +498,7 @@
 
     const typeLabel = (g.type || 'linear').charAt(0).toUpperCase() + (g.type || 'linear').slice(1);
 
-    return `<article class="card">
+    return `<article class="card" onclick="openThemeDetail(${index})" style="cursor:pointer">
       <div class="card-header">
         <h2 class="card-name">${escapeHTML(g.name)}</h2>
         <div class="card-meta">
@@ -279,7 +507,7 @@
         </div>
       </div>
       <div class="gradient-preview" style="background:${gradientCSS}" aria-label="Gradient preview"></div>
-      <button class="copy-btn" data-url="${escapeHTML(g.importUrl)}" onclick="copyUrl(this)">
+      <button class="copy-btn" data-url="${escapeHTML(g.importUrl)}" onclick="event.stopPropagation(); copyUrl(this)">
         ${ICONS.copy}
         <span>Copy Import URL</span>
       </button>
@@ -289,7 +517,6 @@
   function buildGradientCSS(g) {
     const stops = g.stops || [];
     if (stops.length === 0) {
-      // Mesh gradients — show a placeholder
       return 'linear-gradient(135deg, #27272a, #18181b)';
     }
     const stopsStr = stops
@@ -305,22 +532,24 @@
     return `linear-gradient(135deg, ${stopsStr})`;
   }
 
-  // ---- Bundle card ----
-  function renderBundleCard(b) {
-    return `<article class="card card--bundle">
+  function renderBundleCard(b, index) {
+    return `<article class="card card--bundle" onclick="openThemeDetail(${index})" style="cursor:pointer">
       <div class="card-header">
         <h2 class="card-name">${escapeHTML(b.name)}</h2>
         <span class="bundle-badge">✦ Bundle</span>
       </div>
       ${b.description ? `<p class="card-description">${escapeHTML(b.description)}</p>` : ''}
-      <button class="copy-btn" data-url="${escapeHTML(b.importUrl)}" onclick="copyUrl(this)">
+      <button class="copy-btn" data-url="${escapeHTML(b.importUrl)}" onclick="event.stopPropagation(); copyUrl(this)">
         ${ICONS.copy}
         <span>Copy Import URL</span>
       </button>
     </article>`;
   }
 
-  // ---- Copy to clipboard ----
+  // ============================================================
+  //  COPY TO CLIPBOARD
+  // ============================================================
+
   window.copyUrl = async function (btn) {
     const url = btn.getAttribute('data-url');
     if (!url) return;
@@ -328,7 +557,6 @@
     try {
       await navigator.clipboard.writeText(url);
     } catch {
-      // Fallback
       const ta = document.createElement('textarea');
       ta.value = url;
       ta.style.position = 'fixed';
@@ -339,7 +567,6 @@
       document.body.removeChild(ta);
     }
 
-    // Visual feedback
     btn.classList.add('copied');
     btn.innerHTML = `${ICONS.check}<span>Copied!</span>`;
 
@@ -360,7 +587,11 @@
     }, 2500);
   }
 
-  // ---- Tab handling ----
+  // ============================================================
+  //  EVENT HANDLERS
+  // ============================================================
+
+  // Tab handling
   document.querySelectorAll('.tab').forEach((tab) => {
     tab.addEventListener('click', () => {
       document.querySelectorAll('.tab').forEach((t) => {
@@ -371,12 +602,7 @@
       tab.setAttribute('aria-selected', 'true');
       activeCategory = tab.getAttribute('data-category');
 
-      // Show toolbar only for themes
-      if (activeCategory === 'themes') {
-        toolbar.classList.remove('hidden');
-      } else {
-        toolbar.classList.add('hidden');
-      }
+      toolbar.classList.toggle('hidden', activeCategory !== 'themes');
 
       // Reset filter when switching categories
       activeFilter = 'all';
@@ -387,7 +613,7 @@
     });
   });
 
-  // ---- Filter chips ----
+  // Filter chips
   filterChips.addEventListener('click', (e) => {
     const chip = e.target.closest('.chip');
     if (!chip) return;
@@ -397,13 +623,13 @@
     render();
   });
 
-  // ---- Sort ----
+  // Sort
   sortSelect.addEventListener('change', () => {
     activeSort = sortSelect.value;
     render();
   });
 
-  // ---- Search ----
+  // Search
   let debounceTimer = null;
   searchInput.addEventListener('input', () => {
     clearTimeout(debounceTimer);
@@ -411,6 +637,15 @@
       searchQuery = searchInput.value.trim();
       render();
     }, 150);
+  });
+
+  // Handle browser back/forward with hash changes
+  window.addEventListener('hashchange', () => {
+    suppressHashUpdate = true;
+    readHashState();
+    syncUIFromState();
+    render();
+    suppressHashUpdate = false;
   });
 
   // ---- Init ----
