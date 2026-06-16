@@ -181,6 +181,9 @@ function validateThemes() {
   const files = fs.readdirSync(dir).filter(f => f.endsWith('.json'));
   console.log(`\n🎭 Themes: ${files.length} files`);
 
+  // Track names for duplicate detection
+  const seenNames = new Map(); // name → filename
+
   for (const f of files) {
     let data;
     try {
@@ -210,6 +213,33 @@ function validateThemes() {
     if (!data.dark || !data.light) {
       fail(f, 'missing required "dark" and/or "light" mode configuration (both are required)');
       continue;
+    }
+
+    // ── Quality warnings for important metadata fields ──
+    if (!data.name || !data.name.trim()) {
+      warn(f, 'missing "name" — themes should have a display name');
+    }
+
+    if (!data.description || !data.description.trim()) {
+      warn(f, 'missing "description" — add a brief summary for the gallery');
+    }
+
+    if (!data.author || !data.author.trim()) {
+      warn(f, 'missing "author" — attribution helps the community');
+    }
+
+    if (!data.version || !data.version.trim()) {
+      warn(f, 'missing "version" — use semver (e.g. "1.0.0") for update tracking');
+    }
+
+    // ── Duplicate name detection ──
+    if (data.name && data.name.trim()) {
+      const normalized = data.name.trim().toLowerCase();
+      if (seenNames.has(normalized)) {
+        fail(f, `duplicate theme name "${data.name}" (also in ${seenNames.get(normalized)})`);
+      } else {
+        seenNames.set(normalized, f);
+      }
     }
 
     pass(f);
