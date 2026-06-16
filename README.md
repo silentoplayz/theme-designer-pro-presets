@@ -3,7 +3,7 @@
 [![Build Bundles](https://github.com/silentoplayz/theme-designer-pro-presets/actions/workflows/build-bundles.yml/badge.svg)](https://github.com/silentoplayz/theme-designer-pro-presets/actions/workflows/build-bundles.yml)
 ![Canvas FX](https://img.shields.io/badge/Canvas_FX-61_animations-blue)
 ![CSS Presets](https://img.shields.io/badge/CSS-14_presets-purple)
-![Themes](https://img.shields.io/badge/Themes-27_themes-green)
+![Themes](https://img.shields.io/badge/Themes-26_themes-green)
 ![Gradients](https://img.shields.io/badge/Gradients-13_presets-orange)
 
 A curated collection of themes, Canvas FX animations, CSS presets, and gradient packs for [Theme Designer Pro](https://openwebui.com/posts/49fac49a-7cc3-4b9f-8f75-b3916abbfa5f) — the native theming tool for [Open WebUI](https://github.com/open-webui/open-webui).

@@ -178,14 +178,6 @@
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/synthwave_1984.json",
       "file": "themes/synthwave_1984.json"
     },
-    "testing_v1_4_6": {
-      "name": "Testing v1.4.6",
-      "version": "1.0.0",
-      "author": "silentoplayz (G30)",
-      "description": "Experimental tech-demo theme with sharp zero-radius corners, monospace typography, and Bit-Stream Corruption Canvas FX.",
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/testing_v1_4_6.json",
-      "file": "themes/testing_v1_4_6.json"
-    },
     "the_cyanotype": {
       "name": "The Cyanotype",
       "version": "1.0.0",
