@@ -8,6 +8,8 @@
 
 A curated collection of themes, Canvas FX animations, CSS presets, and gradient packs for [Theme Designer Pro](https://openwebui.com/posts/49fac49a-7cc3-4b9f-8f75-b3916abbfa5f) — the native theming tool for [Open WebUI](https://github.com/open-webui/open-webui).
 
+> **[Browse the Preset Gallery →](https://silentoplayz.github.io/theme-designer-pro-presets/)** — preview every theme, effect, and gradient before importing.
+
 > **Import any preset** directly into Theme Designer Pro using the built-in Import button, URL import, or drag-and-drop.
 
 ---
@@ -37,6 +39,7 @@ theme-designer-pro-presets/
 ├── scripts/                 # Build, validation, and manifest tooling
 ├── themes/                  # Complete theme presets (.json)
 ├── tool/                    # Theme Designer Pro tool + documentation
+├── docs/                    # GitHub Pages preset catalog
 ├── .gitignore
 ├── CONTRIBUTING.md
 ├── LICENSE
@@ -164,7 +167,8 @@ This repository uses a [GitHub Actions workflow](.github/workflows/build-bundles
 2. **Build bundles** — `scripts/build-bundles.js` regenerates all bundles
 3. **Build manifest** — `scripts/build-manifest.js` regenerates `manifest.json` with current theme versions
 4. **Update badges** — `scripts/update-badges.js` recalculates preset counts in README badge URLs
-5. **Auto-commit** — if any generated files changed, the bot commits and pushes them
+5. **Build catalog** — `scripts/build-catalog.js` regenerates `docs/catalog.json` for the GitHub Pages gallery
+6. **Auto-commit** — if any generated files changed, the bot commits and pushes them
 
 ### What Happens on Pull Requests
 

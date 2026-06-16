@@ -606,6 +606,7 @@ class Tools:
         .owui-tooltip .tt-tag-canvas { background: rgba(251, 146, 60, 0.2); color: #fdba74; border: 1px solid rgba(251, 146, 60, 0.3); }
         .owui-tooltip .tt-tag-overrides { background: rgba(147, 51, 234, 0.2); color: #c4b5fd; border: 1px solid rgba(147, 51, 234, 0.3); }
         .owui-tooltip .tt-tag-url { background: rgba(6, 182, 212, 0.2); color: #67e8f9; border: 1px solid rgba(6, 182, 212, 0.3); }
+        .owui-tooltip .tt-tag-gradient { background: rgba(244, 114, 182, 0.2); color: #f9a8d4; border: 1px solid rgba(244, 114, 182, 0.3); }
 
         /* TAG FILTER DROPDOWN */
         .tag-filter-wrap { position: relative; }
@@ -621,6 +622,7 @@ class Tools:
         .tag-filter-dot-canvas { background: #fdba74; }
         .tag-filter-dot-overrides { background: #c4b5fd; }
         .tag-filter-dot-linked { background: #67e8f9; }
+        .tag-filter-dot-gradient { background: #f472b6; }
         .tag-filter-btn.has-filter { color: var(--accent); }
         .tag-filter-dot-linear { background: #60a5fa; }
         .tag-filter-dot-radial { background: #f472b6; }
@@ -2334,7 +2336,7 @@ function animate() {
             searchId: 'theme-search-input', searchToggleId: 'theme-search-toggle-btn', searchPlaceholder: 'Search themes...', searchTooltip: 'Search Themes',
             sortId: 'theme-sort-btn',
             filter: { btnId: 'tag-filter-toggle-btn', dropdownId: 'tag-filter-dropdown', tooltip: 'Filter by Tag', options: [
-                { value: 'all', label: 'All Themes' }, { value: 'css', label: 'Custom CSS' }, { value: 'canvas', label: 'Canvas FX' }, { value: 'overrides', label: 'Overrides' }, { value: 'linked', label: 'Linked' }
+                { value: 'all', label: 'All Themes' }, { value: 'css', label: 'Custom CSS' }, { value: 'canvas', label: 'Canvas FX' }, { value: 'gradient', label: 'Gradient' }, { value: 'overrides', label: 'Overrides' }, { value: 'linked', label: 'Linked' }
             ]},
             importId: 'import-json-btn', importTooltip: 'Import JSON',
             exportId: 'export-all-btn', exportTooltip: 'Export All (Backup)',
@@ -8510,6 +8512,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
                         case 'css': return modes.some(m => s[m] && s[m].customCSS && s[m].customCssEnabled !== false);
                         case 'canvas': return modes.some(m => s[m] && s[m].canvasEnabled && s[m].canvasScript);
                         case 'overrides': return modes.some(m => s[m] && s[m].manualOverrides && !!s[m].manualOverridesEnabled);
+                        case 'gradient': return modes.some(m => s[m] && s[m].gradientEnabled && s[m].gradientStops && s[m].gradientStops.length > 0);
                         case 'linked': return !!s.updateUrl;
                         default: return true;
                     }
@@ -8539,7 +8542,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             if (filteredSnapshots.length === 0) {
                 scrollArea.style.display = 'block';
                 container.style.display = 'block';
-                const filterLabels = { css: 'Custom CSS', canvas: 'Canvas FX', overrides: 'Overrides', linked: 'Linked' };
+                const filterLabels = { css: 'Custom CSS', canvas: 'Canvas FX', gradient: 'Gradient', overrides: 'Overrides', linked: 'Linked' };
                 let emptyMsg = 'No themes match';
                 if (searchQuery) emptyMsg += ` &ldquo;${searchQuery}&rdquo;`;
                 if (typeof activeTagFilter !== 'undefined' && activeTagFilter !== 'all') {
@@ -8570,11 +8573,13 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
                 const hasCSS = modes.some(m => s[m] && s[m].customCSS && s[m].customCssEnabled !== false);
                 const hasCanvas = modes.some(m => s[m] && s[m].canvasEnabled && s[m].canvasScript);
                 const hasOverrides = modes.some(m => s[m] && s[m].manualOverrides && !!s[m].manualOverridesEnabled);
-                const hasTags = hasCSS || hasCanvas || hasOverrides || s.updateUrl;
+                const hasGradient = modes.some(m => s[m] && s[m].gradientEnabled && s[m].gradientStops && s[m].gradientStops.length > 0);
+                const hasTags = hasCSS || hasCanvas || hasGradient || hasOverrides || s.updateUrl;
                 if (hasTags) {
                     ttHtml += `<div class="tt-tags">`;
                     if (hasCSS) ttHtml += `<span class="tt-tag tt-tag-css">Custom CSS</span>`;
                     if (hasCanvas) ttHtml += `<span class="tt-tag tt-tag-canvas">Canvas FX</span>`;
+                    if (hasGradient) ttHtml += `<span class="tt-tag tt-tag-gradient">Gradient</span>`;
                     if (hasOverrides) ttHtml += `<span class="tt-tag tt-tag-overrides">Overrides</span>`;
                     if (s.updateUrl) ttHtml += `<span class="tt-tag tt-tag-url">Linked</span>`;
                     ttHtml += `</div>`;
