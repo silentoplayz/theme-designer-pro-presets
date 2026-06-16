@@ -110,9 +110,24 @@ midnight_ocean.json
 
 ---
 
+## 🤖 Automated Theme Submission (Recommended)
+
+The easiest way to submit a theme — **no git required**:
+
+1. Export your theme from Theme Designer Pro (Theme Library → select theme → **↓ Export**)
+2. Open a [Theme Submission issue](../../issues/new?template=theme-submission.yml)
+3. Paste your JSON, fill in the name and description
+4. Submit — a bot automatically validates and opens a PR for you
+
+The bot will comment on your issue with the result:
+- **✅ Valid** — a PR is created and linked, ready for maintainer review
+- **❌ Invalid** — specific errors are listed so you can fix and re-submit
+
+---
+
 ## 🔄 Curation Process
 
-1. **Submit a PR** with your preset(s) in the correct directory
+1. **Submit** — via the automated [Theme Submission form](../../issues/new?template=theme-submission.yml) or a manual PR
 2. **Maintainer review** — checked for quality, performance, API compliance, and visual polish
 3. **Testing** — verified in Theme Designer Pro on the latest Open WebUI version
 4. **Merge** — accepted presets are added and bundles are regenerated automatically

@@ -1,0 +1,181 @@
+name: Theme Submission Bot
+
+on:
+  issues:
+    types: [opened]
+
+# Only one submission processed at a time to avoid branch conflicts
+concurrency:
+  group: theme-submission
+  cancel-in-progress: false
+
+jobs:
+  process:
+    # Only run for issues with the theme-submission label (set by issue template)
+    if: contains(github.event.issue.labels.*.name, 'theme-submission')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # ── Process the submission ──
+      - name: Process theme submission
+        id: process
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_AUTHOR: ${{ github.event.issue.user.login }}
+        run: node scripts/process-submission.js
+
+      # ── On failure: comment with errors ──
+      - name: Comment on failure
+        if: steps.process.outputs.result == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const errors = `${{ steps.process.outputs.errors }}`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: [
+                `## ❌ Theme Validation Failed`,
+                ``,
+                `Hey @${context.payload.issue.user.login}, the bot found some issues with your submission:`,
+                ``,
+                ...errors.split('\n').map(e => `- ${e}`),
+                ``,
+                `**Please edit this issue** to fix the problems above, then close and re-open it to trigger the bot again.`,
+                ``,
+                `---`,
+                `*🤖 Automated validation by Theme Submission Bot*`
+              ].join('\n')
+            });
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['invalid']
+            });
+
+      # ── On success: validate, create branch, PR ──
+      - name: Run full validation
+        if: steps.process.outputs.result == 'success'
+        run: node scripts/validate.js
+
+      - name: Create branch and PR
+        if: steps.process.outputs.result == 'success'
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FILENAME: ${{ steps.process.outputs.filename }}
+          THEME_NAME: ${{ steps.process.outputs.theme_name }}
+          MODES: ${{ steps.process.outputs.modes }}
+          SIZE: ${{ steps.process.outputs.size }}
+          ISSUE_NUM: ${{ github.event.issue.number }}
+          SUBMITTER: ${{ github.event.issue.user.login }}
+        run: |
+          BRANCH="theme-submission/${ISSUE_NUM}-$(echo "${FILENAME}" | sed 's/.json$//')"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout -b "${BRANCH}"
+          git add "themes/${FILENAME}"
+          git commit -m "feat: add community theme '${THEME_NAME}'
+
+          Submitted by @${SUBMITTER} via #${ISSUE_NUM}
+
+          Modes: ${MODES}
+          File: themes/${FILENAME} (${SIZE} KB)"
+
+          git push origin "${BRANCH}"
+
+          PR_URL=$(gh pr create \
+            --base main \
+            --head "${BRANCH}" \
+            --title "feat: add community theme '${THEME_NAME}'" \
+            --body "## 🎨 New Theme: ${THEME_NAME}
+
+          **Submitted by:** @${SUBMITTER}
+          **Source issue:** #${ISSUE_NUM}
+          **File:** \`themes/${FILENAME}\` (${SIZE} KB)
+          **Modes:** ${MODES}
+
+          ---
+
+          This PR was automatically generated from a [theme submission](https://github.com/${GITHUB_REPOSITORY}/issues/${ISSUE_NUM}). The theme JSON has been validated and is ready for review.
+
+          ### Reviewer Checklist
+          - [ ] Theme renders correctly in Theme Designer Pro
+          - [ ] Colors are visually appealing and intentional
+          - [ ] No broken or overlapping UI elements
+
+          ---
+          *🤖 Automated PR by Theme Submission Bot*" \
+            --label "theme-submission")
+
+          echo "pr_url=${PR_URL}" >> $GITHUB_OUTPUT
+
+      - name: Comment on success
+        if: steps.process.outputs.result == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prUrl = `${{ steps.pr.outputs.pr_url }}`;
+            const filename = `${{ steps.process.outputs.filename }}`;
+            const themeName = `${{ steps.process.outputs.theme_name }}`;
+            const modes = `${{ steps.process.outputs.modes }}`;
+            const size = `${{ steps.process.outputs.size }}`;
+            const warnings = `${{ steps.process.outputs.warnings }}`;
+
+            let body = [
+              `## ✅ Theme Validated Successfully!`,
+              ``,
+              `Hey @${context.payload.issue.user.login}, your theme **${themeName}** passed validation! 🎉`,
+              ``,
+              `| Detail | Value |`,
+              `|---|---|`,
+              `| **File** | \`themes/${filename}\` |`,
+              `| **Size** | ${size} KB |`,
+              `| **Modes** | ${modes} |`,
+              `| **Pull Request** | ${prUrl} |`,
+              ``
+            ];
+
+            if (warnings) {
+              body.push(`### ⚠️ Warnings`, ``);
+              body.push(...warnings.split('\n').map(w => `- ${w}`));
+              body.push(``);
+            }
+
+            body.push(
+              `Your theme will be reviewed and merged by a maintainer. Once merged, it will automatically appear in the [Preset Gallery](https://silentoplayz.github.io/theme-designer-pro-presets/) and be included in the next bundle update.`,
+              ``,
+              `---`,
+              `*🤖 Automated validation by Theme Submission Bot*`
+            );
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body.join('\n')
+            });
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['validated']
+            });
