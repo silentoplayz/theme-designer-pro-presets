@@ -1,0 +1,211 @@
+{
+  "name": "Solar Eclipse",
+  "version": "1.0.0",
+  "dark": {
+    "h": 30,
+    "c": 18,
+    "l": 12,
+    "overrides": {},
+    "customCSS": "",
+    "customCssEnabled": false,
+    "autoScope": true,
+    "locks": {},
+    "canvasEnabled": false,
+    "canvasScript": "",
+    "canvasShowAuth": false,
+    "themeShowAuth": false,
+    "customCssShowAuth": false,
+    "gradientEnabled": true,
+    "gradientType": "radial",
+    "gradientAngle": 0,
+    "gradientStops": [
+      {
+        "color": "#1a0a00",
+        "position": 0
+      },
+      {
+        "color": "#3d1c02",
+        "position": 25
+      },
+      {
+        "color": "#d4760a",
+        "position": 48
+      },
+      {
+        "color": "#f5a623",
+        "position": 52
+      },
+      {
+        "color": "#3d1c02",
+        "position": 75
+      },
+      {
+        "color": "#0a0500",
+        "position": 100
+      }
+    ],
+    "gradientIntensity": 100,
+    "gradientAnimation": null,
+    "gradientAnimationSpeed": 5,
+    "gradientShowAuth": false,
+    "gradientRadialPosX": 50,
+    "gradientRadialPosY": 40,
+    "gradientRadialShape": "ellipse",
+    "gradientRadialSize": "farthest-corner",
+    "gradientMeshPoints": [],
+    "gradientMeshBgColor": "#000000"
+  },
+  "light": {
+    "h": 35,
+    "c": 12,
+    "l": 88,
+    "overrides": {},
+    "customCSS": "",
+    "customCssEnabled": false,
+    "autoScope": true,
+    "locks": {},
+    "canvasEnabled": false,
+    "canvasScript": "",
+    "canvasShowAuth": false,
+    "themeShowAuth": false,
+    "customCssShowAuth": false,
+    "gradientEnabled": true,
+    "gradientType": "radial",
+    "gradientAngle": 0,
+    "gradientStops": [
+      {
+        "color": "#fdf6ee",
+        "position": 0
+      },
+      {
+        "color": "#fbe8cc",
+        "position": 30
+      },
+      {
+        "color": "#f5c882",
+        "position": 55
+      },
+      {
+        "color": "#fbe8cc",
+        "position": 75
+      },
+      {
+        "color": "#fdf6ee",
+        "position": 100
+      }
+    ],
+    "gradientIntensity": 100,
+    "gradientAnimation": null,
+    "gradientAnimationSpeed": 5,
+    "gradientShowAuth": false,
+    "gradientRadialPosX": 50,
+    "gradientRadialPosY": 35,
+    "gradientRadialShape": "ellipse",
+    "gradientRadialSize": "farthest-corner",
+    "gradientMeshPoints": [],
+    "gradientMeshBgColor": "#fdf6ee"
+  },
+  "oled": {
+    "h": 25,
+    "c": 20,
+    "l": 0,
+    "overrides": {},
+    "customCSS": "",
+    "customCssEnabled": false,
+    "autoScope": true,
+    "locks": {},
+    "canvasEnabled": false,
+    "canvasScript": "",
+    "canvasShowAuth": false,
+    "themeShowAuth": false,
+    "customCssShowAuth": false,
+    "gradientEnabled": true,
+    "gradientType": "radial",
+    "gradientAngle": 0,
+    "gradientStops": [
+      {
+        "color": "#000000",
+        "position": 0
+      },
+      {
+        "color": "#1a0800",
+        "position": 40
+      },
+      {
+        "color": "#cc7a00",
+        "position": 50
+      },
+      {
+        "color": "#1a0800",
+        "position": 60
+      },
+      {
+        "color": "#000000",
+        "position": 100
+      }
+    ],
+    "gradientIntensity": 100,
+    "gradientAnimation": null,
+    "gradientAnimationSpeed": 5,
+    "gradientShowAuth": false,
+    "gradientRadialPosX": 50,
+    "gradientRadialPosY": 40,
+    "gradientRadialShape": "ellipse",
+    "gradientRadialSize": "farthest-corner",
+    "gradientMeshPoints": [],
+    "gradientMeshBgColor": "#000000"
+  },
+  "her": {
+    "h": 350,
+    "c": 22,
+    "l": 16,
+    "overrides": {},
+    "customCSS": "",
+    "customCssEnabled": false,
+    "autoScope": true,
+    "locks": {},
+    "canvasEnabled": false,
+    "canvasScript": "",
+    "canvasShowAuth": false,
+    "themeShowAuth": false,
+    "customCssShowAuth": false,
+    "gradientEnabled": true,
+    "gradientType": "radial",
+    "gradientAngle": 0,
+    "gradientStops": [
+      {
+        "color": "#1a0508",
+        "position": 0
+      },
+      {
+        "color": "#4a1028",
+        "position": 30
+      },
+      {
+        "color": "#e8657a",
+        "position": 50
+      },
+      {
+        "color": "#4a1028",
+        "position": 70
+      },
+      {
+        "color": "#1a0508",
+        "position": 100
+      }
+    ],
+    "gradientIntensity": 100,
+    "gradientAnimation": null,
+    "gradientAnimationSpeed": 5,
+    "gradientShowAuth": false,
+    "gradientRadialPosX": 50,
+    "gradientRadialPosY": 40,
+    "gradientRadialShape": "ellipse",
+    "gradientRadialSize": "farthest-corner",
+    "gradientMeshPoints": [],
+    "gradientMeshBgColor": "#000000"
+  },
+  "author": "silentoplayz (G30)",
+  "description": "A dramatic theme inspired by a solar eclipse — deep darkness with a radiant corona gradient at its center. Dark mode features warm amber corona tones against near-black space. OLED mode intensifies the effect with true black surroundings and a concentrated golden ring. Light mode softens it into warm parchment tones with a gentle golden radiance. Her mode reimagines the eclipse with a rose-crimson corona. Every mode uses a radial gradient positioned slightly above center to create the celestial effect.",
+  "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/solar_eclipse.json"
+}
