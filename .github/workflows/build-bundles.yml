@@ -60,10 +60,13 @@ jobs:
       - name: Update badge counts
         run: node scripts/update-badges.js
 
+      - name: Build catalog
+        run: node scripts/build-catalog.js
+
       - name: Check for changes
         id: diff
         run: |
-          git add bundles/ manifest.json README.md
+          git add bundles/ manifest.json README.md docs/catalog.json
           git diff --cached --quiet && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
 
       - name: Commit and push updated artifacts
@@ -78,4 +81,4 @@ jobs:
 
       - name: Unstage if no changes
         if: steps.diff.outputs.changed == 'false'
-        run: git reset HEAD -- bundles/ manifest.json README.md
+        run: git reset HEAD -- bundles/ manifest.json README.md docs/catalog.json
