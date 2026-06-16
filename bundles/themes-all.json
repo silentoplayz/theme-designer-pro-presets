@@ -148,6 +148,197 @@
       "targetVersion": "0.9.0"
     },
     {
+      "name": "Amber",
+      "version": "1.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "Warm golden-olive palette reminiscent of polished amber, with a subtle gradient glow.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/amber.json",
+      "dark": {
+        "h": 75,
+        "c": 20,
+        "l": 20,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#1a1608",
+            "position": 0
+          },
+          {
+            "color": "#2e2510",
+            "position": 33
+          },
+          {
+            "color": "#1f1a0a",
+            "position": 66
+          },
+          {
+            "color": "#1a1608",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "light": {
+        "h": 75,
+        "c": 20,
+        "l": 20,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#1a1608",
+            "position": 0
+          },
+          {
+            "color": "#2e2510",
+            "position": 33
+          },
+          {
+            "color": "#1f1a0a",
+            "position": 66
+          },
+          {
+            "color": "#1a1608",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "oled": {
+        "h": 75,
+        "c": 20,
+        "l": 0,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#1a1608",
+            "position": 0
+          },
+          {
+            "color": "#2e2510",
+            "position": 33
+          },
+          {
+            "color": "#1f1a0a",
+            "position": 66
+          },
+          {
+            "color": "#1a1608",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "her": {
+        "h": 75,
+        "c": 20,
+        "l": 20,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#1a1608",
+            "position": 0
+          },
+          {
+            "color": "#2e2510",
+            "position": 33
+          },
+          {
+            "color": "#1f1a0a",
+            "position": 66
+          },
+          {
+            "color": "#1a1608",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      }
+    },
+    {
       "name": "Amber Command: 1979",
       "dark": {
         "h": 45,
@@ -306,6 +497,197 @@
       "description": "Vintage CRT terminal aesthetic with amber monochrome tones, scan-line flicker effects, and Geometric Mainframe Canvas FX.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
       "targetVersion": "0.9.0"
+    },
+    {
+      "name": "Amethyst",
+      "version": "1.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "Vibrant purple tones inspired by amethyst crystals, with a deep violet gradient.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/amethyst.json",
+      "dark": {
+        "h": 290,
+        "c": 25,
+        "l": 18,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#0d0221",
+            "position": 0
+          },
+          {
+            "color": "#261447",
+            "position": 33
+          },
+          {
+            "color": "#1a0a35",
+            "position": 66
+          },
+          {
+            "color": "#0d0221",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "light": {
+        "h": 290,
+        "c": 25,
+        "l": 18,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#0d0221",
+            "position": 0
+          },
+          {
+            "color": "#261447",
+            "position": 33
+          },
+          {
+            "color": "#1a0a35",
+            "position": 66
+          },
+          {
+            "color": "#0d0221",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "oled": {
+        "h": 290,
+        "c": 25,
+        "l": 0,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#0d0221",
+            "position": 0
+          },
+          {
+            "color": "#261447",
+            "position": 33
+          },
+          {
+            "color": "#1a0a35",
+            "position": 66
+          },
+          {
+            "color": "#0d0221",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "her": {
+        "h": 290,
+        "c": 25,
+        "l": 18,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#0d0221",
+            "position": 0
+          },
+          {
+            "color": "#261447",
+            "position": 33
+          },
+          {
+            "color": "#1a0a35",
+            "position": 66
+          },
+          {
+            "color": "#0d0221",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      }
     },
     {
       "name": "Apollo // Analogue Futurism",
@@ -1308,6 +1690,197 @@
       "targetVersion": "0.9.0"
     },
     {
+      "name": "Emerald",
+      "version": "1.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "Rich green hues evoking a dense, jewel-toned forest with matching gradient.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/emerald.json",
+      "dark": {
+        "h": 155,
+        "c": 15,
+        "l": 18,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#0b1a0f",
+            "position": 0
+          },
+          {
+            "color": "#1b3a26",
+            "position": 33
+          },
+          {
+            "color": "#0d2818",
+            "position": 66
+          },
+          {
+            "color": "#0b1a0f",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "light": {
+        "h": 155,
+        "c": 15,
+        "l": 18,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#0b1a0f",
+            "position": 0
+          },
+          {
+            "color": "#1b3a26",
+            "position": 33
+          },
+          {
+            "color": "#0d2818",
+            "position": 66
+          },
+          {
+            "color": "#0b1a0f",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "oled": {
+        "h": 155,
+        "c": 15,
+        "l": 0,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#0b1a0f",
+            "position": 0
+          },
+          {
+            "color": "#1b3a26",
+            "position": 33
+          },
+          {
+            "color": "#0d2818",
+            "position": 66
+          },
+          {
+            "color": "#0b1a0f",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "her": {
+        "h": 155,
+        "c": 15,
+        "l": 18,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#0b1a0f",
+            "position": 0
+          },
+          {
+            "color": "#1b3a26",
+            "position": 33
+          },
+          {
+            "color": "#0d2818",
+            "position": 66
+          },
+          {
+            "color": "#0b1a0f",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      }
+    },
+    {
       "name": "ENTROPY // DATA-STORM",
       "dark": {
         "h": 55,
@@ -2263,6 +2836,197 @@
       "targetVersion": "0.9.0"
     },
     {
+      "name": "Midnight",
+      "version": "1.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "Deep indigo tones with a dark linear gradient backdrop. A refined nocturnal palette.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/midnight.json",
+      "dark": {
+        "h": 250,
+        "c": 20,
+        "l": 15,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#0a0a2e",
+            "position": 0
+          },
+          {
+            "color": "#1a1a4e",
+            "position": 33
+          },
+          {
+            "color": "#0d1b3e",
+            "position": 66
+          },
+          {
+            "color": "#0a0a2e",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "light": {
+        "h": 250,
+        "c": 20,
+        "l": 15,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#0a0a2e",
+            "position": 0
+          },
+          {
+            "color": "#1a1a4e",
+            "position": 33
+          },
+          {
+            "color": "#0d1b3e",
+            "position": 66
+          },
+          {
+            "color": "#0a0a2e",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "oled": {
+        "h": 250,
+        "c": 20,
+        "l": 0,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#0a0a2e",
+            "position": 0
+          },
+          {
+            "color": "#1a1a4e",
+            "position": 33
+          },
+          {
+            "color": "#0d1b3e",
+            "position": 66
+          },
+          {
+            "color": "#0a0a2e",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "her": {
+        "h": 250,
+        "c": 20,
+        "l": 15,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#0a0a2e",
+            "position": 0
+          },
+          {
+            "color": "#1a1a4e",
+            "position": 33
+          },
+          {
+            "color": "#0d1b3e",
+            "position": 66
+          },
+          {
+            "color": "#0a0a2e",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      }
+    },
+    {
       "name": "NEO-TACTICAL // ARCHIVE 01",
       "dark": {
         "h": 220,
@@ -2838,6 +3602,197 @@
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neon_overdrive.json"
     },
     {
+      "name": "Obsidian",
+      "version": "1.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "Pure achromatic darkness with a subtle charcoal-to-navy gradient.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/obsidian.json",
+      "dark": {
+        "h": 0,
+        "c": 0,
+        "l": 10,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#000000",
+            "position": 0
+          },
+          {
+            "color": "#1a1a2e",
+            "position": 33
+          },
+          {
+            "color": "#16213e",
+            "position": 66
+          },
+          {
+            "color": "#0a0a1a",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "light": {
+        "h": 0,
+        "c": 0,
+        "l": 10,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#000000",
+            "position": 0
+          },
+          {
+            "color": "#1a1a2e",
+            "position": 33
+          },
+          {
+            "color": "#16213e",
+            "position": 66
+          },
+          {
+            "color": "#0a0a1a",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "oled": {
+        "h": 0,
+        "c": 0,
+        "l": 0,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#000000",
+            "position": 0
+          },
+          {
+            "color": "#1a1a2e",
+            "position": 33
+          },
+          {
+            "color": "#16213e",
+            "position": 66
+          },
+          {
+            "color": "#0a0a1a",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "her": {
+        "h": 0,
+        "c": 0,
+        "l": 10,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#000000",
+            "position": 0
+          },
+          {
+            "color": "#1a1a2e",
+            "position": 33
+          },
+          {
+            "color": "#16213e",
+            "position": 66
+          },
+          {
+            "color": "#0a0a1a",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      }
+    },
+    {
       "name": "Pink Hues",
       "dark": {
         "h": 354,
@@ -3404,6 +4359,388 @@
       "description": "Adaptation of the Rosé Pine color scheme with muted lavender, rose, and pine tones, firefly constellation Canvas FX, and full color overrides.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
       "targetVersion": "0.9.0"
+    },
+    {
+      "name": "Ruby",
+      "version": "1.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "Deep crimson and rose tones with a rich red gradient backdrop.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/ruby.json",
+      "dark": {
+        "h": 350,
+        "c": 25,
+        "l": 18,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#1a0a0a",
+            "position": 0
+          },
+          {
+            "color": "#3a1020",
+            "position": 33
+          },
+          {
+            "color": "#2a0815",
+            "position": 66
+          },
+          {
+            "color": "#1a0a0a",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "light": {
+        "h": 350,
+        "c": 25,
+        "l": 18,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#1a0a0a",
+            "position": 0
+          },
+          {
+            "color": "#3a1020",
+            "position": 33
+          },
+          {
+            "color": "#2a0815",
+            "position": 66
+          },
+          {
+            "color": "#1a0a0a",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "oled": {
+        "h": 350,
+        "c": 25,
+        "l": 0,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#1a0a0a",
+            "position": 0
+          },
+          {
+            "color": "#3a1020",
+            "position": 33
+          },
+          {
+            "color": "#2a0815",
+            "position": 66
+          },
+          {
+            "color": "#1a0a0a",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "her": {
+        "h": 350,
+        "c": 25,
+        "l": 18,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#1a0a0a",
+            "position": 0
+          },
+          {
+            "color": "#3a1020",
+            "position": 33
+          },
+          {
+            "color": "#2a0815",
+            "position": 66
+          },
+          {
+            "color": "#1a0a0a",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      }
+    },
+    {
+      "name": "Sapphire",
+      "version": "1.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "Cool blue tones reminiscent of a deep sapphire, with a matching ocean-depth gradient.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/sapphire.json",
+      "dark": {
+        "h": 210,
+        "c": 25,
+        "l": 18,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#0a1628",
+            "position": 0
+          },
+          {
+            "color": "#0d3b66",
+            "position": 33
+          },
+          {
+            "color": "#0a2540",
+            "position": 66
+          },
+          {
+            "color": "#0a1628",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "light": {
+        "h": 210,
+        "c": 25,
+        "l": 18,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#0a1628",
+            "position": 0
+          },
+          {
+            "color": "#0d3b66",
+            "position": 33
+          },
+          {
+            "color": "#0a2540",
+            "position": 66
+          },
+          {
+            "color": "#0a1628",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "oled": {
+        "h": 210,
+        "c": 25,
+        "l": 0,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#0a1628",
+            "position": 0
+          },
+          {
+            "color": "#0d3b66",
+            "position": 33
+          },
+          {
+            "color": "#0a2540",
+            "position": 66
+          },
+          {
+            "color": "#0a1628",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "her": {
+        "h": 210,
+        "c": 25,
+        "l": 18,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#0a1628",
+            "position": 0
+          },
+          {
+            "color": "#0d3b66",
+            "position": 33
+          },
+          {
+            "color": "#0a2540",
+            "position": 66
+          },
+          {
+            "color": "#0a1628",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      }
     },
     {
       "name": "Solar Flare",
@@ -4060,6 +5397,197 @@
       "targetVersion": "0.9.0"
     },
     {
+      "name": "Topaz",
+      "version": "1.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "Warm bronze and sienna tones with an earthy gradient backdrop.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/topaz.json",
+      "dark": {
+        "h": 40,
+        "c": 20,
+        "l": 18,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#1a140a",
+            "position": 0
+          },
+          {
+            "color": "#2e2010",
+            "position": 33
+          },
+          {
+            "color": "#241a0c",
+            "position": 66
+          },
+          {
+            "color": "#1a140a",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "light": {
+        "h": 40,
+        "c": 20,
+        "l": 18,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#1a140a",
+            "position": 0
+          },
+          {
+            "color": "#2e2010",
+            "position": 33
+          },
+          {
+            "color": "#241a0c",
+            "position": 66
+          },
+          {
+            "color": "#1a140a",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "oled": {
+        "h": 40,
+        "c": 20,
+        "l": 0,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#1a140a",
+            "position": 0
+          },
+          {
+            "color": "#2e2010",
+            "position": 33
+          },
+          {
+            "color": "#241a0c",
+            "position": 66
+          },
+          {
+            "color": "#1a140a",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      },
+      "her": {
+        "h": 40,
+        "c": 20,
+        "l": 18,
+        "overrides": {},
+        "customCSS": "",
+        "customCssEnabled": false,
+        "autoScope": true,
+        "locks": {},
+        "canvasEnabled": false,
+        "canvasScript": "",
+        "canvasShowAuth": false,
+        "themeShowAuth": false,
+        "customCssShowAuth": false,
+        "gradientEnabled": true,
+        "gradientType": "linear",
+        "gradientAngle": 135,
+        "gradientStops": [
+          {
+            "color": "#1a140a",
+            "position": 0
+          },
+          {
+            "color": "#2e2010",
+            "position": 33
+          },
+          {
+            "color": "#241a0c",
+            "position": 66
+          },
+          {
+            "color": "#1a140a",
+            "position": 100
+          }
+        ],
+        "gradientIntensity": 100,
+        "gradientAnimation": null,
+        "gradientAnimationSpeed": 5,
+        "gradientShowAuth": false,
+        "gradientRadialPosX": 50,
+        "gradientRadialPosY": 50,
+        "gradientRadialShape": "ellipse",
+        "gradientRadialSize": "farthest-corner",
+        "gradientMeshPoints": [],
+        "gradientMeshBgColor": "#000000"
+      }
+    },
+    {
       "name": "Toxic Nebula // Smog-Core",
       "dark": {
         "h": 285,
@@ -4690,7 +6218,7 @@
   "isLibraryBackup": true,
   "version": "1.0.0",
   "_meta": {
-    "generated": "2026-06-16T01:47:34.742Z",
-    "count": 26
+    "generated": "2026-06-16T01:58:58.851Z",
+    "count": 34
   }
 }

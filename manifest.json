@@ -10,6 +10,14 @@
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/aether_nebula_flow.json",
       "file": "themes/aether_nebula_flow.json"
     },
+    "amber": {
+      "name": "Amber",
+      "version": "1.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "Warm golden-olive palette reminiscent of polished amber, with a subtle gradient glow.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/amber.json",
+      "file": "themes/amber.json"
+    },
     "amber_command_1979": {
       "name": "Amber Command: 1979",
       "version": "1.0.0",
@@ -17,6 +25,14 @@
       "description": "Vintage CRT terminal aesthetic with amber monochrome tones, scan-line flicker effects, and Geometric Mainframe Canvas FX.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/amber_command_1979.json",
       "file": "themes/amber_command_1979.json"
+    },
+    "amethyst": {
+      "name": "Amethyst",
+      "version": "1.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "Vibrant purple tones inspired by amethyst crystals, with a deep violet gradient.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/amethyst.json",
+      "file": "themes/amethyst.json"
     },
     "apollo_analogue_futurism": {
       "name": "Apollo // Analogue Futurism",
@@ -58,6 +74,14 @@
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/blue_lightning.json",
       "file": "themes/blue_lightning.json"
     },
+    "emerald": {
+      "name": "Emerald",
+      "version": "1.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "Rich green hues evoking a dense, jewel-toned forest with matching gradient.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/emerald.json",
+      "file": "themes/emerald.json"
+    },
     "entropy_data_storm": {
       "name": "ENTROPY // DATA-STORM",
       "version": "1.0.0",
@@ -98,6 +122,14 @@
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/matrix_rain.json",
       "file": "themes/matrix_rain.json"
     },
+    "midnight": {
+      "name": "Midnight",
+      "version": "1.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "Deep indigo tones with a dark linear gradient backdrop. A refined nocturnal palette.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/midnight.json",
+      "file": "themes/midnight.json"
+    },
     "neo_tactical_archive_01": {
       "name": "NEO-TACTICAL // ARCHIVE 01",
       "version": "1.0.0",
@@ -121,6 +153,14 @@
       "description": "High-octane cyberpunk UI with intense neon magenta and electric blue accents, glitch-styled animations, and Neon Pulse Canvas FX on a deep midnight backdrop.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neon_overdrive.json",
       "file": "themes/neon_overdrive.json"
+    },
+    "obsidian": {
+      "name": "Obsidian",
+      "version": "1.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "Pure achromatic darkness with a subtle charcoal-to-navy gradient.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/obsidian.json",
+      "file": "themes/obsidian.json"
     },
     "pink_hues": {
       "name": "Pink Hues",
@@ -154,6 +194,22 @@
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/rose_pine.json",
       "file": "themes/rose_pine.json"
     },
+    "ruby": {
+      "name": "Ruby",
+      "version": "1.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "Deep crimson and rose tones with a rich red gradient backdrop.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/ruby.json",
+      "file": "themes/ruby.json"
+    },
+    "sapphire": {
+      "name": "Sapphire",
+      "version": "1.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "Cool blue tones reminiscent of a deep sapphire, with a matching ocean-depth gradient.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/sapphire.json",
+      "file": "themes/sapphire.json"
+    },
     "solar_flare": {
       "name": "Solar Flare",
       "version": "1.0.0",
@@ -185,6 +241,14 @@
       "description": "Blueprint-inspired design with architectural grid overlay, deep navy tones, and technical drawing aesthetics. CSS-only — no Canvas FX.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/the_cyanotype.json",
       "file": "themes/the_cyanotype.json"
+    },
+    "topaz": {
+      "name": "Topaz",
+      "version": "1.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "Warm bronze and sienna tones with an earthy gradient backdrop.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/topaz.json",
+      "file": "themes/topaz.json"
     },
     "toxic_nebula_smog_core": {
       "name": "Toxic Nebula // Smog-Core",
