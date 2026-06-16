@@ -23,6 +23,7 @@ theme-designer-pro-presets/
 │   ├── PULL_REQUEST_TEMPLATE.md
 │   └── workflows/
 │       ├── build-bundles.yml   # CI: validate → build → commit
+│       ├── deploy-pages.yml    # CD: deploy docs/ to GitHub Pages
 │       └── theme-submission.yml # Automated theme submission processing
 ├── bundles/                 # Combined import-ready JSON files
 ├── canvas-fx/               # Canvas FX animation scripts (.js)
@@ -155,7 +156,7 @@ setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);
 
 ## ⚙️ CI/CD
 
-This repository uses two [GitHub Actions workflows](.github/workflows/) to automate validation, builds, and community submissions.
+This repository uses three [GitHub Actions workflows](.github/workflows/) to automate validation, builds, deployments, and community submissions.
 
 ### Validate & Build Bundles ([`build-bundles.yml`](.github/workflows/build-bundles.yml))
 
@@ -189,6 +190,14 @@ Triggered when a [Theme Submission](https://github.com/silentoplayz/theme-design
 4. **On failure** — comments with specific error messages so the submitter can fix and resubmit
 
 This allows anyone to submit a theme without knowing git — see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+### Deploy to GitHub Pages ([`deploy-pages.yml`](.github/workflows/deploy-pages.yml))
+
+Deploys the [`docs/`](docs/) preset gallery to [GitHub Pages](https://silentoplayz.github.io/theme-designer-pro-presets/).
+
+- **After builds**: Triggers automatically when `Validate & Build Bundles` completes successfully (via `workflow_run`), ensuring the catalog is deployed with the latest rebuilt `docs/catalog.json`.
+- **On direct changes**: Also triggers on pushes that modify `docs/` or `tool/` files, so documentation and gallery edits are deployed immediately without waiting for a bundle build.
+- **Concurrency**: Uses a `pages` concurrency group to cancel stale deployments and ensure only one deployment runs at a time.
 
 ### Running Locally
 
