@@ -7885,7 +7885,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
     $('check-updates-btn').addEventListener('click', async () => {
         const btn = $('check-updates-btn');
         const origHTML = btn.innerHTML;
-        btn.innerHTML = '<span class="spin">\\u27f3</span> Checking...';
+        btn.innerHTML = '<span class="spin" style="font-size: 13px; line-height: 1;">⟳</span> Checking…';
         btn.disabled = true;
         
         const snapshots = getSnapshots();
