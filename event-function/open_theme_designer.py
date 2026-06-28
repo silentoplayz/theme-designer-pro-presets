@@ -506,11 +506,56 @@ class Event:
                             window.addEventListener('mousemove', _onMouse);
                             window.addEventListener('resize', _onResize);
                             window.addEventListener('message', _onIframeMsg);
+
+                            // Click + pointer events — discrete, sent immediately
+                            const _sendClick = (type, e) => { worker.postMessage({ type: type, x: e.clientX, y: e.clientY }); };
+                            const _onClick = (e) => _sendClick('click', e);
+                            const _onMouseDown = (e) => _sendClick('mousedown', e);
+                            const _onMouseUp = (e) => _sendClick('mouseup', e);
+                            window.addEventListener('click', _onClick, true);
+                            window.addEventListener('mousedown', _onMouseDown, true);
+                            window.addEventListener('mouseup', _onMouseUp, true);
+
+                            // Touch events — touchmove is rAF-coalesced, start/end are discrete
+                            const _touchCoords = (e) => Array.from(e.touches).map(t => ({ x: t.clientX, y: t.clientY }));
+                            const _changedCoords = (e) => Array.from(e.changedTouches).map(t => ({ x: t.clientX, y: t.clientY }));
+                            let _touchDirty = false, _touchData = [];
+                            const _onTouchStart = (e) => {
+                                var c = _touchCoords(e);
+                                worker.postMessage({ type: 'touchstart', touches: c });
+                                if (c.length > 0) worker.postMessage({ type: 'mousedown', x: c[0].x, y: c[0].y });
+                            };
+                            const _onTouchMove = (e) => {
+                                _touchData = _touchCoords(e);
+                                _touchDirty = true;
+                                if (_touchData.length > 0) { _mouseX = _touchData[0].x; _mouseY = _touchData[0].y; _mouseDirty = true; }
+                            };
+                            const _onTouchEnd = (e) => {
+                                var c = _changedCoords(e);
+                                worker.postMessage({ type: 'touchend', touches: c });
+                                if (c.length > 0) worker.postMessage({ type: 'mouseup', x: c[0].x, y: c[0].y });
+                            };
+                            // Replace initial rAF loop with one that also coalesces touchmove
+                            cancelAnimationFrame(_mouseRaf);
+                            (function _sendInput() {
+                                _mouseRaf = requestAnimationFrame(_sendInput);
+                                if (_mouseDirty) { worker.postMessage({ type: 'mousemove', x: _mouseX, y: _mouseY }); _mouseDirty = false; }
+                                if (_touchDirty) { worker.postMessage({ type: 'touchmove', touches: _touchData }); _touchDirty = false; }
+                            })();
+                            window.addEventListener('touchstart', _onTouchStart, { passive: true });
+                            window.addEventListener('touchmove', _onTouchMove, { passive: true });
+                            window.addEventListener('touchend', _onTouchEnd, { passive: true });
                             
                             window.owuiCanvasCleanups.push(() => {
                                 window.removeEventListener('mousemove', _onMouse);
                                 window.removeEventListener('resize', _onResize);
                                 window.removeEventListener('message', _onIframeMsg);
+                                window.removeEventListener('click', _onClick, true);
+                                window.removeEventListener('mousedown', _onMouseDown, true);
+                                window.removeEventListener('mouseup', _onMouseUp, true);
+                                window.removeEventListener('touchstart', _onTouchStart);
+                                window.removeEventListener('touchmove', _onTouchMove);
+                                window.removeEventListener('touchend', _onTouchEnd);
                                 cancelAnimationFrame(_mouseRaf);
                                 clearTimeout(_resizeTimer);
                                 worker.terminate();
@@ -557,6 +602,45 @@ class Event:
                                     window.addEventListener('message', _onIframeMsg);
                                     // Trigger initial resize synchronously (no debounce for first paint)
                                     _canvas.width = window.innerWidth; _canvas.height = window.innerHeight;
+
+                                    // Click + pointer events — discrete, sent immediately
+                                    const _fbSend = (type, data) => { if (window._onmessage) window._onmessage({ data: Object.assign({ type: type }, data) }); };
+                                    const _onClick = (e) => _fbSend('click', { x: e.clientX, y: e.clientY });
+                                    const _onMouseDown = (e) => _fbSend('mousedown', { x: e.clientX, y: e.clientY });
+                                    const _onMouseUp = (e) => _fbSend('mouseup', { x: e.clientX, y: e.clientY });
+                                    window.addEventListener('click', _onClick, true);
+                                    window.addEventListener('mousedown', _onMouseDown, true);
+                                    window.addEventListener('mouseup', _onMouseUp, true);
+
+                                    // Touch events — touchmove coalesced, start/end discrete
+                                    const _touchCoords = (e) => Array.from(e.touches).map(t => ({ x: t.clientX, y: t.clientY }));
+                                    const _changedCoords = (e) => Array.from(e.changedTouches).map(t => ({ x: t.clientX, y: t.clientY }));
+                                    let _touchDirty = false, _touchData = [];
+                                    const _onTouchStart = (e) => {
+                                        var c = _touchCoords(e);
+                                        _fbSend('touchstart', { touches: c });
+                                        if (c.length > 0) _fbSend('mousedown', { x: c[0].x, y: c[0].y });
+                                    };
+                                    const _onTouchMove = (e) => {
+                                        _touchData = _touchCoords(e);
+                                        _touchDirty = true;
+                                        if (_touchData.length > 0) { _mouseX = _touchData[0].x; _mouseY = _touchData[0].y; _mouseDirty = true; }
+                                    };
+                                    const _onTouchEnd = (e) => {
+                                        var c = _changedCoords(e);
+                                        _fbSend('touchend', { touches: c });
+                                        if (c.length > 0) _fbSend('mouseup', { x: c[0].x, y: c[0].y });
+                                    };
+                                    // Replace the rAF pump to also handle coalesced touchmove
+                                    window.cancelAnimationFrame(_mouseRafId);
+                                    (function _pumpInput() {
+                                        _mouseRafId = window.requestAnimationFrame(_pumpInput);
+                                        if (_mouseDirty && window._onmessage) { window._onmessage({ data: { type: 'mousemove', x: _mouseX, y: _mouseY } }); _mouseDirty = false; }
+                                        if (_touchDirty && window._onmessage) { window._onmessage({ data: { type: 'touchmove', touches: _touchData } }); _touchDirty = false; }
+                                    })();
+                                    window.addEventListener('touchstart', _onTouchStart, { passive: true });
+                                    window.addEventListener('touchmove', _onTouchMove, { passive: true });
+                                    window.addEventListener('touchend', _onTouchEnd, { passive: true });
     
                                     const _rAFs =[];
                                     const _intervals =[];
@@ -572,6 +656,12 @@ class Event:
                                         window.removeEventListener('mousemove', _onMouse);
                                         window.removeEventListener('resize', _onResize);
                                         window.removeEventListener('message', _onIframeMsg);
+                                        window.removeEventListener('click', _onClick, true);
+                                        window.removeEventListener('mousedown', _onMouseDown, true);
+                                        window.removeEventListener('mouseup', _onMouseUp, true);
+                                        window.removeEventListener('touchstart', _onTouchStart);
+                                        window.removeEventListener('touchmove', _onTouchMove);
+                                        window.removeEventListener('touchend', _onTouchEnd);
                                         window.cancelAnimationFrame(_mouseRafId);
                                         clearTimeout(_resizeTimer);
                                         _rAFs.forEach(id => window.cancelAnimationFrame(id));
@@ -2585,7 +2675,7 @@ class Event:
                         <p>Inject interactive JavaScript animations directly into the background of Open WebUI. The designer automatically applies a <i>Structural Layer</i> that makes native UI components transparent so the animation shines through.</p>
                         <ul>
                             <li><b>Background Worker Execution:</b> By default, scripts run in a true background Web Worker utilizing <code>OffscreenCanvas</code> (if supported by your browser) to ensure high-performance rendering without blocking the UI thread. It falls back to the main thread in two cases: (1) the browser doesn't support <code>OffscreenCanvas</code>, or (2) the script throws a runtime error in the Worker (e.g., referencing <code>document</code>, which is unavailable in Workers) — the runtime automatically catches the error, terminates the broken Worker, and re-runs the script on the main thread. A status badge in the designer UI shows the browser's <code>OffscreenCanvas</code> capability.</li>
-                            <li><b>Event Handling:</b> Four message types are sent to your script via <code>self.onmessage</code>: <code>init</code> (with canvas, width, height), <code>mousemove</code> (with x, y coordinates), <code>resize</code> (with updated width, height), and <code>context</code> (with live chat context metrics &mdash; message count, character count, estimated tokens).</li>
+                            <li><b>Event Handling:</b> Ten message types are sent to your script via <code>self.onmessage</code>: <code>init</code>, <code>resize</code>, <code>mousemove</code>, <code>click</code>, <code>mousedown</code>, <code>mouseup</code>, <code>touchstart</code>, <code>touchmove</code>, <code>touchend</code>, and <code>context</code>. Touch events also generate synthetic mouse equivalents for cross-device compatibility.</li>
                             <li><b>Show on Auth Pages:</b> Toggle whether canvas animations appear on Login/Signup screens. Enabled by default.</li>
                             <li><b>Preset Gallery:</b> Save, rename, update, delete, and export individual animations. You can directly import native <code>.js</code> animation files by dragging and dropping them into the UI!</li>
 
@@ -2595,7 +2685,7 @@ class Event:
                         <p>Your Canvas FX script runs inside a <b>Web Worker</b> with an <code>OffscreenCanvas</code>. The runtime communicates with your script using a structured message protocol via <code>self.onmessage</code>. Understanding this contract is essential for writing reliable animations.</p>
 
                         <p class="doc-subheading">Inbound Messages (Runtime &rarr; Your Script)</p>
-                        <p>Four message types are dispatched to your script's <code>self.onmessage</code> handler:</p>
+                        <p>Ten message types are dispatched to your script's <code>self.onmessage</code> handler:</p>
                         <table class="doc-table-compact">
                             <thead>
                                 <tr style="border-bottom: 1px solid var(--border);">
@@ -2618,7 +2708,37 @@ class Event:
                                 <tr style="border-bottom: 1px solid var(--border);">
                                     <td><code>mousemove</code></td>
                                     <td><code>{ x, y }</code></td>
-                                    <td>Fired on cursor movement (throttled to once per <code>requestAnimationFrame</code>). Coordinates are <code>clientX</code>/<code>clientY</code> (viewport-relative).</td>
+                                    <td>Fired on cursor movement (throttled to once per <code>requestAnimationFrame</code>). Coordinates are <code>clientX</code>/<code>clientY</code> (viewport-relative). Also fired by <code>touchmove</code> (first finger) for cross-device compatibility.</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--border);">
+                                    <td><code>click</code></td>
+                                    <td><code>{ x, y }</code></td>
+                                    <td>Fired on mouse click. Use this for simple tap interactions (pop bubbles, plant seeds, trigger effects).</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--border);">
+                                    <td><code>mousedown</code></td>
+                                    <td><code>{ x, y }</code></td>
+                                    <td>Fired when a mouse button is pressed. Also fired synthetically on <code>touchstart</code> (first finger). Use with <code>mouseup</code> for drag interactions.</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--border);">
+                                    <td><code>mouseup</code></td>
+                                    <td><code>{ x, y }</code></td>
+                                    <td>Fired when a mouse button is released. Also fired synthetically on <code>touchend</code> (first finger).</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--border);">
+                                    <td><code>touchstart</code></td>
+                                    <td><code>{ touches: [{x, y}, ...] }</code></td>
+                                    <td>Fired when a finger touches the screen. The <code>touches</code> array contains all current touch points, enabling multi-touch interactions. Also generates a synthetic <code>mousedown</code>.</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--border);">
+                                    <td><code>touchmove</code></td>
+                                    <td><code>{ touches: [{x, y}, ...] }</code></td>
+                                    <td>Fired on finger movement (throttled to once per <code>requestAnimationFrame</code>). Also bridges to <code>mousemove</code> (first finger) so mouse-only scripts work on touch devices.</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--border);">
+                                    <td><code>touchend</code></td>
+                                    <td><code>{ touches: [{x, y}, ...] }</code></td>
+                                    <td>Fired when a finger is lifted. The <code>touches</code> array contains the <code>changedTouches</code> (fingers that were removed). Also generates a synthetic <code>mouseup</code>.</td>
                                 </tr>
                                 <tr>
                                     <td><code>context</code></td>
@@ -2679,6 +2799,20 @@ self.onmessage = (e) =&gt; {
     case 'mousemove':
       mouse.x = e.data.x;
       mouse.y = e.data.y;
+      break;
+    case 'click':
+      // e.data.x, e.data.y &mdash; user clicked/tapped here
+      break;
+    case 'mousedown':
+      // e.data.x, e.data.y &mdash; also fired on touchstart
+      break;
+    case 'mouseup':
+      // e.data.x, e.data.y &mdash; also fired on touchend
+      break;
+    case 'touchstart':
+    case 'touchmove':
+    case 'touchend':
+      // e.data.touches &mdash; array of {x, y} for multi-touch
       break;
     case 'context':
       // e.data.messages, e.data.chars, e.data.estimatedTokens
