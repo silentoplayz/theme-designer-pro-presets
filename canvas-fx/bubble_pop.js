@@ -1,127 +1,119 @@
 /**
  * Title: Bubble Pop
- * Description: Colorful translucent bubbles float upward, wobbling gently.
- *   Move your mouse near them and they POP into a shower of tiny sparkle
- *   fragments! New bubbles continuously rise from the bottom. Each bubble
- *   has a shiny highlight and rainbow-tinted surface. Super satisfying
- *   and interactive — perfect for kids who love to "pop" things.
+ * Description: Iridescent bubbles rise from the bottom of the screen.
+ *   Click or tap them to pop them with a satisfying particle burst!
+ *   Bubbles wobble, shimmer, and have realistic reflections. Popping
+ *   creates chain reactions when bubbles are near each other. Score
+ *   fades in as you pop more. Touch-friendly with generous hit zones.
+ *
+ *   Showcases: click, touchstart (multi-pop), mousemove (bubble flee)
  */
 
 /* ---------- CONFIGURABLE VARIABLES ---------- */
-const MAX_BUBBLES       = 45;      // max bubbles on screen
-const BUBBLE_SIZE_MIN   = 18;      // minimum bubble radius
-const BUBBLE_SIZE_MAX   = 50;      // maximum bubble radius
-const RISE_SPEED_MIN    = 0.3;     // minimum upward speed
-const RISE_SPEED_MAX    = 1.2;     // maximum upward speed
-const WOBBLE_AMOUNT     = 0.6;     // horizontal wobble strength
-const POP_RADIUS        = 80;      // mouse proximity to pop a bubble (pixels)
-const FRAGMENT_COUNT    = 12;      // sparkle fragments per pop
-const FRAGMENT_LIFETIME = 40;      // frames fragments live
-const SPAWN_INTERVAL    = 20;      // frames between new bubbles
+const MAX_BUBBLES         = 20;       // max simultaneous bubbles
+const SPAWN_RATE          = 80;       // frames between spawns
+const BUBBLE_MIN_R        = 12;       // min radius
+const BUBBLE_MAX_R        = 35;       // max radius
+const RISE_SPEED          = 0.5;      // base rise speed
+const POP_PARTICLES       = 16;       // particles per pop
+const CHAIN_RADIUS        = 60;       // chain reaction radius
+const FLEE_STRENGTH       = 0.4;      // how much bubbles flee from cursor
 /* --------------------------------------------- */
 
 let canvas, ctx, w, h;
-let bubbles = [];
-let fragments = [];
 let mouse = { x: -9999, y: -9999 };
-let time = 0;
-let spawnTimer = 0;
+let bubbles = [];
+let popFx = [];
+let score = 0;
+let scoreAlpha = 0;
+let frameCount = 0;
 
 setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);
 
-class Bubble {
-	constructor() {
-		this.radius = BUBBLE_SIZE_MIN + Math.random() * (BUBBLE_SIZE_MAX - BUBBLE_SIZE_MIN);
-		this.x = this.radius + Math.random() * ((w || 800) - this.radius * 2);
-		this.y = (h || 600) + this.radius + Math.random() * 100;
-		this.speed = RISE_SPEED_MIN + Math.random() * (RISE_SPEED_MAX - RISE_SPEED_MIN);
-		this.wobblePhase = Math.random() * Math.PI * 2;
-		this.wobbleFreq = 0.015 + Math.random() * 0.02;
-		this.hue = Math.random() * 360;
-		this.popScale = 1;
-		this.alive = true;
+function createBubble() {
+	if (bubbles.length >= MAX_BUBBLES) return;
+	const r = BUBBLE_MIN_R + Math.random() * (BUBBLE_MAX_R - BUBBLE_MIN_R);
+	bubbles.push({
+		x: r + Math.random() * (w - r * 2),
+		y: h + r + Math.random() * 50,
+		r,
+		vx: (Math.random() - 0.5) * 0.5,
+		vy: -(RISE_SPEED + Math.random() * 0.5) * (40 / (r + 10)),
+		hue: Math.random() * 360,
+		wobblePhase: Math.random() * Math.PI * 2,
+		wobbleSpeed: 0.02 + Math.random() * 0.02,
+		shimmerPhase: Math.random() * Math.PI * 2,
+		alpha: 0, // fade in
+		alive: true
+	});
+}
+
+function popBubble(bubble, fromChain) {
+	if (!bubble.alive) return;
+	bubble.alive = false;
+	score++;
+	scoreAlpha = 1;
+
+	// Pop particles
+	const hue = bubble.hue;
+	for (let i = 0; i < POP_PARTICLES; i++) {
+		const angle = (i / POP_PARTICLES) * Math.PI * 2;
+		const speed = 1.5 + Math.random() * 3;
+		popFx.push({
+			x: bubble.x,
+			y: bubble.y,
+			vx: Math.cos(angle) * speed + (Math.random() - 0.5),
+			vy: Math.sin(angle) * speed + (Math.random() - 0.5),
+			size: 2 + Math.random() * 3,
+			hue: hue + (Math.random() - 0.5) * 60,
+			alpha: 0.9,
+			decay: 0.015 + Math.random() * 0.02,
+			iridescent: Math.random() > 0.5
+		});
 	}
 
-	update() {
-		this.y -= this.speed;
-		this.wobblePhase += this.wobbleFreq;
-		this.x += Math.sin(this.wobblePhase) * WOBBLE_AMOUNT;
+	// Shiny ring
+	popFx.push({
+		x: bubble.x,
+		y: bubble.y,
+		vx: 0, vy: 0,
+		size: bubble.r,
+		hue,
+		alpha: 0.5,
+		decay: 0.03,
+		isRing: true,
+		ringRadius: bubble.r
+	});
 
-		// Check mouse proximity for pop
-		const dx = mouse.x - this.x;
-		const dy = mouse.y - this.y;
+	// Chain reaction
+	if (!fromChain) {
+		for (const other of bubbles) {
+			if (!other.alive || other === bubble) continue;
+			const dx = other.x - bubble.x;
+			const dy = other.y - bubble.y;
+			const dist = Math.sqrt(dx * dx + dy * dy);
+			if (dist < CHAIN_RADIUS + other.r) {
+				setTimeout(() => popBubble(other, true), 80 + Math.random() * 120);
+			}
+		}
+	}
+}
+
+function tryPop(x, y) {
+	// Check from top (smallest z-order) to bottom
+	for (let i = bubbles.length - 1; i >= 0; i--) {
+		const b = bubbles[i];
+		if (!b.alive) continue;
+		const dx = b.x - x;
+		const dy = b.y - y;
 		const dist = Math.sqrt(dx * dx + dy * dy);
-		if (dist < POP_RADIUS + this.radius * 0.5) {
-			this.pop();
-			return false;
-		}
-
-		// Off screen
-		if (this.y < -this.radius * 2) return false;
-
-		return true;
-	}
-
-	pop() {
-		// Create sparkle fragments
-		for (let i = 0; i < FRAGMENT_COUNT; i++) {
-			const angle = (i / FRAGMENT_COUNT) * Math.PI * 2 + Math.random() * 0.5;
-			const speed = 2 + Math.random() * 4;
-			fragments.push({
-				x: this.x,
-				y: this.y,
-				vx: Math.cos(angle) * speed,
-				vy: Math.sin(angle) * speed - 1,
-				size: 2 + Math.random() * 4,
-				hue: this.hue + (Math.random() - 0.5) * 60,
-				life: FRAGMENT_LIFETIME,
-				maxLife: FRAGMENT_LIFETIME
-			});
+		const hitZone = b.r * 1.3; // generous hit zone
+		if (dist < hitZone) {
+			popBubble(b, false);
+			return true;
 		}
 	}
-
-	draw(ctx) {
-		const r = this.radius;
-		const x = this.x;
-		const y = this.y;
-
-		// Main bubble body (translucent)
-		const grad = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.1, x, y, r);
-		grad.addColorStop(0, `hsla(${this.hue}, 80%, 85%, 0.25)`);
-		grad.addColorStop(0.5, `hsla(${this.hue}, 70%, 70%, 0.15)`);
-		grad.addColorStop(0.85, `hsla(${this.hue}, 60%, 60%, 0.12)`);
-		grad.addColorStop(1, `hsla(${this.hue}, 50%, 50%, 0.08)`);
-
-		ctx.beginPath();
-		ctx.arc(x, y, r, 0, Math.PI * 2);
-		ctx.fillStyle = grad;
-		ctx.fill();
-
-		// Rim/edge highlight
-		ctx.beginPath();
-		ctx.arc(x, y, r, 0, Math.PI * 2);
-		ctx.strokeStyle = `hsla(${this.hue}, 80%, 80%, 0.25)`;
-		ctx.lineWidth = 1.5;
-		ctx.stroke();
-
-		// Shine highlight (top-left)
-		const shineGrad = ctx.createRadialGradient(
-			x - r * 0.35, y - r * 0.35, r * 0.05,
-			x - r * 0.2, y - r * 0.2, r * 0.45
-		);
-		shineGrad.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
-		shineGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-		ctx.beginPath();
-		ctx.arc(x - r * 0.25, y - r * 0.25, r * 0.45, 0, Math.PI * 2);
-		ctx.fillStyle = shineGrad;
-		ctx.fill();
-
-		// Small secondary shine
-		ctx.beginPath();
-		ctx.arc(x + r * 0.3, y + r * 0.2, r * 0.1, 0, Math.PI * 2);
-		ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-		ctx.fill();
-	}
+	return false;
 }
 
 self.onmessage = (e) => {
@@ -133,13 +125,7 @@ self.onmessage = (e) => {
 			h = e.data.height;
 			canvas.width = w;
 			canvas.height = h;
-			// Seed some initial bubbles
-			for (let i = 0; i < 15; i++) {
-				const b = new Bubble();
-				b.y = Math.random() * h;
-				bubbles.push(b);
-			}
-			startAnimation();
+			animate();
 			break;
 		case 'resize':
 			w = e.data.width;
@@ -151,61 +137,175 @@ self.onmessage = (e) => {
 			mouse.x = e.data.x;
 			mouse.y = e.data.y;
 			break;
+		case 'click':
+			tryPop(e.data.x, e.data.y);
+			break;
+		case 'touchstart':
+			// Multi-touch: try to pop at each finger
+			if (e.data.touches) {
+				for (const t of e.data.touches) {
+					tryPop(t.x, t.y);
+				}
+			}
+			break;
 	}
 };
 
-function startAnimation() {
-	function render() {
-		if (!ctx) return;
-		time++;
+function drawBubble(b) {
+	if (b.alpha <= 0) return;
+	const t = frameCount;
 
-		// Clear with slight transparency for a dreamy trail on fragments
-		ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
-		ctx.fillRect(0, 0, w, h);
+	ctx.save();
+	ctx.globalAlpha = b.alpha * 0.85;
 
-		// Spawn new bubbles
-		spawnTimer++;
-		if (spawnTimer >= SPAWN_INTERVAL && bubbles.length < MAX_BUBBLES) {
-			spawnTimer = 0;
-			bubbles.push(new Bubble());
+	// Iridescent gradient
+	const shimmer = Math.sin(t * 0.03 + b.shimmerPhase) * 30;
+	const baseHue = (b.hue + shimmer + t * 0.2) % 360;
+
+	const gradient = ctx.createRadialGradient(
+		b.x - b.r * 0.3, b.y - b.r * 0.3, b.r * 0.1,
+		b.x, b.y, b.r
+	);
+	gradient.addColorStop(0, `hsla(${baseHue}, 80%, 85%, 0.3)`);
+	gradient.addColorStop(0.4, `hsla(${baseHue + 40}, 60%, 70%, 0.15)`);
+	gradient.addColorStop(0.8, `hsla(${baseHue + 80}, 50%, 60%, 0.08)`);
+	gradient.addColorStop(1, `hsla(${baseHue + 120}, 40%, 50%, 0.02)`);
+
+	ctx.beginPath();
+	ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+	ctx.fillStyle = gradient;
+	ctx.fill();
+
+	// Outline
+	ctx.strokeStyle = `hsla(${baseHue}, 60%, 75%, ${0.25 * b.alpha})`;
+	ctx.lineWidth = 1;
+	ctx.stroke();
+
+	// Highlight reflection
+	ctx.beginPath();
+	ctx.ellipse(
+		b.x - b.r * 0.25,
+		b.y - b.r * 0.3,
+		b.r * 0.3,
+		b.r * 0.15,
+		-0.5,
+		0, Math.PI * 2
+	);
+	ctx.fillStyle = `hsla(0, 0%, 100%, ${0.3 * b.alpha})`;
+	ctx.fill();
+
+	// Secondary reflection
+	ctx.beginPath();
+	ctx.arc(b.x + b.r * 0.15, b.y + b.r * 0.2, b.r * 0.08, 0, Math.PI * 2);
+	ctx.fillStyle = `hsla(0, 0%, 100%, ${0.15 * b.alpha})`;
+	ctx.fill();
+
+	ctx.restore();
+}
+
+function drawPopFx() {
+	for (let i = popFx.length - 1; i >= 0; i--) {
+		const p = popFx[i];
+		p.x += p.vx;
+		p.y += p.vy;
+		if (!p.isRing) p.vy += 0.03;
+		p.alpha -= p.decay;
+
+		if (p.alpha <= 0) {
+			popFx.splice(i, 1);
+			continue;
 		}
 
-		// Update and draw bubbles
-		bubbles = bubbles.filter(b => b.update());
-		for (const b of bubbles) {
-			b.draw(ctx);
+		if (p.isRing) {
+			p.ringRadius += 2;
+			ctx.beginPath();
+			ctx.arc(p.x, p.y, p.ringRadius, 0, Math.PI * 2);
+			ctx.strokeStyle = `hsla(${p.hue}, 70%, 75%, ${p.alpha})`;
+			ctx.lineWidth = 1.5;
+			ctx.stroke();
+		} else {
+			const h = p.iridescent ? (p.hue + frameCount * 3) % 360 : p.hue;
+			ctx.fillStyle = `hsla(${h}, 80%, 70%, ${p.alpha})`;
+			ctx.beginPath();
+			ctx.arc(p.x, p.y, p.size * p.alpha, 0, Math.PI * 2);
+			ctx.fill();
 		}
-
-		// Update and draw fragments
-		fragments = fragments.filter(f => {
-			f.life--;
-			f.vy += 0.12; // gravity
-			f.vx *= 0.97;
-			f.x += f.vx;
-			f.y += f.vy;
-			return f.life > 0;
-		});
-
-		for (const f of fragments) {
-			const progress = 1 - f.life / f.maxLife;
-			const alpha = 1 - progress;
-			const size = f.size * (1 - progress * 0.5);
-
-			ctx.save();
-			ctx.translate(f.x, f.y);
-			ctx.rotate(progress * Math.PI * 3);
-
-			// Glowing fragment
-			ctx.shadowColor = `hsl(${f.hue}, 100%, 70%)`;
-			ctx.shadowBlur = size * 2;
-			ctx.fillStyle = `hsla(${f.hue}, 100%, 75%, ${alpha})`;
-			ctx.fillRect(-size / 2, -size / 2, size, size);
-
-			ctx.shadowBlur = 0;
-			ctx.restore();
-		}
-
-		requestAnimationFrame(render);
 	}
-	requestAnimationFrame(render);
+}
+
+function animate() {
+	if (!ctx) return;
+	frameCount++;
+
+	// Background
+	ctx.fillStyle = 'rgba(8, 10, 20, 0.12)';
+	ctx.fillRect(0, 0, w, h);
+
+	// Spawn bubbles
+	if (frameCount % SPAWN_RATE === 0) {
+		createBubble();
+	}
+
+	// Update bubbles
+	for (let i = bubbles.length - 1; i >= 0; i--) {
+		const b = bubbles[i];
+
+		if (!b.alive) {
+			bubbles.splice(i, 1);
+			continue;
+		}
+
+		// Fade in
+		if (b.alpha < 1) b.alpha = Math.min(1, b.alpha + 0.02);
+
+		// Wobble
+		b.x += Math.sin(frameCount * b.wobbleSpeed + b.wobblePhase) * 0.5;
+		b.x += b.vx;
+		b.y += b.vy;
+
+		// Flee from mouse
+		const dx = b.x - mouse.x;
+		const dy = b.y - mouse.y;
+		const dist = Math.sqrt(dx * dx + dy * dy);
+		if (dist < b.r * 3 && dist > 0) {
+			const force = FLEE_STRENGTH * (1 - dist / (b.r * 3));
+			b.x += (dx / dist) * force;
+			b.y += (dy / dist) * force;
+		}
+
+		// Remove if off screen
+		if (b.y + b.r < -20 || b.x < -b.r * 2 || b.x > w + b.r * 2) {
+			bubbles.splice(i, 1);
+			continue;
+		}
+
+		drawBubble(b);
+	}
+
+	// Pop effects
+	drawPopFx();
+
+	// Score display
+	if (score > 0) {
+		if (scoreAlpha > 0.3) scoreAlpha -= 0.005;
+		ctx.save();
+		ctx.globalAlpha = scoreAlpha;
+		ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+		ctx.font = 'bold 20px sans-serif';
+		ctx.textAlign = 'center';
+		ctx.fillText('\uD83D\uDCAB ' + score, w / 2, 40);
+		ctx.textAlign = 'left';
+		ctx.restore();
+	}
+
+	// Hint text
+	if (bubbles.length === 0 && popFx.length === 0 && score === 0) {
+		ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+		ctx.font = '14px sans-serif';
+		ctx.textAlign = 'center';
+		ctx.fillText('Wait for bubbles, then pop them! \uD83E\uDEE7', w / 2, h / 2);
+		ctx.textAlign = 'left';
+	}
+
+	requestAnimationFrame(animate);
 }
