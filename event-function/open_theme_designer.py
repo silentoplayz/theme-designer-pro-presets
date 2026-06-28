@@ -1901,6 +1901,16 @@ class Event:
         .doc-accordion[open] summary { color: var(--accent); padding-bottom: 12px; }
         .doc-accordion summary svg { transition: 0.3s; opacity: 0.5; }
         .doc-accordion[open] summary svg { transform: rotate(180deg); opacity: 1; color: var(--accent); }
+        .doc-sub-accordion { border: 1px solid var(--border); border-radius: 10px; margin: 16px 0; background: rgba(255,255,255,0.015); overflow: hidden; }
+        body.light-mode .doc-sub-accordion { background: rgba(0,0,0,0.015); }
+        .doc-sub-accordion summary { padding: 14px 18px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; font-weight: 700; color: var(--text-main); font-size: 0.82rem; transition: 0.2s; letter-spacing: -0.01em; }
+        .doc-sub-accordion summary::-webkit-details-marker { display: none; }
+        .doc-sub-accordion summary:hover { color: var(--accent); }
+        .doc-sub-accordion[open] summary { color: var(--accent); border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); }
+        body.light-mode .doc-sub-accordion[open] summary { background: rgba(0,0,0,0.02); }
+        .doc-sub-accordion summary svg, .doc-sub-accordion summary i[data-icon] { transition: 0.3s; opacity: 0.4; font-size: 0.7rem; }
+        .doc-sub-accordion[open] summary svg, .doc-sub-accordion[open] summary i[data-icon] { transform: rotate(180deg); opacity: 0.8; color: var(--accent); }
+        .doc-sub-accordion .doc-sub-inner { padding: 18px 18px 8px; }
         .doc-inner { padding: 0 0 32px; color: var(--text-muted); font-size: 1.05rem; line-height: 1.85; }
         
         .doc-inner h4 { font-size: 1.1rem; color: var(--text-main); margin: 32px 0 16px; font-weight: 700; }
@@ -2681,7 +2691,9 @@ class Event:
 
                         </ul>
 
-                        <h4 style="font-size: 0.78rem; font-weight: 800; margin: 24px 0 12px; color: var(--text-main); letter-spacing: -0.01em;">Canvas Worker Protocol</h4>
+                        <details class="doc-sub-accordion">
+                            <summary>Canvas Worker Protocol <i data-icon="chevron"></i></summary>
+                            <div class="doc-sub-inner">
                         <p>Your Canvas FX script runs inside a <b>Web Worker</b> with an <code>OffscreenCanvas</code>. The runtime communicates with your script using a structured message protocol via <code>self.onmessage</code>. Understanding this contract is essential for writing reliable animations.</p>
 
                         <p class="doc-subheading">Inbound Messages (Runtime &rarr; Your Script)</p>
@@ -2825,8 +2837,12 @@ function animate() {
   // Your drawing code here
   requestAnimationFrame(animate);
 }</code></pre>
+                            </div>
+                        </details>
 
-                        <h4 style="font-size: 0.78rem; font-weight: 800; margin: 24px 0 12px; color: var(--text-main); letter-spacing: -0.01em;">Context-Aware Animations</h4>
+                        <details class="doc-sub-accordion">
+                            <summary>Context-Aware Animations <i data-icon="chevron"></i></summary>
+                            <div class="doc-sub-inner">
                         <p>The Canvas FX engine includes a built-in <b>context data channel</b> that lets your animation react to the live state of the chat conversation. This enables a powerful category of themes &mdash; visuals that <b>grow, fill, or evolve</b> as the user&rsquo;s context window fills up, providing an ambient visual indicator of how much context remains.</p>
 
                         <p class="doc-subheading">How It Works</p>
@@ -2940,6 +2956,8 @@ window.dispatchEvent(new CustomEvent('owui-canvas-context', {
   }
 }));</code></pre>
                         <p>The engine forwards the entire <code>detail</code> object to your Canvas FX script as a <code>context</code> message. Your script can read any custom fields you include.</p>
+                            </div>
+                        </details>
 
                     </div>
                 </details>
@@ -3056,7 +3074,9 @@ window.dispatchEvent(new CustomEvent('owui-canvas-context', {
                     <div class="doc-inner">
                         <p>The <b>Gradient</b> tab provides a dedicated visual gradient builder for applying CSS gradient backgrounds to your Open WebUI instance. The builder automatically generates all required CSS — including structural transparency rules, sidebar/textarea backdrop blur, and chat overlay blending — so you don't need to write any CSS manually.</p>
 
-                        <h4>Gradient Builder Controls</h4>
+                        <details class="doc-sub-accordion">
+                            <summary>Gradient Builder Controls <i data-icon="chevron"></i></summary>
+                            <div class="doc-sub-inner">
                         <ul>
                             <li><b>Gradient Type:</b> Choose between <b>Linear</b> (directional), <b>Radial</b> (center-outward), and <b>Mesh</b> (multi-point radial overlay) gradient modes.</li>
                             <li><b>Color Stops:</b> Add, remove, and reorder color stops with interactive swatches and position sliders. Each stop has a color picker and a position value (0–100%).</li>
@@ -3069,13 +3089,22 @@ window.dispatchEvent(new CustomEvent('owui-canvas-context', {
                             <li><b>Reset / Random:</b> Clear all stops or generate a randomized gradient.</li>
                         </ul>
 
-                        <h4>How It Works</h4>
+                            </div>
+                        </details>
+
+                        <details class="doc-sub-accordion">
+                            <summary>How It Works & Conflict Detection <i data-icon="chevron"></i></summary>
+                            <div class="doc-sub-inner">
                         <p>When the gradient is enabled (with at least 2 color stops), the designer automatically generates a <i>Structural Layer</i> that makes all layout containers transparent so the gradient shows through. It also adds semi-opaque backdrop-blur rules to the sidebar and textarea for readability, and overrides the chat overlay for proper blending.</p>
 
-                        <h4>Conflict Detection</h4>
                         <p>If your <b>Custom CSS Snippet</b> already contains gradient <code>background-image</code> rules, the builder displays a warning banner. Because the Custom CSS Snippet is injected <em>after</em> the Gradient Builder output in the final stylesheet, the Custom CSS gradient will <b>override</b> the builder's gradient via CSS cascade. To use the Gradient Builder exclusively, remove or disable the conflicting rules in your Custom CSS Snippet.</p>
 
-                        <h4>Quick Presets</h4>
+                            </div>
+                        </details>
+
+                        <details class="doc-sub-accordion">
+                            <summary>Quick Presets <i data-icon="chevron"></i></summary>
+                            <div class="doc-sub-inner">
                         <p>The builder includes 12 ready-to-use gradient presets. Click any preset to instantly apply its color stops, type, and direction:</p>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
@@ -3103,6 +3132,9 @@ window.dispatchEvent(new CustomEvent('owui-canvas-context', {
                             </table>
                         </div>
 
+                            </div>
+                        </details>
+
                         <p style="margin-top: 12px; font-size: 0.7rem; color: var(--text-muted); line-height: 1.5;"><b>Advanced:</b> For more complex gradient setups beyond what the builder offers, you can also write gradient CSS manually in the <b>Style Overrides</b> tab using Custom CSS. Note that because Custom CSS is injected after the builder's output, it will override (not layer with) the builder's gradient if both target <code>background-image</code> on the same element.</p>
                     </div>
                 </details>
@@ -3112,7 +3144,9 @@ window.dispatchEvent(new CustomEvent('owui-canvas-context', {
                     <div class="doc-inner">
                         <p>When you enable a <b>Canvas FX animation</b> or a <b>Gradient Background</b>, the designer automatically generates a set of CSS rules called the <i>Structural Layer</i>. This layer makes the native Open WebUI UI panels transparent so the background effect shines through, while intelligently preserving opaque backgrounds on overlay UI elements (dropdown menus, modals, dialogs) for text readability.</p>
 
-                        <h4>The 5 Rendering Layers (Back to Front)</h4>
+                        <details class="doc-sub-accordion">
+                            <summary>The 5 Rendering Layers (Back to Front) <i data-icon="chevron"></i></summary>
+                            <div class="doc-sub-inner">
                         <p>When Canvas FX and/or Gradient Background are active, the final visual output is composed of 5 distinct layers stacked using CSS <code>z-index</code> and <code>position: fixed</code>:</p>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
@@ -3133,7 +3167,12 @@ window.dispatchEvent(new CustomEvent('owui-canvas-context', {
                             </table>
                         </div>
 
-                        <h4>Overlay UI Protection</h4>
+                            </div>
+                        </details>
+
+                        <details class="doc-sub-accordion">
+                            <summary>Overlay UI Protection <i data-icon="chevron"></i></summary>
+                            <div class="doc-sub-inner">
                         <p>Dropdown menus, modal dialogs, and listbox selectors are <b>portaled</b> outside the <code>.app</code> wrapper &mdash; they are appended directly to <code>&lt;body&gt;</code>. To ensure these remain readable against canvas/gradient backgrounds, the structural layer uses a multi-pronged strategy:</p>
                         <ul>
                             <li><b>Zero-specificity transparency:</b> The broad <code>[class*="bg-gray-"]</code> transparency rule is wrapped in CSS <code>:where()</code>, giving it zero specificity contribution. This means <i>any</i> selector with normal specificity can override it.</li>
@@ -3142,7 +3181,12 @@ window.dispatchEvent(new CustomEvent('owui-canvas-context', {
                         </ul>
                         <p style="font-size: 0.7rem; color: var(--text-muted); line-height: 1.5;"><b>Note:</b> The <code>[class*="bg-white"]</code> attribute selector is intentionally <b>not</b> included in the transparency rules. Elements with <code>bg-white</code> classes in Open WebUI are almost always interactive widgets (toggle indicators, button styling, card backgrounds), not structural layout wrappers.</p>
 
-                        <h4>What Triggers the Structural Layer?</h4>
+                            </div>
+                        </details>
+
+                        <details class="doc-sub-accordion">
+                            <summary>What Triggers the Structural Layer? <i data-icon="chevron"></i></summary>
+                            <div class="doc-sub-inner">
                         <p>The structural transparency rules are <b>only</b> emitted when at least one of the following is true for the active mode:</p>
                         <ul>
                             <li><b>Canvas FX</b> is enabled and has a non-empty script, <b>or</b></li>
@@ -3150,7 +3194,12 @@ window.dispatchEvent(new CustomEvent('owui-canvas-context', {
                         </ul>
                         <p>If neither is active, the designer emits simple opaque <code>background-color</code> rules for <code>body</code>, <code>#sidebar</code>, and <code>textarea</code> — no transparency is applied.</p>
 
-                        <h4>What Can Conflict with Transparency?</h4>
+                            </div>
+                        </details>
+
+                        <details class="doc-sub-accordion">
+                            <summary>What Can Conflict with Transparency? <i data-icon="chevron"></i></summary>
+                            <div class="doc-sub-inner">
                         <ul>
                             <li><b>Custom CSS setting opaque backgrounds:</b> If your Custom CSS Snippet sets <code>background-color</code> on <code>.app</code>, <code>main</code>, or other layout containers, it can override the structural transparency and block the background effect from showing through. To fix this, set those backgrounds to <code>transparent</code> in your Custom CSS.</li>
                             <li><b>Open WebUI updates:</b> If Open WebUI changes its class names or DOM structure (e.g., renaming <code>.app</code> to something else), the structural layer selectors may stop matching. This can cause panels to revert to opaque backgrounds, hiding the canvas or gradient behind them.</li>
@@ -3158,7 +3207,12 @@ window.dispatchEvent(new CustomEvent('owui-canvas-context', {
                             <li><b>Third-party extensions or custom elements:</b> Elements using <code>bg-gray-*</code> classes that are not <code>button</code>, <code>a</code>, <code>input</code>, <code>select</code>, <code>label</code>, or <code>span</code> will be made transparent. If a third-party extension injects custom UI with gray backgrounds, it may become transparent. Use the Style Overrides tab to restore specific elements if needed.</li>
                         </ul>
 
-                        <h4>CSS Output Order</h4>
+                            </div>
+                        </details>
+
+                        <details class="doc-sub-accordion">
+                            <summary>CSS Output Order <i data-icon="chevron"></i></summary>
+                            <div class="doc-sub-inner">
                         <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85;">Understanding the injection order helps debug cascade conflicts. The final CSS is assembled in this order:</p>
                         <ol style="font-size: 0.72rem; line-height: 1.7; padding-left: 18px;">
                             <li><b>OKLCH Variable Declarations</b> — <code>--color-gray-*</code> palette ramps per mode</li>
@@ -3168,6 +3222,8 @@ window.dispatchEvent(new CustomEvent('owui-canvas-context', {
                             <li><b>Custom CSS Snippet</b> — your raw CSS (last = highest cascade priority)</li>
                         </ol>
                         <p style="font-size: 0.68rem; color: var(--text-muted); margin-top: 6px;">Because Custom CSS is injected last, it always wins any cascade tie — this is why a gradient <code>background-image</code> in Custom CSS will override the Gradient Builder's output.</p>
+                            </div>
+                        </details>
                     </div>
                 </details>
 
