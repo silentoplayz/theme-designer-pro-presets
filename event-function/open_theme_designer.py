@@ -1569,8 +1569,8 @@ class Event:
         .code-container { display: flex; flex-direction: column; gap: 20px; height: 100%; }
         
         /* Native-Style OWUI Code Blocks */
-        .owui-code-block { display: flex; flex-direction: column; background: #000000; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; flex: 1; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        body.light-mode .owui-code-block { background: var(--bg-surface); border-color: var(--lm-shadow); box-shadow: 0 4px 12px var(--lm-border-subtle); }
+        .owui-code-block { display: flex; flex-direction: column; background: #000000; border-radius: 12px; border: none; overflow: hidden; flex: 1; box-shadow: 0 4px 12px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(255,255,255,0.1); }
+        body.light-mode .owui-code-block { background: var(--bg-surface); box-shadow: 0 4px 12px var(--lm-border-subtle), inset 0 0 0 1px var(--lm-shadow); }
         
         .owui-code-header { display: flex; justify-content: space-between; align-items: center; padding: 6px 14px; background: rgba(255, 255, 255, 0.03); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
         body.light-mode .owui-code-header { background: var(--lm-bg-tint); border-bottom-color: var(--lm-border-subtle); }
@@ -2341,19 +2341,28 @@ class Event:
                         <h4>Changing Fonts</h4>
                         <p>You can change the global font family for your entire Open WebUI instance by pasting a CSS rule into the editor. Because Open WebUI relies on Tailwind utility classes, using the global selector with <code>!important</code> is the cleanest way to force a unified look. Here are a few quick examples:</p>
                         <p style="font-size:0.7rem; font-weight:700; margin-top:10px; margin-bottom:4px; opacity:0.9;">Native OS (San Francisco / Segoe UI)</p>
-                        <pre class="doc-pre-sm"><code>body, input, textarea, button, select, * {
+                        <div style="position: relative;">
+                        <pre class="doc-pre-sm" id="font-example-native"><code>body, input, textarea, button, select, * {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, sans-serif !important;
   letter-spacing: -0.01em !important;
 }</code></pre>
+                            <button class="owui-code-btn" style="position: absolute; top: 6px; right: 6px; font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('font-example-native').textContent).then(()=>showToast('Copied to clipboard'))">Copy</button>
+                        </div>
                         <p style="font-size:0.7rem; font-weight:700; margin-bottom:4px; opacity:0.9;">Hacker Terminal (Monospace)</p>
-                        <pre class="doc-pre-sm"><code>body, input, textarea, button, select, * {
+                        <div style="position: relative;">
+                        <pre class="doc-pre-sm" id="font-example-mono"><code>body, input, textarea, button, select, * {
   font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Courier New', monospace !important;
 }</code></pre>
+                            <button class="owui-code-btn" style="position: absolute; top: 6px; right: 6px; font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('font-example-mono').textContent).then(()=>showToast('Copied to clipboard'))">Copy</button>
+                        </div>
                         <p style="font-size:0.7rem; font-weight:700; margin-bottom:4px; opacity:0.9;">Editorial (Serif)</p>
-                        <pre class="doc-pre-sm"><code>body, input, textarea, button, select, * {
+                        <div style="position: relative;">
+                        <pre class="doc-pre-sm" id="font-example-serif"><code>body, input, textarea, button, select, * {
   font-family: 'Georgia', 'Cambria', 'Times New Roman', serif !important;
   line-height: 1.65 !important;
 }</code></pre>
+                            <button class="owui-code-btn" style="position: absolute; top: 6px; right: 6px; font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('font-example-serif').textContent).then(()=>showToast('Copied to clipboard'))">Copy</button>
+                        </div>
                     </div>
                 </details>
 
@@ -2757,9 +2766,9 @@ function animate() {
 
                         <div class="doc-subheading">🚀 Quick Start — Import Everything at Once</div>
                         <p>Open any Import modal in Theme Designer Pro, paste this URL, and click <b>Load URL</b> — all animations, CSS, themes, and gradients are imported in one shot:</p>
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
-                            <code class="doc-pre" style="flex: 1; margin: 0; font-size: 0.62rem; user-select: all; word-break: break-all;" id="url-bundle-all">https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/everything.json</code>
-                            <button class="btn" style="flex-shrink: 0; font-size: 0.6rem; padding: 6px 12px;" onclick="navigator.clipboard.writeText(document.getElementById('url-bundle-all').textContent).then(()=>showToast('Copied URL'))">Copy</button>
+                        <div style="position: relative; margin-bottom: 16px;">
+                            <code class="doc-pre" style="display: block; margin: 0; font-size: 0.62rem; user-select: all; word-break: break-all; padding-right: 60px;" id="url-bundle-all">https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/everything.json</code>
+                            <button class="owui-code-btn" style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('url-bundle-all').textContent).then(()=>showToast('Copied URL'))">Copy</button>
                         </div>
 
                         <div class="doc-subheading">📦 Import by Category</div>
@@ -2767,23 +2776,31 @@ function animate() {
                         <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span style="font-size: 0.65rem; font-weight: 700; color: var(--text-main); min-width: 100px;">🎨 Themes</span>
-                                <code class="doc-pre" style="flex: 1; margin: 0; font-size: 0.6rem; user-select: all; word-break: break-all;" id="url-bundle-themes">https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/themes-all.json</code>
-                                <button class="btn" style="flex-shrink: 0; font-size: 0.6rem; padding: 6px 12px;" onclick="navigator.clipboard.writeText(document.getElementById('url-bundle-themes').textContent).then(()=>showToast('Copied URL'))">Copy</button>
+                                <div style="position: relative; flex: 1;">
+                                    <code class="doc-pre" style="display: block; margin: 0; font-size: 0.6rem; user-select: all; word-break: break-all; padding-right: 60px;" id="url-bundle-themes">https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/themes-all.json</code>
+                                    <button class="owui-code-btn" style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('url-bundle-themes').textContent).then(()=>showToast('Copied URL'))">Copy</button>
+                                </div>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span style="font-size: 0.65rem; font-weight: 700; color: var(--text-main); min-width: 100px;">✨ Canvas FX</span>
-                                <code class="doc-pre" style="flex: 1; margin: 0; font-size: 0.6rem; user-select: all; word-break: break-all;" id="url-bundle-canvas">https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/canvas-fx-all.json</code>
-                                <button class="btn" style="flex-shrink: 0; font-size: 0.6rem; padding: 6px 12px;" onclick="navigator.clipboard.writeText(document.getElementById('url-bundle-canvas').textContent).then(()=>showToast('Copied URL'))">Copy</button>
+                                <div style="position: relative; flex: 1;">
+                                    <code class="doc-pre" style="display: block; margin: 0; font-size: 0.6rem; user-select: all; word-break: break-all; padding-right: 60px;" id="url-bundle-canvas">https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/canvas-fx-all.json</code>
+                                    <button class="owui-code-btn" style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('url-bundle-canvas').textContent).then(()=>showToast('Copied URL'))">Copy</button>
+                                </div>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span style="font-size: 0.65rem; font-weight: 700; color: var(--text-main); min-width: 100px;">🎨 CSS Presets</span>
-                                <code class="doc-pre" style="flex: 1; margin: 0; font-size: 0.6rem; user-select: all; word-break: break-all;" id="url-bundle-css">https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/css-presets-all.json</code>
-                                <button class="btn" style="flex-shrink: 0; font-size: 0.6rem; padding: 6px 12px;" onclick="navigator.clipboard.writeText(document.getElementById('url-bundle-css').textContent).then(()=>showToast('Copied URL'))">Copy</button>
+                                <div style="position: relative; flex: 1;">
+                                    <code class="doc-pre" style="display: block; margin: 0; font-size: 0.6rem; user-select: all; word-break: break-all; padding-right: 60px;" id="url-bundle-css">https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/css-presets-all.json</code>
+                                    <button class="owui-code-btn" style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('url-bundle-css').textContent).then(()=>showToast('Copied URL'))">Copy</button>
+                                </div>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span style="font-size: 0.65rem; font-weight: 700; color: var(--text-main); min-width: 100px;">🌈 Gradients</span>
-                                <code class="doc-pre" style="flex: 1; margin: 0; font-size: 0.6rem; user-select: all; word-break: break-all;" id="url-bundle-gradients">https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/gradients-all.json</code>
-                                <button class="btn" style="flex-shrink: 0; font-size: 0.6rem; padding: 6px 12px;" onclick="navigator.clipboard.writeText(document.getElementById('url-bundle-gradients').textContent).then(()=>showToast('Copied URL'))">Copy</button>
+                                <div style="position: relative; flex: 1;">
+                                    <code class="doc-pre" style="display: block; margin: 0; font-size: 0.6rem; user-select: all; word-break: break-all; padding-right: 60px;" id="url-bundle-gradients">https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/gradients-all.json</code>
+                                    <button class="owui-code-btn" style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('url-bundle-gradients').textContent).then(()=>showToast('Copied URL'))">Copy</button>
+                                </div>
                             </div>
                         </div>
 
@@ -2821,7 +2838,8 @@ function animate() {
                         <p>Because this function injects a bootloader script directly into your server's <code>index.html</code> file, <b>simply disabling or removing the event function will not remove the theme engine from your interface.</b> Follow these steps for a complete removal:</p>
                         <h4>Step 1: Purge Browser LocalStorage</h4>
                         <p>The easiest way is to use the <b>Factory Reset</b> button in the <b>Danger Zone</b> section below (Section 20). Alternatively, open your Open WebUI instance, press <b>F12</b> to open Developer Tools, go to the <b>Console</b> tab, and paste:</p>
-                        <pre class="doc-pre"><code>['owui_dev_theme_v1', 'owui_dev_theme_v1_css',
+                        <div style="position: relative;">
+                        <pre class="doc-pre" id="purge-localstorage-code"><code>['owui_dev_theme_v1', 'owui_dev_theme_v1_css',
  'owui_theme_snapshots',
  'owui_canvas_presets', 'owui_css_presets', 'owui_gradient_presets',
  'owui_canvas_last_mode', 'owui_canvas_last_script',
@@ -2829,6 +2847,8 @@ function animate() {
   localStorage.removeItem(k); console.log('Purged: ' + k);
 }); sessionStorage.removeItem('owui_theme_draft_mode');
 location.reload();</code></pre>
+                            <button class="owui-code-btn" style="position: absolute; top: 8px; right: 8px; font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('purge-localstorage-code').textContent).then(()=>showToast('Copied to clipboard'))">Copy</button>
+                        </div>
                         <h4>Step 2: Remove Server-Side Theme Files</h4>
                         <p>Delete the theme files from the server's data directory:</p>
                         <ul>
