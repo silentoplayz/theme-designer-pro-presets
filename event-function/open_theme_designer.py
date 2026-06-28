@@ -214,6 +214,64 @@ class Event:
                 }
             }
             
+            // Token usage interceptor — monkey-patches fetch to extract exact
+            // token counts from /chat/completions SSE streaming responses.
+            // Dispatches 'owui-canvas-context' events which the context observer
+            // already listens for — zero coupling between the two systems.
+            (function() {
+                if (window._owuiTokenInterceptor) return;
+                window._owuiTokenInterceptor = true;
+                var _origFetch = window.fetch;
+                window.fetch = function() {
+                    var args = arguments;
+                    var url = typeof args[0] === 'string' ? args[0] : (args[0] && args[0].url) || '';
+                    var result = _origFetch.apply(this, args);
+                    if (url.indexOf('/chat/completions') === -1) return result;
+                    return result.then(function(response) {
+                        if (!response.body || typeof TransformStream === 'undefined') return response;
+                        try {
+                            var decoder = new TextDecoder();
+                            var buf = '';
+                            var transform = new TransformStream({
+                                transform: function(chunk, controller) {
+                                    controller.enqueue(chunk);
+                                    buf += decoder.decode(chunk, { stream: true });
+                                    var lines = buf.split('\\n');
+                                    buf = lines.pop();
+                                    for (var i = 0; i < lines.length; i++) {
+                                        var line = lines[i].trim();
+                                        if (line.indexOf('"usage"') === -1) continue;
+                                        var jsonStr = line;
+                                        if (line.indexOf('data: ') === 0) jsonStr = line.slice(6);
+                                        if (jsonStr === '[DONE]') continue;
+                                        try {
+                                            var d = JSON.parse(jsonStr);
+                                            if (d.usage && d.usage.total_tokens) {
+                                                window.dispatchEvent(new CustomEvent('owui-canvas-context', {
+                                                    detail: {
+                                                        exactTokens: d.usage.total_tokens,
+                                                        promptTokens: d.usage.prompt_tokens || 0,
+                                                        completionTokens: d.usage.completion_tokens || 0,
+                                                        source: 'api'
+                                                    }
+                                                }));
+                                            }
+                                        } catch(x) {}
+                                    }
+                                },
+                                flush: function() { buf = ''; }
+                            });
+                            var newBody = response.body.pipeThrough(transform);
+                            return new Response(newBody, {
+                                status: response.status,
+                                statusText: response.statusText,
+                                headers: response.headers
+                            });
+                        } catch(x) { return response; }
+                    });
+                };
+            })();
+            
             // Context observer for Canvas FX — watches chat DOM for message
             // count/size and sends periodic { type: 'context' } updates to the
             // Canvas FX Worker/handler. Enables context-aware animations.
@@ -2638,15 +2696,28 @@ function animate() {
                         <p>The Canvas FX engine includes a built-in <b>context data channel</b> that lets your animation react to the live state of the chat conversation. This enables a powerful category of themes &mdash; visuals that <b>grow, fill, or evolve</b> as the user&rsquo;s context window fills up, providing an ambient visual indicator of how much context remains.</p>
 
                         <p class="doc-subheading">How It Works</p>
-                        <p>The engine&rsquo;s bootloader automatically observes Open WebUI&rsquo;s chat DOM using a <code>MutationObserver</code> on the <code>#messages-container</code> element. When messages are added, removed, or change (including during streaming responses), the engine scans all <code>.chat-user</code> and <code>.chat-assistant</code> content areas, measures the total character count, and sends a <code>context</code> message to your Canvas FX script:</p>
-                        <pre class="doc-pre"><code>// Sent automatically by the engine (debounced to every ~2 seconds)
-{ type: 'context', messages: 8, chars: 12400, estimatedTokens: 3100 }</code></pre>
+                        <p>The engine provides <b>two complementary data sources</b> for context tracking, both delivered as <code>context</code> messages to your script:</p>
+
+                        <p style="margin: 8px 0 4px; font-weight: 600; font-size: 0.72rem; color: var(--text-main);">1. DOM Observer (continuous, during streaming)</p>
+                        <p>A <code>MutationObserver</code> on the <code>#messages-container</code> element watches for message changes. When content updates (including during streaming), it scans all <code>.chat-user</code> and <code>.chat-assistant</code> areas and sends:</p>
+                        <pre class="doc-pre"><code>{ type: 'context', messages: 8, chars: 12400, estimatedTokens: 3100 }</code></pre>
                         <ul>
                             <li><code>messages</code> &mdash; the number of visible message elements in the chat</li>
                             <li><code>chars</code> &mdash; total character count across all user and assistant messages</li>
                             <li><code>estimatedTokens</code> &mdash; rough token estimate (<code>chars / 4</code>)</li>
                         </ul>
-                        <p>The observer is <b>navigation-aware</b>: when the user switches chats, the engine detects the container being replaced and sends a zero-state (<code>messages: 0, chars: 0, estimatedTokens: 0</code>) before re-attaching to the new chat.</p>
+
+                        <p style="margin: 12px 0 4px; font-weight: 600; font-size: 0.72rem; color: var(--text-main);">2. Fetch Interceptor (exact, after each response)</p>
+                        <p>The engine also intercepts <code>/chat/completions</code> fetch responses via a transparent <code>TransformStream</code>. When the API&rsquo;s SSE stream includes <code>usage</code> data, the exact token counts are forwarded:</p>
+                        <pre class="doc-pre"><code>{ type: 'context', exactTokens: 3847, promptTokens: 2100, completionTokens: 1747, source: 'api' }</code></pre>
+                        <ul>
+                            <li><code>exactTokens</code> &mdash; <code>usage.total_tokens</code> from the API response</li>
+                            <li><code>promptTokens</code> / <code>completionTokens</code> &mdash; exact breakdown</li>
+                            <li><code>source</code> &mdash; always <code>'api'</code> to distinguish from DOM estimates</li>
+                        </ul>
+                        <p>Your script receives both. The DOM observer provides <b>continuous</b> updates during streaming (character count grows in real-time), while the fetch interceptor provides an <b>exact snapshot</b> after each response completes. Prefer <code>exactTokens</code> when available.</p>
+
+                        <p>Both observers are <b>navigation-aware</b>: when the user switches chats, the DOM observer sends a zero-state before re-attaching to the new chat.</p>
 
                         <p class="doc-subheading">Building a Growth Animation</p>
                         <p>The core pattern is simple: compute a <b>growth ratio</b> (0&ndash;1) from the estimated tokens vs. your model&rsquo;s context limit, then map that ratio to visual stages in your animation. Here&rsquo;s the recommended approach:</p>
@@ -2657,7 +2728,8 @@ let targetRatio = 0;         // raw target from context events
 
 // In your message handler:
 case 'context':
-  const tokens = e.data.estimatedTokens || 0;
+  // Prefer exact API tokens when available
+  const tokens = e.data.exactTokens ?? e.data.estimatedTokens ?? 0;
   targetRatio = Math.min(1, (tokens / MAX_TOKENS) * GROWTH_SPEED);
   break;
 
