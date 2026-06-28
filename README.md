@@ -29,7 +29,7 @@ theme-designer-pro-presets/
 ├── canvas-fx/               # Canvas FX animation scripts (.js)
 ├── css-presets/              # CSS-only styling presets (.css)
 ├── docs/                    # GitHub Pages preset catalog
-├── event-function/          # Open Theme Designer event function + documentation
+├── event-function/          # Theme Designer Pro event function + documentation
 ├── gradients/               # Gradient preset packs (.json)
 │   ├── animated/            #   Animated/transitioning gradients
 │   │   ├── linear/
@@ -50,7 +50,7 @@ theme-designer-pro-presets/
 └── README.md
 ```
 
-> **Looking for the theming tools?** The Theme Designer Pro tool lives in [`tool/`](tool/) and the Open Theme Designer event function lives in [`event-function/`](event-function/).
+> **Looking for the theming tools?** The Theme Designer Pro tool lives in [`tool/`](tool/) and the Theme Designer Pro event function lives in [`event-function/`](event-function/).
 
 ---
 
@@ -132,7 +132,7 @@ The Theme Designer Pro Open WebUI **tool** — invoked via AI chat, renders insi
 
 ### ⚡ Event Function ([`event-function/`](event-function/))
 
-The Open Theme Designer **event function** — a standalone admin page variant with server-side persistence and real-time SSE push to all connected users. See [`event-function/README.md`](event-function/README.md) for installation and how it differs from the tool.
+The Theme Designer Pro **event function** — a standalone admin page variant with server-side persistence and real-time SSE push to all connected users. See [`event-function/README.md`](event-function/README.md) for installation and how it differs from the tool.
 
 ---
 

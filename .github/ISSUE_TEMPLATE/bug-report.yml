@@ -10,7 +10,7 @@ body:
         - Preset file (Canvas FX, CSS, Theme, or Gradient)
         - Bundle (import not working)
         - Theme Designer Pro (Tool)
-        - Open Theme Designer (Event Function)
+        - Theme Designer Pro (Event Function)
         - Build tooling (scripts)
         - Validation (false positive/negative)
         - Documentation
@@ -53,5 +53,5 @@ body:
   - type: input
     id: tdp-version
     attributes:
-      label: Theme Designer Pro / Open Theme Designer Version
-      placeholder: "e.g. 1.7.0 (Tool) or 2.0.0 (Event Function)"
+      label: Theme Designer Pro Version
+      placeholder: "e.g. 1.7.0 (Tool) or 1.0.0 (Event Function)"

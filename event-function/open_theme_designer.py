@@ -1,5 +1,5 @@
 """
-title: Open Theme Designer
+title: Theme Designer Pro
 description: Instance-wide theme designer for Open WebUI. Registers an interactive UI at /api/v1/theme-designer and persists themes server-side as CSS injected into index.html — all users see the admin's theme immediately.
 author: @G30
 author_url: https://openwebui.com/u/g30
@@ -66,7 +66,7 @@ class Event:
         designer_url: str = Field(
             default=ROUTE_PATH,
             description=(
-                "🎨 **[Open Theme Designer](/api/v1/theme-designer)** — "
+                "🎨 **[Theme Designer Pro](/api/v1/theme-designer)** — "
                 "The URL path where the designer UI is served. "
                 "Change this to serve the designer at a custom path. "
                 "Requires a server restart or event trigger to take effect."
@@ -1134,7 +1134,7 @@ class Event:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Open Theme Designer</title>
+    <title>Theme Designer Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -1818,7 +1818,7 @@ class Event:
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
             </svg>
-            Open Theme Designer | v{VERSION}
+            Theme Designer Pro | v{VERSION}
         </h1>
         <span class="inactive-badge" id="inactive-badge" data-tooltip="The Theme Active valve is OFF — changes are saved but not pushed to users"><span class="inactive-dot"></span> Theme Inactive</span>
         <div class="mode-toggle" id="global-mode-toggle" role="radiogroup" aria-label="Theme mode">
@@ -2227,7 +2227,7 @@ class Event:
                 <details class="doc-accordion">
                     <summary>1. Getting Started & Architecture <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
-                        <p>Open Theme Designer is an <b>Event Function</b> that registers a standalone admin page at <code>{ROUTE_BASE}</code>. Admins access the designer by navigating directly to that URL (configurable via the <b>Designer URL</b> valve). It uses a multi-layer schema separating core color logic from manual overrides, custom CSS, and structural transparency, and persists themes server-side so they apply to <b>all users</b> in real-time.</p>
+                        <p>Theme Designer Pro is an <b>Event Function</b> that registers a standalone admin page at <code>{ROUTE_BASE}</code>. Admins access the designer by navigating directly to that URL (configurable via the <b>Designer URL</b> valve). It uses a multi-layer schema separating core color logic from manual overrides, custom CSS, and structural transparency, and persists themes server-side so they apply to <b>all users</b> in real-time.</p>
                         <ul>
                             <li><b>Admin-Only Design Page:</b> Only administrators can access the designer page. The generated theme is served to all users via a bootloader script injected into <code>index.html</code>.</li>
                             <li><b>Persistence Engine:</b> Themes are persisted server-side in <code>DATA_DIR/theme/</code> as <code>open_theme_designer.css</code>, <code>open_theme_designer.json</code>, and <code>open_theme_designer_library.json</code>. On page load, the server embeds a safe subset of theme CSS inline into <code>index.html</code> (with structural/gradient rules stripped to prevent a white flash before canvas loads). The bootloader then fetches the full CSS from <code>{ROUTE_BASE}/theme.css</code> and applies it — including the deferred structural/gradient rules. State JSON is also embedded directly into <code>index.html</code> &mdash; eliminating an async fetch for state data. The system uses <code>localStorage</code> only as a write-through backup for offline/Watchtower recovery scenarios.</li>
@@ -2248,7 +2248,7 @@ class Event:
                             <li><b>Legacy Data Migration:</b> Upgrading from an older version? The designer automatically detects legacy data structures and gracefully migrates your saved snapshots and active themes to the latest format without data loss.</li>
                             <li><b>Live Cross-UI Detection:</b> The designer actively listens to your environment. If you change the Open WebUI theme natively (via OS settings or keyboard shortcuts) while the designer is open, it will instantly switch its internal mode tab to match your live environment.</li>
                             <li><b>Valves:</b> Admins can configure feature gating (enable/disable Canvas FX, Custom CSS, Gradient Builder, auth page theming, URL imports) and the designer URL via Valves in the function settings. The <b>Designer URL</b> valve must start with <code>/api/v1/</code> — if it doesn't, the system auto-corrects it to prevent the SPA catch-all from intercepting the route.</li>
-                            <li><b>Self-Adapting UI &amp; Contrast Protection:</b> The Open Theme Designer interface dynamically themes <i>itself</i> based on the colors you pick. It includes built-in contrast protection, automatically shifting text and border colors to remain legible if you create ultra-washed-out palettes.</li>
+                            <li><b>Self-Adapting UI &amp; Contrast Protection:</b> The Theme Designer Pro interface dynamically themes <i>itself</i> based on the colors you pick. It includes built-in contrast protection, automatically shifting text and border colors to remain legible if you create ultra-washed-out palettes.</li>
                             <li><b>Fully Responsive:</b> The designer interface seamlessly adapts to mobile screens so you can tweak your theme on the go.</li>
                             <li><b>Canvas FX Security:</b> Canvas FX scripts are arbitrary JavaScript executed in all users' browsers. Only administrators can set Canvas FX scripts through the designer. <b>Never paste untrusted scripts</b> — always review Canvas FX code before enabling it, especially scripts obtained from third parties.</li>
                         </ul>
@@ -2494,7 +2494,7 @@ function animate() {
                 <details class="doc-accordion">
                     <summary>9. Libraries & Data Management <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
-                        <p>Open Theme Designer features isolated libraries for Themes, Custom CSS, Canvas Scripts, and Gradient Presets. Themes save complete snapshots of all 4 modes, including locks, CSS, Canvas scripts, Manual Variable Overrides, and Gradient Background configuration.</p>
+                        <p>Theme Designer Pro features isolated libraries for Themes, Custom CSS, Canvas Scripts, and Gradient Presets. Themes save complete snapshots of all 4 modes, including locks, CSS, Canvas scripts, Manual Variable Overrides, and Gradient Background configuration.</p>
                         <h4>Theme Library</h4>
                         <ul>
                             <li><b>Snapshot Coverage:</b> When saving a theme snapshot, all associated data is captured &mdash; OKLCH sliders, variable locks & overrides, Manual Variable Overrides, Custom CSS, Canvas FX scripts, and Gradient Background configuration across all 4 modes.</li>
@@ -2524,7 +2524,7 @@ function animate() {
                 <details class="doc-accordion">
                     <summary>10. Theme Updates <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
-                        <p>Open Theme Designer includes a built-in update system that lets you check for newer versions of themes hosted remotely. This requires a <b>Theme Update URL</b> to be set on a saved snapshot.</p>
+                        <p>Theme Designer Pro includes a built-in update system that lets you check for newer versions of themes hosted remotely. This requires a <b>Theme Update URL</b> to be set on a saved snapshot.</p>
                         <h4>Setting Up</h4>
                         <ul>
                             <li><b>Theme Update URL:</b> When saving or editing a theme snapshot, provide a direct URL to the theme's JSON file (e.g., a GitHub raw link). This URL is where the designer will check for newer versions.</li>
@@ -2748,14 +2748,14 @@ function animate() {
                 <details class="doc-accordion">
                     <summary>15. Compliance & Legal Disclaimer <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
-                        <p><b>Open Theme Designer is an event function provided for educational and customization purposes. By using this function, you acknowledge and agree to the following:</b></p>
+                        <p><b>Theme Designer Pro is an event function provided for educational and customization purposes. By using this function, you acknowledge and agree to the following:</b></p>
                         <ul>
                             <li><b>Compliance Responsibility:</b> As of Open WebUI v0.6.6+, the software license strictly prohibits altering, removing, obscuring, or replacing any "Open WebUI" branding (including the name, logo, or distinguishing visual identifiers) in deployments with <b>more than 50 active users</b> in a 30-day period without an Enterprise License.</li>
                             <li><b>Administrative Burden:</b> The responsibility to ensure compliance with the Open WebUI License rests <b>entirely</b> with the server administrator. While modifying color palettes is permitted, you must ensure that your use of the designer (specifically the Style Overrides tab) is not used to hide, obscure, or alter the Open WebUI logo and branding in violation of the license.</li>
-                            <li><b>Liability Waiver:</b> The author of Open Theme Designer (@silentoplayz) shall not be held liable for any material breach of license, legal action, or service termination resulting from the use or misuse of this function on a hosted or distributed Open WebUI instance.</li>
+                            <li><b>Liability Waiver:</b> The author of Theme Designer Pro (@G30) shall not be held liable for any material breach of license, legal action, or service termination resulting from the use or misuse of this function on a hosted or distributed Open WebUI instance.</li>
                             <li><b>Safe Harbor:</b> If your deployment is for personal use, internal team use (with permission), or for an organization of 50 or fewer active users, you are generally exempt from these strict branding restrictions.</li>
                         </ul>
-                        <p style="font-size:0.75rem; margin-top:12px; opacity:0.8;">This function is provided "as is" without warranty of any kind. By using Open Theme Designer, you acknowledge that modifying system files (index.html) may have security implications. Use only on trusted instances.</p>
+                        <p style="font-size:0.75rem; margin-top:12px; opacity:0.8;">This function is provided "as is" without warranty of any kind. By using Theme Designer Pro, you acknowledge that modifying system files (index.html) may have security implications. Use only on trusted instances.</p>
                     </div>
                 </details>
 
@@ -2862,7 +2862,7 @@ location.reload();</code></pre>
                             <li><b>The Manual Way:</b> Open the <code>index.html</code> file on your server (commonly at <code>/app/build/index.html</code>) and delete the entire block wrapped in the <code>&lt;!-- OWUI Theme Pro Bootloader --&gt;</code> markers.</li>
                         </ul>
                         <h4>Step 4: Disable or Remove the Event Function</h4>
-                        <p>In the Open WebUI admin panel, navigate to Functions and disable or delete the Open Theme Designer event function.</p>
+                        <p>In the Open WebUI admin panel, navigate to Functions and disable or delete the Theme Designer Pro event function.</p>
                     </div>
                 </details>
 
@@ -2885,7 +2885,7 @@ location.reload();</code></pre>
                 <details class="doc-accordion" open>
                     <summary style="color: #ef4444;">20. Danger Zone <i data-icon="chevron"></i></summary>
                     <div class="doc-inner" style="display:flex; flex-direction:column; align-items:center; gap:16px;">
-                        <p style="margin:0; text-align:center; color:var(--text-muted); font-size:0.75rem; line-height:1.6;">Permanently wipe <b>all</b> Open Theme Designer data including your theme library, CSS snippets, canvas scripts, gradient presets, and active configuration. This action cannot be undone.</p>
+                        <p style="margin:0; text-align:center; color:var(--text-muted); font-size:0.75rem; line-height:1.6;">Permanently wipe <b>all</b> Theme Designer Pro data including your theme library, CSS snippets, canvas scripts, gradient presets, and active configuration. This action cannot be undone.</p>
                         <button class="btn" id="factory-reset-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 10px 24px; font-weight: 600; border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s; width: 100%; max-width: 320px;">Factory Reset (Wipe All Data)</button>
                     </div>
                 </details>

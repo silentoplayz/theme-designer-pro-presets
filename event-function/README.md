@@ -1,4 +1,4 @@
-# ⚡ Open Theme Designer
+# ⚡ Theme Designer Pro (Event Function)
 
 > Instance-wide theme designer for Open WebUI — standalone admin page with server-side persistence and real-time live push to all users.
 
@@ -11,7 +11,7 @@
 
 ## What Is This?
 
-Open Theme Designer is an **Event Function** for Open WebUI that registers a standalone admin page at a configurable URL (default: `/api/v1/theme-designer`). Unlike the [Theme Designer Pro Tool](../tool/) which runs inside an AI chat iframe, this variant:
+Theme Designer Pro is available as both a **Tool** and an **Event Function** for Open WebUI. This is the **Event Function** variant, which registers a standalone admin page at a configurable URL (default: `/api/v1/theme-designer`). Unlike the [Tool variant](../tool/) which runs inside an AI chat iframe, this variant:
 
 - **Runs as a standalone page** — no iframe, no "Same Origin" sandbox flag needed
 - **Persists themes server-side** — CSS and state are saved to `DATA_DIR/theme/` and injected into `index.html`
@@ -53,7 +53,7 @@ Both products share the same OKLCH engine, Canvas FX system, gradient builder, a
 
 ## 🔧 Valve Configuration
 
-Valves are configured in the Admin Panel under **Functions → Open Theme Designer → ⚙️**.
+Valves are configured in the Admin Panel under **Functions → Theme Designer Pro → ⚙️**.
 
 | Valve | Type | Default | Description |
 |---|---|---|---|

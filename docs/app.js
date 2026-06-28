@@ -1,5 +1,5 @@
 /* ========================================
-   Theme Designer — Preset Gallery
+   Theme Designer Pro — Preset Gallery
    Application logic: fetch, render, search,
    detail modal, shareable URL state
    ======================================== */
