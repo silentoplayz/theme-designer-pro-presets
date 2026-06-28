@@ -2633,6 +2633,108 @@ function animate() {
   // Your drawing code here
   requestAnimationFrame(animate);
 }</code></pre>
+
+                        <h4 style="font-size: 0.78rem; font-weight: 800; margin: 24px 0 12px; color: var(--text-main); letter-spacing: -0.01em;">Context-Aware Animations</h4>
+                        <p>The Canvas FX engine includes a built-in <b>context data channel</b> that lets your animation react to the live state of the chat conversation. This enables a powerful category of themes &mdash; visuals that <b>grow, fill, or evolve</b> as the user&rsquo;s context window fills up, providing an ambient visual indicator of how much context remains.</p>
+
+                        <p class="doc-subheading">How It Works</p>
+                        <p>The engine&rsquo;s bootloader automatically observes Open WebUI&rsquo;s chat DOM using a <code>MutationObserver</code> on the <code>#messages-container</code> element. When messages are added, removed, or change (including during streaming responses), the engine scans all <code>.chat-user</code> and <code>.chat-assistant</code> content areas, measures the total character count, and sends a <code>context</code> message to your Canvas FX script:</p>
+                        <pre class="doc-pre"><code>// Sent automatically by the engine (debounced to every ~2 seconds)
+{ type: 'context', messages: 8, chars: 12400, estimatedTokens: 3100 }</code></pre>
+                        <ul>
+                            <li><code>messages</code> &mdash; the number of visible message elements in the chat</li>
+                            <li><code>chars</code> &mdash; total character count across all user and assistant messages</li>
+                            <li><code>estimatedTokens</code> &mdash; rough token estimate (<code>chars / 4</code>)</li>
+                        </ul>
+                        <p>The observer is <b>navigation-aware</b>: when the user switches chats, the engine detects the container being replaced and sends a zero-state (<code>messages: 0, chars: 0, estimatedTokens: 0</code>) before re-attaching to the new chat.</p>
+
+                        <p class="doc-subheading">Building a Growth Animation</p>
+                        <p>The core pattern is simple: compute a <b>growth ratio</b> (0&ndash;1) from the estimated tokens vs. your model&rsquo;s context limit, then map that ratio to visual stages in your animation. Here&rsquo;s the recommended approach:</p>
+                        <pre class="doc-pre"><code>const MAX_TOKENS = 128000;   // adjust to your model's context limit
+const GROWTH_SPEED = 1;      // set to 10–50 for fast testing
+let contextRatio = 0;        // smoothed 0–1 value
+let targetRatio = 0;         // raw target from context events
+
+// In your message handler:
+case 'context':
+  const tokens = e.data.estimatedTokens || 0;
+  targetRatio = Math.min(1, (tokens / MAX_TOKENS) * GROWTH_SPEED);
+  break;
+
+// In your render loop (smooth interpolation):
+contextRatio += (targetRatio - contextRatio) * 0.01;
+
+// Then use contextRatio to drive visual stages:
+if (contextRatio &lt; 0.1) { /* seed / empty state */ }
+else if (contextRatio &lt; 0.4) { /* early growth */ }
+else if (contextRatio &lt; 0.7) { /* mid growth */ }
+else if (contextRatio &lt; 0.9) { /* full growth */ }
+else { /* warning — context nearly full! */ }</code></pre>
+
+                        <p class="doc-subheading">Design Ideas</p>
+                        <p>Any visual metaphor that has a recognizable progression from &ldquo;empty&rdquo; to &ldquo;full&rdquo; works well. Some examples:</p>
+                        <table class="doc-table-compact">
+                            <thead>
+                                <tr style="border-bottom: 1px solid var(--border);">
+                                    <th>Theme</th>
+                                    <th>Growth Metaphor</th>
+                                    <th>Warning State</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid var(--border);">
+                                    <td>Sunflower</td>
+                                    <td>Seed &rarr; sprout &rarr; stem &rarr; leaves &rarr; bud &rarr; full bloom</td>
+                                    <td>Petals droop, sky turns red</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--border);">
+                                    <td>Mushroom Farm</td>
+                                    <td>Mycelium threads &rarr; pins &rarr; caps &rarr; bioluminescent clusters</td>
+                                    <td>Spore cloud thickens, red pulse</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--border);">
+                                    <td>Bathtub</td>
+                                    <td>Empty tub &rarr; water rising &rarr; bubbles &rarr; overflowing</td>
+                                    <td>Water overflows the rim</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--border);">
+                                    <td>Wheat Field</td>
+                                    <td>Bare soil &rarr; seedlings &rarr; tall stalks &rarr; golden harvest</td>
+                                    <td>Field catches fire</td>
+                                </tr>
+                                <tr>
+                                    <td>Hourglass</td>
+                                    <td>Sand flowing from top to bottom, grains accumulating</td>
+                                    <td>Final grains falling, red glow</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <p class="doc-subheading">Tips</p>
+                        <ul>
+                            <li><b>Smooth interpolation is essential.</b> Context updates arrive every ~2 seconds. Without easing (<code>ratio += (target - ratio) * 0.01</code>), the animation will jump abruptly between states.</li>
+                            <li><b>Use <code>GROWTH_SPEED</code> for testing.</b> At <code>MAX_TOKENS = 128000</code>, you&rsquo;d need a very long conversation to see full growth. Set <code>GROWTH_SPEED = 50</code> during development so a few messages take you through the entire lifecycle.</li>
+                            <li><b>Stagger growth across elements.</b> If your scene has multiple objects (mushroom clusters, wheat stalks), give each a random <code>growStart</code> offset so they don&rsquo;t all appear simultaneously. This creates a much more natural, organic feel.</li>
+                            <li><b>Add a warning state.</b> When <code>contextRatio &gt; 0.85</code>, add a visual cue (color shift, pulsing glow, drooping) so the user knows context is running low &mdash; this is the whole point of the feature.</li>
+                            <li><b>Include a token counter.</b> A small, subtle overlay showing <code>~3.1k / 128k tokens</code> with a mini progress bar gives precise context alongside the ambient visual metaphor.</li>
+                            <li><b>Handle chat switching.</b> When the user opens a different chat, the engine sends <code>messages: 0</code>. Your animation should smoothly reset to the empty state (or snap instantly, depending on the metaphor).</li>
+                        </ul>
+
+                        <p class="doc-subheading">Custom Event API</p>
+                        <p>External scripts (Open WebUI event functions, tools, or browser extensions) can also send context data directly to the Canvas FX script, bypassing the built-in DOM observer. This is useful if you have access to exact token counts from API responses:</p>
+                        <pre class="doc-pre"><code>// From any script running on the Open WebUI page:
+window.dispatchEvent(new CustomEvent('owui-canvas-context', {
+  detail: {
+    messages: 12,
+    chars: 48000,
+    estimatedTokens: 12000,
+    // You can include any extra fields — they're forwarded as-is
+    exactTokens: 11847,
+    maxContext: 128000
+  }
+}));</code></pre>
+                        <p>The engine forwards the entire <code>detail</code> object to your Canvas FX script as a <code>context</code> message. Your script can read any custom fields you include.</p>
+
                     </div>
                 </details>
                 
