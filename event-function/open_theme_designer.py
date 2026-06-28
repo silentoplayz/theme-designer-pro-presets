@@ -489,6 +489,10 @@ class Event:
                         // NOTE: SSE stays open — if admin re-enables, theme-update will re-apply
                     });
                     es.onerror = function() { /* EventSource auto-reconnects */ };
+                    // Free the HTTP/1.1 connection slot before the new page starts loading —
+                    // prevents NetworkError in Open WebUI's ModelSelector caused by
+                    // connection pool exhaustion (6 per-domain limit) during refresh.
+                    window.addEventListener('beforeunload', function() { es.close(); });
                 } catch(e) { console.warn('Theme Pro SSE:', e); }
             }
 
