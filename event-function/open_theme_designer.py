@@ -214,6 +214,101 @@ class Event:
                 }
             }
             
+            // Context observer for Canvas FX — watches chat DOM for message
+            // count/size and sends periodic { type: 'context' } updates to the
+            // Canvas FX Worker/handler. Enables context-aware animations.
+            function startContextObserver(sendFn) {
+                var _observer = null;
+                var _scanTimer = 0;
+                var _pollTimer = 0;
+                var _lastChars = -1;
+                var _lastMsgCount = -1;
+
+                // Custom event API — any Open WebUI plugin/extension can dispatch
+                // window.dispatchEvent(new CustomEvent('owui-canvas-context', { detail: { ratio: 0.65, ... } }))
+                var _onCustom = function(e) {
+                    if (e.detail) sendFn(Object.assign({ type: 'context' }, e.detail));
+                };
+                window.addEventListener('owui-canvas-context', _onCustom);
+
+                function scan() {
+                    var container = document.getElementById('messages-container');
+                    if (!container) return;
+
+                    var messageEls = container.querySelectorAll('[id^="message-"]');
+                    var msgCount = messageEls.length;
+                    var totalChars = 0;
+
+                    // Measure user message text
+                    container.querySelectorAll('.chat-user').forEach(function(el) {
+                        totalChars += (el.textContent || '').length;
+                    });
+                    // Measure assistant message text
+                    container.querySelectorAll('.chat-assistant').forEach(function(el) {
+                        totalChars += (el.textContent || '').length;
+                    });
+
+                    // Only send if data actually changed
+                    if (totalChars !== _lastChars || msgCount !== _lastMsgCount) {
+                        _lastChars = totalChars;
+                        _lastMsgCount = msgCount;
+                        sendFn({
+                            type: 'context',
+                            messages: msgCount,
+                            chars: totalChars,
+                            estimatedTokens: Math.ceil(totalChars / 4)
+                        });
+                    }
+                }
+
+                function setup() {
+                    var container = document.getElementById('messages-container');
+                    if (!container) {
+                        // SPA hasn't rendered the chat yet — poll until it appears
+                        _pollTimer = setTimeout(setup, 1000);
+                        return;
+                    }
+
+                    _observer = new MutationObserver(function() {
+                        clearTimeout(_scanTimer);
+                        _scanTimer = setTimeout(scan, 2000); // Debounce: scan at most every 2s
+                    });
+                    _observer.observe(container, { childList: true, subtree: true, characterData: true });
+
+                    // Also re-attach if SPA navigates away and back (container gets replaced)
+                    var _navObserver = new MutationObserver(function() {
+                        if (!document.getElementById('messages-container')) {
+                            if (_observer) _observer.disconnect();
+                            _lastChars = -1;
+                            _lastMsgCount = -1;
+                            // Send a zero-state so scripts know context was reset
+                            sendFn({ type: 'context', messages: 0, chars: 0, estimatedTokens: 0 });
+                            _pollTimer = setTimeout(setup, 1000);
+                        }
+                    });
+                    _navObserver.observe(document.body, { childList: true, subtree: false });
+
+                    // Store for cleanup
+                    _observer._navObserver = _navObserver;
+
+                    // Initial scan
+                    scan();
+                }
+
+                setup();
+
+                // Return cleanup function
+                return function() {
+                    window.removeEventListener('owui-canvas-context', _onCustom);
+                    if (_observer) {
+                        _observer.disconnect();
+                        if (_observer._navObserver) _observer._navObserver.disconnect();
+                    }
+                    clearTimeout(_scanTimer);
+                    clearTimeout(_pollTimer);
+                };
+            }
+
             let lastCanvasScript = null;
             let lastCanvasWasEnabled = null;
 
@@ -294,6 +389,7 @@ class Event:
                         window.owuiCanvasCleanups = window.owuiCanvasCleanups ||[];
                         
                         const useWorker = !forceFallback && !!canvas.transferControlToOffscreen;
+                        let _canvasSend = null;
                         
                         if (useWorker) {
                             // REAL WORKER MODE (OffscreenCanvas)
@@ -362,6 +458,8 @@ class Event:
                                 worker.terminate();
                                 URL.revokeObjectURL(objectURL);
                             });
+
+                            _canvasSend = function(data) { try { worker.postMessage(data); } catch(x) {} };
                         } else {
                             // FALLBACK MODE (Main Thread Fake Worker)
                             const scriptEl = document.createElement('script');
@@ -434,6 +532,15 @@ class Event:
                                 })();
                             } catch(e) { console.error('Canvas FX Fallback Error:', e); }`;
                             document.body.appendChild(scriptEl);
+
+                            _canvasSend = function(data) { if (window._onmessage) window._onmessage({ data: data }); };
+                        }
+
+                        // Start context observer — sends { type: 'context' } updates
+                        // to the Canvas FX script with live chat metrics
+                        if (_canvasSend) {
+                            var _ctxCleanup = startContextObserver(_canvasSend);
+                            window.owuiCanvasCleanups.push(_ctxCleanup);
                         }
                     } else {
                         lastCanvasScript = "_DISABLED_";
@@ -2420,7 +2527,7 @@ class Event:
                         <p>Inject interactive JavaScript animations directly into the background of Open WebUI. The designer automatically applies a <i>Structural Layer</i> that makes native UI components transparent so the animation shines through.</p>
                         <ul>
                             <li><b>Background Worker Execution:</b> By default, scripts run in a true background Web Worker utilizing <code>OffscreenCanvas</code> (if supported by your browser) to ensure high-performance rendering without blocking the UI thread. It falls back to the main thread in two cases: (1) the browser doesn't support <code>OffscreenCanvas</code>, or (2) the script throws a runtime error in the Worker (e.g., referencing <code>document</code>, which is unavailable in Workers) — the runtime automatically catches the error, terminates the broken Worker, and re-runs the script on the main thread. A status badge in the designer UI shows the browser's <code>OffscreenCanvas</code> capability.</li>
-                            <li><b>Event Handling:</b> Three message types are sent to your script via <code>self.onmessage</code>: <code>init</code> (with canvas, width, height), <code>mousemove</code> (with x, y coordinates), and <code>resize</code> (with updated width, height).</li>
+                            <li><b>Event Handling:</b> Four message types are sent to your script via <code>self.onmessage</code>: <code>init</code> (with canvas, width, height), <code>mousemove</code> (with x, y coordinates), <code>resize</code> (with updated width, height), and <code>context</code> (with live chat context metrics &mdash; message count, character count, estimated tokens).</li>
                             <li><b>Show on Auth Pages:</b> Toggle whether canvas animations appear on Login/Signup screens. Enabled by default.</li>
                             <li><b>Preset Gallery:</b> Save, rename, update, delete, and export individual animations. You can directly import native <code>.js</code> animation files by dragging and dropping them into the UI!</li>
 
@@ -2430,7 +2537,7 @@ class Event:
                         <p>Your Canvas FX script runs inside a <b>Web Worker</b> with an <code>OffscreenCanvas</code>. The runtime communicates with your script using a structured message protocol via <code>self.onmessage</code>. Understanding this contract is essential for writing reliable animations.</p>
 
                         <p class="doc-subheading">Inbound Messages (Runtime &rarr; Your Script)</p>
-                        <p>Three message types are dispatched to your script's <code>self.onmessage</code> handler:</p>
+                        <p>Four message types are dispatched to your script's <code>self.onmessage</code> handler:</p>
                         <table class="doc-table-compact">
                             <thead>
                                 <tr style="border-bottom: 1px solid var(--border);">
@@ -2450,10 +2557,15 @@ class Event:
                                     <td><code>{ width, height }</code></td>
                                     <td>Fired when the browser window is resized. Update your internal <code>width</code>/<code>height</code> and <code>canvas.width</code>/<code>canvas.height</code> accordingly.</td>
                                 </tr>
-                                <tr>
+                                <tr style="border-bottom: 1px solid var(--border);">
                                     <td><code>mousemove</code></td>
                                     <td><code>{ x, y }</code></td>
-                                    <td>Fired on cursor movement. Coordinates are <code>clientX</code>/<code>clientY</code> (viewport-relative).</td>
+                                    <td>Fired on cursor movement (throttled to once per <code>requestAnimationFrame</code>). Coordinates are <code>clientX</code>/<code>clientY</code> (viewport-relative).</td>
+                                </tr>
+                                <tr>
+                                    <td><code>context</code></td>
+                                    <td><code>{ messages, chars, estimatedTokens }</code></td>
+                                    <td>Fired when chat content changes (debounced to every ~2s). <code>messages</code> is the number of message elements visible, <code>chars</code> is the total character count across all messages, and <code>estimatedTokens</code> is <code>chars / 4</code> (rough approximation). Enables context-aware animations that grow or change as the conversation progresses. External scripts can also dispatch custom data via <code>window.dispatchEvent(new CustomEvent('owui-canvas-context', { detail: { ... } }))</code>.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -2509,6 +2621,9 @@ self.onmessage = (e) =&gt; {
     case 'mousemove':
       mouse.x = e.data.x;
       mouse.y = e.data.y;
+      break;
+    case 'context':
+      // e.data.messages, e.data.chars, e.data.estimatedTokens
       break;
   }
 };
