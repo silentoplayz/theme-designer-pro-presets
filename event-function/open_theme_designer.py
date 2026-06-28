@@ -92,8 +92,20 @@ class Event:
                 try { _owuiThemeState = embeddedState.textContent; } catch(x) {}
             }
 
+            // Seed in-memory CSS from localStorage immediately so the synchronous
+            // initial refresh() below has the latest data (localStorage is shared
+            // across all tabs for the same origin and is updated by SSE handlers).
+            // This prevents stale embedded CSS from persisting on duplicated tabs.
+            try {
+                var lsCss = localStorage.getItem('owui_dev_theme_v1_css');
+                if (lsCss) _owuiThemeCss = lsCss;
+                var lsState = localStorage.getItem('owui_dev_theme_v1');
+                if (lsState) _owuiThemeState = lsState;
+            } catch(x) {}
+
             // Fetch CSS from server (always needed — index.html has a safe subset without structural/gradient)
-            fetch('__THEME_ROUTE__/theme.css')
+            // cache: 'no-store' bypasses browser cache entirely — critical for duplicated tabs
+            fetch('__THEME_ROUTE__/theme.css', { cache: 'no-store' })
                 .then(function(r) { if (r.ok && r.status !== 204) return r.text(); return ''; })
                 .then(function(css) {
                     if (css && css.trim()) {
@@ -104,9 +116,11 @@ class Event:
                     }
                 }).catch(function() {});
 
-            // Only fetch state from server if not embedded in index.html
-            if (!_owuiThemeState) {
-            fetch('__THEME_ROUTE__/state.json')
+            // Always fetch state from server — embedded state in index.html may be stale
+            // (only updated on next event() call, not on every theme save).
+            // The embedded state above is still useful for the synchronous initial paint
+            // (flash prevention), but the server fetch overrides it with the latest data.
+            fetch('__THEME_ROUTE__/state.json', { cache: 'no-store' })
                 .then(function(r) { if (r.ok && r.status !== 204) return r.text(); return ''; })
                 .then(function(state) {
                     if (state && state.trim() && state !== '{}') {
@@ -114,9 +128,9 @@ class Event:
                         // Write-through to localStorage (Watchtower recovery fallback)
                         try { localStorage.setItem('owui_dev_theme_v1', state); } catch(x) {}
                         initCanvas();
+                        enforceTheme();
                     }
                 }).catch(function() {});
-            }
             }
 
             // In-memory disable flag — prevents storage/MutationObserver from re-injecting after theme-disable
