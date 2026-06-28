@@ -1,8 +1,7 @@
 /* ========================================
-   Theme Designer Pro — Preset Gallery
+   Theme Designer — Preset Gallery
    Application logic: fetch, render, search,
    detail modal, shareable URL state
-   Aligned with TDP visual language
    ======================================== */
 
 (function () {
@@ -570,7 +569,7 @@
     btn.classList.add('copied');
     btn.innerHTML = `${ICONS.check}<span>Copied!</span>`;
 
-    showToast('Copied! Paste in Theme Designer Pro → Import');
+    showToast('Copied! Paste in Theme Designer → Import');
 
     setTimeout(() => {
       btn.classList.remove('copied');

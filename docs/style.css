@@ -1,11 +1,10 @@
 /* ========================================
-   Theme Designer Pro — Preset Gallery
-   Aligned with TDP's design language:
+   Theme Designer — Preset Gallery
    Zinc dark + blue-500 accent + generous
    radii + spring animations
    ======================================== */
 
-/* --- Design tokens (matched to TDP) --- */
+/* --- Design tokens --- */
 :root {
   --accent: #3b82f6;
   --accent-hover: #60a5fa;
@@ -299,7 +298,7 @@ input, select {
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
-/* --- Category tabs (segmented toggle — matches TDP) --- */
+/* --- Category tabs (segmented toggle) --- */
 .category-tabs {
   display: flex;
   justify-content: center;
@@ -460,7 +459,7 @@ input, select {
   gap: 16px;
 }
 
-/* --- Card base (matches TDP snapshot cards) --- */
+/* --- Card base --- */
 .card {
   background: var(--bg-deep);
   border: 1px solid var(--border);
@@ -561,7 +560,7 @@ input, select {
   color: var(--text-muted);
 }
 
-/* --- Color palette strip (matches TDP snapshot preview) --- */
+/* --- Color palette strip --- */
 .palette-strip {
   display: flex;
   gap: 4px;
@@ -600,7 +599,7 @@ input, select {
   margin-top: 1px;
 }
 
-/* --- Feature badges (TDP color mapping) --- */
+/* --- Feature badges --- */
 .badge-row {
   display: flex;
   flex-wrap: wrap;
@@ -618,28 +617,28 @@ input, select {
   border: 1px solid transparent;
 }
 
-/* CSS — green (matches TDP) */
+/* CSS — green */
 .badge--css {
   color: #6ee7b7;
   border-color: rgba(16, 185, 129, 0.2);
   background: rgba(16, 185, 129, 0.1);
 }
 
-/* Canvas FX — orange (matches TDP) */
+/* Canvas FX — orange */
 .badge--fx {
   color: #fdba74;
   border-color: rgba(251, 146, 60, 0.2);
   background: rgba(251, 146, 60, 0.1);
 }
 
-/* Gradient — pink (matches TDP) */
+/* Gradient — pink */
 .badge--gradient {
   color: #f9a8d4;
   border-color: rgba(244, 114, 182, 0.2);
   background: rgba(244, 114, 182, 0.1);
 }
 
-/* Overrides — purple (matches TDP) */
+/* Overrides — purple */
 .badge--overrides {
   color: #c4b5fd;
   border-color: rgba(147, 51, 234, 0.2);
@@ -774,7 +773,7 @@ input, select {
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
-/* --- Copy button (pill — matches TDP buttons) --- */
+/* --- Copy button (pill) --- */
 .copy-btn {
   display: flex;
   align-items: center;
@@ -858,7 +857,7 @@ input, select {
   to { transform: rotate(360deg); }
 }
 
-/* --- Toast (pill — matches TDP) --- */
+/* --- Toast (pill) --- */
 .toast {
   position: fixed;
   bottom: 24px;
@@ -903,7 +902,7 @@ input, select {
   color: var(--accent);
 }
 
-/* --- Animations (matches TDP) --- */
+/* --- Animations --- */
 @keyframes containerShow {
   from {
     opacity: 0;
@@ -926,7 +925,7 @@ input, select {
   }
 }
 
-/* --- Detail modal (matches TDP modal pattern) --- */
+/* --- Detail modal --- */
 .detail-overlay {
   position: fixed;
   inset: 0;
