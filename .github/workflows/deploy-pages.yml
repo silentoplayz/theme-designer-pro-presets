@@ -14,6 +14,7 @@ on:
     paths:
       - 'docs/**'
       - 'tool/**'
+      - 'event-function/**'
       - '.github/workflows/deploy-pages.yml'
 
 # Only one Pages deployment at a time — cancel stale runs
