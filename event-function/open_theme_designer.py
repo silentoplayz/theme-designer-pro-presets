@@ -326,14 +326,28 @@ class Event:
                             
                             worker.postMessage({ type: 'init', canvas: offscreen, width: window.innerWidth, height: window.innerHeight },[offscreen]);
                             
-                            const _onMouse = (e) => worker.postMessage({ type: 'mousemove', x: e.clientX, y: e.clientY });
+                            // Throttle mousemove via rAF coalescing — on high-refresh displays,
+                            // mousemove fires at 120Hz+. Coalescing to once per animation frame
+                            // cuts cross-thread postMessage overhead in half.
+                            let _mouseX = -9999, _mouseY = -9999, _mouseDirty = false;
+                            const _onMouse = (e) => { _mouseX = e.clientX; _mouseY = e.clientY; _mouseDirty = true; };
+                            let _mouseRaf = 0;
+                            (function _sendMouse() {
+                                _mouseRaf = requestAnimationFrame(_sendMouse);
+                                if (_mouseDirty) { worker.postMessage({ type: 'mousemove', x: _mouseX, y: _mouseY }); _mouseDirty = false; }
+                            })();
+
+                            // Debounce resize — prevents Worker from re-allocating buffers
+                            // dozens of times during a drag-resize.
+                            let _resizeTimer = 0;
                             const _onResize = () => {
-                                // For OffscreenCanvas, we don't resize the DOM element size here (it's 100vw/vh)
-                                // but we tell the worker to update its internal width/height
-                                worker.postMessage({ type: 'resize', width: window.innerWidth, height: window.innerHeight });
+                                clearTimeout(_resizeTimer);
+                                _resizeTimer = setTimeout(() => {
+                                    worker.postMessage({ type: 'resize', width: window.innerWidth, height: window.innerHeight });
+                                }, 150);
                             };
                             // Bridge: receive forwarded mousemove from child iframes (they can't bubble to parent window)
-                            const _onIframeMsg = (e) => { if (e.data && e.data.type === 'owui-canvas-mousemove') worker.postMessage({ type: 'mousemove', x: e.data.x, y: e.data.y }); };
+                            const _onIframeMsg = (e) => { if (e.data && e.data.type === 'owui-canvas-mousemove') { _mouseX = e.data.x; _mouseY = e.data.y; _mouseDirty = true; } };
                             
                             window.addEventListener('mousemove', _onMouse);
                             window.addEventListener('resize', _onResize);
@@ -343,6 +357,8 @@ class Event:
                                 window.removeEventListener('mousemove', _onMouse);
                                 window.removeEventListener('resize', _onResize);
                                 window.removeEventListener('message', _onIframeMsg);
+                                cancelAnimationFrame(_mouseRaf);
+                                clearTimeout(_resizeTimer);
                                 worker.terminate();
                                 URL.revokeObjectURL(objectURL);
                             });
@@ -359,15 +375,32 @@ class Event:
                                     const _canvas = document.getElementById('owui-theme-canvas-bg');
                                     if (!_canvas) return;
                                     
-                                    const _onMouse = (e) => { if (window._onmessage) window._onmessage({ data: { type: 'mousemove', x: e.clientX, y: e.clientY } }); };
-                                    const _onResize = () => { _canvas.width = window.innerWidth; _canvas.height = window.innerHeight; if (window._onmessage) window._onmessage({ data: { type: 'resize', width: window.innerWidth, height: window.innerHeight } }); };
+                                    // Throttle mousemove via rAF coalescing (same as Worker mode)
+                                    let _mouseX = -9999, _mouseY = -9999, _mouseDirty = false;
+                                    const _onMouse = (e) => { _mouseX = e.clientX; _mouseY = e.clientY; _mouseDirty = true; };
+                                    let _mouseRafId = 0;
+                                    (function _pumpMouse() {
+                                        _mouseRafId = window.requestAnimationFrame(_pumpMouse);
+                                        if (_mouseDirty && window._onmessage) { window._onmessage({ data: { type: 'mousemove', x: _mouseX, y: _mouseY } }); _mouseDirty = false; }
+                                    })();
+
+                                    // Debounce resize
+                                    let _resizeTimer = 0;
+                                    const _onResize = () => {
+                                        clearTimeout(_resizeTimer);
+                                        _resizeTimer = setTimeout(() => {
+                                            _canvas.width = window.innerWidth; _canvas.height = window.innerHeight;
+                                            if (window._onmessage) window._onmessage({ data: { type: 'resize', width: window.innerWidth, height: window.innerHeight } });
+                                        }, 150);
+                                    };
                                     // Bridge: receive forwarded mousemove from child iframes (they can't bubble to parent window)
-                                    const _onIframeMsg = (e) => { if (e.data && e.data.type === 'owui-canvas-mousemove' && window._onmessage) window._onmessage({ data: { type: 'mousemove', x: e.data.x, y: e.data.y } }); };
+                                    const _onIframeMsg = (e) => { if (e.data && e.data.type === 'owui-canvas-mousemove') { _mouseX = e.data.x; _mouseY = e.data.y; _mouseDirty = true; } };
                                     
                                     window.addEventListener('mousemove', _onMouse);
                                     window.addEventListener('resize', _onResize);
                                     window.addEventListener('message', _onIframeMsg);
-                                    _onResize();
+                                    // Trigger initial resize synchronously (no debounce for first paint)
+                                    _canvas.width = window.innerWidth; _canvas.height = window.innerHeight;
     
                                     const _rAFs =[];
                                     const _intervals =[];
@@ -383,6 +416,8 @@ class Event:
                                         window.removeEventListener('mousemove', _onMouse);
                                         window.removeEventListener('resize', _onResize);
                                         window.removeEventListener('message', _onIframeMsg);
+                                        window.cancelAnimationFrame(_mouseRafId);
+                                        clearTimeout(_resizeTimer);
                                         _rAFs.forEach(id => window.cancelAnimationFrame(id));
                                         _intervals.forEach(id => window.clearInterval(id));
                                     });
@@ -394,7 +429,6 @@ class Event:
                                         if (finalHandler) {
                                             window._onmessage = finalHandler;
                                             finalHandler({ data: { type: 'init', canvas: _canvas, width: window.innerWidth, height: window.innerHeight } });
-                                            _onResize();
                                         }
                                     })();
                                 })();
