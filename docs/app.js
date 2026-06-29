@@ -128,6 +128,8 @@
   //  DETAIL MODAL
   // ============================================================
 
+  let previouslyFocused = null;
+
   function openDetail(item, category) {
     let html = '';
     switch (category) {
@@ -148,16 +150,24 @@
         break;
     }
 
+    previouslyFocused = document.activeElement;
     detailContent.innerHTML = html;
     detailModal.classList.add('open');
     detailModal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
+    // Focus the close button for keyboard users
+    detailCloseBtn.focus();
   }
 
   function closeDetail() {
     detailModal.classList.remove('open');
     detailModal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    // Restore focus to the element that opened the modal
+    if (previouslyFocused && previouslyFocused.focus) {
+      previouslyFocused.focus();
+      previouslyFocused = null;
+    }
   }
 
   // Close on backdrop click
@@ -172,14 +182,36 @@
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && detailModal.classList.contains('open')) {
       closeDetail();
+      return;
+    }
+    // Focus trap inside modal
+    if (e.key === 'Tab' && detailModal.classList.contains('open')) {
+      const panel = detailModal.querySelector('.detail-panel');
+      const focusable = panel.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
     }
   });
 
-  // Expose for inline onclick
+  // Expose for inline onclick and keyboard activation
   window.openThemeDetail = function (index) {
     if (!catalog) return;
     const items = getFilteredItems();
     if (items[index]) openDetail(items[index], activeCategory);
+  };
+
+  // Keyboard activation for cards (Enter/Space)
+  window.cardKeyHandler = function (e, index) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openThemeDetail(index);
+    }
   };
 
   function buildThemeDetail(t) {
@@ -442,7 +474,7 @@
       ? `<div class="badge-row">${badgesHTML.join('')}</div>`
       : '';
 
-    return `<article class="card" onclick="openThemeDetail(${index})" style="cursor:pointer">
+    return `<article class="card" tabindex="0" role="button" onclick="openThemeDetail(${index})" onkeydown="cardKeyHandler(event, ${index})" style="cursor:pointer">
       <div class="card-header">
         <h2 class="card-name">${escapeHTML(t.name)}</h2>
         <div class="card-meta">
@@ -461,7 +493,7 @@
   }
 
   function renderFxCard(fx, index) {
-    return `<article class="card" onclick="openThemeDetail(${index})" style="cursor:pointer">
+    return `<article class="card" tabindex="0" role="button" onclick="openThemeDetail(${index})" onkeydown="cardKeyHandler(event, ${index})" style="cursor:pointer">
       <div class="card-header">
         <h2 class="card-name">${escapeHTML(fx.name)}</h2>
       </div>
@@ -475,7 +507,7 @@
 
   function renderCssCard(css, index) {
     const displayName = css.name || titleCase(css.file || '');
-    return `<article class="card" onclick="openThemeDetail(${index})" style="cursor:pointer">
+    return `<article class="card" tabindex="0" role="button" onclick="openThemeDetail(${index})" onkeydown="cardKeyHandler(event, ${index})" style="cursor:pointer">
       <div class="card-header">
         <h2 class="card-name">${escapeHTML(displayName)}</h2>
       </div>
@@ -497,7 +529,7 @@
 
     const typeLabel = (g.type || 'linear').charAt(0).toUpperCase() + (g.type || 'linear').slice(1);
 
-    return `<article class="card" onclick="openThemeDetail(${index})" style="cursor:pointer">
+    return `<article class="card" tabindex="0" role="button" onclick="openThemeDetail(${index})" onkeydown="cardKeyHandler(event, ${index})" style="cursor:pointer">
       <div class="card-header">
         <h2 class="card-name">${escapeHTML(g.name)}</h2>
         <div class="card-meta">
@@ -532,7 +564,7 @@
   }
 
   function renderBundleCard(b, index) {
-    return `<article class="card card--bundle" onclick="openThemeDetail(${index})" style="cursor:pointer">
+    return `<article class="card card--bundle" tabindex="0" role="button" onclick="openThemeDetail(${index})" onkeydown="cardKeyHandler(event, ${index})" style="cursor:pointer">
       <div class="card-header">
         <h2 class="card-name">${escapeHTML(b.name)}</h2>
         <span class="bundle-badge">✦ Bundle</span>
