@@ -1761,8 +1761,9 @@
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/hyperspace_warp_drive.js"
     },
     {
-      "name": "Hypno Spiral",
+      "name": "HypnoSpiral",
       "file": "hypno_spiral.js",
+      "description": "A slowly fading, hypnotic spiral made of concentric colored rings that rotate and drift outward. Full-spectrum hue cycling with configurable trail fade, ring spacing, and rotation speed.",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/hypno_spiral.js"
     },
     {
@@ -1786,6 +1787,7 @@
     {
       "name": "Kaleido Spiral Vortex",
       "file": "kaleido_spiral_vortex.js",
+      "description": "A kaleidoscopic vortex of rotating radial wedges with pulsing scale wobble and smooth hue cycling. A subtle noise overlay adds texture across the wedge faces.",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/kaleido_spiral_vortex.js"
     },
     {
@@ -1803,6 +1805,7 @@
     {
       "name": "Liquid Metal",
       "file": "liquid_metal.js",
+      "description": "A sinuous, mouse-reactive liquid metal surface. Points follow the cursor in a smooth chain, generating an undulating wave with a chrome-like linear gradient fill.",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/liquid_metal.js"
     },
     {
@@ -1820,6 +1823,7 @@
     {
       "name": "Matrix Rain Japanese",
       "file": "matrix_rain_japanese.js",
+      "description": "Cascading columns of glowing Japanese Katakana characters that fade to transparency. Each column resets at random intervals with a bright green glow that decays as it falls.",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/matrix_rain_japanese.js"
     },
     {
@@ -1867,6 +1871,7 @@
     {
       "name": "Quantum Foam",
       "file": "quantum_foam.js",
+      "description": "A dense field of 2500 particles that bloom and fade across the full color spectrum, evoking quantum vacuum fluctuations. Particles spawn at random positions, grow outward, and dissolve into transparency.",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/quantum_foam.js"
     },
     {
