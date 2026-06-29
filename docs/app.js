@@ -109,8 +109,9 @@
       t.setAttribute('aria-selected', isCurrent ? 'true' : 'false');
     });
 
-    // Sync toolbar visibility
-    toolbar.classList.toggle('hidden', activeCategory !== 'themes');
+    // Sync toolbar visibility — always show sort, but filter chips only for themes
+    toolbar.classList.remove('hidden');
+    filterChips.style.display = activeCategory === 'themes' ? '' : 'none';
 
     // Sync search
     searchInput.value = searchQuery;
@@ -404,6 +405,10 @@
       list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     } else if (activeSort === 'name-desc') {
       list.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
+    } else if (activeSort === 'newest') {
+      list.sort((a, b) => (b.dateAdded || '').localeCompare(a.dateAdded || ''));
+    } else if (activeSort === 'oldest') {
+      list.sort((a, b) => (a.dateAdded || '').localeCompare(b.dateAdded || ''));
     }
 
     return list;
@@ -633,7 +638,8 @@
       tab.setAttribute('aria-selected', 'true');
       activeCategory = tab.getAttribute('data-category');
 
-      toolbar.classList.toggle('hidden', activeCategory !== 'themes');
+      toolbar.classList.remove('hidden');
+      filterChips.style.display = activeCategory === 'themes' ? '' : 'none';
 
       // Reset filter when switching categories
       activeFilter = 'all';

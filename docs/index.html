@@ -6,6 +6,7 @@
   <title>Theme Designer Pro — Preset Gallery</title>
   <meta name="description" content="Browse, preview, and install curated theme presets, canvas effects, CSS presets, gradients, and bundles for Theme Designer Pro.">
   <meta name="theme-color" content="#09090b">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta property="og:title" content="Theme Designer Pro — Preset Gallery">
   <meta property="og:description" content="A curated collection of premium themes, effects, and presets for Open WebUI.">
   <meta property="og:type" content="website">
@@ -91,14 +92,16 @@
       </nav>
     </section>
 
-    <!-- Toolbar: sort + filters (visible for themes only) -->
-    <section id="toolbar" class="toolbar hidden">
+    <!-- Toolbar: sort (all categories) + filters (themes only) -->
+    <section id="toolbar" class="toolbar">
       <div class="toolbar-inner">
         <div class="sort-group">
           <label for="sort-select" class="sort-label">Sort by</label>
           <select id="sort-select" class="sort-select">
             <option value="name-asc">Name A–Z</option>
             <option value="name-desc">Name Z–A</option>
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
           </select>
         </div>
         <div class="filter-chips" id="filter-chips">

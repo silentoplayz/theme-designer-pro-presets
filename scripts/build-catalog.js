@@ -13,6 +13,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 const DOCS_DIR = path.join(ROOT, 'docs');
@@ -32,6 +33,20 @@ console.log('Building preset catalog...\n');
 function titleCase(filename) {
   const stem = filename.replace(/\.[^.]+$/, '');
   return stem.split('_').filter(Boolean).map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+}
+
+/** Get the ISO date when a file was first committed to git.
+ *  Falls back to current date for uncommitted files. */
+function getDateAdded(filePath) {
+  try {
+    const date = execSync(
+      `git log --reverse --format='%aI' -- "${filePath}"`,
+      { cwd: ROOT, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }
+    ).trim().split('\n')[0];
+    return date || new Date().toISOString();
+  } catch {
+    return new Date().toISOString();
+  }
 }
 
 /** Extract a JSDoc field value (e.g. Title, Description) from script source.
@@ -82,6 +97,7 @@ function buildThemes() {
       description: data.description || '',
       author: data.author || '',
       version: data.version || '0.0.0',
+      dateAdded: getDateAdded(`themes/${file}`),
       modes: {},
       importUrl: `${RAW_BASE}/themes/${file}`,
     };
@@ -129,6 +145,7 @@ function buildCanvasFx() {
       name: title || titleCase(file),
       file,
       description: description || '',
+      dateAdded: getDateAdded(`canvas-fx/${file}`),
       importUrl: `${RAW_BASE}/canvas-fx/${file}`,
     });
 
@@ -152,6 +169,7 @@ function buildCssPresets() {
   const entries = files.map(file => ({
     name: titleCase(file),
     file,
+    dateAdded: getDateAdded(`css-presets/${file}`),
     importUrl: `${RAW_BASE}/css-presets/${file}`,
   }));
 
@@ -194,6 +212,7 @@ function buildGradients() {
       type: data.type || 'linear',
       animated: !!data.animation,
       stops: data.stops || [],
+      dateAdded: getDateAdded(`gradients/${relPath}`),
       importUrl: `${RAW_BASE}/gradients/${relPath}`,
     });
   }
@@ -229,6 +248,7 @@ function buildBundles() {
       name: BUNDLE_NAMES[file] || titleCase(file),
       file,
       description: meta.description || '',
+      dateAdded: getDateAdded(`bundles/${file}`),
       importUrl: `${RAW_BASE}/bundles/${file}`,
     });
 
