@@ -1743,6 +1743,13 @@
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/data_stream.js"
     },
     {
+      "name": "Deep Ocean",
+      "file": "deep_ocean.js",
+      "description": "A layered deep-sea vista rendered from the seafloor looking up toward the surface. God-rays pierce down through the water column, caustic light networks ripple across the sandy floor, bioluminescent jellyfish pulse at different depths, kelp fronds sway in the current, and tiny plankton particles drift through the mid-water. A distant whale song pulse (visual only) occasionally sweeps across the scene. Five distinct depth layers create true parallax. Mouse interaction gently shifts the current direction, swaying kelp and drifting jellyfish.",
+      "dateAdded": "2026-06-29T14:00:54-04:00",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/deep_ocean.js"
+    },
+    {
       "name": "Digital Fishtank V2",
       "file": "digital_fishtank.js",
       "description": "A living aquarium with hungry fish that chase and eat food you drop from the surface. Move your cursor to the top of the tank to sprinkle food pellets — fish detect them, race to eat, and do a happy wiggle. Features bezier-curve fish with stripe patterns, leaf-shaped plants, aerator bubble streams, decorative rocks, caustic lighting, depth layering, fish shadows, and an animated water surface.",
@@ -1780,7 +1787,7 @@
     {
       "name": "Firefly Meadow",
       "file": "firefly_meadow.js",
-      "description": "Softly glowing firefly particles drifting with organic, non-linear movement. They pulse brighter occasionally with warm yellow/green glow. Mouse creates a gentle attraction zone that fireflies investigate.",
+      "description": "A nighttime meadow scene teeming with life. Layered grass silhouettes sway in a gentle breeze at three depth levels. Fireflies drift with species-accurate flash patterns — short bursts separated by long dark intervals, each with a unique rhythm. A crescent moon hangs in the sky casting faint light, stars twinkle overhead, and a ground mist layer hugs the grass line, thickening and thinning with a slow breath-like rhythm. Occasionally a firefly traces a long J-shaped mating flight arc. Mouse position shifts the wind direction, bending the grass.",
       "dateAdded": "2026-06-15T19:29:54-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/firefly_meadow.js"
     },
@@ -1876,11 +1883,25 @@
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/lava_lamp.js"
     },
     {
+      "name": "Lightning",
+      "file": "lightning.js",
+      "description": "Dramatic lightning bolts that fork and flash against a dark sky. Mouse click area triggers a targeted bolt. Background flashes and rumble glow create an immersive storm atmosphere.",
+      "dateAdded": "2026-06-29T14:00:54-04:00",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/lightning.js"
+    },
+    {
       "name": "Liquid Metal",
       "file": "liquid_metal.js",
       "description": "A sinuous, mouse-reactive liquid metal surface. Points follow the cursor in a smooth chain, generating an undulating wave with a chrome-like linear gradient fill.",
       "dateAdded": "2026-06-15T19:29:54-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/liquid_metal.js"
+    },
+    {
+      "name": "Living Sky",
+      "file": "living_sky.js",
+      "description": "A procedural time-aware landscape that reflects the actual time of day. Dawn paints the sky pink, midday goes bright blue, dusk fades to amber, and night reveals stars with occasional shooting stars. A silhouetted mountain range spans the bottom, clouds drift across, and the sun/moon arcs overhead tracking real local time. Always different, always beautiful — no interaction required.",
+      "dateAdded": "2026-06-29T14:00:54-04:00",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/living_sky.js"
     },
     {
       "name": "Magnetic Field",
@@ -2067,7 +2088,7 @@
     {
       "name": "Thunderstorm",
       "file": "thunderstorm.js",
-      "description": "Dramatic lightning bolts that fork and flash against a dark sky. Mouse click area triggers a targeted bolt. Background flashes and rumble glow create an immersive storm atmosphere.",
+      "description": "A full-atmosphere thunderstorm viewed from a sheltered vantage point. Rain falls in dense sheets at three parallax depths, with wind gusts that periodically shift the rain angle. Lightning cracks illuminate the entire scene — a bright white flash followed by branching bolt geometry that forks recursively. Rolling cloud banks drift overhead with volumetric shading, lit from within by distant heat lightning. Puddle reflections shimmer along the bottom. Thunder rumble is visualized as a low-frequency screen shake that decays after each strike. A distant city skyline silhouette anchors the horizon.",
       "dateAdded": "2026-06-15T19:29:54-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/thunderstorm.js"
     },

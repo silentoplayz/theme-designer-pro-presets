@@ -73,7 +73,7 @@ A curated community collection of ready-to-import presets is available at:
 
 | Category | Contents | Format |
 |---|---|---|
-| **Canvas FX** | 73 interactive background animations | `.js` |
+| **Canvas FX** | 76 interactive background animations | `.js` |
 | **CSS Presets** | 11 styling presets (glassmorphism, Neon Cyberpunk, and more) | `.css` |
 | **Themes** | 34 complete multi-mode theme configurations | `.json` |
 | **Gradients** | 13 gradient presets (linear, radial, mesh — still and animated) | `.json` |
