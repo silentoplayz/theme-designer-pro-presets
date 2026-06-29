@@ -20,7 +20,7 @@
 
 ### Canvas FX
 - [ ] Web Worker compatible — no `document`, `window`, `localStorage`, or `alert`
-- [ ] Handles `init`, `resize`, and `mousemove` messages
+- [ ] Handles `init`, `resize`, `mousemove`, `click`, `mousedown`, `mouseup`, `touchstart`, `touchmove`, `touchend`, `context` messages
 - [ ] Includes heartbeat (`self.postMessage({ type: 'heartbeat' })`)
 - [ ] Uses `requestAnimationFrame` for the render loop
 - [ ] Has a JSDoc header with `Title` and `Description`

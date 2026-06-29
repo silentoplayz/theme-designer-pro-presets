@@ -142,10 +142,10 @@ function validateCanvasFx() {
       warn(f, 'missing requestAnimationFrame (recommended for smooth render loop)');
     }
 
-    // Check for multi-line JSDoc description — catalog builder only captures the first line
+    // Check for multi-line JSDoc description (informational)
     const descMatch = content.match(/\*\s*Description:\s*.+\n(\s*\*\s{3,}\S)/);
     if (descMatch) {
-      warn(f, 'multi-line JSDoc Description detected — catalog will only show the first line (consider a single-line description or update build-catalog.js)');
+      warn(f, 'multi-line JSDoc Description detected (catalog captures full text across continuation lines)');
     }
 
     // Check for forbidden DOM access

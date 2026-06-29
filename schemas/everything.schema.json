@@ -62,5 +62,23 @@
       "type": "string",
       "description": "Schema version identifier"
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": { "required": ["canvas_presets"] },
+      "then": { "required": ["isCanvasBackup"] }
+    },
+    {
+      "if": { "required": ["css_presets"] },
+      "then": { "required": ["isCssBackup"] }
+    },
+    {
+      "if": { "required": ["gradient_presets"] },
+      "then": { "required": ["isGradientBackup"] }
+    },
+    {
+      "if": { "required": ["themes"] },
+      "then": { "required": ["isLibraryBackup"] }
+    }
+  ]
 }
