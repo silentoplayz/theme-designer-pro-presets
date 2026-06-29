@@ -29,6 +29,10 @@ self.onmessage = e => {
     h = c.height = e.data.height;
     loop();
   }
+  if (e.data.type === 'resize') {
+    w = c.width = e.data.width;
+    h = c.height = e.data.height;
+  }
 };
 
 function loop() {

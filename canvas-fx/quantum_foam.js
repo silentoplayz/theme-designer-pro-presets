@@ -46,6 +46,15 @@ self.onmessage = e => {
   }
 };
 
+function resetParticle(f) {
+  f.x = Math.random() * w;
+  f.y = Math.random() * h;
+  f.r = MIN_RADIUS;
+  f.life = 1;
+  f.decay = Math.random() * (MAX_LIFE_DECAY - MIN_LIFE_DECAY) + MIN_LIFE_DECAY;
+  f.hue = Math.random() * HUE_RANGE;
+}
+
 function animate() {
   // 1. Erase a portion of the previous frame to transparency
   ctx.globalCompositeOperation = 'destination-out';
@@ -55,28 +64,21 @@ function animate() {
   // 2. Switch back to normal drawing mode for particles
   ctx.globalCompositeOperation = 'source-over';
 
-  foam = foam.filter(f => {
+  for (let i = 0; i < foam.length; i++) {
+    const f = foam[i];
     f.life -= f.decay;
     f.r *= GROWTH_SPEED;
+
+    if (f.life <= 0) {
+      resetParticle(f);
+    }
 
     ctx.beginPath();
     ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
     ctx.fillStyle = `hsla(${f.hue},${SATURATION},${LIGHTNESS},${f.life})`;
     ctx.fill();
-
-    return f.life > 0;
-  });
-
-  while (foam.length < PARTICLE_COUNT) {
-    foam.push({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      r: MIN_RADIUS,
-      life: 1,
-      decay: Math.random() * (MAX_LIFE_DECAY - MIN_LIFE_DECAY) + MIN_LIFE_DECAY,
-      hue: Math.random() * HUE_RANGE
-    });
   }
+
   requestAnimationFrame(animate);
 }
 

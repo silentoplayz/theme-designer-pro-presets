@@ -21,6 +21,14 @@ self.onmessage=e=>{
   if(e.data.type==='resize'){
     w=c.width=e.data.width;h=c.height=e.data.height;
     ctx.font=font+'px monospace';
+    let colCount=Math.floor(w/font);
+    let oldLen=cols.length;
+    cols.length=colCount;
+    glow.length=colCount;
+    for(let i=oldLen;i<colCount;i++){
+      cols[i]=Math.random()*h;
+      glow[i]=Math.random();
+    }
   }
 };
 function animate(){
