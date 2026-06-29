@@ -23,6 +23,13 @@ self.onmessage = (e) => {
     case 'init':      // { canvas: OffscreenCanvas, width, height }
     case 'resize':    // { width, height }
     case 'mousemove': // { x, y }
+    case 'click':     // { x, y }
+    case 'mousedown': // { x, y }
+    case 'mouseup':   // { x, y }
+    case 'touchstart':// { x, y }
+    case 'touchmove': // { x, y }
+    case 'touchend':  // { }
+    case 'context':   // { theme, mode } — sent on theme/mode change
   }
 };
 

@@ -158,7 +158,6 @@ function main() {
       const delimiter = `EOF_${Date.now()}`;
       fs.appendFileSync(outputFile, `${key}<<${delimiter}\n${value}\n${delimiter}\n`);
     }
-    console.log(`::set-output name=${key}::${value.replace(/\n/g, '%0A')}`);
   }
 
   console.log('Processing theme submission...\n');
