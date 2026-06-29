@@ -9,6 +9,28 @@
 
 ---
 
+> [!IMPORTANT]
+> **Tool vs. Event Function — Which should you use?**
+>
+> Theme Designer Pro is available in two forms that target different audiences:
+>
+> | | **Tool** (this file) | **Event Function** |
+> |---|---|---|
+> | **Target audience** | Individual users | Server administrators |
+> | **Storage** | Browser `localStorage` (per-user, per-browser) | Server-side file persistence (instance-wide) |
+> | **Theme scope** | Personal — only affects your own browser | Global — applies to all users on the instance |
+> | **Requires admin** | No | Yes |
+> | **SSE live push** | No | Yes |
+> | **Development status** | Maintenance mode | Actively developed |
+>
+> **Both versions share the same core functionality** — OKLCH palette engine, Canvas FX, gradient builder, custom CSS, and snapshot library.
+>
+> If you're an **admin** looking for instance-wide theming, use the **[Event Function](../event-function/)** with the optional **[Launcher Tool](theme_designer_pro_launcher.py)** companion to open it directly from chat.
+>
+> If you're a **regular user** who wants personal theme customization without admin access, this Tool version is for you.
+
+---
+
 Theme Designer Pro is an advanced, native-injection theming tool for Open WebUI. Powered by the modern OKLCH color space, it allows you to generate beautiful, perceptually uniform color palettes, design and manage cohesive Dark, OLED, Light, and Her modes simultaneously, and apply them instantly to your interface.
 
 With its built-in bootloader injection, your custom themes persist seamlessly across page refreshes and container restarts/updates.

@@ -6,6 +6,9 @@ funding_url: https://buymeacoffee.com/iamg30
 version: 1.6.5
 license: MIT
 required_open_webui_version: 0.9.0
+description: A standalone theming tool for individual Open WebUI users. Themes are
+  stored per-browser via localStorage. For instance-wide, admin-managed theming with
+  server-side persistence, see the Theme Designer Pro Event Function instead.
 """
 
 from fastapi.responses import HTMLResponse
