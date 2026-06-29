@@ -42,7 +42,7 @@ theme-designer-pro-presets/
 ├── schemas/                 # JSON schemas for validation
 ├── scripts/                 # Build, validation, and manifest tooling
 ├── themes/                  # Complete theme presets (.json)
-├── tool/                    # Theme Designer Pro tool + documentation
+├── tool/                    # Theme Designer Pro tools + documentation
 ├── .gitignore
 ├── CONTRIBUTING.md
 ├── LICENSE
@@ -50,7 +50,7 @@ theme-designer-pro-presets/
 └── README.md
 ```
 
-> **Looking for the theming tools?** The Theme Designer Pro tool lives in [`tool/`](tool/) and the Theme Designer Pro event function lives in [`event-function/`](event-function/).
+> **Looking for the theming tools?** The Theme Designer Pro tool lives in [`tool/`](tool/), the event function lives in [`event-function/`](event-function/), and the companion launcher tool is at [`tool/theme_designer_pro_launcher.py`](tool/theme_designer_pro_launcher.py).
 
 ---
 
@@ -128,11 +128,17 @@ Centralized theme update manifest listing every theme with its current version a
 
 ### 🛠️ Tool ([`tool/`](tool/))
 
-The Theme Designer Pro Open WebUI **tool** — invoked via AI chat, renders inside an iframe artifact, and persists themes in browser localStorage. See [`tool/README.md`](tool/README.md) for installation, features, valve configuration, and usage instructions.
+The Theme Designer Pro Open WebUI **tool** — invoked via AI chat, renders inside an iframe artifact, and persists themes in browser localStorage. Designed for **individual users** who want personal theme customization without requiring admin access. See [`tool/README.md`](tool/README.md) for installation, features, valve configuration, and usage instructions.
+
+> **Note:** Active development is focused on the Event Function. The standalone Tool remains fully functional but is in maintenance mode.
 
 ### ⚡ Event Function ([`event-function/`](event-function/))
 
-The Theme Designer Pro **event function** — a standalone admin page variant with server-side persistence and real-time SSE push to all connected users. See [`event-function/README.md`](event-function/README.md) for installation and how it differs from the tool.
+The Theme Designer Pro **event function** — a standalone admin page variant with server-side persistence and real-time SSE push to all connected users. Designed for **server administrators** who want instance-wide theming. See [`event-function/README.md`](event-function/README.md) for installation and how it differs from the tool.
+
+### 🚀 Launcher Tool ([`tool/theme_designer_pro_launcher.py`](tool/theme_designer_pro_launcher.py))
+
+A lightweight **companion tool** for the Event Function that opens the designer page directly inside an Open WebUI chat via iframe — no need to navigate to the URL manually. Admin-only. Requires the Event Function to be installed and running.
 
 ---
 
