@@ -1,9 +1,9 @@
-/*
-  HypnoSpiral – Web-Worker edition
-  Name: HypnoSpiral
-  Description: A slowly fading, hypnotic spiral made of concentric coloured rings that rotate and drift outward.
-  All behaviour is controlled by the CONFIG block below – tweak only there.
-*/
+/**
+ * Title: HypnoSpiral
+ * Description: A slowly fading, hypnotic spiral made of concentric colored rings
+ *   that rotate and drift outward. Full-spectrum hue cycling with configurable
+ *   trail fade, ring spacing, and rotation speed.
+ */
 
 // =========================================================================
 // CONFIG ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––

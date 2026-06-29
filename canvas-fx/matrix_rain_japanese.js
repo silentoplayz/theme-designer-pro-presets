@@ -1,3 +1,9 @@
+/**
+ * Title: Matrix Rain Japanese
+ * Description: Cascading columns of glowing Japanese Katakana characters that
+ *   fade to transparency. Each column resets at random intervals with a bright
+ *   green glow that decays as it falls.
+ */
 // DigitalRain – transparency-optimized
 let c,ctx,w,h,cols=[],font=15,glow=[]; 
 self.onmessage=e=>{

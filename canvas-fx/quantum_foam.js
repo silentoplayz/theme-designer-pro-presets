@@ -1,3 +1,9 @@
+/**
+ * Title: Quantum Foam
+ * Description: A dense field of 2500 particles that bloom and fade across the
+ *   full color spectrum, evoking quantum vacuum fluctuations. Particles spawn at
+ *   random positions, grow outward, and dissolve into transparency.
+ */
 // QuantumFoam – transparency-optimized
 // ------------------------------------------------------------------
 // CONFIGURATION CONSTANTS

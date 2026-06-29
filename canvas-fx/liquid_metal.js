@@ -1,3 +1,9 @@
+/**
+ * Title: Liquid Metal
+ * Description: A sinuous, mouse-reactive liquid metal surface. Points follow the
+ *   cursor in a smooth chain, generating an undulating wave with a chrome-like
+ *   linear gradient fill.
+ */
 // =========================================================================
 // Configurable Parameters
 // =========================================================================

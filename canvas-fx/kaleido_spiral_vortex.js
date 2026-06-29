@@ -1,3 +1,10 @@
+/**
+ * Title: Kaleido Spiral Vortex
+ * Description: A kaleidoscopic vortex of rotating radial wedges with pulsing
+ *   scale wobble and smooth hue cycling. A subtle noise overlay adds texture
+ *   across the wedge faces.
+ */
+
 // ---------- CONFIGURABLE VARIABLES ----------
 const FPS            = 60;          // target frames per second (approx)
 const ROTATION_SPEED = 0.01;        // radians per frame
