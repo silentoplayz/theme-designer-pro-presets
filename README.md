@@ -42,7 +42,10 @@ theme-designer-pro-presets/
 ├── schemas/                 # JSON schemas for validation
 ├── scripts/                 # Build, validation, and manifest tooling
 ├── themes/                  # Complete theme presets (.json)
-├── tool/                    # Theme Designer Pro tools + documentation
+├── tools/                    # Theme Designer Pro tools + documentation
+│   ├── theme_designer_pro.py          # Standalone tool (individual users)
+│   ├── theme_designer_pro_launcher.py # Launcher companion (event function)
+│   └── README.md
 ├── .gitignore
 ├── CONTRIBUTING.md
 ├── LICENSE
@@ -50,7 +53,7 @@ theme-designer-pro-presets/
 └── README.md
 ```
 
-> **Looking for the theming tools?** The Theme Designer Pro tool lives in [`tool/`](tool/), the event function lives in [`event-function/`](event-function/), and the companion launcher tool is at [`tool/theme_designer_pro_launcher.py`](tool/theme_designer_pro_launcher.py).
+> **Looking for the theming tools?** The Theme Designer Pro tool lives in [`tools/`](tools/), the event function lives in [`event-function/`](event-function/), and the companion launcher tool is at [`tools/theme_designer_pro_launcher.py`](tools/theme_designer_pro_launcher.py).
 
 ---
 
@@ -126,9 +129,9 @@ JSON Schema definitions documenting the data formats for themes, Canvas FX, CSS,
 
 Centralized theme update manifest listing every theme with its current version and raw GitHub `updateUrl`. Theme Designer Pro fetches this in a single request to check all themes for updates at once.
 
-### 🛠️ Tool ([`tool/`](tool/))
+### 🛠️ Tool ([`tools/`](tools/))
 
-The Theme Designer Pro Open WebUI **tool** — invoked via AI chat, renders inside an iframe artifact, and persists themes in browser localStorage. Designed for **individual users** who want personal theme customization without requiring admin access. See [`tool/README.md`](tool/README.md) for installation, features, valve configuration, and usage instructions.
+The Theme Designer Pro Open WebUI **tool** — invoked via AI chat, renders inside an iframe artifact, and persists themes in browser localStorage. Designed for **individual users** who want personal theme customization without requiring admin access. See [`tools/README.md`](tools/README.md) for installation, features, valve configuration, and usage instructions.
 
 > **Note:** Active development is focused on the Event Function. The standalone Tool remains fully functional but is in maintenance mode.
 
@@ -136,7 +139,7 @@ The Theme Designer Pro Open WebUI **tool** — invoked via AI chat, renders insi
 
 The Theme Designer Pro **event function** — a standalone admin page variant with server-side persistence and real-time SSE push to all connected users. Designed for **server administrators** who want instance-wide theming. See [`event-function/README.md`](event-function/README.md) for installation and how it differs from the tool.
 
-### 🚀 Launcher Tool ([`tool/theme_designer_pro_launcher.py`](tool/theme_designer_pro_launcher.py))
+### 🚀 Launcher Tool ([`tools/theme_designer_pro_launcher.py`](tools/theme_designer_pro_launcher.py))
 
 A lightweight **companion tool** for the Event Function that opens the designer page directly inside an Open WebUI chat via iframe — no need to navigate to the URL manually. Admin-only. Requires the Event Function to be installed and running.
 
@@ -207,7 +210,7 @@ This allows anyone to submit a theme without knowing git — see [CONTRIBUTING.m
 Deploys the [`docs/`](docs/) preset gallery to [GitHub Pages](https://silentoplayz.github.io/theme-designer-pro-presets/).
 
 - **After builds**: Triggers automatically when `Validate & Build Bundles` completes successfully (via `workflow_run`), ensuring the catalog is deployed with the latest rebuilt `docs/catalog.json`.
-- **On direct changes**: Also triggers on pushes that modify `docs/` or `tool/` files, so documentation and gallery edits are deployed immediately without waiting for a bundle build.
+- **On direct changes**: Also triggers on pushes that modify `docs/` or `tools/` files, so documentation and gallery edits are deployed immediately without waiting for a bundle build.
 - **Concurrency**: Uses a `pages` concurrency group to cancel stale deployments and ensure only one deployment runs at a time.
 
 ### Running Locally
