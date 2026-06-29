@@ -11,7 +11,7 @@ Before submitting a PR, ensure your preset meets these requirements:
 ### Canvas FX Scripts
 
 - [ ] **Web Worker compatible** — no `document`, `window`, `alert`, or `localStorage` access
-- [ ] **Handles all message types** — `init`, `resize`, `mousemove`
+- [ ] **Handles all message types** — `init`, `resize`, `mousemove`, `click`, `mousedown`, `mouseup`, `touchstart`, `touchmove`, `touchend`, `context`
 - [ ] **Includes heartbeat** — `setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);`
 - [ ] **Uses `requestAnimationFrame`** for the render loop
 - [ ] **Has a JSDoc header** with `Title` and `Description`

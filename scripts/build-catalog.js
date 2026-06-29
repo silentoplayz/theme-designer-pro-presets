@@ -34,11 +34,33 @@ function titleCase(filename) {
   return stem.split('_').filter(Boolean).map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
 }
 
-/** Extract a JSDoc field value (e.g. Title, Description) from script source */
+/** Extract a JSDoc field value (e.g. Title, Description) from script source.
+ *  Captures multi-line values where continuation lines use `*   ` (3+ spaces). */
 function extractJSDoc(source, field) {
-  const re = new RegExp(`\\*\\s*${field}:\\s*(.+)`);
-  const m = source.match(re);
-  return m ? m[1].trim() : '';
+  const lines = source.split('\n');
+  const fieldRe = new RegExp(`\\*\\s*${field}:\\s*(.+)`);
+  let result = '';
+  let capturing = false;
+
+  for (const line of lines) {
+    if (!capturing) {
+      const m = line.match(fieldRe);
+      if (m) {
+        result = m[1].trim();
+        capturing = true;
+      }
+    } else {
+      // Continuation line: `*   text` (3+ spaces of indentation after *)
+      const cont = line.match(/\*\s{3,}(\S.*)$/);
+      if (cont) {
+        result += ' ' + cont[1].trim();
+      } else {
+        break; // Next field or end of JSDoc block
+      }
+    }
+  }
+
+  return result;
 }
 
 // ── Themes ──

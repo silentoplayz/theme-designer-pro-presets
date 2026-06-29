@@ -132,6 +132,22 @@ function validateCanvasFx() {
       warn(f, 'missing heartbeat postMessage (recommended for worker keepalive)');
     }
 
+    // Check for init message handler — required to receive the canvas
+    if (!content.includes("'init'") && !content.includes('"init"')) {
+      fail(f, 'missing init message handler (required to receive OffscreenCanvas)');
+    }
+
+    // Check for requestAnimationFrame — recommended render loop
+    if (!content.includes('requestAnimationFrame')) {
+      warn(f, 'missing requestAnimationFrame (recommended for smooth render loop)');
+    }
+
+    // Check for multi-line JSDoc description — catalog builder only captures the first line
+    const descMatch = content.match(/\*\s*Description:\s*.+\n(\s*\*\s{3,}\S)/);
+    if (descMatch) {
+      warn(f, 'multi-line JSDoc Description detected — catalog will only show the first line (consider a single-line description or update build-catalog.js)');
+    }
+
     // Check for forbidden DOM access
     const forbidden = ['document.', 'window.', 'localStorage', 'alert('];
     let hasForbidden = false;
