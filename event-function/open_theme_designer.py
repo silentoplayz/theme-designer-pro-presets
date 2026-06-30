@@ -59,6 +59,10 @@ class Event:
             default="",
             description="Comma-separated allowlist of domains for URL imports (e.g. 'raw.githubusercontent.com, openwebui.com'). Empty = allow all.",
         )
+        enable_community_themes: bool = Field(
+            default=True,
+            description="Show the Community Themes browser in the Themes tab. When disabled, the community themes grid is hidden and no manifest is fetched.",
+        )
         draft_mode_default: bool = Field(
             default=False,
             description="Open the designer in Draft mode by default. When enabled, the designer starts in Draft mode on every fresh page load, preventing accidental live changes.",
@@ -1539,9 +1543,7 @@ class Event:
         body.light-mode input[type="text"] { background: var(--bg-surface) !important; color: var(--text-main) !important; border-color: var(--border) !important; }
         body.light-mode .preset-btn:hover { box-shadow: 0 10px 20px -5px var(--lm-shadow); }
         body.light-mode .footer { background: transparent; border-color: transparent; }
-        body.light-mode .curated-scroll-container::-webkit-scrollbar-track { background: var(--lm-border-subtle); }
-        body.light-mode .curated-scroll-container::-webkit-scrollbar-thumb { background: var(--lm-bg-hover); }
-        body.light-mode .curated-scroll-container::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.25); }
+
         body.light-mode .var-action-btn { background: var(--lm-border-subtle); border-color: var(--lm-shadow); color: var(--text-main); }
         body.light-mode .var-action-btn:hover { background: var(--accent); border-color: var(--accent); color: white; }
         body.light-mode .owui-tooltip { background: var(--bg-surface); color: var(--text-main); border: 1px solid var(--lm-shadow); box-shadow: 0 8px 16px var(--lm-shadow); }
@@ -1561,8 +1563,9 @@ class Event:
         body#tool-body.washed-out .var-action-btn:hover { background: var(--accent); border-color: var(--accent); color: white; }
 
         /* NATIVE-LIKE TOOLTIP */
-        .owui-tooltip { position: absolute; background: #18181b; color: #f4f4f5; padding: 6px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 500; pointer-events: none; z-index: 100000; opacity: 0; transform: translateY(4px); transition: opacity 0.15s ease, transform 0.15s ease; white-space: nowrap; font-family: 'Inter', sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); }
+        .owui-tooltip { position: absolute; background: #18181b; color: #f4f4f5; padding: 6px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 500; pointer-events: none; z-index: 100000; opacity: 0; transform: translateY(4px); transition: opacity 0.15s ease, transform 0.15s ease; white-space: nowrap; font-family: 'Inter', sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); max-width: 320px; }
         .owui-tooltip.visible { opacity: 1; transform: translateY(0); }
+        .owui-tooltip.multiline { white-space: normal; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
         .owui-tooltip.rich { white-space: normal; padding: 10px 14px; max-width: 280px; display: flex; flex-direction: column; gap: 5px; }
         .owui-tooltip .tt-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
         .owui-tooltip .tt-name { font-weight: 700; font-size: 0.78rem; color: #ffffff; }
@@ -1712,14 +1715,14 @@ class Event:
         }
         .header h1 { font-size: 1rem; margin: 0; font-weight: 800; display: flex; align-items: center; gap: 12px; letter-spacing: -0.02em; white-space: nowrap; flex-shrink: 0; }
 
-        .tabs { display: flex; background: var(--bg-deep); padding: 6px; border-radius: 16px; border: 1px solid var(--border); overflow-x: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent; -webkit-overflow-scrolling: touch; flex-shrink: 0; z-index: 90; margin: 12px auto 0; width: calc(100% - 96px); max-width: 1600px; box-sizing: border-box; }
+        .tabs { display: flex; background: var(--bg-deep); padding: 6px; border-radius: 16px; border: 1px solid var(--border); overflow-x: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent; -webkit-overflow-scrolling: touch; flex-shrink: 0; z-index: 90; margin: 12px auto 0; width: calc(100% - 56px); max-width: 1920px; box-sizing: border-box; }
         .tabs::-webkit-scrollbar { height: 4px; }
         .tabs::-webkit-scrollbar-track { background: transparent; }
         .tabs::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
         .tab { flex: 1 0 auto; padding: 14px 18px; text-align: center; font-size: 1rem; font-weight: 700; cursor: pointer; border-radius: 12px; color: var(--text-muted); transition: 0.2s ease; white-space: nowrap; }
         .tab.active { background: var(--bg-elevated); color: var(--text-main); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
 
-        .content-area { padding: 20px 28px; display: flex; flex-direction: column; gap: 20px; flex: 1; overflow-y: auto; overflow-x: hidden; max-width: 1600px; margin: 0 auto; width: 100%; box-sizing: border-box; min-height: 0; }
+        .content-area { padding: 20px 28px; display: flex; flex-direction: column; gap: 20px; flex: 1; overflow-y: auto; overflow-x: hidden; max-width: 1920px; margin: 0 auto; width: 100%; box-sizing: border-box; min-height: 0; }
         .section-title { font-size: 0.95rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2.5px; font-weight: 800; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
         
         .mode-toggle { display: flex; background: rgba(0,0,0,0.2); padding: 3px; border-radius: 10px; border: 1px solid var(--border); gap: 2px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
@@ -1835,13 +1838,34 @@ class Event:
         
         .preset-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
         
-        .curated-scroll-container { overflow-x: auto; overflow-y: hidden; padding: 12px 8px 16px; margin: -12px -8px 0 -8px; width: calc(100% + 16px); border-radius: 12px; scrollbar-width: auto; }
-        .curated-scroll-container::-webkit-scrollbar { height: 10px; }
-        .curated-scroll-container::-webkit-scrollbar-track { background: var(--bg-deep); border-radius: 5px; border: 1px solid var(--border); margin: 0 8px; }
-        .curated-scroll-container::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 5px; min-width: 60px; }
-        .curated-scroll-container::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--accent) 80%, white); }
-        .curated-flex { display: flex; gap: 16px; }
-        .curated-flex .preset-btn { flex: 0 0 calc((100% - 48px) / 4); min-width: 220px; }
+
+
+        @media (min-width: 1400px) {
+            .preset-grid { grid-template-columns: repeat(5, 1fr); }
+
+            .gradient-preset-grid { grid-template-columns: repeat(5, 1fr); }
+        }
+
+        .community-card { position: relative; cursor: pointer; text-align: left; align-items: stretch; }
+        .community-card .community-header { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; gap: 8px; }
+        .community-card .community-name { font-size: 0.72rem; font-weight: 800; color: var(--text-main); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+        .community-card .community-version { font-size: 0.5rem; color: var(--text-muted); opacity: 0.6; background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; font-weight: 600; }
+        .community-card .community-desc { font-size: 0.6rem; color: var(--text-muted); line-height: 1.5; opacity: 0.7; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; width: 100%; }
+        .community-card .community-author { font-size: 0.55rem; opacity: 0.5; width: 100%; display: flex; align-items: center; gap: 5px; }
+        .community-card .community-author-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+        .community-card .community-badges { display: flex; gap: 4px; flex-wrap: wrap; width: 100%; }
+        .community-badge-feat { font-size: 0.45rem; font-weight: 700; padding: 2px 6px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+        .community-badge-feat.badge-css { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+        .community-badge-feat.badge-fx { background: rgba(251,146,60,0.2); color: #fdba74; }
+        .community-badge-feat.badge-gradient { background: rgba(244,114,182,0.2); color: #f9a8d4; }
+        .community-badge-feat.badge-overrides { background: rgba(147,51,234,0.2); color: #c4b5fd; }
+        .community-card .community-install-btn { width: 100%; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-main); padding: 7px 12px; border-radius: 10px; font-size: 0.62rem; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: auto; }
+        .community-card .community-install-btn:hover { background: var(--accent); border-color: var(--accent); color: white; }
+        .community-card .community-install-btn.installed { border-color: rgba(16,185,129,0.3); color: #34d399; }
+        .community-card .community-install-btn.installed:hover { background: rgba(16,185,129,0.15); border-color: #34d399; }
+        .community-card .community-status-badge { position: absolute; top: 8px; right: 8px; font-size: 0.45rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; z-index: 6; text-transform: uppercase; letter-spacing: 0.5px; }
+        .community-status-badge.s-update { background: rgba(251,191,36,0.15); color: #fbbf24; }
 
         .preset-btn { background: var(--bg-deep); border: 1px solid var(--border); padding: 20px; border-radius: 16px; font-size: 1rem; color: var(--text-muted); cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; align-items: center; gap: 12px; font-weight: 600; position: relative; min-width: 0; }
         .preset-btn:hover { border-color: var(--accent); color: var(--text-main); transform: translateY(-4px); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.6); }
@@ -1997,7 +2021,7 @@ class Event:
         body.light-mode .docs-modal-close-btn { background: white; border-color: var(--border); color: var(--text-main); }
         body.light-mode .docs-modal-close-btn:hover { background: var(--accent); color: white; }
 
-        .footer { padding: 12px 28px; border-top: none; background: transparent; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; flex-shrink: 0; z-index: 100; max-width: 1600px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .footer { padding: 12px 28px; border-top: none; background: transparent; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; flex-shrink: 0; z-index: 100; max-width: 1920px; margin: 0 auto; width: 100%; box-sizing: border-box; }
         .footer-left { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
         .footer-right { display: flex; gap: 12px; align-items: center; flex-shrink: 0; }
         .footer-actions { display: flex; gap: 12px; align-items: center; }
@@ -2040,7 +2064,7 @@ class Event:
             /* Preset grid */
             .preset-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
             .preset-btn { padding: 14px; gap: 8px; border-radius: 12px; }
-            .curated-flex .preset-btn { flex: 0 0 calc((100% - 12px) / 2); }
+
 
             /* Slider rows */
             .slider-row { gap: 12px; margin-bottom: 18px; }
@@ -2073,9 +2097,7 @@ class Event:
             /* Variable action buttons */
             .var-action-btn { font-size: 0.65rem; padding: 6px 10px; }
 
-            /* Curated presets: scroll container */
-            .curated-scroll-container { -webkit-overflow-scrolling: touch; }
-            .curated-flex { gap: 10px; }
+
 
             /* Gradient preset grid */
             .gradient-preset-grid { grid-template-columns: repeat(2, 1fr); }
@@ -2200,8 +2222,8 @@ class Event:
     <div id="action-toast" class="action-toast"></div>
 
     <div class="tabs" role="tablist" aria-label="Designer sections">
-        <div class="tab active" data-tab="lch" role="tab" tabindex="0" aria-selected="true">🎨 Design Studio</div>
-        <div class="tab" data-tab="vars" role="tab" tabindex="-1" aria-selected="false">🎯 Color Variables</div>
+        <div class="tab active" data-tab="themes" role="tab" tabindex="0" aria-selected="true">🎭 Themes</div>
+        <div class="tab" data-tab="lch" role="tab" tabindex="-1" aria-selected="false">🎨 Core Palette</div>
         <div class="tab" data-tab="custom" role="tab" tabindex="-1" aria-selected="false">✏️ Style Overrides</div>
         <div class="tab" data-tab="canvas" role="tab" tabindex="-1" aria-selected="false">✨ Canvas FX</div>
         <div class="tab" data-tab="bg" role="tab" tabindex="-1" aria-selected="false">🌈 Gradient</div>
@@ -2210,7 +2232,7 @@ class Event:
 
     <div class="content-area">
 
-        <div id="tab-lch" class="tab-content" role="tabpanel">
+        <div id="tab-lch" class="tab-content" role="tabpanel" style="display:none;">
             <div class="section-title" style="display: flex; justify-content: space-between; align-items: center;">
                 <div>Core Palette</div>
                 <div class="flex-center">
@@ -2248,56 +2270,6 @@ class Event:
             <div class="section-title" style="margin-top: 32px;">OKLCH Tonal Ramp</div>
             <div id="ramp-gray" style="display: flex; height: 52px; margin-top: 10px; gap: 6px; margin-bottom: 32px;"></div>
 
-            <div id="gallery-toolbar-theme"></div>
-
-            <div class="section-title" style="margin-top: 16px;"><div>Curated Presets <span style="opacity: 0.5;" id="curated-count-wrap">| <span id="curated-count">0</span></span></div></div>
-            <div class="curated-scroll-container">
-                <div class="curated-flex">
-                    <button class="preset-btn" data-preset="midnight">
-                        <div class="preset-dots" id="dot-midnight"></div>
-                        Midnight
-                        <div class="selected-check">✓</div>
-                    </button>
-                    <button class="preset-btn" data-preset="emerald">
-                        <div class="preset-dots" id="dot-emerald"></div>
-                        Emerald
-                        <div class="selected-check">✓</div>
-                    </button>
-                    <button class="preset-btn" data-preset="amber">
-                        <div class="preset-dots" id="dot-amber"></div>
-                        Amber
-                        <div class="selected-check">✓</div>
-                    </button>
-                    <button class="preset-btn" data-preset="amethyst">
-                        <div class="preset-dots" id="dot-amethyst"></div>
-                        Amethyst
-                        <div class="selected-check">✓</div>
-                    </button>
-                    <button class="preset-btn" data-preset="ruby">
-                        <div class="preset-dots" id="dot-ruby"></div>
-                        Ruby
-                        <div class="selected-check">✓</div>
-                    </button>
-                    <button class="preset-btn" data-preset="sapphire">
-                        <div class="preset-dots" id="dot-sapphire"></div>
-                        Sapphire
-                        <div class="selected-check">✓</div>
-                    </button>
-                    <button class="preset-btn" data-preset="topaz">
-                        <div class="preset-dots" id="dot-topaz"></div>
-                        Topaz
-                        <div class="selected-check">✓</div>
-                    </button>
-                    <button class="preset-btn" data-preset="obsidian">
-                        <div class="preset-dots" id="dot-obsidian"></div>
-                        Obsidian
-                        <div class="selected-check">✓</div>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-vars" class="tab-content" role="tabpanel" style="display:none">
             <div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.2);padding:12px;border-radius:14px;font-size:0.65rem;color:var(--text-muted);font-style:italic;margin-bottom:16px;border-left:4px solid var(--accent);display:flex;gap:12px;align-items:center;">
                 <span style="font-size:1.1rem">💡</span>
                 <span><b>Pro Tip:</b> Click a variable name to copy its CSS code. Locking (🔒) a variable pins it for the <i>currently selected mode</i> and protects it from being changed by sliders, randomization, or image extraction. Mode overrides are managed separately.</span>
@@ -2538,6 +2510,21 @@ class Event:
             </div>
         </div>
 
+        <div id="tab-themes" class="tab-content" role="tabpanel">
+            <div id="gallery-toolbar-theme"></div>
+
+            <div class="section-title" style="margin-top: 28px;">
+                <div>Community Themes <span style="opacity: 0.5;" id="community-count-wrap">| <span id="community-count">0</span></span></div>
+                <div class="flex-center-gap6">
+                    <button class="btn btn-icon" id="community-install-all-btn" data-tooltip="Install all community themes" style="display:none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+                    <button class="btn btn-icon" id="community-refresh-btn" data-tooltip="Refresh community themes"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg></button>
+                </div>
+            </div>
+            <div id="community-themes-grid" class="preset-grid" style="margin-bottom: 28px;">
+                <div class="empty-state-lg" style="grid-column: 1 / -1;">Loading community themes...</div>
+            </div>
+        </div>
+
         <div id="tab-code" class="tab-content" role="tabpanel" style="display:none; height: 100%;">
             <div class="code-container" style="gap: 20px;">
                 <div style="display: flex; flex-direction: column; flex: 1;">
@@ -2666,7 +2653,7 @@ class Event:
                 <details class="doc-accordion">
                     <summary>5. Variable Overrides & Locks (🔒) <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
-                        <p>While the OKLCH engine dynamically calculates a 12-step ramp, you can manually override any individual step in the <b>Color Variables</b> tab.</p>
+                        <p>While the OKLCH engine dynamically calculates a 12-step ramp, you can manually override any individual step in the <b>Individual Variable Overrides</b> section below the tonal ramp.</p>
                         <h4>Color Picker Overrides</h4>
                         <ul>
                             <li><b>Locking Variables:</b> Clicking the lock (🔒) icon pins a variable. Locked variables are protected and will NOT be overwritten if you change the OKLCH sliders, randomize the theme, or extract a palette from an image. Use the bulk <b>Lock All</b> / <b>Unlock All</b> buttons to quickly pin or release the entire variable set at once.</li>
@@ -4271,6 +4258,9 @@ location.reload();</code></pre>
             { t:'c', id:'delete-all-css-modal', icon:'!', title:'Wipe CSS Snippets?', msg:'Are you sure you want to permanently remove <b>ALL</b> saved CSS snippets? This cannot be undone.', confirmId:'confirm-delete-all-css-btn', confirmLabel:'Wipe All' },
             { t:'c', id:'delete-all-gradient-modal', icon:'!', title:'Wipe Gradient Presets?', msg:'Are you sure you want to permanently remove <b>ALL</b> saved gradient presets? Built-in presets will not be affected. This cannot be undone.', confirmId:'confirm-delete-all-gradient-btn', confirmLabel:'Wipe All' },
 
+            // ── Confirm: Community Install All ──
+            { t:'c', id:'install-all-confirm-modal', icon:'\u2B07\uFE0F', title:'Install All Community Themes?', msg:'<span id="install-all-msg"></span>', confirmId:'confirm-install-all-btn', confirmLabel:'Install All' },
+
             // ── Confirm: Danger with backup checkbox ──
             { t:'c', id:'nuclear-modal', icon:'\u2622\uFE0F', title:'Global Reset?', msg:'This will wipe all active overrides across ALL modes.', msgMb:'20px', confirmId:'confirm-nuclear-btn', confirmLabel:'Wipe', cb:{ id:'nuclear-backup-cb', label:'Create a backup snapshot' } },
             { t:'c', id:'factory-reset-modal', icon:'\u{1F6A8}', title:'Factory Reset?', msg:'This will permanently WIPE all themes, snapshots, and settings. This action is irreversible.', msgMb:'20px', confirmId:'confirm-factory-reset-btn', confirmLabel:'Wipe All', cb:{ id:'factory-backup-cb', label:'Export a backup before wiping', checked:true } },
@@ -4978,6 +4968,13 @@ function startAnimation() {
             tooltipEl.classList.remove('rich');
         }
         tooltipEl.classList.add('visible');
+
+        // Add multiline class for community cards (long descriptions)
+        if (target.classList.contains('community-card')) {
+            tooltipEl.classList.add('multiline');
+        } else {
+            tooltipEl.classList.remove('multiline');
+        }
         
         const applyTooltipColor = (hex) => {
             tooltipEl.style.background = hex;
@@ -8463,16 +8460,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         }, { passive: false });
     }
 
-    // Horizontal wheel scroll for curated presets gallery
-    const curatedScroll = document.querySelector('.curated-scroll-container');
-    if (curatedScroll) {
-        curatedScroll.addEventListener('wheel', (e) => {
-            if (e.deltaY !== 0) {
-                e.preventDefault();
-                curatedScroll.scrollLeft += e.deltaY;
-            }
-        }, { passive: false });
-    }
+
 
     document.querySelectorAll('.copy-css-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -8657,7 +8645,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
 
     document.getElementById('extract-btn').addEventListener('click', () => document.getElementById('image-input').click());
 
-    // Color Variables tab: wire duplicate Randomize/Extract buttons
+    // Core Palette tab: wire duplicate Randomize/Extract buttons
     const randomBtnVars = document.getElementById('random-btn-vars');
     if (randomBtnVars) randomBtnVars.addEventListener('click', () => document.getElementById('random-btn').click());
     const extractBtnVars = document.getElementById('extract-btn-vars');
@@ -9941,6 +9929,325 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         }
     };
 
+    // --- Community Themes Browser ---
+    let _communityManifest = null;
+    let _communityCatalog = null;
+    let _communityLoaded = false;
+    const CATALOG_URL = 'https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/docs/catalog.json';
+    const MODE_ORDER = ['dark', 'light', 'oled', 'her'];
+
+    function oklchToCSS(h, c, l) {
+        // catalog uses c as 0-100 scale, convert to 0-1 for oklch()
+        return `oklch(${l}% ${c / 100} ${h})`;
+    }
+
+    async function loadCommunityThemes(force) {
+        const grid = $('community-themes-grid');
+        if (!grid) return;
+        // Respect valve toggle
+        const cfg = window.__THEME_PRO_CONFIG__;
+        if (cfg && !cfg.enableCommunityThemes) return;
+
+        if (_communityCatalog && !force) {
+            renderCommunityGrid(_communityCatalog);
+            return;
+        }
+
+        grid.innerHTML = '<div class="empty-state-lg" style="grid-column:1/-1;">Loading community themes...</div>';
+
+        try {
+            // Fetch rich catalog (has per-mode data, features, importUrl)
+            const res = await fetch(CATALOG_URL);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            if (!data.themes || !Array.isArray(data.themes)) throw new Error('Invalid catalog');
+            _communityCatalog = data;
+            // Also load manifest for update version checking
+            _communityManifest = await fetchManifest();
+            renderCommunityGrid(data);
+        } catch(e) {
+            // Fall back to manifest-only (fewer features)
+            try {
+                const manifest = await fetchManifest();
+                if (manifest && manifest.themes) {
+                    _communityManifest = manifest;
+                    _communityCatalog = { themes: Object.entries(manifest.themes).map(([k, v]) => ({ ...v, importUrl: v.updateUrl, _key: k })) };
+                    renderCommunityGrid(_communityCatalog);
+                } else {
+                    grid.innerHTML = '<div class="empty-state-lg" style="grid-column:1/-1;">Could not load community themes.</div>';
+                }
+            } catch {
+                grid.innerHTML = '<div class="empty-state-lg" style="grid-column:1/-1;">Could not load community themes.</div>';
+            }
+        }
+    }
+
+    function collectThemeFeatures(modes) {
+        const features = new Set();
+        if (!modes) return features;
+        for (const m of MODE_ORDER) {
+            const mode = modes[m];
+            if (!mode) continue;
+            if (mode.hasCSS) features.add('CSS');
+            if (mode.hasFX) features.add('FX');
+            if (mode.hasGradient) features.add('Gradient');
+            if (mode.hasOverrides) features.add('Overrides');
+        }
+        return features;
+    }
+
+    function renderCommunityGrid(catalog) {
+        const grid = $('community-themes-grid');
+        const countEl = $('community-count');
+        if (!grid) return;
+
+        const themes = catalog.themes || [];
+        if (countEl) countEl.textContent = themes.length;
+
+        // Build lookup of installed themes by importUrl/updateUrl
+        const snapshots = getSnapshots();
+        const installedUrls = new Set();
+        const installedVersions = {};
+        snapshots.forEach(s => {
+            if (s.updateUrl) {
+                const raw = toRawGitHub(s.updateUrl);
+                installedUrls.add(raw);
+                installedUrls.add(s.updateUrl);
+                installedVersions[raw] = s.version || '0.0.0';
+            }
+        });
+
+        const cards = themes.map((t, idx) => {
+            const importUrl = t.importUrl || '';
+            const rawUrl = toRawGitHub(importUrl);
+            const isInstalled = installedUrls.has(rawUrl) || installedUrls.has(importUrl);
+            const hasUpdate = isInstalled && _communityManifest && semverCompare(t.version || '0.0.0', installedVersions[rawUrl] || '0.0.0') > 0;
+
+            // Status badge (update only, no installed badge)
+            let statusBadge = '';
+            if (hasUpdate) statusBadge = '<span class="community-status-badge s-update">Update</span>';
+
+
+            // Feature badges & author dot
+            const modes = t.modes || {};
+            const features = collectThemeFeatures(modes);
+            const badgeMap = { CSS: 'badge-css', FX: 'badge-fx', Gradient: 'badge-gradient', Overrides: 'badge-overrides' };
+            const badgesHTML = features.size ? `<div class="community-badges">
+                ${[...features].map(f => `<span class="community-badge-feat ${badgeMap[f] || ''}">${f}</span>`).join('')}
+            </div>` : '';
+            const dotColor = modes.dark ? oklchToCSS(modes.dark.h, Math.max(modes.dark.c, 20), 55) : 'var(--accent)';
+
+            // Install button
+            const btnClass = isInstalled ? 'installed' : '';
+            const btnLabel = hasUpdate ? '⟳ Update' : (isInstalled ? '✓ Installed' : '↓ Install');
+
+            const descEscaped = (t.description || '').replace(/"/g, '&quot;');
+
+            return `<div class="preset-btn community-card" data-community-idx="${idx}" ${descEscaped ? `data-tooltip="${descEscaped}"` : ''}>
+                ${statusBadge}
+                <div class="community-header">
+                    <span class="community-name">${t.name || ''}</span>
+                    ${t.version ? `<span class="community-version">v${t.version}</span>` : ''}
+                </div>
+                <div class="community-desc">${t.description || ''}</div>
+                <div class="community-author"><span class="community-author-dot" style="background:${dotColor}"></span>${t.author || 'Unknown'}</div>
+                ${badgesHTML}
+                <button class="community-install-btn ${btnClass}" onclick="event.stopPropagation(); installCommunityTheme(${idx})">${btnLabel}</button>
+            </div>`;
+        });
+
+        grid.innerHTML = cards.join('');
+
+        // Toggle Install All button visibility
+        const installAllBtn = $('community-install-all-btn');
+        if (installAllBtn) {
+            const uninstalledCount = themes.filter(t => {
+                const url = t.importUrl || '';
+                return !installedUrls.has(toRawGitHub(url)) && !installedUrls.has(url);
+            }).length;
+            installAllBtn.style.display = uninstalledCount > 0 ? '' : 'none';
+        }
+    }
+
+    window.installCommunityTheme = async function(idx) {
+        if (!_communityCatalog || !_communityCatalog.themes[idx]) return;
+        const t = _communityCatalog.themes[idx];
+        const updateUrl = t.importUrl || '';
+        if (!updateUrl) { showToast('No import URL available'); return; }
+
+        showToast('Downloading theme...');
+        try {
+            const remote = await fetchThemeData(updateUrl);
+            if (!remote) throw new Error('Invalid theme data');
+
+            delete remote._meta;
+            const newTheme = {
+                name: remote.name || t.name,
+                description: remote.description || t.description || '',
+                author: remote.author || t.author || '',
+                version: remote.version || t.version || '1.0.0',
+                targetVersion: remote.targetVersion || '',
+                repositoryUrl: remote.repositoryUrl || '',
+                updateUrl: remote.updateUrl || updateUrl,
+                dark: remote.dark,
+                light: remote.light,
+                oled: remote.oled || null,
+                her: remote.her || null
+            };
+            ensureAllModes(newTheme);
+            MODES.forEach(m => { if (newTheme[m]) newTheme[m] = normalizeModeData(newTheme[m]); });
+
+            const snapshots = getSnapshots();
+            const rawUrl = toRawGitHub(updateUrl);
+            const existingIdx = snapshots.findIndex(s => s.updateUrl && (toRawGitHub(s.updateUrl) === rawUrl || s.updateUrl === updateUrl));
+
+            if (existingIdx >= 0) {
+                MODES.forEach(m => { if (newTheme[m]) snapshots[existingIdx][m] = newTheme[m]; });
+                snapshots[existingIdx].version = newTheme.version;
+                snapshots[existingIdx].description = newTheme.description;
+                snapshots[existingIdx].author = newTheme.author;
+                if (newTheme.targetVersion) snapshots[existingIdx].targetVersion = newTheme.targetVersion;
+                saveSnapshots(snapshots);
+                showToast(`✓ Updated "${newTheme.name}" to v${newTheme.version}`);
+            } else {
+                snapshots.unshift(newTheme);
+                saveSnapshots(snapshots);
+                showToast(`✓ Installed "${newTheme.name}"`);
+            }
+
+            renderSnapshots();
+        } catch(e) {
+            showToast(`Error: ${e.message}`);
+        }
+    };
+
+    // Refresh button
+    const _communityRefreshBtn = $('community-refresh-btn');
+    if (_communityRefreshBtn) {
+        _communityRefreshBtn.addEventListener('click', () => loadCommunityThemes(true));
+    }
+
+    // Install All button
+    const _communityInstallAllBtn = $('community-install-all-btn');
+    if (_communityInstallAllBtn) {
+        _communityInstallAllBtn.addEventListener('click', async () => {
+            if (!_communityCatalog || !_communityCatalog.themes) return;
+
+            // Find uninstalled themes
+            const snapshots = getSnapshots();
+            const installedUrls = new Set();
+            snapshots.forEach(s => {
+                if (s.updateUrl) {
+                    installedUrls.add(toRawGitHub(s.updateUrl));
+                    installedUrls.add(s.updateUrl);
+                }
+            });
+            const uninstalled = _communityCatalog.themes.filter(t => {
+                const url = t.importUrl || '';
+                return url && !installedUrls.has(toRawGitHub(url)) && !installedUrls.has(url);
+            });
+
+            if (uninstalled.length === 0) {
+                showToast('All community themes are already installed!');
+                return;
+            }
+
+            // Build dynamic message with Canvas FX warning
+            const hasFx = uninstalled.some(t => {
+                const modes = t.modes || {};
+                return MODE_ORDER.some(m => modes[m] && modes[m].hasFX);
+            });
+            const msgEl = $('install-all-msg');
+            if (msgEl) {
+                let html = `This will download and add <b>${uninstalled.length}</b> community theme${uninstalled.length > 1 ? 's' : ''} to your library.`;
+                if (hasFx) {
+                    html += `<br><br><span style="color:#fbbf24;">⚠️ Some themes include Canvas FX animation scripts (JavaScript).</span> These scripts run in your browser and are authored by community contributors. Only install if you trust the source.`;
+                }
+                msgEl.innerHTML = html;
+            }
+            showModal('install-all-confirm-modal');
+        });
+    }
+
+    // Install All — confirm handler
+    const _confirmInstallAllBtn = $('confirm-install-all-btn');
+    if (_confirmInstallAllBtn) {
+        _confirmInstallAllBtn.addEventListener('click', async () => {
+            hideModal('install-all-confirm-modal');
+            if (!_communityCatalog || !_communityCatalog.themes) return;
+
+            const snapshots = getSnapshots();
+            const installedUrls = new Set();
+            snapshots.forEach(s => {
+                if (s.updateUrl) {
+                    installedUrls.add(toRawGitHub(s.updateUrl));
+                    installedUrls.add(s.updateUrl);
+                }
+            });
+            const uninstalled = _communityCatalog.themes.filter(t => {
+                const url = t.importUrl || '';
+                return url && !installedUrls.has(toRawGitHub(url)) && !installedUrls.has(url);
+            });
+
+            if (uninstalled.length === 0) return;
+
+            // Batch install via bundle (single fetch for all themes)
+            _communityInstallAllBtn.disabled = true;
+            const origHTML = _communityInstallAllBtn.innerHTML;
+            _communityInstallAllBtn.innerHTML = '<span class="spin" style="font-size:12px;line-height:1;">⟳</span>';
+
+            const BUNDLE_URL = 'https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/themes-all.json';
+            try {
+                const res = await fetch(BUNDLE_URL);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const bundle = await res.json();
+                if (!bundle.themes || !Array.isArray(bundle.themes)) throw new Error('Invalid bundle format');
+
+                // Re-check installed URLs (snapshots may have changed)
+                const currentSnaps = getSnapshots();
+                const currentUrls = new Set();
+                currentSnaps.forEach(s => {
+                    if (s.updateUrl) { currentUrls.add(toRawGitHub(s.updateUrl)); currentUrls.add(s.updateUrl); }
+                });
+
+                let installed = 0;
+                bundle.themes.forEach(remote => {
+                    const url = remote.updateUrl || '';
+                    const rawUrl = url ? toRawGitHub(url) : '';
+                    if (rawUrl && currentUrls.has(rawUrl)) return;
+                    if (url && currentUrls.has(url)) return;
+
+                    delete remote._meta;
+                    ensureAllModes(remote);
+                    MODES.forEach(m => { if (remote[m]) remote[m] = normalizeModeData(remote[m]); });
+                    currentSnaps.push(remote);
+                    if (url) { currentUrls.add(url); if (rawUrl) currentUrls.add(rawUrl); }
+                    installed++;
+                });
+
+                saveSnapshots(currentSnaps);
+                _communityInstallAllBtn.innerHTML = origHTML;
+                _communityInstallAllBtn.disabled = false;
+                renderSnapshots();
+                showToast(`✓ Installed ${installed} theme${installed > 1 ? 's' : ''}`);
+            } catch(e) {
+                _communityInstallAllBtn.innerHTML = origHTML;
+                _communityInstallAllBtn.disabled = false;
+                showToast(`Error: ${e.message}`);
+            }
+        });
+    }
+
+    // Auto-load when Themes tab is first shown
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            if (tab.dataset.tab === 'themes' && !_communityLoaded) {
+                _communityLoaded = true;
+                loadCommunityThemes(false);
+            }
+        });
+    });
+
     // Global "Check for Updates" button
     $('check-updates-btn').addEventListener('click', async () => {
         const btn = $('check-updates-btn');
@@ -10338,6 +10645,16 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             if (tabEl) tabEl.style.display = 'none';
         });
 
+        // ── Community Themes section visibility ──
+        if (!cfg.enableCommunityThemes) {
+            const communitySection = $('community-themes-grid');
+            if (communitySection) communitySection.style.display = 'none';
+            // Also hide the section title above it
+            if (communitySection && communitySection.previousElementSibling && communitySection.previousElementSibling.classList.contains('section-title')) {
+                communitySection.previousElementSibling.style.display = 'none';
+            }
+        }
+
         // If the currently active tab was hidden, fall back to Design Studio
         const activeTab = document.querySelector('.tab.active');
         if (activeTab && hiddenTabs.includes(activeTab.dataset.tab)) {
@@ -10505,6 +10822,8 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
 
     // --- Snapshot System ---
     function renderSnapshots() {
+        // Refresh community grid installed status when library changes
+        if (_communityCatalog) try { renderCommunityGrid(_communityCatalog); } catch(e) {}
         const dm = getActiveDataMode();
         try {
             const container = document.getElementById('snapshot-list');
@@ -11002,6 +11321,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             "enableCustomCss": self.valves.enable_custom_css,
             "enableAuthPageTheming": self.valves.enable_auth_page_theming,
             "enableGradientBuilder": self.valves.enable_gradient_builder,
+            "enableCommunityThemes": self.valves.enable_community_themes,
             "draftModeDefault": self.valves.draft_mode_default,
         }
         config_tag = (
