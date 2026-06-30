@@ -19,7 +19,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
