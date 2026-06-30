@@ -10248,6 +10248,12 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         });
     });
 
+    // Themes is the default tab — load immediately on page init
+    if (!_communityLoaded) {
+        _communityLoaded = true;
+        loadCommunityThemes(false);
+    }
+
     // Global "Check for Updates" button
     $('check-updates-btn').addEventListener('click', async () => {
         const btn = $('check-updates-btn');
