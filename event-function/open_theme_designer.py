@@ -6,7 +6,7 @@ author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
 version: 1.0.0
 license: MIT
-required_open_webui_version: 0.9.0
+required_open_webui_version: 0.10.0
 """
 
 import json as _json
