@@ -2608,7 +2608,7 @@ class Event:
                             <li><b>Global Modes:</b> Easily switch between <b>Dark</b>, <b>OLED</b> (pure black), <b>Light</b>, <b>Her</b>, and <b>System</b> modes using the segmented toggle. Settings, variables, and CSS are managed entirely separately for each mode. System mode proxies to your OS preference (see Section 3). <i>Note: The Her tab dynamically reveals itself by securely syncing with the Open WebUI administrator's <code>enable_easter_eggs</code> configuration in real-time via the <code>/api/config</code> endpoint.</i></li>
                             <li><b>Hue / Chroma / Lightness:</b> Control the base angle, intensity, and brightness. <i>(Pro-Tip: Double-click any slider label to reset it to default).</i></li>
                             <li><b>Tonal Ramp:</b> Below the sliders, the OKLCH Tonal Ramp visualizes the generated 12-step color scale. Click any block in the ramp to copy its hex value to your clipboard.</li>
-                            <li><b>Curated Presets:</b> The <b>Design Studio</b> tab includes a built-in gallery of hand-tuned color presets. Click any preset to instantly apply its hue, chroma, and lightness values to the current mode. Each curated preset also includes a bundled gradient background configuration. When applied via Sync, the gradient is automatically loaded alongside the palette colors.</li>
+
                             <li><b>Sync:</b> Click the <b>Sync</b> button in the footer to selectively copy palette, overrides, CSS, Canvas FX, Gradient Background, or auth settings from the current mode to one or more target modes. Colored badges appear next to each option indicating whether the source and target are already <span style="color:#10b981;">in sync</span> or have <span style="color:#f59e0b;">differences</span>.</li>
                         </ul>
                     </div>
@@ -4652,18 +4652,7 @@ function startAnimation() {
     // Mathematically match Open WebUI's native Tailwind v4 exact baseline
     const lightnessMap = { 50: 0.98, 100: 0.94, 200: 0.92, 300: 0.85, 400: 0.77, 500: 0.69, 600: 0.51, 700: 0.42, 800: 0.32, 850: 0.27, 900: 0.20, 950: 0.16 };
     
-    const CURATED_PRESETS = { 
-        midnight: { dark:[250, 20, 15], oled:[250, 20, 0], light:[250, 20, 15], her:[250, 20, 15], gradient: { type: 'linear', angle: 135, stops: [{color:'#0a0a2e',position:0},{color:'#1a1a4e',position:33},{color:'#0d1b3e',position:66},{color:'#0a0a2e',position:100}] } },
-        emerald: { dark:[155, 15, 18], oled:[155, 15, 0], light:[155, 15, 18], her:[155, 15, 18], gradient: { type: 'linear', angle: 135, stops: [{color:'#0b1a0f',position:0},{color:'#1b3a26',position:33},{color:'#0d2818',position:66},{color:'#0b1a0f',position:100}] } },
-        amber: { dark:[75, 20, 20], oled:[75, 20, 0], light:[75, 20, 20], her:[75, 20, 20], gradient: { type: 'linear', angle: 135, stops: [{color:'#1a1608',position:0},{color:'#2e2510',position:33},{color:'#1f1a0a',position:66},{color:'#1a1608',position:100}] } },
-        amethyst: { dark:[290, 25, 18], oled:[290, 25, 0], light:[290, 25, 18], her:[290, 25, 18], gradient: { type: 'linear', angle: 135, stops: [{color:'#0d0221',position:0},{color:'#261447',position:33},{color:'#1a0a35',position:66},{color:'#0d0221',position:100}] } },
-        ruby: { dark:[350, 25, 18], oled:[350, 25, 0], light:[350, 25, 18], her:[350, 25, 18], gradient: { type: 'linear', angle: 135, stops: [{color:'#1a0a0a',position:0},{color:'#3a1020',position:33},{color:'#2a0815',position:66},{color:'#1a0a0a',position:100}] } },
-        sapphire: { dark:[210, 25, 18], oled:[210, 25, 0], light:[210, 25, 18], her:[210, 25, 18], gradient: { type: 'linear', angle: 135, stops: [{color:'#0a1628',position:0},{color:'#0d3b66',position:33},{color:'#0a2540',position:66},{color:'#0a1628',position:100}] } },
-        topaz: { dark:[40, 20, 18], oled:[40, 20, 0], light:[40, 20, 18], her:[40, 20, 18], gradient: { type: 'linear', angle: 135, stops: [{color:'#1a140a',position:0},{color:'#2e2010',position:33},{color:'#241a0c',position:66},{color:'#1a140a',position:100}] } },
-        obsidian: { dark:[0, 0, 10], oled:[0, 0, 0], light:[0, 0, 10], her:[0, 0, 10], gradient: { type: 'linear', angle: 135, stops: [{color:'#000000',position:0},{color:'#1a1a2e',position:33},{color:'#16213e',position:66},{color:'#0a0a1a',position:100}] } }
-    };
-    const curatedCountEl = document.getElementById('curated-count');
-    if (curatedCountEl) curatedCountEl.textContent = Object.keys(CURATED_PRESETS).length;
+
 
     function renderTonalRampHTML(config, dataMode) {
         const h = config.h, c = config.c / 1000, l = config.l / 100;
@@ -4775,16 +4764,7 @@ function startAnimation() {
         };
     }
 
-    function buildCuratedSourceData(presetData, mode) {
-        const mp = presetData[mode] || presetData.dark;
-        const pg = presetData.gradient || {};
-        return {
-            ...createDefaultModeData({ h: mp[0], c: mp[1], l: mp[2] }),
-            paletteEnabled: true, gradientEnabled: true,
-            gradientType: pg.type || 'linear', gradientAngle: pg.angle || 135,
-            gradientStops: structuredClone(pg.stops || []), gradientIntensity: 100,
-        };
-    }
+
 
     function initDragDrop(listEl, rowSelector, reorderFn) {
         let srcIndex = null, ghost = null, indicator = null, dropIndex = null, offsetY = 0;
@@ -5217,7 +5197,7 @@ function startAnimation() {
         updateActiveHighlights();
         renderCanvasPresets();
         renderCssPresets();
-        renderCuratedDots();
+
         renderGradientTab();
     }
 
@@ -5233,11 +5213,7 @@ function startAnimation() {
             btn.classList.toggle('active-theme', !!isRef);
         });
 
-        document.querySelectorAll('.preset-btn[data-preset]').forEach(btn => {
-            const pId = btn.dataset.preset;
-            const isRef = activeThemeRef[dm] && activeThemeRef[dm].type === 'preset' && activeThemeRef[dm].id === pId;
-            btn.classList.toggle('active-theme', !!isRef);
-        });
+
 
         // Highlight the resolved data mode when in System mode
         document.querySelectorAll('.mode-btn').forEach(btn => {
@@ -5246,17 +5222,7 @@ function startAnimation() {
         });
     }
 
-    function renderCuratedDots() {
-        const dm = getActiveDataMode();
-        Object.keys(CURATED_PRESETS).forEach(id => {
-            const pArr = CURATED_PRESETS[id][dm] || CURATED_PRESETS[id].dark;
-            const dot = document.getElementById('dot-' + id);
-            if (dot) {
-                dot.style.background = '';
-                dot.innerHTML = renderTonalRampHTML({h: pArr[0], c: pArr[1], l: pArr[2], overrides: {}}, dm);
-            }
-        });
-    }
+
 
     function renderPresetGallery({ presets, galleryId, scrollAreaId, searchInputId, countWrapId, countId,
         sortVar, contentField, activeRefMap, loadFnName, emptyMsg, noResultsPrefix,
@@ -7705,11 +7671,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
                     if (s && s[targetMode]) {
                         return s[targetMode];
                     }
-                } else if (srcRef.type === 'preset') {
-                    const presetData = CURATED_PRESETS[srcRef.id];
-                    if (presetData) {
-                        return buildCuratedSourceData(presetData, targetMode);
-                    }
+
                 }
             }
 
@@ -7725,10 +7687,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
                 else src = structuredClone(s.dark || s.light);
             }
             return src;
-        } else if (syncSourceType === 'curated-preset') {
-            const presetData = CURATED_PRESETS[syncSourceId];
-            if (!presetData) return null;
-            return buildCuratedSourceData(presetData, targetMode);
+
         }
         return null;
     }
@@ -8137,11 +8096,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             const sourceName = activeMode === 'system' ? `System (${names[dm]})` : names[dm];
             descText = `Choose what to copy from <b>${sourceName}</b>.`;
             cancelText = "Do Not Sync";
-        } else if (sourceType === 'curated-preset') {
-            titleText = "Apply Curated Preset";
-            descText = `Choose where and what to apply from preset <b>${sourceId.charAt(0).toUpperCase() + sourceId.slice(1)}</b>.`;
-            confirmText = "Apply Preset";
-            cancelText = "Do Not Apply";
+
         } else if (sourceType === 'snapshot') {
             const snapshots = getSnapshots();
             const name = snapshots[sourceId]?.name || `Theme ${sourceId}`;
@@ -8298,9 +8253,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
                         const snapshots = getSnapshots();
                         const s = snapshots[srcRef.id];
                         if (s && s[mode]) { sourceData = s[mode]; usePerModeSource = true; }
-                    } else if (srcRef.type === 'preset') {
-                        const presetData = CURATED_PRESETS[srcRef.id];
-                        if (presetData) { sourceData = buildCuratedSourceData(presetData, mode); usePerModeSource = true; }
+
                     }
                 }
 
@@ -8316,19 +8269,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
                 }
             });
             showToast("Theme synced successfully!");
-        } else if (syncSourceType === 'curated-preset') {
-            const presetData = CURATED_PRESETS[syncSourceId];
-            if (!presetData) return;
 
-            targetModes.forEach(mode => {
-                const sourceData = buildCuratedSourceData(presetData, mode);
-                applySyncToMode(mode, sourceData, {
-                    syncPalette, syncOverrides, syncCss, syncCanvas, syncGradient, syncAuth,
-                    rebuildLocks: true,
-                });
-                if (syncPalette) activeThemeRef[mode] = { type: 'preset', id: syncSourceId };
-            });
-            showToast(`Preset "${syncSourceId}" applied!`);
         } else if (syncSourceType === 'snapshot') {
             const snapshots = getSnapshots();
             const s = snapshots[syncSourceId];
@@ -8489,8 +8430,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             if (snapshots[activeThemeRef[dm].id]) {
                 activeName = snapshots[activeThemeRef[dm].id].name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
             }
-        } else if (activeThemeRef[dm] && activeThemeRef[dm].type === 'preset') {
-            activeName = activeThemeRef[dm].id;
+
         }
         return activeName;
     }
@@ -8732,10 +8672,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         hideModal('import-clipboard-modal');
     };
 
-    document.querySelectorAll('.preset-btn[data-preset]').forEach(b => b.addEventListener('click', () => {
-        const pId = b.dataset.preset;
-        showSyncModal('curated-preset', pId);
-    }));
+
 
     // --- Mass Import/Export Portability ---
     document.getElementById('export-all-btn').onclick = () => {
@@ -10481,7 +10418,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
 
     // App Initialization
     (function() {
-            renderCuratedDots();
+
             
             // Check Her Theme Availability
             async function initHerMode() {
@@ -10661,7 +10598,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             }
         }
 
-        // If the currently active tab was hidden, fall back to Design Studio
+        // If the currently active tab was hidden, fall back to Core Palette
         const activeTab = document.querySelector('.tab.active');
         if (activeTab && hiddenTabs.includes(activeTab.dataset.tab)) {
             const fallback = document.querySelector('.tab[data-tab="lch"]');

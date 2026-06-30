@@ -58,7 +58,7 @@ Unlike the [Tool variant](../tools/) which runs inside an AI chat iframe, this v
 - 🔒 **Smart Locking / Pinning:** Lock specific color variables using the 🔒 icon (or bulk "Lock All" / "Unlock All" buttons). Locked colors are pinned and protected from sliders, randomization, or image extraction.
 - 📋 **Smart Clipboard Parsing & Image Extraction:** Upload an image or press `Ctrl+V` to paste one from your clipboard to calculate dominant colors. The tool also features a Smart JSON paste listener — paste a Theme Designer JSON configuration, and the tool will parse and prompt you to apply it (with a security warning if untrusted Canvas FX scripts are detected).
 - 🎨 **Gradient Background Builder:** Design rich CSS gradient backgrounds using the dedicated Gradient tab. Choose between linear, radial, or conic gradient types, add and position color stops visually, control direction and intensity, and enable smooth gradient animation. Includes built-in gradient presets. The gradient layer applies the same structural transparency rules as Canvas FX.
-- 🔥 **Curated Presets:** Get started instantly with beautiful built-in color presets. Each comes bundled with a matching glassmorphism-style gradient CSS theme. When applied via Sync, a dialog asks if you'd also like to load the complementary CSS.
+
 - 📋 **Theme Metadata & Versioning:** Attach rich metadata when saving — Name, Description, Author, Theme Version, Target WebUI Version, Repository URL, and Theme Update URL. Metadata is embedded in exported `.json` files and preserved through imports.
 - 🔄 **OTA Theme Update Checking:** Themes with a Theme Update URL can be checked for updates against a remote JSON endpoint. Use the per-snapshot ⟳ button or the global "Updates" header button to check all themes at once. Shows a detailed update modal with version comparison.
 - 🌐 **Community Theme Import via URL:** Import themes directly from the web. The Import button opens a dual-mode dialog where you can paste a URL to a remote `theme.json` file, or use the classic file picker. Theme Designer Pro auto-converts `github.com` URLs to raw content.
@@ -141,7 +141,7 @@ The [Launcher Tool](../tools/theme_designer_pro_launcher.py) is a lightweight co
 1. **Navigate to the Designer:** Open your browser and go to your Open WebUI instance's designer URL (default: `/api/v1/theme-designer`)
 2. **Design your Theme:**
    - Use the **Segmented Toggle** to switch between System, Dark, OLED, Light, and Her mode design views
-   - Use the sliders on the **Design Studio** tab to adjust your foundation colors
+   - Use the sliders on the **Core Palette** tab to adjust your foundation colors
    - Hover and click over the **Tonal Ramp** to quickly copy mathematically generated HEX values
    - Switch to the **Color Variables** tab to override and lock specific shades with the built-in color picker. Click a variable name to copy its CSS declaration instantly. Use the **Manual Variable Overrides** code block for direct CSS custom property control
    - Switch to the **Style Overrides** tab to write raw CSS tweaks
@@ -546,7 +546,7 @@ graph TD
         UILoad --> FetchState["Fetch /state.json + /theme.css"]:::frontend
         FetchState --> Tabs{"6 UI Tabs"}:::frontend
 
-        Tabs --> TabLCH["Design Studio"]:::frontend
+        Tabs --> TabLCH["Core Palette"]:::frontend
         Tabs --> TabVars["Color Variables"]:::frontend
         Tabs --> TabCSS["Style Overrides"]:::frontend
         Tabs --> TabCanvas["Canvas FX"]:::frontend
