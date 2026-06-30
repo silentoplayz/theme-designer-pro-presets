@@ -772,11 +772,7 @@ class Event:
             history.replaceState = function() { _replaceState.apply(this, arguments); refresh(); };
 
             // Live theme push via Server-Sent Events (cross-tab/browser/device)
-            // Skip SSE on auth pages — user isn't logged in yet, the connection
-            // gets blocked (wasting an HTTP/1.1 slot), and reconnect retries
-            // contribute to strobe-like flashing. Theme still loads via fetch above.
-            var _isAuthRoute = window.location.pathname.startsWith('/auth');
-            if (!window.__THEME_DESIGNER__ && !_isAuthRoute) {
+            if (!window.__THEME_DESIGNER__) {
                 try {
                     var es = new EventSource('__THEME_ROUTE__/events?_=' + Date.now());
                     es.addEventListener('theme-update', function(e) {
@@ -1724,10 +1720,11 @@ class Event:
         .tab.active { background: var(--bg-elevated); color: var(--text-main); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
 
         .content-area { padding: 20px 28px; display: flex; flex-direction: column; gap: 20px; flex: 1; overflow-y: auto; overflow-x: hidden; max-width: 1600px; margin: 0 auto; width: 100%; box-sizing: border-box; min-height: 0; }
-        .section-title { font-size: 0.95rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2.5px; font-weight: 800; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+        .section-title { font-size: 0.95rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2.5px; font-weight: 800; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
         
-        .mode-toggle { display: flex; background: rgba(0,0,0,0.2); padding: 3px; border-radius: 10px; border: 1px solid var(--border); gap: 2px; flex: 1; min-width: 0; }
-        .mode-btn { flex: 1; padding: 8px 10px; border-radius: 7px; border: none; background: transparent; color: var(--text-muted); font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; }
+        .mode-toggle { display: flex; background: rgba(0,0,0,0.2); padding: 3px; border-radius: 10px; border: 1px solid var(--border); gap: 2px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+        .mode-toggle::-webkit-scrollbar { display: none; }
+        .mode-btn { flex: 1; padding: 8px 10px; border-radius: 7px; border: none; background: transparent; color: var(--text-muted); font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; min-width: 0; }
         .mode-btn.active { background: var(--bg-elevated); color: var(--text-main); box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); }
         .mode-btn.system-active { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
         body.light-mode .mode-btn.system-active { background: color-mix(in srgb, var(--accent) 10%, transparent); }
@@ -2000,12 +1997,12 @@ class Event:
         body.light-mode .docs-modal-close-btn { background: white; border-color: var(--border); color: var(--text-main); }
         body.light-mode .docs-modal-close-btn:hover { background: var(--accent); color: white; }
 
-        .footer { padding: 12px 28px; border-top: none; background: transparent; display: flex; justify-content: space-between; align-items: center; gap: 16px; overflow: hidden; flex-shrink: 0; z-index: 100; max-width: 1600px; margin: 0 auto; width: 100%; box-sizing: border-box; }
-        .footer-left { display: flex; gap: 12px; align-items: center; }
-        .footer-right { display: flex; gap: 12px; align-items: center; }
+        .footer { padding: 12px 28px; border-top: none; background: transparent; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; flex-shrink: 0; z-index: 100; max-width: 1600px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .footer-left { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .footer-right { display: flex; gap: 12px; align-items: center; flex-shrink: 0; }
         .footer-actions { display: flex; gap: 12px; align-items: center; }
         .btn { padding: 8px 16px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg-deep); color: var(--text-main); font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; flex-shrink: 0; }
-        .btn-icon { padding: 0; width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; }
+        .btn-icon { padding: 0 !important; width: 28px; height: 28px; min-width: 28px; min-height: 28px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; }
         .btn:hover { border-color: var(--text-muted); transform: translateY(-2px); }
         .btn-primary { background: var(--accent); border: none; color: white !important; }
         .btn-danger { color: #f87171 !important; border-color: rgba(248, 113, 113, 0.2); }
@@ -2048,17 +2045,17 @@ class Event:
             /* Slider rows */
             .slider-row { gap: 12px; margin-bottom: 18px; }
 
-            /* Footer: stack into centered rows */
-            .footer { padding: 10px 8px; flex-wrap: wrap; justify-content: center; gap: 8px; box-sizing: border-box; }
-            .footer-left { width: 100%; justify-content: center; gap: 6px; flex-wrap: wrap; }
-            .footer-right { width: 100%; justify-content: center; gap: 8px; }
+            /* Footer: tighten spacing */
+            .footer { padding: 10px 8px; gap: 8px; justify-content: center; }
+            .footer-left { gap: 6px; }
+            .footer-right { gap: 8px; }
             .footer-right > div { margin-right: 0; border-right: none; padding-right: 0; }
-            .footer-actions { width: 100%; justify-content: center; gap: 6px; }
+            .footer-actions { gap: 6px; }
 
             /* Buttons */
             .btn { padding: 8px 12px; font-size: 0.7rem; height: auto; min-height: 32px; border-radius: 14px; }
             .btn span.mobile-hide { display: none; }
-            .btn-icon { width: 32px; height: 32px; }
+            .btn-icon { width: 32px; height: 32px; min-width: 32px; min-height: 32px; }
             .draft-publish-btn { padding: 6px 14px; font-size: 0.72rem; }
             .draft-toggle { font-size: 0.72rem; }
 
@@ -2071,7 +2068,7 @@ class Event:
 
             /* Gallery toolbars: allow icon row to wrap */
             .flex-center-gap6 { flex-wrap: wrap; gap: 4px; }
-            .btn-icon { width: 30px; height: 30px; min-width: 30px; }
+            .btn-icon { width: 30px; height: 30px; min-width: 30px; min-height: 30px; }
 
             /* Variable action buttons */
             .var-action-btn { font-size: 0.65rem; padding: 6px 10px; }
@@ -2149,7 +2146,7 @@ class Event:
         .empty-state { text-align: center; width: 100%; padding: 20px; color: var(--text-muted); font-size: 0.75rem; border: 1px dashed var(--border); border-radius: 12px; opacity: 0.6; }
         .empty-state-lg { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 0.75rem; border: 1px dashed var(--border); border-radius: 20px; opacity: 0.6; }
         .flex-center { display: flex; align-items: center; gap: 12px; }
-        .flex-center-gap6 { display: flex; gap: 6px; align-items: center; }
+        .flex-center-gap6 { display: flex; gap: 6px; align-items: center; flex-shrink: 0; flex-wrap: nowrap; }
         .flex-center-gap8 { display: flex; gap: 8px; align-items: center; }
         .flex-end { display: flex; gap: 12px; justify-content: flex-end; }
         .section-title-bar { align-items: center; display: flex; justify-content: space-between; }
