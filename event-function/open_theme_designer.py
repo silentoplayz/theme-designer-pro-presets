@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Registers an interacti
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.0.0
+version: 1.2.0
 license: MIT
 required_open_webui_version: 0.10.0
 """
@@ -1563,9 +1563,9 @@ class Event:
         body#tool-body.washed-out .var-action-btn:hover { background: var(--accent); border-color: var(--accent); color: white; }
 
         /* NATIVE-LIKE TOOLTIP */
-        .owui-tooltip { position: absolute; background: #18181b; color: #f4f4f5; padding: 6px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 500; pointer-events: none; z-index: 100000; opacity: 0; transform: translateY(4px); transition: opacity 0.15s ease, transform 0.15s ease; white-space: nowrap; font-family: 'Inter', sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); max-width: 320px; }
+        .owui-tooltip { position: absolute; background: #18181b; color: #f4f4f5; padding: 6px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 500; pointer-events: none; z-index: 100000; opacity: 0; transform: translateY(4px); transition: opacity 0.15s ease, transform 0.15s ease; white-space: nowrap; font-family: 'Inter', sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); }
         .owui-tooltip.visible { opacity: 1; transform: translateY(0); }
-        .owui-tooltip.multiline { white-space: normal; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
+        .owui-tooltip.multiline { white-space: normal; max-width: 320px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
         .owui-tooltip.rich { white-space: normal; padding: 10px 14px; max-width: 280px; display: flex; flex-direction: column; gap: 5px; }
         .owui-tooltip .tt-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
         .owui-tooltip .tt-name { font-weight: 700; font-size: 0.78rem; color: #ffffff; }
