@@ -478,7 +478,13 @@ class Event:
 
                             const offscreen = canvas.transferControlToOffscreen();
                             
-                            worker.postMessage({ type: 'init', canvas: offscreen, width: window.innerWidth, height: window.innerHeight },[offscreen]);
+                            const _env = {
+                                authToken: (document.cookie.match(/token=([^;]+)/) || [])[1] || localStorage.getItem('token') || '',
+                                baseUrl: window.location.origin,
+                                locale: navigator.language || 'en-US',
+                                timezone: (function() { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(e) { return ''; } })()
+                            };
+                            worker.postMessage({ type: 'init', canvas: offscreen, width: window.innerWidth, height: window.innerHeight, env: _env },[offscreen]);
                             
                             // Throttle mousemove via rAF coalescing — on high-refresh displays,
                             // mousemove fires at 120Hz+. Coalescing to once per animation frame
@@ -674,7 +680,13 @@ class Event:
                                         const finalHandler = onmessage || _onmessage;
                                         if (finalHandler) {
                                             window._onmessage = finalHandler;
-                                            finalHandler({ data: { type: 'init', canvas: _canvas, width: window.innerWidth, height: window.innerHeight } });
+                                            const _fbEnv = {
+                                                authToken: (document.cookie.match(/token=([^;]+)/) || [])[1] || localStorage.getItem('token') || '',
+                                                baseUrl: window.location.origin,
+                                                locale: navigator.language || 'en-US',
+                                                timezone: (function() { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(e) { return ''; } })()
+                                            };
+                                            finalHandler({ data: { type: 'init', canvas: _canvas, width: window.innerWidth, height: window.innerHeight, env: _fbEnv } });
                                         }
                                     })();
                                 })();
