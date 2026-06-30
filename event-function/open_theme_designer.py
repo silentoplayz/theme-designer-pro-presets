@@ -2058,7 +2058,7 @@ class Event:
             .ramp-block { min-width: 38px; font-size: 0.65rem; }
 
             /* Variable grid: single column on small screens */
-            .var-grid { grid-template-columns: 1fr; gap: 12px; }
+            .var-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
             .var-item { padding: 14px; }
 
             /* Preset grid */
