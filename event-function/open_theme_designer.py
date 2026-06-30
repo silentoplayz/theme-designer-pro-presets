@@ -6037,16 +6037,22 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         activeCssRef = { dark: null, oled: null, light: null, her: null };
         activeGradientRef = { dark: null, oled: null, light: null, her: null };
         try {
-            const targets = [window];
-            targets.forEach(t => {
-                try {
-                    t.localStorage.removeItem('owui_dev_theme_v1');
-                    t.localStorage.removeItem('owui_dev_theme_v1_css');
-                    const el = t.document.getElementById('owui-dev-live-theme');
-                    if (el) el.remove();
-                } catch(e) { console.warn('Theme Pro:', e); }
-            });
-            syncParentNativeMode(activeMode);
+            if (!_draftMode) {
+                const targets = [window];
+                targets.forEach(t => {
+                    try {
+                        t.localStorage.removeItem('owui_dev_theme_v1');
+                        t.localStorage.removeItem('owui_dev_theme_v1_css');
+                        const el = t.document.getElementById('owui-dev-live-theme');
+                        if (el) el.remove();
+                    } catch(e) { console.warn('Theme Pro:', e); }
+                });
+                syncParentNativeMode(activeMode);
+            } else {
+                // Draft mode: only remove the local style block — don't touch localStorage
+                const el = document.getElementById('owui-dev-live-theme');
+                if (el) el.remove();
+            }
             commitChange({ clearRef: false, snapshots: true });
             if (!silent) {
                 if (saveBackup) {
