@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — standalone admin page with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Version](https://img.shields.io/badge/version-1.1.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.10.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -121,6 +121,9 @@ You can also import individual presets by pasting any file's GitHub URL directly
 
 > **No sandbox flags required.** Unlike the Tool variant, this event function serves a native page via ASGI routes — no iframe, no "Same Origin" configuration needed.
 
+> [!WARNING]
+> **Running behind nginx or another reverse proxy?** You **must** add `proxy_buffering off;` to your nginx location block (or the equivalent for your proxy). Without this, SSE live push events are silently buffered and themes will only appear on the admin's browser — other users and devices will see no changes. This is the **#1 deployment issue**. See the in-app documentation (📖 Docs → Section 17: Reverse Proxy Configuration) for nginx, Caddy, Apache, and Traefik examples.
+
 ### Optional: Launcher Companion Tool
 
 The [Launcher Tool](../tools/theme_designer_pro_launcher.py) is a lightweight companion that opens the designer page directly inside an Open WebUI chat via iframe — no need to navigate to the URL manually.
@@ -230,7 +233,7 @@ Valves are configured in the Admin Panel under **Functions → Theme Designer Pr
 
 ## 📖 In-App Documentation
 
-The designer includes **20 comprehensive documentation sections** accessible from the **Documentation** tab within the designer page. These cover:
+The designer includes **22 comprehensive documentation sections** accessible via the **📖 Docs** button in the header. These cover:
 
 1. Getting Started & Architecture
 2. OKLCH Foundation & Modes
@@ -248,10 +251,12 @@ The designer includes **20 comprehensive documentation sections** accessible fro
 14. Keyboard Shortcuts & Editor Tips
 15. Compliance & Legal Disclaimer
 16. Community Presets (with import URLs)
-17. Troubleshooting & FAQ
-18. Uninstallation & Complete Removal
-19. Portability & Backups
-20. Danger Zone (Factory Reset)
+17. Reverse Proxy Configuration
+17b. Multi-Worker Deployments
+18. Troubleshooting & FAQ
+19. Uninstallation & Complete Removal
+20. Portability & Backups
+21. Danger Zone (Factory Reset)
 
 ---
 
@@ -379,7 +384,7 @@ Because the event function injects a bootloader into `index.html`, **simply disa
 
 **Step 1: Factory Reset (Purge All Data)**
 
-The easiest way to wipe all saved data is to open Theme Designer Pro, navigate to the **Documentation** tab, and click the red **Factory Reset (Wipe All Data)** button under the Danger Zone section (Section 20). This permanently deletes all themes, snapshots, and configuration.
+The easiest way to wipe all saved data is to open Theme Designer Pro, click the **📖 Docs** button in the header, and click the red **Factory Reset (Wipe All Data)** button under the Danger Zone section (Section 21). This permanently deletes all themes, snapshots, and configuration.
 
 **Step 2: Remove Server Files**
 
@@ -539,7 +544,7 @@ graph TD
     subgraph DesignerUI ["Theme Designer UI: Standalone Page"]
         ServeHTML -.->|"Loads in browser"| UILoad["Initialize Designer App"]:::frontend
         UILoad --> FetchState["Fetch /state.json + /theme.css"]:::frontend
-        FetchState --> Tabs{"7 UI Tabs"}:::frontend
+        FetchState --> Tabs{"6 UI Tabs"}:::frontend
 
         Tabs --> TabLCH["Design Studio"]:::frontend
         Tabs --> TabVars["Color Variables"]:::frontend
@@ -547,7 +552,8 @@ graph TD
         Tabs --> TabCanvas["Canvas FX"]:::frontend
         Tabs --> TabBG["Gradient"]:::frontend
         Tabs --> TabCode["CSS Output"]:::frontend
-        Tabs --> TabDocs["Documentation"]:::frontend
+
+        DocsBtn["📖 Docs Button"]:::frontend --> DocsModal["Documentation Modal"]:::frontend
 
         TabLCH --> CommitChange["commitChange()"]:::frontend
         TabVars --> CommitChange

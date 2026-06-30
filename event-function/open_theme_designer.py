@@ -19,7 +19,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -105,7 +105,7 @@ class Event:
 
             // Fetch CSS from server (always needed — index.html has a safe subset without structural/gradient)
             // cache: 'no-store' bypasses browser cache entirely — critical for duplicated tabs
-            fetch('__THEME_ROUTE__/theme.css', { cache: 'no-store' })
+            fetch('__THEME_ROUTE__/theme.css?_=' + Date.now(), { cache: 'no-store' })
                 .then(function(r) { if (r.ok && r.status !== 204) return r.text(); return ''; })
                 .then(function(css) {
                     if (css && css.trim()) {
@@ -120,7 +120,7 @@ class Event:
             // (only updated on next event() call, not on every theme save).
             // The embedded state above is still useful for the synchronous initial paint
             // (flash prevention), but the server fetch overrides it with the latest data.
-            fetch('__THEME_ROUTE__/state.json', { cache: 'no-store' })
+            fetch('__THEME_ROUTE__/state.json?_=' + Date.now(), { cache: 'no-store' })
                 .then(function(r) { if (r.ok && r.status !== 204) return r.text(); return ''; })
                 .then(function(state) {
                     if (state && state.trim() && state !== '{}') {
@@ -762,7 +762,7 @@ class Event:
             // Live theme push via Server-Sent Events (cross-tab/browser/device)
             if (!window.__THEME_DESIGNER__) {
                 try {
-                    var es = new EventSource('__THEME_ROUTE__/events');
+                    var es = new EventSource('__THEME_ROUTE__/events?_=' + Date.now());
                     es.addEventListener('theme-update', function(e) {
                         _disabled = false;  // Re-enable if admin turned it back on
                         try {
@@ -1200,6 +1200,38 @@ class Event:
         if not hasattr(app.state, "_theme_sse_clients"):
             app.state._theme_sse_clients = []
         Event._sse_clients = app.state._theme_sse_clients
+
+        # --- Redis pub/sub subscriber for multi-worker SSE broadcasting ---
+        redis_url = os.environ.get("REDIS_URL", "")
+        if redis_url and not getattr(app.state, "_theme_redis_sub", False):
+            try:
+                import redis.asyncio as aioredis
+
+                async def _redis_subscriber():
+                    """Listen on Redis channel and forward messages to local SSE clients."""
+                    try:
+                        r = aioredis.from_url(redis_url)
+                        pubsub = r.pubsub()
+                        await pubsub.subscribe("theme_pro_sse")
+                        log.info("[Theme Pro] Redis subscriber started on channel 'theme_pro_sse'")
+                        async for message in pubsub.listen():
+                            if message["type"] != "message":
+                                continue
+                            msg = message["data"]
+                            if isinstance(msg, bytes):
+                                msg = msg.decode("utf-8")
+                            for q in list(Event._sse_clients):
+                                try:
+                                    q.put_nowait(msg)
+                                except asyncio.QueueFull:
+                                    pass
+                    except Exception as exc:
+                        log.warning("[Theme Pro] Redis subscriber exited: %s", exc)
+
+                asyncio.get_event_loop().create_task(_redis_subscriber())
+                app.state._theme_redis_sub = True
+            except Exception as exc:
+                log.warning("[Theme Pro] Could not start Redis subscriber: %s", exc)
 
         # Remove stale routes from previous function load so new handlers take effect
         # Clean up default, current, AND previous paths to ensure only one URL is active
@@ -1698,7 +1730,7 @@ class Event:
         .tab { flex: 1 0 auto; padding: 14px 18px; text-align: center; font-size: 1rem; font-weight: 700; cursor: pointer; border-radius: 12px; color: var(--text-muted); transition: 0.2s ease; white-space: nowrap; }
         .tab.active { background: var(--bg-elevated); color: var(--text-main); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
 
-        .content-area { padding: 32px 48px; display: flex; flex-direction: column; gap: 28px; flex: 1; overflow-y: auto; overflow-x: hidden; max-width: 1600px; margin: 0 auto; width: 100%; box-sizing: border-box; min-height: 0; }
+        .content-area { padding: 20px 28px; display: flex; flex-direction: column; gap: 20px; flex: 1; overflow-y: auto; overflow-x: hidden; max-width: 1600px; margin: 0 auto; width: 100%; box-sizing: border-box; min-height: 0; }
         .section-title { font-size: 0.95rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2.5px; font-weight: 800; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
         
         .mode-toggle { display: flex; background: rgba(0,0,0,0.2); padding: 3px; border-radius: 10px; border: 1px solid var(--border); gap: 2px; flex: 1; min-width: 0; }
@@ -1802,22 +1834,22 @@ class Event:
         body.light-mode .sync-diff-prop-table .prop-diff { color: #ca8a04; }
 
 
-        input[type="range"] { -webkit-appearance: none; width: 100%; height: 10px; background: #000; border-radius: 5px; outline: none; }
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #fff; cursor: pointer; border: 4px solid var(--accent); box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); transition: 0.2s; }
-        input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: #fff; cursor: pointer; border: 4px solid var(--accent); box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
-        input[type="range"]::-moz-range-track { background: transparent; border: none; height: 10px; }
+        input[type="range"] { -webkit-appearance: none; width: 100%; height: 6px; background: #000; border-radius: 3px; outline: none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; cursor: pointer; border: 3px solid var(--accent); box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); transition: 0.2s; }
+        input[type="range"]::-moz-range-thumb { width: 10px; height: 10px; border-radius: 50%; background: #fff; cursor: pointer; border: 3px solid var(--accent); box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+        input[type="range"]::-moz-range-track { background: transparent; border: none; height: 6px; }
         body.light-mode input[type="range"] { background: var(--border); }
 
-        .color-row { display: flex; gap: 24px; align-items: center; margin-bottom: 28px; }
-        .color-preview { width: 72px; height: 72px; border-radius: 18px; border: 2px solid rgba(255, 255, 255, 0.1); flex-shrink: 0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5); }
+        .color-row { display: flex; gap: 16px; align-items: center; margin-bottom: 20px; }
+        .color-preview { width: 52px; height: 52px; border-radius: 14px; border: 2px solid rgba(255, 255, 255, 0.1); flex-shrink: 0; box-shadow: 0 8px 20px -5px rgba(0,0,0,0.4); }
         
         .preset-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
         
-        .curated-scroll-container { overflow-x: auto; overflow-y: hidden; padding: 12px 8px; margin: -12px -8px 0 -8px; width: calc(100% + 16px); border-radius: 12px; scrollbar-width: auto; }
-        .curated-scroll-container::-webkit-scrollbar { height: 8px; }
-        .curated-scroll-container::-webkit-scrollbar-track { background: var(--bg-deep); border-radius: 4px; border: 1px solid var(--border); margin: 0 8px; }
-        .curated-scroll-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-        .curated-scroll-container::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+        .curated-scroll-container { overflow-x: auto; overflow-y: hidden; padding: 12px 8px 16px; margin: -12px -8px 0 -8px; width: calc(100% + 16px); border-radius: 12px; scrollbar-width: auto; }
+        .curated-scroll-container::-webkit-scrollbar { height: 10px; }
+        .curated-scroll-container::-webkit-scrollbar-track { background: var(--bg-deep); border-radius: 5px; border: 1px solid var(--border); margin: 0 8px; }
+        .curated-scroll-container::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 5px; min-width: 60px; }
+        .curated-scroll-container::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--accent) 80%, white); }
         .curated-flex { display: flex; gap: 16px; }
         .curated-flex .preset-btn { flex: 0 0 calc((100% - 48px) / 4); min-width: 220px; }
 
@@ -1963,16 +1995,23 @@ class Event:
         .inactive-badge.visible { display: flex; }
         .inactive-badge .inactive-dot { width: 7px; height: 7px; border-radius: 50%; background: #ef4444; animation: draft-pulse 1.5s ease-in-out infinite; flex-shrink: 0; }
 
-        .header-json-btn { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; padding: 12px 18px; border-radius: 12px; cursor: pointer; transition: 0.2s ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .header-json-btn { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 700; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: 0.2s ease; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
         .header-json-btn:hover { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
         body.light-mode .header-json-btn { border-color: var(--border); color: var(--text-muted); }
         body.light-mode .header-json-btn:hover { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); }
 
-        .footer { padding: 16px 48px; border-top: none; background: transparent; display: flex; justify-content: space-between; align-items: center; gap: 16px; overflow: hidden; flex-shrink: 0; z-index: 100; max-width: 1600px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        #tab-docs { position: fixed !important; inset: 0; z-index: 9999; background: var(--bg-surface); overflow-y: auto; padding: 32px 48px; display: none; }
+        #tab-docs .docs-container { max-width: 1200px; margin: 0 auto; position: relative; }
+        .docs-modal-close-btn { position: fixed; top: 20px; right: 28px; z-index: 10000; background: var(--bg-deep); border: 1px solid var(--border); color: var(--text-main); font-size: 1.4rem; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; line-height: 1; }
+        .docs-modal-close-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
+        body.light-mode .docs-modal-close-btn { background: white; border-color: var(--border); color: var(--text-main); }
+        body.light-mode .docs-modal-close-btn:hover { background: var(--accent); color: white; }
+
+        .footer { padding: 12px 28px; border-top: none; background: transparent; display: flex; justify-content: space-between; align-items: center; gap: 16px; overflow: hidden; flex-shrink: 0; z-index: 100; max-width: 1600px; margin: 0 auto; width: 100%; box-sizing: border-box; }
         .footer-left { display: flex; gap: 12px; align-items: center; }
         .footer-right { display: flex; gap: 12px; align-items: center; }
         .footer-actions { display: flex; gap: 12px; align-items: center; }
-        .btn { padding: 12px 22px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg-deep); color: var(--text-main); font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; flex-shrink: 0; }
+        .btn { padding: 8px 16px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg-deep); color: var(--text-main); font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; flex-shrink: 0; }
         .btn-icon { padding: 0; width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; }
         .btn:hover { border-color: var(--text-muted); transform: translateY(-2px); }
         .btn-primary { background: var(--accent); border: none; color: white !important; }
@@ -2162,6 +2201,10 @@ class Event:
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1"/><path d="M16 3h1a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2 2 2 0 0 0-2 2v5a2 2 0 0 1-2 2h-1"/></svg>
                 <span class="btn-label">JSON</span>
             </button>
+            <button class="header-json-btn" id="docs-modal-btn" data-tooltip="Open documentation">
+                <span style="font-size: 13px; line-height: 1;">📖</span>
+                <span class="btn-label">Docs</span>
+            </button>
         </div>
     </div>
     <div id="action-toast" class="action-toast"></div>
@@ -2173,7 +2216,6 @@ class Event:
         <div class="tab" data-tab="canvas" role="tab" tabindex="-1" aria-selected="false">✨ Canvas FX</div>
         <div class="tab" data-tab="bg" role="tab" tabindex="-1" aria-selected="false">🌈 Gradient</div>
         <div class="tab" data-tab="code" role="tab" tabindex="-1" aria-selected="false">📋 CSS Output</div>
-        <div class="tab" data-tab="docs" role="tab" tabindex="-1" aria-selected="false">📖 Documentation</div>
     </div>
 
     <div class="content-area">
@@ -2336,9 +2378,9 @@ class Event:
         <div id="tab-canvas" class="tab-content" role="tabpanel" style="display:none; height: 100%;">
             <div class="code-container">
                 <div class="section-title section-title-bar">
-                    <div>Web Worker Canvas FX <span id="canvas-worker-badge" style="display:none; font-size: 0.55rem; font-weight: 800; padding: 2px 6px; border-radius: 12px; margin-left: 8px; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.05em;"></span></div>
+                    <div>Canvas FX <span id="canvas-worker-badge" style="display:none; font-size: 0.55rem; font-weight: 800; padding: 2px 6px; border-radius: 12px; margin-left: 8px; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.05em;"></span></div>
                     <div class="flex-center">
-                        <label class="toggle-label" data-tooltip="Run animation script in background"><input type="checkbox" id="toggle-canvas-fx" class="cb-input"> Enabled</label>
+                        <label class="toggle-label" data-tooltip="Run animation script in background for this mode"><input type="checkbox" id="toggle-canvas-fx" class="cb-input"> Enabled</label>
                         <label class="toggle-label" data-tooltip="Show animations on Login/Signup pages (Default: Visible)"><input type="checkbox" id="toggle-canvas-auth" class="cb-input"> Show on Auth Pages</label>
                     </div>
                 </div>
@@ -2361,9 +2403,9 @@ class Event:
 
         <div id="tab-bg" class="tab-content" role="tabpanel" style="display:none;">
             <div class="section-title section-title-bar">
-                <div>System Gradient Background</div>
+                <div>Gradient Background</div>
                 <div class="flex-center">
-                    <label class="toggle-label" data-tooltip="Enable gradient background"><input type="checkbox" id="toggle-gradient-bg" class="cb-input"> Enabled</label>
+                    <label class="toggle-label" data-tooltip="Enable gradient background for this mode"><input type="checkbox" id="toggle-gradient-bg" class="cb-input"> Enabled</label>
                     <label class="toggle-label" data-tooltip="Slowly shift gradient position with a looping animation"><input type="checkbox" id="toggle-gradient-animation" class="cb-input"> Animate</label>
                     <label class="toggle-label" data-tooltip="Show gradient on Login/Signup pages (Default: Visible)"><input type="checkbox" id="toggle-gradient-auth" checked class="cb-input"> Show on Auth Pages</label>
                 </div>
@@ -2546,7 +2588,8 @@ class Event:
             </div>
         </div>
 
-        <div id="tab-docs" class="tab-content" role="tabpanel" style="display:none;">
+        <div id="tab-docs" style="display:none;">
+            <button class="docs-modal-close-btn" id="docs-modal-close">&times;</button>
             <div class="docs-container">
                 
                 <details class="doc-accordion">
@@ -3353,15 +3396,89 @@ window.dispatchEvent(new CustomEvent('owui-canvas-context', {
                 </details>
 
                 <details class="doc-accordion">
-                    <summary>17. Troubleshooting &amp; FAQ <i data-icon="chevron"></i></summary>
+                    <summary>17. Reverse Proxy Configuration <i data-icon="chevron"></i></summary>
+                    <div class="doc-inner">
+                        <p>If Open WebUI is behind a reverse proxy (nginx, Caddy, Apache, Traefik, etc.), <b>response buffering must be disabled</b> for Theme Designer Pro to work correctly. Without this, SSE live push events are buffered and never delivered to clients, and theme data may not reach other users/devices.</p>
+
+                        <div class="doc-subheading">⚠️ Why This Matters</div>
+                        <p>Theme Designer Pro uses three delivery layers to push themes to all users:</p>
+                        <ul>
+                            <li><b>Server-Sent Events (SSE)</b> — live push to connected browsers via <code>{ROUTE_BASE}/events</code></li>
+                            <li><b>HTTP fetch</b> — bootloader fetches <code>{ROUTE_BASE}/theme.css</code> and <code>{ROUTE_BASE}/state.json</code> on every page load</li>
+                            <li><b>index.html injection</b> — theme CSS baked into the HTML for instant first paint</li>
+                        </ul>
+                        <p>Reverse proxies that <b>buffer responses</b> (the default for nginx) will hold SSE events in memory and never flush them to the client. This causes themes to appear only on the admin's browser while other users and devices see no changes, even after hard reloading.</p>
+
+                        <div class="doc-subheading">nginx</div>
+                        <p>Add <code>proxy_buffering off;</code> to your Open WebUI location block:</p>
+                        <pre class="doc-pre"><code>location / {
+    proxy_pass http://127.0.0.1:8080;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    # REQUIRED for SSE streaming (theme live push, chat streaming)
+    proxy_buffering off;
+}</code></pre>
+                        <p style="font-size: 0.75rem; opacity: 0.8;">Then run: <code>sudo nginx -t &amp;&amp; sudo systemctl reload nginx</code></p>
+
+                        <div class="doc-subheading">Caddy</div>
+                        <p>Caddy disables response buffering by default — no additional configuration needed. If you have explicitly enabled buffering, disable it:</p>
+                        <pre class="doc-pre"><code>your-domain.com {
+    reverse_proxy localhost:8080 {
+        flush_interval -1
+    }
+}</code></pre>
+
+                        <div class="doc-subheading">Apache</div>
+                        <p>Disable output buffering for the Open WebUI proxy:</p>
+                        <pre class="doc-pre"><code>ProxyPass / http://127.0.0.1:8080/
+ProxyPassReverse / http://127.0.0.1:8080/
+
+# Disable buffering for SSE streaming
+SetEnv proxy-sendchunked 1
+SetEnv proxy-sendcl 0</code></pre>
+
+                        <div class="doc-subheading">Traefik</div>
+                        <p>Ensure response buffering middleware is not applied to the Open WebUI service. Traefik streams by default, but if you've added a <code>buffering</code> middleware, remove it for the Open WebUI router.</p>
+
+                        <div class="doc-subheading">🔍 Diagnostic Checklist</div>
+                        <p>If themes aren't propagating to other users/devices:</p>
+                        <ul>
+                            <li><b>Step 1:</b> On the non-working device, navigate directly to <code>https://your-instance{ROUTE_BASE}/theme.css</code> — if it returns CSS content, the server is working and the issue is in the delivery layer (proxy buffering or missing bootloader).</li>
+                            <li><b>Step 2:</b> On the non-working device, View Page Source and search for <code>owui-theme-bootloader</code> — if missing, the bootloader wasn't injected into <code>index.html</code> (send a chat message to trigger <code>event()</code>).</li>
+                            <li><b>Step 3:</b> In DevTools → Network tab, check for an active <code>EventSource</code> connection to <code>{ROUTE_BASE}/events</code> — if it's failing or immediately closing, your proxy is likely buffering or blocking SSE.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="doc-accordion">
+                    <summary>17b. Multi-Worker Deployments <i data-icon="chevron"></i></summary>
+                    <div class="doc-inner">
+                        <p>If you run Open WebUI with <b>multiple Uvicorn workers</b> (<code>UVICORN_WORKERS &gt; 1</code>), be aware of this SSE limitation:</p>
+                        <ul>
+                            <li><b>Live push is worker-local.</b> SSE client connections are held in process memory. A theme save handled by Worker A will only broadcast to clients connected to Worker A. Clients on Workers B/C/D will not receive live push events.</li>
+                            <li><b>Page-load fetch still works.</b> The bootloader fetches <code>{ROUTE_BASE}/theme.css</code> and <code>{ROUTE_BASE}/state.json</code> from disk on every page load, which works correctly across all workers. Themes propagate on the next page load/refresh.</li>
+                            <li><b>Redis fixes this.</b> If <code>REDIS_URL</code> is set in your environment (which Open WebUI already uses for WebSocket relay), Theme Designer Pro automatically uses Redis pub/sub to broadcast SSE events across all workers. No additional configuration is needed beyond setting <code>REDIS_URL</code>.</li>
+                        </ul>
+                        <p><b>TL;DR:</b> Single-worker deployments (the default) work perfectly. Multi-worker deployments get live push across workers automatically if <code>REDIS_URL</code> is set; otherwise, themes propagate on page refresh.</p>
+                    </div>
+                </details>
+
+                <details class="doc-accordion">
+                    <summary>18. Troubleshooting &amp; FAQ <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
                         <p>Common issues and their solutions.</p>
                         <ul>
                             <li><b>Python permission error when injecting the bootloader.</b> The event function must have write access to your Open WebUI <code>index.html</code> file. If you are running a highly restricted bare-metal deployment or custom volume mappings, the function cannot inject the persistence script.</li>
                             <li><b>Canvas FX animations are lagging.</b> Heavy mathematically complex animations can drain resources. Ensure your browser supports <code>OffscreenCanvas</code> (indicated by the green <b>Background Worker</b> badge in the designer UI). Note: the badge reflects browser <i>capability</i>, not the actual execution path &mdash; if your script uses DOM APIs like <code>document</code>, the runtime auto-falls back to the main thread even when the badge shows "Background Worker." If your script runs on the main thread, keep animations simple. Even with Web Workers, massive particle counts or heavy calculations can still consume significant CPU/GPU resources.</li>
-                            <li><b>My theme doesn't apply to other users.</b> Ensure the admin has synced the theme via the designer. The bootloader serves the theme to all users on page load from <code>{ROUTE_BASE}/theme.css</code>. If the theme files are missing from <code>DATA_DIR/theme/</code>, the bootloader has nothing to serve. If users already have the page open, the SSE channel should push updates automatically — verify the connection is active by checking the browser's Network tab for an open <code>EventSource</code> request to <code>{ROUTE_BASE}/events</code>.</li>
-                            <li><b>Theme changes aren't appearing live on other devices/browsers.</b> Live push uses Server-Sent Events (SSE). Verify that: (1) the other device has the page open (SSE only pushes to active connections), (2) your reverse proxy isn't buffering SSE responses (nginx requires <code>X-Accel-Buffering: no</code>, which is set automatically), and (3) the browser's Network tab shows an active connection to <code>{ROUTE_BASE}/events</code>. If the connection drops, the browser auto-reconnects after 3 seconds.</li>
-                            <li><b>Theme reverts after disabling the function.</b> Disabling the event function stops <code>event()</code> from running, but the bootloader remains in <code>index.html</code> and the theme CSS persists. To fully remove the theme, use <code>Theme Active = OFF</code> (which actively strips the bootloader and CSS) before disabling the function, or follow the Uninstallation steps in Section 19.</li>
+                            <li><b>My theme doesn't apply to other users.</b> Most commonly caused by <b>reverse proxy buffering</b> — see Section 17 above. Also ensure the admin has synced the theme via the designer (not Draft mode). The bootloader serves the theme to all users on page load from <code>{ROUTE_BASE}/theme.css</code>. If the theme files are missing from <code>DATA_DIR/theme/</code>, the bootloader has nothing to serve. Verify the endpoint works by navigating directly to <code>{ROUTE_BASE}/theme.css</code> in your browser — it should return CSS content.</li>
+                            <li><b>Theme changes aren't appearing live on other devices/browsers.</b> This is almost always caused by <b>nginx or another reverse proxy buffering SSE responses</b>. See Section 17 for the fix. The function sends <code>X-Accel-Buffering: no</code> automatically, but nginx must have <code>proxy_buffering off</code> in the location block for this header to be respected. Quick diagnostic: open DevTools → Network tab on the non-working device and check if the <code>EventSource</code> connection to <code>{ROUTE_BASE}/events</code> is active and receiving heartbeat pings every 30 seconds.</li>
+                            <li><b>Theme reverts after disabling the function.</b> Disabling the event function stops <code>event()</code> from running, but the bootloader remains in <code>index.html</code> and the theme CSS persists. To fully remove the theme, use <code>Theme Active = OFF</code> (which actively strips the bootloader and CSS) before disabling the function, or follow the Uninstallation steps in Section 20.</li>
                             <li><b>Theme Active valve change doesn't take effect immediately.</b> Valve changes are detected automatically on the next system event (e.g., a chat message or user login). The system compares the current valve state to the previous state and broadcasts the appropriate SSE event (<code>theme-disable</code> or <code>theme-update</code>). There is no <code>on_valves_updated</code> hook in Open WebUI's event function API, so one system event must fire to trigger the detection.</li>
                             <li><b>Theme Active OFF doesn't fully strip the theme.</b> The <code>theme-disable</code> SSE event removes all 6 injected DOM elements by ID: <code>owui-dev-live-theme</code> (main CSS), <code>owui-server-theme</code> (server-injected CSS), <code>owui-theme-style</code> (legacy), <code>owui-theme-canvas-bg</code> (canvas), <code>owui-theme-bg-color</code> (background div), and <code>owui-canvas-script-runner</code> (canvas script). It also clears the in-memory theme state and localStorage cache to prevent re-injection by the MutationObserver.</li>
                             <li><b>Live push stopped working after re-saving the function.</b> This should not happen — SSE connections are persisted on <code>app.state</code> and survive function hot-reloads. If you do experience this, verify the SSE endpoint is accessible at <code>{ROUTE_BASE}/events</code>. The server sends a heartbeat every 30 seconds — if the connection is truly dead, the EventSource will auto-reconnect after 3 seconds.</li>
@@ -3372,11 +3489,11 @@ window.dispatchEvent(new CustomEvent('owui-canvas-context', {
                 </details>
 
                 <details class="doc-accordion">
-                    <summary>18. Uninstallation &amp; Complete Removal <i data-icon="chevron"></i></summary>
+                    <summary>19. Uninstallation &amp; Complete Removal <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
                         <p>Because this function injects a bootloader script directly into your server's <code>index.html</code> file, <b>simply disabling or removing the event function will not remove the theme engine from your interface.</b> Follow these steps for a complete removal:</p>
                         <h4>Step 1: Purge Browser LocalStorage</h4>
-                        <p>The easiest way is to use the <b>Factory Reset</b> button in the <b>Danger Zone</b> section below (Section 20). Alternatively, open your Open WebUI instance, press <b>F12</b> to open Developer Tools, go to the <b>Console</b> tab, and paste:</p>
+                        <p>The easiest way is to use the <b>Factory Reset</b> button in the <b>Danger Zone</b> section below (Section 21). Alternatively, open your Open WebUI instance, press <b>F12</b> to open Developer Tools, go to the <b>Console</b> tab, and paste:</p>
                         <div style="position: relative;">
                         <pre class="doc-pre" id="purge-localstorage-code"><code>['owui_dev_theme_v1', 'owui_dev_theme_v1_css',
  'owui_theme_snapshots',
@@ -3406,7 +3523,7 @@ location.reload();</code></pre>
                 </details>
 
                 <details class="doc-accordion" open>
-                    <summary>19. Portability & Backups <i data-icon="chevron"></i></summary>
+                    <summary>20. Portability & Backups <i data-icon="chevron"></i></summary>
                     <div class="doc-inner" style="display:flex; flex-direction:column; align-items:center; gap:16px;">
                         <p style="margin:0; text-align:center;">Export your complete theme library snapshots, custom CSS presets, canvas animation scripts, and gradient presets to separate portable backup files at once. You can restore them anytime using the import features in their respective tabs.</p>
                         
@@ -3422,7 +3539,7 @@ location.reload();</code></pre>
                 </details>
 
                 <details class="doc-accordion" open>
-                    <summary style="color: #ef4444;">20. Danger Zone <i data-icon="chevron"></i></summary>
+                    <summary style="color: #ef4444;">21. Danger Zone <i data-icon="chevron"></i></summary>
                     <div class="doc-inner" style="display:flex; flex-direction:column; align-items:center; gap:16px;">
                         <p style="margin:0; text-align:center; color:var(--text-muted); font-size:0.75rem; line-height:1.6;">Permanently wipe <b>all</b> Theme Designer Pro data including your theme library, CSS snippets, canvas scripts, gradient presets, and active configuration. This action cannot be undone.</p>
                         <button class="btn" id="factory-reset-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 10px 24px; font-weight: 600; border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s; width: 100%; max-width: 320px;">Factory Reset (Wipe All Data)</button>
@@ -3436,7 +3553,7 @@ location.reload();</code></pre>
         <div class="footer-left">
             <button class="btn btn-danger" id="nuclear-btn" data-tooltip="Reset all modes to default">Global Reset</button>
             <button class="btn btn-danger" id="reset-mode-btn" data-tooltip="Reset only the current mode to default" style="opacity: 0.85;">Reset Mode</button>
-            <button class="btn" id="sync-mode-btn" data-tooltip="Selective sync between theme modes">Sync</button>
+            <button class="btn" id="sync-mode-btn" data-tooltip="Copy settings from one mode to another (e.g., Dark → Light) — choose what to sync">Sync</button>
             
             <div style="display: flex; gap: 4px; margin-left: 8px; border-left: 1px solid var(--border); padding-left: 12px;">
                 <button class="btn btn-icon" id="undo-btn" data-tooltip="Undo (Ctrl+Z)" aria-label="Undo" disabled style="width: 32px; height: 32px; opacity: 0.5;">
@@ -3450,7 +3567,7 @@ location.reload();</code></pre>
         <div class="footer-right">
             <div class="draft-toggle" id="draft-toggle-wrap">
                     <span class="draft-toggle-label active" id="draft-label-live">Live</span>
-                    <div class="draft-switch" id="draft-switch" data-tooltip="Toggle Draft Mode — changes won't push to users until you Publish"></div>
+                    <div class="draft-switch" id="draft-switch" data-tooltip="Click to enter Draft mode — changes will stay local until you Publish"></div>
                     <span class="draft-toggle-label" id="draft-label-draft"><span class="draft-dot" style="display:none;" id="draft-dot"></span> Draft</span>
             </div>
             <button class="draft-publish-btn" id="draft-publish-btn" data-tooltip="Push all changes live to all users">
@@ -3781,7 +3898,7 @@ location.reload();</code></pre>
             exportId: 'export-all-btn', exportTooltip: 'Export All (Backup)',
             save: { id: 'save-snapshot-btn', tooltip: 'Save as New Theme' },
             deleteId: 'delete-all-themes-btn', deleteTooltip: 'Delete All Themes',
-            scrollId: 'snapshot-scroll', scrollStyle: 'max-height: 210px; overflow-y: auto; overflow-x: hidden; padding: 12px 8px; margin: -12px -8px 12px -8px; width: calc(100% + 16px); display: none;',
+            scrollId: 'snapshot-scroll', scrollStyle: 'max-height: 420px; overflow-y: auto; overflow-x: hidden; padding: 12px 8px; margin: -12px -8px 12px -8px; width: calc(100% + 16px); display: none;',
             galleryId: 'snapshot-list', galleryClass: 'preset-grid',
         },
         {
@@ -4001,6 +4118,7 @@ location.reload();</code></pre>
         if (labelDraft) labelDraft.classList.toggle('active', on);
         if (publishBtn) publishBtn.classList.toggle('visible', on);
         if (draftDot) draftDot.style.display = on ? 'inline-block' : 'none';
+        if (sw) sw.setAttribute('data-tooltip', on ? 'Click to exit Draft and push changes live to all users' : 'Click to enter Draft mode \u2014 changes will stay local until you Publish');
         sessionStorage.setItem('owui_theme_draft_mode', on ? '1' : '0');
     }
 
@@ -5072,6 +5190,8 @@ function startAnimation() {
         syncCheck('toggle-palette-enabled', !!config.paletteEnabled);
         syncCheck('toggle-theme-auth', config.themeShowAuth !== false);
         syncCheck('toggle-custom-auth', config.customCssShowAuth !== false);
+        { const el = $('toggle-theme-auth'); if (el) { const l = el.closest('label'); if (l) l.style.opacity = config.paletteEnabled ? '1' : '0.35'; } }
+        { ['toggle-auto-scope','toggle-custom-auth'].forEach(id => { const el = $(id); if (el) { const l = el.closest('label'); if (l) l.style.opacity = (config.customCssEnabled !== false) ? '1' : '0.35'; } }); }
         
         // Sync Manual Overrides Editor
         if ($('manual-overrides-editor')) { $('manual-overrides-editor').value = config.manualOverrides || ""; updateLineNumbers($('manual-overrides-editor')); }
@@ -5083,6 +5203,7 @@ function startAnimation() {
 
         syncCheck('toggle-canvas-fx', config.canvasEnabled === true);
         syncCheck('toggle-canvas-auth', config.canvasShowAuth !== false);
+        { const a = $('toggle-canvas-auth'); if (a) { const l = a.closest('label'); if (l) { l.style.opacity = config.canvasEnabled ? '1' : '0.35'; } } }
         
         const workerBadge = $('canvas-worker-badge');
         if (workerBadge) {
@@ -6255,20 +6376,28 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         if (el) el.addEventListener('change', (e) => {
             const dm = getActiveDataMode();
             themeData[dm][key] = e.target.checked;
+            // Sync dependent toggle opacity
+            if (id === 'toggle-palette-enabled') { const a = $('toggle-theme-auth'); if (a) { const l = a.closest('label'); if (l) l.style.opacity = e.target.checked ? '1' : '0.35'; } }
+            if (id === 'toggle-custom-css') { ['toggle-auto-scope','toggle-custom-auth'].forEach(did => { const d = $(did); if (d) { const l = d.closest('label'); if (l) l.style.opacity = e.target.checked ? '1' : '0.35'; } }); }
             commitChange();
         });
     });
 
     const toggleCanvasFx = $('toggle-canvas-fx');
-    if (toggleCanvasFx) toggleCanvasFx.addEventListener('change', (e) => {
-        const dm = getActiveDataMode();
-        themeData[dm].canvasEnabled = e.target.checked;
-        if (e.target.checked && !themeData[dm].canvasScript) {
-            themeData[dm].canvasScript = DEFAULT_CANVAS_SCRIPT;
-            if ($('canvas-fx-editor')) $('canvas-fx-editor').value = DEFAULT_CANVAS_SCRIPT;
-        }
-        commitChange();
-    });
+    if (toggleCanvasFx) {
+        const _syncCanvasDeps = (on) => { const a = $('toggle-canvas-auth'); if (a) { const l = a.closest('label'); if (l) { l.style.opacity = on ? '1' : '0.35'; } } };
+        _syncCanvasDeps(toggleCanvasFx.checked);
+        toggleCanvasFx.addEventListener('change', (e) => {
+            const dm = getActiveDataMode();
+            themeData[dm].canvasEnabled = e.target.checked;
+            if (e.target.checked && !themeData[dm].canvasScript) {
+                themeData[dm].canvasScript = DEFAULT_CANVAS_SCRIPT;
+                if ($('canvas-fx-editor')) $('canvas-fx-editor').value = DEFAULT_CANVAS_SCRIPT;
+            }
+            _syncCanvasDeps(e.target.checked);
+            commitChange();
+        });
+    }
 
     // === GRADIENT BUILDER LOGIC ===
 
@@ -6301,6 +6430,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         syncCheck('toggle-gradient-bg', config.gradientEnabled === true);
         syncCheck('toggle-gradient-auth', config.gradientShowAuth !== false);
         syncCheck('toggle-gradient-animation', config.gradientAnimation === true);
+        { ['toggle-gradient-animation','toggle-gradient-auth'].forEach(id => { const el = $(id); if (el) { const l = el.closest('label'); if (l) { l.style.opacity = config.gradientEnabled ? '1' : '0.35'; } } }); }
 
         // Detect Custom CSS gradient conflict
         const conflictWarning = $('gradient-conflict-warning');
@@ -7370,25 +7500,30 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
 
     // Gradient toggle handler
     const toggleGradientBg = $('toggle-gradient-bg');
-    if (toggleGradientBg) toggleGradientBg.addEventListener('change', (e) => {
-        const dm = getActiveDataMode();
-        themeData[dm].gradientEnabled = e.target.checked;
-        if (e.target.checked) {
-            if (themeData[dm].gradientType === 'mesh') {
-                if (!themeData[dm].gradientMeshPoints || themeData[dm].gradientMeshPoints.length < 2) {
-                    themeData[dm].gradientMeshPoints = [{color:'#6366f1',x:25,y:25,spread:50},{color:'#ec4899',x:75,y:30,spread:45},{color:'#06b6d4',x:50,y:75,spread:50}];
-                    themeData[dm].gradientMeshBgColor = themeData[dm].gradientMeshBgColor || '#0a0a12';
+    if (toggleGradientBg) {
+        const _syncGradDeps = (on) => { ['toggle-gradient-animation','toggle-gradient-auth'].forEach(id => { const el = $(id); if (el) { const l = el.closest('label'); if (l) { l.style.opacity = on ? '1' : '0.35'; } } }); };
+        _syncGradDeps(toggleGradientBg.checked);
+        toggleGradientBg.addEventListener('change', (e) => {
+            const dm = getActiveDataMode();
+            themeData[dm].gradientEnabled = e.target.checked;
+            if (e.target.checked) {
+                if (themeData[dm].gradientType === 'mesh') {
+                    if (!themeData[dm].gradientMeshPoints || themeData[dm].gradientMeshPoints.length < 2) {
+                        themeData[dm].gradientMeshPoints = [{color:'#6366f1',x:25,y:25,spread:50},{color:'#ec4899',x:75,y:30,spread:45},{color:'#06b6d4',x:50,y:75,spread:50}];
+                        themeData[dm].gradientMeshBgColor = themeData[dm].gradientMeshBgColor || '#0a0a12';
+                    }
+                } else if (!themeData[dm].gradientStops || themeData[dm].gradientStops.length < 2) {
+                    themeData[dm].gradientStops = [
+                        { color: '#0f0c29', position: 0 },
+                        { color: '#302b63', position: 50 },
+                        { color: '#24243e', position: 100 }
+                    ];
                 }
-            } else if (!themeData[dm].gradientStops || themeData[dm].gradientStops.length < 2) {
-                themeData[dm].gradientStops = [
-                    { color: '#0f0c29', position: 0 },
-                    { color: '#302b63', position: 50 },
-                    { color: '#24243e', position: 100 }
-                ];
             }
-        }
-        commitChange();
-    });
+            _syncGradDeps(e.target.checked);
+            commitChange();
+        });
+    }
 
     // Gradient animation toggle handler
     const toggleGradientAnim = $('toggle-gradient-animation');
@@ -8295,6 +8430,16 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         }
     });
 
+    // Docs modal handlers
+    const docsModalBtn = document.getElementById('docs-modal-btn');
+    const docsModalClose = document.getElementById('docs-modal-close');
+    const docsPanel = document.getElementById('tab-docs');
+    if (docsModalBtn && docsPanel) {
+        docsModalBtn.addEventListener('click', () => { docsPanel.style.display = 'block'; });
+        if (docsModalClose) docsModalClose.addEventListener('click', () => { docsPanel.style.display = 'none'; });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && docsPanel.style.display !== 'none') { docsPanel.style.display = 'none'; } });
+    }
+
     document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', () => {
             document.querySelectorAll('.tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); t.setAttribute('tabindex', '-1'); });
@@ -8305,11 +8450,6 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             document.getElementById('tab-' + tab.dataset.tab).style.display = 'block';
             sessionStorage.setItem('owui_theme_tool_tab', tab.dataset.tab);
             
-            // Contextual UI Visibility
-            const isDocs = tab.dataset.tab === 'docs';
-            ['reset-mode-btn', 'sync-mode-btn'].forEach(id => {
-                if ($(id)) $(id).style.display = isDocs ? 'none' : 'flex';
-            });
 
             // Flush stale CSS Output if switching to the code tab
             if (tab.dataset.tab === 'code' && _codeViewStale) updateCodeView();
@@ -10444,7 +10584,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             if (snapshots.length === 0) { 
                 scrollArea.style.display = 'block';
                 container.style.display = 'block';
-                container.innerHTML = `<div class="empty-state-lg">Your saved themes will appear here.</div>`;
+                container.innerHTML = `<div class="empty-state-lg"><div style="margin-bottom:8px;">Your theme library is empty.</div><div style="font-size:0.65rem; line-height:1.6;">Save your current theme using the <b>📸 Snapshot</b> button, or import community presets from <a href="https://silentoplayz.github.io/theme-designer-pro-presets/" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:underline;">the preset gallery</a>.</div></div>`;
                 return; 
             }
 
@@ -10923,6 +11063,18 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
 
         payload = json.dumps({"css": css, "state": state}, separators=(",", ":"))
         msg = f"event: theme-update\ndata: {payload}\n\n"
+        # If Redis is available, publish there (subscriber handles local delivery)
+        redis_url = os.environ.get("REDIS_URL", "")
+        if redis_url:
+            try:
+                import redis as _sync_redis
+
+                r = _sync_redis.Redis.from_url(redis_url)
+                r.publish("theme_pro_sse", msg)
+                r.close()
+                return
+            except Exception:
+                pass  # Fall through to local broadcast
         for q in list(cls._sse_clients):
             try:
                 q.put_nowait(msg)
@@ -10933,6 +11085,18 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
     def _broadcast_disable(cls):
         """Push a theme-disable event to all SSE clients (strip theme + reload)."""
         msg = "event: theme-disable\ndata: disable\n\n"
+        # If Redis is available, publish there (subscriber handles local delivery)
+        redis_url = os.environ.get("REDIS_URL", "")
+        if redis_url:
+            try:
+                import redis as _sync_redis
+
+                r = _sync_redis.Redis.from_url(redis_url)
+                r.publish("theme_pro_sse", msg)
+                r.close()
+                return
+            except Exception:
+                pass  # Fall through to local broadcast
         for q in list(cls._sse_clients):
             try:
                 q.put_nowait(msg)
