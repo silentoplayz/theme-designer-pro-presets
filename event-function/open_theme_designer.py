@@ -141,9 +141,17 @@ class Event:
                 return { 'oled-dark': 'oled', her: 'her', light: 'light', dark: 'dark' }[theme] || 'dark';
             }
 
+            var _refreshPending = false;
             function enforceTheme() {
                 const savedCss = _owuiThemeCss || localStorage.getItem('owui_dev_theme_v1_css');
                 if (savedCss) {
+                    // Remove server-embedded CSS FIRST — it's a stale subset that can conflict
+                    // with the full live CSS (especially custom CSS with !important rules).
+                    // Removing before creating owui-dev-live-theme prevents a childList
+                    // mutation with both style elements present (double-styled state).
+                    var serverStyle = document.getElementById('owui-server-theme');
+                    if (serverStyle) serverStyle.remove();
+
                     let style = document.getElementById('owui-dev-live-theme');
                     if (!style) {
                         style = document.createElement('style');
@@ -192,10 +200,6 @@ class Event:
                     }
                     
                     if (style.innerHTML !== finalCss) style.innerHTML = finalCss;
-                    // Remove server-embedded CSS — it's a stale subset that can conflict
-                    // with the full live CSS (especially custom CSS with !important rules)
-                    var serverStyle = document.getElementById('owui-server-theme');
-                    if (serverStyle) serverStyle.remove();
                 }
                 
                 const storedTheme = localStorage.getItem('theme');
@@ -712,7 +716,15 @@ class Event:
                 }
             }
             
-            function refresh() { if (_disabled) return; enforceTheme(); initCanvas(); }
+            function refresh() {
+                if (_disabled) return;
+                // Debounce via rAF — collapses rapid MutationObserver triggers into one paint.
+                // Prevents strobe-like flashing on auth pages where class/data-theme mutations
+                // from Open WebUI's init fire multiple times in quick succession.
+                if (_refreshPending) return;
+                _refreshPending = true;
+                requestAnimationFrame(function() { _refreshPending = false; enforceTheme(); initCanvas(); });
+            }
 
             refresh();
             
@@ -760,7 +772,11 @@ class Event:
             history.replaceState = function() { _replaceState.apply(this, arguments); refresh(); };
 
             // Live theme push via Server-Sent Events (cross-tab/browser/device)
-            if (!window.__THEME_DESIGNER__) {
+            // Skip SSE on auth pages — user isn't logged in yet, the connection
+            // gets blocked (wasting an HTTP/1.1 slot), and reconnect retries
+            // contribute to strobe-like flashing. Theme still loads via fetch above.
+            var _isAuthRoute = window.location.pathname.startsWith('/auth');
+            if (!window.__THEME_DESIGNER__ && !_isAuthRoute) {
                 try {
                     var es = new EventSource('__THEME_ROUTE__/events?_=' + Date.now());
                     es.addEventListener('theme-update', function(e) {
@@ -1201,45 +1217,8 @@ class Event:
             app.state._theme_sse_clients = []
         Event._sse_clients = app.state._theme_sse_clients
 
-        # --- Redis pub/sub subscriber for multi-worker SSE broadcasting ---
-        _WORKER_ID = str(os.getpid())
-        redis_url = os.environ.get("REDIS_URL", "")
-        if redis_url and not getattr(app.state, "_theme_redis_sub", False):
-            try:
-                import redis.asyncio as aioredis
-
-                async def _redis_subscriber():
-                    """Listen on Redis channel and forward messages to local SSE clients."""
-                    try:
-                        r = aioredis.from_url(redis_url)
-                        pubsub = r.pubsub()
-                        await pubsub.subscribe("theme_pro_sse")
-                        log.info("[Theme Pro] Redis subscriber started on channel 'theme_pro_sse'")
-                        async for message in pubsub.listen():
-                            if message["type"] != "message":
-                                continue
-                            raw = message["data"]
-                            if isinstance(raw, bytes):
-                                raw = raw.decode("utf-8")
-                            # Skip messages from this same worker (already delivered locally)
-                            if raw.startswith("wid:"):
-                                newline = raw.index("\n")
-                                sender_id = raw[4:newline]
-                                if sender_id == _WORKER_ID:
-                                    continue
-                                raw = raw[newline + 1:]  # Strip the wid: header
-                            for q in list(Event._sse_clients):
-                                try:
-                                    q.put_nowait(raw)
-                                except asyncio.QueueFull:
-                                    pass
-                    except Exception as exc:
-                        log.warning("[Theme Pro] Redis subscriber exited: %s", exc)
-
-                asyncio.get_event_loop().create_task(_redis_subscriber())
-                app.state._theme_redis_sub = True
-            except Exception as exc:
-                log.warning("[Theme Pro] Could not start Redis subscriber: %s", exc)
+        # NOTE: Redis pub/sub subscriber is started in event() (async context),
+        # not here (_register_route is sync and may run in a transient event loop).
 
         # Remove stale routes from previous function load so new handlers take effect
         # Clean up default, current, AND previous paths to ensure only one URL is active
@@ -1340,13 +1319,18 @@ class Event:
 
             async def event_stream():
                 try:
+                    # Flush padding: Cloudflare's free-tier proxy may buffer small SSE
+                    # chunks until an internal threshold (~4KB) is reached. Sending a
+                    # burst of SSE comments forces the proxy into streaming mode.
                     yield "retry: 3000\n\n"  # Auto-reconnect after 3s
+                    yield ": " + "x" * 4096 + "\n\n"  # Flush padding
+                    yield ": stream-ready\n\n"
                     while True:
                         try:
-                            msg = await asyncio.wait_for(queue.get(), timeout=30)
+                            msg = await asyncio.wait_for(queue.get(), timeout=15)
                             yield msg  # Pre-formatted SSE string
                         except asyncio.TimeoutError:
-                            yield ": heartbeat\n\n"  # Keep-alive ping
+                            yield ": heartbeat\n\n"  # Keep-alive (15s for Cloudflare compatibility)
                 except (asyncio.CancelledError, GeneratorExit):
                     pass
                 finally:
@@ -1357,9 +1341,10 @@ class Event:
                 event_stream(),
                 media_type="text/event-stream",
                 headers={
-                    "Cache-Control": "no-cache",
+                    "Cache-Control": "no-cache, no-store, no-transform",
+                    "Content-Encoding": "identity",  # Prevent compression buffering
                     "Connection": "keep-alive",
-                    "X-Accel-Buffering": "no",  # Disable nginx buffering
+                    "X-Accel-Buffering": "no",  # Disable nginx/Cloudflare buffering
                 },
             )
 
@@ -11082,8 +11067,14 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         if redis_url:
             try:
                 import redis as _sync_redis
-
-                r = _sync_redis.Redis.from_url(redis_url)
+                import inspect as _insp
+                _extra = {}
+                try:
+                    if 'maint_notifications' in _insp.signature(_sync_redis.Redis.from_url).parameters:
+                        _extra['maint_notifications'] = False
+                except Exception:
+                    pass
+                r = _sync_redis.Redis.from_url(redis_url, **_extra)
                 r.publish("theme_pro_sse", f"wid:{os.getpid()}\n{msg}")
                 r.close()
             except Exception:
@@ -11103,8 +11094,14 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         if redis_url:
             try:
                 import redis as _sync_redis
-
-                r = _sync_redis.Redis.from_url(redis_url)
+                import inspect as _insp
+                _extra = {}
+                try:
+                    if 'maint_notifications' in _insp.signature(_sync_redis.Redis.from_url).parameters:
+                        _extra['maint_notifications'] = False
+                except Exception:
+                    pass
+                r = _sync_redis.Redis.from_url(redis_url, **_extra)
                 r.publish("theme_pro_sse", f"wid:{os.getpid()}\n{msg}")
                 r.close()
             except Exception:
@@ -11131,6 +11128,71 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         # Always register routes (guard prevents duplicates; re-registers on URL change)
         if __app__ is not None:
             self._register_route(__app__)
+
+            # --- Redis pub/sub subscriber for multi-worker SSE broadcasting ---
+            # Started here in event() (async context) rather than _register_route (sync)
+            # to avoid 'Task was destroyed' errors from transient startup event loops.
+            _WORKER_ID = str(os.getpid())
+            redis_url = os.environ.get("REDIS_URL", "")
+            # Check if subscriber task exists and is still alive (not destroyed/done)
+            _existing_task = getattr(__app__.state, "_theme_redis_task", None)
+            _sub_alive = _existing_task is not None and not _existing_task.done()
+            if redis_url and not _sub_alive:
+                try:
+                    import redis.asyncio as aioredis
+                    import inspect as _insp
+
+                    # Detect if redis-py supports maint_notifications (v7+)
+                    _redis_extra = {}
+                    try:
+                        if 'maint_notifications' in _insp.signature(aioredis.from_url).parameters:
+                            _redis_extra['maint_notifications'] = False
+                        else:
+                            import logging as _logging
+                            _logging.getLogger('redis.connection').setLevel(_logging.WARNING)
+                    except Exception:
+                        pass
+
+                    async def _redis_subscriber():
+                        """Listen on Redis channel and forward messages to local SSE clients.
+                        Reconnects automatically on timeout or connection loss."""
+                        while True:
+                            try:
+                                r = aioredis.from_url(
+                                    redis_url,
+                                    socket_timeout=None,
+                                    socket_connect_timeout=10,
+                                    **_redis_extra,
+                                )
+                                pubsub = r.pubsub()
+                                await pubsub.subscribe("theme_pro_sse")
+                                log.info("[Theme Pro] Redis subscriber connected on channel 'theme_pro_sse'")
+                                async for message in pubsub.listen():
+                                    if message["type"] != "message":
+                                        continue
+                                    raw = message["data"]
+                                    if isinstance(raw, bytes):
+                                        raw = raw.decode("utf-8")
+                                    if raw.startswith("wid:"):
+                                        newline = raw.index("\n")
+                                        sender_id = raw[4:newline]
+                                        if sender_id == _WORKER_ID:
+                                            continue
+                                        raw = raw[newline + 1:]
+                                    for q in list(Event._sse_clients):
+                                        try:
+                                            q.put_nowait(raw)
+                                        except asyncio.QueueFull:
+                                            pass
+                            except asyncio.CancelledError:
+                                break
+                            except Exception as exc:
+                                log.warning("[Theme Pro] Redis subscriber lost connection: %s — reconnecting in 5s", exc)
+                                await asyncio.sleep(5)
+
+                    __app__.state._theme_redis_task = asyncio.get_running_loop().create_task(_redis_subscriber())
+                except Exception as exc:
+                    log.warning("[Theme Pro] Could not start Redis subscriber: %s", exc)
 
         # Detect if the theme_active valve has changed since last run
         valve_changed = (
