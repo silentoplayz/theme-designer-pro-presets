@@ -2060,6 +2060,7 @@ class Event:
             /* Variable grid: single column on small screens */
             .var-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
             .var-item { padding: 14px; }
+            .var-actions-right { margin-left: 0 !important; }
 
             /* Preset grid */
             .preset-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
@@ -2280,9 +2281,11 @@ class Event:
                 <div style="display:flex; gap:8px; flex-wrap: wrap; align-items: center; width:100%;">
                     <button class="var-action-btn var-action-static" id="random-btn-vars" data-tooltip="Generate random base colors">✦ Randomize</button>
                     <button class="var-action-btn var-action-static" id="extract-btn-vars" data-tooltip="Paste or upload an image to extract palette">◎ Extract</button>
-                    <button class="var-action-btn var-action-static" id="lock-all-btn" data-tooltip="Lock All Variables" aria-label="Lock all variables"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="vertical-align:-1px; margin-right:2px;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>Lock All</button>
-                    <button class="var-action-btn var-action-static" id="unlock-all-btn" data-tooltip="Unlock All Variables" aria-label="Unlock all variables"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="vertical-align:-1px; margin-right:2px;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>Unlock All</button>
-                    <button class="var-action-btn var-action-static" id="reset-all-btn" data-tooltip="Reset Unlocked Overrides to Default" aria-label="Reset all unlocked overrides to default">⟲ Reset All</button>
+                    <div class="var-actions-right" style="display:flex; gap:8px; flex-wrap: wrap; margin-left:auto;">
+                        <button class="var-action-btn var-action-static" id="lock-all-btn" data-tooltip="Lock All Variables" aria-label="Lock all variables"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="vertical-align:-1px; margin-right:2px;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>Lock All</button>
+                        <button class="var-action-btn var-action-static" id="unlock-all-btn" data-tooltip="Unlock All Variables" aria-label="Unlock all variables"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="vertical-align:-1px; margin-right:2px;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>Unlock All</button>
+                        <button class="var-action-btn var-action-static" id="reset-all-btn" data-tooltip="Reset Unlocked Overrides to Default" aria-label="Reset all unlocked overrides to default">⟲ Reset All</button>
+                    </div>
                 </div>
             </div>
 
