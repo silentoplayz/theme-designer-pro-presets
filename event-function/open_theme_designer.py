@@ -1202,6 +1202,7 @@ class Event:
         Event._sse_clients = app.state._theme_sse_clients
 
         # --- Redis pub/sub subscriber for multi-worker SSE broadcasting ---
+        _WORKER_ID = str(os.getpid())
         redis_url = os.environ.get("REDIS_URL", "")
         if redis_url and not getattr(app.state, "_theme_redis_sub", False):
             try:
@@ -1217,12 +1218,19 @@ class Event:
                         async for message in pubsub.listen():
                             if message["type"] != "message":
                                 continue
-                            msg = message["data"]
-                            if isinstance(msg, bytes):
-                                msg = msg.decode("utf-8")
+                            raw = message["data"]
+                            if isinstance(raw, bytes):
+                                raw = raw.decode("utf-8")
+                            # Skip messages from this same worker (already delivered locally)
+                            if raw.startswith("wid:"):
+                                newline = raw.index("\n")
+                                sender_id = raw[4:newline]
+                                if sender_id == _WORKER_ID:
+                                    continue
+                                raw = raw[newline + 1:]  # Strip the wid: header
                             for q in list(Event._sse_clients):
                                 try:
-                                    q.put_nowait(msg)
+                                    q.put_nowait(raw)
                                 except asyncio.QueueFull:
                                     pass
                     except Exception as exc:
@@ -11070,11 +11078,10 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
                 import redis as _sync_redis
 
                 r = _sync_redis.Redis.from_url(redis_url)
-                r.publish("theme_pro_sse", msg)
+                r.publish("theme_pro_sse", f"wid:{os.getpid()}\n{msg}")
                 r.close()
-                return
             except Exception:
-                pass  # Fall through to local broadcast
+                pass  # Redis unavailable — local broadcast still runs below
         for q in list(cls._sse_clients):
             try:
                 q.put_nowait(msg)
@@ -11092,11 +11099,10 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
                 import redis as _sync_redis
 
                 r = _sync_redis.Redis.from_url(redis_url)
-                r.publish("theme_pro_sse", msg)
+                r.publish("theme_pro_sse", f"wid:{os.getpid()}\n{msg}")
                 r.close()
-                return
             except Exception:
-                pass  # Fall through to local broadcast
+                pass  # Redis unavailable — local broadcast still runs below
         for q in list(cls._sse_clients):
             try:
                 q.put_nowait(msg)
