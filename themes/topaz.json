@@ -1,6 +1,7 @@
 {
   "name": "Topaz",
   "version": "1.0.0",
+  "targetVersion": "0.10.0",
   "author": "silentoplayz (G30)",
   "description": "Warm bronze and sienna tones with an earthy gradient backdrop.",
   "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/topaz.json",
