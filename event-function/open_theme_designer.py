@@ -16,6 +16,7 @@ import re as _re
 import asyncio
 
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -66,6 +67,15 @@ class Event:
         draft_mode_default: bool = Field(
             default=False,
             description="Open the designer in Draft mode by default. When enabled, the designer starts in Draft mode on every fresh page load, preventing accidental live changes.",
+        )
+        sidebar_transparency: Literal["opaque", "translucent", "transparent"] = Field(
+            default="opaque",
+            description=(
+                "Controls sidebar visibility when Canvas FX or gradients are active. "
+                "'opaque' (default) — solid background for best readability. "
+                "'translucent' — frosted glass effect (backdrop-blur) that lets backgrounds show through. "
+                "'transparent' — fully see-through sidebar with no blur."
+            ),
         )
         designer_url: str = Field(
             default=ROUTE_PATH,
@@ -1319,6 +1329,9 @@ class Event:
                 return PlainTextResponse("", media_type="text/css", status_code=204)
             css = event_instance._load_css()
             if css:
+                # Enforce sidebar_transparency valve at serving layer
+                if event_instance.valves.sidebar_transparency != "opaque":
+                    css = event_instance._apply_sidebar_transparency(css, event_instance.valves.sidebar_transparency)
                 return PlainTextResponse(
                     content=css,
                     media_type="text/css",
@@ -1500,7 +1513,11 @@ class Event:
                 broadcast_state = state if isinstance(state, str) else ""
                 if broadcast_state and not self.valves.enable_canvas_fx:
                     broadcast_state = self._strip_canvas_from_state(broadcast_state)
-                Event._broadcast_update(css, broadcast_state)
+                # Enforce sidebar_transparency valve: post-process CSS for broadcast
+                broadcast_css = css
+                if self.valves.sidebar_transparency != "opaque":
+                    broadcast_css = self._apply_sidebar_transparency(broadcast_css, self.valves.sidebar_transparency)
+                Event._broadcast_update(broadcast_css, broadcast_state)
 
             return JSONResponse(
                 {"status": "ok", "bytes": len(css), "theme_active": should_broadcast}
@@ -5539,11 +5556,13 @@ function startAnimation() {
     }
 
     function buildGradientStructuralCss({ selector, baseColor, animCss, keyframesCss, comment, bodyBg }) {
-        const sidebarRgba = hexToRgba(baseColor, 0.75);
+        const sidebarMode = window.__THEME_PRO_CONFIG__?.sidebarTransparency || 'opaque';
+        const sidebarRgba = sidebarMode === 'opaque' ? hexToRgba(baseColor, 0.75) : sidebarMode === 'translucent' ? hexToRgba(baseColor, 0.25) : 'transparent';
+        const sidebarBlur = sidebarMode === 'opaque' ? 'blur(12px)' : sidebarMode === 'translucent' ? 'blur(20px) saturate(1.3)' : 'none';
         const overlayFrom = hexToRgba(baseColor, 0.7);
         const overlayTo = hexToRgba(baseColor, 0.35);
         const textareaRgba = hexToRgba(baseColor, 0.5);
-        return `\n/*[OWUI_GRADIENT_START]*/\n/* ${comment} */\n${selector} body {\n${bodyBg}\n  background-attachment: fixed !important;\n${animCss}\n}\n${selector} body::before { content: none !important; display: none !important; }\n${selector} #chat-container .bg-linear-to-t {\n  background-image: linear-gradient(to top, ${overlayFrom}, ${overlayTo}) !important;\n}\n${selector} #sidebar {\n  background-color: ${sidebarRgba} !important;\n  backdrop-filter: blur(12px) !important;\n}\n${selector} textarea {\n  background-color: ${textareaRgba} !important;\n  backdrop-filter: blur(8px) !important;\n}\n${keyframesCss}/*[OWUI_GRADIENT_END]*/\n`;
+        return `\n/*[OWUI_GRADIENT_START]*/\n/* ${comment} */\n${selector} body {\n${bodyBg}\n  background-attachment: fixed !important;\n${animCss}\n}\n${selector} body::before { content: none !important; display: none !important; }\n${selector} #chat-container .bg-linear-to-t {\n  background-image: linear-gradient(to top, ${overlayFrom}, ${overlayTo}) !important;\n}\n${selector} #sidebar {\n  background-color: ${sidebarRgba} !important;\n  backdrop-filter: ${sidebarBlur} !important;\n}\n${selector} textarea {\n  background-color: ${textareaRgba} !important;\n  backdrop-filter: blur(8px) !important;\n}\n${keyframesCss}/*[OWUI_GRADIENT_END]*/\n`;
     }
 
     function buildGradientCss(modeData, selector) {
@@ -5655,6 +5674,12 @@ function startAnimation() {
                 (config.gradientType !== 'mesh' && config.gradientStops && config.gradientStops.length >= 2)
             );
             if (hasCanvas || hasGradient) {
+                const sidebarMode = window.__THEME_PRO_CONFIG__?.sidebarTransparency || 'opaque';
+                const sidebarRule = sidebarMode === 'translucent'
+                    ? `${selector} #sidebar { background-color: transparent !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }`
+                    : sidebarMode === 'transparent'
+                    ? `${selector} #sidebar { background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }`
+                    : `${selector} #sidebar { background-color: var(${bgSidebar}) !important; }`;
                 return `
 ${selector} body { background-color: var(${bgBody}) !important; }
 ${hasCanvas ? `${selector} #owui-theme-bg-color { background-color: transparent !important; }` : ''}
@@ -5665,8 +5690,8 @@ ${selector} #app-container :where([class*="bg-gray-"]:not(button):not(a):not(inp
 ${selector} #auth-page :where([class*="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
 ${selector} .app :where(.message-content) { background-color: transparent !important; }
 ${selector} .app :where(nav, .sticky, [class*="bg-gradient"]) { background-color: transparent !important; background-image: none !important; }
-${selector} #sidebar { background-color: var(${bgSidebar}) !important; }
-${selector} #sidebar * :where([class*="bg-gray-"]) { background-color: revert-layer; }
+${sidebarRule}
+${sidebarMode !== 'opaque' ? '' : `${selector} #sidebar * :where([class*="bg-gray-"]) { background-color: revert-layer; }`}
 ${selector} textarea { background-color: var(${bgTextarea}) !important; }
 `;
             } else {
@@ -11308,6 +11333,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             "enableGradientBuilder": self.valves.enable_gradient_builder,
             "enableCommunityThemes": self.valves.enable_community_themes,
             "draftModeDefault": self.valves.draft_mode_default,
+            "sidebarTransparency": self.valves.sidebar_transparency,
         }
         config_tag = (
             '<script id="owui-valve-config">'
@@ -11333,6 +11359,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
     _last_theme_active = None  # Track valve state to detect changes
     _last_designer_url = None  # Track URL changes to re-register routes
     _last_enable_canvas_fx = None  # Track Canvas FX valve to broadcast changes
+    _last_sidebar_transparency = None  # Track sidebar transparency valve to broadcast changes
     _sse_clients: list = (
         []
     )  # Active SSE connections — aliased to app.state in _register_route()
@@ -11356,6 +11383,43 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             return _json.dumps(data, separators=(",", ":"))
         except Exception:
             return state_str
+
+    @staticmethod
+    def _apply_sidebar_transparency(css: str, mode: str) -> str:
+        """Post-process saved CSS to replace opaque sidebar backgrounds.
+
+        mode='translucent': frosted glass (transparent bg + backdrop-blur)
+        mode='transparent': fully see-through (transparent bg, no blur)
+
+        Handles both structural rules (var-based) and gradient rules (rgba-based).
+        Applied at the serving/broadcast layer without modifying the saved file.
+        """
+        import re as _re
+
+        if mode == 'translucent':
+            blur_val = 'blur(20px) saturate(1.3)'
+        else:
+            blur_val = 'none'
+
+        # Replace structural opaque sidebar: `#sidebar { background-color: var(--color-gray-...) !important; }`
+        css = _re.sub(
+            r'(#sidebar\s*\{\s*background-color:\s*)var\(--[^)]+\)(\s*!important\s*;\s*\})',
+            rf'\1transparent\2'.rstrip('}') + f' backdrop-filter: {blur_val} !important; -webkit-backdrop-filter: {blur_val} !important; }}',
+            css,
+        )
+        # Replace gradient semi-opaque sidebar: `#sidebar { background-color: rgba(...) !important; backdrop-filter: blur(...) !important; }`
+        css = _re.sub(
+            r'(#sidebar\s*\{\s*background-color:\s*)rgba\([^)]+\)(\s*!important\s*;\s*backdrop-filter:\s*)blur\([^)]+\)',
+            rf'\1transparent\2{blur_val}',
+            css,
+        )
+        # Remove the revert-layer rule that restores opaque backgrounds inside sidebar
+        css = _re.sub(
+            r'[^\n]*#sidebar\s*\*\s*:where\(\[class\*="bg-gray-"\]\)\s*\{\s*background-color:\s*revert-layer\s*;?\s*\}[^\n]*\n?',
+            '',
+            css,
+        )
+        return css
 
     @classmethod
     def _broadcast_update(cls, css="", state=""):
@@ -11508,6 +11572,12 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             and Event._last_enable_canvas_fx != self.valves.enable_canvas_fx
         )
 
+        # Detect if the sidebar_transparency valve has changed since last run
+        sidebar_valve_changed = (
+            Event._last_sidebar_transparency is not None
+            and Event._last_sidebar_transparency != self.valves.sidebar_transparency
+        )
+
         # Inject bootloader + theme CSS on first event, startup, OR valve change.
         # Since POST handler no longer writes to index.html, event() is the sole writer.
         # Always run injection — the while-loop stripping makes it idempotent.
@@ -11516,6 +11586,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             or not Event._injected
             or valve_changed
             or canvas_valve_changed
+            or sidebar_valve_changed
             or url_changed
         )
 
@@ -11569,6 +11640,19 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
                         "[Theme Pro] Canvas FX valve changed to %s — re-broadcast to SSE clients",
                         self.valves.enable_canvas_fx,
                     )
+                # If sidebar_transparency valve changed, re-broadcast CSS with post-processing
+                if sidebar_valve_changed:
+                    css = self._load_css() or ""
+                    if self.valves.sidebar_transparency != "opaque":
+                        css = self._apply_sidebar_transparency(css, self.valves.sidebar_transparency)
+                    state = self._load_state() or ""
+                    if not self.valves.enable_canvas_fx:
+                        state = self._strip_canvas_from_state(state)
+                    Event._broadcast_update(css, state)
+                    log.info(
+                        "[Theme Pro] Sidebar transparency valve changed to '%s' — re-broadcast to SSE clients",
+                        self.valves.sidebar_transparency,
+                    )
                 log.info("[Theme Pro] Injection tasks completed")
 
             Event._injected = True
@@ -11577,4 +11661,5 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         Event._last_theme_active = self.valves.theme_active
         Event._last_designer_url = self.valves.designer_url
         Event._last_enable_canvas_fx = self.valves.enable_canvas_fx
+        Event._last_sidebar_transparency = self.valves.sidebar_transparency
 
