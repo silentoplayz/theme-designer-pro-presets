@@ -2446,7 +2446,7 @@ class Event:
                     </div>
                 </div>
 
-                <div id="gradient-radial-controls" style="display:none; margin-top: 12px; padding-top: 14px; border-top: 1px dashed var(--border);">
+                <div id="gradient-radial-controls" style="display:none; margin-top: 12px; padding-top: 14px; border-top: 1px solid var(--border);">
                     <div class="sub-label-mb">Radial Settings</div>
                     <div style="display: flex; gap: 16px; align-items: flex-start;">
                         <div style="display: flex; flex-direction: column; align-items: center; flex-shrink: 0;">
@@ -2476,7 +2476,7 @@ class Event:
                     </div>
                 </div>
 
-                <div id="gradient-mesh-controls" style="display:none; margin-top: 12px; padding-top: 14px; border-top: 1px dashed var(--border);">
+                <div id="gradient-mesh-controls" style="display:none; margin-top: 12px; padding-top: 14px; border-top: 1px solid var(--border);">
                     <div class="sub-label-mb">Mesh Editor</div>
                     <div class="mesh-editor-pad" id="mesh-editor-pad" role="application" aria-label="Mesh gradient editor. Click to add points, drag to move, double-click to remove." tabindex="0"></div>
                     <div class="mesh-hint" id="mesh-hint">Click to add · Drag to move · Double-click to remove</div>
@@ -2521,7 +2521,7 @@ class Event:
 
                 <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
                     <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 14px;">Controls</div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <div id="gradient-controls-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
                         <div class="slider-row" id="gradient-angle-row">
                             <label data-reset="gradient-angle"><span data-tooltip="Double-click to reset to 135°" style="cursor:pointer">Gradient Direction</span> <span class="slider-val" id="val-gradient-angle">135°</span></label>
                             <input type="range" id="sl-gradient-angle" min="0" max="360" value="135">
@@ -6476,7 +6476,10 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         // Show/hide angle row for non-linear types
         const angleRow = $('gradient-angle-row');
         const isMesh = config.gradientType === 'mesh';
-        if (angleRow) angleRow.style.display = (config.gradientType === 'radial' || isMesh) ? 'none' : 'flex';
+        const isLinear = config.gradientType !== 'radial' && !isMesh;
+        if (angleRow) angleRow.style.display = isLinear ? 'flex' : 'none';
+        const controlsGrid = $('gradient-controls-grid');
+        if (controlsGrid) controlsGrid.style.gridTemplateColumns = isLinear ? '1fr 1fr' : '1fr';
 
         // Show/hide stops section and preview for mesh
         const stopsSection = $('gradient-stops-section');
