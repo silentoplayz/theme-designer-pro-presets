@@ -5562,7 +5562,7 @@ function startAnimation() {
         const overlayFrom = hexToRgba(baseColor, 0.7);
         const overlayTo = hexToRgba(baseColor, 0.35);
         const textareaRgba = hexToRgba(baseColor, 0.5);
-        return `\n/*[OWUI_GRADIENT_START]*/\n/* ${comment} */\n${selector} body {\n${bodyBg}\n  background-attachment: fixed !important;\n${animCss}\n}\n${selector} body::before { content: none !important; display: none !important; }\n${selector} #chat-container .bg-linear-to-t {\n  background-image: linear-gradient(to top, ${overlayFrom}, ${overlayTo}) !important;\n}\n${selector} #sidebar {\n  background-color: ${sidebarRgba} !important;\n  backdrop-filter: ${sidebarBlur} !important;\n}\n${selector} textarea {\n  background-color: ${textareaRgba} !important;\n  backdrop-filter: blur(8px) !important;\n}\n${keyframesCss}/*[OWUI_GRADIENT_END]*/\n`;
+        return `\n/*[OWUI_GRADIENT_START]*/\n/* ${comment} */\n${selector} body {\n${bodyBg}\n  background-attachment: fixed !important;\n${animCss}\n}\n${selector} body::before { content: none !important; display: none !important; }\n${selector} #chat-container .bg-linear-to-t {\n  background-image: linear-gradient(to top, ${overlayFrom}, ${overlayTo}) !important;\n}\n${selector} #sidebar { /*[FX]*/\n  background-color: ${sidebarRgba} !important;\n  backdrop-filter: ${sidebarBlur} !important;\n}\n${selector} textarea {\n  background-color: ${textareaRgba} !important;\n  backdrop-filter: blur(8px) !important;\n}\n${keyframesCss}/*[OWUI_GRADIENT_END]*/\n`;
     }
 
     function buildGradientCss(modeData, selector) {
@@ -5676,10 +5676,10 @@ function startAnimation() {
             if (hasCanvas || hasGradient) {
                 const sidebarMode = window.__THEME_PRO_CONFIG__?.sidebarTransparency || 'opaque';
                 const sidebarRule = sidebarMode === 'translucent'
-                    ? `${selector} #sidebar { background-color: transparent !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }`
+                    ? `${selector} #sidebar { /*[FX]*/ background-color: transparent !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }`
                     : sidebarMode === 'transparent'
-                    ? `${selector} #sidebar { background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }`
-                    : `${selector} #sidebar { background-color: var(${bgSidebar}) !important; }`;
+                    ? `${selector} #sidebar { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }`
+                    : `${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; }`;
                 return `
 ${selector} body { background-color: var(${bgBody}) !important; }
 ${hasCanvas ? `${selector} #owui-theme-bg-color { background-color: transparent !important; }` : ''}
@@ -5691,7 +5691,7 @@ ${selector} #auth-page :where([class*="bg-gray-"]:not(button):not(a):not(input):
 ${selector} .app :where(.message-content) { background-color: transparent !important; }
 ${selector} .app :where(nav, .sticky, [class*="bg-gradient"]) { background-color: transparent !important; background-image: none !important; }
 ${sidebarRule}
-${sidebarMode !== 'opaque' ? '' : `${selector} #sidebar * :where([class*="bg-gray-"]) { background-color: revert-layer; }`}
+${sidebarMode !== 'opaque' ? '' : `${selector} #sidebar * :where([class*="bg-gray-"]) { /*[FX]*/ background-color: revert-layer; }`}
 ${selector} textarea { background-color: var(${bgTextarea}) !important; }
 `;
             } else {
@@ -11391,8 +11391,8 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         mode='translucent': frosted glass (transparent bg + backdrop-blur)
         mode='transparent': fully see-through (transparent bg, no blur)
 
-        Handles both structural rules (var-based) and gradient rules (rgba-based).
-        Applied at the serving/broadcast layer without modifying the saved file.
+        Only affects sidebar rules marked with /*[FX]*/ (canvas/gradient blocks).
+        Plain-mode sidebar rules (no marker) are left untouched.
         """
         import re as _re
 
@@ -11401,21 +11401,21 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         else:
             blur_val = 'none'
 
-        # Replace structural opaque sidebar: `#sidebar { background-color: var(--color-gray-...) !important; }`
+        # Replace structural opaque sidebar (marked with /*[FX]*/): var-based bg
         css = _re.sub(
-            r'(#sidebar\s*\{\s*background-color:\s*)var\(--[^)]+\)(\s*!important\s*;\s*\})',
+            r'(#sidebar\s*\{\s*/\*\[FX\]\*/\s*background-color:\s*)var\(--[^)]+\)(\s*!important\s*;\s*\})',
             rf'\1transparent\2'.rstrip('}') + f' backdrop-filter: {blur_val} !important; -webkit-backdrop-filter: {blur_val} !important; }}',
             css,
         )
-        # Replace gradient semi-opaque sidebar: `#sidebar { background-color: rgba(...) !important; backdrop-filter: blur(...) !important; }`
+        # Replace gradient sidebar (marked with /*[FX]*/): rgba-based bg + existing blur
         css = _re.sub(
-            r'(#sidebar\s*\{\s*background-color:\s*)rgba\([^)]+\)(\s*!important\s*;\s*backdrop-filter:\s*)blur\([^)]+\)',
+            r'(#sidebar\s*\{\s*/\*\[FX\]\*/[^}]*background-color:\s*)rgba\([^)]+\)(\s*!important\s*;[^}]*backdrop-filter:\s*)blur\([^)]+\)',
             rf'\1transparent\2{blur_val}',
             css,
         )
-        # Remove the revert-layer rule that restores opaque backgrounds inside sidebar
+        # Remove the revert-layer rule (marked with /*[FX]*/)
         css = _re.sub(
-            r'[^\n]*#sidebar\s*\*\s*:where\(\[class\*="bg-gray-"\]\)\s*\{\s*background-color:\s*revert-layer\s*;?\s*\}[^\n]*\n?',
+            r'[^\n]*#sidebar[^{]*\{\s*/\*\[FX\]\*/\s*background-color:\s*revert-layer\s*;?\s*\}[^\n]*\n?',
             '',
             css,
         )
