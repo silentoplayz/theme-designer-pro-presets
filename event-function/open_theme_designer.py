@@ -11429,6 +11429,28 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             '',
             css,
         )
+
+        # Mobile override: auto-upgrade transparent → translucent for readability
+        # Uses #sidebar#sidebar for specificity to override the transparent rules.
+        if mode == 'transparent':
+            css += (
+                "\n/* Mobile: auto-upgrade transparent sidebar to translucent */\n"
+                "@media (max-width: 768px) {\n"
+                "  .dark #sidebar#sidebar,\n"
+                '  [data-theme="dark"] #sidebar#sidebar,\n'
+                '  [data-theme="oled-dark"] #sidebar#sidebar {\n'
+                "    background-color: color-mix(in srgb, var(--color-gray-950) 20%, transparent) !important;\n"
+                "    backdrop-filter: blur(20px) saturate(1.3) !important;\n"
+                "    -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;\n"
+                "  }\n"
+                '  :root:not(.dark):not([data-theme="dark"]):not([data-theme="oled-dark"]) #sidebar#sidebar {\n'
+                "    background-color: color-mix(in srgb, var(--color-gray-50) 20%, transparent) !important;\n"
+                "    backdrop-filter: blur(20px) saturate(1.3) !important;\n"
+                "    -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;\n"
+                "  }\n"
+                "}\n"
+            )
+
         return css
 
     @classmethod
