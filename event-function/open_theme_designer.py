@@ -1877,13 +1877,17 @@ class Event:
         body.light-mode .sync-diff-code-expanded .diff-line.removed { background: rgba(239,68,68,0.06); color: #dc2626; }
         body.light-mode .sync-diff-code-expanded .diff-line.added { background: rgba(34,197,94,0.06); color: #16a34a; }
 
-        .sync-diff-gradient-bar { height: 16px; border-radius: 4px; border: 1px solid var(--border); margin: 4px 0; }
+        .sync-diff-gradient-bar { height: 28px; border-radius: 6px; border: 1px solid var(--border); flex: 1; min-width: 0; }
+        .sync-diff-gradient-row { display: flex; align-items: center; gap: 10px; margin: 6px 0 10px 0; }
+        .sync-diff-gradient-row .gradient-label { font-size: 0.6rem; opacity: 0.5; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+        .sync-diff-gradient-row .gradient-arrow { font-size: 0.75rem; opacity: 0.35; flex-shrink: 0; }
 
-        .sync-diff-prop-table { margin: 4px 0 2px 0; font-size: 0.5rem; }
-        .sync-diff-prop-table td { padding: 1px 8px 1px 0; }
-        .sync-diff-prop-table .prop-key { opacity: 0.6; }
+        .sync-diff-prop-table { margin: 0 auto; font-size: 0.65rem; width: 100%; border-collapse: collapse; }
+        .sync-diff-prop-table td { padding: 5px 10px; text-align: center; }
+        .sync-diff-prop-table .prop-key { opacity: 0.6; text-align: left; font-weight: 500; }
         .sync-diff-prop-table .prop-match { color: #22c55e; }
         .sync-diff-prop-table .prop-diff { color: #eab308; font-weight: 600; }
+        .sync-diff-prop-table thead td { opacity: 0.4; font-size: 0.55rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 4px; }
         body.light-mode .sync-diff-prop-table .prop-match { color: #16a34a; }
         body.light-mode .sync-diff-prop-table .prop-diff { color: #ca8a04; }
 
@@ -8105,10 +8109,11 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             if (data.type === 'conic') return `conic-gradient(from ${data.angle}deg, ${stopStr})`;
             return `linear-gradient(${data.angle}deg, ${stopStr})`;
         };
-        h += `<div style="margin-left:0;">`;
-        h += `<div style="font-size:0.45rem; opacity:0.4; margin-bottom:2px;">Source</div>`;
+        h += `<div class="sync-diff-gradient-row">`;
+        h += `<span class="gradient-label">Source</span>`;
         h += `<div class="sync-diff-gradient-bar" style="background:${makeGradientCSS(s)};"></div>`;
-        h += `<div style="font-size:0.45rem; opacity:0.4; margin-bottom:2px; margin-top:4px;">Target</div>`;
+        h += `<span class="gradient-arrow">→</span>`;
+        h += `<span class="gradient-label">Target</span>`;
         h += `<div class="sync-diff-gradient-bar" style="background:${makeGradientCSS(t)};"></div>`;
         h += `</div>`;
         // Property table
@@ -8119,9 +8124,10 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             ['Animated', s.anim ? 'Yes' : 'No', t.anim ? 'Yes' : 'No']
         ];
         h += `<table class="sync-diff-prop-table">`;
+        h += `<thead><tr><td></td><td>Source</td><td></td><td>Target</td><td></td></tr></thead>`;
         props.forEach(([key, sv, tv]) => {
             const match = String(sv) === String(tv);
-            h += `<tr><td class="prop-key">${key}</td><td>${sv}</td><td>→ ${tv}</td><td class="${match ? 'prop-match' : 'prop-diff'}">${match ? '✓' : '⚠'}</td></tr>`;
+            h += `<tr><td class="prop-key">${key}</td><td>${sv}</td><td style="opacity:0.3">→</td><td>${tv}</td><td class="${match ? 'prop-match' : 'prop-diff'}">${match ? '✓' : '⚠'}</td></tr>`;
         });
         h += `</table>`;
         return h;
@@ -8130,11 +8136,12 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
     function _renderAuthDiff(entry) {
         const labels = ['Theme on Auth', 'CSS on Auth', 'Canvas on Auth', 'Gradient on Auth'];
         let h = `<table class="sync-diff-prop-table">`;
+        h += `<thead><tr><td></td><td>Source</td><td></td><td>Target</td><td></td></tr></thead>`;
         labels.forEach((label, i) => {
             const sv = entry.srcAuth[i];
             const tv = entry.tgtAuth[i];
             const match = sv === tv;
-            h += `<tr><td class="prop-key">${label}</td><td>${sv ? '✓ ON' : '✗ OFF'}</td><td>→ ${tv ? '✓ ON' : '✗ OFF'}</td><td class="${match ? 'prop-match' : 'prop-diff'}">${match ? '✓' : '⚠'}</td></tr>`;
+            h += `<tr><td class="prop-key">${label}</td><td>${sv ? '✓ ON' : '✗ OFF'}</td><td style="opacity:0.3">→</td><td>${tv ? '✓ ON' : '✗ OFF'}</td><td class="${match ? 'prop-match' : 'prop-diff'}">${match ? '✓' : '⚠'}</td></tr>`;
         });
         h += `</table>`;
         return h;
