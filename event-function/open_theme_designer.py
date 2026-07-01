@@ -14,7 +14,7 @@ import logging
 import os
 import re as _re
 import asyncio
-import threading
+
 from pathlib import Path
 
 from pydantic import BaseModel, Field
@@ -1984,7 +1984,7 @@ class Event:
         .doc-table td { padding: 12px 16px; font-size: 0.75rem; vertical-align: middle; border-bottom: 1px solid rgba(255,255,255,0.03); }
         body.light-mode .doc-table td { border-bottom-color: var(--lm-bg-tint); }
         .doc-table tr:last-child td { border-bottom: none; }
-        .doc-swatch { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); display: inline-block; vertical-align: middle; margin-right: 8px; }
+
         .doc-code-inline { background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--accent); }
 
         .action-toast { position: fixed; top: 90px; right: 28px; background: var(--accent); color: white; padding: 10px 22px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; opacity: 0; pointer-events: none; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9999; box-shadow: 0 4px 15px rgba(59,130,246,0.4); transform: translateY(-5px) scale(0.95); }
@@ -2083,8 +2083,6 @@ class Event:
             .draft-publish-btn { padding: 6px 14px; font-size: 0.72rem; }
             .draft-toggle { font-size: 0.72rem; }
 
-            /* Code editors */
-            .owui-code-area { font-size: 11px !important; }
 
             /* Modals */
             .modal-panel-save, .control-group.modal-panel-save { width: 95vw !important; max-width: 95vw !important; padding: 20px !important; }
@@ -2102,8 +2100,7 @@ class Event:
             /* Gradient preset grid */
             .gradient-preset-grid { grid-template-columns: repeat(2, 1fr); }
 
-            /* Sync modal */
-            .sync-delta-grid { grid-template-columns: 1fr !important; }
+
         }
 
         /* Extra-small screens (iPhone SE, etc.) */
@@ -4651,8 +4648,6 @@ function startAnimation() {
 
     // Mathematically match Open WebUI's native Tailwind v4 exact baseline
     const lightnessMap = { 50: 0.98, 100: 0.94, 200: 0.92, 300: 0.85, 400: 0.77, 500: 0.69, 600: 0.51, 700: 0.42, 800: 0.32, 850: 0.27, 900: 0.20, 950: 0.16 };
-    
-
 
     function renderTonalRampHTML(config, dataMode) {
         const h = config.h, c = config.c / 1000, l = config.l / 100;
@@ -4763,7 +4758,6 @@ function startAnimation() {
             her: createDefaultModeData({ h: data.h, c: data.c, l: data.l }),
         };
     }
-
 
 
     function initDragDrop(listEl, rowSelector, reorderFn) {
@@ -5197,7 +5191,6 @@ function startAnimation() {
         updateActiveHighlights();
         renderCanvasPresets();
         renderCssPresets();
-
         renderGradientTab();
     }
 
@@ -5214,14 +5207,12 @@ function startAnimation() {
         });
 
 
-
         // Highlight the resolved data mode when in System mode
         document.querySelectorAll('.mode-btn').forEach(btn => {
             const m = btn.dataset.mode;
             btn.classList.toggle('system-active', activeMode === 'system' && m !== 'system' && m === dm);
         });
     }
-
 
 
     function renderPresetGallery({ presets, galleryId, scrollAreaId, searchInputId, countWrapId, countId,
@@ -7589,7 +7580,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         });
     };
 
-    let syncSourceType = 'active-mode'; // 'active-mode', 'curated-preset', 'snapshot'
+    let syncSourceType = 'active-mode'; // 'active-mode', 'snapshot'
     let syncSourceId = null;
 
     function updateTargetsHeaderToggleState() {
@@ -8662,7 +8653,6 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             }
         }
     });
-
     $('confirm-clipboard-import-btn').onclick = async () => {
         if (pendingClipboardData) {
             const file = new File([pendingClipboardData], "clipboard-import.json", { type: "application/json" });
@@ -8671,7 +8661,6 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         }
         hideModal('import-clipboard-modal');
     };
-
 
 
     // --- Mass Import/Export Portability ---
