@@ -5556,9 +5556,8 @@ function startAnimation() {
     }
 
     function buildGradientStructuralCss({ selector, baseColor, animCss, keyframesCss, comment, bodyBg }) {
-        const sidebarMode = window.__THEME_PRO_CONFIG__?.sidebarTransparency || 'opaque';
-        const sidebarRgba = sidebarMode === 'opaque' ? hexToRgba(baseColor, 0.75) : sidebarMode === 'translucent' ? hexToRgba(baseColor, 0.25) : 'transparent';
-        const sidebarBlur = sidebarMode === 'opaque' ? 'blur(12px)' : sidebarMode === 'translucent' ? 'blur(20px) saturate(1.3)' : 'none';
+        const sidebarRgba = hexToRgba(baseColor, 0.75);
+        const sidebarBlur = 'blur(12px)';
         const overlayFrom = hexToRgba(baseColor, 0.7);
         const overlayTo = hexToRgba(baseColor, 0.35);
         const textareaRgba = hexToRgba(baseColor, 0.5);
@@ -5674,12 +5673,6 @@ function startAnimation() {
                 (config.gradientType !== 'mesh' && config.gradientStops && config.gradientStops.length >= 2)
             );
             if (hasCanvas || hasGradient) {
-                const sidebarMode = window.__THEME_PRO_CONFIG__?.sidebarTransparency || 'opaque';
-                const sidebarRule = sidebarMode === 'translucent'
-                    ? `${selector} #sidebar { /*[FX]*/ background-color: transparent !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }`
-                    : sidebarMode === 'transparent'
-                    ? `${selector} #sidebar { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }`
-                    : `${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; }`;
                 return `
 ${selector} body { background-color: var(${bgBody}) !important; }
 ${hasCanvas ? `${selector} #owui-theme-bg-color { background-color: transparent !important; }` : ''}
@@ -5690,8 +5683,8 @@ ${selector} #app-container :where([class*="bg-gray-"]:not(button):not(a):not(inp
 ${selector} #auth-page :where([class*="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
 ${selector} .app :where(.message-content) { background-color: transparent !important; }
 ${selector} .app :where(nav, .sticky, [class*="bg-gradient"]) { background-color: transparent !important; background-image: none !important; }
-${sidebarRule}
-${sidebarMode !== 'opaque' ? '' : `${selector} #sidebar * :where([class*="bg-gray-"]) { /*[FX]*/ background-color: revert-layer; }`}
+${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; }
+${selector} #sidebar * :where([class*="bg-gray-"]) { /*[FX]*/ background-color: revert-layer; }
 ${selector} textarea { background-color: var(${bgTextarea}) !important; }
 `;
             } else {
@@ -11388,7 +11381,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
     def _apply_sidebar_transparency(css: str, mode: str) -> str:
         """Post-process saved CSS to replace opaque sidebar backgrounds.
 
-        mode='translucent': frosted glass (transparent bg + backdrop-blur)
+        mode='translucent': tinted glass (semi-transparent bg + backdrop-blur)
         mode='transparent': fully see-through (transparent bg, no blur)
 
         Only affects sidebar rules marked with /*[FX]*/ (canvas/gradient blocks).
@@ -11402,17 +11395,34 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             blur_val = 'none'
 
         # Replace structural opaque sidebar (marked with /*[FX]*/): var-based bg
-        css = _re.sub(
-            r'(#sidebar\s*\{\s*/\*\[FX\]\*/\s*background-color:\s*)var\(--[^)]+\)(\s*!important\s*;\s*\})',
-            rf'\1transparent\2'.rstrip('}') + f' backdrop-filter: {blur_val} !important; -webkit-backdrop-filter: {blur_val} !important; }}',
-            css,
-        )
+        # Pattern groups: (1: prefix) (2: var ref) (3: !important;) — closing } matched but not captured
+        if mode == 'translucent':
+            css = _re.sub(
+                r'(#sidebar\s*\{\s*/\*\[FX\]\*/\s*background-color:\s*)(var\(--[^)]+\))(\s*!important\s*;)\s*\}',
+                rf'\1color-mix(in srgb, \2 20%, transparent)\3 backdrop-filter: {blur_val} !important; -webkit-backdrop-filter: {blur_val} !important; }}',
+                css,
+            )
+        else:
+            css = _re.sub(
+                r'(#sidebar\s*\{\s*/\*\[FX\]\*/\s*background-color:\s*)var\(--[^)]+\)(\s*!important\s*;)\s*\}',
+                rf'\1transparent\2 backdrop-filter: {blur_val} !important; -webkit-backdrop-filter: {blur_val} !important; }}',
+                css,
+            )
+
         # Replace gradient sidebar (marked with /*[FX]*/): rgba-based bg + existing blur
-        css = _re.sub(
-            r'(#sidebar\s*\{\s*/\*\[FX\]\*/[^}]*background-color:\s*)rgba\([^)]+\)(\s*!important\s*;[^}]*backdrop-filter:\s*)blur\([^)]+\)',
-            rf'\1transparent\2{blur_val}',
-            css,
-        )
+        if mode == 'translucent':
+            css = _re.sub(
+                r'(#sidebar\s*\{\s*/\*\[FX\]\*/[^}]*background-color:\s*)rgba\(([^,]+,[^,]+,[^,]+),\s*[\d.]+\)(\s*!important\s*;[^}]*backdrop-filter:\s*)blur\([^)]+\)',
+                rf'\1rgba(\2, 0.25)\3{blur_val}',
+                css,
+            )
+        else:
+            css = _re.sub(
+                r'(#sidebar\s*\{\s*/\*\[FX\]\*/[^}]*background-color:\s*)rgba\([^)]+\)(\s*!important\s*;[^}]*backdrop-filter:\s*)blur\([^)]+\)',
+                rf'\1transparent\2{blur_val}',
+                css,
+            )
+
         # Remove the revert-layer rule (marked with /*[FX]*/)
         css = _re.sub(
             r'[^\n]*#sidebar[^{]*\{\s*/\*\[FX\]\*/\s*background-color:\s*revert-layer\s*;?\s*\}[^\n]*\n?',
