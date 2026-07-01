@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Registers an interacti
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.2.0
+version: 1.3.0
 license: MIT
 required_open_webui_version: 0.10.0
 """
@@ -20,7 +20,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.2.0"
+VERSION = "1.3.0"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -2650,7 +2650,7 @@ class Event:
                             <li><b>Session Persistence:</b> The designer utilizes <code>sessionStorage</code> to remember exactly which tab you were working in. If you navigate away and return to the designer, it will restore your last active tab automatically.</li>
                             <li><b>Legacy Data Migration:</b> Upgrading from an older version? The designer automatically detects legacy data structures and gracefully migrates your saved snapshots and active themes to the latest format without data loss.</li>
                             <li><b>Live Cross-UI Detection:</b> The designer actively listens to your environment. If you change the Open WebUI theme natively (via OS settings or keyboard shortcuts) while the designer is open, it will instantly switch its internal mode tab to match your live environment.</li>
-                            <li><b>Valves:</b> Admins can configure feature gating (enable/disable Canvas FX, Custom CSS, Gradient Builder, auth page theming, URL imports) and the designer URL via Valves in the function settings. The <b>Designer URL</b> valve must start with <code>/api/v1/</code> — if it doesn't, the system auto-corrects it to prevent the SPA catch-all from intercepting the route.</li>
+                            <li><b>Valves:</b> Admins can configure feature gating (enable/disable Canvas FX, Custom CSS, Gradient Builder, auth page theming, URL imports), sidebar transparency, and the designer URL via Valves in the function settings. The <b>Sidebar Transparency</b> valve controls the chat sidebar's visibility when Canvas FX or gradients are active &mdash; choose between <code>opaque</code> (solid background, best readability), <code>translucent</code> (frosted glass with backdrop-blur), or <code>transparent</code> (fully see-through). On mobile devices, <code>transparent</code> is automatically upgraded to <code>translucent</code> for readability. Changes to Valve settings propagate instantly to all connected users via SSE. The <b>Designer URL</b> valve must start with <code>/api/v1/</code> &mdash; if it doesn't, the system auto-corrects it to prevent the SPA catch-all from intercepting the route.</li>
                             <li><b>Self-Adapting UI &amp; Contrast Protection:</b> The Theme Designer Pro interface dynamically themes <i>itself</i> based on the colors you pick. It includes built-in contrast protection, automatically shifting text and border colors to remain legible if you create ultra-washed-out palettes.</li>
                             <li><b>Fully Responsive:</b> The designer interface seamlessly adapts to mobile screens so you can tweak your theme on the go.</li>
                             <li><b>Canvas FX Security:</b> Canvas FX scripts are arbitrary JavaScript executed in all users' browsers. Only administrators can set Canvas FX scripts through the designer. <b>Never paste untrusted scripts</b> — always review Canvas FX code before enabling it, especially scripts obtained from third parties.</li>
@@ -3252,7 +3252,7 @@ window.dispatchEvent(new CustomEvent('owui-canvas-context', {
                                     <tr><td><b>2. Background Color Div</b></td><td>-2</td><td>A full-viewport <code>&lt;div id="owui-theme-bg-color"&gt;</code> inserted behind everything. When Canvas FX is active, its background is set to <code>transparent</code> by the structural layer so the canvas shows through. Without Canvas, this layer is inert.</td></tr>
                                     <tr><td><b>3. Canvas Element</b></td><td>0</td><td>A full-viewport <code>&lt;canvas id="owui-theme-canvas-bg"&gt;</code> where your Canvas FX animation renders. Has <code>pointer-events: none</code> so it never intercepts clicks.</td></tr>
                                     <tr><td><b>4. Structural Transparency</b></td><td>—</td><td>CSS rules that set <code>background-color: transparent</code> on <code>.app</code>, <code>.app&nbsp;&gt;&nbsp;div</code>, <code>main</code>, <code>nav</code>, <code>.sticky</code>, and <code>[class*="bg-gray-"]</code> layout wrappers — but explicitly <b>excludes</b> interactive elements (<code>button</code>, <code>a</code>, <code>input</code>, <code>select</code>, <code>label</code>, <code>span</code>) via <code>:not()</code> filters. Overlay UI (dropdown menus, modal dialogs, listbox selectors) is naturally unaffected because transparency rules only target elements within <code>.app</code>, <code>#app-container</code>, and <code>#auth-page</code> scope. Uses CSS <code>:where()</code> for zero-specificity transparency so overlay restore rules always win.</td></tr>
-                                    <tr><td><b>5. Glass Panels</b></td><td>—</td><td>Semi-opaque overlays with <code>backdrop-filter: blur()</code> on the <b>sidebar</b> and <b>textarea</b>. These give text areas readability while still letting the background show through. The Gradient Builder auto-calculates RGBA values from the darkest gradient stop.</td></tr>
+                                    <tr><td><b>5. Glass Panels</b></td><td>—</td><td>Semi-opaque overlays with <code>backdrop-filter: blur()</code> on the <b>sidebar</b> and <b>textarea</b>. These give text areas readability while still letting the background show through. The Gradient Builder auto-calculates RGBA values from the darkest gradient stop. The sidebar's glass behavior is controlled by the <b>Sidebar Transparency</b> valve: <code>opaque</code> (default) uses a solid background, <code>translucent</code> applies a tinted glass effect with <code>backdrop-filter: blur(20px) saturate(1.3)</code>, and <code>transparent</code> removes the background entirely (auto-upgraded to translucent on mobile for readability).</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -3267,7 +3267,7 @@ window.dispatchEvent(new CustomEvent('owui-canvas-context', {
                         <ul>
                             <li><b>Zero-specificity transparency:</b> The broad <code>[class*="bg-gray-"]</code> transparency rule is wrapped in CSS <code>:where()</code>, giving it zero specificity contribution. This means <i>any</i> selector with normal specificity can override it.</li>
                             <li><b>Element exclusions:</b> Interactive elements like <code>button</code>, <code>a</code>, <code>input</code>, <code>select</code>, <code>label</code>, and <code>span</code> are excluded from transparency entirely via <code>:not()</code> filters. This protects toggle knobs (<code>bg-white</code> circles), styled buttons, and other small UI widgets. Dropdown menus, modal dialogs, and listbox selectors &mdash; which are <b>portaled</b> outside the <code>.app</code> wrapper &mdash; are naturally unaffected because the transparency rules only target elements within <code>.app</code>, <code>#app-container</code>, and <code>#auth-page</code> scope.</li>
-                            <li><b>Sidebar child restore:</b> Inside <code>#sidebar</code>, a <code>revert-layer</code> rule restores original backgrounds on nested <code>[class*="bg-gray-"]</code> elements, preventing sidebar items from becoming invisible.</li>
+                            <li><b>Sidebar child restore:</b> Inside <code>#sidebar</code>, a <code>revert-layer</code> rule restores original backgrounds on nested <code>[class*="bg-gray-"]</code> elements, preventing sidebar items from becoming invisible. This rule is only applied when the <b>Sidebar Transparency</b> valve is set to <code>opaque</code> (the default). When set to <code>translucent</code> or <code>transparent</code>, the revert-layer rule is removed so the sidebar and its children become transparent, allowing Canvas FX and gradient backgrounds to show through.</li>
                         </ul>
                         <p style="font-size: 0.7rem; color: var(--text-muted); line-height: 1.5;"><b>Note:</b> The <code>[class*="bg-white"]</code> attribute selector is intentionally <b>not</b> included in the transparency rules. Elements with <code>bg-white</code> classes in Open WebUI are almost always interactive widgets (toggle indicators, button styling, card backgrounds), not structural layout wrappers.</p>
 
