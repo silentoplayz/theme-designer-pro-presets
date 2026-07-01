@@ -11660,12 +11660,18 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
                 # If theme was just re-enabled, push the saved theme to all SSE clients
                 if valve_changed:
                     css = self._load_css() or ""
+                    if self.valves.sidebar_transparency != "opaque":
+                        css = self._apply_sidebar_transparency(css, self.valves.sidebar_transparency)
                     state = self._load_state() or ""
+                    if not self.valves.enable_canvas_fx:
+                        state = self._strip_canvas_from_state(state)
                     Event._broadcast_update(css, state)
                     log.info("[Theme Pro] Theme re-enabled — pushed to SSE clients")
                 # If Canvas FX valve changed, re-broadcast state so clients update immediately
                 if canvas_valve_changed:
                     css = self._load_css() or ""
+                    if self.valves.sidebar_transparency != "opaque":
+                        css = self._apply_sidebar_transparency(css, self.valves.sidebar_transparency)
                     state = self._load_state() or ""
                     # Strip canvas data from broadcast if Canvas FX is now disabled
                     if not self.valves.enable_canvas_fx:
