@@ -10585,6 +10585,9 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             if (communitySection && communitySection.previousElementSibling && communitySection.previousElementSibling.classList.contains('section-title')) {
                 communitySection.previousElementSibling.style.display = 'none';
             }
+            // Expand theme library to fill the page since community section is gone
+            const snapshotScroll = $('snapshot-scroll');
+            if (snapshotScroll) snapshotScroll.style.maxHeight = 'none';
         }
 
         // If the currently active tab was hidden, fall back to Core Palette
