@@ -5,6 +5,7 @@
   "author": "silentoplayz (G30)",
   "description": "Warm golden-olive palette reminiscent of polished amber, with a subtle gradient glow.",
   "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/amber.json",
+  "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
   "dark": {
     "h": 75,
     "c": 20,

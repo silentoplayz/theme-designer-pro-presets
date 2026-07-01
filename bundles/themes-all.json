@@ -337,7 +337,8 @@
         "gradientRadialSize": "farthest-corner",
         "gradientMeshPoints": [],
         "gradientMeshBgColor": "#000000"
-      }
+      },
+      "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets"
     },
     {
       "name": "Amber Command: 1979",
@@ -689,7 +690,8 @@
         "gradientRadialSize": "farthest-corner",
         "gradientMeshPoints": [],
         "gradientMeshBgColor": "#000000"
-      }
+      },
+      "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets"
     },
     {
       "name": "Apollo // Analogue Futurism",
@@ -1416,7 +1418,7 @@
           "--color-blue-900": true,
           "--color-blue-950": true
         },
-        "customCSS": "/* Animated gradient — Aurora Borealis */\nbody {\n  background-image: linear-gradient(135deg, #0a0a2e, #1a3a5c, #0d7377, #1a3a5c, #0a0a2e) !important;\n  background-attachment: fixed !important;\n  background-size: 400% 400% !important;\n  animation: auroraShift 16s ease infinite !important;\n}\n@keyframes auroraShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* Make layout containers transparent */\n#app, #app > div, #app > div > div, main, .app,\n.bg-gray-900, .bg-gray-950,\n.dark\\:bg-gray-900, .dark\\:bg-gray-950 {\n  background-color: transparent !important;\n  background-image: none !important;\n}\n\n/* Blend chat/folder background images with gradient */\n#chat-container .bg-linear-to-t {\n  background-image: linear-gradient(\n    to top, rgba(10, 10, 46, 0.7), rgba(13, 115, 119, 0.35)\n  ) !important;\n}\n\n/* Sidebar & input readability */\n#sidebar {\n  background-color: rgba(10, 10, 46, 0.7) !important;\n  backdrop-filter: blur(12px) !important;\n}\ntextarea {\n  background-color: rgba(10, 10, 46, 0.5) !important;\n  backdrop-filter: blur(8px) !important;\n}",
+        "customCSS": "/* Animated gradient \u2014 Aurora Borealis */\nbody {\n  background-image: linear-gradient(135deg, #0a0a2e, #1a3a5c, #0d7377, #1a3a5c, #0a0a2e) !important;\n  background-attachment: fixed !important;\n  background-size: 400% 400% !important;\n  animation: auroraShift 16s ease infinite !important;\n}\n@keyframes auroraShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* Make layout containers transparent */\n#app, #app > div, #app > div > div, main, .app,\n.bg-gray-900, .bg-gray-950,\n.dark\\:bg-gray-900, .dark\\:bg-gray-950 {\n  background-color: transparent !important;\n  background-image: none !important;\n}\n\n/* Blend chat/folder background images with gradient */\n#chat-container .bg-linear-to-t {\n  background-image: linear-gradient(\n    to top, rgba(10, 10, 46, 0.7), rgba(13, 115, 119, 0.35)\n  ) !important;\n}\n\n/* Sidebar & input readability */\n#sidebar {\n  background-color: rgba(10, 10, 46, 0.7) !important;\n  backdrop-filter: blur(12px) !important;\n}\ntextarea {\n  background-color: rgba(10, 10, 46, 0.5) !important;\n  backdrop-filter: blur(8px) !important;\n}",
         "customCssEnabled": true,
         "autoScope": true,
         "canvasEnabled": true,
@@ -1497,7 +1499,7 @@
           "--color-blue-900": true,
           "--color-blue-950": true
         },
-        "customCSS": "/* Animated gradient — Aurora Borealis */\nbody {\n  background-image: linear-gradient(135deg, #0a0a2e, #1a3a5c, #0d7377, #1a3a5c, #0a0a2e) !important;\n  background-attachment: fixed !important;\n  background-size: 400% 400% !important;\n  animation: auroraShift 16s ease infinite !important;\n}\n@keyframes auroraShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* Make layout containers transparent */\n#app, #app > div, #app > div > div, main, .app,\n.bg-gray-900, .bg-gray-950,\n.dark\\:bg-gray-900, .dark\\:bg-gray-950 {\n  background-color: transparent !important;\n  background-image: none !important;\n}\n\n/* Blend chat/folder background images with gradient */\n#chat-container .bg-linear-to-t {\n  background-image: linear-gradient(\n    to top, rgba(10, 10, 46, 0.7), rgba(13, 115, 119, 0.35)\n  ) !important;\n}\n\n/* Sidebar & input readability */\n#sidebar {\n  background-color: rgba(10, 10, 46, 0.7) !important;\n  backdrop-filter: blur(12px) !important;\n}\ntextarea {\n  background-color: rgba(10, 10, 46, 0.5) !important;\n  backdrop-filter: blur(8px) !important;\n}",
+        "customCSS": "/* Animated gradient \u2014 Aurora Borealis */\nbody {\n  background-image: linear-gradient(135deg, #0a0a2e, #1a3a5c, #0d7377, #1a3a5c, #0a0a2e) !important;\n  background-attachment: fixed !important;\n  background-size: 400% 400% !important;\n  animation: auroraShift 16s ease infinite !important;\n}\n@keyframes auroraShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* Make layout containers transparent */\n#app, #app > div, #app > div > div, main, .app,\n.bg-gray-900, .bg-gray-950,\n.dark\\:bg-gray-900, .dark\\:bg-gray-950 {\n  background-color: transparent !important;\n  background-image: none !important;\n}\n\n/* Blend chat/folder background images with gradient */\n#chat-container .bg-linear-to-t {\n  background-image: linear-gradient(\n    to top, rgba(10, 10, 46, 0.7), rgba(13, 115, 119, 0.35)\n  ) !important;\n}\n\n/* Sidebar & input readability */\n#sidebar {\n  background-color: rgba(10, 10, 46, 0.7) !important;\n  backdrop-filter: blur(12px) !important;\n}\ntextarea {\n  background-color: rgba(10, 10, 46, 0.5) !important;\n  backdrop-filter: blur(8px) !important;\n}",
         "customCssEnabled": true,
         "autoScope": true,
         "canvasEnabled": true,
@@ -1578,7 +1580,7 @@
           "--color-blue-900": true,
           "--color-blue-950": true
         },
-        "customCSS": "/* Animated gradient — Aurora Borealis */\nbody {\n  background-image: linear-gradient(135deg, #0a0a2e, #1a3a5c, #0d7377, #1a3a5c, #0a0a2e) !important;\n  background-attachment: fixed !important;\n  background-size: 400% 400% !important;\n  animation: auroraShift 16s ease infinite !important;\n}\n@keyframes auroraShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* Make layout containers transparent */\n#app, #app > div, #app > div > div, main, .app,\n.bg-gray-900, .bg-gray-950,\n.dark\\:bg-gray-900, .dark\\:bg-gray-950 {\n  background-color: transparent !important;\n  background-image: none !important;\n}\n\n/* Blend chat/folder background images with gradient */\n#chat-container .bg-linear-to-t {\n  background-image: linear-gradient(\n    to top, rgba(10, 10, 46, 0.7), rgba(13, 115, 119, 0.35)\n  ) !important;\n}\n\n/* Sidebar & input readability */\n#sidebar {\n  background-color: rgba(10, 10, 46, 0.7) !important;\n  backdrop-filter: blur(12px) !important;\n}\ntextarea {\n  background-color: rgba(10, 10, 46, 0.5) !important;\n  backdrop-filter: blur(8px) !important;\n}",
+        "customCSS": "/* Animated gradient \u2014 Aurora Borealis */\nbody {\n  background-image: linear-gradient(135deg, #0a0a2e, #1a3a5c, #0d7377, #1a3a5c, #0a0a2e) !important;\n  background-attachment: fixed !important;\n  background-size: 400% 400% !important;\n  animation: auroraShift 16s ease infinite !important;\n}\n@keyframes auroraShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* Make layout containers transparent */\n#app, #app > div, #app > div > div, main, .app,\n.bg-gray-900, .bg-gray-950,\n.dark\\:bg-gray-900, .dark\\:bg-gray-950 {\n  background-color: transparent !important;\n  background-image: none !important;\n}\n\n/* Blend chat/folder background images with gradient */\n#chat-container .bg-linear-to-t {\n  background-image: linear-gradient(\n    to top, rgba(10, 10, 46, 0.7), rgba(13, 115, 119, 0.35)\n  ) !important;\n}\n\n/* Sidebar & input readability */\n#sidebar {\n  background-color: rgba(10, 10, 46, 0.7) !important;\n  backdrop-filter: blur(12px) !important;\n}\ntextarea {\n  background-color: rgba(10, 10, 46, 0.5) !important;\n  backdrop-filter: blur(8px) !important;\n}",
         "customCssEnabled": true,
         "autoScope": true,
         "canvasEnabled": true,
@@ -1659,7 +1661,7 @@
           "--color-blue-900": true,
           "--color-blue-950": true
         },
-        "customCSS": "/* Animated gradient — Aurora Borealis */\nbody {\n  background-image: linear-gradient(135deg, #0a0a2e, #1a3a5c, #0d7377, #1a3a5c, #0a0a2e) !important;\n  background-attachment: fixed !important;\n  background-size: 400% 400% !important;\n  animation: auroraShift 16s ease infinite !important;\n}\n@keyframes auroraShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* Make layout containers transparent */\n#app, #app > div, #app > div > div, main, .app,\n.bg-gray-900, .bg-gray-950,\n.dark\\:bg-gray-900, .dark\\:bg-gray-950 {\n  background-color: transparent !important;\n  background-image: none !important;\n}\n\n/* Blend chat/folder background images with gradient */\n#chat-container .bg-linear-to-t {\n  background-image: linear-gradient(\n    to top, rgba(10, 10, 46, 0.7), rgba(13, 115, 119, 0.35)\n  ) !important;\n}\n\n/* Sidebar & input readability */\n#sidebar {\n  background-color: rgba(10, 10, 46, 0.7) !important;\n  backdrop-filter: blur(12px) !important;\n}\ntextarea {\n  background-color: rgba(10, 10, 46, 0.5) !important;\n  backdrop-filter: blur(8px) !important;\n}",
+        "customCSS": "/* Animated gradient \u2014 Aurora Borealis */\nbody {\n  background-image: linear-gradient(135deg, #0a0a2e, #1a3a5c, #0d7377, #1a3a5c, #0a0a2e) !important;\n  background-attachment: fixed !important;\n  background-size: 400% 400% !important;\n  animation: auroraShift 16s ease infinite !important;\n}\n@keyframes auroraShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* Make layout containers transparent */\n#app, #app > div, #app > div > div, main, .app,\n.bg-gray-900, .bg-gray-950,\n.dark\\:bg-gray-900, .dark\\:bg-gray-950 {\n  background-color: transparent !important;\n  background-image: none !important;\n}\n\n/* Blend chat/folder background images with gradient */\n#chat-container .bg-linear-to-t {\n  background-image: linear-gradient(\n    to top, rgba(10, 10, 46, 0.7), rgba(13, 115, 119, 0.35)\n  ) !important;\n}\n\n/* Sidebar & input readability */\n#sidebar {\n  background-color: rgba(10, 10, 46, 0.7) !important;\n  backdrop-filter: blur(12px) !important;\n}\ntextarea {\n  background-color: rgba(10, 10, 46, 0.5) !important;\n  backdrop-filter: blur(8px) !important;\n}",
         "customCssEnabled": true,
         "autoScope": true,
         "canvasEnabled": true,
@@ -1881,7 +1883,8 @@
         "gradientRadialSize": "farthest-corner",
         "gradientMeshPoints": [],
         "gradientMeshBgColor": "#000000"
-      }
+      },
+      "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets"
     },
     {
       "name": "ENTROPY // DATA-STORM",
@@ -1921,7 +1924,7 @@
           "--color-gray-950": true
         },
         "canvasEnabled": true,
-        "canvasScript": "/**\n * Title: Bit-Stream Corruption\n * Description: A chaotic storm of digital artifacts and ASCII bits that scramble near the cursor.\n */\n\nconst CONFIG = {\n    bitCount: 150,\n    color: 'rgba(255, 255, 0, 0.4)',\n    glitchColor: 'rgba(255, 255, 255, 0.8)',\n    chars: ['0', '1', 'X', '_', '|', '§', 'Δ'],\n    fontSize: 12,\n    noiseForce: 0.5\n};\n\nlet canvas, ctx, w, h;\nlet bits = [];\nlet mouse = { x: -5000, y: -5000 };\n\nself.onmessage = (e) => {\n    if (e.data.type === 'init') {\n        canvas = e.data.canvas; ctx = canvas.getContext('2d');\n        resize(e.data.width, e.data.height);\n        render();\n    } else if (e.data.type === 'resize') {\n        resize(e.data.width, e.data.height);\n    } else if (e.data.type === 'mousemove') {\n        mouse.x = e.data.x; mouse.y = e.data.y;\n    }\n};\n\nfunction resize(width, height) {\n    w = width; h = height;\n    if (canvas) { canvas.width = w; canvas.height = h; }\n    bits = [];\n    for (let i = 0; i < CONFIG.bitCount; i++) {\n        bits.push({\n            x: Math.random() * w, y: Math.random() * h,\n            char: CONFIG.chars[Math.floor(Math.random() * CONFIG.chars.length)],\n            vx: (Math.random() - 0.5) * 4,\n            vy: (Math.random() - 0.5) * 4,\n            life: Math.random() * 100\n        });\n    }\n}\n\nfunction render() {\n    if (!ctx) return;\n    ctx.clearRect(0, 0, w, h);\n    ctx.font = `${CONFIG.fontSize}px 'JetBrains Mono', monospace`;\n\n    for (let b of bits) {\n        let dx = mouse.x - b.x; let dy = mouse.y - b.y;\n        let dist = Math.hypot(dx, dy);\n\n        // Glitch Logic: Scramble positions near mouse\n        if (dist < 200) {\n            b.x += (Math.random() - 0.5) * 15;\n            b.y += (Math.random() - 0.5) * 15;\n            ctx.fillStyle = CONFIG.glitchColor;\n        } else {\n            b.x += b.vx; b.y += b.vy;\n            ctx.fillStyle = CONFIG.color;\n        }\n\n        // Digital drift\n        if (Math.random() > 0.98) b.char = CONFIG.chars[Math.floor(Math.random() * CONFIG.chars.length)];\n\n        // Screen Wrap\n        if (b.x < 0) b.x = w; if (b.x > w) b.x = 0;\n        if (b.y < 0) b.y = h; if (b.y > h) b.y = 0;\n\n        ctx.fillText(b.char, b.x, b.y);\n    }\n    requestAnimationFrame(render);\n}",
+        "canvasScript": "/**\n * Title: Bit-Stream Corruption\n * Description: A chaotic storm of digital artifacts and ASCII bits that scramble near the cursor.\n */\n\nconst CONFIG = {\n    bitCount: 150,\n    color: 'rgba(255, 255, 0, 0.4)',\n    glitchColor: 'rgba(255, 255, 255, 0.8)',\n    chars: ['0', '1', 'X', '_', '|', '\u00a7', '\u0394'],\n    fontSize: 12,\n    noiseForce: 0.5\n};\n\nlet canvas, ctx, w, h;\nlet bits = [];\nlet mouse = { x: -5000, y: -5000 };\n\nself.onmessage = (e) => {\n    if (e.data.type === 'init') {\n        canvas = e.data.canvas; ctx = canvas.getContext('2d');\n        resize(e.data.width, e.data.height);\n        render();\n    } else if (e.data.type === 'resize') {\n        resize(e.data.width, e.data.height);\n    } else if (e.data.type === 'mousemove') {\n        mouse.x = e.data.x; mouse.y = e.data.y;\n    }\n};\n\nfunction resize(width, height) {\n    w = width; h = height;\n    if (canvas) { canvas.width = w; canvas.height = h; }\n    bits = [];\n    for (let i = 0; i < CONFIG.bitCount; i++) {\n        bits.push({\n            x: Math.random() * w, y: Math.random() * h,\n            char: CONFIG.chars[Math.floor(Math.random() * CONFIG.chars.length)],\n            vx: (Math.random() - 0.5) * 4,\n            vy: (Math.random() - 0.5) * 4,\n            life: Math.random() * 100\n        });\n    }\n}\n\nfunction render() {\n    if (!ctx) return;\n    ctx.clearRect(0, 0, w, h);\n    ctx.font = `${CONFIG.fontSize}px 'JetBrains Mono', monospace`;\n\n    for (let b of bits) {\n        let dx = mouse.x - b.x; let dy = mouse.y - b.y;\n        let dist = Math.hypot(dx, dy);\n\n        // Glitch Logic: Scramble positions near mouse\n        if (dist < 200) {\n            b.x += (Math.random() - 0.5) * 15;\n            b.y += (Math.random() - 0.5) * 15;\n            ctx.fillStyle = CONFIG.glitchColor;\n        } else {\n            b.x += b.vx; b.y += b.vy;\n            ctx.fillStyle = CONFIG.color;\n        }\n\n        // Digital drift\n        if (Math.random() > 0.98) b.char = CONFIG.chars[Math.floor(Math.random() * CONFIG.chars.length)];\n\n        // Screen Wrap\n        if (b.x < 0) b.x = w; if (b.x > w) b.x = 0;\n        if (b.y < 0) b.y = h; if (b.y > h) b.y = 0;\n\n        ctx.fillText(b.char, b.x, b.y);\n    }\n    requestAnimationFrame(render);\n}",
         "canvasShowAuth": true,
         "themeShowAuth": true,
         "customCssShowAuth": true
@@ -2016,7 +2019,7 @@
           "--color-gray-950": true
         },
         "canvasEnabled": true,
-        "canvasScript": "/**\n * Title: Bit-Stream Corruption (Her)\n * Description: A chaotic storm of digital artifacts in warm rose tones that scramble near the cursor.\n */\n\nconst CONFIG = {\n    bitCount: 150,\n    color: 'rgba(255, 77, 136, 0.3)',\n    glitchColor: 'rgba(230, 25, 107, 0.7)',\n    chars: ['0', '1', 'X', '_', '|', '§', 'Δ'],\n    fontSize: 12,\n    noiseForce: 0.5\n};\n\nlet canvas, ctx, w, h;\nlet bits = [];\nlet mouse = { x: -5000, y: -5000 };\n\nsetInterval(() => self.postMessage({ type: 'heartbeat' }), 1000);\n\nself.onmessage = (e) => {\n    if (e.data.type === 'init') {\n        canvas = e.data.canvas; ctx = canvas.getContext('2d');\n        resize(e.data.width, e.data.height);\n        render();\n    } else if (e.data.type === 'resize') {\n        resize(e.data.width, e.data.height);\n    } else if (e.data.type === 'mousemove') {\n        mouse.x = e.data.x; mouse.y = e.data.y;\n    }\n};\n\nfunction resize(width, height) {\n    w = width; h = height;\n    if (canvas) { canvas.width = w; canvas.height = h; }\n    bits = [];\n    for (let i = 0; i < CONFIG.bitCount; i++) {\n        bits.push({\n            x: Math.random() * w, y: Math.random() * h,\n            char: CONFIG.chars[Math.floor(Math.random() * CONFIG.chars.length)],\n            vx: (Math.random() - 0.5) * 4,\n            vy: (Math.random() - 0.5) * 4,\n            life: Math.random() * 100\n        });\n    }\n}\n\nfunction render() {\n    if (!ctx) return;\n    ctx.clearRect(0, 0, w, h);\n    ctx.font = `${CONFIG.fontSize}px 'JetBrains Mono', monospace`;\n\n    for (let b of bits) {\n        let dx = mouse.x - b.x; let dy = mouse.y - b.y;\n        let dist = Math.hypot(dx, dy);\n\n        // Glitch Logic: Scramble positions near mouse\n        if (dist < 200) {\n            b.x += (Math.random() - 0.5) * 15;\n            b.y += (Math.random() - 0.5) * 15;\n            ctx.fillStyle = CONFIG.glitchColor;\n        } else {\n            b.x += b.vx; b.y += b.vy;\n            ctx.fillStyle = CONFIG.color;\n        }\n\n        // Digital drift\n        if (Math.random() > 0.98) b.char = CONFIG.chars[Math.floor(Math.random() * CONFIG.chars.length)];\n\n        // Screen Wrap\n        if (b.x < 0) b.x = w; if (b.x > w) b.x = 0;\n        if (b.y < 0) b.y = h; if (b.y > h) b.y = 0;\n\n        ctx.fillText(b.char, b.x, b.y);\n    }\n    requestAnimationFrame(render);\n}",
+        "canvasScript": "/**\n * Title: Bit-Stream Corruption (Her)\n * Description: A chaotic storm of digital artifacts in warm rose tones that scramble near the cursor.\n */\n\nconst CONFIG = {\n    bitCount: 150,\n    color: 'rgba(255, 77, 136, 0.3)',\n    glitchColor: 'rgba(230, 25, 107, 0.7)',\n    chars: ['0', '1', 'X', '_', '|', '\u00a7', '\u0394'],\n    fontSize: 12,\n    noiseForce: 0.5\n};\n\nlet canvas, ctx, w, h;\nlet bits = [];\nlet mouse = { x: -5000, y: -5000 };\n\nsetInterval(() => self.postMessage({ type: 'heartbeat' }), 1000);\n\nself.onmessage = (e) => {\n    if (e.data.type === 'init') {\n        canvas = e.data.canvas; ctx = canvas.getContext('2d');\n        resize(e.data.width, e.data.height);\n        render();\n    } else if (e.data.type === 'resize') {\n        resize(e.data.width, e.data.height);\n    } else if (e.data.type === 'mousemove') {\n        mouse.x = e.data.x; mouse.y = e.data.y;\n    }\n};\n\nfunction resize(width, height) {\n    w = width; h = height;\n    if (canvas) { canvas.width = w; canvas.height = h; }\n    bits = [];\n    for (let i = 0; i < CONFIG.bitCount; i++) {\n        bits.push({\n            x: Math.random() * w, y: Math.random() * h,\n            char: CONFIG.chars[Math.floor(Math.random() * CONFIG.chars.length)],\n            vx: (Math.random() - 0.5) * 4,\n            vy: (Math.random() - 0.5) * 4,\n            life: Math.random() * 100\n        });\n    }\n}\n\nfunction render() {\n    if (!ctx) return;\n    ctx.clearRect(0, 0, w, h);\n    ctx.font = `${CONFIG.fontSize}px 'JetBrains Mono', monospace`;\n\n    for (let b of bits) {\n        let dx = mouse.x - b.x; let dy = mouse.y - b.y;\n        let dist = Math.hypot(dx, dy);\n\n        // Glitch Logic: Scramble positions near mouse\n        if (dist < 200) {\n            b.x += (Math.random() - 0.5) * 15;\n            b.y += (Math.random() - 0.5) * 15;\n            ctx.fillStyle = CONFIG.glitchColor;\n        } else {\n            b.x += b.vx; b.y += b.vy;\n            ctx.fillStyle = CONFIG.color;\n        }\n\n        // Digital drift\n        if (Math.random() > 0.98) b.char = CONFIG.chars[Math.floor(Math.random() * CONFIG.chars.length)];\n\n        // Screen Wrap\n        if (b.x < 0) b.x = w; if (b.x > w) b.x = 0;\n        if (b.y < 0) b.y = h; if (b.y > h) b.y = 0;\n\n        ctx.fillText(b.char, b.x, b.y);\n    }\n    requestAnimationFrame(render);\n}",
         "canvasShowAuth": true,
         "themeShowAuth": true,
         "customCssShowAuth": true
@@ -3028,7 +3031,8 @@
         "gradientRadialSize": "farthest-corner",
         "gradientMeshPoints": [],
         "gradientMeshBgColor": "#000000"
-      }
+      },
+      "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets"
     },
     {
       "name": "NEO-TACTICAL // ARCHIVE 01",
@@ -3188,7 +3192,7 @@
         "customCssEnabled": true,
         "autoScope": true,
         "canvasEnabled": true,
-        "canvasScript": "let canvas, ctx, W, H;\nconst COLS = [];\nconst CHARS = '01アイウエオカキクケコサシスセソ><{}[]';\nconst FONT_SIZE = 14;\nlet colCount = 0;\n\nfunction init(c, w, h) {\n  canvas = c; ctx = c.getContext('2d'); W = w; H = h;\n  colCount = Math.floor(W / FONT_SIZE);\n  COLS.length = 0;\n  for (let i = 0; i < colCount; i++) COLS.push(Math.random() * H / FONT_SIZE | 0);\n}\n\nfunction draw() {\n  ctx.fillStyle = 'rgba(10, 0, 20, 0.08)';\n  ctx.fillRect(0, 0, W, H);\n  ctx.font = FONT_SIZE + 'px monospace';\n  for (let i = 0; i < colCount; i++) {\n    const ch = CHARS[Math.random() * CHARS.length | 0];\n    const x = i * FONT_SIZE;\n    const y = COLS[i] * FONT_SIZE;\n    ctx.fillStyle = Math.random() > 0.92 ? '#ff00ff' : '#00ffff';\n    ctx.globalAlpha = 0.6 + Math.random() * 0.4;\n    ctx.fillText(ch, x, y);\n    ctx.globalAlpha = 1;\n    if (y > H && Math.random() > 0.975) COLS[i] = 0;\n    COLS[i]++;\n  }\n  requestAnimationFrame(draw);\n}\n\nsetInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);\n\nself.onmessage = function(e) {\n  const { type, canvas: c, width, height } = e.data;\n  switch (type) {\n    case 'init': init(c, width, height); draw(); break;\n    case 'resize': W = width; H = height; if (canvas) { canvas.width = W; canvas.height = H; } colCount = Math.floor(W / FONT_SIZE); while (COLS.length < colCount) COLS.push(0); COLS.length = colCount; break;\n    case 'mousemove': break;\n  }\n};"
+        "canvasScript": "let canvas, ctx, W, H;\nconst COLS = [];\nconst CHARS = '01\u30a2\u30a4\u30a6\u30a8\u30aa\u30ab\u30ad\u30af\u30b1\u30b3\u30b5\u30b7\u30b9\u30bb\u30bd><{}[]';\nconst FONT_SIZE = 14;\nlet colCount = 0;\n\nfunction init(c, w, h) {\n  canvas = c; ctx = c.getContext('2d'); W = w; H = h;\n  colCount = Math.floor(W / FONT_SIZE);\n  COLS.length = 0;\n  for (let i = 0; i < colCount; i++) COLS.push(Math.random() * H / FONT_SIZE | 0);\n}\n\nfunction draw() {\n  ctx.fillStyle = 'rgba(10, 0, 20, 0.08)';\n  ctx.fillRect(0, 0, W, H);\n  ctx.font = FONT_SIZE + 'px monospace';\n  for (let i = 0; i < colCount; i++) {\n    const ch = CHARS[Math.random() * CHARS.length | 0];\n    const x = i * FONT_SIZE;\n    const y = COLS[i] * FONT_SIZE;\n    ctx.fillStyle = Math.random() > 0.92 ? '#ff00ff' : '#00ffff';\n    ctx.globalAlpha = 0.6 + Math.random() * 0.4;\n    ctx.fillText(ch, x, y);\n    ctx.globalAlpha = 1;\n    if (y > H && Math.random() > 0.975) COLS[i] = 0;\n    COLS[i]++;\n  }\n  requestAnimationFrame(draw);\n}\n\nsetInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);\n\nself.onmessage = function(e) {\n  const { type, canvas: c, width, height } = e.data;\n  switch (type) {\n    case 'init': init(c, width, height); draw(); break;\n    case 'resize': W = width; H = height; if (canvas) { canvas.width = W; canvas.height = H; } colCount = Math.floor(W / FONT_SIZE); while (COLS.length < colCount) COLS.push(0); COLS.length = colCount; break;\n    case 'mousemove': break;\n  }\n};"
       },
       "oled": {
         "h": 320,
@@ -3213,7 +3217,7 @@
         "customCssEnabled": true,
         "autoScope": true,
         "canvasEnabled": true,
-        "canvasScript": "let canvas, ctx, W, H;\nconst COLS = [];\nconst CHARS = '01アイウエオカキクケコサシスセソ><{}[]';\nconst FONT_SIZE = 14;\nlet colCount = 0;\n\nfunction init(c, w, h) {\n  canvas = c; ctx = c.getContext('2d'); W = w; H = h;\n  colCount = Math.floor(W / FONT_SIZE);\n  COLS.length = 0;\n  for (let i = 0; i < colCount; i++) COLS.push(Math.random() * H / FONT_SIZE | 0);\n}\n\nfunction draw() {\n  ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';\n  ctx.fillRect(0, 0, W, H);\n  ctx.font = FONT_SIZE + 'px monospace';\n  for (let i = 0; i < colCount; i++) {\n    const ch = CHARS[Math.random() * CHARS.length | 0];\n    const x = i * FONT_SIZE;\n    const y = COLS[i] * FONT_SIZE;\n    ctx.fillStyle = Math.random() > 0.92 ? '#ff00ff' : '#00ffff';\n    ctx.globalAlpha = 0.5 + Math.random() * 0.5;\n    ctx.fillText(ch, x, y);\n    ctx.globalAlpha = 1;\n    if (y > H && Math.random() > 0.975) COLS[i] = 0;\n    COLS[i]++;\n  }\n  requestAnimationFrame(draw);\n}\n\nsetInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);\n\nself.onmessage = function(e) {\n  const { type, canvas: c, width, height } = e.data;\n  switch (type) {\n    case 'init': init(c, width, height); draw(); break;\n    case 'resize': W = width; H = height; if (canvas) { canvas.width = W; canvas.height = H; } colCount = Math.floor(W / FONT_SIZE); while (COLS.length < colCount) COLS.push(0); COLS.length = colCount; break;\n    case 'mousemove': break;\n  }\n};"
+        "canvasScript": "let canvas, ctx, W, H;\nconst COLS = [];\nconst CHARS = '01\u30a2\u30a4\u30a6\u30a8\u30aa\u30ab\u30ad\u30af\u30b1\u30b3\u30b5\u30b7\u30b9\u30bb\u30bd><{}[]';\nconst FONT_SIZE = 14;\nlet colCount = 0;\n\nfunction init(c, w, h) {\n  canvas = c; ctx = c.getContext('2d'); W = w; H = h;\n  colCount = Math.floor(W / FONT_SIZE);\n  COLS.length = 0;\n  for (let i = 0; i < colCount; i++) COLS.push(Math.random() * H / FONT_SIZE | 0);\n}\n\nfunction draw() {\n  ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';\n  ctx.fillRect(0, 0, W, H);\n  ctx.font = FONT_SIZE + 'px monospace';\n  for (let i = 0; i < colCount; i++) {\n    const ch = CHARS[Math.random() * CHARS.length | 0];\n    const x = i * FONT_SIZE;\n    const y = COLS[i] * FONT_SIZE;\n    ctx.fillStyle = Math.random() > 0.92 ? '#ff00ff' : '#00ffff';\n    ctx.globalAlpha = 0.5 + Math.random() * 0.5;\n    ctx.fillText(ch, x, y);\n    ctx.globalAlpha = 1;\n    if (y > H && Math.random() > 0.975) COLS[i] = 0;\n    COLS[i]++;\n  }\n  requestAnimationFrame(draw);\n}\n\nsetInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);\n\nself.onmessage = function(e) {\n  const { type, canvas: c, width, height } = e.data;\n  switch (type) {\n    case 'init': init(c, width, height); draw(); break;\n    case 'resize': W = width; H = height; if (canvas) { canvas.width = W; canvas.height = H; } colCount = Math.floor(W / FONT_SIZE); while (COLS.length < colCount) COLS.push(0); COLS.length = colCount; break;\n    case 'mousemove': break;\n  }\n};"
       },
       "light": {
         "h": 320,
@@ -3238,7 +3242,7 @@
         "customCssEnabled": true,
         "autoScope": true,
         "canvasEnabled": true,
-        "canvasScript": "let canvas, ctx, W, H;\nconst COLS = [];\nconst CHARS = '01アイウエオカキクケコサシスセソ><{}[]';\nconst FONT_SIZE = 14;\nlet colCount = 0;\n\nfunction init(c, w, h) {\n  canvas = c; ctx = c.getContext('2d'); W = w; H = h;\n  colCount = Math.floor(W / FONT_SIZE);\n  COLS.length = 0;\n  for (let i = 0; i < colCount; i++) COLS.push(Math.random() * H / FONT_SIZE | 0);\n}\n\nfunction draw() {\n  ctx.fillStyle = 'rgba(245, 235, 250, 0.1)';\n  ctx.fillRect(0, 0, W, H);\n  ctx.font = FONT_SIZE + 'px monospace';\n  for (let i = 0; i < colCount; i++) {\n    const ch = CHARS[Math.random() * CHARS.length | 0];\n    const x = i * FONT_SIZE;\n    const y = COLS[i] * FONT_SIZE;\n    ctx.fillStyle = Math.random() > 0.92 ? '#cc00cc' : '#0099aa';\n    ctx.globalAlpha = 0.25 + Math.random() * 0.25;\n    ctx.fillText(ch, x, y);\n    ctx.globalAlpha = 1;\n    if (y > H && Math.random() > 0.975) COLS[i] = 0;\n    COLS[i]++;\n  }\n  requestAnimationFrame(draw);\n}\n\nsetInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);\n\nself.onmessage = function(e) {\n  const { type, canvas: c, width, height } = e.data;\n  switch (type) {\n    case 'init': init(c, width, height); draw(); break;\n    case 'resize': W = width; H = height; if (canvas) { canvas.width = W; canvas.height = H; } colCount = Math.floor(W / FONT_SIZE); while (COLS.length < colCount) COLS.push(0); COLS.length = colCount; break;\n    case 'mousemove': break;\n  }\n};"
+        "canvasScript": "let canvas, ctx, W, H;\nconst COLS = [];\nconst CHARS = '01\u30a2\u30a4\u30a6\u30a8\u30aa\u30ab\u30ad\u30af\u30b1\u30b3\u30b5\u30b7\u30b9\u30bb\u30bd><{}[]';\nconst FONT_SIZE = 14;\nlet colCount = 0;\n\nfunction init(c, w, h) {\n  canvas = c; ctx = c.getContext('2d'); W = w; H = h;\n  colCount = Math.floor(W / FONT_SIZE);\n  COLS.length = 0;\n  for (let i = 0; i < colCount; i++) COLS.push(Math.random() * H / FONT_SIZE | 0);\n}\n\nfunction draw() {\n  ctx.fillStyle = 'rgba(245, 235, 250, 0.1)';\n  ctx.fillRect(0, 0, W, H);\n  ctx.font = FONT_SIZE + 'px monospace';\n  for (let i = 0; i < colCount; i++) {\n    const ch = CHARS[Math.random() * CHARS.length | 0];\n    const x = i * FONT_SIZE;\n    const y = COLS[i] * FONT_SIZE;\n    ctx.fillStyle = Math.random() > 0.92 ? '#cc00cc' : '#0099aa';\n    ctx.globalAlpha = 0.25 + Math.random() * 0.25;\n    ctx.fillText(ch, x, y);\n    ctx.globalAlpha = 1;\n    if (y > H && Math.random() > 0.975) COLS[i] = 0;\n    COLS[i]++;\n  }\n  requestAnimationFrame(draw);\n}\n\nsetInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);\n\nself.onmessage = function(e) {\n  const { type, canvas: c, width, height } = e.data;\n  switch (type) {\n    case 'init': init(c, width, height); draw(); break;\n    case 'resize': W = width; H = height; if (canvas) { canvas.width = W; canvas.height = H; } colCount = Math.floor(W / FONT_SIZE); while (COLS.length < colCount) COLS.push(0); COLS.length = colCount; break;\n    case 'mousemove': break;\n  }\n};"
       },
       "her": {
         "h": 320,
@@ -3263,7 +3267,7 @@
         "customCssEnabled": true,
         "autoScope": true,
         "canvasEnabled": true,
-        "canvasScript": "let canvas, ctx, W, H;\nconst COLS = [];\nconst CHARS = '01アイウエオカキクケコサシスセソ><{}[]';\nconst FONT_SIZE = 14;\nlet colCount = 0;\n\nfunction init(c, w, h) {\n  canvas = c; ctx = c.getContext('2d'); W = w; H = h;\n  colCount = Math.floor(W / FONT_SIZE);\n  COLS.length = 0;\n  for (let i = 0; i < colCount; i++) COLS.push(Math.random() * H / FONT_SIZE | 0);\n}\n\nfunction draw() {\n  ctx.fillStyle = 'rgba(250, 235, 240, 0.1)';\n  ctx.fillRect(0, 0, W, H);\n  ctx.font = FONT_SIZE + 'px monospace';\n  for (let i = 0; i < colCount; i++) {\n    const ch = CHARS[Math.random() * CHARS.length | 0];\n    const x = i * FONT_SIZE;\n    const y = COLS[i] * FONT_SIZE;\n    ctx.fillStyle = Math.random() > 0.92 ? '#dd44aa' : '#aa3388';\n    ctx.globalAlpha = 0.2 + Math.random() * 0.25;\n    ctx.fillText(ch, x, y);\n    ctx.globalAlpha = 1;\n    if (y > H && Math.random() > 0.975) COLS[i] = 0;\n    COLS[i]++;\n  }\n  requestAnimationFrame(draw);\n}\n\nsetInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);\n\nself.onmessage = function(e) {\n  const { type, canvas: c, width, height } = e.data;\n  switch (type) {\n    case 'init': init(c, width, height); draw(); break;\n    case 'resize': W = width; H = height; if (canvas) { canvas.width = W; canvas.height = H; } colCount = Math.floor(W / FONT_SIZE); while (COLS.length < colCount) COLS.push(0); COLS.length = colCount; break;\n    case 'mousemove': break;\n  }\n};"
+        "canvasScript": "let canvas, ctx, W, H;\nconst COLS = [];\nconst CHARS = '01\u30a2\u30a4\u30a6\u30a8\u30aa\u30ab\u30ad\u30af\u30b1\u30b3\u30b5\u30b7\u30b9\u30bb\u30bd><{}[]';\nconst FONT_SIZE = 14;\nlet colCount = 0;\n\nfunction init(c, w, h) {\n  canvas = c; ctx = c.getContext('2d'); W = w; H = h;\n  colCount = Math.floor(W / FONT_SIZE);\n  COLS.length = 0;\n  for (let i = 0; i < colCount; i++) COLS.push(Math.random() * H / FONT_SIZE | 0);\n}\n\nfunction draw() {\n  ctx.fillStyle = 'rgba(250, 235, 240, 0.1)';\n  ctx.fillRect(0, 0, W, H);\n  ctx.font = FONT_SIZE + 'px monospace';\n  for (let i = 0; i < colCount; i++) {\n    const ch = CHARS[Math.random() * CHARS.length | 0];\n    const x = i * FONT_SIZE;\n    const y = COLS[i] * FONT_SIZE;\n    ctx.fillStyle = Math.random() > 0.92 ? '#dd44aa' : '#aa3388';\n    ctx.globalAlpha = 0.2 + Math.random() * 0.25;\n    ctx.fillText(ch, x, y);\n    ctx.globalAlpha = 1;\n    if (y > H && Math.random() > 0.975) COLS[i] = 0;\n    COLS[i]++;\n  }\n  requestAnimationFrame(draw);\n}\n\nsetInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);\n\nself.onmessage = function(e) {\n  const { type, canvas: c, width, height } = e.data;\n  switch (type) {\n    case 'init': init(c, width, height); draw(); break;\n    case 'resize': W = width; H = height; if (canvas) { canvas.width = W; canvas.height = H; } colCount = Math.floor(W / FONT_SIZE); while (COLS.length < colCount) COLS.push(0); COLS.length = colCount; break;\n    case 'mousemove': break;\n  }\n};"
       },
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neon_cyberpunk_animated.json",
       "version": "1.0.0",
@@ -3795,7 +3799,8 @@
         "gradientRadialSize": "farthest-corner",
         "gradientMeshPoints": [],
         "gradientMeshBgColor": "#000000"
-      }
+      },
+      "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets"
     },
     {
       "name": "Pink Hues",
@@ -4257,7 +4262,7 @@
       "targetVersion": "0.10.0"
     },
     {
-      "name": "Rosé Pine",
+      "name": "Ros\u00e9 Pine",
       "dark": {
         "h": 250,
         "c": 0,
@@ -4361,7 +4366,7 @@
       "version": "1.0.0",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/rose_pine.json",
       "author": "silentoplayz (G30)",
-      "description": "Adaptation of the Rosé Pine color scheme with muted lavender, rose, and pine tones, firefly constellation Canvas FX, and full color overrides.",
+      "description": "Adaptation of the Ros\u00e9 Pine color scheme with muted lavender, rose, and pine tones, firefly constellation Canvas FX, and full color overrides.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
       "targetVersion": "0.10.0"
     },
@@ -4555,7 +4560,8 @@
         "gradientRadialSize": "farthest-corner",
         "gradientMeshPoints": [],
         "gradientMeshBgColor": "#000000"
-      }
+      },
+      "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets"
     },
     {
       "name": "Sapphire",
@@ -4747,7 +4753,8 @@
         "gradientRadialSize": "farthest-corner",
         "gradientMeshPoints": [],
         "gradientMeshBgColor": "#000000"
-      }
+      },
+      "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets"
     },
     {
       "name": "Solar Flare",
@@ -5399,7 +5406,7 @@
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/the_cyanotype.json",
       "version": "1.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Blueprint-inspired design with architectural grid overlay, deep navy tones, and technical drawing aesthetics. CSS-only — no Canvas FX.",
+      "description": "Blueprint-inspired design with architectural grid overlay, deep navy tones, and technical drawing aesthetics. CSS-only \u2014 no Canvas FX.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
       "targetVersion": "0.10.0"
     },
@@ -5593,7 +5600,8 @@
         "gradientRadialSize": "farthest-corner",
         "gradientMeshPoints": [],
         "gradientMeshBgColor": "#000000"
-      }
+      },
+      "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets"
     },
     {
       "name": "Toxic Nebula // Smog-Core",
