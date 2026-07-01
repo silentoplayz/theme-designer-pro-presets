@@ -145,7 +145,7 @@
       "author": "silentoplayz (G30)",
       "description": "Atmospheric translucent UI with gaseous nebula Canvas FX and holographic shimmer accents. Cool blue tones with frosted glass panels.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "Amber",
@@ -496,7 +496,7 @@
       "author": "silentoplayz (G30)",
       "description": "Vintage CRT terminal aesthetic with amber monochrome tones, scan-line flicker effects, and Geometric Mainframe Canvas FX.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "Amethyst",
@@ -848,7 +848,7 @@
       "author": "silentoplayz (G30)",
       "description": "NASA-era analogue hardware interface with industrial chassis textures, Vector Telemetry Canvas FX, and muted steel-blue tones.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "Astral Projection",
@@ -1021,7 +1021,7 @@
       "author": "silentoplayz (G30)",
       "description": "Deep space glassmorphism with ethereal violet-blue tones, Hyperspace Warp Drive Canvas FX, and luminous translucent panels.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "Bio-Digital Synthesis",
@@ -1181,7 +1181,7 @@
       "author": "silentoplayz (G30)",
       "description": "Living bio-organic UI with pulsing borders, Synaptic Network Canvas FX, and vibrant magenta-purple neural tones.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "Bioluminescence",
@@ -1354,7 +1354,7 @@
       "author": "silentoplayz (G30)",
       "description": "Deep ocean bioluminescent aesthetic with glowing cyan accents, jellyfish-inspired Canvas FX, and frosted glass panels.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "Blue Lightning",
@@ -1687,7 +1687,7 @@
       "author": "silentoplayz (G30)",
       "description": "Electric aurora borealis gradients with Blue Lightning Twinkle Canvas FX and vibrant cerulean-teal tones.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "Emerald",
@@ -2023,14 +2023,14 @@
       "author": "silentoplayz (G30)",
       "description": "Industrial containment UI with corroded amber warning tones, Bit-Stream Corruption Canvas FX, and JetBrains Mono typography.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "Four Seasons (Desynced)",
       "description": "Nature-inspired seasonal palette with emerald canopy tones, Fireflies Canvas FX, and soft rounded corners.",
       "author": "silentoplayz (G30)",
       "version": "1.0.0",
-      "targetVersion": "0.9.0",
+      "targetVersion": "0.10.0",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/four_seasons_desynced.json",
       "dark": {
@@ -2489,7 +2489,7 @@
       "author": "silentoplayz (G30)",
       "description": "Fusion reactor control interface with industrial plating, Plasma Arc Discharge Canvas FX, and cool blue containment tones.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "LUMINA // AURORA",
@@ -2662,7 +2662,7 @@
       "author": "silentoplayz (G30)",
       "description": "Premium glassmorphism with layered frosted panels, Fluid Aurora Borealis Canvas FX, and deep indigo-violet tones.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "Matrix Rain",
@@ -2833,7 +2833,7 @@
       "author": "silentoplayz (G30)",
       "description": "Hacker terminal aesthetic with phosphor-green grid lines, Matrix code rain Canvas FX, and monochrome dark palette.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "Midnight",
@@ -3157,7 +3157,7 @@
       "author": "silentoplayz (G30)",
       "description": "Military console interface with Lidar Topographical Scan Canvas FX, monospace typography, and stealth blue-gray tones.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "Neon Cyberpunk (Animated)",
@@ -3266,7 +3266,7 @@
       "author": "silentoplayz (G30)",
       "description": "Neon-drenched cyberpunk UI with animated magenta and cyan glitch accents, matrix data rain Canvas FX, and full color overrides.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "Neon Overdrive",
@@ -3597,7 +3597,7 @@
       "description": "High-octane cyberpunk UI with intense neon magenta and electric blue accents, glitch-styled animations, and Neon Pulse Canvas FX on a deep midnight backdrop.",
       "author": "silentoplayz (G30)",
       "version": "1.0.0",
-      "targetVersion": "0.9.0",
+      "targetVersion": "0.10.0",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neon_overdrive.json"
     },
@@ -3899,7 +3899,7 @@
       "author": "silentoplayz (G30)",
       "description": "Soft pink and rose color palette with warm pastel accents, gentle floating bokeh Canvas FX, and full color overrides.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "Project Singularity",
@@ -4046,7 +4046,7 @@
       "author": "silentoplayz (G30)",
       "description": "Void interface with gravitational distortion effects, Accretion Canvas FX, and deep violet-black tones with phase-shift animations.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "Retro Terminal (CRT)",
@@ -4249,7 +4249,7 @@
       "author": "silentoplayz (G30)",
       "description": "Classic green phosphor CRT terminal with VT323 font, scan-line overlay, Matrix code Canvas FX, and authentic retro glow.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "Rosé Pine",
@@ -4358,7 +4358,7 @@
       "author": "silentoplayz (G30)",
       "description": "Adaptation of the Rosé Pine color scheme with muted lavender, rose, and pine tones, firefly constellation Canvas FX, and full color overrides.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "Ruby",
@@ -4913,7 +4913,7 @@
       "author": "silentoplayz (G30)",
       "description": "Luxury golden UI with warm amber accents, Solar Wind Embers Canvas FX, and rich copper-toned glassmorphism.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "Sovereign",
@@ -5086,7 +5086,7 @@
       "author": "silentoplayz (G30)",
       "description": "Architectural material design with Prismatic Caustics Canvas FX, premium glassmorphism panels, and deep navy-indigo tones.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "Synthwave 1984",
@@ -5259,7 +5259,7 @@
       "author": "silentoplayz (G30)",
       "description": "Retro-futuristic synthwave aesthetic with neon magenta glow, Perspective Grid Canvas FX, and chrome-styled accents.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "The Cyanotype",
@@ -5394,7 +5394,7 @@
       "author": "silentoplayz (G30)",
       "description": "Blueprint-inspired design with architectural grid overlay, deep navy tones, and technical drawing aesthetics. CSS-only — no Canvas FX.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "Topaz",
@@ -5718,7 +5718,7 @@
       "author": "silentoplayz (G30)",
       "description": "Hazardous atmosphere UI with corrosive green accents, Smog particle Canvas FX, and toxic purple-violet tones with liquid pulse animations.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "Wasteland Uplink (Amber)",
@@ -6051,7 +6051,7 @@
       "author": "silentoplayz (G30)",
       "description": "Post-apocalyptic terminal with Radiation Dust Canvas FX, VT323 monospace font, amber phosphor glow, and weathered UI elements.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     },
     {
       "name": "Windows Hotdog Stand",
@@ -6212,7 +6212,7 @@
       "author": "silentoplayz (G30)",
       "description": "Faithful recreation of the infamous Windows 3.1 Hot Dog Stand color scheme with retro pixel rain Canvas FX.",
       "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
-      "targetVersion": "0.9.0"
+      "targetVersion": "0.10.0"
     }
   ],
   "isLibraryBackup": true,

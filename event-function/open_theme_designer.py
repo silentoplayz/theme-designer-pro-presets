@@ -81,11 +81,16 @@ class Event:
     <!-- OWUI Theme Pro Bootloader -->
     <script id="owui-theme-bootloader">
     (function() {
+        // Prevent duplicate listener/observer registration on hot-reload re-injection
+        if (window._owuiBootloaderReady) return;
+        window._owuiBootloaderReady = true;
         try {
             // In-memory theme state — primary source for canvas, eliminates localStorage dependency
             var _owuiThemeState = null;
             // In-memory CSS — primary source for draft mode, where sessionStorage is invisible to bootloader
             var _owuiThemeCss = null;
+            // Monotonic version counter — prevents stale fetch responses from overwriting fresher SSE data
+            var _themeVersion = 0;
 
             // Fetch server-side CSS and state — keeps ALL users in sync with admin's theme
             // Skip on the designer page (it manages its own state directly)
@@ -109,9 +114,11 @@ class Event:
 
             // Fetch CSS from server (always needed — index.html has a safe subset without structural/gradient)
             // cache: 'no-store' bypasses browser cache entirely — critical for duplicated tabs
+            var _fetchVersion = _themeVersion;  // Capture before async fetch
             fetch('__THEME_ROUTE__/theme.css?_=' + Date.now(), { cache: 'no-store' })
                 .then(function(r) { if (r.ok && r.status !== 204) return r.text(); return ''; })
                 .then(function(css) {
+                    if (_themeVersion > _fetchVersion) return; // SSE already delivered fresher data
                     if (css && css.trim()) {
                         _owuiThemeCss = css;
                         // Write-through to localStorage (Watchtower recovery fallback)
@@ -127,6 +134,7 @@ class Event:
             fetch('__THEME_ROUTE__/state.json?_=' + Date.now(), { cache: 'no-store' })
                 .then(function(r) { if (r.ok && r.status !== 204) return r.text(); return ''; })
                 .then(function(state) {
+                    if (_themeVersion > _fetchVersion) return; // SSE already delivered fresher data
                     if (state && state.trim() && state !== '{}') {
                         _owuiThemeState = state;
                         // Write-through to localStorage (Watchtower recovery fallback)
@@ -169,38 +177,47 @@ class Event:
                     const isAuthPage = window.location.pathname.startsWith('/auth');
 
                     // Strip palette vars for modes with paletteEnabled === false (applies on all pages)
+                    // Parse state once, validate before parsing to avoid SyntaxError on corrupted data
+                    var _parsedState = null;
                     try {
-                        const savedData = JSON.parse(_owuiThemeState || localStorage.getItem('owui_dev_theme_v1') || '{}');
-                        ['dark', 'oled', 'light', 'her'].forEach(function(m) {
-                            if (savedData[m] && savedData[m].paletteEnabled === false) {
-                                var palTag = m.toUpperCase();
-                                var palRe = new RegExp('/\\*\\[OWUI_PAL_' + palTag + '_START\\]\\*/[\\s\\S]*?/\\*\\[OWUI_PAL_' + palTag + '_END\\]\\*/', 'g');
-                                finalCss = finalCss.replace(palRe, '');
-                            }
-                        });
-                    } catch(e) { console.warn('Theme Pro:', e); }
+                        var _rawState = _owuiThemeState || localStorage.getItem('owui_dev_theme_v1') || '{}';
+                        if (typeof _rawState === 'string' && _rawState.charAt(0) === '{') {
+                            _parsedState = JSON.parse(_rawState);
+                        }
+                    } catch(e) { /* corrupted state — skip stripping, theme still applies */ }
 
-                    if (isAuthPage) {
+                    if (_parsedState) {
                         try {
-                            const savedData = JSON.parse(_owuiThemeState || localStorage.getItem('owui_dev_theme_v1') || '{}');
-                            const mode = themeToMode(localStorage.getItem('theme') || 'dark');
-                            const config = savedData[mode];
-                            
-                            if (config) {
-                                if (config.themeShowAuth === false) {
-                                    finalCss = finalCss.replace(/\/\*\[OWUI_VARS_START\]\*\/[\s\S]*?\/\*\[OWUI_VARS_END\]\*\//g, '');
+                            ['dark', 'oled', 'light', 'her'].forEach(function(m) {
+                                if (_parsedState[m] && _parsedState[m].paletteEnabled === false) {
+                                    var palTag = m.toUpperCase();
+                                    var palRe = new RegExp('/\\*\\[OWUI_PAL_' + palTag + '_START\\]\\*/[\\s\\S]*?/\\*\\[OWUI_PAL_' + palTag + '_END\\]\\*/', 'g');
+                                    finalCss = finalCss.replace(palRe, '');
                                 }
-                                if (config.customCssShowAuth === false) {
-                                    finalCss = finalCss.replace(/\/\*\[OWUI_CUSTOM_START\]\*\/[\s\S]*?\/\*\[OWUI_CUSTOM_END\]\*\//g, '');
-                                }
-                                if (config.canvasShowAuth === false && config.gradientShowAuth === false) {
-                                    finalCss = finalCss.replace(/\/\*\[OWUI_STRUCTURAL_START\]\*\/[\s\S]*?\/\*\[OWUI_STRUCTURAL_END\]\*\//g, '');
-                                }
-                                if (config.gradientShowAuth === false) {
-                                    finalCss = finalCss.replace(/\/\*\[OWUI_GRADIENT_START\]\*\/[\s\S]*?\/\*\[OWUI_GRADIENT_END\]\*\//g, '');
-                                }
-                            }
+                            });
                         } catch(e) { console.warn('Theme Pro:', e); }
+
+                        if (isAuthPage) {
+                            try {
+                                const mode = themeToMode(localStorage.getItem('theme') || 'dark');
+                                const config = _parsedState[mode];
+                            
+                                if (config) {
+                                    if (config.themeShowAuth === false) {
+                                        finalCss = finalCss.replace(/\/\*\[OWUI_VARS_START\]\*\/[\s\S]*?\/\*\[OWUI_VARS_END\]\*\//g, '');
+                                    }
+                                    if (config.customCssShowAuth === false) {
+                                        finalCss = finalCss.replace(/\/\*\[OWUI_CUSTOM_START\]\*\/[\s\S]*?\/\*\[OWUI_CUSTOM_END\]\*\//g, '');
+                                    }
+                                    if (config.canvasShowAuth === false && config.gradientShowAuth === false) {
+                                        finalCss = finalCss.replace(/\/\*\[OWUI_STRUCTURAL_START\]\*\/[\s\S]*?\/\*\[OWUI_STRUCTURAL_END\]\*\//g, '');
+                                    }
+                                    if (config.gradientShowAuth === false) {
+                                        finalCss = finalCss.replace(/\/\*\[OWUI_GRADIENT_START\]\*\/[\s\S]*?\/\*\[OWUI_GRADIENT_END\]\*\//g, '');
+                                    }
+                                }
+                            } catch(e) { console.warn('Theme Pro:', e); }
+                        }
                     }
                     
                     if (style.innerHTML !== finalCss) style.innerHTML = finalCss;
@@ -270,11 +287,18 @@ class Event:
                                 flush: function() { buf = ''; }
                             });
                             var newBody = response.body.pipeThrough(transform);
-                            return new Response(newBody, {
+                            var newResp = new Response(newBody, {
                                 status: response.status,
                                 statusText: response.statusText,
                                 headers: response.headers
                             });
+                            // Preserve read-only properties the constructor drops
+                            try {
+                                Object.defineProperty(newResp, 'url', { value: response.url });
+                                Object.defineProperty(newResp, 'type', { value: response.type });
+                                Object.defineProperty(newResp, 'redirected', { value: response.redirected });
+                            } catch(x) {}
+                            return newResp;
                         } catch(x) { return response; }
                     });
                 };
@@ -377,8 +401,9 @@ class Event:
 
             let lastCanvasScript = null;
             let lastCanvasWasEnabled = null;
-
+            var _canvasGeneration = 0;
             function initCanvas(forceFallback) {
+                var myGen = ++_canvasGeneration;
                 try {
                     if (!document.body) {
                         setTimeout(initCanvas, 50);
@@ -398,7 +423,13 @@ class Event:
                         lastCanvasWasEnabled = false;
                         return;
                     }
-                    const savedData = JSON.parse(_owuiThemeState || localStorage.getItem('owui_dev_theme_v1') || '{}');
+                    var _rawCanvasState = _owuiThemeState || localStorage.getItem('owui_dev_theme_v1') || '{}';
+                    var savedData = {};
+                    try {
+                        if (typeof _rawCanvasState === 'string' && _rawCanvasState.charAt(0) === '{') {
+                            savedData = JSON.parse(_rawCanvasState);
+                        }
+                    } catch(e) { /* corrupted state — skip canvas init */ return; }
                     const mode = themeToMode(document.documentElement.getAttribute('data-theme') || 'dark');
                     const config = savedData[mode];
                     
@@ -469,6 +500,8 @@ class Event:
                             worker.onerror = function(ev) {
                                 if (workerFailed) return;
                                 workerFailed = true;
+                                // Stale — a newer initCanvas() already ran, don't tear down its canvas
+                                if (myGen !== _canvasGeneration) return;
                                 ev.preventDefault(); // Suppress console error for the re-thrown ReferenceError
                                 worker.terminate();
                                 URL.revokeObjectURL(objectURL);
@@ -773,7 +806,11 @@ class Event:
             const _pushState = history.pushState;
             history.pushState = function() { _pushState.apply(this, arguments); refresh(); };
             const _replaceState = history.replaceState;
-            history.replaceState = function() { _replaceState.apply(this, arguments); refresh(); };
+            history.replaceState = function() {
+                var result = _replaceState.apply(this, arguments);
+                try { refresh(); } catch(e) { /* Firefox throttles rapid History API calls — safe to skip */ }
+                return result;
+            };
 
             // Live theme push via Server-Sent Events (cross-tab/browser/device)
             if (!window.__THEME_DESIGNER__) {
@@ -783,6 +820,7 @@ class Event:
                         _disabled = false;  // Re-enable if admin turned it back on
                         try {
                             var d = JSON.parse(e.data);
+                            _themeVersion++;  // Mark SSE data as fresher than any pending fetch
                             // 1. Update in-memory state and CSS (primary source for canvas + enforce)
                             if (d.css) _owuiThemeCss = d.css;
                             if (d.state) _owuiThemeState = d.state;
@@ -973,9 +1011,11 @@ class Event:
         return css_dir / CSS_FILE_NAME
 
     def _save_css(self, css: str) -> None:
-        """Write theme CSS to disk."""
+        """Write theme CSS to disk (atomic: write tmp + rename)."""
         path = self._get_css_path()
-        path.write_text(css, encoding="utf-8")
+        tmp = path.with_suffix(".tmp")
+        tmp.write_text(css, encoding="utf-8")
+        os.replace(str(tmp), str(path))
         log.info("[Theme Pro] Saved theme CSS to %s (%d bytes)", path, len(css))
 
     def _load_css(self) -> str | None:
@@ -990,9 +1030,11 @@ class Event:
         return self._get_css_path().with_name("open_theme_designer.json")
 
     def _save_state(self, state: str) -> None:
-        """Write theme state JSON to disk."""
+        """Write theme state JSON to disk (atomic: write tmp + rename)."""
         path = self._get_state_path()
-        path.write_text(state, encoding="utf-8")
+        tmp = path.with_suffix(".tmp")
+        tmp.write_text(state, encoding="utf-8")
+        os.replace(str(tmp), str(path))
         log.info("[Theme Pro] Saved theme state to %s (%d bytes)", path, len(state))
 
     def _load_state(self) -> str | None:
@@ -1007,9 +1049,11 @@ class Event:
         return self._get_css_path().with_name("open_theme_designer_library.json")
 
     def _save_library(self, library: str) -> None:
-        """Write preset/snapshot library JSON to disk."""
+        """Write preset/snapshot library JSON to disk (atomic: write tmp + rename)."""
         path = self._get_library_path()
-        path.write_text(library, encoding="utf-8")
+        tmp = path.with_suffix(".tmp")
+        tmp.write_text(library, encoding="utf-8")
+        os.replace(str(tmp), str(path))
         log.info("[Theme Pro] Saved library to %s (%d bytes)", path, len(library))
 
     def _load_library(self) -> str | None:
@@ -1987,8 +2031,8 @@ class Event:
 
         .doc-code-inline { background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--accent); }
 
-        .action-toast { position: fixed; top: 90px; right: 28px; background: var(--accent); color: white; padding: 10px 22px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; opacity: 0; pointer-events: none; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9999; box-shadow: 0 4px 15px rgba(59,130,246,0.4); transform: translateY(-5px) scale(0.95); }
-        .action-toast.show { opacity: 1; transform: translateY(0) scale(1); }
+        .action-toast { position: absolute; left: 50%; transform: translateX(-50%) scale(0.95); background: var(--accent); color: white; padding: 8px 20px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; opacity: 0; pointer-events: none; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9999; box-shadow: 0 4px 15px rgba(59,130,246,0.4); white-space: nowrap; }
+        .action-toast.show { opacity: 1; transform: translateX(-50%) scale(1); }
 
         /* Draft Mode Toggle */
         .draft-toggle { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; font-weight: 600; flex-shrink: 0; }
@@ -2014,14 +2058,15 @@ class Event:
         body.light-mode .header-json-btn { border-color: var(--border); color: var(--text-muted); }
         body.light-mode .header-json-btn:hover { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); }
 
-        #tab-docs { position: fixed !important; inset: 0; z-index: 9999; background: var(--bg-surface); overflow-y: auto; padding: 32px 48px; display: none; }
+        #tab-docs { position: fixed !important; inset: 0; z-index: 9999; background: oklch(0.20 0 0 / 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); overflow-y: auto; padding: 32px 48px; display: none; }
+        body.light-mode #tab-docs { background: oklch(0.96 0 0 / 0.75); }
         #tab-docs .docs-container { max-width: 1200px; margin: 0 auto; position: relative; }
         .docs-modal-close-btn { position: fixed; top: 20px; right: 28px; z-index: 10000; background: var(--bg-deep); border: 1px solid var(--border); color: var(--text-main); font-size: 1.4rem; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; line-height: 1; }
         .docs-modal-close-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
         body.light-mode .docs-modal-close-btn { background: white; border-color: var(--border); color: var(--text-main); }
         body.light-mode .docs-modal-close-btn:hover { background: var(--accent); color: white; }
 
-        .footer { padding: 12px 28px; border-top: none; background: transparent; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; flex-shrink: 0; z-index: 100; max-width: 1920px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .footer { padding: 12px 28px; border-top: none; background: transparent; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; flex-shrink: 0; z-index: 100; max-width: 1920px; margin: 0 auto; width: 100%; box-sizing: border-box; position: relative; }
         .footer-left { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
         .footer-right { display: flex; gap: 12px; align-items: center; flex-shrink: 0; }
         .footer-actions { display: flex; gap: 12px; align-items: center; }
@@ -2216,7 +2261,7 @@ class Event:
             </button>
         </div>
     </div>
-    <div id="action-toast" class="action-toast"></div>
+
 
     <div class="tabs" role="tablist" aria-label="Designer sections">
         <div class="tab active" data-tab="themes" role="tab" tabindex="0" aria-selected="true">🎭 Themes</div>
@@ -2459,13 +2504,15 @@ class Event:
 
                 <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
                     <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 14px;">Controls</div>
-                    <div class="slider-row" id="gradient-angle-row">
-                        <label data-reset="gradient-angle"><span data-tooltip="Double-click to reset to 135°" style="cursor:pointer">Gradient Direction</span> <span class="slider-val" id="val-gradient-angle">135°</span></label>
-                        <input type="range" id="sl-gradient-angle" min="0" max="360" value="135">
-                    </div>
-                    <div class="slider-row">
-                        <label data-reset="gradient-intensity"><span data-tooltip="Double-click to reset to 85%" style="cursor:pointer">Color Intensity</span> <span class="slider-val" id="val-gradient-intensity">85%</span></label>
-                        <input type="range" id="sl-gradient-intensity" min="0" max="100" value="85">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                        <div class="slider-row" id="gradient-angle-row">
+                            <label data-reset="gradient-angle"><span data-tooltip="Double-click to reset to 135°" style="cursor:pointer">Gradient Direction</span> <span class="slider-val" id="val-gradient-angle">135°</span></label>
+                            <input type="range" id="sl-gradient-angle" min="0" max="360" value="135">
+                        </div>
+                        <div class="slider-row">
+                            <label data-reset="gradient-intensity"><span data-tooltip="Double-click to reset to 85%" style="cursor:pointer">Color Intensity</span> <span class="slider-val" id="val-gradient-intensity">85%</span></label>
+                            <input type="range" id="sl-gradient-intensity" min="0" max="100" value="85">
+                        </div>
                     </div>
                     <div id="gradient-speed-row-wrapper">
                         <div class="slider-row" id="gradient-speed-row" style="margin-top: 10px; display: none;">
@@ -3535,6 +3582,7 @@ location.reload();</code></pre>
                 </button>
             </div>
         </div>
+        <div id="action-toast" class="action-toast"></div>
         <div class="footer-right">
             <div class="draft-toggle" id="draft-toggle-wrap">
                     <span class="draft-toggle-label active" id="draft-label-live">Live</span>
@@ -5182,9 +5230,11 @@ function startAnimation() {
         }
 
         renderVariableGrid(config, activeVars);
-        updateCodeView();
-        if (shouldInject) injectLive();
-        else forceLocalIframeTheme();
+        // Generate CSS once and pass to all consumers (was called 3x per change)
+        const _css = generateCoreCSS();
+        updateCodeView(_css);
+        if (shouldInject) injectLive(_css);
+        else forceLocalIframeTheme(_css);
         updateActiveHighlights();
         renderCanvasPresets();
         renderCssPresets();
@@ -5273,7 +5323,7 @@ function startAnimation() {
             <div class="preset-btn ${isActive ? 'active-theme' : ''}" style="padding: 12px 8px;" onclick="${loadFnName}(${i})">
                 ${actions}
                 <div class="preset-dots" style="background: var(--border); opacity: 0.5;"></div>
-                <span style="font-size: 10px; width: 100%; overflow: hidden; text-overflow: ellipsis; text-align: center; white-space: nowrap; display: block;">${p.name}</span>
+                <span style="font-size: 10px; width: 100%; overflow: hidden; text-overflow: ellipsis; text-align: center; white-space: nowrap; display: block;">${_esc(p.name)}</span>
                 <div class="selected-check">✓</div>
             </div>
             `;
@@ -5411,14 +5461,15 @@ function startAnimation() {
         });
     }
 
+    // Reusable canvas/context for oklchToHex — avoids creating 26 canvas elements per commit
+    const _hexCanvas = document.createElement('canvas');
+    _hexCanvas.width = 1; _hexCanvas.height = 1;
+    const _hexCtx = _hexCanvas.getContext('2d');
     function oklchToHex(str) {
         if (str.startsWith('#')) return str;
-        const canvas = document.createElement('canvas');
-        canvas.width = 1; canvas.height = 1;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#000000'; ctx.fillStyle = str;       
-        ctx.fillRect(0, 0, 1, 1);
-        const data = ctx.getImageData(0, 0, 1, 1).data;
+        _hexCtx.fillStyle = '#000000'; _hexCtx.fillStyle = str;
+        _hexCtx.fillRect(0, 0, 1, 1);
+        const data = _hexCtx.getImageData(0, 0, 1, 1).data;
         return "#" +[data[0], data[1], data[2]].map(x => x.toString(16).padStart(2, '0')).join('');
     }
 
@@ -5717,11 +5768,11 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
     }
 
     let _codeViewStale = true;
-    function updateCodeView() {
+    function updateCodeView(preGeneratedCss) {
         const codeTab = document.getElementById('tab-code');
         if (codeTab && codeTab.style.display === 'none') { _codeViewStale = true; return; }
         _codeViewStale = false;
-        let rawCss = generateCoreCSS();
+        let rawCss = preGeneratedCss || generateCoreCSS();
         if (document.getElementById('toggle-minify-css')?.checked) rawCss = minifyCss(rawCss);
         const rawTextarea = document.getElementById('raw-css');
         if (rawTextarea) { rawTextarea.value = rawCss; updateLineNumbers(rawTextarea); }
@@ -5736,7 +5787,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
     document.getElementById('toggle-minify-css')?.addEventListener('change', updateCodeView);
     document.getElementById('toggle-minify-tailwind')?.addEventListener('change', updateCodeView);
     
-    function forceLocalIframeTheme() {
+    function forceLocalIframeTheme(preGeneratedCss) {
         const dm = getActiveDataMode();
         const config = themeData[dm];
         const dataMode = dm;
@@ -5755,7 +5806,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         
         // Strip user Custom CSS, Structural, and Gradient rules from the generated CSS.
         // We add a targeted gradient rule for body#tool-body below instead.
-        let iframeCss = generateCoreCSS()
+        let iframeCss = (preGeneratedCss || generateCoreCSS())
             .replace(/\/\*\[OWUI_CUSTOM_START\]\*\/[\s\S]*?\/\*\[OWUI_CUSTOM_END\]\*\//g, '')
             .replace(/\/\*\[OWUI_STRUCTURAL_START\]\*\/[\s\S]*?\/\*\[OWUI_STRUCTURAL_END\]\*\//g, '')
             .replace(/\/\*\[OWUI_GRADIENT_START\]\*\/[\s\S]*?\/\*\[OWUI_GRADIENT_END\]\*\//g, '');
@@ -5839,8 +5890,8 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         } catch(e) { console.warn('Theme Pro:', e); }
     }
 
-    function injectLive() {
-        let css = generateCoreCSS();
+    function injectLive(preGeneratedCss) {
+        let css = preGeneratedCss || generateCoreCSS();
         try {
                 let oldStyle = document.getElementById('owui-dev-live-theme');
                 if (shouldInject) {
@@ -5912,7 +5963,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
                     oldStyle.remove();
                 }
         } catch (e) { console.warn('Theme Pro:', e); }
-        forceLocalIframeTheme();
+        forceLocalIframeTheme(css);
     }
 
     function resetActiveMode(silent = false, saveBackup = false) {
@@ -9121,6 +9172,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             let importedCount = 0, skippedCount = 0;
             for (const file of files) {
                 try {
+                    if (file.size > 2 * 1024 * 1024) { showToast(`File too large: ${_esc(file.name)} (max 2MB)`); skippedCount++; continue; }
                     const text = await file.text();
                     const result = parseFile(file, text);
                     importedCount += result.imported;
@@ -9332,6 +9384,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         
         for (const file of files) {
             try {
+                if (file.size > 2 * 1024 * 1024) { showToast(`File too large: ${_esc(file.name)} (max 2MB)`); skippedCount++; continue; }
                 const text = await file.text();
                 const data = JSON.parse(text);
                 
@@ -10840,7 +10893,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
                 container.style.display = 'block';
                 const filterLabels = { css: 'Custom CSS', canvas: 'Canvas FX', gradient: 'Gradient', overrides: 'Overrides', linked: 'Linked' };
                 let emptyMsg = 'No themes match';
-                if (searchQuery) emptyMsg += ` &ldquo;${searchQuery}&rdquo;`;
+                if (searchQuery) emptyMsg += ` &ldquo;${_esc(searchQuery)}&rdquo;`;
                 if (typeof activeTagFilter !== 'undefined' && activeTagFilter !== 'all') {
                     emptyMsg += (searchQuery ? ' with' : '') + ` the <strong>${filterLabels[activeTagFilter] || activeTagFilter}</strong> tag`;
                 }
@@ -10890,7 +10943,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
                     <div class="snapshot-action export-snapshot" onclick="event.stopPropagation(); exportSnapshot(${i})" data-tooltip="Export theme">↓</div>
                     ${s.updateUrl ? '<div class="snapshot-action check-update-snapshot" onclick="event.stopPropagation(); checkSingleUpdate(' + i + ')" data-tooltip="Check for update">⟳</div>' : ''}
                     <div class="preset-dots">${renderTonalRampHTML(s[dm], dm)}</div>
-                    <span style="font-size: 10px; width: 100%; overflow: hidden; text-overflow: ellipsis; text-align: center; white-space: nowrap; display: block;">${s.name}${s.version ? ' <span style="opacity:0.5;">v' + s.version + '</span>' : ''}</span>
+                    <span style="font-size: 10px; width: 100%; overflow: hidden; text-overflow: ellipsis; text-align: center; white-space: nowrap; display: block;">${_esc(s.name)}${s.version ? ' <span style="opacity:0.5;">v' + _esc(s.version) + '</span>' : ''}</span>
                     <div class="selected-check">✓</div>
                 </div>
             `;}).join('');
