@@ -2267,11 +2267,8 @@ class Event:
             <div class="section-title" style="margin-top: 32px;">OKLCH Tonal Ramp</div>
             <div id="ramp-gray" style="display: flex; height: 52px; margin-top: 10px; gap: 6px; margin-bottom: 32px;"></div>
 
-            <div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.2);padding:12px;border-radius:14px;font-size:0.65rem;color:var(--text-muted);font-style:italic;margin-bottom:16px;border-left:4px solid var(--accent);display:flex;gap:12px;align-items:center;">
-                <span style="font-size:1.1rem">💡</span>
-                <span><b>Pro Tip:</b> Click a variable name to copy its CSS code. Locking (🔒) a variable pins it for the <i>currently selected mode</i> and protects it from being changed by sliders, randomization, or image extraction. Mode overrides are managed separately.</span>
-            </div>
-            
+
+
             <div class="section-title" style="align-items: center; margin-bottom: 12px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px;">
                 <div>Individual Variable Overrides</div>
                 <div style="display:flex; gap:8px; flex-wrap: wrap; align-items: center; width:100%;">
