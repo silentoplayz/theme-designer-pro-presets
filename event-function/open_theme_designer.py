@@ -194,15 +194,18 @@ class Event:
                         if (typeof _rawState === 'string' && _rawState.charAt(0) === '{') {
                             _parsedState = JSON.parse(_rawState);
                         }
+                        var _palRegexes = {};
+                        ['dark', 'oled', 'light', 'her'].forEach(function(m) {
+                            var palTag = m.toUpperCase();
+                            _palRegexes[m] = new RegExp('/\\*\\[OWUI_PAL_' + palTag + '_START\\]\\*/[\\s\\S]*?/\\*\\[OWUI_PAL_' + palTag + '_END\\]\\*/', 'g');
+                        });
                     } catch(e) { /* corrupted state — skip stripping, theme still applies */ }
 
                     if (_parsedState) {
                         try {
                             ['dark', 'oled', 'light', 'her'].forEach(function(m) {
                                 if (_parsedState[m] && _parsedState[m].paletteEnabled === false) {
-                                    var palTag = m.toUpperCase();
-                                    var palRe = new RegExp('/\\*\\[OWUI_PAL_' + palTag + '_START\\]\\*/[\\s\\S]*?/\\*\\[OWUI_PAL_' + palTag + '_END\\]\\*/', 'g');
-                                    finalCss = finalCss.replace(palRe, '');
+                                    finalCss = finalCss.replace(_palRegexes[m], '');
                                 }
                             });
                         } catch(e) { console.warn('Theme Pro:', e); }
@@ -230,7 +233,7 @@ class Event:
                         }
                     }
                     
-                    if (style.innerHTML !== finalCss) style.innerHTML = finalCss;
+                    if (style.textContent !== finalCss) style.textContent = finalCss;
                 }
                 
                 const storedTheme = localStorage.getItem('theme');
@@ -416,7 +419,7 @@ class Event:
                 var myGen = ++_canvasGeneration;
                 try {
                     if (!document.body) {
-                        setTimeout(initCanvas, 50);
+                        setTimeout(function() { initCanvas(forceFallback); }, 50);
                         return;
                     }
                     // Valve gate: admin disabled Canvas FX
@@ -692,8 +695,8 @@ class Event:
                                     window.cancelAnimationFrame(_mouseRafId);
                                     (function _pumpInput() {
                                         _mouseRafId = window.requestAnimationFrame(_pumpInput);
-                                        if (_mouseDirty && window._onmessage) { window._onmessage({ data: { type: 'mousemove', x: _mouseX, y: _mouseY } }); _mouseDirty = false; }
-                                        if (_touchDirty && window._onmessage) { window._onmessage({ data: { type: 'touchmove', touches: _touchData } }); _touchDirty = false; }
+                                        if (_mouseDirty && _fbHandler) { _fbHandler({ data: { type: 'mousemove', x: _mouseX, y: _mouseY } }); _mouseDirty = false; }
+                                        if (_touchDirty && _fbHandler) { _fbHandler({ data: { type: 'touchmove', touches: _touchData } }); _touchDirty = false; }
                                     })();
                                     window.addEventListener('touchstart', _onTouchStart, { passive: true });
                                     window.addEventListener('touchmove', _onTouchMove, { passive: true });
@@ -701,12 +704,14 @@ class Event:
     
                                     const _rAFs =[];
                                     const _intervals =[];
+                                    const _timeouts =[];
                                     let _stopped = false;
                                     const requestAnimationFrame = (fn) => { if (_stopped) return -1; const id = window.requestAnimationFrame(fn); _rAFs.push(id); return id; };
                                     const setInterval = (fn, delay) => { if (_stopped) return -1; const id = window.setInterval(fn, delay); _intervals.push(id); return id; };
+                                    const setTimeout = (fn, delay) => { if (_stopped) return -1; const id = window.setTimeout(fn, delay); _timeouts.push(id); return id; };
                                     
-                                    let _onmessage = null;
-                                    const self = { postMessage: (msg) => {}, set onmessage(fn) { _onmessage = fn; window._onmessage = fn; } };
+                                    let _fbHandler = null;
+                                    const self = { postMessage: (msg) => {}, set onmessage(fn) { _fbHandler = fn; } };
     
                                     window.owuiCanvasCleanups.push(() => {
                                         _stopped = true;
@@ -723,14 +728,15 @@ class Event:
                                         clearTimeout(_resizeTimer);
                                         _rAFs.forEach(id => window.cancelAnimationFrame(id));
                                         _intervals.forEach(id => window.clearInterval(id));
+                                        _timeouts.forEach(id => window.clearTimeout(id));
                                     });
     
                                     (function() {
                                         let onmessage = null;
                                         ${config.canvasScript}
-                                        const finalHandler = onmessage || _onmessage;
+                                        const finalHandler = onmessage || _fbHandler;
                                         if (finalHandler) {
-                                            window._onmessage = finalHandler;
+                                            _fbHandler = finalHandler;
                                             const _fbEnv = {
                                                 authToken: (document.cookie.match(/token=([^;]+)/) || [])[1] || localStorage.getItem('token') || '',
                                                 baseUrl: window.location.origin,
@@ -995,8 +1001,16 @@ class Event:
                         new_content = content.replace(
                             "</head>", self._get_bootloader_script() + "</head>"
                         )
-                        with open(path, "w", encoding="utf-8") as f:
-                            f.write(new_content)
+                        import tempfile as _tmpf
+                        _fd, _tmp = _tmpf.mkstemp(dir=os.path.dirname(path), suffix='.tmp')
+                        try:
+                            with os.fdopen(_fd, 'w', encoding='utf-8') as f:
+                                f.write(new_content)
+                            os.replace(_tmp, path)
+                        except BaseException:
+                            try: os.unlink(_tmp)
+                            except OSError: pass
+                            raise
                         log.info(
                             "[Theme Pro] Successfully injected bootloader into %s", path
                         )
@@ -1147,13 +1161,23 @@ class Event:
                 # Enforce Canvas FX valve: strip canvas data so remote clients can't see it
                 if not self.valves.enable_canvas_fx:
                     state_json = self._strip_canvas_from_state(state_json)
-                state_block = f"{STATE_START}{state_json}{STATE_END}\n"
+                # Prevent </script> in JSON values from breaking the HTML parse
+                safe_state_json = state_json.replace("</", "<\\/")
+                state_block = f"{STATE_START}{safe_state_json}{STATE_END}\n"
 
                 if "</head>" in content:
                     inject_block = style_block + state_block
                     new_content = content.replace("</head>", inject_block + "</head>")
-                    with open(path, "w", encoding="utf-8") as f:
-                        f.write(new_content)
+                    import tempfile as _tmpf
+                    _fd, _tmp = _tmpf.mkstemp(dir=os.path.dirname(path), suffix='.tmp')
+                    try:
+                        with os.fdopen(_fd, 'w', encoding='utf-8') as f:
+                            f.write(new_content)
+                        os.replace(_tmp, path)
+                    except BaseException:
+                        try: os.unlink(_tmp)
+                        except OSError: pass
+                        raise
                     log.info("[Theme Pro] Injected server theme CSS + state into %s", path)
         except Exception as e:
             log.warning("[Theme Pro] Error injecting theme CSS into %s: %s", path, e)
@@ -1200,8 +1224,16 @@ class Event:
                     changed = True
 
                 if changed:
-                    with open(path, "w", encoding="utf-8") as f:
-                        f.write(content)
+                    import tempfile as _tmpf
+                    _fd, _tmp = _tmpf.mkstemp(dir=os.path.dirname(path), suffix='.tmp')
+                    try:
+                        with os.fdopen(_fd, 'w', encoding='utf-8') as f:
+                            f.write(content)
+                        os.replace(_tmp, path)
+                    except BaseException:
+                        try: os.unlink(_tmp)
+                        except OSError: pass
+                        raise
                     log.info("[Theme Pro] Stripped server theme assets from %s", path)
         except Exception as e:
             log.warning("[Theme Pro] Error stripping theme assets from %s: %s", path, e)
@@ -1554,7 +1586,8 @@ class Event:
             --bg-control-light: #fafafa;
         }
 
-        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; transition: background-color 0.3s, border-color 0.3s, color 0.3s; }
+        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+        button, .tab, .mode-btn, .preset-btn, .gradient-type-pill, .draft-switch, input, select, textarea, .pill { transition: background-color 0.3s, border-color 0.3s, color 0.3s; }
         
         body { 
             font-family: 'Inter', sans-serif;
@@ -1848,17 +1881,17 @@ class Event:
         .sync-diff-ramp-label { font-size: 0.5rem; font-weight: 600; width: 30px; flex-shrink: 0; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.5px; }
         .sync-diff-ramp { display: flex; gap: 1px; height: 14px; flex: 1; border-radius: 4px; overflow: hidden; }
         .sync-diff-ramp .swatch { flex: 1; min-width: 0; }
-        .sync-diff-values { display: flex; gap: 10px; font-size: 0.5rem; font-family: 'SF Mono', 'Fira Code', monospace; margin-left: 0; opacity: 0.7; }
+        .sync-diff-values { display: flex; gap: 10px; font-size: 0.5rem; font-family: 'JetBrains Mono', monospace; margin-left: 0; opacity: 0.7; }
         .sync-diff-values .delta { color: #eab308; font-weight: 600; }
         body.light-mode .sync-diff-values .delta { color: #ca8a04; }
 
-        .sync-diff-code-box { background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.48rem; line-height: 1.5; max-height: 52px; overflow: hidden; white-space: pre; color: var(--text-muted); margin: 4px 0 2px 0; }
+        .sync-diff-code-box { background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.48rem; line-height: 1.5; max-height: 52px; overflow: hidden; white-space: pre; color: var(--text-muted); margin: 4px 0 2px 0; }
         .sync-diff-code-box .truncation { opacity: 0.4; font-style: italic; }
         body.light-mode .sync-diff-code-box { background: rgba(0,0,0,0.04); }
 
         .sync-diff-code-summary { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; cursor: pointer; transition: 0.2s; font-size: 0.5rem; color: var(--text-muted); margin: 4px 0 2px; user-select: none; }
         .sync-diff-code-summary:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); }
-        .sync-diff-code-summary .summary-label { font-family: 'SF Mono', 'Fira Code', monospace; opacity: 0.7; }
+        .sync-diff-code-summary .summary-label { font-family: 'JetBrains Mono', monospace; opacity: 0.7; }
         .sync-diff-code-summary .summary-action { font-size: 0.45rem; color: var(--accent); opacity: 0.7; white-space: nowrap; }
         body.light-mode .sync-diff-code-summary { background: rgba(0,0,0,0.03); }
 
@@ -1867,7 +1900,7 @@ class Event:
         .sync-diff-code-expanded .diff-header span { flex: 1; padding: 4px 8px; }
         .sync-diff-code-expanded .diff-header span + span { border-left: 1px solid var(--border); }
         .sync-diff-code-expanded .diff-body { display: flex; max-height: 200px; overflow-y: auto; scrollbar-width: thin; }
-        .sync-diff-code-expanded .diff-col { flex: 1; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.44rem; line-height: 1.6; white-space: pre-wrap; word-break: break-all; min-width: 0; }
+        .sync-diff-code-expanded .diff-col { flex: 1; font-family: 'JetBrains Mono', monospace; font-size: 0.44rem; line-height: 1.6; white-space: pre-wrap; word-break: break-all; min-width: 0; }
         .sync-diff-code-expanded .diff-col + .diff-col { border-left: 1px solid var(--border); }
         .sync-diff-code-expanded .diff-line { padding: 0 6px; }
         .sync-diff-code-expanded .diff-line.removed { background: rgba(239,68,68,0.1); color: #f87171; }
@@ -4491,7 +4524,11 @@ location.reload();</code></pre>
 
             const res = await fetch(fetchUrl);
             if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            const contentLength = parseInt(res.headers.get('content-length') || '0', 10);
+            const MAX_URL_SIZE = 2 * 1024 * 1024; // 2MB — matches local file import limit
+            if (contentLength > MAX_URL_SIZE) throw new Error(`File too large (${(contentLength / 1024 / 1024).toFixed(1)}MB). Maximum is 2MB.`);
             const text = await res.text();
+            if (text.length > MAX_URL_SIZE) throw new Error(`File too large (${(text.length / 1024 / 1024).toFixed(1)}MB). Maximum is 2MB.`);
             const fileName = url.split('/').pop().split('?')[0] || defaultName;
 
             let isJson = fileName.endsWith('.json');
@@ -4541,6 +4578,7 @@ location.reload();</code></pre>
         'gradientMeshPoints', 'gradientMeshBgColor'
     ];
     const GRADIENT_CLONE_KEYS = new Set(['gradientStops', 'gradientMeshPoints']);
+    const DEFAULT_MESH_POINTS = [{color:'#6366f1',x:25,y:25,spread:50},{color:'#ec4899',x:75,y:30,spread:45},{color:'#06b6d4',x:50,y:75,spread:50}];
 
     function compareGradientProps(a, b) {
         return GRADIENT_PROP_KEYS.every(k => {
@@ -4777,6 +4815,18 @@ function startAnimation() {
     // History Engine (Undo/Redo)
     let historyStack =[];
     let historyIndex = -1;
+
+    // Push initial state so the first edit can be undone
+    (function pushInitialState() {
+        historyStack.push(structuredClone({
+            themeData,
+            activeThemeRef,
+            activeCanvasRef,
+            activeCssRef,
+            activeGradientRef
+        }));
+        historyIndex = 0;
+    })();
 
     function pushState() {
         // Remove redo history if we are in the middle of the stack
@@ -5091,16 +5141,11 @@ function startAnimation() {
                (m1.autoScope === true) === (m2.autoScope === true) &&
                (m1.canvasEnabled === true) === (m2.canvasEnabled === true) &&
                (m1.canvasScript || "") === (m2.canvasScript || "") &&
-               (m1.gradientEnabled === true) === (m2.gradientEnabled === true) &&
-               (m1.gradientType || DEFAULT_MODE_DATA.gradientType) === (m2.gradientType || DEFAULT_MODE_DATA.gradientType) &&
-               (m1.gradientAngle ?? DEFAULT_MODE_DATA.gradientAngle) === (m2.gradientAngle ?? DEFAULT_MODE_DATA.gradientAngle) &&
-               JSON.stringify(m1.gradientStops || []) === JSON.stringify(m2.gradientStops || []) &&
-               (m1.gradientRadialPosX ?? 50) === (m2.gradientRadialPosX ?? 50) &&
-               (m1.gradientRadialPosY ?? 50) === (m2.gradientRadialPosY ?? 50) &&
-               (m1.gradientRadialShape || 'ellipse') === (m2.gradientRadialShape || 'ellipse') &&
-               (m1.gradientRadialSize || 'farthest-corner') === (m2.gradientRadialSize || 'farthest-corner') &&
-               JSON.stringify(m1.gradientMeshPoints || []) === JSON.stringify(m2.gradientMeshPoints || []) &&
-               (m1.gradientMeshBgColor || '#0a0a12') === (m2.gradientMeshBgColor || '#0a0a12');
+               compareGradientProps(m1, m2) &&
+               (m1.themeShowAuth === true) === (m2.themeShowAuth === true) &&
+               (m1.customCssShowAuth === true) === (m2.customCssShowAuth === true) &&
+               (m1.canvasShowAuth === true) === (m2.canvasShowAuth === true) &&
+               (m1.gradientShowAuth === true) === (m2.gradientShowAuth === true);
     };
 
 
@@ -6759,7 +6804,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         }).join('');
 
         if (allEntries.length === 0 && searchTerm) {
-            html = `<div style="grid-column:1/-1; text-align:center; padding:20px 0; color:var(--text-muted); font-size:0.7rem;">No presets match "${searchTerm}"</div>`;
+            html = `<div style="grid-column:1/-1; text-align:center; padding:20px 0; color:var(--text-muted); font-size:0.7rem;">No presets match "${_esc(searchTerm)}"</div>`;
         }
 
         gallery.innerHTML = html;
@@ -7147,7 +7192,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
     const confirmSaveGradientBtn = $('confirm-save-gradient-btn');
     if (confirmSaveGradientBtn) confirmSaveGradientBtn.addEventListener('click', () => {
         const name = $('gradient-preset-name-input').value.trim();
-        if (!name) return;
+        if (!name) { showToast('Please enter a preset name'); return; }
         const dm = getActiveDataMode();
         const config = themeData[dm];
         const preset = {
@@ -7304,7 +7349,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             themeData[dm].gradientType = pill.dataset.gtype;
             // Auto-populate mesh defaults when switching to mesh
             if (pill.dataset.gtype === 'mesh' && themeData[dm].gradientEnabled && (!themeData[dm].gradientMeshPoints || themeData[dm].gradientMeshPoints.length < 2)) {
-                themeData[dm].gradientMeshPoints = [{color:'#6366f1',x:25,y:25,spread:50},{color:'#ec4899',x:75,y:30,spread:45},{color:'#06b6d4',x:50,y:75,spread:50}];
+                themeData[dm].gradientMeshPoints = structuredClone(DEFAULT_MESH_POINTS);
                 themeData[dm].gradientMeshBgColor = themeData[dm].gradientMeshBgColor || '#0a0a12';
             }
             window._selectedMeshPoint = null;
@@ -7532,7 +7577,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             if (e.target.checked) {
                 if (themeData[dm].gradientType === 'mesh') {
                     if (!themeData[dm].gradientMeshPoints || themeData[dm].gradientMeshPoints.length < 2) {
-                        themeData[dm].gradientMeshPoints = [{color:'#6366f1',x:25,y:25,spread:50},{color:'#ec4899',x:75,y:30,spread:45},{color:'#06b6d4',x:50,y:75,spread:50}];
+                        themeData[dm].gradientMeshPoints = structuredClone(DEFAULT_MESH_POINTS);
                         themeData[dm].gradientMeshBgColor = themeData[dm].gradientMeshBgColor || '#0a0a12';
                     }
                 } else if (!themeData[dm].gradientStops || themeData[dm].gradientStops.length < 2) {
@@ -8001,8 +8046,8 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         let h = `<table class="sync-diff-prop-table"><tr style="opacity:0.5;font-size:0.45rem;"><td>Variable</td><td>Source</td><td>Target</td></tr>`;
         const maxShow = 5;
         diffKeys.slice(0, maxShow).forEach(k => {
-            const sv = entry.src[k] || '<span style="opacity:0.3;">—</span>';
-            const tv = entry.tgt[k] || '<span style="opacity:0.3;">—</span>';
+            const sv = entry.src[k] ? _esc(entry.src[k]) : '<span style="opacity:0.3;">—</span>';
+            const tv = entry.tgt[k] ? _esc(entry.tgt[k]) : '<span style="opacity:0.3;">—</span>';
             h += `<tr><td class="prop-key">${_esc(k)}</td><td>${sv}</td><td>${tv}</td></tr>`;
         });
         h += `</table>`;
@@ -8120,7 +8165,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         const props = [
             ['Type', s.type, t.type],
             ['Angle', s.angle + '°', t.angle + '°'],
-            ['Stops', s.stops.length, t.stops.length],
+            ['Stops', (s.stops || []).length, (t.stops || []).length],
             ['Animated', s.anim ? 'Yes' : 'No', t.anim ? 'Yes' : 'No']
         ];
         h += `<table class="sync-diff-prop-table">`;
@@ -8327,6 +8372,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
                 applySyncToMode(mode, sourceData, {
                     syncPalette, syncOverrides, syncCss, syncCanvas, syncGradient, syncAuth,
                     rebuildLocks: usePerModeSource,
+                    adjustL: (m, l) => m === 'oled' ? 0 : l,
                     cssRef: usePerModeSource ? undefined : activeCssRef[dm],
                     canvasRef: usePerModeSource ? undefined : activeCanvasRef[dm],
                     gradientRef: usePerModeSource ? undefined : activeGradientRef[dm],
@@ -8397,16 +8443,24 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             ['import-gradient-modal', null, true]
         ];
 
+        const activeEl = document.activeElement;
+        const isEditingInModal = activeEl && (activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'INPUT');
+
         for (const [modalId, confirmBtnId, allowBackspace] of modalConfigs) {
             const modal = $(modalId);
             if (modal && modal.style.display === 'flex') {
-                if (e.key === 'Enter') { 
+                if (e.key === 'Enter' && !isEditingInModal) { 
                     e.preventDefault(); 
                     const btn = $(confirmBtnId);
                     if (btn) btn.click(); 
                     return; 
                 }
-                if (e.key === 'Escape' || (e.key === 'Backspace' && allowBackspace)) {
+                if (e.key === 'Escape') {
+                    e.preventDefault(); 
+                    modal.style.display = 'none'; 
+                    return;
+                }
+                if (e.key === 'Backspace' && allowBackspace && !isEditingInModal) {
                     e.preventDefault(); 
                     modal.style.display = 'none'; 
                     return;
@@ -8415,7 +8469,6 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         }
 
         // Undo/Redo Shortcuts — skip when user is typing in a text field
-        const activeEl = document.activeElement;
         const isEditing = activeEl && (activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'INPUT');
         if ((e.ctrlKey || e.metaKey) && !isEditing) {
             if (e.key === 'z' && !e.shiftKey) {
@@ -8648,6 +8701,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             showToast(`Palette Extracted! (Hue ${h}°)`);
         };
         img.src = URL.createObjectURL(file);
+        img.addEventListener('load', () => URL.revokeObjectURL(img.src), { once: true });
     }
 
     document.getElementById('extract-btn').addEventListener('click', () => document.getElementById('image-input').click());
@@ -8665,6 +8719,10 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
     // Smart Paste Listener (Images OR JSON)
     let pendingClipboardData = null;
     window.addEventListener('paste', async (e) => {
+        // Skip when user is pasting into an input or textarea
+        const pasteTarget = document.activeElement;
+        if (pasteTarget && (pasteTarget.tagName === 'INPUT' || pasteTarget.tagName === 'TEXTAREA')) return;
+
         const items = e.clipboardData.items;
         let handled = false;
         
@@ -10050,11 +10108,11 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             return `<div class="preset-btn community-card" data-community-idx="${idx}" ${descEscaped ? `data-tooltip="${descEscaped}"` : ''}>
                 ${statusBadge}
                 <div class="community-header">
-                    <span class="community-name">${t.name || ''}</span>
-                    ${t.version ? `<span class="community-version">v${t.version}</span>` : ''}
+                    <span class="community-name">${_esc(t.name || '')}</span>
+                    ${t.version ? `<span class="community-version">v${_esc(t.version)}</span>` : ''}
                 </div>
-                <div class="community-desc">${t.description || ''}</div>
-                <div class="community-author"><span class="community-author-dot" style="background:${dotColor}"></span>${t.author || 'Unknown'}</div>
+                <div class="community-desc">${_esc(t.description || '')}</div>
+                <div class="community-author"><span class="community-author-dot" style="background:${dotColor}"></span>${_esc(t.author || 'Unknown')}</div>
                 ${badgesHTML}
                 <button class="community-install-btn ${btnClass}" onclick="event.stopPropagation(); installCommunityTheme(${idx})">${btnLabel}</button>
             </div>`;
@@ -10233,6 +10291,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
                 _communityInstallAllBtn.innerHTML = origHTML;
                 _communityInstallAllBtn.disabled = false;
                 renderSnapshots();
+                if (_communityCatalog) try { renderCommunityGrid(_communityCatalog); } catch(e) {}
                 showToast(`✓ Installed ${installed} theme${installed > 1 ? 's' : ''}`);
             } catch(e) {
                 _communityInstallAllBtn.innerHTML = origHTML;
@@ -10315,7 +10374,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             html += `<div style="font-size: 0.7rem; font-weight: 700; color: #10b981; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Updates Available (${updates.length})</div>`;
             updates.forEach(u => {
                 html += `<div style="display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; background: var(--bg-deep); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px;">`;
-                html += `<div><div style="font-size: 0.78rem; font-weight: 700; color: var(--text-main);">${u.local.name}</div><div style="font-size: 0.65rem; color: var(--text-muted);">v${u.localVersion} → <span style="color:#10b981;">v${u.remoteVersion}</span></div></div>`;
+                html += `<div><div style="font-size: 0.78rem; font-weight: 700; color: var(--text-main);">${_esc(u.local.name)}</div><div style="font-size: 0.65rem; color: var(--text-muted);">v${_esc(u.localVersion)} → <span style="color:#10b981;">v${_esc(u.remoteVersion)}</span></div></div>`;
                 if (u.viaManifest) {
                     // Manifest-sourced: fetch full data on click
                     html += `<button class="btn btn-primary" style="background:#10b981; padding: 6px 14px; font-size: 0.68rem;" onclick="(async()=>{const ok=await applyManifestUpdate(${u.index},'${u.remoteUpdateUrl}');if(ok){this.innerText='Updated!';this.disabled=true;this.style.opacity='0.5';}})()">Update</button>`;
@@ -10355,7 +10414,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
             html += `<div style="font-size: 0.7rem; font-weight: 700; color: #ef4444; text-transform: uppercase; letter-spacing: 1px; margin: 12px 0 10px;">Errors (${errors.length})</div>`;
             errors.forEach(e => {
                 html += `<div style="padding: 8px 12px; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 10px; margin-bottom: 6px; font-size: 0.72rem;">`;
-                html += `<span style="color:var(--text-main); font-weight:600;">${e.local.name}</span> <span style="color:#ef4444;">${e.error}</span>`;
+                html += `<span style="color:var(--text-main); font-weight:600;">${_esc(e.local.name)}</span> <span style="color:#ef4444;">${_esc(e.error)}</span>`;
                 html += `</div>`;
             });
         }
@@ -10423,12 +10482,12 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         pendingUpdate = result;
         const info = $('update-modal-info');
         const details = $('update-modal-details');
-        info.innerHTML = `<b>${result.local.name}</b> has an update available.`;
+        info.innerHTML = `<b>${_esc(result.local.name)}</b> has an update available.`;
         
-        let detailsHtml = `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Current version</span><span style="color:var(--text-main); font-weight:700;">v${result.localVersion}</span></div>`;
-        detailsHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Available version</span><span style="color:#10b981; font-weight:700;">v${result.remoteVersion}</span></div>`;
-        if (result.remote.author) detailsHtml += `<div style="display:flex; justify-content:space-between;"><span>Author</span><span style="color:var(--text-main);">${result.remote.author}</span></div>`;
-        if (result.remote.description) detailsHtml += `<div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border); font-style:italic;">${result.remote.description}</div>`;
+        let detailsHtml = `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Current version</span><span style="color:var(--text-main); font-weight:700;">v${_esc(result.localVersion)}</span></div>`;
+        detailsHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Available version</span><span style="color:#10b981; font-weight:700;">v${_esc(result.remoteVersion)}</span></div>`;
+        if (result.remote.author) detailsHtml += `<div style="display:flex; justify-content:space-between;"><span>Author</span><span style="color:var(--text-main);">${_esc(result.remote.author)}</span></div>`;
+        if (result.remote.description) detailsHtml += `<div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border); font-style:italic;">${_esc(result.remote.description)}</div>`;
         details.innerHTML = detailsHtml;
         
         showModal('update-modal');
@@ -11464,29 +11523,34 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
         return css
 
     @classmethod
+    def _redis_publish(cls, msg: str):
+        """Publish a message to the Redis theme_pro_sse channel (sync, best-effort)."""
+        redis_url = os.environ.get("REDIS_URL", "")
+        if not redis_url:
+            return
+        try:
+            import redis as _sync_redis
+            import inspect as _insp
+            _extra = {}
+            try:
+                if 'maint_notifications' in _insp.signature(_sync_redis.Redis.from_url).parameters:
+                    _extra['maint_notifications'] = False
+            except Exception:
+                pass
+            r = _sync_redis.Redis.from_url(redis_url, **_extra)
+            r.publish("theme_pro_sse", f"wid:{os.getpid()}\n{msg}")
+            r.close()
+        except Exception:
+            pass  # Redis unavailable — local broadcast still runs below
+
+    @classmethod
     def _broadcast_update(cls, css="", state=""):
         """Push a theme-update event with inline data to all connected SSE clients."""
         import json
 
         payload = json.dumps({"css": css, "state": state}, separators=(",", ":"))
         msg = f"event: theme-update\ndata: {payload}\n\n"
-        # If Redis is available, publish there (subscriber handles local delivery)
-        redis_url = os.environ.get("REDIS_URL", "")
-        if redis_url:
-            try:
-                import redis as _sync_redis
-                import inspect as _insp
-                _extra = {}
-                try:
-                    if 'maint_notifications' in _insp.signature(_sync_redis.Redis.from_url).parameters:
-                        _extra['maint_notifications'] = False
-                except Exception:
-                    pass
-                r = _sync_redis.Redis.from_url(redis_url, **_extra)
-                r.publish("theme_pro_sse", f"wid:{os.getpid()}\n{msg}")
-                r.close()
-            except Exception:
-                pass  # Redis unavailable — local broadcast still runs below
+        cls._redis_publish(msg)
         for q in list(cls._sse_clients):
             try:
                 q.put_nowait(msg)
@@ -11497,23 +11561,7 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
     def _broadcast_disable(cls):
         """Push a theme-disable event to all SSE clients (strip theme + reload)."""
         msg = "event: theme-disable\ndata: disable\n\n"
-        # If Redis is available, publish there (subscriber handles local delivery)
-        redis_url = os.environ.get("REDIS_URL", "")
-        if redis_url:
-            try:
-                import redis as _sync_redis
-                import inspect as _insp
-                _extra = {}
-                try:
-                    if 'maint_notifications' in _insp.signature(_sync_redis.Redis.from_url).parameters:
-                        _extra['maint_notifications'] = False
-                except Exception:
-                    pass
-                r = _sync_redis.Redis.from_url(redis_url, **_extra)
-                r.publish("theme_pro_sse", f"wid:{os.getpid()}\n{msg}")
-                r.close()
-            except Exception:
-                pass  # Redis unavailable — local broadcast still runs below
+        cls._redis_publish(msg)
         for q in list(cls._sse_clients):
             try:
                 q.put_nowait(msg)
@@ -11664,8 +11712,8 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
                         )
                 self._inject_bootloader()
                 self._inject_theme_css()
-                # If theme was just re-enabled, push the saved theme to all SSE clients
-                if valve_changed:
+                # If any valve changed, broadcast current theme state once
+                if valve_changed or canvas_valve_changed or sidebar_valve_changed:
                     css = self._load_css() or ""
                     if self.valves.sidebar_transparency != "opaque":
                         css = self._apply_sidebar_transparency(css, self.valves.sidebar_transparency)
@@ -11673,34 +11721,11 @@ ${selector} textarea { background-color: var(${bgTextarea}) !important; }
                     if not self.valves.enable_canvas_fx:
                         state = self._strip_canvas_from_state(state)
                     Event._broadcast_update(css, state)
-                    log.info("[Theme Pro] Theme re-enabled — pushed to SSE clients")
-                # If Canvas FX valve changed, re-broadcast state so clients update immediately
-                if canvas_valve_changed:
-                    css = self._load_css() or ""
-                    if self.valves.sidebar_transparency != "opaque":
-                        css = self._apply_sidebar_transparency(css, self.valves.sidebar_transparency)
-                    state = self._load_state() or ""
-                    # Strip canvas data from broadcast if Canvas FX is now disabled
-                    if not self.valves.enable_canvas_fx:
-                        state = self._strip_canvas_from_state(state)
-                    Event._broadcast_update(css, state)
-                    log.info(
-                        "[Theme Pro] Canvas FX valve changed to %s — re-broadcast to SSE clients",
-                        self.valves.enable_canvas_fx,
-                    )
-                # If sidebar_transparency valve changed, re-broadcast CSS with post-processing
-                if sidebar_valve_changed:
-                    css = self._load_css() or ""
-                    if self.valves.sidebar_transparency != "opaque":
-                        css = self._apply_sidebar_transparency(css, self.valves.sidebar_transparency)
-                    state = self._load_state() or ""
-                    if not self.valves.enable_canvas_fx:
-                        state = self._strip_canvas_from_state(state)
-                    Event._broadcast_update(css, state)
-                    log.info(
-                        "[Theme Pro] Sidebar transparency valve changed to '%s' — re-broadcast to SSE clients",
-                        self.valves.sidebar_transparency,
-                    )
+                    _reasons = []
+                    if valve_changed: _reasons.append("theme re-enabled")
+                    if canvas_valve_changed: _reasons.append(f"Canvas FX → {self.valves.enable_canvas_fx}")
+                    if sidebar_valve_changed: _reasons.append(f"sidebar → {self.valves.sidebar_transparency}")
+                    log.info("[Theme Pro] Valve change (%s) — pushed to SSE clients", ", ".join(_reasons))
                 log.info("[Theme Pro] Injection tasks completed")
 
             Event._injected = True
