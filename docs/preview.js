@@ -318,6 +318,10 @@
     thumbUp: icon(['M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3'], { strokeWidth: '2.3' }),
     thumbDown: icon(['M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17'], { strokeWidth: '2.3' }),
     continueResponse: icon(['M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z', 'M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z'], { strokeWidth: '2.3' }),
+    // sibling pager chevrons (ResponseMessage.svelte ~L907/L978, size-3.5 at
+    // stroke-width 2.5)
+    prevMsg: icon(['M15.75 19.5 8.25 12l7.5-7.5'], { strokeWidth: '2.5' }),
+    nextMsg: icon(['m8.25 4.5 7.5 7.5-7.5 7.5'], { strokeWidth: '2.5' }),
     // ResponseMessage.svelte "Generation Info" button (id="info-{id}"), shown
     // when message.usage exists, between Read Aloud and Good Response
     info: icon(['M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z'], { strokeWidth: '2.3' }),
@@ -373,16 +377,40 @@
       userActions(!!notFirst) +
       '</div></div></div>';
   }
-  function aiRow(stats, body, fups, t) {
+  // Sibling pager (ResponseMessage.svelte ~L900-995): chevron buttons around
+  // a tracking-widest "i/n" count, leading the action row of each variant.
+  function branchPager(i, n) {
+    return '<div class="branch-pager">' +
+      '<span class="branch-nav branch-prev">' + ACTION_SVG.prevMsg + '</span>' +
+      '<span class="branch-count">' + (i + 1) + '/' + n + '</span>' +
+      '<span class="branch-nav branch-next">' + ACTION_SVG.nextMsg + '</span>' +
+      '</div>';
+  }
+
+  // A response with regenerated variants. Each variant carries its own stats
+  // line, reasoning, body, actions (with per-variant Generation Info) and
+  // follow-ups; only the first is visible until the pager switches.
+  function aiRowMulti(variants) {
+    var n = variants.length;
     return '<div class="message-listitem group"><div class="msg">' +
       '<div class="ai-avatar" style="background:#fff !important; color:#000 !important;">OI</div>' +
       '<div class="ai-col flex-auto w-0 pl-1 relative">' +
-      '<div class="ai-model">Preview Model</div><div class="ai-stats">' + stats + '</div>' +
-      '<div class="chat-assistant w-full min-w-full">' +
-      thoughtBlock(t) +
-      '<div class="markdown-prose">' + body + '</div>' +
-      msgActions(stats) + followUps(fups || null) +
+      '<div class="ai-model">Preview Model</div>' +
+      '<div class="branches">' +
+      variants.map(function (v, i) {
+        return '<div class="branch' + (i === 0 ? ' active' : '') + '">' +
+          '<div class="ai-stats">' + v.stats + '</div>' +
+          '<div class="chat-assistant w-full min-w-full">' +
+          thoughtBlock(v.thought) +
+          '<div class="markdown-prose">' + v.body + '</div>' +
+          msgActions(v.stats, n > 1 ? branchPager(i, n) : '') +
+          followUps(v.fups || null) +
+          '</div></div>';
+      }).join('') +
       '</div></div></div></div>';
+  }
+  function aiRow(stats, body, fups, t) {
+    return aiRowMulti([{ stats: stats, body: body, fups: fups, thought: t }]);
   }
 
   // FollowUps.svelte — hairline-separated rows under a "Follow up" heading
@@ -401,8 +429,8 @@
     return String(stats || '').split(' | ').join('\n');
   }
 
-  function msgActions(stats) {
-    return '<div class="msg-actions">' +
+  function msgActions(stats, pagerHtml) {
+    return '<div class="msg-actions">' + (pagerHtml || '') +
       ['edit', 'copy', 'speak'].map(function (k) { return actionBtn(k); }).join('') +
       '<span class="msg-action" data-tip="' + esc(statsTip(stats)) + '" data-tip-placement="bottom">' + ACTION_SVG.info + '</span>' +
       ['thumbUp', 'thumbDown', 'continueResponse', 'regenerate'].map(function (k) { return actionBtn(k); }).join('') +
@@ -664,6 +692,15 @@ nav .right.is-new .temp-chat { display: flex; }
 .msg-action.delete { padding: 4px; border-radius: 2px; }
 .msg-action.delete:hover { background: transparent; color: ${isLight ? '#000' : '#fff'}; }
 
+/* Sibling branches: one variant visible at a time, switched by the pager */
+.branch { display: none; }
+.branch.active { display: block; }
+.branch-pager { display: flex; align-items: center; }
+.branch-nav { display: flex; align-self: center; padding: 4px; border-radius: 6px; cursor: pointer; transition: background 0.15s, color 0.15s; }
+.branch-nav:hover { background: ${ghostHover}; color: ${isLight ? '#000' : '#fff'}; }
+.branch-nav svg { width: 14px; height: 14px; }
+.branch-count { font-size: 0.875rem; letter-spacing: 0.1em; font-weight: 400; align-self: center; white-space: nowrap; color: ${isLight ? 'var(--color-gray-900)' : 'var(--color-gray-100)'}; }
+
 /* ResponseMessage/FollowUps.svelte, rendered in a my-2.5 wrapper after the
    action row and only on the last message: an mt-4 block with a text-sm
    heading and text-sm rows separated by hairlines */
@@ -815,14 +852,26 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
         null,
         { seconds: 6, body: 'The user wants to see the preset on realistic chat content. I should show the layout pieces the theme actually paints — the sidebar, a user bubble, inline code, a fenced code block, and the input shell — so every themed surface is visible at once.' })}
       ${userRow('Nice. The palette applies to every surface?', true)}
-      ${aiRow('Response Speed: 98.7 t/s | Total Duration: 1.9s | Eval Count: 164 | Session: 2018 tokens',
-        '<p><b>Exactly</b> — backgrounds, borders, and text all come from the preset, and Canvas FX or gradients render behind the whole interface.</p>',
-        [
-          'How do I import one of these presets into my instance?',
-          'Which presets look best with structural transparency enabled?',
-          'Can I combine a Canvas FX script with a gradient background?',
-          'What happens to the palette in OLED mode?',
-        ])}
+      ${aiRowMulti([
+        {
+          stats: 'Response Speed: 98.7 t/s | Total Duration: 1.9s | Eval Count: 164 | Session: 2018 tokens',
+          body: '<p><b>Exactly</b> — backgrounds, borders, and text all come from the preset, and Canvas FX or gradients render behind the whole interface.</p>',
+          fups: [
+            'How do I import one of these presets into my instance?',
+            'Which presets look best with structural transparency enabled?',
+            'Can I combine a Canvas FX script with a gradient background?',
+            'What happens to the palette in OLED mode?',
+          ],
+        },
+        {
+          stats: 'Response Speed: 101.2 t/s | Total Duration: 2.3s | Eval Count: 189 | Session: 2043 tokens',
+          body: '<p>It does — the designer emits one <code>--color-gray-*</code> ramp per mode, and every surface here reads from it: backgrounds, borders, bubbles, even this pager. Regenerate a response and the palette holds.</p>',
+          fups: [
+            'Do regenerated responses keep the same theme variables?',
+            'Which mode should I preview first for a new preset?',
+          ],
+        },
+      ])}
     </div>
     <div class="input-wrap">
       <div id="chat-input-container">
@@ -902,14 +951,25 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   var BOLT_SVG = ${JSON.stringify(SVG.bolt)};
 
   var MSG_ACTIONS_TPL = ${JSON.stringify(MSG_ACTIONS_TPL)};
-  function msgActions(stats) {
+  function msgActions(stats, pagerHtml) {
     var tip = String(stats || '').split(' | ').join('\\n')
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    return MSG_ACTIONS_TPL.replace('__TDP_STATS__', tip);
+    var row = MSG_ACTIONS_TPL.replace('__TDP_STATS__', tip);
+    return pagerHtml ? row.replace('<div class="msg-actions">', '<div class="msg-actions">' + pagerHtml) : row;
+  }
+
+  function branchPager(i, n) {
+    return '<div class="branch-pager">' +
+      '<span class="branch-nav branch-prev">' + BRANCH_PREV + '</span>' +
+      '<span class="branch-count">' + (i + 1) + '/' + n + '</span>' +
+      '<span class="branch-nav branch-next">' + BRANCH_NEXT + '</span>' +
+      '</div>';
   }
   var USER_ACTIONS = ${JSON.stringify(USER_ACTIONS)};
   var USER_ACTIONS_DEL = ${JSON.stringify(USER_ACTIONS_DEL)};
   var THOUGHT_CHEVRON = ${JSON.stringify(SVG.chevronDown)};
+  var BRANCH_PREV = ${JSON.stringify(ACTION_SVG.prevMsg)};
+  var BRANCH_NEXT = ${JSON.stringify(ACTION_SVG.nextMsg)};
 
   // Follow-ups only render on the last message upstream, and each of these
   // conversations has exactly one reply — so every ai() call may carry them.
@@ -929,14 +989,26 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     return '<div class="thought" role="button">Thought for ' + t.seconds + ' seconds' + THOUGHT_CHEVRON + '</div>' +
       '<div class="thought-body markdown-prose" hidden><blockquote>' + t.body + '</blockquote></div>';
   }
-  function ai(stats, body, fups, t) {
+  function aiMulti(variants) {
+    var n = variants.length;
     return '<div class="message-listitem group"><div class="msg">' +
       '<div class="ai-avatar" style="background:#fff !important; color:#000 !important;">OI</div>' +
       '<div class="ai-col flex-auto w-0 pl-1 relative">' +
-      '<div class="ai-model">Preview Model</div><div class="ai-stats">' + stats + '</div>' +
-      '<div class="chat-assistant w-full min-w-full">' + thought(t) +
-      '<div class="markdown-prose">' + body + '</div>' + msgActions(stats) + followUps(fups) +
+      '<div class="ai-model">Preview Model</div>' +
+      '<div class="branches">' +
+      variants.map(function (v, i) {
+        return '<div class="branch' + (i === 0 ? ' active' : '') + '">' +
+          '<div class="ai-stats">' + v.stats + '</div>' +
+          '<div class="chat-assistant w-full min-w-full">' + thought(v.thought) +
+          '<div class="markdown-prose">' + v.body + '</div>' +
+          msgActions(v.stats, n > 1 ? branchPager(i, n) : '') +
+          followUps(v.fups || null) +
+          '</div></div>';
+      }).join('') +
       '</div></div></div></div>';
+  }
+  function ai(stats, body, fups, t) {
+    return aiMulti([{ stats: stats, body: body, fups: fups, thought: t }]);
   }
   // notFirst mirrors UserMessage.svelte's !isFirstMessage gate on Delete
   function user(text, notFirst) {
@@ -981,15 +1053,26 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     'gradient': {
       title: 'Gradient inspiration',
       html: user('What kind of gradients look good behind a chat UI?') +
-        ai('Response Speed: 101.4 t/s | Total Duration: 2.2s | Eval Count: 198 | Session: 1544 tokens',
-          '<p>Three directions worth trying:</p>' +
-          '<ol><li><b>Deep linear</b> — near-black corners into a saturated core</li>' +
-          '<li><b>Radial glow</b> — a soft light source behind the input bar</li>' +
-          '<li><b>Mesh</b> — several drifting color points for an aurora feel</li></ol>' +
-          '<p>Browse the <a>preset gallery</a> for ready-made packs — every one imports with a single URL.</p>',
-          ['How do I animate a gradient without it feeling busy?',
-           'Which gradients hold up in light mode?',
-           'Can I export a gradient I built back out as a preset?'])
+        aiMulti([
+          {
+            stats: 'Response Speed: 101.4 t/s | Total Duration: 2.2s | Eval Count: 198 | Session: 1544 tokens',
+            body: '<p>Three directions worth trying:</p>' +
+              '<ol><li><b>Deep linear</b> — near-black corners into a saturated core</li>' +
+              '<li><b>Radial glow</b> — a soft light source behind the input bar</li>' +
+              '<li><b>Mesh</b> — several drifting color points for an aurora feel</li></ol>' +
+              '<p>Browse the <a>preset gallery</a> for ready-made packs — every one imports with a single URL.</p>',
+            fups: ['How do I animate a gradient without it feeling busy?',
+              'Which gradients hold up in light mode?',
+              'Can I export a gradient I built back out as a preset?'],
+          },
+          {
+            stats: 'Response Speed: 97.8 t/s | Total Duration: 2.6s | Eval Count: 214 | Session: 1602 tokens',
+            body: '<p>Regenerated take: anchor a <b>radial glow</b> behind the input bar first, then layer a slow mesh drift over it — depth without motion sickness.</p>' +
+              '<p>Keep the darkest stop near the sidebar so text stays readable, and preview both <code>dark</code> and <code>light</code> before committing.</p>',
+            fups: ['What intensity works best for mesh gradients?',
+              'Can the gradient animate only when the chat is idle?'],
+          },
+        ])
     },
     'transparency': {
       title: 'Structural transparency',
@@ -1052,6 +1135,22 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
 
   document.querySelectorAll('[data-chat]').forEach(function (el) {
     el.addEventListener('click', function () { openChat(el.getAttribute('data-chat')); });
+  });
+
+  // Branch pager: show the previous/next regenerated variant. Bounds are
+  // guarded like showPreviousMessage/showNextMessage upstream.
+  msgs.addEventListener('click', function (e) {
+    var nav = e.target && e.target.closest ? e.target.closest('.branch-nav') : null;
+    if (!nav || !msgs.contains(nav)) return;
+    var wrap = nav.closest('.branches');
+    if (!wrap) return;
+    var branches = [].slice.call(wrap.children);
+    var cur = -1;
+    branches.forEach(function (b, i) { if (b.classList.contains('active')) cur = i; });
+    var next = nav.classList.contains('branch-next') ? cur + 1 : cur - 1;
+    if (cur < 0 || next < 0 || next >= branches.length) return;
+    branches[cur].classList.remove('active');
+    branches[next].classList.add('active');
   });
 
   // Reasoning collapsibles toggle like Collapsible.svelte. Delegated from the
