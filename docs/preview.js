@@ -504,11 +504,16 @@
 
     const hasInnerFx = !!(opts.canvasScript || opts.gradient);
     const effectsOn = opts.transparent || hasInnerFx;
+    // Structural layer. The layout wrappers and bg-gray-* surfaces clear so
+    // the effect shows through — but the sidebar is deliberately untouched:
+    // in the running app it keeps its native bg-gray-50/70 dark:bg-gray-950/70
+    // wash (Sidebar.svelte:985), which is what lets effects bleed through it
+    // at ~30%. The 72% + blur(14px) rule that used to live here was an
+    // invention and made the mock's sidebar read frosted/opaque instead.
     const structural = effectsOn
       ? `
   ${opts.transparent ? 'body { background: transparent !important; }' : ''}
   .app, main, nav { background: transparent !important; }
-  #sidebar { background: color-mix(in srgb, ${sidebarBg} 72%, transparent) !important; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
   .chat-user .bubble { background: transparent; }`
       : '';
     // In-iframe gradient: body background layers, exactly like the designer's
