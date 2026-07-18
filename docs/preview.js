@@ -1540,9 +1540,11 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     let frame = null;
     const renderMode = (modeKey) => {
       if (frame) frame.remove();
-      // the mock body is transparent here, so the stage is the effect's
-      // backdrop — OLED needs it true black, like the app's body
-      stage.style.background = modeKey === 'oled' ? '#000000' : '';
+      // The mock body is transparent here, so the stage is the effect's
+      // backdrop — it must match the app's body: true black for OLED, white
+      // for light (scripts that don't paint a background rely on it, and the
+      // light sidebar's gray-50 wash only reads correctly over white).
+      stage.style.background = modeKey === 'oled' ? '#000000' : modeKey === 'light' ? '#ffffff' : '';
       frame = mountMockFrame(
         stage,
         buildMockSrcdoc({ modeKey, vars: defaultModeVars(modeKey), customCSS: '', transparent: true, initialChat: currentMockChat, initialCollapsed: currentSidebarCollapsed })
