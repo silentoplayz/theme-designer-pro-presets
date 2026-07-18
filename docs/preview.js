@@ -318,6 +318,9 @@
     thumbUp: icon(['M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3'], { strokeWidth: '2.3' }),
     thumbDown: icon(['M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17'], { strokeWidth: '2.3' }),
     continueResponse: icon(['M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z', 'M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z'], { strokeWidth: '2.3' }),
+    // ResponseMessage.svelte "Generation Info" button (id="info-{id}"), shown
+    // when message.usage exists, between Read Aloud and Good Response
+    info: icon(['M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z'], { strokeWidth: '2.3' }),
     regenerate: icon(['M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99'], { strokeWidth: '2.3' }),
     // UserMessage.svelte:591 — Delete is drawn at stroke-width 2, not 2.3
     trash: icon(['m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0'], { strokeWidth: '2' }),
@@ -378,7 +381,7 @@
       '<div class="chat-assistant w-full min-w-full">' +
       thoughtBlock(t) +
       '<div class="markdown-prose">' + body + '</div>' +
-      MSG_ACTIONS + followUps(fups || null) +
+      msgActions(stats) + followUps(fups || null) +
       '</div></div></div></div>';
   }
 
@@ -394,12 +397,20 @@
   }
 
   // The row Open WebUI renders under a finished assistant reply, in source order.
-  const MSG_ACTIONS =
-    '<div class="msg-actions">' +
-    ['edit', 'copy', 'speak', 'thumbUp', 'thumbDown', 'continueResponse', 'regenerate']
-      .map(function (k) { return actionBtn(k); })
-      .join('') +
-    '</div>';
+  function statsTip(stats) {
+    return String(stats || '').split(' | ').join('\n');
+  }
+
+  function msgActions(stats) {
+    return '<div class="msg-actions">' +
+      ['edit', 'copy', 'speak'].map(function (k) { return actionBtn(k); }).join('') +
+      '<span class="msg-action" data-tip="' + esc(statsTip(stats)) + '" data-tip-placement="bottom">' + ACTION_SVG.info + '</span>' +
+      ['thumbUp', 'thumbDown', 'continueResponse', 'regenerate'].map(function (k) { return actionBtn(k); }).join('') +
+      '</div>';
+  }
+  // Template for the in-iframe script: it swaps the placeholder for each
+  // message's own stats when building rows on chat switch.
+  const MSG_ACTIONS_TPL = msgActions('__TDP_STATS__');
 
   function esc(str) {
     return String(str == null ? '' : str)
@@ -706,7 +717,9 @@ nav .right.is-new .temp-chat { display: flex; }
 
 /* Tooltip.svelte -> tippy theme 'dark' (app.css:379): rounded-lg bg-gray-950
    text-xs border border-gray-900 shadow-xl, content padding 5px 9px */
-#tdp-tooltip { position: fixed; z-index: 300; max-width: 300px; padding: 5px 9px; border-radius: 8px; background: var(--color-gray-950); border: 1px solid var(--color-gray-900); color: #fff; font-size: 12px; line-height: 1.35; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); pointer-events: none; opacity: 0; transition: opacity 0.1s; }
+#tdp-tooltip { position: fixed; z-index: 300; max-width: 300px; padding: 5px 9px; border-radius: 8px; background: var(--color-gray-950); border: 1px solid var(--color-gray-900); color: #fff; font-size: 12px; line-height: 1.35; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); pointer-events: none; opacity: 0; transition: opacity 0.1s; white-space: pre-line; }
+/* Generation Info renders its usage block in a <pre> upstream */
+#tdp-tooltip.pre { font-family: ui-monospace, 'JetBrains Mono', monospace; text-align: left; }
 #tdp-tooltip.show { opacity: 1; }
 
 /* Backdrop behind the mobile sidebar (Sidebar.svelte L767-776:
@@ -888,7 +901,12 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   if (!msgs || !navTitle) return;
   var BOLT_SVG = ${JSON.stringify(SVG.bolt)};
 
-  var MSG_ACTIONS = ${JSON.stringify(MSG_ACTIONS)};
+  var MSG_ACTIONS_TPL = ${JSON.stringify(MSG_ACTIONS_TPL)};
+  function msgActions(stats) {
+    var tip = String(stats || '').split(' | ').join('\\n')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return MSG_ACTIONS_TPL.replace('__TDP_STATS__', tip);
+  }
   var USER_ACTIONS = ${JSON.stringify(USER_ACTIONS)};
   var USER_ACTIONS_DEL = ${JSON.stringify(USER_ACTIONS_DEL)};
   var THOUGHT_CHEVRON = ${JSON.stringify(SVG.chevronDown)};
@@ -917,7 +935,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       '<div class="ai-col flex-auto w-0 pl-1 relative">' +
       '<div class="ai-model">Preview Model</div><div class="ai-stats">' + stats + '</div>' +
       '<div class="chat-assistant w-full min-w-full">' + thought(t) +
-      '<div class="markdown-prose">' + body + '</div>' + MSG_ACTIONS + followUps(fups) +
+      '<div class="markdown-prose">' + body + '</div>' + msgActions(stats) + followUps(fups) +
       '</div></div></div></div>';
   }
   // notFirst mirrors UserMessage.svelte's !isFirstMessage gate on Delete
@@ -1131,6 +1149,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     current = el;
     if (!el) { tip.classList.remove('show'); return; }
     tip.textContent = el.getAttribute('data-tip');
+    tip.classList.toggle('pre', tip.textContent.indexOf('\\n') !== -1);
     tip.classList.add('show');
     var r = el.getBoundingClientRect();
     var p = el.getAttribute('data-tip-placement') || 'top';
