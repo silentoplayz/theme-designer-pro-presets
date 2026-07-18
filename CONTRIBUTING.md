@@ -2,6 +2,8 @@
 
 Thank you for your interest in contributing! This repository is a **curated gallery** — every preset is reviewed for quality, performance, and visual impact before being accepted.
 
+By participating, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
+
 ---
 
 ## 📋 Submission Checklist

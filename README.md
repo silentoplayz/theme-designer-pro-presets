@@ -208,4 +208,4 @@ node scripts/validate.js       # Check all presets (run before pushing)
 
 ## 🤝 Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on submitting presets, quality standards, and the curation process.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on submitting presets, quality standards, and the curation process. All participants are expected to follow our [Code of Conduct](CODE_OF_CONDUCT.md).
