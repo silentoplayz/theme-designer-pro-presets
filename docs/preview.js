@@ -509,6 +509,11 @@ ${g.animated ? '@keyframes tdp-preview-gradient-shift { 0% { background-position
 ${varLines}
 }
 * { box-sizing: border-box; margin: 0; }
+/* --app-text-scale is Open WebUI's UI Scale mechanism (app.css:27-36): the
+   Interface-settings slider sets the var and html font-size scales every
+   rem-based size. Px-based chrome (sidebar, nav) stays fixed, as upstream. */
+:root { --app-text-scale: 1; }
+html { font-size: calc(1rem * var(--app-text-scale, 1)); }
 html, body { height: 100%; }
 body { background: ${bg}; font-family: -apple-system, BlinkMacSystemFont, 'Inter', ui-sans-serif, 'Segoe UI', Roboto, sans-serif; color: ${proseText}; overflow: hidden; font-size: 0.9375rem; -webkit-font-smoothing: antialiased; }
 svg { width: 16px; height: 16px; flex-shrink: 0; }
@@ -1307,11 +1312,19 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
 
   window.addEventListener('message', function (e) {
     var d = e.data;
-    if (!d || d.__tdpPreview !== true || d.kind !== 'topinset') return;
-    var px = Number(d.px);
-    if (!isFinite(px) || px < 0) return;
-    inset = px;
-    apply();
+    if (!d || d.__tdpPreview !== true) return;
+    if (d.kind === 'topinset') {
+      var px = Number(d.px);
+      if (!isFinite(px) || px < 0) return;
+      inset = px;
+      apply();
+    } else if (d.kind === 'textscale') {
+      // Interface.svelte's UI Scale slider — setTextScale(scale) upstream
+      var sc = Number(d.scale);
+      if (!isFinite(sc) || sc < 1 || sc > 1.5) return;
+      root.style.setProperty('--app-text-scale', String(sc));
+      apply(); // content height changed, so the first-row offset must too
+    }
   });
 
   window.addEventListener('resize', apply);
@@ -1345,6 +1358,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   let active = null; // { destroy() }
   let currentMockChat = 'default'; // survives mode-pill rebuilds within one preview
   let currentSidebarCollapsed = false; // ditto, so switching modes keeps the rail state
+  let currentTextScale = 1; // UI Scale slider value, reapplied to rebuilt frames
 
   function setStatus(msg) {
     statusEl.textContent = msg || '';
@@ -1365,6 +1379,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   function openOverlay(title) {
     currentMockChat = 'default';
     currentSidebarCollapsed = false;
+    currentTextScale = 1;
     titleEl.textContent = title;
     stage.innerHTML = '';
     controlsEl.innerHTML = '';
@@ -1391,6 +1406,12 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     targets.forEach((w) => { try { if (w) w.postMessage(msg, '*'); } catch (e) {} });
   }
 
+  function sendTextScale(win) {
+    const msg = { __tdpPreview: true, kind: 'textscale', scale: currentTextScale };
+    const targets = win ? [win] : Array.from(stage.querySelectorAll('iframe')).map((f) => f.contentWindow);
+    targets.forEach((w) => { try { if (w) w.postMessage(msg, '*'); } catch (e) {} });
+  }
+
   window.addEventListener('resize', () => {
     if (overlay.classList.contains('open')) sendTopInset();
   });
@@ -1403,7 +1424,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     if (e.data.kind === 'sidebarchange') currentSidebarCollapsed = !!e.data.collapsed;
     if (e.data.kind === 'status' && typeof e.data.text === 'string') setStatus(e.data.text);
     // a frame just mounted (including after a mode-pill rebuild) — answer it
-    if (e.data.kind === 'ready') requestAnimationFrame(() => sendTopInset(e.source));
+    if (e.data.kind === 'ready') requestAnimationFrame(() => { sendTopInset(e.source); if (currentTextScale !== 1) sendTextScale(e.source); });
   });
   document.addEventListener(
     'keydown',
@@ -1426,6 +1447,30 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   // all four — not just CSS presets. Appended last so it trails any pills or
   // interaction hints the caller already added.
   function addMockNote() {
+    // Open WebUI's UI Scale slider (Interface.svelte: range 1-1.5, step
+    // 0.01, shown as "Nx") riding along in the preview pill. Every mock
+    // preview gets it, so it mounts with the shared note.
+    const wrap = document.createElement('label');
+    wrap.className = 'preview-scale';
+    wrap.innerHTML = '<span>UI Scale</span>';
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.min = '1';
+    slider.max = '1.5';
+    slider.step = '0.01';
+    slider.value = String(currentTextScale);
+    const out = document.createElement('output');
+    const fmt = (v) => (Number(v) === 1 ? '1x' : Number(v).toFixed(2).replace(/0$/, '') + 'x');
+    out.textContent = fmt(slider.value);
+    slider.addEventListener('input', () => {
+      currentTextScale = Number(slider.value);
+      out.textContent = fmt(slider.value);
+      sendTextScale();
+    });
+    wrap.appendChild(slider);
+    wrap.appendChild(out);
+    controlsEl.appendChild(wrap);
+
     const note = document.createElement('span');
     note.className = 'preview-hint';
     note.textContent = 'Approximate — rendered on a mock chat layout';
