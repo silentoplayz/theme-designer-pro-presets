@@ -393,7 +393,7 @@
   function aiRowMulti(variants) {
     var n = variants.length;
     return '<div class="message-listitem group"><div class="msg">' +
-      '<div class="ai-avatar" style="background:#fff !important; color:#000 !important;">OI</div>' +
+      '<div class="ai-avatar"><img src="owui-logo.png" alt=""></div>' +
       '<div class="ai-col flex-auto w-0 pl-1 relative">' +
       '<div class="ai-model">Preview Model</div>' +
       '<div class="branches">' +
@@ -564,14 +564,14 @@ svg { width: 1rem; height: 1rem; flex-shrink: 0; }
 .rail-btn:hover > span { background: ${navHover}; }
 .rail-btn svg { width: 1rem; height: 1rem; }
 /* the logo swaps to the sidebar-toggle glyph on hover (group-hover:hidden) */
-.rail-logo i { width: 1.25rem; height: 1.25rem; border-radius: 50%; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-size: 0.5rem; font-weight: 800; font-style: normal; letter-spacing: -0.02em; border: 1px solid rgb(0 0 0 / 0.1); }
+.rail-logo img { width: 1.25rem; height: 1.25rem; border-radius: 50%; object-fit: cover; }
 .rail-logo svg { display: none; }
-.rail-logo:hover i { display: none; }
+.rail-logo:hover img { display: none; }
 .rail-logo:hover svg { display: block; }
 .rail-avatar { width: 1.375rem; height: 1.375rem; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #ec4899); }
 .brand { display: flex; align-items: center; gap: 2px; padding: 0 0 6px; color: ${textMain}; }
 .brand-dot { width: 2.125rem; height: 2.125rem; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-.brand-dot i { width: 1.25rem; height: 1.25rem; border-radius: 50%; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-size: 0.5rem; font-weight: 800; font-style: normal; letter-spacing: -0.02em; border: 1px solid rgb(0 0 0 / 0.1); }
+.brand-dot img { width: 1.25rem; height: 1.25rem; border-radius: 50%; object-fit: cover; }
 .brand .brand-name { flex: 1; padding: 0 2px; font-size: 0.875rem; font-weight: 400; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-200)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .brand .panel-icon { width: 1.875rem; height: 1.875rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: ${textMuted}; }
 .brand .panel-icon svg { width: 1rem; height: 1rem; }
@@ -654,7 +654,8 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
    hover-gated (invisible group-hover:visible); the mock keeps them visible
    so the preview shows the full anatomy without interaction. */
 .user-actions { display: flex; align-items: center; justify-content: flex-end; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-500)'}; }
-.ai-avatar { width: 1.75rem; height: 1.75rem; border-radius: 16px; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-size: 0.5625rem; font-weight: 800; flex-shrink: 0; margin: 2px 8px 0 0; border: 1px solid rgb(0 0 0 / 0.1); }
+.ai-avatar { width: 1.75rem; height: 1.75rem; flex-shrink: 0; margin: 2px 8px 0 0; }
+.ai-avatar img { width: 100%; height: 100%; border-radius: 16px; object-fit: cover; display: block; }
 .ai-col { flex: 1; min-width: 0; padding-left: 4px; }
 .ai-model { font-size: 1rem; font-weight: 400; color: ${isLight ? '#000' : '#fff'}; margin-bottom: 1px; line-height: 1.4; }
 .ai-stats { font-size: 1rem; color: ${textFaint}; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -696,7 +697,8 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
 /* Logo, model name and greeting left-align with the Suggested column — the
    head shares the suggestion block's width and padding so their edges meet */
 .ph-head { width: min(42rem, 100%); padding: 0 20px; display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
-.ph-logo { width: 2.5rem; height: 2.5rem; border-radius: 16px; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8125rem; margin-bottom: 2px; border: 1px solid rgb(0 0 0 / 0.1); }
+.ph-logo { width: 2.5rem; height: 2.5rem; margin-bottom: 2px; }
+.ph-logo img { width: 100%; height: 100%; border-radius: 16px; object-fit: cover; display: block; }
 .ph-model { font-size: 1.875rem; line-height: 2.25rem; font-weight: 400; color: ${isLight ? 'var(--color-gray-800)' : 'var(--color-gray-100)'}; max-width: 36rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ph-sub { font-size: 1.875rem; line-height: 2.25rem; font-weight: 400; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-400)'}; margin: 0 0 22px; }
 .ph-suggest { width: min(42rem, 100%); padding: 0 20px; }
@@ -836,7 +838,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
 <div class="app">
   <div class="sidebar-rail">
     <div class="rail-group">
-      <span class="rail-btn lg rail-logo" data-tip="Open Sidebar" data-tip-placement="right"><span><i>OI</i>${SVG.panel}</span></span>
+      <span class="rail-btn lg rail-logo" data-tip="Open Sidebar" data-tip-placement="right"><span><img src="owui-logo.png" alt="">${SVG.panel}</span></span>
       <span class="rail-btn rail-action" data-chat="new" data-tip="New Chat" data-tip-placement="right" style="margin-top:4px"><span>${SVG.editPencil}</span></span>
       <span class="rail-btn rail-action" data-tip="Search" data-tip-placement="right"><span>${SVG.search}</span></span>
       <span class="rail-btn rail-action" data-tip="Notes" data-tip-placement="right"><span>${SVG.notes}</span></span>
@@ -847,7 +849,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
   </div>
   <div id="backdrop"></div>
   <div class="sidebar-panel" id="sidebar">
-    <div class="brand"><div class="brand-dot"><i>OI</i></div><span class="brand-name">Open WebUI</span><span class="panel-icon" data-tip="Close Sidebar">${SVG.panel}</span></div>
+    <div class="brand"><div class="brand-dot"><img src="owui-logo.png" alt=""></div><span class="brand-name">Open WebUI</span><span class="panel-icon" data-tip="Close Sidebar">${SVG.panel}</span></div>
     <div class="side-item" data-chat="new">${SVG.editPencil} <span class="label">New Chat</span></div>
     <div class="side-item">${SVG.search} <span class="label">Search</span></div>
     <div class="side-item">${SVG.notes} <span class="label">Notes</span></div>
@@ -1023,7 +1025,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   function aiMulti(variants) {
     var n = variants.length;
     return '<div class="message-listitem group"><div class="msg">' +
-      '<div class="ai-avatar" style="background:#fff !important; color:#000 !important;">OI</div>' +
+      '<div class="ai-avatar"><img src="owui-logo.png" alt=""></div>' +
       '<div class="ai-col flex-auto w-0 pl-1 relative">' +
       '<div class="ai-model">Preview Model</div>' +
       '<div class="branches">' +
@@ -1134,7 +1136,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       title: 'New Chat',
       html: '<div class="placeholder">' +
         '<div class="ph-head">' +
-        '<div class="ph-logo" style="background:#fff !important; color:#000 !important;">OI</div>' +
+        '<div class="ph-logo"><img src="owui-logo.png" alt=""></div>' +
         '<div class="ph-model">Preview Model</div>' +
         '<div class="ph-sub">How can I help you today?</div>' +
         '</div>' +
