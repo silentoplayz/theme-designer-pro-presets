@@ -426,15 +426,22 @@ svg { width: 16px; height: 16px; flex-shrink: 0; }
    rounded-xl px-2 py-1.5 nav items, size-4 icons, text-[13px] leading-5.
    Collapsing swaps it for the w-[42px] rail (Sidebar.svelte L806-974); the
    panel itself uses transition:slide{duration:250,axis:'x'}. */
-.sidebar-panel { width: 245px; flex-shrink: 0; background: ${sidebarBg}; border-right: 1px solid ${borderSubtle}; padding: 6px 4px 4px; display: flex; flex-direction: column; overflow: hidden; transition: width 250ms ease, opacity 150ms ease; }
+/* Sidebar.svelte:985 — the expanded panel is bg-gray-50/70 dark:bg-gray-950/70
+   on desktop (opaque only on mobile, see the media query below). Painting it
+   fully opaque here made any theme-applied border-radius cut a hard wedge of
+   body colour out of each corner. */
+.sidebar-panel { width: 245px; flex-shrink: 0; background: color-mix(in srgb, ${sidebarBg} 70%, transparent); border-right: 1px solid ${borderSubtle}; padding: 6px 4px 4px; display: flex; flex-direction: column; overflow: hidden; transition: width 250ms ease, opacity 150ms ease; }
 /* min-width:0 is required — flex items default to min-width:auto, which would
    floor the panel at its nowrap content width and defeat width:0 */
 .app.collapsed .sidebar-panel { width: 0; min-width: 0; padding-left: 0; padding-right: 0; border-right-width: 0; opacity: 0; pointer-events: none; }
 
 /* The collapsed rail: w-[42px] py-1 px-1, justify-between, border-e-[0.5px] */
-.sidebar-rail { display: none; width: 42px; flex-shrink: 0; padding: 4px; flex-direction: column; justify-content: space-between; align-items: center; background: ${sidebarBg}; border-right: 0.5px solid ${borderSubtle}; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-300)'}; overflow: hidden; cursor: pointer; transition: background 0.15s; }
+/* Sidebar.svelte:808 — the rail carries no background class at all, just a
+   hover tint, so whatever is behind the app shows straight through it */
+.sidebar-rail { display: none; width: 42px; flex-shrink: 0; padding: 4px; flex-direction: column; justify-content: space-between; align-items: center; background: transparent; border-right: 0.5px solid ${borderSubtle}; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-300)'}; overflow: hidden; cursor: pointer; transition: background 0.15s; }
 .app.collapsed .sidebar-rail { display: flex; }
-.sidebar-rail:hover { background: ${isLight ? 'color-mix(in srgb, var(--color-gray-50) 30%, ' + sidebarBg + ')' : 'color-mix(in srgb, var(--color-gray-800) 30%, ' + sidebarBg + ')'}; }
+/* hover:bg-gray-50/30 dark:hover:bg-gray-800/30 — a tint, not a fill */
+.sidebar-rail:hover { background: ${isLight ? 'color-mix(in srgb, var(--color-gray-50) 30%, transparent)' : 'color-mix(in srgb, var(--color-gray-800) 30%, transparent)'}; }
 .rail-group { display: flex; flex-direction: column; align-items: center; }
 /* size-8.5 / size-8 hit areas wrapping a size-[30px] rounded-lg hover target */
 .rail-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
