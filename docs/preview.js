@@ -664,14 +664,14 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
 <div class="app">
   <div id="rail" title="Open Sidebar">
     <div class="rail-group">
-      <span class="rail-btn lg rail-logo"><span><i>OI</i>${SVG.panel}</span></span>
-      <span class="rail-btn" style="margin-top:4px">${'<span>' + SVG.editPencil + '</span>'}</span>
-      <span class="rail-btn"><span>${SVG.search}</span></span>
-      <span class="rail-btn"><span>${SVG.notes}</span></span>
-      <span class="rail-btn"><span>${SVG.workspace}</span></span>
-      <span class="rail-btn"><span>${SVG.code}</span></span>
+      <span class="rail-btn lg rail-logo" title="Open Sidebar"><span><i>OI</i>${SVG.panel}</span></span>
+      <span class="rail-btn rail-action" data-chat="new" title="New Chat" style="margin-top:4px"><span>${SVG.editPencil}</span></span>
+      <span class="rail-btn rail-action" title="Search"><span>${SVG.search}</span></span>
+      <span class="rail-btn rail-action" title="Notes"><span>${SVG.notes}</span></span>
+      <span class="rail-btn rail-action" title="Workspace"><span>${SVG.workspace}</span></span>
+      <span class="rail-btn rail-action" title="Playground"><span>${SVG.code}</span></span>
     </div>
-    <span class="rail-btn lg"><span><span class="rail-avatar"></span></span></span>
+    <span class="rail-btn lg rail-action" title="User menu"><span><span class="rail-avatar"></span></span></span>
   </div>
   <div id="backdrop"></div>
   <div id="sidebar">
@@ -967,7 +967,16 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   }
 
   toggle.addEventListener('click', function (e) { e.stopPropagation(); setCollapsed(true); });
+
+  // The rail expands when you click the logo or empty space, but its action
+  // buttons don't — upstream each one calls stopImmediatePropagation so it
+  // runs its own handler instead of the enclosing expand button. The New Chat
+  // pencil therefore opens the New Chat view with the sidebar still collapsed,
+  // and the user menu sits outside that button entirely.
   rail.addEventListener('click', function () { setCollapsed(false); });
+  rail.querySelectorAll('.rail-action').forEach(function (el) {
+    el.addEventListener('click', function (e) { e.stopPropagation(); });
+  });
   if (navToggle) navToggle.addEventListener('click', function (e) { e.stopPropagation(); setCollapsed(false); });
   if (backdrop) backdrop.addEventListener('click', function () { setCollapsed(true); });
 
