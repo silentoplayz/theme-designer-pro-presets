@@ -1001,6 +1001,17 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     return asJSON ? res.json() : res.text();
   }
 
+  // Every preview type renders on the same mock chat, so the caveat applies to
+  // all four — not just CSS presets. Appended last so it trails any pills or
+  // interaction hints the caller already added.
+  function addMockNote() {
+    const note = document.createElement('span');
+    note.className = 'preview-hint';
+    note.textContent = 'Approximate — rendered on a mock chat layout';
+    controlsEl.appendChild(note);
+    return note;
+  }
+
   function pillGroup(labels, activeLabel, onPick) {
     const wrap = document.createElement('div');
     wrap.className = 'preview-pills';
@@ -1048,6 +1059,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       stage.appendChild(bgEl);
       const mock = mockOverEffect('dark');
       active = { destroy: () => mock.remove() };
+      addMockNote();
       setStatus('');
     } catch (err) {
       setStatus('Could not load this gradient: ' + err.message);
@@ -1090,6 +1102,8 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
         wrap.appendChild(slider);
         controlsEl.appendChild(wrap);
       }
+
+      addMockNote();
     } catch (err) {
       setStatus('Could not load this script: ' + err.message);
     }
@@ -1110,11 +1124,8 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
         );
       };
       controlsEl.appendChild(pillGroup(['dark', 'light'], 'dark', renderMode));
-      const note = document.createElement('span');
-      note.className = 'preview-hint';
-      note.textContent = 'Approximate — rendered on a mock chat layout';
-      controlsEl.appendChild(note);
       renderMode('dark');
+      addMockNote();
       active = { destroy() { if (frame) frame.remove(); } };
     } catch (err) {
       setStatus('Could not load this preset: ' + err.message);
@@ -1158,6 +1169,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
         controlsEl.appendChild(pillGroup(present, present[0], renderMode));
       }
       renderMode(present[0]);
+      addMockNote();
 
       active = {
         destroy() {
