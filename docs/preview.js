@@ -170,11 +170,12 @@
       if (!rafId) rafId = requestAnimationFrame(pump);
     };
 
-    const onMove = (e) => queueMove(e.clientX, e.clientY);
-    const onClick = (e) => post({ type: 'click', x: e.clientX, y: e.clientY });
-    const onDown = (e) => post({ type: 'mousedown', x: e.clientX, y: e.clientY });
-    const onUp = (e) => post({ type: 'mouseup', x: e.clientX, y: e.clientY });
-    const touches = (e) => Array.from(e.touches.length ? e.touches : e.changedTouches).map((t) => ({ x: t.clientX, y: t.clientY }));
+    const safeXY = (e) => { try { return { x: e.clientX, y: e.clientY }; } catch (_) { return null; } };
+    const onMove = (e) => { const p = safeXY(e); if (p) queueMove(p.x, p.y); };
+    const onClick = (e) => { const p = safeXY(e); if (p) post({ type: 'click', x: p.x, y: p.y }); };
+    const onDown = (e) => { const p = safeXY(e); if (p) post({ type: 'mousedown', x: p.x, y: p.y }); };
+    const onUp = (e) => { const p = safeXY(e); if (p) post({ type: 'mouseup', x: p.x, y: p.y }); };
+    const touches = (e) => { try { return Array.from(e.touches.length ? e.touches : e.changedTouches).map((t) => ({ x: t.clientX, y: t.clientY })); } catch (_) { return []; } };
     const onTouchStart = (e) => {
       const c = touches(e);
       post({ type: 'touchstart', touches: c });
@@ -307,12 +308,21 @@
       ? 'color-mix(in srgb, #ffffff 5%, transparent)'
       : 'color-mix(in srgb, var(--color-gray-500) 5%, transparent)';
 
-    const structural = opts.transparent
+    const hasInnerFx = !!(opts.canvasScript || opts.gradient);
+    const effectsOn = opts.transparent || hasInnerFx;
+    const structural = effectsOn
       ? `
-  body { background: transparent !important; }
+  ${opts.transparent ? 'body { background: transparent !important; }' : ''}
   .app, main, nav { background: transparent !important; }
   #sidebar { background: color-mix(in srgb, ${sidebarBg} 72%, transparent) !important; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
   .chat-user > div { background: color-mix(in srgb, ${bubble} 72%, transparent); }`
+      : '';
+    // In-iframe gradient: body background layers, exactly like the designer's
+    // gradient section (emitted before custom CSS so cascade order matches)
+    const g = opts.gradient;
+    const gradientCSS = g
+      ? `body { ${g.background ? `background-color: ${g.background} !important;` : ''} background-image: ${g.backgroundImage} !important; background-attachment: fixed !important; ${g.animated ? `background-size: 300% 300% !important; animation: tdp-preview-gradient-shift ${g.speed}s ease infinite;` : ''} }
+${g.animated ? '@keyframes tdp-preview-gradient-shift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }' : ''}`
       : '';
 
     return `<!DOCTYPE html>
@@ -326,7 +336,7 @@ ${varLines}
 html, body { height: 100%; }
 body { background: ${bg}; font-family: -apple-system, BlinkMacSystemFont, 'Inter', ui-sans-serif, 'Segoe UI', Roboto, sans-serif; color: ${proseText}; overflow: hidden; font-size: 0.9375rem; -webkit-font-smoothing: antialiased; }
 svg { width: 16px; height: 16px; flex-shrink: 0; }
-.app { display: flex; height: 100vh; }
+.app { display: flex; height: 100vh; position: relative; }
 
 #sidebar { width: 245px; flex-shrink: 0; background: ${sidebarBg}; border-right: 1px solid ${borderSubtle}; padding: 8px 6px 8px; display: flex; flex-direction: column; overflow: hidden; }
 .brand { display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 13px; padding: 6px 10px 10px 8px; color: ${textMain}; }
@@ -422,12 +432,14 @@ textarea::placeholder { color: ${textMuted}; }
 #send-message-button:hover { filter: ${isLight ? 'brightness(1.4)' : 'brightness(0.88)'}; }
 .footer-note { text-align: center; font-size: 10.5px; color: ${textFaint}; padding: 4px 0 6px; }
 ${structural}
+${gradientCSS}
 </style>
 <style>
 ${safeCSS}
 </style>
 </head>
 <body data-initial-chat="${esc(opts.initialChat || 'default')}">
+${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;"></canvas>' : ''}
 <div class="app">
   <div id="sidebar">
     <div class="brand"><div class="brand-dot" style="background:#fff !important; color:#000 !important;">OI</div> Open WebUI <span class="panel-icon">${SVG.panel}</span></div>
@@ -497,20 +509,54 @@ ${safeCSS}
     </div>
   </main>
 </div>
+${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.stringify(opts.canvasScript).replace(/</g, '\\u003c')}</script>
+<script>
+(function () {
+  var el = document.getElementById('cfx-src');
+  var canvas = document.getElementById('owui-theme-canvas-bg');
+  if (!el || !canvas) return;
+  var report = function (text) { try { parent.postMessage({ __tdpPreview: true, kind: 'status', text: text }, '*'); } catch (e) {} };
+  if (!canvas.transferControlToOffscreen) { report('Live Canvas FX preview needs a browser with OffscreenCanvas support.'); return; }
+  var src;
+  try { src = JSON.parse(el.textContent); } catch (e) { return; }
+  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+  var url = URL.createObjectURL(new Blob([src], { type: 'application/javascript' }));
+  var worker;
+  try { worker = new Worker(url); } catch (e) { report('Could not start the animation worker: ' + e.message); return; }
+  worker.onerror = function (e) { report('Script error: ' + (e.message || 'the animation failed to run.')); };
+  var off = canvas.transferControlToOffscreen();
+  var wpost = function (m, t) { try { worker.postMessage(m, t); } catch (e) {} };
+  wpost({ type: 'init', canvas: off, width: window.innerWidth, height: window.innerHeight, env: { authToken: '', baseUrl: '', locale: navigator.language, timezone: '' } }, [off]);
+  var pend = null, raf = null;
+  var pump = function () { raf = null; if (pend) { wpost(pend); pend = null; } };
+  var qm = function (x, y) { pend = { type: 'mousemove', x: x, y: y }; if (!raf) raf = requestAnimationFrame(pump); };
+  var xy = function (e) { try { return { x: e.clientX, y: e.clientY }; } catch (err) { return null; } };
+  window.addEventListener('mousemove', function (e) { var p = xy(e); if (p) qm(p.x, p.y); }, { passive: true });
+  window.addEventListener('click', function (e) { var p = xy(e); if (p) wpost({ type: 'click', x: p.x, y: p.y }); }, true);
+  window.addEventListener('mousedown', function (e) { var p = xy(e); if (p) wpost({ type: 'mousedown', x: p.x, y: p.y }); }, true);
+  window.addEventListener('mouseup', function (e) { var p = xy(e); if (p) wpost({ type: 'mouseup', x: p.x, y: p.y }); }, true);
+  window.addEventListener('touchstart', function (e) { try { var t = e.touches[0]; if (t) wpost({ type: 'mousedown', x: t.clientX, y: t.clientY }); } catch (err) {} }, { passive: true });
+  window.addEventListener('touchmove', function (e) { try { var t = e.touches[0]; if (t) qm(t.clientX, t.clientY); } catch (err) {} }, { passive: true });
+  window.addEventListener('resize', function () { wpost({ type: 'resize', width: window.innerWidth, height: window.innerHeight }); });
+})();
+</script>` : ''}
 <script>
 (function () {
   var post = function (kind, data) {
     try { parent.postMessage(Object.assign({ __tdpPreview: true, kind: kind }, data), '*'); } catch (e) {}
   };
-  window.addEventListener('mousemove', function (e) { post('mousemove', { x: e.clientX, y: e.clientY }); }, { passive: true });
-  window.addEventListener('click', function (e) { post('click', { x: e.clientX, y: e.clientY }); }, true);
-  window.addEventListener('mousedown', function (e) { post('mousedown', { x: e.clientX, y: e.clientY }); }, true);
-  window.addEventListener('mouseup', function (e) { post('mouseup', { x: e.clientX, y: e.clientY }); }, true);
+  var xy = function (e) { try { return { x: e.clientX, y: e.clientY }; } catch (err) { return null; } };
+  window.addEventListener('mousemove', function (e) { var p = xy(e); if (p) post('mousemove', p); }, { passive: true });
+  window.addEventListener('click', function (e) { var p = xy(e); if (p) post('click', p); }, true);
+  window.addEventListener('mousedown', function (e) { var p = xy(e); if (p) post('mousedown', p); }, true);
+  window.addEventListener('mouseup', function (e) { var p = xy(e); if (p) post('mouseup', p); }, true);
   var touchList = function (e) {
-    var list = e.touches.length ? e.touches : e.changedTouches;
-    var out = [];
-    for (var i = 0; i < list.length; i++) out.push({ x: list[i].clientX, y: list[i].clientY });
-    return out;
+    try {
+      var list = e.touches.length ? e.touches : e.changedTouches;
+      var out = [];
+      for (var i = 0; i < list.length; i++) out.push({ x: list[i].clientX, y: list[i].clientY });
+      return out;
+    } catch (err) { return []; }
   };
   window.addEventListener('touchstart', function (e) { post('touchstart', { touches: touchList(e) }); }, { passive: true });
   window.addEventListener('touchmove', function (e) { post('touchmove', { touches: touchList(e) }); }, { passive: true });
@@ -681,6 +727,7 @@ ${safeCSS}
     if (!e.data || e.data.__tdpPreview !== true || !overlay.classList.contains('open')) return;
     if (e.data.kind === 'escape') closePreview();
     if (e.data.kind === 'chatchange' && typeof e.data.chat === 'string') currentMockChat = e.data.chat;
+    if (e.data.kind === 'status' && typeof e.data.text === 'string') setStatus(e.data.text);
   });
   document.addEventListener(
     'keydown',
@@ -829,29 +876,14 @@ ${safeCSS}
       if (present.length === 0) throw new Error('no mode data found');
 
       let frame = null;
-      let engine = null;
-      let gradientEl = null;
 
       const renderMode = (modeKey) => {
         if (frame) { frame.remove(); frame = null; }
-        if (engine) { engine.destroy(); engine = null; }
-        if (gradientEl) { gradientEl.remove(); gradientEl = null; }
         setStatus('');
 
         const mode = theme[modeKey];
         const hasCanvas = mode.canvasEnabled && mode.canvasScript && mode.canvasScript.trim();
         const gLayers = mode.gradientEnabled ? gradientLayers(mode) : null;
-        const hasEffects = !!(hasCanvas || gLayers);
-
-        if (gLayers) {
-          gradientEl = document.createElement('div');
-          gradientEl.className = 'preview-gradient-bg';
-          applyGradientToEl(gradientEl, gLayers);
-          stage.appendChild(gradientEl);
-        }
-        if (hasCanvas) {
-          engine = startCanvasEngine(mode.canvasScript, stage, setStatus);
-        }
 
         frame = mountMockFrame(
           stage,
@@ -859,7 +891,8 @@ ${safeCSS}
             modeKey,
             vars: themeVars(mode),
             customCSS: mode.customCssEnabled !== false ? mode.customCSS || '' : '',
-            transparent: hasEffects,
+            canvasScript: hasCanvas ? mode.canvasScript : null,
+            gradient: gLayers,
             initialChat: currentMockChat,
           })
         );
@@ -872,9 +905,7 @@ ${safeCSS}
 
       active = {
         destroy() {
-          if (engine) engine.destroy();
           if (frame) frame.remove();
-          if (gradientEl) gradientEl.remove();
         },
       };
     } catch (err) {
