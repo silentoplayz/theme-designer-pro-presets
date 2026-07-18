@@ -279,6 +279,8 @@
     plus: icon(['M6 12H12M18 12H12M12 12V6M12 12V18']),
     // Sidebar/icons/ChevronRight.svelte — "Pinned" disclosure
     chevron: icon(['M9 6L15 12L9 18']),
+    // icons/ChevronDown.svelte — the model selector's trigger caret
+    chevronDown: icon(['m19.5 8.25-7.5 7.5-7.5-7.5'], { strokeWidth: '2.5' }),
     // icons/Sidebar.svelte — sidebar collapse toggle
     panel: icon(['M19 21L5 21C3.89543 21 3 20.1046 3 19L3 5C3 3.89543 3.89543 3 5 3L19 3C20.1046 3 21 3.89543 21 5L21 19C21 20.1046 20.1046 21 19 21Z', 'M9.5 21V3', 'M5.5 10L7.25 12L5.5 14']),
     // icons/PencilSquare.svelte — navbar "New Chat"
@@ -585,6 +587,14 @@ textarea::placeholder { color: ${textMuted}; }
 .input-row .icon-btn svg { width: 18px; height: 18px; }
 .input-row .icon-btn:first-child svg { width: 20px; height: 20px; }
 .input-row .spacer { flex: 1; }
+/* ModelSelector in the input row (MessageInput.svelte L2223-2231): a
+   max-w-[13rem] trigger — rounded-lg pl-2 pr-1.5 py-1 gap-1.5 text-[13px]
+   text-gray-600 dark:text-gray-300 — with a truncating label and a
+   size-2.5 ChevronDown at stroke-width 2.5 */
+.model-select { display: flex; align-items: center; gap: 6px; min-width: 0; max-width: 13rem; padding: 4px 6px 4px 8px; border-radius: 8px; font-size: 13px; font-weight: 400; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-300)'}; cursor: pointer; transition: background 0.1s, color 0.1s; }
+.model-select:hover { background: ${navHover}; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-200)'}; }
+.model-select .name { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.model-select svg { width: 10px; height: 10px; flex-shrink: 0; margin-left: 4px; }
 .mic-btn { padding: 6px; margin-right: 2px; border-radius: 9999px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-300)'}; cursor: pointer; transition: color 0.15s; }
 .mic-btn svg { width: 18px; height: 18px; }
 .mic-btn:hover { color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-200)'}; }
@@ -681,6 +691,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
           <span class="icon-btn">${SVG.plusAlt}</span>
           <span class="icon-btn">${SVG.component}</span>
           <span class="spacer"></span>
+          <span class="model-select"><span class="name">Preview Model</span>${SVG.chevronDown}</span>
           <span class="mic-btn">${SVG.mic}</span>
           <button id="call-button">${SVG.voice}</button>
         </div>
