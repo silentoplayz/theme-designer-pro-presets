@@ -456,7 +456,16 @@
     const safeCSS = String(opts.customCSS || '').replace(/<\//g, '<\\/');
     const htmlClass = opts.modeKey === 'her' ? 'her' : isLight ? 'light' : 'dark';
     const dataTheme = opts.modeKey === 'oled' ? 'oled-dark' : htmlClass;
-    const varLines = Object.entries(opts.vars).map(([k, v]) => `  ${k}: ${v};`).join('\n');
+    // OLED renders on true black in Open WebUI (gray-800..950 forced to
+    // #101010/#050505/#000/#000) — apply the same values over any palette.
+    const varsOut = Object.assign({}, opts.vars);
+    if (opts.modeKey === 'oled') {
+      varsOut['--color-gray-800'] = '#101010';
+      varsOut['--color-gray-850'] = '#050505';
+      varsOut['--color-gray-900'] = '#000000';
+      varsOut['--color-gray-950'] = '#000000';
+    }
+    const varLines = Object.entries(varsOut).map(([k, v]) => `  ${k}: ${v};`).join('\n');
 
     const bg = isLight ? '#ffffff' : 'var(--color-gray-900)';
     const sidebarBg = isLight ? 'var(--color-gray-50)' : 'var(--color-gray-950)';
@@ -498,6 +507,7 @@
   ${opts.transparent ? 'body { background: transparent !important; }' : ''}
   .app, main, nav { background: transparent !important; }
   #sidebar { background: color-mix(in srgb, ${sidebarBg} 72%, transparent) !important; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+  #chat-input-container { background: color-mix(in srgb, ${isLight ? '#ffffff' : 'var(--color-gray-900)'} 72%, transparent) !important; }
   .chat-user .bubble { background: transparent; }`
       : '';
     // In-iframe gradient: body background layers, exactly like the designer's
@@ -725,7 +735,7 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
 .followups { margin-top: 16px; }
 .followups-title { font-size: 0.9375rem; font-weight: 400; color: ${proseText}; }
 .followups-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
-.followup { padding: 4px 0; font-size: 0.9375rem; text-align: left; color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; cursor: pointer; transition: color 0.15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.followup { padding: 4px 0; font-size: 0.9375rem; text-align: left; color: var(--color-gray-500); cursor: pointer; transition: color 0.15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .followup:hover { color: ${isLight ? '#000' : '#fff'}; }
 .followups-list hr { border: none; border-top: 1px solid ${borderSubtle}; margin: 0; }
 
@@ -1384,6 +1394,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     if (active && active.destroy) active.destroy();
     active = null;
     stage.innerHTML = '';
+    stage.style.background = '';
     controlsEl.innerHTML = '';
     setStatus('');
     overlay.classList.remove('open');
@@ -1529,6 +1540,9 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     let frame = null;
     const renderMode = (modeKey) => {
       if (frame) frame.remove();
+      // the mock body is transparent here, so the stage is the effect's
+      // backdrop — OLED needs it true black, like the app's body
+      stage.style.background = modeKey === 'oled' ? '#000000' : '';
       frame = mountMockFrame(
         stage,
         buildMockSrcdoc({ modeKey, vars: defaultModeVars(modeKey), customCSS: '', transparent: true, initialChat: currentMockChat, initialCollapsed: currentSidebarCollapsed })
