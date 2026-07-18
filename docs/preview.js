@@ -287,6 +287,8 @@
     dots: icon(['M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z']),
     // icons/Knobs.svelte — the navbar's Chat Controls button
     knobs: icon(['M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75'], { strokeWidth: '1' }),
+    // icons/ChatPlus.svelte — mobile navbar "New Chat"
+    chatPlus: icon(['M9 12H12M15 12H12M12 12V9M12 12V15', 'M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.8214 2.48697 15.5291 3.33782 17L2.5 21.5L7 20.6622C8.47087 21.513 10.1786 22 12 22Z']),
     // icons/ChatBubbleDotted.svelte — Temporary Chat (dashes are part of the glyph)
     chatBubbleDotted: icon(['<path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.8214 2.48697 15.5291 3.33782 17L2.5 21.5L7 20.6622C8.47087 21.513 10.1786 22 12 22Z" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2.5 3.5"></path>']),
     // icons/Bolt.svelte — the "Suggested" marker on the chat placeholder
@@ -409,7 +411,7 @@ ${g.animated ? '@keyframes tdp-preview-gradient-shift { 0% { background-position
 
     return `<!DOCTYPE html>
 <html class="${htmlClass}" data-theme="${dataTheme}">
-<head><meta charset="utf-8">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 :root {
 ${varLines}
@@ -492,7 +494,10 @@ svg { width: 16px; height: 16px; flex-shrink: 0; }
 .avatar { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #ec4899); flex-shrink: 0; }
 .avatar.sm { width: 20px; height: 20px; border-radius: 50%; }
 
-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+/* The gallery's floating .preview-topbar overlays the stage, so the whole
+   chat column starts below it. The host measures the bar and posts its real
+   height back (it can wrap on narrow screens); 76px is the desktop default. */
+main { flex: 1; display: flex; flex-direction: column; min-width: 0; padding-top: var(--tdp-top-inset, 76px); }
 /* Navbar.svelte: pt-0.5 pb-1, pl-1.5 pr-1, title text-[15px] gray-700/300,
    size-6 rounded-lg icon buttons, and the -bottom-10 gradient scrim */
 nav { padding: 2px 4px 4px 6px; display: flex; align-items: center; gap: 8px; color: ${textMain}; position: relative; z-index: 2; flex-shrink: 0; }
@@ -511,12 +516,6 @@ nav .right.is-new .temp-chat { display: flex; }
 #messages-container { flex: 1; overflow: hidden; padding: 8px 0 6px; display: flex; flex-direction: column; width: 100%; }
 #messages-container > .chat-user,
 #messages-container > .chat-assistant { max-width: 58rem; width: 100%; margin: 0 auto 12px; padding: 0 20px; }
-/* The gallery's floating toolbar (.preview-topbar in style.css: top 16px,
-   52px tall) overlays the stage, so the conversation has to start below its
-   68px bottom edge. Only the first row is offset — the New Chat placeholder
-   centres itself in the container and must not be pushed off-centre. */
-#messages-container > .chat-user:first-child,
-#messages-container > .chat-assistant:first-child { margin-top: 40px; }
 .chat-user { display: flex; flex-direction: column; align-items: flex-end; }
 .chat-user .bubble { max-width: 90%; background: ${bubble}; border-radius: 24px; padding: 6px 16px; font-size: 0.9375rem; line-height: 1.625; color: ${proseText}; }
 /* UserMessage.svelte: Edit + Copy in a justify-end row, invisible until the
@@ -614,6 +613,41 @@ textarea::placeholder { color: ${textMuted}; }
 #call-button svg { width: 20px; height: 20px; }
 #call-button:hover { background: ${isLight ? 'var(--color-gray-900)' : 'var(--color-gray-100)'}; }
 .footer-note { text-align: center; font-size: 10.5px; color: ${textFaint}; padding: 4px 0 6px; }
+
+/* Backdrop behind the mobile sidebar (Sidebar.svelte L767-776:
+   fixed md:hidden z-40 inset-0 bg-black/60, closes on click) */
+#backdrop { display: none; position: fixed; inset: 0; z-index: 40; background: rgb(0 0 0 / 0.6); }
+/* Both are mobile-only upstream. Selectors must out-specify nav .nav-btn. */
+nav .nav-toggle, nav .nav-newchat { display: none; }
+
+/* --- Mobile: BREAKPOINT is 768 in routes/+layout.svelte --- */
+@media (max-width: 767px) {
+  /* no collapsed rail on mobile — it renders under {#if !$mobile && ...} */
+  #rail { display: none !important; }
+  /* the panel becomes a fixed drawer, opaque rather than the 70% desktop wash */
+  #sidebar { position: fixed; top: 0; left: 0; height: 100%; z-index: 50; width: 245px; min-width: 245px;
+    background: ${isLight ? 'var(--color-gray-50)' : 'var(--color-gray-950)'};
+    transform: translateX(-100%); transition: transform 250ms ease; opacity: 1; pointer-events: auto;
+    padding: 6px 4px 4px; border-right-width: 1px; }
+  .app.collapsed #sidebar { transform: translateX(-100%); }
+  .app:not(.collapsed) #sidebar { transform: translateX(0); }
+  .app:not(.collapsed) #backdrop { display: block; }
+  /* Navbar gains the sidebar toggle and a New Chat button, and px-2.5 pt-1.5 */
+  nav { padding-left: 10px; padding-right: 10px; }
+  nav .nav-toggle { display: flex; }
+  .app:not(.collapsed) nav .nav-toggle { display: none; }
+  nav .nav-newchat { display: flex; }
+  #messages-container > .chat-user,
+  #messages-container > .chat-assistant { padding: 0 12px; }
+  .input-wrap { padding: 0 6px; }
+  .placeholder { padding-left: 8px; padding-right: 8px; }
+  .ph-suggest { padding: 0 8px; }
+  .ph-grid { grid-template-columns: 1fr; }
+  .ph-model, .ph-sub { font-size: 1.25rem; line-height: 1.75rem; }
+  .ph-logo { width: 36px; height: 36px; }
+  .model-select { max-width: 8rem; }
+}
+
 ${structural}
 ${gradientCSS}
 </style>
@@ -635,6 +669,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
     </div>
     <span class="rail-btn lg"><span><span class="rail-avatar"></span></span></span>
   </div>
+  <div id="backdrop"></div>
   <div id="sidebar">
     <div class="brand"><div class="brand-dot"><i>OI</i></div><span class="brand-name">Open WebUI</span><span class="panel-icon">${SVG.panel}</span></div>
     <div class="side-item" data-chat="new">${SVG.editPencil} <span class="label">New Chat</span></div>
@@ -663,7 +698,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
     <div class="side-user"><div class="avatar"></div> You</div>
   </div>
   <main>
-    <nav><span id="nav-title">Theme preview chat</span><span class="nav-btn">${SVG.dots}</span><span class="right" id="nav-right"><span class="nav-btn temp-chat" title="Temporary Chat">${SVG.chatBubbleDotted}</span><span class="nav-btn controls" title="Controls">${SVG.knobs}</span></span></nav>
+    <nav><span class="nav-btn nav-toggle" title="Open Sidebar">${SVG.panel}</span><span id="nav-title">Theme preview chat</span><span class="nav-btn">${SVG.dots}</span><span class="right" id="nav-right"><span class="nav-btn nav-newchat" title="New Chat">${SVG.chatPlus}</span><span class="nav-btn temp-chat" title="Temporary Chat">${SVG.chatBubbleDotted}</span><span class="nav-btn controls" title="Controls">${SVG.knobs}</span></span></nav>
     <div id="messages-container">
       <div class="chat-user"><div class="bubble">Show me what this preset looks like on a real conversation.</div>${USER_ACTIONS}</div>
       <div class="chat-assistant">
@@ -914,6 +949,12 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   var toggle = document.querySelector('.brand .panel-icon');
   if (!app || !rail || !toggle) return;
 
+  var backdrop = document.getElementById('backdrop');
+  var navToggle = document.querySelector('.nav-toggle');
+  var MOBILE = 768; // routes/+layout.svelte BREAKPOINT
+
+  function isMobile() { return window.innerWidth < MOBILE; }
+
   function setCollapsed(on) {
     app.classList.toggle('collapsed', on);
     try { parent.postMessage({ __tdpPreview: true, kind: 'sidebarchange', collapsed: on }, '*'); } catch (e) {}
@@ -921,8 +962,35 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
 
   toggle.addEventListener('click', function (e) { e.stopPropagation(); setCollapsed(true); });
   rail.addEventListener('click', function () { setCollapsed(false); });
+  if (navToggle) navToggle.addEventListener('click', function (e) { e.stopPropagation(); setCollapsed(false); });
+  if (backdrop) backdrop.addEventListener('click', function () { setCollapsed(true); });
 
-  if (document.body.getAttribute('data-sidebar-collapsed') === '1') app.classList.add('collapsed');
+  // showSidebar defaults to false on mobile, and closes when crossing into it
+  var startCollapsed = document.body.getAttribute('data-sidebar-collapsed') === '1' || isMobile();
+  if (startCollapsed) app.classList.add('collapsed');
+
+  var wasMobile = isMobile();
+  window.addEventListener('resize', function () {
+    var now = isMobile();
+    if (now !== wasMobile) {
+      wasMobile = now;
+      if (now) setCollapsed(true);
+    }
+  });
+})();
+
+// The floating preview toolbar lives in the parent and can change height when
+// it wraps, so ask for its real height instead of assuming one.
+(function () {
+  window.addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || d.__tdpPreview !== true || d.kind !== 'topinset') return;
+    var px = Number(d.px);
+    if (isFinite(px) && px >= 0) {
+      document.documentElement.style.setProperty('--tdp-top-inset', px + 'px');
+    }
+  });
+  try { parent.postMessage({ __tdpPreview: true, kind: 'ready' }, '*'); } catch (e) {}
 })();
 </script>
 </body>
@@ -982,6 +1050,26 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     closeBtn.focus();
   }
 
+  // The topbar floats over the stage and wraps on narrow screens, so the mock
+  // is told its real height rather than hardcoding one on both sides.
+  function topInsetPx() {
+    const bar = overlay.querySelector('.preview-topbar');
+    if (!bar) return 76;
+    const r = bar.getBoundingClientRect();
+    const stageTop = stage.getBoundingClientRect().top;
+    return Math.max(0, Math.round(r.bottom - stageTop) + 8);
+  }
+
+  function sendTopInset(win) {
+    const msg = { __tdpPreview: true, kind: 'topinset', px: topInsetPx() };
+    const targets = win ? [win] : Array.from(stage.querySelectorAll('iframe')).map((f) => f.contentWindow);
+    targets.forEach((w) => { try { if (w) w.postMessage(msg, '*'); } catch (e) {} });
+  }
+
+  window.addEventListener('resize', () => {
+    if (overlay.classList.contains('open')) sendTopInset();
+  });
+
   closeBtn.addEventListener('click', closePreview);
   window.addEventListener('message', (e) => {
     if (!e.data || e.data.__tdpPreview !== true || !overlay.classList.contains('open')) return;
@@ -989,6 +1077,8 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     if (e.data.kind === 'chatchange' && typeof e.data.chat === 'string') currentMockChat = e.data.chat;
     if (e.data.kind === 'sidebarchange') currentSidebarCollapsed = !!e.data.collapsed;
     if (e.data.kind === 'status' && typeof e.data.text === 'string') setStatus(e.data.text);
+    // a frame just mounted (including after a mode-pill rebuild) — answer it
+    if (e.data.kind === 'ready') requestAnimationFrame(() => sendTopInset(e.source));
   });
   document.addEventListener(
     'keydown',
