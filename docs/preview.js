@@ -456,18 +456,7 @@
     const safeCSS = String(opts.customCSS || '').replace(/<\//g, '<\\/');
     const htmlClass = opts.modeKey === 'her' ? 'her' : isLight ? 'light' : 'dark';
     const dataTheme = opts.modeKey === 'oled' ? 'oled-dark' : htmlClass;
-    // Selecting OLED Dark in Open WebUI writes these four values as inline
-    // documentElement styles (Settings/General.svelte L182-186), which beat
-    // any theme's stylesheet vars — so OLED forces true black over every
-    // theme. Mirrored centrally here for the same reason.
-    const varsOut = Object.assign({}, opts.vars);
-    if (opts.modeKey === 'oled') {
-      varsOut['--color-gray-800'] = '#101010';
-      varsOut['--color-gray-850'] = '#050505';
-      varsOut['--color-gray-900'] = '#000000';
-      varsOut['--color-gray-950'] = '#000000';
-    }
-    const varLines = Object.entries(varsOut).map(([k, v]) => `  ${k}: ${v};`).join('\n');
+    const varLines = Object.entries(opts.vars).map(([k, v]) => `  ${k}: ${v};`).join('\n');
 
     const bg = isLight ? '#ffffff' : 'var(--color-gray-900)';
     const sidebarBg = isLight ? 'var(--color-gray-50)' : 'var(--color-gray-950)';
@@ -1521,11 +1510,18 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     return wrap;
   }
 
-  // Non-theme previews use the designer's default ramp; the OLED true-black
-  // overlay is applied centrally in buildMockSrcdoc, as the app applies it
-  // over every palette.
+  // Non-theme previews have no palette of their own; OLED overlays the exact
+  // values Open WebUI applies for oled-dark (Settings/General.svelte L182-186)
+  // on the designer's default ramp.
   function defaultModeVars(modeKey) {
-    return themeVars(null);
+    const vars = themeVars(null);
+    if (modeKey === 'oled') {
+      vars['--color-gray-800'] = '#101010';
+      vars['--color-gray-850'] = '#050505';
+      vars['--color-gray-900'] = '#000000';
+      vars['--color-gray-950'] = '#000000';
+    }
+    return vars;
   }
 
   // Shared: mount the mock UI over an effect layer, with mode pills
