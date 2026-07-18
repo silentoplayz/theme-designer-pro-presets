@@ -398,7 +398,7 @@
       ? `
   ${opts.transparent ? 'body { background: transparent !important; }' : ''}
   .app, main, nav { background: transparent !important; }
-  #sidebar { background: color-mix(in srgb, ${sidebarBg} 72%, transparent) !important; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+  #sidebar, #rail { background: color-mix(in srgb, ${sidebarBg} 72%, transparent) !important; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
   .chat-user .bubble { background: color-mix(in srgb, ${bubble} 72%, transparent); }`
       : '';
     // In-iframe gradient: body background layers, exactly like the designer's
