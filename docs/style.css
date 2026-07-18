@@ -1357,58 +1357,26 @@ input, select {
 /* Narrow screens: let the toolbar wrap instead of overflowing. The mock is
    told the resulting height over postMessage, so it stays clear either way. */
 @media (max-width: 767px) {
+  /* Small screens keep only what is interactive: the mode pills and the
+     close button. Badge, title, and hints are stripped, so the bar shrinks
+     to one compact pill and barely covers the mock. Its real height still
+     reaches the mock over the inset handshake. */
   .preview-topbar {
     top: 8px;
-    left: 8px;
-    right: 8px;
-    transform: none;
-    max-width: none;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 4px 8px;
-    padding: 6px 8px;
-    border-radius: 16px;
+    max-width: calc(100vw - 16px);
+    gap: 8px;
+    padding: 5px 6px;
   }
 
-  /* the badge is decorative — the chrome is already obviously a preview */
-  .preview-label {
+  .preview-titlebox,
+  .preview-hint,
+  .preview-context {
     display: none;
   }
 
-  .preview-titlebox {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .preview-title {
-    max-width: none;
-    font-size: 0.8rem;
-  }
-
-  /* row 1 is title + close, row 2 the controls — without the reorder the
-     close button wraps onto a third row of its own */
   .preview-close {
-    order: 1;
-  }
-
-  .preview-controls-box {
-    order: 2;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 6px 8px;
-    width: 100%;
-  }
-
-  .preview-hint {
-    white-space: normal;
-    text-align: center;
-    font-size: 0.6rem;
-    line-height: 1.3;
-  }
-
-  .preview-context {
-    width: 100%;
-    justify-content: center;
+    width: 30px;
+    height: 30px;
   }
 }
 
