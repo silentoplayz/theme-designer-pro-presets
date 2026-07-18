@@ -511,6 +511,12 @@ nav .right.is-new .temp-chat { display: flex; }
 #messages-container { flex: 1; overflow: hidden; padding: 8px 0 6px; display: flex; flex-direction: column; width: 100%; }
 #messages-container > .chat-user,
 #messages-container > .chat-assistant { max-width: 58rem; width: 100%; margin: 0 auto 12px; padding: 0 20px; }
+/* The gallery's floating toolbar (.preview-topbar in style.css: top 16px,
+   52px tall) overlays the stage, so the conversation has to start below its
+   68px bottom edge. Only the first row is offset — the New Chat placeholder
+   centres itself in the container and must not be pushed off-centre. */
+#messages-container > .chat-user:first-child,
+#messages-container > .chat-assistant:first-child { margin-top: 40px; }
 .chat-user { display: flex; flex-direction: column; align-items: flex-end; }
 .chat-user .bubble { max-width: 90%; background: ${bubble}; border-radius: 24px; padding: 6px 16px; font-size: 0.9375rem; line-height: 1.625; color: ${proseText}; }
 /* UserMessage.svelte: Edit + Copy in a justify-end row, invisible until the
