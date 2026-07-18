@@ -317,6 +317,23 @@
 
   const CHAT_MENU = '<span class="chat-actions"><span class="chat-menu-btn">' + SVG.moreHorizontal + '</span></span>';
 
+  // UserMessage.svelte's Edit + Copy pair (same two glyphs the assistant row uses)
+  const USER_ACTIONS =
+    '<div class="user-actions">' +
+    ['edit', 'copy'].map(function (k) { return '<span class="msg-action">' + ACTION_SVG[k] + '</span>'; }).join('') +
+    '</div>';
+
+  // FollowUps.svelte — hairline-separated rows under a "Follow up" heading
+  function followUps(items) {
+    if (!items || !items.length) return '';
+    return '<div class="followups-wrap"><div class="followups">' +
+      '<div class="followups-title">Follow up</div><div class="followups-list">' +
+      items.map(function (q, i) {
+        return '<div class="followup">' + q + '</div>' + (i < items.length - 1 ? '<hr>' : '');
+      }).join('') +
+      '</div></div></div>';
+  }
+
   // The row Open WebUI renders under a finished assistant reply, in source order.
   const MSG_ACTIONS =
     '<div class="msg-actions">' +
@@ -376,7 +393,7 @@
   ${opts.transparent ? 'body { background: transparent !important; }' : ''}
   .app, main, nav { background: transparent !important; }
   #sidebar { background: color-mix(in srgb, ${sidebarBg} 72%, transparent) !important; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
-  .chat-user > div { background: color-mix(in srgb, ${bubble} 72%, transparent); }`
+  .chat-user .bubble { background: color-mix(in srgb, ${bubble} 72%, transparent); }`
       : '';
     // In-iframe gradient: body background layers, exactly like the designer's
     // gradient section (emitted before custom CSS so cascade order matches)
@@ -486,8 +503,12 @@ nav .right { margin-left: auto; display: flex; align-items: center; gap: 8px; pa
 #messages-container { flex: 1; overflow: hidden; padding: 8px 0 6px; display: flex; flex-direction: column; width: 100%; }
 #messages-container > .chat-user,
 #messages-container > .chat-assistant { max-width: 58rem; width: 100%; margin: 0 auto 12px; padding: 0 20px; }
-.chat-user { display: flex; justify-content: flex-end; }
-.chat-user > div { max-width: 90%; background: ${bubble}; border-radius: 24px; padding: 6px 16px; font-size: 0.9375rem; line-height: 1.625; color: ${proseText}; }
+.chat-user { display: flex; flex-direction: column; align-items: flex-end; }
+.chat-user .bubble { max-width: 90%; background: ${bubble}; border-radius: 24px; padding: 6px 16px; font-size: 0.9375rem; line-height: 1.625; color: ${proseText}; }
+/* UserMessage.svelte: Edit + Copy in a justify-end row, invisible until the
+   message is hovered (invisible group-hover:visible) */
+.user-actions { display: flex; justify-content: flex-end; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-500)'}; visibility: hidden; }
+.chat-user:hover .user-actions { visibility: visible; }
 .chat-assistant { display: flex; }
 .ai-avatar { width: 28px; height: 28px; border-radius: 16px; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; flex-shrink: 0; margin: 2px 8px 0 0; border: 1px solid rgb(0 0 0 / 0.1); }
 .ai-col { flex: 1; min-width: 0; padding-left: 4px; }
@@ -534,6 +555,17 @@ nav .right { margin-left: auto; display: flex; align-items: center; gap: 8px; pa
 .msg-action { padding: 6px; border-radius: 8px; display: flex; cursor: pointer; transition: background 0.15s, color 0.15s; }
 .msg-action:hover { background: ${ghostHover}; color: ${isLight ? '#000' : '#fff'}; }
 .msg-actions svg { width: 16px; height: 16px; }
+
+/* ResponseMessage/FollowUps.svelte, rendered in a my-2.5 wrapper after the
+   action row and only on the last message: an mt-4 block with a text-sm
+   heading and text-sm rows separated by hairlines */
+.followups-wrap { margin: 10px 0; }
+.followups { margin-top: 16px; }
+.followups-title { font-size: 0.875rem; font-weight: 400; color: ${proseText}; }
+.followups-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+.followup { padding: 4px 0; font-size: 0.875rem; text-align: left; color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; cursor: pointer; transition: color 0.15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.followup:hover { color: ${isLight ? '#000' : '#fff'}; }
+.followups-list hr { border: none; border-top: 1px solid ${borderSubtle}; margin: 0; }
 
 /* MessageInput.svelte: max-w-[58rem] px-2.5 mx-auto shell, shadow-lg
    rounded-3xl border-gray-100/30 dark:border-gray-850/30 bg-white/5
@@ -611,7 +643,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
   <main>
     <nav><span id="nav-title">Theme preview chat</span><span class="nav-btn">${SVG.dots}</span><span class="right"><span class="nav-btn">${SVG.pencilSquare}</span><span class="nav-btn">${SVG.panel}</span></span></nav>
     <div id="messages-container">
-      <div class="chat-user"><div>Show me what this preset looks like on a real conversation.</div></div>
+      <div class="chat-user"><div class="bubble">Show me what this preset looks like on a real conversation.</div>${USER_ACTIONS}</div>
       <div class="chat-assistant">
         <div class="ai-avatar" style="background:#fff !important; color:#000 !important;">OI</div>
         <div class="ai-col">
@@ -625,7 +657,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
           ${MSG_ACTIONS}
         </div>
       </div>
-      <div class="chat-user"><div>Nice. The palette applies to every surface?</div></div>
+      <div class="chat-user"><div class="bubble">Nice. The palette applies to every surface?</div>${USER_ACTIONS}</div>
       <div class="chat-assistant">
         <div class="ai-avatar" style="background:#fff !important; color:#000 !important;">OI</div>
         <div class="ai-col">
@@ -633,6 +665,12 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
           <div class="ai-stats">Response Speed: 98.7 t/s | Total Duration: 1.9s | Eval Count: 164 | Session: 2018 tokens</div>
           <div class="prose"><p><b>Exactly</b> — backgrounds, borders, and text all come from the preset, and Canvas FX or gradients render behind the whole interface.</p></div>
           ${MSG_ACTIONS}
+          ${followUps([
+            'How do I import one of these presets into my instance?',
+            'Which presets look best with structural transparency enabled?',
+            'Can I combine a Canvas FX script with a gradient background?',
+            'What happens to the palette in OLED mode?',
+          ])}
         </div>
       </div>
     </div>
@@ -713,14 +751,27 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   var BOLT_SVG = ${JSON.stringify(SVG.bolt)};
 
   var MSG_ACTIONS = ${JSON.stringify(MSG_ACTIONS)};
+  var USER_ACTIONS = ${JSON.stringify(USER_ACTIONS)};
 
-  function ai(stats, body) {
+  // Follow-ups only render on the last message upstream, and each of these
+  // conversations has exactly one reply — so every ai() call may carry them.
+  function followUps(items) {
+    if (!items || !items.length) return '';
+    return '<div class="followups-wrap"><div class="followups">' +
+      '<div class="followups-title">Follow up</div><div class="followups-list">' +
+      items.map(function (q, i) {
+        return '<div class="followup">' + q + '</div>' + (i < items.length - 1 ? '<hr>' : '');
+      }).join('') +
+      '</div></div></div>';
+  }
+
+  function ai(stats, body, fups) {
     return '<div class="chat-assistant"><div class="ai-avatar" style="background:#fff !important; color:#000 !important;">OI</div><div class="ai-col">' +
       '<div class="ai-model">Preview Model</div><div class="ai-stats">' + stats + '</div>' +
-      '<div class="prose">' + body + '</div>' + MSG_ACTIONS + '</div></div>';
+      '<div class="prose">' + body + '</div>' + MSG_ACTIONS + followUps(fups) + '</div></div>';
   }
   function user(text) {
-    return '<div class="chat-user"><div>' + text + '</div></div>';
+    return '<div class="chat-user"><div class="bubble">' + text + '</div>' + USER_ACTIONS + '</div>';
   }
 
   var CHATS = {
@@ -735,7 +786,10 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
           '<tr><td><code>850</code></td><td>27%</td><td>Bubbles, panels</td></tr>' +
           '<tr><td><code>950</code></td><td>16%</td><td>Sidebar</td></tr>' +
           '</tbody></table>' +
-          '<p>Shifting the base <b>lightness</b> slides the whole ramp while keeping the perceptual spacing intact.</p>')
+          '<p>Shifting the base <b>lightness</b> slides the whole ramp while keeping the perceptual spacing intact.</p>',
+          ['Why OKLCH instead of HSL for the ramp?',
+           'How do I keep contrast accessible across all twelve steps?',
+           'Can I pin a single step and regenerate the rest?'])
     },
     'fx': {
       title: 'Canvas FX ideas',
@@ -746,7 +800,10 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
           '<li><b>Mushroom farm</b> — mycelium spreads with every reply</li>' +
           '<li><b>Hourglass</b> — sand drains as the window fills</li></ul>' +
           '<blockquote>Any metaphor with a clear empty-to-full progression works — the engine streams live token counts to your script.</blockquote>' +
-          '<p>All of them fall back to <code>estimatedTokens</code> when exact usage data is unavailable.</p>')
+          '<p>All of them fall back to <code>estimatedTokens</code> when exact usage data is unavailable.</p>',
+          ['What data does the engine stream to my script?',
+           'How expensive are these effects on a laptop GPU?',
+           'Can a script react to which model is selected?'])
     },
     'gradient': {
       title: 'Gradient inspiration',
@@ -756,7 +813,10 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
           '<ol><li><b>Deep linear</b> — near-black corners into a saturated core</li>' +
           '<li><b>Radial glow</b> — a soft light source behind the input bar</li>' +
           '<li><b>Mesh</b> — several drifting color points for an aurora feel</li></ol>' +
-          '<p>Browse the <a>preset gallery</a> for ready-made packs — every one imports with a single URL.</p>')
+          '<p>Browse the <a>preset gallery</a> for ready-made packs — every one imports with a single URL.</p>',
+          ['How do I animate a gradient without it feeling busy?',
+           'Which gradients hold up in light mode?',
+           'Can I export a gradient I built back out as a preset?'])
     },
     'transparency': {
       title: 'Structural transparency',
@@ -764,7 +824,10 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
         ai('Response Speed: 108.9 t/s | Total Duration: 2.8s | Eval Count: 264 | Session: 2035 tokens',
           '<h4>The structural layer</h4>' +
           '<p>When Canvas FX or a gradient is active, layout containers turn <code>transparent</code> so the effect shines through, while the sidebar keeps a frosted-glass backdrop for readability.</p>' +
-          '<p>Portaled menus and dialogs live <b>outside</b> the app container, so they stay opaque — no unreadable dropdowns.</p>')
+          '<p>Portaled menus and dialogs live <b>outside</b> the app container, so they stay opaque — no unreadable dropdowns.</p>',
+          ['Which containers get transparency applied?',
+           'How do I keep code blocks readable over an effect?',
+           'Does the frosted sidebar cost much performance?'])
     },
     'notes': {
       title: 'Preset gallery notes',
@@ -774,7 +837,10 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
           '<ul><li><b>Themes</b> — full palette on this mock UI, per mode</li>' +
           '<li><b>Canvas FX</b> — real Web Worker execution behind the chat</li>' +
           '<li><b>CSS presets</b> — applied to genuine Open WebUI markup</li>' +
-          '<li><b>Gradients</b> — exact designer math, animation included</li></ul>')
+          '<li><b>Gradients</b> — exact designer math, animation included</li></ul>',
+          ['How do I submit a preset to this gallery?',
+           'Can I preview a preset before importing it?',
+           'What makes a good Canvas FX submission?'])
     },
     'new': {
       title: 'New Chat',
