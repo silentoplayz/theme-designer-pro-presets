@@ -477,7 +477,14 @@
     const activeItem = isLight ? 'rgb(0 0 0 / 0.035)' : 'rgb(255 255 255 / 0.045)';
     const iconHover = isLight ? 'var(--color-gray-100)' : 'var(--color-gray-800)';
     const ghostHover = isLight ? 'rgb(0 0 0 / 0.05)' : 'rgb(255 255 255 / 0.05)';
-    const proseText = isLight ? 'var(--color-gray-700)' : 'var(--color-gray-100)';
+    // Chat prose colors are NOT themed in Open WebUI: the typography plugin
+    // bakes its palette from @theme (tailwind.css:5-18) as literals at build
+    // time, so --color-gray-* overrides never reach message text — only
+    // utility classes (stats line, sidebar, follow-ups) follow the theme.
+    // These literals are the baked values: prose body gray-700 / invert
+    // body gray-300.
+    const proseText = isLight ? 'oklch(0.42 0 0)' : 'oklch(0.85 0 0)';
+    const proseBold = isLight ? 'oklch(0.2 0 0)' : '#fff';
     const ageText = isLight ? 'var(--color-gray-400)' : 'var(--color-gray-500)';
     const codeBlockBg = isLight ? '#ffffff' : '#000000';
     const inputBg = isLight
@@ -657,7 +664,7 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
 .markdown-prose { font-size: 1rem; line-height: 1.625; color: ${proseText}; }
 .markdown-prose p { margin-bottom: 8px; }
 .markdown-prose p:last-child { margin-bottom: 0; }
-.markdown-prose b { color: ${isLight ? '#000' : '#fff'}; font-weight: 500; }
+.markdown-prose b { color: ${proseBold}; font-weight: 500; }
 .markdown-prose code { background: ${codeBg}; padding: 2px 6px; border-radius: 6px; font-family: ui-monospace, 'JetBrains Mono', monospace; font-size: 0.8em; color: ${textMain}; }
 /* CodeBlock.svelte: rounded-2xl border my-0.5, header py-1.5 px-3.5 text-xs */
 .code-block { border-radius: 16px; border: 1px solid ${borderSubtle}; background: ${codeBlockBg}; margin: 12px 0; overflow: hidden; }
@@ -667,12 +674,12 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
 .markdown-prose pre { background: ${codeBlockBg}; padding: 10px 20px 16px; font-family: ui-monospace, 'JetBrains Mono', monospace; font-size: 0.875rem; line-height: 1.5; overflow: hidden; margin: 0; color: ${proseText}; }
 .markdown-prose ul, .markdown-prose ol { margin: 8px 0 8px 22px; }
 .markdown-prose li { margin: 2px 0; }
-.markdown-prose blockquote { border-left: 2px solid ${border}; padding: 2px 0 2px 12px; color: ${textMuted}; margin: 12px 0; }
-.markdown-prose a { color: ${textMain}; text-decoration: underline; cursor: pointer; }
+.markdown-prose blockquote { border-left: 2px solid ${border}; padding: 2px 0 2px 12px; color: ${isLight ? 'oklch(0.2 0 0)' : 'oklch(0.94 0 0)'}; margin: 12px 0; }
+.markdown-prose a { color: ${proseBold}; text-decoration: underline; cursor: pointer; }
 .markdown-prose table { border-collapse: collapse; margin: 6px 0 10px; font-size: 0.78125rem; }
 .markdown-prose th, .markdown-prose td { border: 1px solid ${border}; padding: 5px 10px; text-align: left; }
-.markdown-prose th { background: ${codeBg}; color: ${textMain}; font-weight: 600; }
-.markdown-prose h4 { font-size: 0.9375rem; font-weight: 600; color: ${textMain}; margin: 8px 0 4px; }
+.markdown-prose th { background: ${codeBg}; color: ${proseBold}; font-weight: 600; }
+.markdown-prose h4 { font-size: 0.9375rem; font-weight: 600; color: ${proseBold}; margin: 8px 0 4px; }
 /* Placeholder.svelte: max-w-[58rem] translate-y-6 centered block, size-10
    rounded-2xl model image, text-2xl name; Suggestions.svelte rows are
    borderless px-2.5 py-1.5 rounded-lg with text-sm / text-xs lines */
