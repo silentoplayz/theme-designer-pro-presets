@@ -249,18 +249,52 @@
 
   // ---- Mock Open WebUI chat (inert sandboxed iframe) ----
 
+  // Icon paths copied verbatim from Open WebUI's icon components so the mock
+  // uses the same glyphs as the real app rather than lookalikes. Source paths:
+  //   layout/Sidebar/icons/{EditPencil,Search,Notes,Workspace,Code,ChevronRight,Plus}.svelte
+  //   icons/{Sidebar,PencilSquare,EllipsisHorizontal,Bolt,PlusAlt,Component,Mic,Voice}.svelte
+  // Every one is a 24x24 stroke icon at stroke-width 1.5 (Voice overrides to 2.5).
+  // Entries are path data strings; an entry may also be a raw element (Mic's
+  // <rect>) so shapes stay byte-identical to the component they came from.
+  function icon(shapes, opt) {
+    const o = opt || {};
+    return '<svg viewBox="0 0 24 24" aria-hidden="true" fill="' + (o.fill || 'none') +
+      '" stroke="currentColor" stroke-width="' + (o.strokeWidth || '1.5') +
+      '" stroke-linecap="round" stroke-linejoin="round">' +
+      shapes.map(function (s) { return s.charAt(0) === '<' ? s : '<path d="' + s + '"/>'; }).join('') + '</svg>';
+  }
+
   const SVG = {
-    pencil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>',
-    search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>',
-    notes: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>',
-    grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
-    code: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
-    plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>',
-    chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
-    dots: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>',
-    mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg>',
-    arrowUp: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>',
-    panel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 3v18"/></svg>',
+    // Sidebar/icons/EditPencil.svelte — sidebar "New Chat"
+    editPencil: icon(['M14.3632 5.65156L15.8431 4.17157C16.6242 3.39052 17.8905 3.39052 18.6716 4.17157L20.0858 5.58579C20.8668 6.36683 20.8668 7.63316 20.0858 8.41421L18.6058 9.8942M14.3632 5.65156L4.74749 15.2672C4.41542 15.5993 4.21079 16.0376 4.16947 16.5054L3.92738 19.2459C3.87261 19.8659 4.39148 20.3848 5.0115 20.33L7.75191 20.0879C8.21972 20.0466 8.65806 19.8419 8.99013 19.5099L18.6058 9.8942M14.3632 5.65156L18.6058 9.8942']),
+    // Sidebar/icons/Search.svelte
+    search: icon(['M17 17L21 21', 'M3 11C3 15.4183 6.58172 19 11 19C13.213 19 15.2161 18.1015 16.6644 16.6493C18.1077 15.2022 19 13.2053 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11Z']),
+    // Sidebar/icons/Notes.svelte
+    notes: icon(['M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143', 'M6 17L20 17', 'M6 21L20 21', 'M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17', 'M9 7L15 7']),
+    // Sidebar/icons/Workspace.svelte
+    workspace: icon(['M13.9922 17H16.9922M19.9922 17H16.9922M16.9922 17V14M16.9922 17V20', 'M4 9.4V4.6C4 4.26863 4.26863 4 4.6 4H9.4C9.73137 4 10 4.26863 10 4.6V9.4C10 9.73137 9.73137 10 9.4 10H4.6C4.26863 10 4 9.73137 4 9.4Z', 'M4 19.4V14.6C4 14.2686 4.26863 14 4.6 14H9.4C9.73137 14 10 14.2686 10 14.6V19.4C10 19.7314 9.73137 20 9.4 20H4.6C4.26863 20 4 19.7314 4 19.4Z', 'M14 9.4V4.6C14 4.26863 14.2686 4 14.6 4H19.4C19.7314 4 20 4.26863 20 4.6V9.4C20 9.73137 19.7314 10 19.4 10H14.6C14.2686 10 14 9.73137 14 9.4Z']),
+    // Sidebar/icons/Code.svelte — "Playground"
+    code: icon(['M13.5 6L10 18.5', 'M6.5 8.5L3 12L6.5 15.5', 'M17.5 8.5L21 12L17.5 15.5']),
+    // Sidebar/icons/Plus.svelte — section "add" affordance
+    plus: icon(['M6 12H12M18 12H12M12 12V6M12 12V18']),
+    // Sidebar/icons/ChevronRight.svelte — "Pinned" disclosure
+    chevron: icon(['M9 6L15 12L9 18']),
+    // icons/Sidebar.svelte — sidebar collapse toggle
+    panel: icon(['M19 21L5 21C3.89543 21 3 20.1046 3 19L3 5C3 3.89543 3.89543 3 5 3L19 3C20.1046 3 21 3.89543 21 5L21 19C21 20.1046 20.1046 21 19 21Z', 'M9.5 21V3', 'M5.5 10L7.25 12L5.5 14']),
+    // icons/PencilSquare.svelte — navbar "New Chat"
+    pencilSquare: icon(['m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10']),
+    // icons/EllipsisHorizontal.svelte
+    dots: icon(['M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z']),
+    // icons/Bolt.svelte — the "Suggested" marker on the chat placeholder
+    bolt: icon(['m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z']),
+    // icons/PlusAlt.svelte — input bar "More"
+    plusAlt: icon(['M6 12H12M18 12H12M12 12V6M12 12V18']),
+    // icons/Component.svelte — input bar "Integrations"
+    component: icon(['M5.21173 15.1113L2.52473 12.4243C2.29041 12.1899 2.29041 11.8101 2.52473 11.5757L5.21173 8.88873C5.44605 8.65442 5.82595 8.65442 6.06026 8.88873L8.74727 11.5757C8.98158 11.8101 8.98158 12.1899 8.74727 12.4243L6.06026 15.1113C5.82595 15.3456 5.44605 15.3456 5.21173 15.1113Z', 'M11.5757 21.475L8.88874 18.788C8.65443 18.5537 8.65443 18.1738 8.88874 17.9395L11.5757 15.2525C11.8101 15.0182 12.19 15.0182 12.4243 15.2525L15.1113 17.9395C15.3456 18.1738 15.3456 18.5537 15.1113 18.788L12.4243 21.475C12.19 21.7094 11.8101 21.7094 11.5757 21.475Z', 'M11.5757 8.7475L8.88874 6.06049C8.65443 5.82618 8.65443 5.44628 8.88874 5.21197L11.5757 2.52496C11.8101 2.29065 12.19 2.29065 12.4243 2.52496L15.1113 5.21197C15.3456 5.44628 15.3456 5.82618 15.1113 6.06049L12.4243 8.7475C12.19 8.98181 11.8101 8.98181 11.5757 8.7475Z', 'M17.9396 15.1113L15.2526 12.4243C15.0183 12.1899 15.0183 11.8101 15.2526 11.5757L17.9396 8.88873C18.174 8.65442 18.5539 8.65442 18.7882 8.88873L21.4752 11.5757C21.7095 11.8101 21.7095 12.1899 21.4752 12.4243L18.7882 15.1113C18.5539 15.3456 18.174 15.3456 17.9396 15.1113Z']),
+    // icons/Mic.svelte — "Dictate"
+    mic: icon(['<rect x="9" y="2" width="6" height="12" rx="3" />', 'M5 10v1a7 7 0 0 0 14 0v-1M12 18v4m0 0H9m3 0h3']),
+    // icons/Voice.svelte — the filled circle button shown while the input is empty
+    voice: icon(['M12 4L12 20', 'M8 9L8 15', 'M20 10L20 14', 'M4 10L4 14', 'M16 7L16 17'], { strokeWidth: '2.5' }),
   };
 
   function esc(str) {
@@ -293,7 +327,6 @@
       : 'color-mix(in srgb, var(--color-gray-850) 30%, transparent)';
     const bubble = isLight ? 'var(--color-gray-50)' : 'var(--color-gray-850)';
     const codeBg = isLight ? 'var(--color-gray-50)' : 'var(--color-gray-800)';
-    const hover = isLight ? 'var(--color-gray-100)' : 'var(--color-gray-850)';
     const itemHover = isLight ? 'var(--color-gray-50)' : 'var(--color-gray-900)';
     const navHover = isLight
       ? 'color-mix(in srgb, var(--color-gray-50) 40%, transparent)'
@@ -338,46 +371,60 @@ body { background: ${bg}; font-family: -apple-system, BlinkMacSystemFont, 'Inter
 svg { width: 16px; height: 16px; flex-shrink: 0; }
 .app { display: flex; height: 100vh; position: relative; }
 
-#sidebar { width: 245px; flex-shrink: 0; background: ${sidebarBg}; border-right: 1px solid ${borderSubtle}; padding: 8px 6px 8px; display: flex; flex-direction: column; overflow: hidden; }
-.brand { display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 13px; padding: 6px 10px 10px 8px; color: ${textMain}; }
-.brand-dot { width: 24px; height: 24px; border-radius: 7px; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; letter-spacing: -0.02em; border: 1px solid rgb(0 0 0 / 0.1); }
-.brand .panel-icon { margin-left: auto; color: ${textMuted}; }
-.brand .panel-icon svg { width: 15px; height: 15px; }
-.side-item { display: flex; align-items: center; gap: 10px; min-height: 32px; padding: 6px 11px; border-radius: 12px; color: ${textSoft}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; line-height: 20px; }
-.side-item svg { width: 15px; height: 15px; color: ${textSoft}; }
+/* Sidebar.svelte: w-[var(--sidebar-width)]=245px, border-e, px-1 rows,
+   rounded-xl px-2 py-1.5 nav items, size-4 icons, text-[13px] leading-5 */
+#sidebar { width: 245px; flex-shrink: 0; background: ${sidebarBg}; border-right: 1px solid ${borderSubtle}; padding: 6px 4px 4px; display: flex; flex-direction: column; overflow: hidden; }
+.brand { display: flex; align-items: center; gap: 2px; padding: 0 0 6px; color: ${textMain}; }
+.brand-dot { width: 34px; height: 34px; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.brand-dot i { width: 20px; height: 20px; border-radius: 50%; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; font-style: normal; letter-spacing: -0.02em; border: 1px solid rgb(0 0 0 / 0.1); }
+.brand .brand-name { flex: 1; padding: 0 2px; font-size: 14px; font-weight: 400; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-200)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand .panel-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: ${textMuted}; }
+.brand .panel-icon svg { width: 16px; height: 16px; }
+.brand-dot:hover, .brand .panel-icon:hover { background: ${navHover}; }
+.side-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; margin: 0 4px; border-radius: 12px; color: ${textSoft}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; line-height: 20px; }
+.side-item svg { width: 16px; height: 16px; color: ${textSoft}; }
 .side-item { cursor: pointer; transition: background 0.15s; }
 .side-item:hover { background: ${navHover}; }
+.side-scroll .side-item { padding: 6px 8px; }
 .side-scroll .side-item:hover { background: ${itemHover}; }
 .side-item.active, .side-scroll .side-item.active:hover { background: ${activeItem}; color: ${isLight ? 'var(--color-gray-800)' : 'var(--color-gray-200)'}; }
-.side-item .age { margin-left: auto; font-size: 10px; color: ${ageText}; }
+.side-item .label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.side-item .age { flex-shrink: 0; padding-left: 8px; font-size: 10px; color: ${ageText}; }
 .side-item .add { margin-left: auto; color: ${textFaint}; }
 .side-item .add svg { width: 12px; height: 12px; }
-.side-label { font-size: 12px; color: ${textMuted}; padding: 16px 0 4px 10px; display: flex; align-items: center; }
-.side-label .add { margin-left: auto; padding-right: 8px; color: ${textFaint}; }
-.side-label .add svg { width: 12px; height: 12px; }
-.side-pinned { display: flex; align-items: center; gap: 6px; padding: 14px 10px 2px; color: ${textMuted}; font-size: 12px; }
+/* Section.svelte: text-xs gray-400/gray-500 header with a size-3.5 Plus */
+.side-label { font-size: 12px; color: ${isLight ? 'var(--color-gray-400)' : 'var(--color-gray-500)'}; padding: 12px 4px 4px 10px; display: flex; align-items: center; }
+.side-label .add { margin-left: auto; color: inherit; }
+.side-label .add svg { width: 14px; height: 14px; }
+.side-label .add:hover { color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; }
+.side-pinned { display: flex; align-items: center; gap: 6px; margin: 0 4px; padding: 6px 8px; border-radius: 12px; color: ${textSoft}; font-size: 13px; line-height: 20px; }
 .side-pinned svg { width: 11px; height: 11px; }
-.side-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; scrollbar-width: none; }
+.side-pinned:hover { background: ${itemHover}; }
+.side-divider { height: 1px; margin: 6px 4px; background: ${borderSubtle}; }
+.side-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; scrollbar-width: none; padding-top: 2px; }
 .side-scroll::-webkit-scrollbar { display: none; }
-.side-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; color: ${textMain}; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.15s; }
-.side-user:hover { background: ${itemHover}; }
-.side-label .add, .side-pinned, .brand .panel-icon { cursor: pointer; transition: color 0.15s; }
-.side-label .add:hover, .brand .panel-icon:hover { color: ${textMain}; }
+.side-user { display: flex; align-items: center; gap: 8px; margin: 0 4px; padding: 6px 8px; border-radius: 12px; color: ${textMain}; font-weight: 400; font-size: 13px; line-height: 20px; cursor: pointer; transition: background 0.15s; }
+.side-user:hover { background: ${navHover}; }
+.side-label .add, .side-pinned, .brand .panel-icon, .brand-dot { cursor: pointer; transition: background 0.15s, color 0.15s; }
 .avatar { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #ec4899); flex-shrink: 0; }
-.avatar.sm { width: 18px; height: 18px; border-radius: 6px; }
+.avatar.sm { width: 20px; height: 20px; border-radius: 50%; }
 
 main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-nav { padding: 8px 12px 8px 16px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: ${textMain}; position: relative; z-index: 2; }
-${opts.transparent ? '' : `nav::before { content: ''; position: absolute; inset: 0 0 -34px 0; background: linear-gradient(to bottom, color-mix(in srgb, ${bg} 90%, transparent), color-mix(in srgb, ${bg} 50%, transparent) 40%, transparent 97%); z-index: -1; pointer-events: none; }`}
-nav .dots { color: ${textMuted}; display: flex; }
-nav .dots svg { width: 14px; height: 14px; }
-nav .right { margin-left: auto; color: ${textMuted}; display: flex; gap: 14px; }
-nav .right svg { width: 15px; height: 15px; }
-nav .dots, nav .right { cursor: pointer; }
-nav .dots:hover, nav .right:hover { color: ${textMain}; }
+/* Navbar.svelte: pt-0.5 pb-1, pl-1.5 pr-1, title text-[15px] gray-700/300,
+   size-6 rounded-lg icon buttons, and the -bottom-10 gradient scrim */
+nav { padding: 2px 4px 4px 6px; display: flex; align-items: center; gap: 8px; color: ${textMain}; position: relative; z-index: 2; flex-shrink: 0; }
+${opts.transparent ? '' : `nav::before { content: ''; position: absolute; inset: 0 0 -40px 0; background: linear-gradient(to bottom, color-mix(in srgb, ${bg} 90%, transparent), color-mix(in srgb, ${bg} 50%, transparent) 40%, transparent 97%); z-index: -1; pointer-events: none; }`}
+#nav-title { padding: 4px 4px 4px 6px; font-size: 15px; font-weight: 400; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-300)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+nav .nav-btn { width: 24px; height: 24px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: ${textMuted}; cursor: pointer; transition: background 0.15s, color 0.15s; }
+nav .nav-btn svg { width: 16px; height: 16px; }
+nav .nav-btn:hover { background: ${navHover}; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-200)'}; }
+nav .right { margin-left: auto; display: flex; align-items: center; gap: 8px; padding-right: 4px; }
 
-#messages-container { flex: 1; overflow: hidden; padding: 16px 24px 6px; display: flex; flex-direction: column; gap: 14px; max-width: 768px; width: 100%; margin: 0 auto; }
-.chat-user { display: flex; justify-content: flex-end; padding-bottom: 4px; }
+/* Messages.svelte: rows are max-w-[58rem] px-5 mb-3 inside a full-width scroller */
+#messages-container { flex: 1; overflow: hidden; padding: 8px 0 6px; display: flex; flex-direction: column; width: 100%; }
+#messages-container > .chat-user,
+#messages-container > .chat-assistant { max-width: 58rem; width: 100%; margin: 0 auto 12px; padding: 0 20px; }
+.chat-user { display: flex; justify-content: flex-end; }
 .chat-user > div { max-width: 90%; background: ${bubble}; border-radius: 24px; padding: 6px 16px; font-size: 0.9375rem; line-height: 1.625; color: ${proseText}; }
 .chat-assistant { display: flex; }
 .ai-avatar { width: 28px; height: 28px; border-radius: 16px; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; flex-shrink: 0; margin: 2px 8px 0 0; border: 1px solid rgb(0 0 0 / 0.1); }
@@ -389,47 +436,65 @@ nav .dots:hover, nav .right:hover { color: ${textMain}; }
 .prose p:last-child { margin-bottom: 0; }
 .prose b { color: ${isLight ? '#000' : '#fff'}; font-weight: 500; }
 .prose code { background: ${codeBg}; padding: 2px 6px; border-radius: 6px; font-family: ui-monospace, 'JetBrains Mono', monospace; font-size: 0.8em; color: ${textMain}; }
-.code-block { border-radius: 16px; border: 1px solid ${borderSubtle}; background: ${codeBlockBg}; margin: 6px 0 10px; overflow: hidden; }
-.code-block-header { display: flex; align-items: center; justify-content: space-between; padding: 6px 14px 0; font-size: 11px; color: ${textMuted}; }
-.code-block-header .cb-action { cursor: pointer; color: ${isLight ? '#000' : '#fff'}; font-size: 11px; }
+/* CodeBlock.svelte: rounded-2xl border my-0.5, header py-1.5 px-3.5 text-xs */
+.code-block { border-radius: 16px; border: 1px solid ${borderSubtle}; background: ${codeBlockBg}; margin: 12px 0; overflow: hidden; }
+.code-block-header { display: flex; align-items: center; justify-content: space-between; padding: 6px 14px; font-size: 12px; color: ${isLight ? '#000' : '#fff'}; }
+.code-block-header .cb-action { cursor: pointer; padding: 2px 6px; border-radius: 6px; font-size: 12px; }
 .code-block-header .cb-action:hover { opacity: 0.7; }
-.prose pre { background: ${codeBlockBg}; padding: 8px 14px 12px; font-family: ui-monospace, 'JetBrains Mono', monospace; font-size: 12px; overflow: hidden; margin: 0; color: ${proseText}; }
-.prose ul, .prose ol { margin: 4px 0 10px 22px; }
-.prose li { margin-bottom: 4px; }
-.prose blockquote { border-left: 2px solid ${border}; padding: 2px 0 2px 12px; color: ${textMuted}; margin: 6px 0 10px; }
+.prose pre { background: ${codeBlockBg}; padding: 4px 20px 16px; font-family: ui-monospace, 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.5; overflow: hidden; margin: 0; color: ${proseText}; }
+.prose ul, .prose ol { margin: 8px 0 8px 22px; }
+.prose li { margin: 2px 0; }
+.prose blockquote { border-left: 2px solid ${border}; padding: 2px 0 2px 12px; color: ${textMuted}; margin: 12px 0; }
 .prose a { color: ${textMain}; text-decoration: underline; cursor: pointer; }
 .prose table { border-collapse: collapse; margin: 6px 0 10px; font-size: 12.5px; }
 .prose th, .prose td { border: 1px solid ${border}; padding: 5px 10px; text-align: left; }
 .prose th { background: ${codeBg}; color: ${textMain}; font-weight: 600; }
 .prose h4 { font-size: 0.9375rem; font-weight: 600; color: ${textMain}; margin: 8px 0 4px; }
-.placeholder { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-bottom: 30px; }
-.ph-logo { width: 44px; height: 44px; border-radius: 12px; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; margin-bottom: 10px; border: 1px solid rgb(0 0 0 / 0.1); }
-.ph-model { font-size: 28px; font-weight: 500; color: ${isLight ? 'var(--color-gray-800)' : 'var(--color-gray-100)'}; }
-.ph-sub { font-size: 19px; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-400)'}; margin: 2px 0 20px; }
-.ph-label { font-size: 11px; color: ${textFaint}; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
-.ph-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: min(560px, 92%); }
-.ph-card { border: 1px solid ${borderSubtle}; border-radius: 14px; padding: 10px 14px; cursor: pointer; transition: background 0.15s; }
-.ph-card:hover { background: ${hover}; }
-.ph-card b { display: block; font-size: 13px; color: ${textSoft}; font-weight: 600; }
-.ph-card span { font-size: 12px; color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; }
+/* Placeholder.svelte: max-w-[58rem] translate-y-6 centered block, size-10
+   rounded-2xl model image, text-2xl name; Suggestions.svelte rows are
+   borderless px-2.5 py-1.5 rounded-lg with text-sm / text-xs lines */
+.placeholder { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; max-width: 58rem; width: 100%; margin: 0 auto; padding: 0 8px 24px; transform: translateY(-12px); }
+.ph-logo { width: 40px; height: 40px; border-radius: 16px; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; margin-bottom: 2px; border: 1px solid rgb(0 0 0 / 0.1); }
+.ph-model { font-size: 1.5rem; line-height: 2rem; font-weight: 400; color: ${isLight ? 'var(--color-gray-800)' : 'var(--color-gray-100)'}; max-width: 36rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-sub { font-size: 1.5rem; line-height: 2rem; font-weight: 400; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-400)'}; margin: 0 0 22px; }
+.ph-suggest { width: min(42rem, 100%); padding: 0 20px; }
+.ph-label { font-size: 12px; line-height: 1.4; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-400)'}; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+.ph-label svg { width: 14px; height: 14px; }
+.ph-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: start; }
+.ph-card { border-radius: 8px; padding: 6px 10px; cursor: pointer; background: transparent; transition: color 0.15s; text-align: left; }
+.ph-card b { display: block; font-size: 14px; line-height: 1.375; font-weight: 400; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-300)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-card span { display: block; font-size: 12px; line-height: 1.375; font-weight: 400; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-400)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-card:hover b { color: ${isLight ? 'var(--color-gray-950)' : '#fff'}; }
+.ph-card:hover span { color: ${isLight ? 'var(--color-gray-900)' : 'var(--color-gray-100)'}; }
 .msg-actions { display: flex; gap: 4px; margin-top: 8px; color: ${textMuted}; }
 .msg-actions .icon-sm { padding: 4px; border-radius: 6px; display: flex; cursor: pointer; transition: background 0.15s, color 0.15s; }
 .msg-actions .icon-sm:hover { background: ${ghostHover}; color: ${textMain}; }
-.msg-actions svg { width: 15px; height: 15px; }
+.msg-actions svg { width: 14px; height: 14px; }
 
-.input-wrap { padding: 0 16px 4px; max-width: 800px; width: 100%; margin: 0 auto; }
-#chat-input-container { background: ${inputBg}; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid ${borderSubtle}; border-radius: 24px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); padding: 10px 10px 8px 18px; display: flex; flex-direction: column; gap: 8px; }
+/* MessageInput.svelte: max-w-[58rem] px-2.5 mx-auto shell, shadow-lg
+   rounded-3xl border-gray-100/30 dark:border-gray-850/30 bg-white/5
+   dark:bg-gray-500/5 backdrop-blur-sm */
+.input-wrap { padding: 0 10px; max-width: 58rem; width: 100%; margin: 0 auto; }
+#chat-input-container { background: ${inputBg}; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid ${borderSubtle}; border-radius: 24px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); padding: 10px 10px 8px 18px; display: flex; flex-direction: column; gap: 8px; transition: border-color 0.15s; }
+#chat-input-container:hover { border-color: ${isLight ? 'var(--color-gray-200)' : 'var(--color-gray-800)'}; }
 textarea { background: transparent; border: none; resize: none; outline: none; color: ${textMain}; font-family: inherit; font-size: 0.9375rem; height: 24px; width: 100%; padding-top: 2px; }
 textarea::placeholder { color: ${textMuted}; }
-.input-row { display: flex; align-items: center; gap: 4px; color: ${textSoft}; }
-.input-row .icon-btn { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s; }
+/* MessageInput.svelte controls: PlusAlt/Component sit in size-[1.875rem]
+   rounded-full buttons, Dictate is rounded-full p-1.5 mr-0.5, and with an
+   empty prompt the trailing control is Voice mode — bg-black dark:bg-white
+   rounded-full p-[5px] — not the submit arrow. */
+.input-row { display: flex; align-items: center; gap: 2px; }
+.input-row .icon-btn { width: 30px; height: 30px; border-radius: 9999px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: ${isLight ? 'var(--color-gray-700)' : '#fff'}; cursor: pointer; transition: background 0.15s; }
 .input-row .icon-btn:hover { background: ${iconHover}; }
+.input-row .icon-btn svg { width: 18px; height: 18px; }
+.input-row .icon-btn:first-child svg { width: 20px; height: 20px; }
 .input-row .spacer { flex: 1; }
-.input-row svg { width: 17px; height: 17px; }
-#send-message-button { width: 32px; height: 32px; border-radius: 50%; border: none; background: ${isLight ? 'var(--color-gray-900)' : '#fff'}; color: ${isLight ? '#fff' : 'var(--color-gray-900)'}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: default; margin-left: 4px; }
-#send-message-button svg { width: 15px; height: 15px; }
-#send-message-button { cursor: pointer; transition: filter 0.15s; }
-#send-message-button:hover { filter: ${isLight ? 'brightness(1.4)' : 'brightness(0.88)'}; }
+.mic-btn { padding: 6px; margin-right: 2px; border-radius: 9999px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-300)'}; cursor: pointer; transition: color 0.15s; }
+.mic-btn svg { width: 18px; height: 18px; }
+.mic-btn:hover { color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-200)'}; }
+#call-button { padding: 5px; border-radius: 9999px; border: none; background: ${isLight ? '#000' : '#fff'}; color: ${isLight ? '#fff' : '#000'}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; transition: background 0.15s; }
+#call-button svg { width: 20px; height: 20px; }
+#call-button:hover { background: ${isLight ? 'var(--color-gray-900)' : 'var(--color-gray-100)'}; }
 .footer-note { text-align: center; font-size: 10.5px; color: ${textFaint}; padding: 4px 0 6px; }
 ${structural}
 ${gradientCSS}
@@ -442,33 +507,34 @@ ${safeCSS}
 ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;"></canvas>' : ''}
 <div class="app">
   <div id="sidebar">
-    <div class="brand"><div class="brand-dot" style="background:#fff !important; color:#000 !important;">OI</div> Open WebUI <span class="panel-icon">${SVG.panel}</span></div>
-    <div class="side-item" data-chat="new">${SVG.pencil} New Chat</div>
-    <div class="side-item">${SVG.search} Search</div>
-    <div class="side-item">${SVG.notes} Notes</div>
-    <div class="side-item">${SVG.grid} Workspace</div>
-    <div class="side-item">${SVG.code} Playground</div>
+    <div class="brand"><div class="brand-dot"><i>OI</i></div><span class="brand-name">Open WebUI</span><span class="panel-icon">${SVG.panel}</span></div>
+    <div class="side-item" data-chat="new">${SVG.editPencil} <span class="label">New Chat</span></div>
+    <div class="side-item">${SVG.search} <span class="label">Search</span></div>
+    <div class="side-item">${SVG.notes} <span class="label">Notes</span></div>
+    <div class="side-item">${SVG.workspace} <span class="label">Workspace</span></div>
+    <div class="side-item">${SVG.code} <span class="label">Playground</span></div>
+    <div class="side-divider"></div>
     <div class="side-scroll">
       <div class="side-label">Models</div>
-      <div class="side-item"><span class="avatar sm"></span> Preview Model</div>
+      <div class="side-item"><span class="avatar sm"></span> <span class="label">Preview Model</span></div>
       <div class="side-label">Notes <span class="add">${SVG.plus}</span></div>
       <div class="side-label">Channels <span class="add">${SVG.plus}</span></div>
       <div class="side-label">Folders <span class="add">${SVG.plus}</span></div>
       <div class="side-label">Chats</div>
-      <div class="side-pinned">${SVG.chevron} Pinned</div>
+      <div class="side-pinned">${SVG.chevron} <span class="label">Pinned</span></div>
       <div class="side-label">Today</div>
-      <div class="side-item active" data-chat="default">Theme preview chat</div>
+      <div class="side-item active" data-chat="default"><span class="label">Theme preview chat</span></div>
       <div class="side-label">Previous 7 days</div>
-      <div class="side-item" data-chat="oklch">OKLCH color ramps <span class="age">1d</span></div>
-      <div class="side-item" data-chat="fx">Canvas FX ideas <span class="age">2d</span></div>
-      <div class="side-item" data-chat="gradient">Gradient inspiration <span class="age">3d</span></div>
-      <div class="side-item" data-chat="transparency">Structural transparency <span class="age">4d</span></div>
-      <div class="side-item" data-chat="notes">Preset gallery notes <span class="age">6d</span></div>
+      <div class="side-item" data-chat="oklch"><span class="label">OKLCH color ramps</span><span class="age">1d</span></div>
+      <div class="side-item" data-chat="fx"><span class="label">Canvas FX ideas</span><span class="age">2d</span></div>
+      <div class="side-item" data-chat="gradient"><span class="label">Gradient inspiration</span><span class="age">3d</span></div>
+      <div class="side-item" data-chat="transparency"><span class="label">Structural transparency</span><span class="age">4d</span></div>
+      <div class="side-item" data-chat="notes"><span class="label">Preset gallery notes</span><span class="age">6d</span></div>
     </div>
     <div class="side-user"><div class="avatar"></div> You</div>
   </div>
   <main>
-    <nav><span id="nav-title">Theme preview chat</span> <span class="dots">${SVG.dots}</span><span class="right">${SVG.pencil}${SVG.panel}</span></nav>
+    <nav><span id="nav-title">Theme preview chat</span><span class="nav-btn">${SVG.dots}</span><span class="right"><span class="nav-btn">${SVG.pencilSquare}</span><span class="nav-btn">${SVG.panel}</span></span></nav>
     <div id="messages-container">
       <div class="chat-user"><div>Show me what this preset looks like on a real conversation.</div></div>
       <div class="chat-assistant">
@@ -498,11 +564,11 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
       <div id="chat-input-container">
         <textarea placeholder="Send a Message" disabled></textarea>
         <div class="input-row">
-          <span class="icon-btn">${SVG.plus}</span>
-          <span class="icon-btn">${SVG.grid}</span>
+          <span class="icon-btn">${SVG.plusAlt}</span>
+          <span class="icon-btn">${SVG.component}</span>
           <span class="spacer"></span>
-          <span class="icon-btn">${SVG.mic}</span>
-          <button id="send-message-button">${SVG.arrowUp}</button>
+          <span class="mic-btn">${SVG.mic}</span>
+          <button id="call-button">${SVG.voice}</button>
         </div>
       </div>
       <div class="footer-note">Preview Model can make mistakes. Verify important information.</div>
@@ -568,6 +634,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   var msgs = document.getElementById('messages-container');
   var navTitle = document.getElementById('nav-title');
   if (!msgs || !navTitle) return;
+  var BOLT_SVG = ${JSON.stringify(SVG.bolt)};
 
   function ai(stats, body) {
     return '<div class="chat-assistant"><div class="ai-avatar" style="background:#fff !important; color:#000 !important;">OI</div><div class="ai-col">' +
@@ -636,13 +703,14 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       html: '<div class="placeholder"><div class="ph-logo" style="background:#fff !important; color:#000 !important;">OI</div>' +
         '<div class="ph-model">Preview Model</div>' +
         '<div class="ph-sub">How can I help you today?</div>' +
-        '<div class="ph-label">&#9889; Suggested</div>' +
+        '<div class="ph-suggest">' +
+        '<div class="ph-label">' + BOLT_SVG + 'Suggested</div>' +
         '<div class="ph-grid">' +
         '<div class="ph-card"><b>Help me study</b><span>vocabulary for a college entrance exam</span></div>' +
         '<div class="ph-card"><b>Give me ideas</b><span>for weekend projects with the kids</span></div>' +
         '<div class="ph-card"><b>Show me a code snippet</b><span>of a sticky website header</span></div>' +
         '<div class="ph-card"><b>Overcome procrastination</b><span>give me tips</span></div>' +
-        '</div></div>'
+        '</div></div></div>'
     }
   };
 
