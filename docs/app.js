@@ -10,7 +10,7 @@
   // ---- Helpers ----
 
   function oklchToCSS(h, c, l) {
-    return `oklch(${l}% ${c / 100} ${h})`;
+    return `oklch(${l}% ${c / 1000} ${h})`;
   }
 
   function titleCase(str) {
@@ -28,6 +28,7 @@
 
   // SVG icons
   const ICONS = {
+    play: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M8 5v14l11-7z"/></svg>',
     copy: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
     check: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
   };
@@ -131,20 +132,20 @@
 
   let previouslyFocused = null;
 
-  function openDetail(item, category) {
+  function openDetail(item, category, index) {
     let html = '';
     switch (category) {
       case 'themes':
-        html = buildThemeDetail(item);
+        html = buildThemeDetail(item, index);
         break;
       case 'canvasFx':
-        html = buildSimpleDetail(item, 'Canvas FX Animation');
+        html = buildSimpleDetail(item, 'Canvas FX Animation', index);
         break;
       case 'cssPresets':
-        html = buildSimpleDetail(item, 'CSS Preset');
+        html = buildSimpleDetail(item, 'CSS Preset', index);
         break;
       case 'gradients':
-        html = buildGradientDetail(item);
+        html = buildGradientDetail(item, index);
         break;
       case 'bundles':
         html = buildSimpleDetail(item, 'Import Bundle');
@@ -204,8 +205,30 @@
   window.openThemeDetail = function (index) {
     if (!catalog) return;
     const items = getFilteredItems();
-    if (items[index]) openDetail(items[index], activeCategory);
+    if (items[index]) openDetail(items[index], activeCategory, index);
   };
+
+  // Live preview entry (preview.js provides window.openPreview)
+  window.previewItem = function (index) {
+    if (!catalog || !window.openPreview) return;
+    const items = getFilteredItems();
+    if (items[index]) window.openPreview(items[index], activeCategory);
+  };
+
+  const PREVIEWABLE = ['themes', 'canvasFx', 'cssPresets', 'gradients'];
+
+  function actionRow(item, index, category) {
+    const previewBtn = PREVIEWABLE.includes(category)
+      ? `<button class="preview-btn" onclick="event.stopPropagation(); previewItem(${index})" aria-label="Live preview">${ICONS.play}<span>Preview</span></button>`
+      : '';
+    return `<div class="card-actions">
+      <button class="copy-btn" data-url="${escapeHTML(item.importUrl)}" onclick="event.stopPropagation(); copyUrl(this)">
+        ${ICONS.copy}
+        <span>Copy Import URL</span>
+      </button>
+      ${previewBtn}
+    </div>`;
+  }
 
   // Keyboard activation for cards (Enter/Space)
   window.cardKeyHandler = function (e, index) {
@@ -215,7 +238,7 @@
     }
   };
 
-  function buildThemeDetail(t) {
+  function buildThemeDetail(t, index) {
     const modes = t.modes || {};
     const presentModes = MODE_ORDER.filter((m) => modes[m]);
     const features = collectFeatures(modes, presentModes);
@@ -236,7 +259,7 @@
         return `<div class="detail-mode-card">
           <div class="detail-mode-swatch" style="background:${color}"></div>
           <div class="detail-mode-name">${m}</div>
-          <div class="detail-mode-values">H${mode.h} C${(mode.c / 100).toFixed(2)} L${mode.l}%</div>
+          <div class="detail-mode-values">H${mode.h} C${(mode.c / 1000).toFixed(3)} L${mode.l}%</div>
           ${modeFeatures.length ? `<div class="detail-mode-features">${modeFeatures.join('')}</div>` : ''}
         </div>`;
       })
@@ -262,14 +285,17 @@
       <div class="detail-palette">${modesHTML}</div>
       <div class="detail-section-label">Import URL</div>
       <div class="detail-import-url">${escapeHTML(t.importUrl)}</div>
-      <button class="copy-btn" data-url="${escapeHTML(t.importUrl)}" onclick="copyUrl(this)">
-        ${ICONS.copy}
-        <span>Copy Import URL</span>
-      </button>
+      <div class="card-actions">
+        <button class="copy-btn" data-url="${escapeHTML(t.importUrl)}" onclick="copyUrl(this)">
+          ${ICONS.copy}
+          <span>Copy Import URL</span>
+        </button>
+        ${index != null ? `<button class="preview-btn" onclick="previewItem(${index})">${ICONS.play}<span>Preview</span></button>` : ''}
+      </div>
     `;
   }
 
-  function buildGradientDetail(g) {
+  function buildGradientDetail(g, index) {
     const gradientCSS = buildGradientCSS(g);
     const typeLabel = (g.type || 'linear').charAt(0).toUpperCase() + (g.type || 'linear').slice(1);
     const typeBadgeClass =
@@ -284,14 +310,17 @@
       <div class="gradient-preview" style="background:${gradientCSS};height:80px;margin-bottom:20px;border-radius:var(--radius-sm)" aria-label="Gradient preview"></div>
       <div class="detail-section-label">Import URL</div>
       <div class="detail-import-url">${escapeHTML(g.importUrl)}</div>
-      <button class="copy-btn" data-url="${escapeHTML(g.importUrl)}" onclick="copyUrl(this)">
-        ${ICONS.copy}
-        <span>Copy Import URL</span>
-      </button>
+      <div class="card-actions">
+        <button class="copy-btn" data-url="${escapeHTML(g.importUrl)}" onclick="copyUrl(this)">
+          ${ICONS.copy}
+          <span>Copy Import URL</span>
+        </button>
+        ${index != null ? `<button class="preview-btn" onclick="previewItem(${index})">${ICONS.play}<span>Preview</span></button>` : ''}
+      </div>
     `;
   }
 
-  function buildSimpleDetail(item, typeLabel) {
+  function buildSimpleDetail(item, typeLabel, index) {
     const displayName = item.name || titleCase(item.file || '');
     return `
       <h2 class="detail-title">${escapeHTML(displayName)}</h2>
@@ -302,10 +331,13 @@
       ${item.description ? `<p class="detail-description">${escapeHTML(item.description)}</p>` : ''}
       <div class="detail-section-label">Import URL</div>
       <div class="detail-import-url">${escapeHTML(item.importUrl)}</div>
-      <button class="copy-btn" data-url="${escapeHTML(item.importUrl)}" onclick="copyUrl(this)">
-        ${ICONS.copy}
-        <span>Copy Import URL</span>
-      </button>
+      <div class="card-actions">
+        <button class="copy-btn" data-url="${escapeHTML(item.importUrl)}" onclick="copyUrl(this)">
+          ${ICONS.copy}
+          <span>Copy Import URL</span>
+        </button>
+        ${index != null && PREVIEWABLE.includes(activeCategory) ? `<button class="preview-btn" onclick="previewItem(${index})">${ICONS.play}<span>Preview</span></button>` : ''}
+      </div>
     `;
   }
 
@@ -460,7 +492,7 @@
               const mode = modes[m];
               const color = oklchToCSS(mode.h, mode.c, mode.l);
               return `<div class="palette-group">
-                <div class="palette-swatch" style="background:${color}" title="${m}: oklch(${mode.l}% ${(mode.c / 100).toFixed(3)} ${mode.h})"></div>
+                <div class="palette-swatch" style="background:${color}" title="${m}: oklch(${mode.l}% ${(mode.c / 1000).toFixed(3)} ${mode.h})"></div>
                 <span class="palette-mode-name">${m}</span>
               </div>`;
             })
@@ -490,10 +522,7 @@
       ${t.author ? `<span class="card-author">${escapeHTML(t.author)}</span>` : ''}
       ${paletteHTML}
       ${badgeRowHTML}
-      <button class="copy-btn" data-url="${escapeHTML(t.importUrl)}" onclick="event.stopPropagation(); copyUrl(this)">
-        ${ICONS.copy}
-        <span>Copy Import URL</span>
-      </button>
+      ${actionRow(t, index, 'themes')}
     </article>`;
   }
 
@@ -503,10 +532,7 @@
         <h2 class="card-name">${escapeHTML(fx.name)}</h2>
       </div>
       ${fx.description ? `<p class="card-description">${escapeHTML(fx.description)}</p>` : ''}
-      <button class="copy-btn" data-url="${escapeHTML(fx.importUrl)}" onclick="event.stopPropagation(); copyUrl(this)">
-        ${ICONS.copy}
-        <span>Copy Import URL</span>
-      </button>
+      ${actionRow(fx, index, 'canvasFx')}
     </article>`;
   }
 
@@ -516,10 +542,7 @@
       <div class="card-header">
         <h2 class="card-name">${escapeHTML(displayName)}</h2>
       </div>
-      <button class="copy-btn" data-url="${escapeHTML(css.importUrl)}" onclick="event.stopPropagation(); copyUrl(this)">
-        ${ICONS.copy}
-        <span>Copy Import URL</span>
-      </button>
+      ${actionRow(css, index, 'cssPresets')}
     </article>`;
   }
 
@@ -543,10 +566,7 @@
         </div>
       </div>
       <div class="gradient-preview" style="background:${gradientCSS}" aria-label="Gradient preview"></div>
-      <button class="copy-btn" data-url="${escapeHTML(g.importUrl)}" onclick="event.stopPropagation(); copyUrl(this)">
-        ${ICONS.copy}
-        <span>Copy Import URL</span>
-      </button>
+      ${actionRow(g, index, 'gradients')}
     </article>`;
   }
 

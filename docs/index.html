@@ -145,6 +145,23 @@
   <!-- Toast -->
   <div id="toast" class="toast" aria-live="polite"></div>
 
+  <!-- Live preview overlay -->
+  <div id="preview-overlay" class="preview-overlay" aria-hidden="true">
+    <div id="preview-stage" class="preview-stage" aria-live="off"></div>
+    <div class="preview-topbar">
+      <div class="preview-titlebox">
+        <span class="preview-label">Live Preview</span>
+        <span id="preview-title" class="preview-title"></span>
+      </div>
+      <div id="preview-controls" class="preview-controls-box"></div>
+      <button class="preview-close" id="preview-close-btn" aria-label="Close preview">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+    <div id="preview-status" class="preview-status" aria-live="polite"></div>
+  </div>
+
   <script src="app.js"></script>
+  <script src="preview.js"></script>
 </body>
 </html>
