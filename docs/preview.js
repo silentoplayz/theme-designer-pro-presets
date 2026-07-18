@@ -1211,7 +1211,10 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   var navToggle = document.querySelector('.nav-toggle');
   var MOBILE = 768; // routes/+layout.svelte BREAKPOINT
 
-  function isMobile() { return window.innerWidth < MOBILE; }
+  // Sandboxed srcdoc frames run this script before layout, while innerWidth
+  // is still 0 — which must not read as "mobile", or every mode-pill rebuild
+  // would collapse an expanded sidebar.
+  function isMobile() { return window.innerWidth > 0 && window.innerWidth < MOBILE; }
 
   var panel = document.querySelector('.sidebar-panel');
 
@@ -1248,12 +1251,19 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   if (navToggle) navToggle.addEventListener('click', function (e) { e.stopPropagation(); setCollapsed(false); });
   if (backdrop) backdrop.addEventListener('click', function () { setCollapsed(true); });
 
-  // showSidebar defaults to false on mobile, and closes when crossing into it
-  var startCollapsed = document.body.getAttribute('data-sidebar-collapsed') === '1' || isMobile();
-  if (startCollapsed) app.classList.add('collapsed');
-  syncSidebarId(startCollapsed);
-
+  // showSidebar defaults to false on mobile, and closes when crossing into it.
+  // Applied twice: once synchronously (attr only, width may still be 0) and
+  // once after first layout, when the mobile default can be judged for real.
+  var attrCollapsed = document.body.getAttribute('data-sidebar-collapsed') === '1';
   var wasMobile = isMobile();
+  function applyInitial() {
+    var start = attrCollapsed || isMobile();
+    app.classList.toggle('collapsed', start);
+    syncSidebarId(start);
+    wasMobile = isMobile();
+  }
+  applyInitial();
+  requestAnimationFrame(applyInitial);
   window.addEventListener('resize', function () {
     var now = isMobile();
     if (now !== wasMobile) {
