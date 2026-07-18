@@ -400,8 +400,31 @@ svg { width: 16px; height: 16px; flex-shrink: 0; }
 .app { display: flex; height: 100vh; position: relative; }
 
 /* Sidebar.svelte: w-[var(--sidebar-width)]=245px, border-e, px-1 rows,
-   rounded-xl px-2 py-1.5 nav items, size-4 icons, text-[13px] leading-5 */
-#sidebar { width: 245px; flex-shrink: 0; background: ${sidebarBg}; border-right: 1px solid ${borderSubtle}; padding: 6px 4px 4px; display: flex; flex-direction: column; overflow: hidden; }
+   rounded-xl px-2 py-1.5 nav items, size-4 icons, text-[13px] leading-5.
+   Collapsing swaps it for the w-[42px] rail (Sidebar.svelte L806-974); the
+   panel itself uses transition:slide{duration:250,axis:'x'}. */
+#sidebar { width: 245px; flex-shrink: 0; background: ${sidebarBg}; border-right: 1px solid ${borderSubtle}; padding: 6px 4px 4px; display: flex; flex-direction: column; overflow: hidden; transition: width 250ms ease, opacity 150ms ease; }
+/* min-width:0 is required — flex items default to min-width:auto, which would
+   floor the panel at its nowrap content width and defeat width:0 */
+.app.collapsed #sidebar { width: 0; min-width: 0; padding-left: 0; padding-right: 0; border-right-width: 0; opacity: 0; pointer-events: none; }
+
+/* The collapsed rail: w-[42px] py-1 px-1, justify-between, border-e-[0.5px] */
+#rail { display: none; width: 42px; flex-shrink: 0; padding: 4px; flex-direction: column; justify-content: space-between; align-items: center; background: ${sidebarBg}; border-right: 0.5px solid ${borderSubtle}; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-300)'}; overflow: hidden; cursor: pointer; transition: background 0.15s; }
+.app.collapsed #rail { display: flex; }
+#rail:hover { background: ${isLight ? 'color-mix(in srgb, var(--color-gray-50) 30%, ' + sidebarBg + ')' : 'color-mix(in srgb, var(--color-gray-800) 30%, ' + sidebarBg + ')'}; }
+.rail-group { display: flex; flex-direction: column; align-items: center; }
+/* size-8.5 / size-8 hit areas wrapping a size-[30px] rounded-lg hover target */
+.rail-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.rail-btn.lg { width: 34px; height: 34px; }
+.rail-btn > span { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+.rail-btn:hover > span { background: ${navHover}; }
+.rail-btn svg { width: 16px; height: 16px; }
+/* the logo swaps to the sidebar-toggle glyph on hover (group-hover:hidden) */
+.rail-logo i { width: 20px; height: 20px; border-radius: 50%; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; font-style: normal; letter-spacing: -0.02em; border: 1px solid rgb(0 0 0 / 0.1); }
+.rail-logo svg { display: none; }
+.rail-logo:hover i { display: none; }
+.rail-logo:hover svg { display: block; }
+.rail-avatar { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #ec4899); }
 .brand { display: flex; align-items: center; gap: 2px; padding: 0 0 6px; color: ${textMain}; }
 .brand-dot { width: 34px; height: 34px; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
 .brand-dot i { width: 20px; height: 20px; border-radius: 50%; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; font-style: normal; letter-spacing: -0.02em; border: 1px solid rgb(0 0 0 / 0.1); }
@@ -544,9 +567,20 @@ ${gradientCSS}
 ${safeCSS}
 </style>
 </head>
-<body data-initial-chat="${esc(opts.initialChat || 'default')}">
+<body data-initial-chat="${esc(opts.initialChat || 'default')}" data-sidebar-collapsed="${opts.initialCollapsed ? '1' : '0'}">
 ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;"></canvas>' : ''}
 <div class="app">
+  <div id="rail" title="Open Sidebar">
+    <div class="rail-group">
+      <span class="rail-btn lg rail-logo"><span><i>OI</i>${SVG.panel}</span></span>
+      <span class="rail-btn" style="margin-top:4px">${'<span>' + SVG.editPencil + '</span>'}</span>
+      <span class="rail-btn"><span>${SVG.search}</span></span>
+      <span class="rail-btn"><span>${SVG.notes}</span></span>
+      <span class="rail-btn"><span>${SVG.workspace}</span></span>
+      <span class="rail-btn"><span>${SVG.code}</span></span>
+    </div>
+    <span class="rail-btn lg"><span><span class="rail-avatar"></span></span></span>
+  </div>
   <div id="sidebar">
     <div class="brand"><div class="brand-dot"><i>OI</i></div><span class="brand-name">Open WebUI</span><span class="panel-icon">${SVG.panel}</span></div>
     <div class="side-item" data-chat="new">${SVG.editPencil} <span class="label">New Chat</span></div>
@@ -778,6 +812,26 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   var initial = document.body.getAttribute('data-initial-chat');
   if (initial && initial !== 'default' && CHATS[initial]) openChat(initial);
 })();
+
+// Sidebar collapse/expand. Open WebUI drives this from the showSidebar store:
+// the expanded panel's header button closes it, and the collapsed rail (the
+// whole column is a button) reopens it.
+(function () {
+  var app = document.querySelector('.app');
+  var rail = document.getElementById('rail');
+  var toggle = document.querySelector('.brand .panel-icon');
+  if (!app || !rail || !toggle) return;
+
+  function setCollapsed(on) {
+    app.classList.toggle('collapsed', on);
+    try { parent.postMessage({ __tdpPreview: true, kind: 'sidebarchange', collapsed: on }, '*'); } catch (e) {}
+  }
+
+  toggle.addEventListener('click', function (e) { e.stopPropagation(); setCollapsed(true); });
+  rail.addEventListener('click', function () { setCollapsed(false); });
+
+  if (document.body.getAttribute('data-sidebar-collapsed') === '1') app.classList.add('collapsed');
+})();
 </script>
 </body>
 </html>`;
@@ -805,6 +859,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
 
   let active = null; // { destroy() }
   let currentMockChat = 'default'; // survives mode-pill rebuilds within one preview
+  let currentSidebarCollapsed = false; // ditto, so switching modes keeps the rail state
 
   function setStatus(msg) {
     statusEl.textContent = msg || '';
@@ -824,6 +879,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
 
   function openOverlay(title) {
     currentMockChat = 'default';
+    currentSidebarCollapsed = false;
     titleEl.textContent = title;
     stage.innerHTML = '';
     controlsEl.innerHTML = '';
@@ -839,6 +895,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     if (!e.data || e.data.__tdpPreview !== true || !overlay.classList.contains('open')) return;
     if (e.data.kind === 'escape') closePreview();
     if (e.data.kind === 'chatchange' && typeof e.data.chat === 'string') currentMockChat = e.data.chat;
+    if (e.data.kind === 'sidebarchange') currentSidebarCollapsed = !!e.data.collapsed;
     if (e.data.kind === 'status' && typeof e.data.text === 'string') setStatus(e.data.text);
   });
   document.addEventListener(
@@ -882,7 +939,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       if (frame) frame.remove();
       frame = mountMockFrame(
         stage,
-        buildMockSrcdoc({ modeKey, vars: themeVars(null), customCSS: '', transparent: true, initialChat: currentMockChat })
+        buildMockSrcdoc({ modeKey, vars: themeVars(null), customCSS: '', transparent: true, initialChat: currentMockChat, initialCollapsed: currentSidebarCollapsed })
       );
     };
     controlsEl.appendChild(pillGroup(['dark', 'light'], defaultMode, renderMode));
@@ -963,7 +1020,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
         if (frame) frame.remove();
         frame = mountMockFrame(
           stage,
-          buildMockSrcdoc({ modeKey, vars: themeVars(null), customCSS: css, transparent: false, initialChat: currentMockChat })
+          buildMockSrcdoc({ modeKey, vars: themeVars(null), customCSS: css, transparent: false, initialChat: currentMockChat, initialCollapsed: currentSidebarCollapsed })
         );
       };
       controlsEl.appendChild(pillGroup(['dark', 'light'], 'dark', renderMode));
@@ -1006,6 +1063,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
             canvasScript: hasCanvas ? mode.canvasScript : null,
             gradient: gLayers,
             initialChat: currentMockChat,
+            initialCollapsed: currentSidebarCollapsed,
           })
         );
       };
