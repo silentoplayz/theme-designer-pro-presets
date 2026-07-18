@@ -596,7 +596,6 @@ svg { width: 1rem; height: 1rem; flex-shrink: 0; }
 .side-pinned { display: flex; align-items: center; gap: 6px; margin: 0 4px; padding: 6px 8px; border-radius: 12px; color: ${textSoft}; font-size: 0.8125rem; line-height: 1.25rem; }
 .side-pinned svg { width: 0.6875rem; height: 0.6875rem; }
 .side-pinned:hover { background: ${itemHover}; }
-.side-divider { height: 1px; margin: 6px 4px; background: ${borderSubtle}; }
 .side-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; scrollbar-width: none; padding-top: 2px; }
 .side-scroll::-webkit-scrollbar { display: none; }
 .side-user { display: flex; align-items: center; gap: 8px; margin: 0 4px; padding: 6px 8px; border-radius: 12px; color: ${textMain}; font-weight: 400; font-size: 0.8125rem; line-height: 1.25rem; cursor: pointer; transition: background 0.15s; }
@@ -844,7 +843,6 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
     <div class="side-item">${SVG.notes} <span class="label">Notes</span></div>
     <div class="side-item">${SVG.workspace} <span class="label">Workspace</span></div>
     <div class="side-item">${SVG.code} <span class="label">Playground</span></div>
-    <div class="side-divider"></div>
     <div class="side-scroll">
       <div class="side-label">Models</div>
       <div class="side-item"><span class="avatar sm"></span> <span class="label">Preview Model</span></div>
@@ -1502,17 +1500,31 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     return wrap;
   }
 
-  // Shared: mount the mock UI over an effect layer, with dark/light pills
+  // Non-theme previews have no palette of their own; OLED overlays the exact
+  // values Open WebUI applies for oled-dark (Settings/General.svelte L182-186)
+  // on the designer's default ramp.
+  function defaultModeVars(modeKey) {
+    const vars = themeVars(null);
+    if (modeKey === 'oled') {
+      vars['--color-gray-800'] = '#101010';
+      vars['--color-gray-850'] = '#050505';
+      vars['--color-gray-900'] = '#000000';
+      vars['--color-gray-950'] = '#000000';
+    }
+    return vars;
+  }
+
+  // Shared: mount the mock UI over an effect layer, with mode pills
   function mockOverEffect(defaultMode) {
     let frame = null;
     const renderMode = (modeKey) => {
       if (frame) frame.remove();
       frame = mountMockFrame(
         stage,
-        buildMockSrcdoc({ modeKey, vars: themeVars(null), customCSS: '', transparent: true, initialChat: currentMockChat, initialCollapsed: currentSidebarCollapsed })
+        buildMockSrcdoc({ modeKey, vars: defaultModeVars(modeKey), customCSS: '', transparent: true, initialChat: currentMockChat, initialCollapsed: currentSidebarCollapsed })
       );
     };
-    controlsEl.appendChild(pillGroup(['dark', 'light'], defaultMode, renderMode));
+    controlsEl.appendChild(pillGroup(['dark', 'oled', 'light'], defaultMode, renderMode));
     renderMode(defaultMode);
     return { remove: () => { if (frame) frame.remove(); } };
   }
@@ -1593,10 +1605,10 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
         if (frame) frame.remove();
         frame = mountMockFrame(
           stage,
-          buildMockSrcdoc({ modeKey, vars: themeVars(null), customCSS: css, transparent: false, initialChat: currentMockChat, initialCollapsed: currentSidebarCollapsed })
+          buildMockSrcdoc({ modeKey, vars: defaultModeVars(modeKey), customCSS: css, transparent: false, initialChat: currentMockChat, initialCollapsed: currentSidebarCollapsed })
         );
       };
-      controlsEl.appendChild(pillGroup(['dark', 'light'], 'dark', renderMode));
+      controlsEl.appendChild(pillGroup(['dark', 'oled', 'light'], 'dark', renderMode));
       renderMode('dark');
       addMockNote();
       active = { destroy() { if (frame) frame.remove(); } };
