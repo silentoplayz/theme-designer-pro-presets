@@ -323,15 +323,27 @@
     trash: icon(['m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0'], { strokeWidth: '2' }),
   };
 
-  const CHAT_MENU = '<span class="chat-actions"><span class="chat-menu-btn">' + SVG.moreHorizontal + '</span></span>';
+  // Tooltip contents match the upstream <Tooltip content=...> wrappers, which
+  // all use placement="bottom" on message action buttons.
+  const ACTION_LABELS = {
+    edit: 'Edit', copy: 'Copy', speak: 'Read Aloud', thumbUp: 'Good Response',
+    thumbDown: 'Bad Response', continueResponse: 'Continue Response',
+    regenerate: 'Regenerate', trash: 'Delete',
+  };
+  function actionBtn(k, extraClass) {
+    return '<span class="msg-action' + (extraClass || '') + '" data-tip="' + ACTION_LABELS[k] +
+      '" data-tip-placement="bottom">' + ACTION_SVG[k] + '</span>';
+  }
+
+  const CHAT_MENU = '<span class="chat-actions"><span class="chat-menu-btn" data-tip="More">' + SVG.moreHorizontal + '</span></span>';
 
   // UserMessage.svelte's Edit + Copy pair (same two glyphs the assistant row
   // uses), plus Delete — which L578 gates on `!isFirstMessage || siblings > 1`,
   // so the opening message of a conversation never carries it.
   function userActions(withDelete) {
     return '<div class="user-actions">' +
-      ['edit', 'copy'].map(function (k) { return '<span class="msg-action">' + ACTION_SVG[k] + '</span>'; }).join('') +
-      (withDelete ? '<span class="msg-action delete">' + ACTION_SVG.trash + '</span>' : '') +
+      ['edit', 'copy'].map(function (k) { return actionBtn(k); }).join('') +
+      (withDelete ? actionBtn('trash', ' delete') : '') +
       '</div>';
   }
   const USER_ACTIONS = userActions(false);
@@ -344,7 +356,7 @@
   function thoughtBlock(t) {
     if (!t) return '';
     return '<div class="thought" role="button">Thought for ' + t.seconds + ' seconds' + SVG.chevronDown + '</div>' +
-      '<div class="thought-body prose" hidden><blockquote>' + t.body + '</blockquote></div>';
+      '<div class="thought-body markdown-prose" hidden><blockquote>' + t.body + '</blockquote></div>';
   }
 
   // Full message rows in Open WebUI's DOM shape (Message.svelte row >
@@ -365,7 +377,7 @@
       '<div class="ai-model">Preview Model</div><div class="ai-stats">' + stats + '</div>' +
       '<div class="chat-assistant w-full min-w-full">' +
       thoughtBlock(t) +
-      '<div class="prose markdown-prose">' + body + '</div>' +
+      '<div class="markdown-prose">' + body + '</div>' +
       MSG_ACTIONS + followUps(fups || null) +
       '</div></div></div></div>';
   }
@@ -376,7 +388,7 @@
     return '<div class="followups-wrap"><div class="followups">' +
       '<div class="followups-title">Follow up</div><div class="followups-list">' +
       items.map(function (q, i) {
-        return '<div class="followup">' + q + '</div>' + (i < items.length - 1 ? '<hr>' : '');
+        return '<div class="followup" data-tip="' + q + '">' + q + '</div>' + (i < items.length - 1 ? '<hr>' : '');
       }).join('') +
       '</div></div></div>';
   }
@@ -385,7 +397,7 @@
   const MSG_ACTIONS =
     '<div class="msg-actions">' +
     ['edit', 'copy', 'speak', 'thumbUp', 'thumbDown', 'continueResponse', 'regenerate']
-      .map(function (k) { return '<span class="msg-action">' + ACTION_SVG[k] + '</span>'; })
+      .map(function (k) { return actionBtn(k); })
       .join('') +
     '</div>';
 
@@ -578,11 +590,11 @@ nav .right.is-new .temp-chat { display: flex; }
 /* UserMessage.svelte: Edit + Copy in a justify-end row. Upstream they are
    hover-gated (invisible group-hover:visible); the mock keeps them visible
    so the preview shows the full anatomy without interaction. */
-.user-actions { display: flex; justify-content: flex-end; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-500)'}; }
+.user-actions { display: flex; align-items: center; justify-content: flex-end; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-500)'}; }
 .ai-avatar { width: 28px; height: 28px; border-radius: 16px; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; flex-shrink: 0; margin: 2px 8px 0 0; border: 1px solid rgb(0 0 0 / 0.1); }
 .ai-col { flex: 1; min-width: 0; padding-left: 4px; }
 .ai-model { font-size: 0.9375rem; font-weight: 400; color: ${isLight ? '#000' : '#fff'}; margin-bottom: 1px; line-height: 1.4; }
-.ai-stats { font-size: 10.5px; color: ${textFaint}; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ai-stats { font-size: 0.9375rem; color: ${textFaint}; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* common/Collapsible.svelte reasoning trigger: w-fit py-1 text-[0.9375rem]
    text-gray-500 hover:text-gray-700 dark:hover:text-gray-300, size-3 chevron
    at stroke-width 2.75; expanded slot content wrapped in mb-1.5 */
@@ -592,25 +604,28 @@ nav .right.is-new .temp-chat { display: flex; }
 .thought.open svg { transform: translateY(1px) rotate(180deg); }
 .thought-body { margin-bottom: 6px; }
 .thought-body[hidden] { display: none; }
-.prose { font-size: 0.9375rem; line-height: 1.625; color: ${proseText}; }
-.prose p { margin-bottom: 8px; }
-.prose p:last-child { margin-bottom: 0; }
-.prose b { color: ${isLight ? '#000' : '#fff'}; font-weight: 500; }
-.prose code { background: ${codeBg}; padding: 2px 6px; border-radius: 6px; font-family: ui-monospace, 'JetBrains Mono', monospace; font-size: 0.8em; color: ${textMain}; }
+/* The DOM class in Open WebUI is markdown-prose (app.css:124); "prose" is
+   only a Tailwind @apply and never appears as a literal class. Preset CSS
+   targeting .prose must miss here exactly as it misses in the app. */
+.markdown-prose { font-size: 0.9375rem; line-height: 1.625; color: ${proseText}; }
+.markdown-prose p { margin-bottom: 8px; }
+.markdown-prose p:last-child { margin-bottom: 0; }
+.markdown-prose b { color: ${isLight ? '#000' : '#fff'}; font-weight: 500; }
+.markdown-prose code { background: ${codeBg}; padding: 2px 6px; border-radius: 6px; font-family: ui-monospace, 'JetBrains Mono', monospace; font-size: 0.8em; color: ${textMain}; }
 /* CodeBlock.svelte: rounded-2xl border my-0.5, header py-1.5 px-3.5 text-xs */
 .code-block { border-radius: 16px; border: 1px solid ${borderSubtle}; background: ${codeBlockBg}; margin: 12px 0; overflow: hidden; }
 .code-block-header { display: flex; align-items: center; justify-content: space-between; padding: 6px 14px; font-size: 12px; color: ${isLight ? '#000' : '#fff'}; }
 .code-block-header .cb-action { cursor: pointer; padding: 2px 6px; border-radius: 6px; font-size: 12px; }
 .code-block-header .cb-action:hover { opacity: 0.7; }
-.prose pre { background: ${codeBlockBg}; padding: 10px 20px 16px; font-family: ui-monospace, 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.5; overflow: hidden; margin: 0; color: ${proseText}; }
-.prose ul, .prose ol { margin: 8px 0 8px 22px; }
-.prose li { margin: 2px 0; }
-.prose blockquote { border-left: 2px solid ${border}; padding: 2px 0 2px 12px; color: ${textMuted}; margin: 12px 0; }
-.prose a { color: ${textMain}; text-decoration: underline; cursor: pointer; }
-.prose table { border-collapse: collapse; margin: 6px 0 10px; font-size: 12.5px; }
-.prose th, .prose td { border: 1px solid ${border}; padding: 5px 10px; text-align: left; }
-.prose th { background: ${codeBg}; color: ${textMain}; font-weight: 600; }
-.prose h4 { font-size: 0.9375rem; font-weight: 600; color: ${textMain}; margin: 8px 0 4px; }
+.markdown-prose pre { background: ${codeBlockBg}; padding: 10px 20px 16px; font-family: ui-monospace, 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.5; overflow: hidden; margin: 0; color: ${proseText}; }
+.markdown-prose ul, .markdown-prose ol { margin: 8px 0 8px 22px; }
+.markdown-prose li { margin: 2px 0; }
+.markdown-prose blockquote { border-left: 2px solid ${border}; padding: 2px 0 2px 12px; color: ${textMuted}; margin: 12px 0; }
+.markdown-prose a { color: ${textMain}; text-decoration: underline; cursor: pointer; }
+.markdown-prose table { border-collapse: collapse; margin: 6px 0 10px; font-size: 12.5px; }
+.markdown-prose th, .markdown-prose td { border: 1px solid ${border}; padding: 5px 10px; text-align: left; }
+.markdown-prose th { background: ${codeBg}; color: ${textMain}; font-weight: 600; }
+.markdown-prose h4 { font-size: 0.9375rem; font-weight: 600; color: ${textMain}; margin: 8px 0 4px; }
 /* Placeholder.svelte: max-w-[58rem] translate-y-6 centered block, size-10
    rounded-2xl model image, text-2xl name; Suggestions.svelte rows are
    borderless px-2.5 py-1.5 rounded-lg with text-sm / text-xs lines */
@@ -689,6 +704,11 @@ nav .right.is-new .temp-chat { display: flex; }
 #call-button:hover { background: ${isLight ? 'var(--color-gray-900)' : 'var(--color-gray-100)'}; }
 .footer-note { text-align: center; font-size: 10.5px; color: ${textFaint}; padding: 4px 0 6px; }
 
+/* Tooltip.svelte -> tippy theme 'dark' (app.css:379): rounded-lg bg-gray-950
+   text-xs border border-gray-900 shadow-xl, content padding 5px 9px */
+#tdp-tooltip { position: fixed; z-index: 300; max-width: 300px; padding: 5px 9px; border-radius: 8px; background: var(--color-gray-950); border: 1px solid var(--color-gray-900); color: #fff; font-size: 12px; line-height: 1.35; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); pointer-events: none; opacity: 0; transition: opacity 0.1s; }
+#tdp-tooltip.show { opacity: 1; }
+
 /* Backdrop behind the mobile sidebar (Sidebar.svelte L767-776:
    fixed md:hidden z-40 inset-0 bg-black/60, closes on click) */
 #backdrop { display: none; position: fixed; inset: 0; z-index: 40; background: rgb(0 0 0 / 0.6); }
@@ -732,20 +752,20 @@ ${safeCSS}
 <body data-initial-chat="${esc(opts.initialChat || 'default')}" data-sidebar-collapsed="${opts.initialCollapsed ? '1' : '0'}">
 ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;"></canvas>' : ''}
 <div class="app">
-  <div class="sidebar-rail" title="Open Sidebar">
+  <div class="sidebar-rail">
     <div class="rail-group">
-      <span class="rail-btn lg rail-logo" title="Open Sidebar"><span><i>OI</i>${SVG.panel}</span></span>
-      <span class="rail-btn rail-action" data-chat="new" title="New Chat" style="margin-top:4px"><span>${SVG.editPencil}</span></span>
-      <span class="rail-btn rail-action" title="Search"><span>${SVG.search}</span></span>
-      <span class="rail-btn rail-action" title="Notes"><span>${SVG.notes}</span></span>
-      <span class="rail-btn rail-action" title="Workspace"><span>${SVG.workspace}</span></span>
-      <span class="rail-btn rail-action" title="Playground"><span>${SVG.code}</span></span>
+      <span class="rail-btn lg rail-logo" data-tip="Open Sidebar" data-tip-placement="right"><span><i>OI</i>${SVG.panel}</span></span>
+      <span class="rail-btn rail-action" data-chat="new" data-tip="New Chat" data-tip-placement="right" style="margin-top:4px"><span>${SVG.editPencil}</span></span>
+      <span class="rail-btn rail-action" data-tip="Search" data-tip-placement="right"><span>${SVG.search}</span></span>
+      <span class="rail-btn rail-action" data-tip="Notes" data-tip-placement="right"><span>${SVG.notes}</span></span>
+      <span class="rail-btn rail-action" data-tip="Workspace" data-tip-placement="right"><span>${SVG.workspace}</span></span>
+      <span class="rail-btn rail-action" data-tip="Playground" data-tip-placement="right"><span>${SVG.code}</span></span>
     </div>
-    <span class="rail-btn lg rail-action" title="User menu"><span><span class="rail-avatar"></span></span></span>
+    <span class="rail-btn lg rail-action"><span><span class="rail-avatar"></span></span></span>
   </div>
   <div id="backdrop"></div>
   <div class="sidebar-panel" id="sidebar">
-    <div class="brand"><div class="brand-dot"><i>OI</i></div><span class="brand-name">Open WebUI</span><span class="panel-icon">${SVG.panel}</span></div>
+    <div class="brand"><div class="brand-dot"><i>OI</i></div><span class="brand-name">Open WebUI</span><span class="panel-icon" data-tip="Close Sidebar">${SVG.panel}</span></div>
     <div class="side-item" data-chat="new">${SVG.editPencil} <span class="label">New Chat</span></div>
     <div class="side-item">${SVG.search} <span class="label">Search</span></div>
     <div class="side-item">${SVG.notes} <span class="label">Notes</span></div>
@@ -755,9 +775,9 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
     <div class="side-scroll">
       <div class="side-label">Models</div>
       <div class="side-item"><span class="avatar sm"></span> <span class="label">Preview Model</span></div>
-      <div class="side-label">Notes <span class="add">${SVG.plus}</span></div>
-      <div class="side-label">Channels <span class="add">${SVG.plus}</span></div>
-      <div class="side-label">Folders <span class="add">${SVG.plus}</span></div>
+      <div class="side-label">Notes <span class="add" data-tip="New Note">${SVG.plus}</span></div>
+      <div class="side-label">Channels <span class="add" data-tip="Create Channel">${SVG.plus}</span></div>
+      <div class="side-label">Folders <span class="add" data-tip="New Folder">${SVG.plus}</span></div>
       <div class="side-label">Chats</div>
       <div class="side-pinned">${SVG.chevron} <span class="label">Pinned</span></div>
       <div class="side-label">Today</div>
@@ -772,7 +792,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
     <div class="side-user"><div class="avatar"></div> You</div>
   </div>
   <main>
-    <nav><span class="nav-btn nav-toggle" title="Open Sidebar">${SVG.panel}</span><span id="nav-title">Theme preview chat</span><span class="nav-btn">${SVG.dots}</span><span class="right" id="nav-right"><span class="nav-btn nav-newchat" title="New Chat">${SVG.chatPlus}</span><span class="nav-btn temp-chat" title="Temporary Chat">${SVG.chatBubbleDotted}</span><span class="nav-btn controls" title="Controls">${SVG.knobs}</span></span></nav>
+    <nav><span class="nav-btn nav-toggle" data-tip="Open Sidebar">${SVG.panel}</span><span id="nav-title">Theme preview chat</span><span class="nav-btn">${SVG.dots}</span><span class="right" id="nav-right"><span class="nav-btn nav-newchat" data-tip="New Chat">${SVG.chatPlus}</span><span class="nav-btn temp-chat" data-tip="Temporary Chat">${SVG.chatBubbleDotted}</span><span class="nav-btn controls" data-tip="Controls">${SVG.knobs}</span></span></nav>
     <div id="messages-container">
       ${userRow('Show me what this preset looks like on a real conversation.', false)}
       ${aiRow('Response Speed: 104.3 t/s | Total Duration: 2.418s | Prompt Evals: 147 | Eval Count: 236 | Session: 1854 tokens',
@@ -795,12 +815,12 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
       <div id="chat-input-container">
         <div id="chat-input" class="ProseMirror input-prose" contenteditable="false"><p class="is-editor-empty" data-placeholder="Send a Message"><br></p></div>
         <div class="input-row">
-          <span class="icon-btn">${SVG.plusAlt}</span>
-          <span class="icon-btn">${SVG.component}</span>
+          <span class="icon-btn" data-tip="More">${SVG.plusAlt}</span>
+          <span class="icon-btn" data-tip="Integrations">${SVG.component}</span>
           <span class="spacer"></span>
           <span class="model-select"><span class="name">Preview Model</span>${SVG.chevronDown}</span>
-          <span class="mic-btn">${SVG.mic}</span>
-          <button id="call-button">${SVG.voice}</button>
+          <span class="mic-btn" data-tip="Dictate">${SVG.mic}</span>
+          <button id="call-button" data-tip="Voice mode">${SVG.voice}</button>
         </div>
       </div>
       <div class="footer-note">Preview Model can make mistakes. Verify important information.</div>
@@ -880,7 +900,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     return '<div class="followups-wrap"><div class="followups">' +
       '<div class="followups-title">Follow up</div><div class="followups-list">' +
       items.map(function (q, i) {
-        return '<div class="followup">' + q + '</div>' + (i < items.length - 1 ? '<hr>' : '');
+        return '<div class="followup" data-tip="' + q + '">' + q + '</div>' + (i < items.length - 1 ? '<hr>' : '');
       }).join('') +
       '</div></div></div>';
   }
@@ -889,7 +909,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   function thought(t) {
     if (!t) return '';
     return '<div class="thought" role="button">Thought for ' + t.seconds + ' seconds' + THOUGHT_CHEVRON + '</div>' +
-      '<div class="thought-body prose" hidden><blockquote>' + t.body + '</blockquote></div>';
+      '<div class="thought-body markdown-prose" hidden><blockquote>' + t.body + '</blockquote></div>';
   }
   function ai(stats, body, fups, t) {
     return '<div class="message-listitem group"><div class="msg">' +
@@ -897,7 +917,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       '<div class="ai-col flex-auto w-0 pl-1 relative">' +
       '<div class="ai-model">Preview Model</div><div class="ai-stats">' + stats + '</div>' +
       '<div class="chat-assistant w-full min-w-full">' + thought(t) +
-      '<div class="prose markdown-prose">' + body + '</div>' + MSG_ACTIONS + followUps(fups) +
+      '<div class="markdown-prose">' + body + '</div>' + MSG_ACTIONS + followUps(fups) +
       '</div></div></div></div>';
   }
   // notFirst mirrors UserMessage.svelte's !isFirstMessage gate on Delete
@@ -1095,6 +1115,35 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       if (now) setCollapsed(true);
     }
   });
+})();
+
+// Tippy-style tooltips (Tooltip.svelte, theme 'dark'). One fixed element,
+// delegated hover, placements top (default) / bottom / right matching the
+// upstream call sites. Delegation keeps injected chat HTML working.
+(function () {
+  var tip = document.createElement('div');
+  tip.id = 'tdp-tooltip';
+  document.body.appendChild(tip);
+  var current = null;
+  document.addEventListener('mouseover', function (e) {
+    var el = e.target && e.target.closest ? e.target.closest('[data-tip]') : null;
+    if (el === current) return;
+    current = el;
+    if (!el) { tip.classList.remove('show'); return; }
+    tip.textContent = el.getAttribute('data-tip');
+    tip.classList.add('show');
+    var r = el.getBoundingClientRect();
+    var p = el.getAttribute('data-tip-placement') || 'top';
+    var tw = tip.offsetWidth, th = tip.offsetHeight, x, y;
+    if (p === 'bottom') { x = r.left + r.width / 2 - tw / 2; y = r.bottom + 6; }
+    else if (p === 'right') { x = r.right + 6; y = r.top + r.height / 2 - th / 2; }
+    else { x = r.left + r.width / 2 - tw / 2; y = r.top - th - 6; }
+    x = Math.max(4, Math.min(x, window.innerWidth - tw - 4));
+    y = Math.max(4, Math.min(y, window.innerHeight - th - 4));
+    tip.style.left = x + 'px';
+    tip.style.top = y + 'px';
+  });
+  document.addEventListener('mouseleave', function () { current = null; tip.classList.remove('show'); }, true);
 })();
 
 // The floating preview toolbar lives in the parent and can change height when
