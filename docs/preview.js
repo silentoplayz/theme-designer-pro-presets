@@ -311,6 +311,7 @@
     speak: icon(['M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z'], { strokeWidth: '2.3' }),
     thumbUp: icon(['M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3'], { strokeWidth: '2.3' }),
     thumbDown: icon(['M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17'], { strokeWidth: '2.3' }),
+    continueResponse: icon(['M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z', 'M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z'], { strokeWidth: '2.3' }),
     regenerate: icon(['M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99'], { strokeWidth: '2.3' }),
   };
 
@@ -319,7 +320,7 @@
   // The row Open WebUI renders under a finished assistant reply, in source order.
   const MSG_ACTIONS =
     '<div class="msg-actions">' +
-    ['edit', 'copy', 'speak', 'thumbUp', 'thumbDown', 'regenerate']
+    ['edit', 'copy', 'speak', 'thumbUp', 'thumbDown', 'continueResponse', 'regenerate']
       .map(function (k) { return '<span class="msg-action">' + ACTION_SVG[k] + '</span>'; })
       .join('') +
     '</div>';
