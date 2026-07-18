@@ -295,7 +295,34 @@
     mic: icon(['<rect x="9" y="2" width="6" height="12" rx="3" />', 'M5 10v1a7 7 0 0 0 14 0v-1M12 18v4m0 0H9m3 0h3']),
     // icons/Voice.svelte — the filled circle button shown while the input is empty
     voice: icon(['M12 4L12 20', 'M8 9L8 15', 'M20 10L20 14', 'M4 10L4 14', 'M16 7L16 17'], { strokeWidth: '2.5' }),
+    // Sidebar/icons/MoreHorizontal.svelte — the per-chat menu trigger
+    moreHorizontal: icon([
+      'M20 12.5C20.2761 12.5 20.5 12.2761 20.5 12C20.5 11.7239 20.2761 11.5 20 11.5C19.7239 11.5 19.5 11.7239 19.5 12C19.5 12.2761 19.7239 12.5 20 12.5Z',
+      'M12 12.5C12.2761 12.5 12.5 12.2761 12.5 12C12.5 11.7239 12.2761 11.5 12 11.5C11.7239 11.5 11.5 11.7239 11.5 12C11.5 12.2761 11.7239 12.5 12 12.5Z',
+      'M4 12.5C4.27614 12.5 4.5 12.2761 4.5 12C4.5 11.7239 4.27614 11.5 4 11.5C3.72386 11.5 3.5 11.7239 3.5 12C3.5 12.2761 3.72386 12.5 4 12.5Z',
+    ], { fill: 'currentColor', strokeWidth: '2' }),
   };
+
+  // ResponseMessage.svelte's action row — inline SVGs rather than components,
+  // all w-4 h-4 at stroke-width 2.3. Read Aloud uses its idle (unmuted) state.
+  const ACTION_SVG = {
+    edit: icon(['M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125'], { strokeWidth: '2.3' }),
+    copy: icon(['M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184'], { strokeWidth: '2.3' }),
+    speak: icon(['M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z'], { strokeWidth: '2.3' }),
+    thumbUp: icon(['M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3'], { strokeWidth: '2.3' }),
+    thumbDown: icon(['M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17'], { strokeWidth: '2.3' }),
+    regenerate: icon(['M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99'], { strokeWidth: '2.3' }),
+  };
+
+  const CHAT_MENU = '<span class="chat-actions"><span class="chat-menu-btn">' + SVG.moreHorizontal + '</span></span>';
+
+  // The row Open WebUI renders under a finished assistant reply, in source order.
+  const MSG_ACTIONS =
+    '<div class="msg-actions">' +
+    ['edit', 'copy', 'speak', 'thumbUp', 'thumbDown', 'regenerate']
+      .map(function (k) { return '<span class="msg-action">' + ACTION_SVG[k] + '</span>'; })
+      .join('') +
+    '</div>';
 
   function esc(str) {
     return String(str == null ? '' : str)
@@ -390,6 +417,17 @@ svg { width: 16px; height: 16px; flex-shrink: 0; }
 .side-item.active, .side-scroll .side-item.active:hover { background: ${activeItem}; color: ${isLight ? 'var(--color-gray-800)' : 'var(--color-gray-200)'}; }
 .side-item .label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .side-item .age { flex-shrink: 0; padding-left: 8px; font-size: 10px; color: ${ageText}; }
+/* ChatItem.svelte: the menu sits absolute right-1 inset-y-0 mr-1.5 and is
+   invisible until hover (or always, on the selected chat, which also swaps
+   the time-ago indicator out and pads the title with pr-12) */
+.side-scroll .side-item[data-chat] { position: relative; }
+.chat-actions { position: absolute; top: 0; bottom: 0; right: 4px; margin-right: 6px; display: flex; align-items: center; visibility: hidden; }
+.side-item:hover .chat-actions, .side-item.active .chat-actions { visibility: visible; }
+.side-item:hover .age, .side-item.active .age { display: none; }
+.side-item:hover .label, .side-item.active .label { padding-right: 20px; }
+.chat-menu-btn { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: color 0.15s; }
+.chat-menu-btn svg { width: 14px; height: 14px; }
+.chat-menu-btn:hover { color: ${isLight ? '#000' : '#fff'}; }
 .side-item .add { margin-left: auto; color: ${textFaint}; }
 .side-item .add svg { width: 12px; height: 12px; }
 /* Section.svelte: text-xs gray-400/gray-500 header with a size-3.5 Plus */
@@ -466,10 +504,12 @@ nav .right { margin-left: auto; display: flex; align-items: center; gap: 8px; pa
 .ph-card span { display: block; font-size: 12px; line-height: 1.375; font-weight: 400; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-400)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ph-card:hover b { color: ${isLight ? 'var(--color-gray-950)' : '#fff'}; }
 .ph-card:hover span { color: ${isLight ? 'var(--color-gray-900)' : 'var(--color-gray-100)'}; }
-.msg-actions { display: flex; gap: 4px; margin-top: 8px; color: ${textMuted}; }
-.msg-actions .icon-sm { padding: 4px; border-radius: 6px; display: flex; cursor: pointer; transition: background 0.15s, color 0.15s; }
-.msg-actions .icon-sm:hover { background: ${ghostHover}; color: ${textMain}; }
-.msg-actions svg { width: 14px; height: 14px; }
+/* ResponseMessage.svelte action row: text-gray-600 dark:text-gray-500 mt-0.5,
+   buttons p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 */
+.msg-actions { display: flex; align-items: center; justify-content: flex-start; margin-top: 2px; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-500)'}; }
+.msg-action { padding: 6px; border-radius: 8px; display: flex; cursor: pointer; transition: background 0.15s, color 0.15s; }
+.msg-action:hover { background: ${ghostHover}; color: ${isLight ? '#000' : '#fff'}; }
+.msg-actions svg { width: 16px; height: 16px; }
 
 /* MessageInput.svelte: max-w-[58rem] px-2.5 mx-auto shell, shadow-lg
    rounded-3xl border-gray-100/30 dark:border-gray-850/30 bg-white/5
@@ -523,13 +563,13 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
       <div class="side-label">Chats</div>
       <div class="side-pinned">${SVG.chevron} <span class="label">Pinned</span></div>
       <div class="side-label">Today</div>
-      <div class="side-item active" data-chat="default"><span class="label">Theme preview chat</span></div>
+      <div class="side-item active" data-chat="default"><span class="label">Theme preview chat</span>${CHAT_MENU}</div>
       <div class="side-label">Previous 7 days</div>
-      <div class="side-item" data-chat="oklch"><span class="label">OKLCH color ramps</span><span class="age">1d</span></div>
-      <div class="side-item" data-chat="fx"><span class="label">Canvas FX ideas</span><span class="age">2d</span></div>
-      <div class="side-item" data-chat="gradient"><span class="label">Gradient inspiration</span><span class="age">3d</span></div>
-      <div class="side-item" data-chat="transparency"><span class="label">Structural transparency</span><span class="age">4d</span></div>
-      <div class="side-item" data-chat="notes"><span class="label">Preset gallery notes</span><span class="age">6d</span></div>
+      <div class="side-item" data-chat="oklch"><span class="label">OKLCH color ramps</span><span class="age">1d</span>${CHAT_MENU}</div>
+      <div class="side-item" data-chat="fx"><span class="label">Canvas FX ideas</span><span class="age">2d</span>${CHAT_MENU}</div>
+      <div class="side-item" data-chat="gradient"><span class="label">Gradient inspiration</span><span class="age">3d</span>${CHAT_MENU}</div>
+      <div class="side-item" data-chat="transparency"><span class="label">Structural transparency</span><span class="age">4d</span>${CHAT_MENU}</div>
+      <div class="side-item" data-chat="notes"><span class="label">Preset gallery notes</span><span class="age">6d</span>${CHAT_MENU}</div>
     </div>
     <div class="side-user"><div class="avatar"></div> You</div>
   </div>
@@ -547,7 +587,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
             <div class="code-block"><div class="code-block-header"><span>javascript</span><span class="cb-action">Copy</span></div><pre>const theme = 'applied';</pre></div>
             <p>Every surface is painted by the preset's <code>--color-gray-*</code> ramp — the same variables the designer generates.</p>
           </div>
-          <div class="msg-actions"><span class="icon-sm">${SVG.dots}</span></div>
+          ${MSG_ACTIONS}
         </div>
       </div>
       <div class="chat-user"><div>Nice. The palette applies to every surface?</div></div>
@@ -557,6 +597,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
           <div class="ai-model">Preview Model</div>
           <div class="ai-stats">Response Speed: 98.7 t/s | Total Duration: 1.9s | Eval Count: 164 | Session: 2018 tokens</div>
           <div class="prose"><p><b>Exactly</b> — backgrounds, borders, and text all come from the preset, and Canvas FX or gradients render behind the whole interface.</p></div>
+          ${MSG_ACTIONS}
         </div>
       </div>
     </div>
@@ -636,10 +677,12 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   if (!msgs || !navTitle) return;
   var BOLT_SVG = ${JSON.stringify(SVG.bolt)};
 
+  var MSG_ACTIONS = ${JSON.stringify(MSG_ACTIONS)};
+
   function ai(stats, body) {
     return '<div class="chat-assistant"><div class="ai-avatar" style="background:#fff !important; color:#000 !important;">OI</div><div class="ai-col">' +
       '<div class="ai-model">Preview Model</div><div class="ai-stats">' + stats + '</div>' +
-      '<div class="prose">' + body + '</div></div></div>';
+      '<div class="prose">' + body + '</div>' + MSG_ACTIONS + '</div></div>';
   }
   function user(text) {
     return '<div class="chat-user"><div>' + text + '</div></div>';
