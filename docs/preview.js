@@ -516,7 +516,7 @@ ${varLines}
 html { font-size: calc(1rem * var(--app-text-scale, 1)); }
 html, body { height: 100%; }
 body { background: ${bg}; font-family: -apple-system, BlinkMacSystemFont, 'Inter', ui-sans-serif, 'Segoe UI', Roboto, sans-serif; color: ${proseText}; overflow: hidden; font-size: 0.9375rem; -webkit-font-smoothing: antialiased; }
-svg { width: 16px; height: 16px; flex-shrink: 0; }
+svg { width: 1rem; height: 1rem; flex-shrink: 0; }
 .app { display: flex; height: 100vh; position: relative; }
 
 /* Sidebar.svelte: w-[var(--sidebar-width)]=245px, border-e, px-1 rows,
@@ -541,33 +541,33 @@ svg { width: 16px; height: 16px; flex-shrink: 0; }
 .sidebar-rail:hover { background: ${isLight ? 'color-mix(in srgb, var(--color-gray-50) 30%, transparent)' : 'color-mix(in srgb, var(--color-gray-800) 30%, transparent)'}; }
 .rail-group { display: flex; flex-direction: column; align-items: center; }
 /* size-8.5 / size-8 hit areas wrapping a size-[30px] rounded-lg hover target */
-.rail-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-.rail-btn.lg { width: 34px; height: 34px; }
-.rail-btn > span { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+.rail-btn { width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.rail-btn.lg { width: 2.125rem; height: 2.125rem; }
+.rail-btn > span { width: 1.875rem; height: 1.875rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
 .rail-btn:hover > span { background: ${navHover}; }
-.rail-btn svg { width: 16px; height: 16px; }
+.rail-btn svg { width: 1rem; height: 1rem; }
 /* the logo swaps to the sidebar-toggle glyph on hover (group-hover:hidden) */
-.rail-logo i { width: 20px; height: 20px; border-radius: 50%; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; font-style: normal; letter-spacing: -0.02em; border: 1px solid rgb(0 0 0 / 0.1); }
+.rail-logo i { width: 1.25rem; height: 1.25rem; border-radius: 50%; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-size: 0.5rem; font-weight: 800; font-style: normal; letter-spacing: -0.02em; border: 1px solid rgb(0 0 0 / 0.1); }
 .rail-logo svg { display: none; }
 .rail-logo:hover i { display: none; }
 .rail-logo:hover svg { display: block; }
-.rail-avatar { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #ec4899); }
+.rail-avatar { width: 1.375rem; height: 1.375rem; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #ec4899); }
 .brand { display: flex; align-items: center; gap: 2px; padding: 0 0 6px; color: ${textMain}; }
-.brand-dot { width: 34px; height: 34px; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-.brand-dot i { width: 20px; height: 20px; border-radius: 50%; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; font-style: normal; letter-spacing: -0.02em; border: 1px solid rgb(0 0 0 / 0.1); }
-.brand .brand-name { flex: 1; padding: 0 2px; font-size: 14px; font-weight: 400; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-200)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.brand .panel-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: ${textMuted}; }
-.brand .panel-icon svg { width: 16px; height: 16px; }
+.brand-dot { width: 2.125rem; height: 2.125rem; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.brand-dot i { width: 1.25rem; height: 1.25rem; border-radius: 50%; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-size: 0.5rem; font-weight: 800; font-style: normal; letter-spacing: -0.02em; border: 1px solid rgb(0 0 0 / 0.1); }
+.brand .brand-name { flex: 1; padding: 0 2px; font-size: 0.875rem; font-weight: 400; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-200)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand .panel-icon { width: 1.875rem; height: 1.875rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: ${textMuted}; }
+.brand .panel-icon svg { width: 1rem; height: 1rem; }
 .brand-dot:hover, .brand .panel-icon:hover { background: ${navHover}; }
-.side-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; margin: 0 4px; border-radius: 12px; color: ${textSoft}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; line-height: 20px; }
-.side-item svg { width: 16px; height: 16px; color: ${textSoft}; }
+.side-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.375rem 0.5rem; margin: 0 4px; border-radius: 12px; color: ${textSoft}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.8125rem; line-height: 1.25rem; }
+.side-item svg { width: 1rem; height: 1rem; color: ${textSoft}; }
 .side-item { cursor: pointer; transition: background 0.15s; }
 .side-item:hover { background: ${navHover}; }
 .side-scroll .side-item { padding: 6px 8px; }
 .side-scroll .side-item:hover { background: ${itemHover}; }
 .side-item.active, .side-scroll .side-item.active:hover { background: ${activeItem}; color: ${isLight ? 'var(--color-gray-800)' : 'var(--color-gray-200)'}; }
 .side-item .label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.side-item .age { flex-shrink: 0; padding-left: 8px; font-size: 10px; color: ${ageText}; }
+.side-item .age { flex-shrink: 0; padding-left: 8px; font-size: 0.625rem; color: ${ageText}; }
 /* ChatItem.svelte: the menu sits absolute right-1 inset-y-0 mr-1.5 and is
    invisible until hover (or always, on the selected chat, which also swaps
    the time-ago indicator out and pads the title with pr-12) */
@@ -576,37 +576,37 @@ svg { width: 16px; height: 16px; flex-shrink: 0; }
 .side-item:hover .chat-actions, .side-item.active .chat-actions { visibility: visible; }
 .side-item:hover .age, .side-item.active .age { display: none; }
 .side-item:hover .label, .side-item.active .label { padding-right: 20px; }
-.chat-menu-btn { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: color 0.15s; }
-.chat-menu-btn svg { width: 14px; height: 14px; }
+.chat-menu-btn { width: 1.25rem; height: 1.25rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: color 0.15s; }
+.chat-menu-btn svg { width: 0.875rem; height: 0.875rem; }
 .chat-menu-btn:hover { color: ${isLight ? '#000' : '#fff'}; }
 .side-item .add { margin-left: auto; color: ${textFaint}; }
-.side-item .add svg { width: 12px; height: 12px; }
+.side-item .add svg { width: 0.75rem; height: 0.75rem; }
 /* Section.svelte: text-xs gray-400/gray-500 header with a size-3.5 Plus */
-.side-label { font-size: 12px; color: ${isLight ? 'var(--color-gray-400)' : 'var(--color-gray-500)'}; padding: 12px 4px 4px 10px; display: flex; align-items: center; }
+.side-label { font-size: 0.75rem; color: ${isLight ? 'var(--color-gray-400)' : 'var(--color-gray-500)'}; padding: 0.75rem 0.25rem 0.25rem 0.625rem; display: flex; align-items: center; }
 .side-label .add { margin-left: auto; color: inherit; }
-.side-label .add svg { width: 14px; height: 14px; }
+.side-label .add svg { width: 0.875rem; height: 0.875rem; }
 .side-label .add:hover { color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; }
-.side-pinned { display: flex; align-items: center; gap: 6px; margin: 0 4px; padding: 6px 8px; border-radius: 12px; color: ${textSoft}; font-size: 13px; line-height: 20px; }
-.side-pinned svg { width: 11px; height: 11px; }
+.side-pinned { display: flex; align-items: center; gap: 6px; margin: 0 4px; padding: 6px 8px; border-radius: 12px; color: ${textSoft}; font-size: 0.8125rem; line-height: 1.25rem; }
+.side-pinned svg { width: 0.6875rem; height: 0.6875rem; }
 .side-pinned:hover { background: ${itemHover}; }
 .side-divider { height: 1px; margin: 6px 4px; background: ${borderSubtle}; }
 .side-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; scrollbar-width: none; padding-top: 2px; }
 .side-scroll::-webkit-scrollbar { display: none; }
-.side-user { display: flex; align-items: center; gap: 8px; margin: 0 4px; padding: 6px 8px; border-radius: 12px; color: ${textMain}; font-weight: 400; font-size: 13px; line-height: 20px; cursor: pointer; transition: background 0.15s; }
+.side-user { display: flex; align-items: center; gap: 8px; margin: 0 4px; padding: 6px 8px; border-radius: 12px; color: ${textMain}; font-weight: 400; font-size: 0.8125rem; line-height: 1.25rem; cursor: pointer; transition: background 0.15s; }
 .side-user:hover { background: ${navHover}; }
 .side-label .add, .side-pinned, .brand .panel-icon, .brand-dot { cursor: pointer; transition: background 0.15s, color 0.15s; }
-.avatar { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #ec4899); flex-shrink: 0; }
-.avatar.sm { width: 20px; height: 20px; border-radius: 50%; }
+.avatar { width: 1.375rem; height: 1.375rem; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #ec4899); flex-shrink: 0; }
+.avatar.sm { width: 1.25rem; height: 1.25rem; border-radius: 50%; }
 
 main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 /* Navbar.svelte: pt-0.5 pb-1, pl-1.5 pr-1, title text-[15px] gray-700/300,
    size-6 rounded-lg icon buttons, and the -bottom-10 gradient scrim */
 nav { padding: 2px 4px 4px 6px; display: flex; align-items: center; gap: 8px; color: ${textMain}; position: relative; z-index: 2; flex-shrink: 0; }
 ${opts.transparent ? '' : `nav::before { content: ''; position: absolute; inset: 0 0 -40px 0; background: linear-gradient(to bottom, color-mix(in srgb, ${bg} 90%, transparent), color-mix(in srgb, ${bg} 50%, transparent) 40%, transparent 97%); z-index: -1; pointer-events: none; }`}
-#nav-title { padding: 4px 4px 4px 6px; font-size: 15px; font-weight: 400; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-300)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-nav .nav-btn { width: 24px; height: 24px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; cursor: pointer; transition: background 0.15s, color 0.15s; }
-nav .nav-btn svg { width: 18px; height: 18px; }
-nav .nav-btn.controls svg { width: 20px; height: 20px; }
+#nav-title { padding: 4px 4px 4px 6px; font-size: 0.9375rem; font-weight: 400; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-300)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+nav .nav-btn { width: 1.5rem; height: 1.5rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; cursor: pointer; transition: background 0.15s, color 0.15s; }
+nav .nav-btn svg { width: 1.125rem; height: 1.125rem; }
+nav .nav-btn.controls svg { width: 1.25rem; height: 1.25rem; }
 nav .nav-btn:hover { background: ${navHover}; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-200)'}; }
 nav .right { margin-left: auto; display: flex; align-items: center; gap: 8px; padding-right: 4px; }
 /* Temporary Chat only renders when there's no chat id — i.e. on New Chat */
@@ -633,12 +633,12 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
 .msg { display: flex; width: 100%; }
 .chat-user, .chat-assistant { width: 100%; min-width: 100%; }
 .bubble-row { display: flex; justify-content: flex-end; padding-bottom: 4px; }
-.chat-user .bubble { max-width: 90%; background: ${bubble}; border-radius: 24px; padding: 6px 16px; font-size: 1rem; line-height: 1.625; color: ${proseText}; }
+.chat-user .bubble { max-width: 90%; background: ${bubble}; border-radius: 24px; padding: 0.375rem 1rem; font-size: 1rem; line-height: 1.625; color: ${proseText}; }
 /* UserMessage.svelte: Edit + Copy in a justify-end row. Upstream they are
    hover-gated (invisible group-hover:visible); the mock keeps them visible
    so the preview shows the full anatomy without interaction. */
 .user-actions { display: flex; align-items: center; justify-content: flex-end; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-500)'}; }
-.ai-avatar { width: 28px; height: 28px; border-radius: 16px; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; flex-shrink: 0; margin: 2px 8px 0 0; border: 1px solid rgb(0 0 0 / 0.1); }
+.ai-avatar { width: 1.75rem; height: 1.75rem; border-radius: 16px; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-size: 0.5625rem; font-weight: 800; flex-shrink: 0; margin: 2px 8px 0 0; border: 1px solid rgb(0 0 0 / 0.1); }
 .ai-col { flex: 1; min-width: 0; padding-left: 4px; }
 .ai-model { font-size: 1rem; font-weight: 400; color: ${isLight ? '#000' : '#fff'}; margin-bottom: 1px; line-height: 1.4; }
 .ai-stats { font-size: 1rem; color: ${textFaint}; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -647,7 +647,7 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
    at stroke-width 2.75; expanded slot content wrapped in mb-1.5 */
 .thought { width: fit-content; padding: 4px 0; display: flex; align-items: center; gap: 8px; font-size: 1rem; color: var(--color-gray-500); cursor: pointer; transition: color 0.15s; }
 .thought:hover { color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-300)'}; }
-.thought svg { width: 12px; height: 12px; transform: translateY(1px); transition: transform 0.15s; }
+.thought svg { width: 0.75rem; height: 0.75rem; transform: translateY(1px); transition: transform 0.15s; }
 .thought.open svg { transform: translateY(1px) rotate(180deg); }
 .thought-body { margin-bottom: 6px; }
 .thought-body[hidden] { display: none; }
@@ -661,15 +661,15 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
 .markdown-prose code { background: ${codeBg}; padding: 2px 6px; border-radius: 6px; font-family: ui-monospace, 'JetBrains Mono', monospace; font-size: 0.8em; color: ${textMain}; }
 /* CodeBlock.svelte: rounded-2xl border my-0.5, header py-1.5 px-3.5 text-xs */
 .code-block { border-radius: 16px; border: 1px solid ${borderSubtle}; background: ${codeBlockBg}; margin: 12px 0; overflow: hidden; }
-.code-block-header { display: flex; align-items: center; justify-content: space-between; padding: 6px 14px; font-size: 12px; color: ${isLight ? '#000' : '#fff'}; }
-.code-block-header .cb-action { cursor: pointer; padding: 2px 6px; border-radius: 6px; font-size: 12px; }
+.code-block-header { display: flex; align-items: center; justify-content: space-between; padding: 6px 14px; font-size: 0.75rem; color: ${isLight ? '#000' : '#fff'}; }
+.code-block-header .cb-action { cursor: pointer; padding: 2px 6px; border-radius: 6px; font-size: 0.75rem; }
 .code-block-header .cb-action:hover { opacity: 0.7; }
-.markdown-prose pre { background: ${codeBlockBg}; padding: 10px 20px 16px; font-family: ui-monospace, 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.5; overflow: hidden; margin: 0; color: ${proseText}; }
+.markdown-prose pre { background: ${codeBlockBg}; padding: 10px 20px 16px; font-family: ui-monospace, 'JetBrains Mono', monospace; font-size: 0.875rem; line-height: 1.5; overflow: hidden; margin: 0; color: ${proseText}; }
 .markdown-prose ul, .markdown-prose ol { margin: 8px 0 8px 22px; }
 .markdown-prose li { margin: 2px 0; }
 .markdown-prose blockquote { border-left: 2px solid ${border}; padding: 2px 0 2px 12px; color: ${textMuted}; margin: 12px 0; }
 .markdown-prose a { color: ${textMain}; text-decoration: underline; cursor: pointer; }
-.markdown-prose table { border-collapse: collapse; margin: 6px 0 10px; font-size: 12.5px; }
+.markdown-prose table { border-collapse: collapse; margin: 6px 0 10px; font-size: 0.78125rem; }
 .markdown-prose th, .markdown-prose td { border: 1px solid ${border}; padding: 5px 10px; text-align: left; }
 .markdown-prose th { background: ${codeBg}; color: ${textMain}; font-weight: 600; }
 .markdown-prose h4 { font-size: 0.9375rem; font-weight: 600; color: ${textMain}; margin: 8px 0 4px; }
@@ -680,12 +680,12 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
 /* Logo, model name and greeting left-align with the Suggested column — the
    head shares the suggestion block's width and padding so their edges meet */
 .ph-head { width: min(42rem, 100%); padding: 0 20px; display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
-.ph-logo { width: 40px; height: 40px; border-radius: 16px; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; margin-bottom: 2px; border: 1px solid rgb(0 0 0 / 0.1); }
+.ph-logo { width: 2.5rem; height: 2.5rem; border-radius: 16px; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8125rem; margin-bottom: 2px; border: 1px solid rgb(0 0 0 / 0.1); }
 .ph-model { font-size: 1.875rem; line-height: 2.25rem; font-weight: 400; color: ${isLight ? 'var(--color-gray-800)' : 'var(--color-gray-100)'}; max-width: 36rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ph-sub { font-size: 1.875rem; line-height: 2.25rem; font-weight: 400; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-400)'}; margin: 0 0 22px; }
 .ph-suggest { width: min(42rem, 100%); padding: 0 20px; }
-.ph-label { font-size: 12px; line-height: 1.4; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-400)'}; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
-.ph-label svg { width: 14px; height: 14px; }
+.ph-label { font-size: 0.75rem; line-height: 1.4; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-400)'}; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+.ph-label svg { width: 0.875rem; height: 0.875rem; }
 .ph-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: start; }
 .ph-card { border-radius: 8px; padding: 6px 10px; cursor: pointer; background: transparent; transition: color 0.15s; text-align: left; }
 .ph-card b { display: block; font-size: 1rem; line-height: 1.375; font-weight: 400; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-300)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -697,7 +697,7 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
 .msg-actions { display: flex; align-items: center; justify-content: flex-start; margin-top: 2px; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-500)'}; }
 .msg-action { padding: 6px; border-radius: 8px; display: flex; cursor: pointer; transition: background 0.15s, color 0.15s; }
 .msg-action:hover { background: ${ghostHover}; color: ${isLight ? '#000' : '#fff'}; }
-.msg-actions svg { width: 16px; height: 16px; }
+.msg-actions svg { width: 1rem; height: 1rem; }
 /* UserMessage.svelte:580 — Delete is p-1 rounded-sm and, unlike the p-1.5
    rounded-lg Edit/Copy beside it, takes no background on hover */
 .msg-action.delete { padding: 4px; border-radius: 2px; }
@@ -709,7 +709,7 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
 .branch-pager { display: flex; align-items: center; }
 .branch-nav { display: flex; align-self: center; padding: 4px; border-radius: 6px; cursor: pointer; transition: background 0.15s, color 0.15s; }
 .branch-nav:hover { background: ${ghostHover}; color: ${isLight ? '#000' : '#fff'}; }
-.branch-nav svg { width: 14px; height: 14px; }
+.branch-nav svg { width: 0.875rem; height: 0.875rem; }
 .branch-count { font-size: 0.875rem; letter-spacing: 0.1em; font-weight: 400; align-self: center; white-space: nowrap; color: ${isLight ? 'var(--color-gray-900)' : 'var(--color-gray-100)'}; }
 
 /* ResponseMessage/FollowUps.svelte, rendered in a my-2.5 wrapper after the
@@ -742,21 +742,21 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
    empty prompt the trailing control is Voice mode — bg-black dark:bg-white
    rounded-full p-[5px] — not the submit arrow. */
 .input-row { display: flex; align-items: center; gap: 2px; }
-.input-row .icon-btn { width: 30px; height: 30px; border-radius: 9999px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: ${isLight ? 'var(--color-gray-700)' : '#fff'}; cursor: pointer; transition: background 0.15s; }
+.input-row .icon-btn { width: 1.875rem; height: 1.875rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: ${isLight ? 'var(--color-gray-700)' : '#fff'}; cursor: pointer; transition: background 0.15s; }
 .input-row .icon-btn:hover { background: ${iconHover}; }
-.input-row .icon-btn svg { width: 18px; height: 18px; }
-.input-row .icon-btn:first-child svg { width: 20px; height: 20px; }
+.input-row .icon-btn svg { width: 1.125rem; height: 1.125rem; }
+.input-row .icon-btn:first-child svg { width: 1.25rem; height: 1.25rem; }
 .input-row .spacer { flex: 1; }
 /* ModelSelector in the input row (MessageInput.svelte L2223-2231): a
    max-w-[13rem] trigger — rounded-lg pl-2 pr-1.5 py-1 gap-1.5 text-[13px]
    text-gray-600 dark:text-gray-300 — with a truncating label and a
    size-2.5 ChevronDown at stroke-width 2.5 */
-.model-select { display: flex; align-items: center; gap: 6px; min-width: 0; max-width: 13rem; padding: 4px 6px 4px 8px; border-radius: 8px; font-size: 13px; font-weight: 400; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-300)'}; cursor: pointer; transition: background 0.1s, color 0.1s; }
+.model-select { display: flex; align-items: center; gap: 6px; min-width: 0; max-width: 13rem; padding: 4px 6px 4px 8px; border-radius: 8px; font-size: 0.8125rem; font-weight: 400; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-300)'}; cursor: pointer; transition: background 0.1s, color 0.1s; }
 .model-select:hover { background: ${navHover}; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-200)'}; }
 .model-select .name { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.model-select svg { width: 10px; height: 10px; flex-shrink: 0; margin-left: 4px; }
+.model-select svg { width: 0.625rem; height: 0.625rem; flex-shrink: 0; margin-left: 4px; }
 .mic-btn { padding: 6px; margin-right: 2px; border-radius: 9999px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-300)'}; cursor: pointer; transition: color 0.15s; }
-.mic-btn svg { width: 18px; height: 18px; }
+.mic-btn svg { width: 1.125rem; height: 1.125rem; }
 .mic-btn:hover { color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-200)'}; }
 /* The real Voice mode button carries bg-black/dark:bg-white as literal
    classes (MessageInput.svelte:2306) — presets style it through those
@@ -764,13 +764,13 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
    must carry the same class string. Styled via .call-button so the class
    tokens stay purely selector bait, like the bubble's bg-gray classes. */
 .call-button { padding: 5px; border-radius: 9999px; border: none; background: ${isLight ? '#000' : '#fff'}; color: ${isLight ? '#fff' : '#000'}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; transition: background 0.15s; }
-.call-button svg { width: 20px; height: 20px; }
+.call-button svg { width: 1.25rem; height: 1.25rem; }
 .call-button:hover { background: ${isLight ? 'var(--color-gray-900)' : 'var(--color-gray-100)'}; }
-.footer-note { text-align: center; font-size: 10.5px; color: ${textFaint}; padding: 4px 0 6px; }
+.footer-note { text-align: center; font-size: 0.65625rem; color: ${textFaint}; padding: 4px 0 6px; }
 
 /* Tooltip.svelte -> tippy theme 'dark' (app.css:379): rounded-lg bg-gray-950
    text-xs border border-gray-900 shadow-xl, content padding 5px 9px */
-#tdp-tooltip { position: fixed; z-index: 300; max-width: 300px; padding: 5px 9px; border-radius: 8px; background: var(--color-gray-950); border: 1px solid var(--color-gray-900); color: #fff; font-size: 12px; line-height: 1.35; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); pointer-events: none; opacity: 0; transition: opacity 0.1s; white-space: pre-line; }
+#tdp-tooltip { position: fixed; z-index: 300; max-width: 300px; padding: 5px 9px; border-radius: 8px; background: var(--color-gray-950); border: 1px solid var(--color-gray-900); color: #fff; font-size: 0.75rem; line-height: 1.35; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); pointer-events: none; opacity: 0; transition: opacity 0.1s; white-space: pre-line; }
 /* Generation Info renders its usage block in a <pre> upstream */
 #tdp-tooltip.pre { font-family: ui-monospace, 'JetBrains Mono', monospace; text-align: left; }
 #tdp-tooltip.show { opacity: 1; }
@@ -804,7 +804,7 @@ nav .nav-toggle, nav .nav-newchat { display: none; }
   .ph-suggest { padding: 0 8px; }
   .ph-grid { grid-template-columns: 1fr; }
   .ph-model, .ph-sub { font-size: 1.5rem; line-height: 2rem; }
-  .ph-logo { width: 36px; height: 36px; }
+  .ph-logo { width: 2.25rem; height: 2.25rem; }
   .model-select { max-width: 8rem; }
 }
 
