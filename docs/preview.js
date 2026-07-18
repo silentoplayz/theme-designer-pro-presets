@@ -337,6 +337,39 @@
   const USER_ACTIONS = userActions(false);
   const USER_ACTIONS_DEL = userActions(true);
 
+  // common/Collapsible.svelte with attributes.type === 'reasoning': the
+  // "Thought for X seconds" trigger plus the reasoning body, which the
+  // middleware emits as a blockquote. Collapsed by default like upstream
+  // ($settings.expandDetails defaults false).
+  function thoughtBlock(t) {
+    if (!t) return '';
+    return '<div class="thought" role="button">Thought for ' + t.seconds + ' seconds' + SVG.chevronDown + '</div>' +
+      '<div class="thought-body prose" hidden><blockquote>' + t.body + '</blockquote></div>';
+  }
+
+  // Full message rows in Open WebUI's DOM shape (Message.svelte row >
+  // UserMessage/ResponseMessage flex > chat-{role} block). Literal utility
+  // class strings ride along so preset CSS written against the app's markup —
+  // .user-message .rounded-3xl, [class*="bg-gray-"] — matches here too.
+  function userRow(text, notFirst) {
+    return '<div class="message-listitem group"><div class="msg user-message group">' +
+      '<div class="chat-user w-full min-w-full">' +
+      '<div class="bubble-row"><div class="bubble rounded-3xl max-w-[90%] px-4 py-1.5 bg-gray-50 dark:bg-gray-850"><div class="markdown-prose">' + text + '</div></div></div>' +
+      userActions(!!notFirst) +
+      '</div></div></div>';
+  }
+  function aiRow(stats, body, fups, t) {
+    return '<div class="message-listitem group"><div class="msg">' +
+      '<div class="ai-avatar" style="background:#fff !important; color:#000 !important;">OI</div>' +
+      '<div class="ai-col flex-auto w-0 pl-1 relative">' +
+      '<div class="ai-model">Preview Model</div><div class="ai-stats">' + stats + '</div>' +
+      '<div class="chat-assistant w-full min-w-full">' +
+      thoughtBlock(t) +
+      '<div class="prose markdown-prose">' + body + '</div>' +
+      MSG_ACTIONS + followUps(fups || null) +
+      '</div></div></div></div>';
+  }
+
   // FollowUps.svelte — hairline-separated rows under a "Follow up" heading
   function followUps(items) {
     if (!items || !items.length) return '';
@@ -407,7 +440,7 @@
   ${opts.transparent ? 'body { background: transparent !important; }' : ''}
   .app, main, nav { background: transparent !important; }
   #sidebar { background: color-mix(in srgb, ${sidebarBg} 72%, transparent) !important; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
-  .chat-user .bubble { background: color-mix(in srgb, ${bubble} 72%, transparent); }`
+  .chat-user .bubble { background: transparent; }`
       : '';
     // In-iframe gradient: body background layers, exactly like the designer's
     // gradient section (emitted before custom CSS so cascade order matches)
@@ -526,26 +559,39 @@ nav .right.is-new .temp-chat { display: flex; }
 
 /* Messages.svelte: rows are max-w-[58rem] px-5 mb-3 inside a full-width scroller */
 #messages-container { flex: 1; overflow: hidden; padding: 8px 0 6px; display: flex; flex-direction: column; width: 100%; }
-#messages-container > .chat-user,
-#messages-container > .chat-assistant { max-width: 58rem; width: 100%; margin: 0 auto 12px; padding: 0 20px; }
+#messages-container > .message-listitem { max-width: 58rem; width: 100%; margin: 0 auto 12px; padding: 0 20px; }
 /* The gallery's floating .preview-topbar overlays the stage, so the opening
    message has to start below it. The navbar deliberately stays put and sits
    under the bar. Only the first row is offset — the New Chat placeholder
    centres itself and must not be pushed off-centre. The value is measured at
    runtime (the bar wraps on narrow screens); this default covers desktop. */
-#messages-container > .chat-user:first-child,
-#messages-container > .chat-assistant:first-child { margin-top: var(--tdp-first-row-offset, 37px); }
-.chat-user { display: flex; flex-direction: column; align-items: flex-end; }
+#messages-container > .message-listitem:first-child { margin-top: var(--tdp-first-row-offset, 37px); }
+/* Row anatomy mirrors the real DOM so preset CSS lands identically:
+   Message.svelte row (.message-listitem) > flex wrapper (.msg, with
+   UserMessage's .user-message class) > .chat-user / .chat-assistant, which
+   upstream sit INSIDE the flex column (UserMessage:168, ResponseMessage:676)
+   as w-full min-w-full blocks — not on the outer row. */
+.msg { display: flex; width: 100%; }
+.chat-user, .chat-assistant { width: 100%; min-width: 100%; }
+.bubble-row { display: flex; justify-content: flex-end; padding-bottom: 4px; }
 .chat-user .bubble { max-width: 90%; background: ${bubble}; border-radius: 24px; padding: 6px 16px; font-size: 0.9375rem; line-height: 1.625; color: ${proseText}; }
-/* UserMessage.svelte: Edit + Copy in a justify-end row, invisible until the
-   message is hovered (invisible group-hover:visible) */
-.user-actions { display: flex; justify-content: flex-end; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-500)'}; visibility: hidden; }
-.chat-user:hover .user-actions { visibility: visible; }
-.chat-assistant { display: flex; }
+/* UserMessage.svelte: Edit + Copy in a justify-end row. Upstream they are
+   hover-gated (invisible group-hover:visible); the mock keeps them visible
+   so the preview shows the full anatomy without interaction. */
+.user-actions { display: flex; justify-content: flex-end; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-500)'}; }
 .ai-avatar { width: 28px; height: 28px; border-radius: 16px; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; flex-shrink: 0; margin: 2px 8px 0 0; border: 1px solid rgb(0 0 0 / 0.1); }
 .ai-col { flex: 1; min-width: 0; padding-left: 4px; }
 .ai-model { font-size: 0.9375rem; font-weight: 400; color: ${isLight ? '#000' : '#fff'}; margin-bottom: 1px; line-height: 1.4; }
 .ai-stats { font-size: 10.5px; color: ${textFaint}; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* common/Collapsible.svelte reasoning trigger: w-fit py-1 text-[0.9375rem]
+   text-gray-500 hover:text-gray-700 dark:hover:text-gray-300, size-3 chevron
+   at stroke-width 2.75; expanded slot content wrapped in mb-1.5 */
+.thought { width: fit-content; padding: 4px 0; display: flex; align-items: center; gap: 8px; font-size: 0.9375rem; color: var(--color-gray-500); cursor: pointer; transition: color 0.15s; }
+.thought:hover { color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-300)'}; }
+.thought svg { width: 12px; height: 12px; transform: translateY(1px); transition: transform 0.15s; }
+.thought.open svg { transform: translateY(1px) rotate(180deg); }
+.thought-body { margin-bottom: 6px; }
+.thought-body[hidden] { display: none; }
 .prose { font-size: 0.9375rem; line-height: 1.625; color: ${proseText}; }
 .prose p { margin-bottom: 8px; }
 .prose p:last-child { margin-bottom: 0; }
@@ -556,7 +602,7 @@ nav .right.is-new .temp-chat { display: flex; }
 .code-block-header { display: flex; align-items: center; justify-content: space-between; padding: 6px 14px; font-size: 12px; color: ${isLight ? '#000' : '#fff'}; }
 .code-block-header .cb-action { cursor: pointer; padding: 2px 6px; border-radius: 6px; font-size: 12px; }
 .code-block-header .cb-action:hover { opacity: 0.7; }
-.prose pre { background: ${codeBlockBg}; padding: 4px 20px 16px; font-family: ui-monospace, 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.5; overflow: hidden; margin: 0; color: ${proseText}; }
+.prose pre { background: ${codeBlockBg}; padding: 10px 20px 16px; font-family: ui-monospace, 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.5; overflow: hidden; margin: 0; color: ${proseText}; }
 .prose ul, .prose ol { margin: 8px 0 8px 22px; }
 .prose li { margin: 2px 0; }
 .prose blockquote { border-left: 2px solid ${border}; padding: 2px 0 2px 12px; color: ${textMuted}; margin: 12px 0; }
@@ -568,7 +614,7 @@ nav .right.is-new .temp-chat { display: flex; }
 /* Placeholder.svelte: max-w-[58rem] translate-y-6 centered block, size-10
    rounded-2xl model image, text-2xl name; Suggestions.svelte rows are
    borderless px-2.5 py-1.5 rounded-lg with text-sm / text-xs lines */
-.placeholder { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; max-width: 58rem; width: 100%; margin: 0 auto; padding: 0 8px 24px; transform: translateY(-12px); }
+.placeholder { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; max-width: 58rem; width: 100%; margin: 0 auto; padding: 0 8px 24px; transform: translateY(24px); }
 .ph-logo { width: 40px; height: 40px; border-radius: 16px; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; margin-bottom: 2px; border: 1px solid rgb(0 0 0 / 0.1); }
 .ph-model { font-size: 1.5rem; line-height: 2rem; font-weight: 400; color: ${isLight ? 'var(--color-gray-800)' : 'var(--color-gray-100)'}; max-width: 36rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ph-sub { font-size: 1.5rem; line-height: 2rem; font-weight: 400; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-400)'}; margin: 0 0 22px; }
@@ -609,8 +655,14 @@ nav .right.is-new .temp-chat { display: flex; }
 .input-wrap { padding: 0 10px; max-width: 58rem; width: 100%; margin: 0 auto; }
 #chat-input-container { background: ${inputBg}; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid ${borderSubtle}; border-radius: 24px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); padding: 10px 10px 8px 18px; display: flex; flex-direction: column; gap: 8px; transition: border-color 0.15s; }
 #chat-input-container:hover { border-color: ${isLight ? 'var(--color-gray-200)' : 'var(--color-gray-800)'}; }
-textarea { background: transparent; border: none; resize: none; outline: none; color: ${textMain}; font-family: inherit; font-size: 0.9375rem; height: 24px; width: 100%; padding-top: 2px; }
-textarea::placeholder { color: ${textMuted}; }
+/* The real chat input is a ProseMirror contenteditable (RichTextInput,
+   id="chat-input", .input-prose = !text-[0.9375rem]) — NOT a <textarea>.
+   Preset CSS that skins textarea/input fields therefore never touches the
+   chat input in Open WebUI, and must not touch it here either. */
+#chat-input { outline: none; width: 100%; min-height: 24px; padding-top: 2px; font-size: 0.9375rem; line-height: 1.5; color: ${textMain}; }
+#chat-input p { margin: 0; }
+/* app.css:418 — placeholder is a ::before on the empty first paragraph */
+.ProseMirror p.is-editor-empty:first-child::before { content: attr(data-placeholder); float: left; color: ${isLight ? '#676767' : '#757575'}; pointer-events: none; height: 0; }
 /* MessageInput.svelte controls: PlusAlt/Component sit in size-[1.875rem]
    rounded-full buttons, Dictate is rounded-full p-1.5 mr-0.5, and with an
    empty prompt the trailing control is Voice mode — bg-black dark:bg-white
@@ -660,8 +712,7 @@ nav .nav-toggle, nav .nav-newchat { display: none; }
   nav .nav-toggle { display: flex; }
   .app:not(.collapsed) nav .nav-toggle { display: none; }
   nav .nav-newchat { display: flex; }
-  #messages-container > .chat-user,
-  #messages-container > .chat-assistant { padding: 0 12px; }
+  #messages-container > .message-listitem { padding: 0 12px; }
   .input-wrap { padding: 0 6px; }
   .placeholder { padding-left: 8px; padding-right: 8px; }
   .ph-suggest { padding: 0 8px; }
@@ -723,40 +774,26 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
   <main>
     <nav><span class="nav-btn nav-toggle" title="Open Sidebar">${SVG.panel}</span><span id="nav-title">Theme preview chat</span><span class="nav-btn">${SVG.dots}</span><span class="right" id="nav-right"><span class="nav-btn nav-newchat" title="New Chat">${SVG.chatPlus}</span><span class="nav-btn temp-chat" title="Temporary Chat">${SVG.chatBubbleDotted}</span><span class="nav-btn controls" title="Controls">${SVG.knobs}</span></span></nav>
     <div id="messages-container">
-      <div class="chat-user"><div class="bubble">Show me what this preset looks like on a real conversation.</div>${USER_ACTIONS}</div>
-      <div class="chat-assistant">
-        <div class="ai-avatar" style="background:#fff !important; color:#000 !important;">OI</div>
-        <div class="ai-col">
-          <div class="ai-model">Preview Model</div>
-          <div class="ai-stats">Response Speed: 104.3 t/s | Total Duration: 2.418s | Prompt Evals: 147 | Eval Count: 236 | Session: 1854 tokens</div>
-          <div class="prose">
-            <p>Here you go — this mock chat mirrors Open WebUI's layout: <b>sidebar</b>, <b>message bubbles</b>, <code>inline code</code>, and the input bar below.</p>
-            <div class="code-block"><div class="code-block-header"><span>javascript</span><span class="cb-action">Copy</span></div><pre>const theme = 'applied';</pre></div>
-            <p>Every surface is painted by the preset's <code>--color-gray-*</code> ramp — the same variables the designer generates.</p>
-          </div>
-          ${MSG_ACTIONS}
-        </div>
-      </div>
-      <div class="chat-user"><div class="bubble">Nice. The palette applies to every surface?</div>${USER_ACTIONS_DEL}</div>
-      <div class="chat-assistant">
-        <div class="ai-avatar" style="background:#fff !important; color:#000 !important;">OI</div>
-        <div class="ai-col">
-          <div class="ai-model">Preview Model</div>
-          <div class="ai-stats">Response Speed: 98.7 t/s | Total Duration: 1.9s | Eval Count: 164 | Session: 2018 tokens</div>
-          <div class="prose"><p><b>Exactly</b> — backgrounds, borders, and text all come from the preset, and Canvas FX or gradients render behind the whole interface.</p></div>
-          ${MSG_ACTIONS}
-          ${followUps([
-            'How do I import one of these presets into my instance?',
-            'Which presets look best with structural transparency enabled?',
-            'Can I combine a Canvas FX script with a gradient background?',
-            'What happens to the palette in OLED mode?',
-          ])}
-        </div>
-      </div>
+      ${userRow('Show me what this preset looks like on a real conversation.', false)}
+      ${aiRow('Response Speed: 104.3 t/s | Total Duration: 2.418s | Prompt Evals: 147 | Eval Count: 236 | Session: 1854 tokens',
+        '<p>Here you go — this mock chat mirrors Open WebUI\'s layout: <b>sidebar</b>, <b>message bubbles</b>, <code>inline code</code>, and the input bar below.</p>' +
+        '<div class="code-block"><div class="code-block-header"><span>javascript</span><span class="cb-action">Copy</span></div><pre>const theme = \'applied\';</pre></div>' +
+        '<p>Every surface is painted by the preset\'s <code>--color-gray-*</code> ramp — the same variables the designer generates.</p>',
+        null,
+        { seconds: 6, body: 'The user wants to see the preset on realistic chat content. I should show the layout pieces the theme actually paints — the sidebar, a user bubble, inline code, a fenced code block, and the input shell — so every themed surface is visible at once.' })}
+      ${userRow('Nice. The palette applies to every surface?', true)}
+      ${aiRow('Response Speed: 98.7 t/s | Total Duration: 1.9s | Eval Count: 164 | Session: 2018 tokens',
+        '<p><b>Exactly</b> — backgrounds, borders, and text all come from the preset, and Canvas FX or gradients render behind the whole interface.</p>',
+        [
+          'How do I import one of these presets into my instance?',
+          'Which presets look best with structural transparency enabled?',
+          'Can I combine a Canvas FX script with a gradient background?',
+          'What happens to the palette in OLED mode?',
+        ])}
     </div>
     <div class="input-wrap">
       <div id="chat-input-container">
-        <textarea placeholder="Send a Message" disabled></textarea>
+        <div id="chat-input" class="ProseMirror input-prose" contenteditable="false"><p class="is-editor-empty" data-placeholder="Send a Message"><br></p></div>
         <div class="input-row">
           <span class="icon-btn">${SVG.plusAlt}</span>
           <span class="icon-btn">${SVG.component}</span>
@@ -834,6 +871,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   var MSG_ACTIONS = ${JSON.stringify(MSG_ACTIONS)};
   var USER_ACTIONS = ${JSON.stringify(USER_ACTIONS)};
   var USER_ACTIONS_DEL = ${JSON.stringify(USER_ACTIONS_DEL)};
+  var THOUGHT_CHEVRON = ${JSON.stringify(SVG.chevronDown)};
 
   // Follow-ups only render on the last message upstream, and each of these
   // conversations has exactly one reply — so every ai() call may carry them.
@@ -847,15 +885,28 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       '</div></div></div>';
   }
 
-  function ai(stats, body, fups) {
-    return '<div class="chat-assistant"><div class="ai-avatar" style="background:#fff !important; color:#000 !important;">OI</div><div class="ai-col">' +
+  // Mirrors the outer thoughtBlock — reasoning collapsible, collapsed first
+  function thought(t) {
+    if (!t) return '';
+    return '<div class="thought" role="button">Thought for ' + t.seconds + ' seconds' + THOUGHT_CHEVRON + '</div>' +
+      '<div class="thought-body prose" hidden><blockquote>' + t.body + '</blockquote></div>';
+  }
+  function ai(stats, body, fups, t) {
+    return '<div class="message-listitem group"><div class="msg">' +
+      '<div class="ai-avatar" style="background:#fff !important; color:#000 !important;">OI</div>' +
+      '<div class="ai-col flex-auto w-0 pl-1 relative">' +
       '<div class="ai-model">Preview Model</div><div class="ai-stats">' + stats + '</div>' +
-      '<div class="prose">' + body + '</div>' + MSG_ACTIONS + followUps(fups) + '</div></div>';
+      '<div class="chat-assistant w-full min-w-full">' + thought(t) +
+      '<div class="prose markdown-prose">' + body + '</div>' + MSG_ACTIONS + followUps(fups) +
+      '</div></div></div></div>';
   }
   // notFirst mirrors UserMessage.svelte's !isFirstMessage gate on Delete
   function user(text, notFirst) {
-    return '<div class="chat-user"><div class="bubble">' + text + '</div>' +
-      (notFirst ? USER_ACTIONS_DEL : USER_ACTIONS) + '</div>';
+    return '<div class="message-listitem group"><div class="msg user-message group">' +
+      '<div class="chat-user w-full min-w-full">' +
+      '<div class="bubble-row"><div class="bubble rounded-3xl max-w-[90%] px-4 py-1.5 bg-gray-50 dark:bg-gray-850"><div class="markdown-prose">' + text + '</div></div></div>' +
+      (notFirst ? USER_ACTIONS_DEL : USER_ACTIONS) +
+      '</div></div></div>';
   }
 
   var CHATS = {
@@ -911,7 +962,8 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
           '<p>Portaled menus and dialogs live <b>outside</b> the app container, so they stay opaque — no unreadable dropdowns.</p>',
           ['Which containers get transparency applied?',
            'How do I keep code blocks readable over an effect?',
-           'Does the frosted sidebar cost much performance?'])
+           'Does the frosted sidebar cost much performance?'],
+          { seconds: 12, body: 'They are asking how effects remain visible behind the UI. The key is the structural layer: it clears backgrounds on the layout wrappers while the sidebar keeps a frosted backdrop, and portaled overlays are deliberately left opaque so menus stay legible.' })
     },
     'notes': {
       title: 'Preset gallery notes',
@@ -962,6 +1014,18 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
 
   document.querySelectorAll('[data-chat]').forEach(function (el) {
     el.addEventListener('click', function () { openChat(el.getAttribute('data-chat')); });
+  });
+
+  // Reasoning collapsibles toggle like Collapsible.svelte. Delegated from the
+  // container so chat switches (which replace innerHTML) keep working.
+  msgs.addEventListener('click', function (e) {
+    var t = e.target && e.target.closest ? e.target.closest('.thought') : null;
+    if (!t || !msgs.contains(t)) return;
+    var body = t.nextElementSibling;
+    if (!body || !body.classList.contains('thought-body')) return;
+    var open = body.hasAttribute('hidden');
+    if (open) body.removeAttribute('hidden'); else body.setAttribute('hidden', '');
+    t.classList.toggle('open', open);
   });
 
   var initial = document.body.getAttribute('data-initial-chat');
@@ -1045,7 +1109,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   // to the navbar's height and the container's padding.
   function apply() {
     if (inset === null) return;
-    var row = document.querySelector('#messages-container > .chat-user, #messages-container > .chat-assistant');
+    var row = document.querySelector('#messages-container > .message-listitem');
     if (!row) return; // the New Chat placeholder needs no offset
     root.style.setProperty('--tdp-first-row-offset', '0px');
     var natural = row.getBoundingClientRect().top;
