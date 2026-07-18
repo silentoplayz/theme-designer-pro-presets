@@ -628,19 +628,19 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
 .msg { display: flex; width: 100%; }
 .chat-user, .chat-assistant { width: 100%; min-width: 100%; }
 .bubble-row { display: flex; justify-content: flex-end; padding-bottom: 4px; }
-.chat-user .bubble { max-width: 90%; background: ${bubble}; border-radius: 24px; padding: 6px 16px; font-size: 0.9375rem; line-height: 1.625; color: ${proseText}; }
+.chat-user .bubble { max-width: 90%; background: ${bubble}; border-radius: 24px; padding: 6px 16px; font-size: 1rem; line-height: 1.625; color: ${proseText}; }
 /* UserMessage.svelte: Edit + Copy in a justify-end row. Upstream they are
    hover-gated (invisible group-hover:visible); the mock keeps them visible
    so the preview shows the full anatomy without interaction. */
 .user-actions { display: flex; align-items: center; justify-content: flex-end; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-500)'}; }
 .ai-avatar { width: 28px; height: 28px; border-radius: 16px; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; flex-shrink: 0; margin: 2px 8px 0 0; border: 1px solid rgb(0 0 0 / 0.1); }
 .ai-col { flex: 1; min-width: 0; padding-left: 4px; }
-.ai-model { font-size: 0.9375rem; font-weight: 400; color: ${isLight ? '#000' : '#fff'}; margin-bottom: 1px; line-height: 1.4; }
-.ai-stats { font-size: 0.9375rem; color: ${textFaint}; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ai-model { font-size: 1rem; font-weight: 400; color: ${isLight ? '#000' : '#fff'}; margin-bottom: 1px; line-height: 1.4; }
+.ai-stats { font-size: 1rem; color: ${textFaint}; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* common/Collapsible.svelte reasoning trigger: w-fit py-1 text-[0.9375rem]
    text-gray-500 hover:text-gray-700 dark:hover:text-gray-300, size-3 chevron
    at stroke-width 2.75; expanded slot content wrapped in mb-1.5 */
-.thought { width: fit-content; padding: 4px 0; display: flex; align-items: center; gap: 8px; font-size: 0.9375rem; color: var(--color-gray-500); cursor: pointer; transition: color 0.15s; }
+.thought { width: fit-content; padding: 4px 0; display: flex; align-items: center; gap: 8px; font-size: 1rem; color: var(--color-gray-500); cursor: pointer; transition: color 0.15s; }
 .thought:hover { color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-300)'}; }
 .thought svg { width: 12px; height: 12px; transform: translateY(1px); transition: transform 0.15s; }
 .thought.open svg { transform: translateY(1px) rotate(180deg); }
@@ -649,7 +649,7 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
 /* The DOM class in Open WebUI is markdown-prose (app.css:124); "prose" is
    only a Tailwind @apply and never appears as a literal class. Preset CSS
    targeting .prose must miss here exactly as it misses in the app. */
-.markdown-prose { font-size: 0.9375rem; line-height: 1.625; color: ${proseText}; }
+.markdown-prose { font-size: 1rem; line-height: 1.625; color: ${proseText}; }
 .markdown-prose p { margin-bottom: 8px; }
 .markdown-prose p:last-child { margin-bottom: 0; }
 .markdown-prose b { color: ${isLight ? '#000' : '#fff'}; font-weight: 500; }
@@ -676,15 +676,15 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
    head shares the suggestion block's width and padding so their edges meet */
 .ph-head { width: min(42rem, 100%); padding: 0 20px; display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
 .ph-logo { width: 40px; height: 40px; border-radius: 16px; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; margin-bottom: 2px; border: 1px solid rgb(0 0 0 / 0.1); }
-.ph-model { font-size: 1.5rem; line-height: 2rem; font-weight: 400; color: ${isLight ? 'var(--color-gray-800)' : 'var(--color-gray-100)'}; max-width: 36rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ph-sub { font-size: 1.5rem; line-height: 2rem; font-weight: 400; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-400)'}; margin: 0 0 22px; }
+.ph-model { font-size: 1.875rem; line-height: 2.25rem; font-weight: 400; color: ${isLight ? 'var(--color-gray-800)' : 'var(--color-gray-100)'}; max-width: 36rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-sub { font-size: 1.875rem; line-height: 2.25rem; font-weight: 400; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-400)'}; margin: 0 0 22px; }
 .ph-suggest { width: min(42rem, 100%); padding: 0 20px; }
 .ph-label { font-size: 12px; line-height: 1.4; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-400)'}; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
 .ph-label svg { width: 14px; height: 14px; }
 .ph-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: start; }
 .ph-card { border-radius: 8px; padding: 6px 10px; cursor: pointer; background: transparent; transition: color 0.15s; text-align: left; }
-.ph-card b { display: block; font-size: 14px; line-height: 1.375; font-weight: 400; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-300)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ph-card span { display: block; font-size: 12px; line-height: 1.375; font-weight: 400; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-400)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-card b { display: block; font-size: 1rem; line-height: 1.375; font-weight: 400; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-300)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-card span { display: block; font-size: 0.8125rem; line-height: 1.375; font-weight: 400; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-400)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ph-card:hover b { color: ${isLight ? 'var(--color-gray-950)' : '#fff'}; }
 .ph-card:hover span { color: ${isLight ? 'var(--color-gray-900)' : 'var(--color-gray-100)'}; }
 /* ResponseMessage.svelte action row: text-gray-600 dark:text-gray-500 mt-0.5,
@@ -712,9 +712,9 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
    heading and text-sm rows separated by hairlines */
 .followups-wrap { margin: 10px 0; }
 .followups { margin-top: 16px; }
-.followups-title { font-size: 0.875rem; font-weight: 400; color: ${proseText}; }
+.followups-title { font-size: 0.9375rem; font-weight: 400; color: ${proseText}; }
 .followups-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
-.followup { padding: 4px 0; font-size: 0.875rem; text-align: left; color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; cursor: pointer; transition: color 0.15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.followup { padding: 4px 0; font-size: 0.9375rem; text-align: left; color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; cursor: pointer; transition: color 0.15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .followup:hover { color: ${isLight ? '#000' : '#fff'}; }
 .followups-list hr { border: none; border-top: 1px solid ${borderSubtle}; margin: 0; }
 
@@ -728,7 +728,7 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
    id="chat-input", .input-prose = !text-[0.9375rem]) — NOT a <textarea>.
    Preset CSS that skins textarea/input fields therefore never touches the
    chat input in Open WebUI, and must not touch it here either. */
-#chat-input { outline: none; width: 100%; min-height: 24px; padding-top: 2px; font-size: 0.9375rem; line-height: 1.5; color: ${textMain}; }
+#chat-input { outline: none; width: 100%; min-height: 24px; padding-top: 2px; font-size: 1rem; line-height: 1.5; color: ${textMain}; }
 #chat-input p { margin: 0; }
 /* app.css:418 — placeholder is a ::before on the empty first paragraph */
 .ProseMirror p.is-editor-empty:first-child::before { content: attr(data-placeholder); float: left; color: ${isLight ? '#676767' : '#757575'}; pointer-events: none; height: 0; }
@@ -753,9 +753,14 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
 .mic-btn { padding: 6px; margin-right: 2px; border-radius: 9999px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-300)'}; cursor: pointer; transition: color 0.15s; }
 .mic-btn svg { width: 18px; height: 18px; }
 .mic-btn:hover { color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-200)'}; }
-#call-button { padding: 5px; border-radius: 9999px; border: none; background: ${isLight ? '#000' : '#fff'}; color: ${isLight ? '#fff' : '#000'}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; transition: background 0.15s; }
-#call-button svg { width: 20px; height: 20px; }
-#call-button:hover { background: ${isLight ? 'var(--color-gray-900)' : 'var(--color-gray-100)'}; }
+/* The real Voice mode button carries bg-black/dark:bg-white as literal
+   classes (MessageInput.svelte:2306) — presets style it through those
+   (e.g. Astral Projection's .bg-black gradient), so the mock's button
+   must carry the same class string. Styled via .call-button so the class
+   tokens stay purely selector bait, like the bubble's bg-gray classes. */
+.call-button { padding: 5px; border-radius: 9999px; border: none; background: ${isLight ? '#000' : '#fff'}; color: ${isLight ? '#fff' : '#000'}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; transition: background 0.15s; }
+.call-button svg { width: 20px; height: 20px; }
+.call-button:hover { background: ${isLight ? 'var(--color-gray-900)' : 'var(--color-gray-100)'}; }
 .footer-note { text-align: center; font-size: 10.5px; color: ${textFaint}; padding: 4px 0 6px; }
 
 /* Tooltip.svelte -> tippy theme 'dark' (app.css:379): rounded-lg bg-gray-950
@@ -793,7 +798,7 @@ nav .nav-toggle, nav .nav-newchat { display: none; }
   .placeholder { padding-left: 8px; padding-right: 8px; }
   .ph-suggest { padding: 0 8px; }
   .ph-grid { grid-template-columns: 1fr; }
-  .ph-model, .ph-sub { font-size: 1.25rem; line-height: 1.75rem; }
+  .ph-model, .ph-sub { font-size: 1.5rem; line-height: 2rem; }
   .ph-logo { width: 36px; height: 36px; }
   .model-select { max-width: 8rem; }
 }
@@ -888,7 +893,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
           <span class="spacer"></span>
           <span class="model-select"><span class="name">Preview Model</span>${SVG.chevronDown}</span>
           <span class="mic-btn" data-tip="Dictate">${SVG.mic}</span>
-          <button id="call-button" data-tip="Voice mode">${SVG.voice}</button>
+          <button class="call-button bg-black text-white dark:bg-white dark:text-black rounded-full p-[5px] self-center" data-tip="Voice mode">${SVG.voice}</button>
         </div>
       </div>
       <div class="footer-note">Preview Model can make mistakes. Verify important information.</div>
