@@ -607,6 +607,9 @@ nav .right { margin-left: auto; display: flex; align-items: center; gap: 8px; pa
 /* Temporary Chat only renders when there's no chat id — i.e. on New Chat */
 nav .right .temp-chat { display: none; }
 nav .right.is-new .temp-chat { display: flex; }
+/* Navbar.svelte:117 gates the title block (and the chat menu inside it) on
+   chat?.id, so New Chat shows neither */
+nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
 
 /* Messages.svelte: rows are max-w-[58rem] px-5 mb-3 inside a full-width scroller */
 #messages-container { flex: 1; overflow: hidden; padding: 8px 0 6px; display: flex; flex-direction: column; width: 100%; }
@@ -845,7 +848,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
     <div class="side-user"><div class="avatar"></div> You</div>
   </div>
   <main>
-    <nav><span class="nav-btn nav-toggle" data-tip="Open Sidebar">${SVG.panel}</span><span id="nav-title">Theme preview chat</span><span class="nav-btn">${SVG.dots}</span><span class="right" id="nav-right"><span class="nav-btn nav-newchat" data-tip="New Chat">${SVG.chatPlus}</span><span class="nav-btn temp-chat" data-tip="Temporary Chat">${SVG.chatBubbleDotted}</span><span class="nav-btn controls" data-tip="Controls">${SVG.knobs}</span></span></nav>
+    <nav><span class="nav-btn nav-toggle" data-tip="Open Sidebar">${SVG.panel}</span><span id="nav-title">Theme preview chat</span><span class="nav-btn nav-chat-menu">${SVG.dots}</span><span class="right" id="nav-right"><span class="nav-btn nav-newchat" data-tip="New Chat">${SVG.chatPlus}</span><span class="nav-btn temp-chat" data-tip="Temporary Chat">${SVG.chatBubbleDotted}</span><span class="nav-btn controls" data-tip="Controls">${SVG.knobs}</span></span></nav>
     <div id="messages-container">
       ${userRow('Show me what this preset looks like on a real conversation.', false)}
       ${aiRow('Response Speed: 104.3 t/s | Total Duration: 2.418s | Prompt Evals: 147 | Eval Count: 236 | Session: 1854 tokens',
@@ -1135,6 +1138,9 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     // Navbar.svelte gates Temporary Chat on !chat?.id, so it shows only here
     var navRight = document.getElementById('nav-right');
     if (navRight) navRight.classList.toggle('is-new', key === 'new');
+    // and :117 gates the title + chat menu on chat?.id — hidden on New Chat
+    var navEl = document.querySelector('nav');
+    if (navEl) navEl.classList.toggle('is-new', key === 'new');
     msgs.innerHTML = chat.html;
     // the offset is measured, so it has to be recomputed for the new content
     if (window.__tdpApplyInset) window.__tdpApplyInset();
