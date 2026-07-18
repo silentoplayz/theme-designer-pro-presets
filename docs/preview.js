@@ -283,10 +283,12 @@
     chevronDown: icon(['m19.5 8.25-7.5 7.5-7.5-7.5'], { strokeWidth: '2.5' }),
     // icons/Sidebar.svelte — sidebar collapse toggle
     panel: icon(['M19 21L5 21C3.89543 21 3 20.1046 3 19L3 5C3 3.89543 3.89543 3 5 3L19 3C20.1046 3 21 3.89543 21 5L21 19C21 20.1046 20.1046 21 19 21Z', 'M9.5 21V3', 'M5.5 10L7.25 12L5.5 14']),
-    // icons/PencilSquare.svelte — navbar "New Chat"
-    pencilSquare: icon(['m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10']),
     // icons/EllipsisHorizontal.svelte
     dots: icon(['M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z']),
+    // icons/Knobs.svelte — the navbar's Chat Controls button
+    knobs: icon(['M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75'], { strokeWidth: '1' }),
+    // icons/ChatBubbleDotted.svelte — Temporary Chat (dashes are part of the glyph)
+    chatBubbleDotted: icon(['<path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.8214 2.48697 15.5291 3.33782 17L2.5 21.5L7 20.6622C8.47087 21.513 10.1786 22 12 22Z" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2.5 3.5"></path>']),
     // icons/Bolt.svelte — the "Suggested" marker on the chat placeholder
     bolt: icon(['m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z']),
     // icons/PlusAlt.svelte — input bar "More"
@@ -496,10 +498,14 @@ main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 nav { padding: 2px 4px 4px 6px; display: flex; align-items: center; gap: 8px; color: ${textMain}; position: relative; z-index: 2; flex-shrink: 0; }
 ${opts.transparent ? '' : `nav::before { content: ''; position: absolute; inset: 0 0 -40px 0; background: linear-gradient(to bottom, color-mix(in srgb, ${bg} 90%, transparent), color-mix(in srgb, ${bg} 50%, transparent) 40%, transparent 97%); z-index: -1; pointer-events: none; }`}
 #nav-title { padding: 4px 4px 4px 6px; font-size: 15px; font-weight: 400; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-300)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-nav .nav-btn { width: 24px; height: 24px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: ${textMuted}; cursor: pointer; transition: background 0.15s, color 0.15s; }
-nav .nav-btn svg { width: 16px; height: 16px; }
+nav .nav-btn { width: 24px; height: 24px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; cursor: pointer; transition: background 0.15s, color 0.15s; }
+nav .nav-btn svg { width: 18px; height: 18px; }
+nav .nav-btn.controls svg { width: 20px; height: 20px; }
 nav .nav-btn:hover { background: ${navHover}; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-200)'}; }
 nav .right { margin-left: auto; display: flex; align-items: center; gap: 8px; padding-right: 4px; }
+/* Temporary Chat only renders when there's no chat id — i.e. on New Chat */
+nav .right .temp-chat { display: none; }
+nav .right.is-new .temp-chat { display: flex; }
 
 /* Messages.svelte: rows are max-w-[58rem] px-5 mb-3 inside a full-width scroller */
 #messages-container { flex: 1; overflow: hidden; padding: 8px 0 6px; display: flex; flex-direction: column; width: 100%; }
@@ -651,7 +657,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
     <div class="side-user"><div class="avatar"></div> You</div>
   </div>
   <main>
-    <nav><span id="nav-title">Theme preview chat</span><span class="nav-btn">${SVG.dots}</span><span class="right"><span class="nav-btn">${SVG.pencilSquare}</span><span class="nav-btn">${SVG.panel}</span></span></nav>
+    <nav><span id="nav-title">Theme preview chat</span><span class="nav-btn">${SVG.dots}</span><span class="right" id="nav-right"><span class="nav-btn temp-chat" title="Temporary Chat">${SVG.chatBubbleDotted}</span><span class="nav-btn controls" title="Controls">${SVG.knobs}</span></span></nav>
     <div id="messages-container">
       <div class="chat-user"><div class="bubble">Show me what this preset looks like on a real conversation.</div>${USER_ACTIONS}</div>
       <div class="chat-assistant">
@@ -878,6 +884,9 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       if (item) item.classList.add('active');
     }
     navTitle.textContent = chat.title;
+    // Navbar.svelte gates Temporary Chat on !chat?.id, so it shows only here
+    var navRight = document.getElementById('nav-right');
+    if (navRight) navRight.classList.toggle('is-new', key === 'new');
     msgs.innerHTML = chat.html;
     try { parent.postMessage({ __tdpPreview: true, kind: 'chatchange', chat: key }, '*'); } catch (e) {}
   }
