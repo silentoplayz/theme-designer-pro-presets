@@ -28,7 +28,7 @@ theme-designer-pro-presets/
 ├── bundles/                 # Combined import-ready JSON files
 ├── canvas-fx/               # Canvas FX animation scripts (.js)
 ├── css-presets/             # CSS-only styling presets (.css)
-├── docs/                    # GitHub Pages preset catalog
+├── docs/                    # GitHub Pages gallery site (see docs/README.md to run locally)
 ├── event-function/          # Theme Designer Pro event function + documentation
 ├── gradients/               # Gradient preset packs (.json)
 │   ├── animated/            #   Animated/transitioning gradients
@@ -184,7 +184,7 @@ This allows anyone to submit a theme without knowing git — see [CONTRIBUTING.m
 
 ### Deploy to GitHub Pages ([`deploy-pages.yml`](.github/workflows/deploy-pages.yml))
 
-Deploys the [`docs/`](docs/) preset gallery to [GitHub Pages](https://silentoplayz.github.io/theme-designer-pro-presets/).
+Deploys the [`docs/`](docs/) preset gallery to [GitHub Pages](https://silentoplayz.github.io/theme-designer-pro-presets/). To run the gallery locally, see [`docs/README.md`](docs/README.md).
 
 - **After builds**: Triggers automatically when `Validate & Build Bundles` completes successfully (via `workflow_run`), ensuring the catalog is deployed with the latest rebuilt `docs/catalog.json`.
 - **On direct changes**: Also triggers on pushes that modify `docs/` or `tools/` files, so documentation and gallery edits are deployed immediately without waiting for a bundle build.
