@@ -1510,15 +1510,6 @@ input, select {
   flex: 1;
 }
 
-@media (max-width: 640px) {
-  .preview-topbar {
-    flex-wrap: wrap;
-    justify-content: center;
-    border-radius: var(--radius-md);
-    left: 16px;
-    right: 16px;
-    transform: none;
-    max-width: none;
-  }
-  .preview-title { max-width: 50vw; }
-}
+/* (The old ≤640px full-width topbar block lived here. It pinned left/right
+   to 16px, which stretched the bar edge-to-edge and overrode the ≤767px
+   compact-pill rules above — the bar now stays shrink-to-fit everywhere.) */
