@@ -494,10 +494,7 @@ svg { width: 16px; height: 16px; flex-shrink: 0; }
 .avatar { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #ec4899); flex-shrink: 0; }
 .avatar.sm { width: 20px; height: 20px; border-radius: 50%; }
 
-/* The gallery's floating .preview-topbar overlays the stage, so the whole
-   chat column starts below it. The host measures the bar and posts its real
-   height back (it can wrap on narrow screens); 76px is the desktop default. */
-main { flex: 1; display: flex; flex-direction: column; min-width: 0; padding-top: var(--tdp-top-inset, 76px); }
+main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 /* Navbar.svelte: pt-0.5 pb-1, pl-1.5 pr-1, title text-[15px] gray-700/300,
    size-6 rounded-lg icon buttons, and the -bottom-10 gradient scrim */
 nav { padding: 2px 4px 4px 6px; display: flex; align-items: center; gap: 8px; color: ${textMain}; position: relative; z-index: 2; flex-shrink: 0; }
@@ -516,6 +513,13 @@ nav .right.is-new .temp-chat { display: flex; }
 #messages-container { flex: 1; overflow: hidden; padding: 8px 0 6px; display: flex; flex-direction: column; width: 100%; }
 #messages-container > .chat-user,
 #messages-container > .chat-assistant { max-width: 58rem; width: 100%; margin: 0 auto 12px; padding: 0 20px; }
+/* The gallery's floating .preview-topbar overlays the stage, so the opening
+   message has to start below it. The navbar deliberately stays put and sits
+   under the bar. Only the first row is offset — the New Chat placeholder
+   centres itself and must not be pushed off-centre. The value is measured at
+   runtime (the bar wraps on narrow screens); this default covers desktop. */
+#messages-container > .chat-user:first-child,
+#messages-container > .chat-assistant:first-child { margin-top: var(--tdp-first-row-offset, 37px); }
 .chat-user { display: flex; flex-direction: column; align-items: flex-end; }
 .chat-user .bubble { max-width: 90%; background: ${bubble}; border-radius: 24px; padding: 6px 16px; font-size: 0.9375rem; line-height: 1.625; color: ${proseText}; }
 /* UserMessage.svelte: Edit + Copy in a justify-end row, invisible until the
@@ -929,6 +933,8 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     var navRight = document.getElementById('nav-right');
     if (navRight) navRight.classList.toggle('is-new', key === 'new');
     msgs.innerHTML = chat.html;
+    // the offset is measured, so it has to be recomputed for the new content
+    if (window.__tdpApplyInset) window.__tdpApplyInset();
     try { parent.postMessage({ __tdpPreview: true, kind: 'chatchange', chat: key }, '*'); } catch (e) {}
   }
 
@@ -980,16 +986,37 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
 })();
 
 // The floating preview toolbar lives in the parent and can change height when
-// it wraps, so ask for its real height instead of assuming one.
+// it wraps, so ask for its real height instead of assuming one. Only the first
+// message clears it — the navbar intentionally stays under the bar.
 (function () {
+  var root = document.documentElement;
+  var inset = null;
+
+  // Measure where the first row lands with no offset, then add exactly enough
+  // to reach the inset. Derived rather than hardcoded so it survives changes
+  // to the navbar's height and the container's padding.
+  function apply() {
+    if (inset === null) return;
+    var row = document.querySelector('#messages-container > .chat-user, #messages-container > .chat-assistant');
+    if (!row) return; // the New Chat placeholder needs no offset
+    root.style.setProperty('--tdp-first-row-offset', '0px');
+    var natural = row.getBoundingClientRect().top;
+    var needed = Math.max(0, Math.round(inset - natural));
+    root.style.setProperty('--tdp-first-row-offset', needed + 'px');
+  }
+
+  window.__tdpApplyInset = apply;
+
   window.addEventListener('message', function (e) {
     var d = e.data;
     if (!d || d.__tdpPreview !== true || d.kind !== 'topinset') return;
     var px = Number(d.px);
-    if (isFinite(px) && px >= 0) {
-      document.documentElement.style.setProperty('--tdp-top-inset', px + 'px');
-    }
+    if (!isFinite(px) || px < 0) return;
+    inset = px;
+    apply();
   });
+
+  window.addEventListener('resize', apply);
   try { parent.postMessage({ __tdpPreview: true, kind: 'ready' }, '*'); } catch (e) {}
 })();
 </script>
