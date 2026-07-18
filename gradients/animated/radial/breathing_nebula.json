@@ -1,0 +1,18 @@
+{
+  "name": "Breathing Nebula",
+  "type": "radial",
+  "stops": [
+    { "color": "#6b21a8", "position": 0 },
+    { "color": "#3730a3", "position": 30 },
+    { "color": "#1e1b4b", "position": 60 },
+    { "color": "#0a0a1a", "position": 100 }
+  ],
+  "angle": 0,
+  "intensity": 90,
+  "animation": true,
+  "speed": 3,
+  "radialPosX": 50,
+  "radialPosY": 50,
+  "radialShape": "circle",
+  "radialSize": "farthest-side"
+}

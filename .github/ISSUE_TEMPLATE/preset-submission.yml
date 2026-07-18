@@ -1,0 +1,52 @@
+name: Preset Submission
+description: Submit a new Canvas FX, CSS, theme, or gradient preset for the gallery
+labels: ["preset"]
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Preset Type
+      options:
+        - Canvas FX animation
+        - CSS preset
+        - Theme
+        - Gradient
+    validations:
+      required: true
+
+  - type: input
+    id: name
+    attributes:
+      label: Preset Name
+      placeholder: "e.g. Midnight Aurora"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What does this preset look/feel like? What makes it unique?
+    validations:
+      required: true
+
+  - type: textarea
+    id: file
+    attributes:
+      label: Preset File
+      description: Paste the preset content or attach the file. Canvas FX = JavaScript, CSS = raw CSS, Themes/Gradients = JSON.
+      render: text
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Submission Checklist
+      options:
+        - label: I have tested this preset in Theme Designer Pro
+          required: true
+        - label: This preset does not break core Open WebUI layout
+          required: true
+        - label: This is my own original work (or I have permission to share it)
+          required: true

@@ -1,0 +1,53 @@
+name: Deploy to GitHub Pages
+
+on:
+  # Run after Validate & Build Bundles completes (handles bundle auto-commits)
+  workflow_run:
+    workflows: ['Validate & Build Bundles']
+    types: [completed]
+    branches: [main]
+
+  # Also run on direct pushes that DON'T touch preset files
+  # (e.g. docs-only, tool, or workflow edits)
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'tools/**'
+      - 'event-function/**'
+      - '.github/workflows/deploy-pages.yml'
+
+# Only one Pages deployment at a time — cancel stale runs
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    # Skip if triggered by a failed build-bundles run
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

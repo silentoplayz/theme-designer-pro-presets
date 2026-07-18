@@ -1,0 +1,57 @@
+/* --- SOLAR FLARE LUXURY UI --- */
+.app * {
+	border-color: rgba(255, 180, 50, 0.15) !important;
+}
+
+/* Golden Prose */
+.prose h1, .prose h2, .prose h3 {
+	color: #ffcc00 !important;
+	text-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
+	font-weight: 800 !important;
+}
+.prose code {
+	color: #ffaa00 !important;
+	background-color: rgba(255, 170, 0, 0.1) !important;
+	border: 1px solid rgba(255, 170, 0, 0.3);
+}
+
+/* Obsidian Frosted Inputs */
+input, textarea, .bg-gray-850 {
+	background-color: rgba(18, 9, 2, 0.6) !important;
+	backdrop-filter: blur(10px) !important;
+	-webkit-backdrop-filter: blur(10px) !important;
+	border: 1px solid rgba(255, 180, 50, 0.2) !important;
+	border-radius: 12px !important;
+	transition: all 0.3s ease;
+}
+input:focus, textarea:focus {
+	border-color: #ffcc00 !important;
+	box-shadow: 0 0 15px rgba(255, 204, 0, 0.15) !important;
+}
+
+/* Sunflare Gradient Buttons */
+button.bg-blue-500, button.bg-blue-600, .bg-black {
+	background: linear-gradient(135deg, #ffcc00, #ff6600) !important;
+	border: none !important;
+	color: #26150a !important;
+	font-weight: 700 !important;
+	letter-spacing: 0.5px;
+	box-shadow: 0 4px 15px rgba(255, 102, 0, 0.3);
+	border-radius: 24px !important;
+	transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+button.bg-blue-500:hover, button.bg-blue-600:hover {
+	transform: translateY(-2px) scale(1.03);
+	box-shadow: 0 8px 25px rgba(255, 102, 0, 0.5) !important;
+}
+
+/* Molten Scrollbar */
+::-webkit-scrollbar-thumb {
+	background: #ffaa00 !important;
+	border: 3px solid transparent;
+	background-clip: content-box;
+	border-radius: 10px;
+}
+::-webkit-scrollbar-track {
+	background: transparent !important;
+}

@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Canvas FX Preset Bundle",
+  "description": "Import-ready JSON bundle containing Canvas FX animation presets for Theme Designer Pro",
+  "type": "object",
+  "required": ["canvas_presets", "isCanvasBackup"],
+  "properties": {
+    "canvas_presets": {
+      "type": "array",
+      "description": "Array of Canvas FX animation presets",
+      "items": {
+        "type": "object",
+        "required": ["name", "script"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name of the animation preset"
+          },
+          "script": {
+            "type": "string",
+            "description": "Complete JavaScript source code of the Canvas FX animation (Web Worker compatible)"
+          }
+        }
+      }
+    },
+    "isCanvasBackup": {
+      "type": "boolean",
+      "const": true,
+      "description": "Must be true — identifies this as a Canvas FX backup file"
+    },
+    "version": {
+      "type": "string",
+      "description": "Schema version identifier"
+    }
+  }
+}

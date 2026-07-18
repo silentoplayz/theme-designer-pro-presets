@@ -1,0 +1,37 @@
+/* Animated gradient — Aurora Borealis */
+body {
+  background-image: linear-gradient(135deg, #0a0a2e, #1a3a5c, #0d7377, #1a3a5c, #0a0a2e) !important;
+  background-attachment: fixed !important;
+  background-size: 400% 400% !important;
+  animation: auroraShift 16s ease infinite !important;
+}
+@keyframes auroraShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Make layout containers transparent (scoped to .app / #app-container —
+   there is no #app element in Open WebUI; portaled menus stay opaque) */
+.app, .app > div, .app > div > div, main,
+#app-container, #app-container > *,
+.app :where([class*="bg-gray-9"]):not(button):not(a):not(input):not(select) {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* Blend chat/folder background images with gradient */
+#chat-container .bg-linear-to-t {
+  background-image: linear-gradient(
+    to top, rgba(10, 10, 46, 0.7), rgba(13, 115, 119, 0.35)
+  ) !important;
+}
+
+/* Sidebar & input readability */
+#sidebar {
+  background-color: rgba(10, 10, 46, 0.7) !important;
+  backdrop-filter: blur(12px) !important;
+}
+textarea {
+  background-color: rgba(10, 10, 46, 0.5) !important;
+  backdrop-filter: blur(8px) !important;

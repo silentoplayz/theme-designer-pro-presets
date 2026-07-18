@@ -1,0 +1,24 @@
+{
+  "name": "Plasma Field",
+  "type": "mesh",
+  "stops": [
+    { "color": "#e11d48", "position": 0 },
+    { "color": "#7c3aed", "position": 50 },
+    { "color": "#0f172a", "position": 100 }
+  ],
+  "angle": 0,
+  "intensity": 80,
+  "animation": true,
+  "speed": 5,
+  "radialPosX": 50,
+  "radialPosY": 50,
+  "radialShape": "circle",
+  "radialSize": "farthest-side",
+  "meshPoints": [
+    { "color": "#f43f5e", "x": 10, "y": 20, "spread": 55 },
+    { "color": "#8b5cf6", "x": 90, "y": 10, "spread": 50 },
+    { "color": "#06b6d4", "x": 20, "y": 85, "spread": 48 },
+    { "color": "#f97316", "x": 80, "y": 80, "spread": 52 }
+  ],
+  "meshBgColor": "#0f0720"
+}

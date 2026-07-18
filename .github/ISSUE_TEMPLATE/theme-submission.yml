@@ -1,0 +1,61 @@
+name: "\U0001F3A8 Theme Submission"
+description: Submit a theme for the gallery — a bot validates and opens a PR automatically
+labels: ["theme-submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Submit Your Theme
+
+        Paste your exported theme JSON below. A bot will automatically validate it, generate a clean filename, and open a pull request — **no git required**.
+
+        **How to export:** In Theme Designer Pro → Theme Library → select your theme → click the **↓ Export** button → copy the JSON contents.
+
+  - type: input
+    id: name
+    attributes:
+      label: Theme Name
+      description: The display name for your theme (used in the gallery and catalog).
+      placeholder: "e.g. Neon Cyberpunk"
+    validations:
+      required: true
+
+  - type: textarea
+    id: json
+    attributes:
+      label: Theme JSON
+      description: Paste the full exported JSON from Theme Designer Pro.
+      placeholder: '{ "name": "...", "dark": { ... }, "light": { ... } }'
+      render: json
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What does this theme look and feel like? What makes it unique?
+      placeholder: "A vibrant cyberpunk palette with neon accents and deep shadows..."
+    validations:
+      required: true
+
+  - type: input
+    id: author
+    attributes:
+      label: Author Credit
+      description: How you'd like to be credited (e.g. your name, username, or GitHub handle).
+      placeholder: "e.g. @yourusername"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Submission Checklist
+      options:
+        - label: I have tested this theme in Theme Designer Pro and it renders correctly
+          required: true
+        - label: This theme does not break core Open WebUI layout or functionality
+          required: true
+        - label: This is my own original work (or I have permission to share it)
+          required: true

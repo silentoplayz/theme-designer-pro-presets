@@ -1,0 +1,214 @@
+/* ==============================
+   Tactical HUD
+   Designed to pair with the
+   Tactical Liquid Grid canvas.
+   ============================== */
+
+/* --- Base: dark void + subtle grid --- */
+body {
+  background-color: #020a12 !important;
+  background-image:
+    linear-gradient(rgba(0, 220, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 220, 255, 0.03) 1px, transparent 1px) !important;
+  background-size: 40px 40px !important;
+  background-attachment: fixed !important;
+}
+
+/* --- Transparency: let Canvas FX bleed through (scoped to .app so
+   portaled dropdowns/modals/tooltips stay opaque) --- */
+.app, .app > div, .app > div > div, main, #app-container, #app-container > *,
+.app :where([class*="bg-gray-"]):not(button):not(a):not(input):not(select):not(.user-message *) {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* --- Sidebar: frosted glass panel --- */
+#sidebar {
+  background-color: rgba(2, 10, 18, 0.82) !important;
+  backdrop-filter: blur(14px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.2) !important;
+  border-right: 1px solid rgba(0, 220, 255, 0.18) !important;
+  box-shadow: inset -6px 0 20px rgba(0, 220, 255, 0.04) !important;
+}
+
+/* Sidebar gradient overlays */
+.sidebar-bg-gradient-to-t,
+.sidebar-bg-gradient-to-b {
+  --tw-gradient-from: rgba(2, 10, 18, 0.9) !important;
+  --tw-gradient-to: transparent !important;
+}
+
+/* Active sidebar chat highlight */
+#sidebar a.bg-gray-100\/10,
+#sidebar [class*="bg-gray-850"] {
+  background-color: rgba(0, 220, 255, 0.08) !important;
+  border-left: 2px solid #00dcff !important;
+}
+
+/* --- Navbar gradient overlay --- */
+#navbar-bg-gradient-to-b {
+  background-image: linear-gradient(
+    to bottom,
+    rgba(2, 10, 18, 0.8),
+    transparent
+  ) !important;
+}
+
+/* --- Chat scroll overlay --- */
+#chat-container .bg-linear-to-t {
+  background-image: linear-gradient(
+    to top,
+    rgba(2, 10, 18, 0.85),
+    rgba(2, 10, 18, 0.3)
+  ) !important;
+}
+
+/* --- User message bubble --- */
+.user-message .rounded-3xl {
+  background-color: rgba(0, 220, 255, 0.07) !important;
+  border: 1px solid rgba(0, 220, 255, 0.15) !important;
+}
+
+/* --- Chat input area --- */
+#chat-input-container {
+  background-color: rgba(2, 10, 18, 0.7) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(0, 220, 255, 0.15) !important;
+  border-radius: 14px !important;
+  transition: border-color 0.3s, box-shadow 0.3s !important;
+}
+
+#chat-input-container:focus-within {
+  border-color: rgba(0, 220, 255, 0.5) !important;
+  box-shadow: 0 0 20px rgba(0, 220, 255, 0.1),
+              0 0 60px rgba(0, 220, 255, 0.04) !important;
+}
+
+textarea {
+  background-color: transparent !important;
+}
+
+/* --- Send button: pulsing neon --- */
+#send-message-button {
+  background-color: rgba(0, 220, 255, 0.85) !important;
+  color: #020a12 !important;
+  box-shadow: 0 0 12px rgba(0, 220, 255, 0.35) !important;
+  animation: hud-pulse 2.5s ease-in-out infinite !important;
+}
+
+@keyframes hud-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(0, 220, 255, 0.25); }
+  50% { box-shadow: 0 0 22px rgba(0, 220, 255, 0.55),
+                    0 0 50px rgba(0, 220, 255, 0.12); }
+}
+
+/* --- Prose / Markdown content --- */
+.prose {
+  color: #c4e8f0 !important;
+}
+
+.prose h1, .prose h2, .prose h3 {
+  color: #00dcff !important;
+}
+
+.prose a {
+  color: #00dcff !important;
+  text-decoration-color: rgba(0, 220, 255, 0.3) !important;
+}
+
+.prose strong {
+  color: #e0f4ff !important;
+}
+
+.prose hr {
+  border-color: rgba(0, 220, 255, 0.12) !important;
+}
+
+/* --- Code blocks --- */
+.prose pre {
+  background-color: rgba(2, 8, 16, 0.92) !important;
+  border: 1px solid rgba(0, 220, 255, 0.12) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+.prose code:not(pre code) {
+  background-color: rgba(0, 220, 255, 0.1) !important;
+  color: #00dcff !important;
+  padding: 1px 5px !important;
+  border-radius: 4px !important;
+}
+
+/* --- Tables --- */
+.prose table {
+  border-color: rgba(0, 220, 255, 0.15) !important;
+}
+
+.prose th {
+  background-color: rgba(0, 220, 255, 0.06) !important;
+  color: #00dcff !important;
+  border-color: rgba(0, 220, 255, 0.15) !important;
+}
+
+.prose td {
+  border-color: rgba(0, 220, 255, 0.08) !important;
+}
+
+/* --- Inputs & textareas (settings, modals) --- */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="search"],
+select {
+  background-color: rgba(2, 10, 18, 0.8) !important;
+  border-color: rgba(0, 220, 255, 0.15) !important;
+  color: #e0f4ff !important;
+}
+
+input:focus, select:focus {
+  border-color: rgba(0, 220, 255, 0.4) !important;
+  box-shadow: 0 0 10px rgba(0, 220, 255, 0.08) !important;
+  outline: none !important;
+}
+
+/* --- Dialogs & modals --- */
+[role="dialog"] > div {
+  background-color: rgba(5, 14, 24, 0.95) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 220, 255, 0.12) !important;
+}
+
+/* --- Tooltips (Tippy) --- */
+.tippy-box {
+  background-color: rgba(2, 12, 20, 0.95) !important;
+  border: 1px solid rgba(0, 220, 255, 0.2) !important;
+  color: #c4e8f0 !important;
+}
+
+.tippy-arrow::before {
+  color: rgba(2, 12, 20, 0.95) !important;
+}
+
+/* --- Global border tint (scoped to .app; menus keep native borders) --- */
+.app * {
+  border-color: rgba(0, 220, 255, 0.08) !important;
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 220, 255, 0.25);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 220, 255, 0.5);
+}
+
+/* --- Selection highlight --- */
+::selection {
+  background: rgba(0, 220, 255, 0.25) !important;
+  color: #ffffff !important;
+}

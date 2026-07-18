@@ -1,0 +1,57 @@
+name: Bug Report
+description: Report an issue with a preset, bundle, or the build tooling
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Preset file (Canvas FX, CSS, Theme, or Gradient)
+        - Bundle (import not working)
+        - Theme Designer Pro (Tool)
+        - Theme Designer Pro (Event Function)
+        - Build tooling (scripts)
+        - Validation (false positive/negative)
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: file
+    attributes:
+      label: Affected File(s)
+      description: Which file or bundle is the issue with?
+      placeholder: "e.g. bundles/everything.json, themes/sovereign.json"
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the bug and what you expected to happen instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this?
+      value: |
+        1. Open Theme Designer Pro
+        2. Click Import → Load URL
+        3. Paste URL: ...
+        4. See error: ...
+
+  - type: input
+    id: owui-version
+    attributes:
+      label: Open WebUI Version
+      placeholder: "e.g. 0.9.1"
+
+  - type: input
+    id: tdp-version
+    attributes:
+      label: Theme Designer Pro Version
+      placeholder: "e.g. 1.7.0 (Tool) or 1.0.0 (Event Function)"
