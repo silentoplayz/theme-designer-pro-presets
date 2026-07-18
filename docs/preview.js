@@ -669,6 +669,9 @@ nav .right.is-new .temp-chat { display: flex; }
    rounded-2xl model image, text-2xl name; Suggestions.svelte rows are
    borderless px-2.5 py-1.5 rounded-lg with text-sm / text-xs lines */
 .placeholder { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; max-width: 58rem; width: 100%; margin: 0 auto; padding: 0 8px 24px; transform: translateY(24px); }
+/* Logo, model name and greeting left-align with the Suggested column — the
+   head shares the suggestion block's width and padding so their edges meet */
+.ph-head { width: min(42rem, 100%); padding: 0 20px; display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
 .ph-logo { width: 40px; height: 40px; border-radius: 16px; background: #fff !important; color: #000 !important; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; margin-bottom: 2px; border: 1px solid rgb(0 0 0 / 0.1); }
 .ph-model { font-size: 1.5rem; line-height: 2rem; font-weight: 400; color: ${isLight ? 'var(--color-gray-800)' : 'var(--color-gray-100)'}; max-width: 36rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ph-sub { font-size: 1.5rem; line-height: 2rem; font-weight: 400; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-400)'}; margin: 0 0 22px; }
@@ -1101,16 +1104,21 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     },
     'new': {
       title: 'New Chat',
-      html: '<div class="placeholder"><div class="ph-logo" style="background:#fff !important; color:#000 !important;">OI</div>' +
+      html: '<div class="placeholder">' +
+        '<div class="ph-head">' +
+        '<div class="ph-logo" style="background:#fff !important; color:#000 !important;">OI</div>' +
         '<div class="ph-model">Preview Model</div>' +
         '<div class="ph-sub">How can I help you today?</div>' +
+        '</div>' +
         '<div class="ph-suggest">' +
         '<div class="ph-label">' + BOLT_SVG + 'Suggested</div>' +
         '<div class="ph-grid">' +
+        '<div class="ph-card"><b>Tell me a fun fact</b><span>about the Roman Empire</span></div>' +
         '<div class="ph-card"><b>Help me study</b><span>vocabulary for a college entrance exam</span></div>' +
-        '<div class="ph-card"><b>Give me ideas</b><span>for weekend projects with the kids</span></div>' +
-        '<div class="ph-card"><b>Show me a code snippet</b><span>of a sticky website header</span></div>' +
+        '<div class="ph-card"><b>Explain options trading</b><span>if I\\'m familiar with buying and selling stocks</span></div>' +
         '<div class="ph-card"><b>Overcome procrastination</b><span>give me tips</span></div>' +
+        '<div class="ph-card"><b>Show me a code snippet</b><span>of a website\\'s sticky header</span></div>' +
+        '<div class="ph-card"><b>Give me ideas</b><span>for what to do with my kids\\' art</span></div>' +
         '</div></div></div>'
     }
   };
