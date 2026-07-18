@@ -398,7 +398,7 @@
       ? `
   ${opts.transparent ? 'body { background: transparent !important; }' : ''}
   .app, main, nav { background: transparent !important; }
-  #sidebar, #rail { background: color-mix(in srgb, ${sidebarBg} 72%, transparent) !important; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+  #sidebar { background: color-mix(in srgb, ${sidebarBg} 72%, transparent) !important; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
   .chat-user .bubble { background: color-mix(in srgb, ${bubble} 72%, transparent); }`
       : '';
     // In-iframe gradient: body background layers, exactly like the designer's
@@ -426,15 +426,15 @@ svg { width: 16px; height: 16px; flex-shrink: 0; }
    rounded-xl px-2 py-1.5 nav items, size-4 icons, text-[13px] leading-5.
    Collapsing swaps it for the w-[42px] rail (Sidebar.svelte L806-974); the
    panel itself uses transition:slide{duration:250,axis:'x'}. */
-#sidebar { width: 245px; flex-shrink: 0; background: ${sidebarBg}; border-right: 1px solid ${borderSubtle}; padding: 6px 4px 4px; display: flex; flex-direction: column; overflow: hidden; transition: width 250ms ease, opacity 150ms ease; }
+.sidebar-panel { width: 245px; flex-shrink: 0; background: ${sidebarBg}; border-right: 1px solid ${borderSubtle}; padding: 6px 4px 4px; display: flex; flex-direction: column; overflow: hidden; transition: width 250ms ease, opacity 150ms ease; }
 /* min-width:0 is required — flex items default to min-width:auto, which would
    floor the panel at its nowrap content width and defeat width:0 */
-.app.collapsed #sidebar { width: 0; min-width: 0; padding-left: 0; padding-right: 0; border-right-width: 0; opacity: 0; pointer-events: none; }
+.app.collapsed .sidebar-panel { width: 0; min-width: 0; padding-left: 0; padding-right: 0; border-right-width: 0; opacity: 0; pointer-events: none; }
 
 /* The collapsed rail: w-[42px] py-1 px-1, justify-between, border-e-[0.5px] */
-#rail { display: none; width: 42px; flex-shrink: 0; padding: 4px; flex-direction: column; justify-content: space-between; align-items: center; background: ${sidebarBg}; border-right: 0.5px solid ${borderSubtle}; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-300)'}; overflow: hidden; cursor: pointer; transition: background 0.15s; }
-.app.collapsed #rail { display: flex; }
-#rail:hover { background: ${isLight ? 'color-mix(in srgb, var(--color-gray-50) 30%, ' + sidebarBg + ')' : 'color-mix(in srgb, var(--color-gray-800) 30%, ' + sidebarBg + ')'}; }
+.sidebar-rail { display: none; width: 42px; flex-shrink: 0; padding: 4px; flex-direction: column; justify-content: space-between; align-items: center; background: ${sidebarBg}; border-right: 0.5px solid ${borderSubtle}; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-300)'}; overflow: hidden; cursor: pointer; transition: background 0.15s; }
+.app.collapsed .sidebar-rail { display: flex; }
+.sidebar-rail:hover { background: ${isLight ? 'color-mix(in srgb, var(--color-gray-50) 30%, ' + sidebarBg + ')' : 'color-mix(in srgb, var(--color-gray-800) 30%, ' + sidebarBg + ')'}; }
 .rail-group { display: flex; flex-direction: column; align-items: center; }
 /* size-8.5 / size-8 hit areas wrapping a size-[30px] rounded-lg hover target */
 .rail-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
@@ -627,14 +627,14 @@ nav .nav-toggle, nav .nav-newchat { display: none; }
 /* --- Mobile: BREAKPOINT is 768 in routes/+layout.svelte --- */
 @media (max-width: 767px) {
   /* no collapsed rail on mobile — it renders under {#if !$mobile && ...} */
-  #rail { display: none !important; }
+  .sidebar-rail { display: none !important; }
   /* the panel becomes a fixed drawer, opaque rather than the 70% desktop wash */
-  #sidebar { position: fixed; top: 0; left: 0; height: 100%; z-index: 50; width: 245px; min-width: 245px;
+  .sidebar-panel { position: fixed; top: 0; left: 0; height: 100%; z-index: 50; width: 245px; min-width: 245px;
     background: ${isLight ? 'var(--color-gray-50)' : 'var(--color-gray-950)'};
     transform: translateX(-100%); transition: transform 250ms ease; opacity: 1; pointer-events: auto;
     padding: 6px 4px 4px; border-right-width: 1px; }
-  .app.collapsed #sidebar { transform: translateX(-100%); }
-  .app:not(.collapsed) #sidebar { transform: translateX(0); }
+  .app.collapsed .sidebar-panel { transform: translateX(-100%); }
+  .app:not(.collapsed) .sidebar-panel { transform: translateX(0); }
   .app:not(.collapsed) #backdrop { display: block; }
   /* Navbar gains the sidebar toggle and a New Chat button, and px-2.5 pt-1.5 */
   nav { padding-left: 10px; padding-right: 10px; }
@@ -662,7 +662,7 @@ ${safeCSS}
 <body data-initial-chat="${esc(opts.initialChat || 'default')}" data-sidebar-collapsed="${opts.initialCollapsed ? '1' : '0'}">
 ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;"></canvas>' : ''}
 <div class="app">
-  <div id="rail" title="Open Sidebar">
+  <div class="sidebar-rail" title="Open Sidebar">
     <div class="rail-group">
       <span class="rail-btn lg rail-logo" title="Open Sidebar"><span><i>OI</i>${SVG.panel}</span></span>
       <span class="rail-btn rail-action" data-chat="new" title="New Chat" style="margin-top:4px"><span>${SVG.editPencil}</span></span>
@@ -674,7 +674,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
     <span class="rail-btn lg rail-action" title="User menu"><span><span class="rail-avatar"></span></span></span>
   </div>
   <div id="backdrop"></div>
-  <div id="sidebar">
+  <div class="sidebar-panel" id="sidebar">
     <div class="brand"><div class="brand-dot"><i>OI</i></div><span class="brand-name">Open WebUI</span><span class="panel-icon">${SVG.panel}</span></div>
     <div class="side-item" data-chat="new">${SVG.editPencil} <span class="label">New Chat</span></div>
     <div class="side-item">${SVG.search} <span class="label">Search</span></div>
@@ -951,7 +951,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
 // whole column is a button) reopens it.
 (function () {
   var app = document.querySelector('.app');
-  var rail = document.getElementById('rail');
+  var rail = document.querySelector('.sidebar-rail');
   var toggle = document.querySelector('.brand .panel-icon');
   if (!app || !rail || !toggle) return;
 
@@ -961,8 +961,24 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
 
   function isMobile() { return window.innerWidth < MOBILE; }
 
+  var panel = document.querySelector('.sidebar-panel');
+
+  // Upstream the rail (Sidebar.svelte:810) and the expanded panel (:983) are
+  // separate elements behind an {#if}, but both carry id="sidebar" — so only
+  // ever one exists and preset CSS written against #sidebar hits whichever is
+  // showing. The mock keeps both in the DOM for the collapse transition, so
+  // the id is moved to the visible one instead. Without this, a theme styling
+  // #sidebar (rounding, borders, backgrounds) would skip the collapsed rail.
+  function syncSidebarId(collapsed) {
+    var active = collapsed ? rail : panel;
+    var inactive = collapsed ? panel : rail;
+    if (inactive) inactive.removeAttribute('id');
+    if (active) active.id = 'sidebar';
+  }
+
   function setCollapsed(on) {
     app.classList.toggle('collapsed', on);
+    syncSidebarId(on);
     try { parent.postMessage({ __tdpPreview: true, kind: 'sidebarchange', collapsed: on }, '*'); } catch (e) {}
   }
 
@@ -983,6 +999,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   // showSidebar defaults to false on mobile, and closes when crossing into it
   var startCollapsed = document.body.getAttribute('data-sidebar-collapsed') === '1' || isMobile();
   if (startCollapsed) app.classList.add('collapsed');
+  syncSidebarId(startCollapsed);
 
   var wasMobile = isMobile();
   window.addEventListener('resize', function () {
