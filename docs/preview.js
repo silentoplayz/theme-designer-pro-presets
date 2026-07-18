@@ -319,15 +319,23 @@
     thumbDown: icon(['M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17'], { strokeWidth: '2.3' }),
     continueResponse: icon(['M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z', 'M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z'], { strokeWidth: '2.3' }),
     regenerate: icon(['M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99'], { strokeWidth: '2.3' }),
+    // UserMessage.svelte:591 — Delete is drawn at stroke-width 2, not 2.3
+    trash: icon(['m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0'], { strokeWidth: '2' }),
   };
 
   const CHAT_MENU = '<span class="chat-actions"><span class="chat-menu-btn">' + SVG.moreHorizontal + '</span></span>';
 
-  // UserMessage.svelte's Edit + Copy pair (same two glyphs the assistant row uses)
-  const USER_ACTIONS =
-    '<div class="user-actions">' +
-    ['edit', 'copy'].map(function (k) { return '<span class="msg-action">' + ACTION_SVG[k] + '</span>'; }).join('') +
-    '</div>';
+  // UserMessage.svelte's Edit + Copy pair (same two glyphs the assistant row
+  // uses), plus Delete — which L578 gates on `!isFirstMessage || siblings > 1`,
+  // so the opening message of a conversation never carries it.
+  function userActions(withDelete) {
+    return '<div class="user-actions">' +
+      ['edit', 'copy'].map(function (k) { return '<span class="msg-action">' + ACTION_SVG[k] + '</span>'; }).join('') +
+      (withDelete ? '<span class="msg-action delete">' + ACTION_SVG.trash + '</span>' : '') +
+      '</div>';
+  }
+  const USER_ACTIONS = userActions(false);
+  const USER_ACTIONS_DEL = userActions(true);
 
   // FollowUps.svelte — hairline-separated rows under a "Follow up" heading
   function followUps(items) {
@@ -579,6 +587,10 @@ nav .right.is-new .temp-chat { display: flex; }
 .msg-action { padding: 6px; border-radius: 8px; display: flex; cursor: pointer; transition: background 0.15s, color 0.15s; }
 .msg-action:hover { background: ${ghostHover}; color: ${isLight ? '#000' : '#fff'}; }
 .msg-actions svg { width: 16px; height: 16px; }
+/* UserMessage.svelte:580 — Delete is p-1 rounded-sm and, unlike the p-1.5
+   rounded-lg Edit/Copy beside it, takes no background on hover */
+.msg-action.delete { padding: 4px; border-radius: 2px; }
+.msg-action.delete:hover { background: transparent; color: ${isLight ? '#000' : '#fff'}; }
 
 /* ResponseMessage/FollowUps.svelte, rendered in a my-2.5 wrapper after the
    action row and only on the last message: an mt-4 block with a text-sm
@@ -725,7 +737,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
           ${MSG_ACTIONS}
         </div>
       </div>
-      <div class="chat-user"><div class="bubble">Nice. The palette applies to every surface?</div>${USER_ACTIONS}</div>
+      <div class="chat-user"><div class="bubble">Nice. The palette applies to every surface?</div>${USER_ACTIONS_DEL}</div>
       <div class="chat-assistant">
         <div class="ai-avatar" style="background:#fff !important; color:#000 !important;">OI</div>
         <div class="ai-col">
@@ -821,6 +833,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
 
   var MSG_ACTIONS = ${JSON.stringify(MSG_ACTIONS)};
   var USER_ACTIONS = ${JSON.stringify(USER_ACTIONS)};
+  var USER_ACTIONS_DEL = ${JSON.stringify(USER_ACTIONS_DEL)};
 
   // Follow-ups only render on the last message upstream, and each of these
   // conversations has exactly one reply — so every ai() call may carry them.
@@ -839,8 +852,10 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       '<div class="ai-model">Preview Model</div><div class="ai-stats">' + stats + '</div>' +
       '<div class="prose">' + body + '</div>' + MSG_ACTIONS + followUps(fups) + '</div></div>';
   }
-  function user(text) {
-    return '<div class="chat-user"><div class="bubble">' + text + '</div>' + USER_ACTIONS + '</div>';
+  // notFirst mirrors UserMessage.svelte's !isFirstMessage gate on Delete
+  function user(text, notFirst) {
+    return '<div class="chat-user"><div class="bubble">' + text + '</div>' +
+      (notFirst ? USER_ACTIONS_DEL : USER_ACTIONS) + '</div>';
   }
 
   var CHATS = {
