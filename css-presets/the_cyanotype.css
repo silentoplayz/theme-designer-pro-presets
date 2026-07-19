@@ -15,7 +15,7 @@ body {
 }
 
 /* 3. INPUTS & TEXT AREAS: Darkened with indigo tint */
-input, textarea, .tiptap, .prose-editor, .bg-gray-50, .dark\:bg-gray-850 {
+input, textarea, #chat-input-container, .tiptap, .input-prose, .bg-gray-50, .dark\:bg-gray-850 {
     background-color: rgba(10, 21, 32, 0.95) !important; /* Darker, more solid indigo */
     border: 1px solid rgba(26, 177, 255, 0.3) !important;
     color: #e6f7ff !important;
@@ -28,12 +28,12 @@ input, textarea, .tiptap, .prose-editor, .bg-gray-50, .dark\:bg-gray-850 {
     border: none !important;
 }
 
-.user-message, .assistant-message {
+.user-message, .chat-assistant {
     border-bottom: 1px solid rgba(26, 177, 255, 0.08) !important;
 }
 
 /* 5. SIDEBAR: Darker, blurred navigation */
-#sidebar, .sidebar-container {
+#sidebar {
     background-color: rgba(2, 4, 8, 0.9) !important; /* Darkened sidebar */
     backdrop-filter: blur(12px);
     border-right: 1px solid rgba(26, 177, 255, 0.1) !important;
@@ -46,17 +46,17 @@ input, textarea, .tiptap, .prose-editor, .bg-gray-50, .dark\:bg-gray-850 {
 }
 
 /* 6. MARKDOWN & CODE: Clean legibility */
-.prose {
+.markdown-prose {
     color: #b3e6ff !important;
 }
 
-.prose pre {
+.markdown-prose pre {
     background-color: rgba(2, 4, 8, 0.95) !important;
     border: 1px solid rgba(26, 177, 255, 0.2) !important;
     border-radius: 8px !important;
 }
 
-.prose code:not(pre code) {
+.markdown-prose code:not(pre code) {
     background-color: rgba(26, 177, 255, 0.12) !important;
     color: #1ab1ff !important;
 }

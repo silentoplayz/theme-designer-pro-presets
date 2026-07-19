@@ -56,7 +56,7 @@
       "--color-blue-900": true,
       "--color-blue-950": true
     },
-    "customCSS": "* { border-radius: 4px !important; } ::selection { background: #ff00bf; color: #00ffcc; text-shadow: none; } input, textarea { border: 1px solid #ff00bf !important; box-shadow: inset 0 0 5px rgba(255, 0, 191, 0.2) !important; background-color: rgba(17, 0, 28, 0.8) !important; color: #00ffcc !important; } button:hover { box-shadow: 0 0 10px #ff00bf !important; transition: all 0.2s ease-in-out; } ::-webkit-scrollbar-thumb { background: #ff00bf !important; border-radius: 0px !important; }",
+    "customCSS": "* { border-radius: 4px !important; } ::selection { background: #ff00bf; color: #00ffcc; text-shadow: none; } input, textarea, #chat-input-container { border: 1px solid #ff00bf !important; box-shadow: inset 0 0 5px rgba(255, 0, 191, 0.2) !important; background-color: rgba(17, 0, 28, 0.8) !important; color: #00ffcc !important; } button:hover { box-shadow: 0 0 10px #ff00bf !important; transition: all 0.2s ease-in-out; } ::-webkit-scrollbar-thumb { background: #ff00bf !important; border-radius: 0px !important; }",
     "customCssEnabled": true,
     "autoScope": true,
     "canvasEnabled": true,
@@ -137,7 +137,7 @@
       "--color-blue-900": true,
       "--color-blue-950": true
     },
-    "customCSS": "* { border-radius: 4px !important; } ::selection { background: #ff00bf; color: #00ffcc; text-shadow: none; } input, textarea { border: 1px solid #ff00bf !important; box-shadow: inset 0 0 5px rgba(255, 0, 191, 0.2) !important; background-color: rgba(255, 255, 255, 0.8) !important; color: #220038 !important; } button:hover { box-shadow: 0 0 10px #ff00bf !important; transition: all 0.2s ease-in-out; } ::-webkit-scrollbar-thumb { background: #ff00bf !important; border-radius: 0px !important; }",
+    "customCSS": "* { border-radius: 4px !important; } ::selection { background: #ff00bf; color: #00ffcc; text-shadow: none; } input, textarea, #chat-input-container { border: 1px solid #ff00bf !important; box-shadow: inset 0 0 5px rgba(255, 0, 191, 0.2) !important; background-color: rgba(255, 255, 255, 0.8) !important; color: #220038 !important; } button:hover { box-shadow: 0 0 10px #ff00bf !important; transition: all 0.2s ease-in-out; } ::-webkit-scrollbar-thumb { background: #ff00bf !important; border-radius: 0px !important; }",
     "customCssEnabled": true,
     "autoScope": true,
     "canvasEnabled": true,
@@ -218,7 +218,7 @@
       "--color-blue-900": true,
       "--color-blue-950": true
     },
-    "customCSS": "* { border-radius: 4px !important; } ::selection { background: #ff00bf; color: #00ffcc; text-shadow: none; } input, textarea { border: 1px solid #ff00bf !important; box-shadow: inset 0 0 5px rgba(255, 0, 191, 0.2) !important; background-color: rgba(0, 0, 0, 0.8) !important; color: #00ffcc !important; } button:hover { box-shadow: 0 0 10px #ff00bf !important; transition: all 0.2s ease-in-out; } ::-webkit-scrollbar-thumb { background: #ff00bf !important; border-radius: 0px !important; }",
+    "customCSS": "* { border-radius: 4px !important; } ::selection { background: #ff00bf; color: #00ffcc; text-shadow: none; } input, textarea, #chat-input-container { border: 1px solid #ff00bf !important; box-shadow: inset 0 0 5px rgba(255, 0, 191, 0.2) !important; background-color: rgba(0, 0, 0, 0.8) !important; color: #00ffcc !important; } button:hover { box-shadow: 0 0 10px #ff00bf !important; transition: all 0.2s ease-in-out; } ::-webkit-scrollbar-thumb { background: #ff00bf !important; border-radius: 0px !important; }",
     "customCssEnabled": true,
     "autoScope": true,
     "canvasEnabled": true,
@@ -299,7 +299,7 @@
       "--color-blue-900": true,
       "--color-blue-950": true
     },
-    "customCSS": "* { border-radius: 4px !important; } ::selection { background: #ff2d9e; color: #ff9ecb; text-shadow: none; } input, textarea { border: 1px solid #ff2d9e !important; box-shadow: inset 0 0 5px rgba(255, 45, 158, 0.2) !important; background-color: rgba(28, 4, 18, 0.8) !important; color: #ff9ecb !important; } button:hover { box-shadow: 0 0 10px #ff2d9e !important; transition: all 0.2s ease-in-out; } ::-webkit-scrollbar-thumb { background: #ff2d9e !important; border-radius: 0px !important; }",
+    "customCSS": "* { border-radius: 4px !important; } ::selection { background: #ff2d9e; color: #ff9ecb; text-shadow: none; } input, textarea, #chat-input-container { border: 1px solid #ff2d9e !important; box-shadow: inset 0 0 5px rgba(255, 45, 158, 0.2) !important; background-color: rgba(28, 4, 18, 0.8) !important; color: #ff9ecb !important; } button:hover { box-shadow: 0 0 10px #ff2d9e !important; transition: all 0.2s ease-in-out; } ::-webkit-scrollbar-thumb { background: #ff2d9e !important; border-radius: 0px !important; }",
     "customCssEnabled": true,
     "autoScope": true,
     "canvasEnabled": true,

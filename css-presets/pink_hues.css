@@ -5,7 +5,7 @@
   --hover-bg: #ffc0db;
 }
 
-.app *, #app-container * {
+.app * {
   color: var(--primary-text) !important;
 }
 

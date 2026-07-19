@@ -14,7 +14,6 @@ body {
 /* Make layout containers transparent (scoped to .app / #app-container —
    there is no #app element in Open WebUI; portaled menus stay opaque) */
 .app, .app > div, .app > div > div, main,
-#app-container, #app-container > *,
 .app :where([class*="bg-gray-9"]):not(button):not(a):not(input):not(select) {
   background-color: transparent !important;
   background-image: none !important;

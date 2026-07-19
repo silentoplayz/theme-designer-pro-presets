@@ -2,7 +2,7 @@
 /* Square corners are the whole point here, so this is a deliberate global
    override rather than an accidental one. Scoped to app + portaled layers
    so nothing outside the UI is touched. */
-.app *, #app-container *, [role="menu"] *, [role="dialog"] * {
+.app *, [role="menu"] *, [role="dialog"] * {
 	border-radius: 0 !important;
 }
 
@@ -13,7 +13,7 @@ html, body {
 
 ::selection { background: #000000; color: #FFFF00; }
 
-input, textarea {
+input, textarea, #chat-input-container {
 	border: 2px solid #000000 !important;
 	background-color: #FFFFFF !important;
 	color: #000000 !important;

@@ -4,11 +4,11 @@
 }
 
 /* Ethereal Typography */
-.prose h1, .prose h2, .prose h3, .prose h4 {
+.markdown-prose h1, .markdown-prose h2, .markdown-prose h3, .markdown-prose h4 {
 	color: #aaddff !important;
 	text-shadow: 0 0 15px rgba(136, 187, 255, 0.2);
 }
-.prose code {
+.markdown-prose code {
 	color: #cdd3f5 !important;
 	background-color: rgba(136, 187, 255, 0.1) !important;
 	border: 1px solid rgba(136, 187, 255, 0.2);
@@ -16,7 +16,7 @@
 }
 
 /* Frosted Glass Inputs */
-input, textarea, .bg-gray-850 {
+input, textarea, #chat-input-container, .bg-gray-850 {
 	background-color: rgba(10, 11, 20, 0.5) !important;
 	backdrop-filter: blur(12px) !important;
 	-webkit-backdrop-filter: blur(12px) !important;
@@ -25,7 +25,7 @@ input, textarea, .bg-gray-850 {
 	box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
 	transition: all 0.3s ease;
 }
-input:focus, textarea:focus {
+input:focus, textarea:focus, #chat-input-container:focus-within {
 	border-color: #88bbff !important;
 	background-color: rgba(16, 18, 35, 0.7) !important;
 	box-shadow: 0 0 20px rgba(136, 187, 255, 0.2), inset 0 0 10px rgba(0, 0, 0, 0.5) !important;

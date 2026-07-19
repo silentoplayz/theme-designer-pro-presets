@@ -16,7 +16,7 @@ body {
 
 /* --- Transparency: let Canvas FX bleed through (scoped to .app so
    portaled dropdowns/modals/tooltips stay opaque) --- */
-.app, .app > div, .app > div > div, main, #app-container, #app-container > *,
+.app, .app > div, .app > div > div, main,
 .app :where([class*="bg-gray-"]):not(button):not(a):not(input):not(select):not(.user-message *) {
   background-color: transparent !important;
   background-image: none !important;
@@ -104,36 +104,36 @@ textarea {
 }
 
 /* --- Prose / Markdown content --- */
-.prose {
+.markdown-prose {
   color: #c4e8f0 !important;
 }
 
-.prose h1, .prose h2, .prose h3 {
+.markdown-prose h1, .markdown-prose h2, .markdown-prose h3 {
   color: #00dcff !important;
 }
 
-.prose a {
+.markdown-prose a {
   color: #00dcff !important;
   text-decoration-color: rgba(0, 220, 255, 0.3) !important;
 }
 
-.prose strong {
+.markdown-prose strong {
   color: #e0f4ff !important;
 }
 
-.prose hr {
+.markdown-prose hr {
   border-color: rgba(0, 220, 255, 0.12) !important;
 }
 
 /* --- Code blocks --- */
-.prose pre {
+.markdown-prose pre {
   background-color: rgba(2, 8, 16, 0.92) !important;
   border: 1px solid rgba(0, 220, 255, 0.12) !important;
   border-radius: 10px !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
 }
 
-.prose code:not(pre code) {
+.markdown-prose code:not(pre code) {
   background-color: rgba(0, 220, 255, 0.1) !important;
   color: #00dcff !important;
   padding: 1px 5px !important;
@@ -141,17 +141,17 @@ textarea {
 }
 
 /* --- Tables --- */
-.prose table {
+.markdown-prose table {
   border-color: rgba(0, 220, 255, 0.15) !important;
 }
 
-.prose th {
+.markdown-prose th {
   background-color: rgba(0, 220, 255, 0.06) !important;
   color: #00dcff !important;
   border-color: rgba(0, 220, 255, 0.15) !important;
 }
 
-.prose td {
+.markdown-prose td {
   border-color: rgba(0, 220, 255, 0.08) !important;
 }
 

@@ -10,7 +10,7 @@ html, body {
 /* Phosphor borders */ .app * {
 	border-color: rgba(26, 255, 26, 0.25) !important;
 }
-input, textarea, .prose {
+input, textarea, #chat-input-container, .markdown-prose {
 	background-color: rgba(10, 26, 10, 0.85) !important;
 	border: 1px solid rgba(26, 255, 26, 0.35) !important;
 }

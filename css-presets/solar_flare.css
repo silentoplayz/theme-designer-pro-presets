@@ -4,19 +4,19 @@
 }
 
 /* Golden Prose */
-.prose h1, .prose h2, .prose h3 {
+.markdown-prose h1, .markdown-prose h2, .markdown-prose h3 {
 	color: #ffcc00 !important;
 	text-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
 	font-weight: 800 !important;
 }
-.prose code {
+.markdown-prose code {
 	color: #ffaa00 !important;
 	background-color: rgba(255, 170, 0, 0.1) !important;
 	border: 1px solid rgba(255, 170, 0, 0.3);
 }
 
 /* Obsidian Frosted Inputs */
-input, textarea, .bg-gray-850 {
+input, textarea, #chat-input-container, .bg-gray-850 {
 	background-color: rgba(18, 9, 2, 0.6) !important;
 	backdrop-filter: blur(10px) !important;
 	-webkit-backdrop-filter: blur(10px) !important;
@@ -24,7 +24,7 @@ input, textarea, .bg-gray-850 {
 	border-radius: 12px !important;
 	transition: all 0.3s ease;
 }
-input:focus, textarea:focus {
+input:focus, textarea:focus, #chat-input-container:focus-within {
 	border-color: #ffcc00 !important;
 	box-shadow: 0 0 15px rgba(255, 204, 0, 0.15) !important;
 }

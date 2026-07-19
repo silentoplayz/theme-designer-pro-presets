@@ -1,4 +1,4 @@
-.app *, #app-container * {
+.app * {
     color: #e0def4 !important;
     stroke: #907aa9 !important;
 }
@@ -7,7 +7,7 @@
     background-color: #1f1d2e !important;
 }
 
-#nav {
+nav {
     background-color: #191724;
 }
 
@@ -24,28 +24,28 @@
 }
 
 
-#chat-textarea {
+#chat-input {
     background: #393552;
     margin: 0.3rem;
     padding: 0.5rem;
 }
 
-.bg-gradient-to-t.from-white.dark\:from-gray-800.from-40\%.pb-2 {
+#chat-container .bg-linear-to-t {
     background: #26233a !important;
     padding-top: 0.6rem;
 }
 
-.text-white.bg-gray-100.dark\:text-gray-800.dark\:bg-gray-600.disabled.transition.rounded-lg.p-1.mr-0\.5.w-7.h-7.self-center {
+#send-message-button.disabled {
     background-color: #6e6a86;
     transition: background 0.2s ease-out linear;
 }
 
-.bg-black.text-white.hover\:bg-gray-900.dark\:bg-white.dark\:text-black.dark\:hover\:bg-gray-100.transition.rounded-lg.p-1.mr-0\.5.w-7.h-7.self-center {
+#send-message-button.w-7.h-7.self-center {
     background-color: #286983;
     transition: background 0.2s ease-out linear;
 }
 
-.bg-black.text-white.hover\:bg-gray-900.dark\:bg-white.dark\:text-black.dark\:hover\:bg-gray-100.transition.rounded-lg.p-1.mr-0\.5.w-7.h-7.self-center > * {
+#send-message-button.w-7.h-7.self-center > * {
     fill: #9ccfd8 !important;
     transition: fill 0.2s ease-out linear;
 }

@@ -18,7 +18,7 @@
       "--color-gray-900": "#0c0010",
       "--color-gray-950": "#06000a"
     },
-    "customCSS": "/* --- BIO-DIGITAL SYNTHESIS: LIVING UI --- */\n\n@keyframes bio-pulse {\n  0% { border-color: rgba(207, 51, 255, 0.2); }\n  50% { border-color: rgba(0, 255, 234, 0.4); }\n  100% { border-color: rgba(207, 51, 255, 0.2); }\n}\n\n/* The Living Panel */\n.prose, .bg-gray-850, input, textarea {\n\tbackground: rgba(12, 0, 16, 0.6) !important;\n\tbackdrop-filter: blur(12px) !important;\n\t-webkit-backdrop-filter: blur(12px) !important;\n\tborder: 1px solid rgba(207, 51, 255, 0.3) !important;\n\tborder-radius: 20px !important;\n\tanimation: bio-pulse 4s infinite ease-in-out;\n}\n\n/* Spinal Scrollbar */\n::-webkit-scrollbar {\n\twidth: 10px;\n}\n::-webkit-scrollbar-thumb {\n\tbackground: linear-gradient(#cf33ff, #00ffea) !important;\n\tborder: 3px solid #06000a;\n\tborder-radius: 20px;\n}\n::-webkit-scrollbar-track {\n\tbackground: #06000a !important;\n}\n\n/* Synapse Headers */\n.prose h1, .prose h2, .prose h3 {\n\tcolor: #00ffea !important;\n\ttext-shadow: 0 0 10px rgba(0, 255, 234, 0.3);\n\tfont-weight: 200 !important;\n\tletter-spacing: 0.05em;\n}\n\n/* Biomech Buttons */\nbutton.bg-blue-500, button.bg-blue-600, .btn-primary {\n\tbackground: transparent !important;\n\tcolor: #00ffea !important;\n\tborder: 1px solid #00ffea !important;\n\ttext-transform: uppercase;\n\tfont-weight: 800 !important;\n\tletter-spacing: 2px;\n\tborder-radius: 4px !important;\n\tbox-shadow: inset 0 0 10px rgba(0, 255, 234, 0.2);\n\ttransition: all 0.2s ease;\n}\n\nbutton.bg-blue-500:hover {\n\tbackground: #00ffea !important;\n\tcolor: #06000a !important;\n\tbox-shadow: 0 0 30px rgba(0, 255, 234, 0.6) !important;\n}\n\n/* Hide structural noise */\n#sidebar {\n\tbackground: rgba(6, 0, 10, 0.85) !important;\n\tborder-right: 1px solid rgba(207, 51, 255, 0.2) !important;\n}",
+    "customCSS": "/* --- BIO-DIGITAL SYNTHESIS: LIVING UI --- */\n\n@keyframes bio-pulse {\n  0% { border-color: rgba(207, 51, 255, 0.2); }\n  50% { border-color: rgba(0, 255, 234, 0.4); }\n  100% { border-color: rgba(207, 51, 255, 0.2); }\n}\n\n/* The Living Panel */\n.markdown-prose, .bg-gray-850, input, textarea, #chat-input-container {\n\tbackground: rgba(12, 0, 16, 0.6) !important;\n\tbackdrop-filter: blur(12px) !important;\n\t-webkit-backdrop-filter: blur(12px) !important;\n\tborder: 1px solid rgba(207, 51, 255, 0.3) !important;\n\tborder-radius: 20px !important;\n\tanimation: bio-pulse 4s infinite ease-in-out;\n}\n\n/* Spinal Scrollbar */\n::-webkit-scrollbar {\n\twidth: 10px;\n}\n::-webkit-scrollbar-thumb {\n\tbackground: linear-gradient(#cf33ff, #00ffea) !important;\n\tborder: 3px solid #06000a;\n\tborder-radius: 20px;\n}\n::-webkit-scrollbar-track {\n\tbackground: #06000a !important;\n}\n\n/* Synapse Headers */\n.markdown-prose h1, .markdown-prose h2, .markdown-prose h3 {\n\tcolor: #00ffea !important;\n\ttext-shadow: 0 0 10px rgba(0, 255, 234, 0.3);\n\tfont-weight: 200 !important;\n\tletter-spacing: 0.05em;\n}\n\n/* Biomech Buttons */\nbutton.bg-blue-500, button.bg-blue-600, .bg-black {\n\tbackground: transparent !important;\n\tcolor: #00ffea !important;\n\tborder: 1px solid #00ffea !important;\n\ttext-transform: uppercase;\n\tfont-weight: 800 !important;\n\tletter-spacing: 2px;\n\tborder-radius: 4px !important;\n\tbox-shadow: inset 0 0 10px rgba(0, 255, 234, 0.2);\n\ttransition: all 0.2s ease;\n}\n\nbutton.bg-blue-500:hover {\n\tbackground: #00ffea !important;\n\tcolor: #06000a !important;\n\tbox-shadow: 0 0 30px rgba(0, 255, 234, 0.6) !important;\n}\n\n/* Hide structural noise */\n#sidebar {\n\tbackground: rgba(6, 0, 10, 0.85) !important;\n\tborder-right: 1px solid rgba(207, 51, 255, 0.2) !important;\n}",
     "customCssEnabled": true,
     "autoScope": true,
     "locks": {
@@ -59,7 +59,7 @@
       "--color-gray-100": "#ebfffd",
       "--color-gray-50": "#ffffff"
     },
-    "customCSS": "/* Bio-Digital Light: Clinical Biotech */\n.prose, input, textarea { background: rgba(255, 255, 255, 0.8) !important; border-color: #00b3a3 !important; }\nbutton.bg-blue-500 { background: #00b3a3 !important; color: #fff !important; border: none !important; }",
+    "customCSS": "/* Bio-Digital Light: Clinical Biotech */\n.markdown-prose, input, textarea, #chat-input-container { background: rgba(255, 255, 255, 0.8) !important; border-color: #00b3a3 !important; }\nbutton.bg-blue-500 { background: #00b3a3 !important; color: #fff !important; border: none !important; }",
     "customCssEnabled": true,
     "autoScope": true,
     "locks": {
@@ -100,7 +100,7 @@
       "--color-gray-100": "#fdf2ff",
       "--color-gray-50": "#ffffff"
     },
-    "customCSS": "/* BIO-DIGITAL (OLED) */\n.prose { background: rgba(0, 0, 0, 0.6) !important; border: 1px solid #cf33ff !important; }\nbutton.bg-blue-500 { box-shadow: 0 0 20px #00ffea; }",
+    "customCSS": "/* BIO-DIGITAL (OLED) */\n.markdown-prose { background: rgba(0, 0, 0, 0.6) !important; border: 1px solid #cf33ff !important; }\nbutton.bg-blue-500 { box-shadow: 0 0 20px #00ffea; }",
     "customCssEnabled": true,
     "autoScope": true,
     "locks": {

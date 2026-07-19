@@ -18,7 +18,7 @@
       "--color-gray-900": "#040710",
       "--color-gray-950": "#020408"
     },
-    "customCSS": "/* --- AETHER: ATMOSPHERIC TRANSLUCENCY --- */\n\n@keyframes holographic-shimmer {\n\t0% { border-image-source: conic-gradient(from 0deg, transparent, rgba(128, 163, 255, 0.3), transparent); }\n\t100% { border-image-source: conic-gradient(from 360deg, transparent, rgba(128, 163, 255, 0.3), transparent); }\n}\n\n/* The Refractive Layer */\n#sidebar, .prose, .bg-gray-850, input, textarea {\n\tbackground: rgba(7, 12, 26, 0.4) !important;\n\tbackdrop-filter: blur(40px) saturate(1.8) contrast(1.1) !important;\n\t-webkit-backdrop-filter: blur(40px) saturate(1.8) contrast(1.1) !important;\n\tborder: 1px solid transparent !important;\n\tborder-image: conic-gradient(from 0deg, transparent, rgba(128, 163, 255, 0.2), transparent) 1 !important;\n\tanimation: holographic-shimmer 8s linear infinite;\n\tborder-radius: 24px !important;\n}\n\n/* Nebula Typography */\n.prose h1, .prose h2, .prose h3 {\n\tcolor: #ffffff !important;\n\tfont-weight: 200 !important;\n\tletter-spacing: -0.01em;\n\ttext-shadow: \n\t\t0 0 10px rgba(84, 132, 255, 0.5),\n\t\t0 0 20px rgba(173, 194, 255, 0.3) !important;\n}\n\n/* The Liquid Scrollbar */\n::-webkit-scrollbar {\n\twidth: 4px;\n}\n::-webkit-scrollbar-thumb {\n\tbackground: linear-gradient(transparent, rgba(255,255,255,0.3), transparent) !important;\n\tborder-radius: 10px;\n}\n\n/* High-Fidelity Buttons */\nbutton.bg-blue-500, button.bg-blue-600, .bg-black {\n\tbackground: rgba(255, 255, 255, 0.05) !important;\n\tbackdrop-filter: blur(10px);\n\tborder: 1px solid rgba(255, 255, 255, 0.1) !important;\n\tcolor: #fff !important;\n\tborder-radius: 30px !important;\n\ttransition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);\n}\n\nbutton.bg-blue-500:hover {\n\tbackground: rgba(255, 255, 255, 1) !important;\n\tcolor: #040710 !important;\n\tbox-shadow: 0 0 30px rgba(255, 255, 255, 0.4);\n}\n\n/* Clean Chat List */\n.chat-item {\n\ttransition: background 0.3s ease;\n\tborder-radius: 12px !important;\n}\n.chat-item:hover {\n\tbackground: rgba(255, 255, 255, 0.03) !important;\n}",
+    "customCSS": "/* --- AETHER: ATMOSPHERIC TRANSLUCENCY --- */\n\n@keyframes holographic-shimmer {\n\t0% { border-image-source: conic-gradient(from 0deg, transparent, rgba(128, 163, 255, 0.3), transparent); }\n\t100% { border-image-source: conic-gradient(from 360deg, transparent, rgba(128, 163, 255, 0.3), transparent); }\n}\n\n/* The Refractive Layer */\n#sidebar, .markdown-prose, .bg-gray-850, input, textarea, #chat-input-container {\n\tbackground: rgba(7, 12, 26, 0.4) !important;\n\tbackdrop-filter: blur(40px) saturate(1.8) contrast(1.1) !important;\n\t-webkit-backdrop-filter: blur(40px) saturate(1.8) contrast(1.1) !important;\n\tborder: 1px solid transparent !important;\n\tborder-image: conic-gradient(from 0deg, transparent, rgba(128, 163, 255, 0.2), transparent) 1 !important;\n\tanimation: holographic-shimmer 8s linear infinite;\n\tborder-radius: 24px !important;\n}\n\n/* Nebula Typography */\n.markdown-prose h1, .markdown-prose h2, .markdown-prose h3 {\n\tcolor: #ffffff !important;\n\tfont-weight: 200 !important;\n\tletter-spacing: -0.01em;\n\ttext-shadow: \n\t\t0 0 10px rgba(84, 132, 255, 0.5),\n\t\t0 0 20px rgba(173, 194, 255, 0.3) !important;\n}\n\n/* The Liquid Scrollbar */\n::-webkit-scrollbar {\n\twidth: 4px;\n}\n::-webkit-scrollbar-thumb {\n\tbackground: linear-gradient(transparent, rgba(255,255,255,0.3), transparent) !important;\n\tborder-radius: 10px;\n}\n\n/* High-Fidelity Buttons */\nbutton.bg-blue-500, button.bg-blue-600, .bg-black {\n\tbackground: rgba(255, 255, 255, 0.05) !important;\n\tbackdrop-filter: blur(10px);\n\tborder: 1px solid rgba(255, 255, 255, 0.1) !important;\n\tcolor: #fff !important;\n\tborder-radius: 30px !important;\n\ttransition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);\n}\n\nbutton.bg-blue-500:hover {\n\tbackground: rgba(255, 255, 255, 1) !important;\n\tcolor: #040710 !important;\n\tbox-shadow: 0 0 30px rgba(255, 255, 255, 0.4);\n}\n\n/* Clean Chat List */\n#sidebar-chat-item {\n\ttransition: background 0.3s ease;\n\tborder-radius: 12px !important;\n}\n#sidebar-chat-item:hover {\n\tbackground: rgba(255, 255, 255, 0.03) !important;\n}",
     "customCssEnabled": true,
     "autoScope": true,
     "locks": {
@@ -59,7 +59,7 @@
       "--color-gray-100": "#f0f4ff",
       "--color-gray-50": "#f8faff"
     },
-    "customCSS": "/* AETHER LIGHT: Morning Mist Observer */\nbody { background-color: #f8fafc !important; }\n.prose, #sidebar { background: rgba(255, 255, 255, 0.6) !important; border-image: conic-gradient(from 0deg, transparent, rgba(0,0,0,0.1), transparent) 1 !important; }\nbutton.bg-blue-500 { background: #0f172a !important; color: #fff !important; }",
+    "customCSS": "/* AETHER LIGHT: Morning Mist Observer */\nbody { background-color: #f8fafc !important; }\n.markdown-prose, #sidebar { background: rgba(255, 255, 255, 0.6) !important; border-image: conic-gradient(from 0deg, transparent, rgba(0,0,0,0.1), transparent) 1 !important; }\nbutton.bg-blue-500 { background: #0f172a !important; color: #fff !important; }",
     "customCssEnabled": true,
     "autoScope": true,
     "locks": {},
@@ -87,7 +87,7 @@
       "--color-gray-100": "#d9e2ff",
       "--color-gray-50": "#ffffff"
     },
-    "customCSS": "/* AETHER OLED: Depth in Darkness */\n.prose { background: rgba(0,0,0,0.4) !important; border-image: conic-gradient(from 0deg, transparent, #2a66ff, transparent) 1 !important; }\nbutton.bg-blue-500 { box-shadow: 0 0 20px rgba(42, 102, 255, 0.4); }",
+    "customCSS": "/* AETHER OLED: Depth in Darkness */\n.markdown-prose { background: rgba(0,0,0,0.4) !important; border-image: conic-gradient(from 0deg, transparent, #2a66ff, transparent) 1 !important; }\nbutton.bg-blue-500 { box-shadow: 0 0 20px rgba(42, 102, 255, 0.4); }",
     "customCssEnabled": true,
     "autoScope": true,
     "locks": {
@@ -128,7 +128,7 @@
       "--color-gray-900": "#10030a",
       "--color-gray-950": "#080205"
     },
-    "customCSS": "/* AETHER HER: Event Horizon Rose */\n.prose h1 { text-shadow: 0 0 15px rgba(255, 50, 150, 0.4); }\nbutton.bg-blue-500 { background: #eb73ae !important; }",
+    "customCSS": "/* AETHER HER: Event Horizon Rose */\n.markdown-prose h1 { text-shadow: 0 0 15px rgba(255, 50, 150, 0.4); }\nbutton.bg-blue-500 { background: #eb73ae !important; }",
     "customCssEnabled": true,
     "autoScope": true,
     "locks": {},
