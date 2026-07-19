@@ -12,6 +12,8 @@ A curated collection of themes, Canvas FX animations, CSS presets, and gradient 
 
 > **Import any preset** directly into Theme Designer Pro using the built-in Import button, URL import, or drag-and-drop.
 
+> **💬 [Join the Discussions](https://github.com/silentoplayz/theme-designer-pro-presets/discussions)** — ask questions in [Q&A](https://github.com/silentoplayz/theme-designer-pro-presets/discussions/categories/q-a), show off your setup in [Show and tell](https://github.com/silentoplayz/theme-designer-pro-presets/discussions/6), or pitch presets in [Ideas](https://github.com/silentoplayz/theme-designer-pro-presets/discussions/7). Bugs still go to [Issues](https://github.com/silentoplayz/theme-designer-pro-presets/issues).
+
 ---
 
 ## 📦 Repository Structure

@@ -112,6 +112,12 @@ midnight_ocean.json
 
 ---
 
+## 💬 Questions & Ideas First
+
+Not sure if your idea fits, or stuck on something? Start in [Discussions](../../discussions) — [Q&A](../../discussions/categories/q-a) for help, [Ideas](../../discussions/categories/ideas) to float a preset concept before building it, and [Show and tell](../../discussions/categories/show-and-tell) for finished setups. Keep Issues for bug reports and the submission form below.
+
+---
+
 ## 🤖 Automated Theme Submission (Recommended)
 
 The easiest way to submit a theme — **no git required**:
