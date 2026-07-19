@@ -46,3 +46,14 @@ button[type="submit"] {
 button.px-3\.5.py-1\.5.text-sm.font-medium.bg-black.hover\:bg-gray-900.text-white.dark\:bg-white.dark\:text-black.dark\:hover\:bg-gray-100.transition.rounded-full {
   background-color: var(--primary-pink) !important;
 }
+
+/* Dark modes: burgundy text vanishes on dark surfaces — flip the chat side
+   to a soft pink while the light-pink sidebar keeps its burgundy text
+   (id selector outranks the mode override). */
+html.dark .app * {
+  color: #ffd6e7 !important;
+}
+
+#sidebar, #sidebar * {
+  color: #8b1538 !important;
+}

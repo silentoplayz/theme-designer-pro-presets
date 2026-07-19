@@ -18,7 +18,7 @@
       "--color-gray-900": "#ff0000",
       "--color-gray-950": "#ff0000"
     },
-    "customCSS": "* { border-radius: 0px !important; font-family: 'Courier New', Courier, monospace !important; } ::selection { background: #000000; color: #FFFF00; } input, textarea, #chat-input-container { border: 2px solid #000000 !important; background-color: #FFFFFF !important; color: #000000 !important; } button { border: 2px solid #000000 !important; box-shadow: 2px 2px 0px #000000 !important; }",
+    "customCSS": "* { border-radius: 0px !important; font-family: 'Courier New', Courier, monospace !important; } ::selection { background: #000000; color: #FFFF00; } input, textarea, #chat-input-container { border: 2px solid #000000 !important; background-color: #FFFFFF !important; color: #000000 !important; } button { border: 2px solid #000000 !important; box-shadow: 2px 2px 0px #000000 !important; }\n/* Dark modes: the white input slab reads broken on a dark page \u2014 serve the\n   dark hotdog instead: black bun, yellow mustard text, red ketchup borders. */\nhtml.dark input, html.dark textarea, html.dark #chat-input-container {\n  background-color: #000000 !important;\n  color: #FFFF00 !important;\n  border-color: #FF0000 !important;\n}\n\nhtml.dark button {\n  border-color: #FFFF00 !important;\n  box-shadow: 2px 2px 0px #FF0000 !important;\n}\n",
     "customCssEnabled": true,
     "autoScope": true,
     "locks": {
@@ -56,7 +56,7 @@
       "--color-gray-900": "#ff0000",
       "--color-gray-950": "#ff0000"
     },
-    "customCSS": "* { border-radius: 0px !important; font-family: 'Courier New', Courier, monospace !important; }\nbody { background-color: #000000 !important; }\n::selection { background: #FFFF00; color: #000000; }\n.markdown-prose, span, label { color: #FFFF00 !important; }\ninput, textarea, #chat-input-container { border: 2px solid #FF0000 !important; background-color: #000000 !important; color: #FFFF00 !important; }\nbutton { border: 2px solid #FFFF00 !important; box-shadow: 2px 2px 0px #FF0000 !important; }\nbutton.bg-blue-500, button.bg-blue-600 { background-color: #FF0000 !important; color: #FFFF00 !important; }\n::-webkit-scrollbar-thumb { background: #FF0000 !important; }",
+    "customCSS": "* { border-radius: 0px !important; font-family: 'Courier New', Courier, monospace !important; }\nbody { background-color: #000000 !important; }\n::selection { background: #FFFF00; color: #000000; }\n.markdown-prose, span, label { color: #FFFF00 !important; }\ninput, textarea, #chat-input-container { border: 2px solid #FF0000 !important; background-color: #000000 !important; color: #FFFF00 !important; }\nbutton { border: 2px solid #FFFF00 !important; box-shadow: 2px 2px 0px #FF0000 !important; }\nbutton.bg-blue-500, button.bg-blue-600 { background-color: #FF0000 !important; color: #FFFF00 !important; }\n::-webkit-scrollbar-thumb { background: #FF0000 !important; }\n/* Dark modes: the white input slab reads broken on a dark page \u2014 serve the\n   dark hotdog instead: black bun, yellow mustard text, red ketchup borders. */\nhtml.dark input, html.dark textarea, html.dark #chat-input-container {\n  background-color: #000000 !important;\n  color: #FFFF00 !important;\n  border-color: #FF0000 !important;\n}\n\nhtml.dark button {\n  border-color: #FFFF00 !important;\n  box-shadow: 2px 2px 0px #FF0000 !important;\n}\n",
     "customCssEnabled": true,
     "autoScope": true,
     "locks": {
