@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.6.0
+version: 1.6.1
 license: MIT
 required_open_webui_version: 0.10.0
 """
@@ -21,7 +21,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.6.0"
+VERSION = "1.6.1"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -1661,27 +1661,22 @@ class Event:
         # NOTE: Redis pub/sub subscriber is started in event() (async context),
         # not here (_register_route is sync and may run in a transient event loop).
 
-        # Cancel background tasks (Redis subscriber, SSE heartbeat) on server
-        # shutdown. Without this they are abandoned mid-await when the loop
-        # closes: asyncio's asyncgen teardown then hits the still-suspended
-        # pubsub.listen() generator ("aclose(): asynchronous generator is
-        # already running") and redis disconnect coroutines leak un-awaited.
-        # Registered once per app (flag on app.state survives hot-reloads).
+        # Legacy shutdown hook. On modern stacks this NEVER fires: Starlette
+        # ignores router.on_shutdown when the app was built with a lifespan=
+        # context (Open WebUI's is), and Starlette 1.3+ dropped the mechanism
+        # entirely. The reliable cleanup path is the system.shutdown.* events
+        # handled in event() → _shutdown_cleanup(). This registration stays
+        # only for old Open WebUI builds without lifespan events, where
+        # on_shutdown still runs.
         if not getattr(app.state, "_theme_shutdown_registered", False):
-            app.state._theme_shutdown_registered = True
+            _on_shutdown = getattr(app.router, "on_shutdown", None)
+            if isinstance(_on_shutdown, list):
+                app.state._theme_shutdown_registered = True
 
-            async def _theme_shutdown():
-                for attr in ("_theme_redis_task", "_theme_sse_heartbeat"):
-                    task = getattr(app.state, attr, None)
-                    if task is not None:
-                        task.cancel()
-                        try:
-                            await task
-                        except BaseException:
-                            pass  # CancelledError (expected) or teardown noise
-                        setattr(app.state, attr, None)
+                async def _theme_shutdown():
+                    await Event._shutdown_cleanup(app)
 
-            app.router.on_shutdown.append(_theme_shutdown)
+                _on_shutdown.append(_theme_shutdown)
 
         # Remove stale routes from previous function load so new handlers take effect
         # Clean up default, current, AND previous paths to ensure only one URL is active
@@ -1865,7 +1860,9 @@ class Event:
             # restarted here if it ever died (self-healing: without it, idle
             # connections get proxy-killed and EventSource reconnects here).
             _hb = getattr(request.app.state, "_theme_sse_heartbeat", None)
-            if _hb is None or _hb.done():
+            if (_hb is None or _hb.done()) and not getattr(
+                request.app.state, "_theme_shutting_down", False
+            ):
 
                 async def _sse_heartbeat():
                     while True:
@@ -1894,7 +1891,15 @@ class Event:
                     while True:
                         # Pre-formatted SSE strings; heartbeats arrive via the
                         # shared task above, so no per-client timeout needed.
-                        yield await queue.get()
+                        msg = await queue.get()
+                        if msg is None:
+                            # Shutdown sentinel from _shutdown_cleanup(): end
+                            # the stream so uvicorn's graceful wait for
+                            # in-flight responses can complete. Without this,
+                            # an open EventSource stalls shutdown until the
+                            # container runtime SIGKILLs the process.
+                            break
+                        yield msg
                 except (asyncio.CancelledError, GeneratorExit):
                     pass
                 finally:
@@ -13071,6 +13076,48 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             except asyncio.QueueFull:
                 pass
 
+    @classmethod
+    async def _shutdown_cleanup(cls, app):
+        """Cancel background tasks and end SSE streams before the loop closes.
+
+        Called from event() on system.shutdown.* (primary path — Open WebUI
+        publishes those from its lifespan exit while the event loop is still
+        fully alive) and from the legacy router.on_shutdown hook on old
+        stacks where that still fires.
+
+        Idempotent via app.state._theme_shutting_down. That flag also gates
+        the subscriber/heartbeat creation paths: shutdown events are
+        dispatched as fire-and-forget tasks, so a straggler event() can run
+        mid-teardown — if it respawned the Redis subscriber, the new task
+        would miss the runner's cancellation sweep and be destroyed pending
+        at loop close ("Task was destroyed but it is pending!",
+        "RuntimeError: no running event loop", un-awaited redis disconnect
+        coroutines in the GC phase of interpreter shutdown).
+        """
+        app.state._theme_shutting_down = True
+        for attr in ("_theme_redis_task", "_theme_sse_heartbeat"):
+            task = getattr(app.state, attr, None)
+            if task is not None:
+                task.cancel()
+                try:
+                    await task
+                except BaseException:
+                    pass  # CancelledError (expected) or teardown noise
+                setattr(app.state, attr, None)
+        # Wake every SSE stream with a None sentinel so the generators
+        # return. This lets uvicorn's graceful wait for in-flight responses
+        # finish instead of stalling on open EventSource connections until
+        # the container runtime SIGKILLs the process (~10s restart penalty).
+        for q in list(cls._sse_clients):
+            try:
+                q.put_nowait(None)
+            except asyncio.QueueFull:
+                try:
+                    q.get_nowait()  # Drop one queued frame to make room
+                    q.put_nowait(None)
+                except (asyncio.QueueEmpty, asyncio.QueueFull):
+                    pass
+
     async def event(
         self,
         event: dict,
@@ -13079,6 +13126,28 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         __app__=None,
         **kwargs,
     ) -> None:
+        # --- Server shutdown cleanup ---
+        # Open WebUI publishes system.shutdown.* from its lifespan exit while
+        # the event loop is still running — the only reliable shutdown hook
+        # (router.on_shutdown never fires on lifespan-based apps). Cancel the
+        # Redis subscriber + SSE heartbeat and end SSE streams NOW; once the
+        # loop closes, an un-cancelled subscriber surfaces at interpreter
+        # exit as "Task was destroyed but it is pending!" / "RuntimeError:
+        # no running event loop" GC noise. Runs even when the function is
+        # disabled: a subscriber started before a disable is still alive.
+        if __event_name__ in (
+            "system.shutdown.started",
+            "system.shutdown.completed",
+        ):
+            if __app__ is not None and not getattr(
+                __app__.state, "_theme_shutting_down", False
+            ):
+                log.info(
+                    "[Theme Pro] Server shutdown — cancelling background tasks and closing SSE streams"
+                )
+                await Event._shutdown_cleanup(__app__)
+            return  # No injection/broadcast work during shutdown
+
         # --- Pre-disable cleanup ---
         # When the admin toggles this function OFF, Open WebUI dispatches
         # 'function.disabling' synchronously BEFORE committing is_active=False.
@@ -13178,7 +13247,12 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             # Check if subscriber task exists and is still alive (not destroyed/done)
             _existing_task = getattr(__app__.state, "_theme_redis_task", None)
             _sub_alive = _existing_task is not None and not _existing_task.done()
-            if redis_url and not _sub_alive:
+            # Never (re)spawn once shutdown cleanup ran: shutdown events are
+            # dispatched fire-and-forget, so this code can execute mid-teardown
+            # after the old subscriber was cancelled (_sub_alive False again) —
+            # a respawned task would be orphaned at loop close.
+            _shutting_down = getattr(__app__.state, "_theme_shutting_down", False)
+            if redis_url and not _sub_alive and not _shutting_down:
                 try:
                     import redis.asyncio as aioredis
                     import inspect as _insp
@@ -13200,6 +13274,10 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                         while True:
                             r = None
                             pubsub = None
+                            # Set when the loop/interpreter is dying: skip every
+                            # remaining await (logging included) so finalization
+                            # stays silent instead of raising into the GC.
+                            _teardown = False
                             try:
                                 r = aioredis.from_url(
                                     redis_url,
@@ -13229,7 +13307,23 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                                             pass
                             except asyncio.CancelledError:
                                 break
+                            except GeneratorExit:
+                                # GC is finalizing this coroutine after the loop
+                                # already closed (shutdown cleanup never ran —
+                                # e.g. hard kill). Any await here raises straight
+                                # into the finalizer; bail out silently.
+                                _teardown = True
+                                raise
                             except Exception as exc:
+                                # During finalization redis-py can convert the
+                                # thrown GeneratorExit into an ordinary
+                                # ConnectionError, landing here with no loop to
+                                # sleep on. Only log + retry on a live loop.
+                                try:
+                                    asyncio.get_running_loop()
+                                except RuntimeError:
+                                    _teardown = True
+                                    return
                                 log.warning("[Theme Pro] Redis subscriber lost connection: %s — reconnecting in 5s", exc)
                                 await asyncio.sleep(5)
                             finally:
@@ -13239,14 +13333,15 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                                 # on new versions and compatible with old ones.
                                 # BaseException: a re-delivered CancelledError during
                                 # shutdown must not skip closing the second connection.
-                                if pubsub:
-                                    try:
-                                        await (pubsub.aclose() if hasattr(pubsub, "aclose") else pubsub.close())
-                                    except BaseException: pass
-                                if r:
-                                    try:
-                                        await (r.aclose() if hasattr(r, "aclose") else r.close())
-                                    except BaseException: pass
+                                if not _teardown:
+                                    if pubsub:
+                                        try:
+                                            await (pubsub.aclose() if hasattr(pubsub, "aclose") else pubsub.close())
+                                        except BaseException: pass
+                                    if r:
+                                        try:
+                                            await (r.aclose() if hasattr(r, "aclose") else r.close())
+                                        except BaseException: pass
 
                     __app__.state._theme_redis_task = asyncio.get_running_loop().create_task(_redis_subscriber())
                 except Exception as exc:
