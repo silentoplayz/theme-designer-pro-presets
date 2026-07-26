@@ -78,7 +78,7 @@ Unlike the [Tool variant](../tools/) which runs inside an AI chat iframe, this v
 - 📱 **Fully Responsive:** The designer adapts to mobile screens with three responsive breakpoints (≤768px tablets, ≤480px phones, ≤390px iPhone SE) including icon-only mode for narrow header buttons.
 - 💾 **Session Persistence:** The designer remembers which tab you were on via `sessionStorage`, so refreshing the page returns you to exactly where you left off.
 - ⏪ **Legacy Data Migration:** Automatically detects legacy data structures and gracefully migrates saved snapshots and active themes to the latest format without data loss.
-- 🔌 **Function Lifecycle Integration:** Toggling the function OFF in the admin panel triggers a clean `function.disabling` lifecycle event that strips the theme from `index.html`, broadcasts `theme-disable` to all connected clients, and clears `localStorage` — no page refresh needed. Toggling back ON triggers `function.enabling`, which re-injects the bootloader and broadcasts the theme to all clients immediately.
+- 🔌 **Function Lifecycle Integration:** Toggling the function OFF in the admin panel triggers a clean `function.disable_started` lifecycle event that strips the theme from `index.html`, broadcasts `theme-disable` to all connected clients, and clears `localStorage` — no page refresh needed. Toggling back ON triggers `function.enable_started`, which re-injects the bootloader and broadcasts the theme to all clients immediately. Requires Open WebUI v0.11.0 or newer (pre-toggle lifecycle events).
 - ☢️ **Safe Nuclear & Factory Resets:** "Reset Mode" and "Global Reset" buttons safely clear all custom styling and restore Open WebUI to its original look. Confirmation dialogs offer pre-wipe backups. Factory Reset under the Documentation tab's Danger Zone permanently wipes all data.
 
 ---
@@ -253,7 +253,7 @@ Valves are configured in the Admin Panel under **Functions → Theme Designer Pr
 > **Note:** All Valves default to their most permissive values — the event function behaves identically to an un-valved installation out of the box. Admins only need to configure Valves if they want to restrict specific features.
 
 > [!IMPORTANT]
-> Most valve changes take effect on the **next `event()` call** (i.e., any chat message or function event). Saving valve values alone doesn't trigger re-injection — it happens the next time the event function runs. The exception is the function **ON/OFF toggle** in the admin panel, which triggers `function.disabling`/`function.enabling` lifecycle events that take effect immediately.
+> Most valve changes take effect on the **next `event()` call** (i.e., any chat message or function event). Saving valve values alone doesn't trigger re-injection — it happens the next time the event function runs. The exception is the function **ON/OFF toggle** in the admin panel, which triggers `function.disable_started`/`function.enable_started` lifecycle events that take effect immediately (on Open WebUI v0.11.0 or newer).
 
 ---
 
@@ -321,7 +321,7 @@ Theme Designer Pro uses a unique server-side injection architecture. Unlike the 
    The bootloader assembles auth-page CSS from the structured sections delivered inside `state.json` (under the `_cssSections` key), honoring each feature’s independent "Show on Auth Pages" toggle (colors, custom CSS, canvas, gradient). For themes saved by older versions without sections, it falls back to slicing the flat CSS by `/*[OWUI_*]*/` marker comments.
 
 7. **Function Lifecycle Integration:**
-   When the admin toggles the function OFF, Open WebUI dispatches `function.disabling` synchronously. Theme Designer Pro uses this to strip theme CSS from `index.html`, re-inject the bootloader with `__THEME_ACTIVE__=false` (keeping SSE alive for the disable broadcast), and broadcast `theme-disable` to all connected clients. When toggled back ON, `function.enabling` triggers re-injection and broadcasts the saved theme to all clients immediately.
+   When the admin toggles the function OFF, Open WebUI dispatches `function.disable_started` synchronously, before the toggle is committed. Theme Designer Pro uses this to strip theme CSS from `index.html`, re-inject the bootloader with `__THEME_ACTIVE__=false` (keeping SSE alive for the disable broadcast), and broadcast `theme-disable` to all connected clients. When toggled back ON, `function.enable_started` triggers re-injection and broadcasts the saved theme to all clients immediately. These pre-toggle lifecycle events exist in Open WebUI v0.11.0 and newer; on older builds the toggle simply takes effect without live cleanup/re-injection.
 
 8. **Hot Reload Behavior:**
    When the event function is re-saved in the admin panel, `_register_route()` fires and resets `Event._injected = False`. The next `event()` call detects this and re-runs the full injection pipeline. Route registration inserts ASGI routes *before* the SPA catch-all to ensure they take priority.
@@ -411,7 +411,7 @@ The fallback is automatic — Worker errors are caught, the Worker is terminated
   - _Check:_ Ensure the "Show on Auth Pages" toggles are enabled for each feature you want on auth pages (Colors, CSS, Canvas, Gradient). Also verify the `enable_auth_page_theming` valve is `true`.
 
 - **Theme reverts after disabling the function.**
-  - _Reason:_ Toggling the function OFF triggers the `function.disabling` lifecycle event, which broadcasts a `theme-disable` SSE event to strip the theme from all clients. The bootloader and CSS in `index.html` are also cleaned up. When re-enabled, the `function.enabling` event re-injects everything automatically. Follow the Uninstallation steps below for complete removal.
+  - _Reason:_ Toggling the function OFF triggers the `function.disable_started` lifecycle event, which broadcasts a `theme-disable` SSE event to strip the theme from all clients. The bootloader and CSS in `index.html` are also cleaned up. When re-enabled, the `function.enable_started` event re-injects everything automatically. On Open WebUI older than v0.11.0 these lifecycle events don't exist, so the theme instead _persists_ after disabling — follow the Uninstallation steps below for complete removal.
 
 - **SSE connection keeps reconnecting.**
   - _Reason:_ SSE connections are long-lived. Some reverse proxies (Nginx, Cloudflare) terminate idle connections. Configure your proxy to allow long-lived connections on the `/events` endpoint, or increase proxy timeout settings.
@@ -499,8 +499,8 @@ graph TD
     %% --- PYTHON BACKEND ---
     subgraph Backend ["Python Backend: Event Function"]
         EventFn(["async event()"]):::endpoint --> CheckLifecycle{"Lifecycle event?"}:::backend
-        CheckLifecycle -->|"function.disabling"| DisableCleanup["Strip theme + broadcast disable"]:::backend
-        CheckLifecycle -->|"function.enabling"| EnableReinject["Reset _injected flag"]:::backend
+        CheckLifecycle -->|"function.disable_started"| DisableCleanup["Strip theme + broadcast disable"]:::backend
+        CheckLifecycle -->|"function.enable_started"| EnableReinject["Reset _injected flag"]:::backend
         CheckLifecycle -->|"Other"| CheckInjected{"_injected?"}:::backend
 
         CheckInjected -->|"No"| InjectPipeline["Full Injection Pipeline"]:::backend

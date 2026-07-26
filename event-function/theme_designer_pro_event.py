@@ -4,9 +4,9 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.6.1
+version: 1.6.2
 license: MIT
-required_open_webui_version: 0.10.0
+required_open_webui_version: 0.11.0
 """
 
 import hashlib
@@ -21,7 +21,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.6.1"
+VERSION = "1.6.2"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -1194,7 +1194,7 @@ class Event:
         Args:
             theme_active_override: If not None, overrides the default active=True
                 for the __THEME_ACTIVE__ flag in the injected script. Used during
-                function.disabling to keep the bootloader (and SSE) alive while
+                function.disable_started to keep the bootloader (and SSE) alive while
                 preventing theme application on fresh page loads.
 
         Returns True when the bootloader is present in index.html afterwards,
@@ -1232,7 +1232,7 @@ class Event:
 
         Args:
             theme_active_override: If not None, overrides the default active=True
-                for the __THEME_ACTIVE__ flag. Used during function.disabling
+                for the __THEME_ACTIVE__ flag. Used during function.disable_started
                 to keep SSE alive while preventing theme application.
         """
         active = theme_active_override if theme_active_override is not None else True
@@ -3236,7 +3236,7 @@ class Event:
                             <li><b>Live Push via SSE:</b> Theme changes are broadcast to <b>all connected users in real-time</b> using Server-Sent Events (SSE). When the admin edits the theme, a lightweight version token is pushed to every open browser tab — across container tabs, different browsers, and different devices — and each client refetches the latest CSS and state from the server (with ETag revalidation, so unchanged files cost a cheap 304) with no page refresh required. The SSE channel at <code>{ROUTE_BASE}/events</code> auto-reconnects on connection loss (retry interval: 3 seconds) and survives function hot-reloads. Connections are capped per worker; over-cap clients receive a long retry interval and stay themed via normal page-load fetches until a slot frees up.</li>
                             <li><b>SSE Heartbeat:</b> The server sends a keep-alive heartbeat every 15 seconds to detect stale connections. If a client disconnects (closes the tab, loses network), the server-side queue is automatically cleaned up.</li>
                             <li><b>SSE Hot-Reload Persistence:</b> SSE connections survive function re-saves (hot-reloads). The client list is stored on the ASGI app's state object, which persists across module reloads. This means re-saving the function code in the admin panel does <b>not</b> break live push to existing tabs.</li>
-                            <li><b>Theme Disable/Re-Enable:</b> When the function is toggled OFF in the admin panel, a <code>function.disabling</code> lifecycle event fires, allowing Theme Designer Pro to broadcast a <code>theme-disable</code> SSE event that strips all theme-related elements (styles, canvas, background div, script runner) and clears <code>localStorage</code> on every connected client &mdash; no page refresh needed. When toggled back ON, the <code>function.enabling</code> lifecycle event triggers re-injection of the bootloader and a <code>theme-update</code> broadcast that re-applies the theme to all clients.</li>
+                            <li><b>Theme Disable/Re-Enable:</b> When the function is toggled OFF in the admin panel, a <code>function.disable_started</code> lifecycle event fires, allowing Theme Designer Pro to broadcast a <code>theme-disable</code> SSE event that strips all theme-related elements (styles, canvas, background div, script runner) and clears <code>localStorage</code> on every connected client &mdash; no page refresh needed. When toggled back ON, the <code>function.enable_started</code> lifecycle event triggers re-injection of the bootloader and a <code>theme-update</code> broadcast that re-applies the theme to all clients. Requires Open WebUI v0.11.0 or newer (pre-toggle lifecycle events); on older builds, toggling OFF leaves the theme in place until clients reload.</li>
                             <li><b>Server Sync:</b> When the admin makes changes, they are automatically synced to the server via POST to <code>{ROUTE_BASE}</code> (debounced at 250ms). The server saves the CSS and state files, re-injects the bootloader, and broadcasts the update to all SSE clients.</li>
                             <li><b>Draft Mode:</b> Toggle between <b>Live</b> and <b>Draft</b> mode via the header switch. In Draft mode, changes are only visible on the designer page itself — they are <b>not</b> synced to the server or pushed to other users. Click <b>Publish</b> (or switch the toggle back to Live) to push all draft changes live. See Section 4 for full details.</li>
                             <li><b>Hot Reload:</b> The function hot-reloads when updated in the admin panel — no server restart is needed.</li>
@@ -4322,7 +4322,7 @@ SetEnv proxy-sendcl 0</code></pre>
                             <li><b>Canvas FX animations are lagging.</b> Heavy mathematically complex animations can drain resources. Ensure your browser supports <code>OffscreenCanvas</code> (indicated by the green <b>Background Worker</b> badge in the designer UI). Note: the badge is a pre-launch prediction (browser capability plus a static scan of the script source) &mdash; a script that only fails at runtime still falls back to the main thread without the badge changing. If your script runs on the main thread, keep animations simple. Even with Web Workers, massive particle counts or heavy calculations can still consume significant CPU/GPU resources.</li>
                             <li><b>My theme doesn't apply to other users.</b> Most commonly caused by <b>reverse proxy buffering</b> — see Section 17 above. Also ensure the admin has synced the theme via the designer (not Draft mode). The bootloader serves the theme to all users on page load from <code>{ROUTE_BASE}/theme.css</code>. If the theme files are missing from <code>DATA_DIR/theme/</code>, the bootloader has nothing to serve. Verify the endpoint works by navigating directly to <code>{ROUTE_BASE}/theme.css</code> in your browser — it should return CSS content.</li>
                             <li><b>Theme changes aren't appearing live on other devices/browsers.</b> This is almost always caused by <b>nginx or another reverse proxy buffering SSE responses</b>. See Section 17 for the fix. The function sends <code>X-Accel-Buffering: no</code> automatically, but nginx must have <code>proxy_buffering off</code> in the location block for this header to be respected. Quick diagnostic: open DevTools → Network tab on the non-working device and check if the <code>EventSource</code> connection to <code>{ROUTE_BASE}/events</code> is active and receiving heartbeat pings every 15 seconds.</li>
-                            <li><b>Theme reverts after disabling the function.</b> Toggling the function OFF triggers the <code>function.disabling</code> lifecycle event, which broadcasts a <code>theme-disable</code> SSE event to strip the theme from all clients. The bootloader and CSS in <code>index.html</code> are also cleaned up. When re-enabled, the <code>function.enabling</code> event re-injects everything automatically. Follow the Uninstallation steps in Section 19 for complete removal.</li>
+                            <li><b>Theme reverts after disabling the function.</b> Toggling the function OFF triggers the <code>function.disable_started</code> lifecycle event, which broadcasts a <code>theme-disable</code> SSE event to strip the theme from all clients. The bootloader and CSS in <code>index.html</code> are also cleaned up. When re-enabled, the <code>function.enable_started</code> event re-injects everything automatically. On Open WebUI older than v0.11.0 these lifecycle events don't exist, so the theme instead <i>persists</i> after disabling &mdash; follow the Uninstallation steps in Section 19 for complete removal.</li>
                             <li><b>Function toggle cleanup details.</b> The <code>theme-disable</code> SSE event removes all 6 injected DOM elements by ID: <code>owui-dev-live-theme</code> (main CSS), <code>owui-server-theme</code> (server-injected CSS), <code>owui-theme-style</code> (legacy), <code>owui-theme-canvas-bg</code> (canvas), <code>owui-theme-bg-color</code> (background div), and <code>owui-canvas-script-runner</code> (canvas script). It also clears the in-memory theme state and localStorage cache to prevent re-injection by the MutationObserver.</li>
                             <li><b>Live push stopped working after re-saving the function.</b> This should not happen — SSE connections are persisted on <code>app.state</code> and survive function hot-reloads. If you do experience this, verify the SSE endpoint is accessible at <code>{ROUTE_BASE}/events</code>. The server sends a heartbeat every 15 seconds — if the connection is truly dead, the EventSource will auto-reconnect after 3 seconds.</li>
                             <li><b>Draft mode is fully sandboxed.</b> Theme CSS and state data use <code>sessionStorage</code> (tab-scoped), <code>syncToServer()</code> is gated off entirely, and mode changes (Dark/Light/System/etc.) are only applied locally to the designer page's <code>&lt;html&gt;</code> element — <code>localStorage.setItem('theme')</code> is skipped, so other tabs and the admin's live session are never affected.</li>
@@ -12741,15 +12741,15 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     # -- entry point ---------------------------------------------------------
 
     _injected = False  # Class-level flag to avoid re-injecting on every event
-    _function_disabled = False  # Set True when function.disabling fires; blocks route handlers
+    _function_disabled = False  # Set True when function.disable_started fires; blocks route handlers
     # Delivery caches for /theme.css and /state.json: (cache_key, body, etag).
     # Keyed on source-file mtimes + valve settings, so saves and valve changes
     # invalidate naturally; per-process (each worker warms its own copy).
     _css_delivery_cache = None
     _state_delivery_cache = None
-    _toggle_seq = 0  # Monotonic counter — incremented on every enabling/disabling lifecycle event
-    _disable_seq = 0  # Sequence number of the last function.disabling event
-    _reenabling = False  # Set by function.enabling; triggers SSE broadcast on next inject
+    _toggle_seq = 0  # Monotonic counter — incremented on every enable_started/disable_started lifecycle event
+    _disable_seq = 0  # Sequence number of the last function.disable_started event
+    _reenabling = False  # Set by function.enable_started; triggers SSE broadcast on next inject
     _routes_registered_url = None  # Route base the routes were registered under
     _last_designer_url = None  # Track URL changes to re-register routes
     _last_enable_canvas_fx = None  # Track Canvas FX valve to broadcast changes
@@ -13150,7 +13150,9 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
         # --- Pre-disable cleanup ---
         # When the admin toggles this function OFF, Open WebUI dispatches
-        # 'function.disabling' synchronously BEFORE committing is_active=False.
+        # 'function.disable_started' synchronously BEFORE committing
+        # is_active=False (Open WebUI v0.11.0+; earlier builds never
+        # dispatch pre-toggle lifecycle events).
         # This is our last chance to clean up before we stop receiving events.
         #
         # Strategy: strip theme from index.html and broadcast disable.
@@ -13158,7 +13160,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         #   2. Re-inject bootloader with __THEME_ACTIVE__=false (keeps SSE alive
         #      so theme-update broadcast on re-enable reaches all connected clients)
         #   3. Broadcast theme-disable to strip theme from all open tabs
-        if __event_name__ == "function.disabling":
+        if __event_name__ == "function.disable_started":
             subject = event.get("subject", {})
             if subject.get("id") == __id__:
                 Event._toggle_seq += 1
@@ -13182,10 +13184,12 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
         # --- Pre-enable re-injection ---
         # When the admin toggles this function back ON, Open WebUI dispatches
-        # 'function.enabling' synchronously BEFORE committing is_active=True.
-        # Ensure _injected is False so the main logic below re-injects the
-        # bootloader and theme CSS into index.html immediately.
-        if __event_name__ == "function.enabling":
+        # 'function.enable_started' synchronously BEFORE committing
+        # is_active=True (the not-yet-active function is included via
+        # extra_function_ids). Ensure _injected is False so the main logic
+        # below re-injects the bootloader and theme CSS into index.html
+        # immediately.
+        if __event_name__ == "function.enable_started":
             subject = event.get("subject", {})
             if subject.get("id") == __id__:
                 Event._toggle_seq += 1
@@ -13203,15 +13207,15 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                     Event._function_disabled = False
                 else:
                     log.info(
-                        "[Theme Pro] Stale function.enabling (seq=%d) superseded by disable (seq=%d) — ignoring",
+                        "[Theme Pro] Stale function.enable_started (seq=%d) superseded by disable (seq=%d) — ignoring",
                         my_seq, Event._disable_seq,
                     )
                     return  # A newer disable already won; do not re-inject
 
         # If the function is disabled, skip all injection / broadcast work.
         # Do NOT unconditionally clear _function_disabled here — only the
-        # explicit function.enabling lifecycle event (above) is allowed to
-        # clear it, after verifying its sequence number.
+        # explicit function.enable_started lifecycle event (above) is allowed
+        # to clear it, after verifying its sequence number.
         if Event._function_disabled:
             return
 
@@ -13391,7 +13395,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             _css_ok = await asyncio.to_thread(self._inject_theme_css)
             # Broadcast theme state to connected clients when:
             # - First injection cycle after disable/startup (_was_not_injected)
-            # - Function was just re-enabled (_reenabling flag from function.enabling)
+            # - Function was just re-enabled (_reenabling flag from function.enable_started)
             # - A valve changed (admin toggled a setting)
             _reenabling = Event._reenabling
             Event._reenabling = False
