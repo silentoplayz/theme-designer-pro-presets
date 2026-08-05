@@ -1,10 +1,10 @@
 """
 title: Theme Designer Pro
-description: Instance-wide theme designer for Open WebUI. Replaces the built-in dark, light, OLED, and her modes with fully custom themes for all users. Registers an interactive UI at /api/v1/theme-designer and persists themes server-side as CSS injected into index.html — every user sees the admin's theme immediately.
+description: Instance-wide theme designer for Open WebUI. Replaces the built-in dark, light, OLED, and her modes with fully custom themes for all users. Registers an interactive UI at /api/v1/theme-designer and persists themes server-side, publishing them through the shared static-asset registry so every user sees the admin's theme from the first paint.
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.6.2
+version: 1.7.0
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -17,15 +17,223 @@ import re as _re
 import asyncio
 
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.6.2"
+VERSION = "1.7.0"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
 log = logging.getLogger(__name__)
+
+
+# ===========================================================================
+# Shared static-asset registry
+# --- KEEP BYTE-IDENTICAL IN EVERY PLUGIN THAT USES IT ----------------------
+# ---------------------------------------------------------------------------
+# app.html loads /static/loader.js and /static/custom.css on every page, and
+# loader.js is the only hook running before the SvelteKit bundle hydrates. Two
+# URLs, many plugins - so none may own either. Each publishes a fragment into
+# one app.state registry and the route composes them PER REQUEST, so load order
+# is irrelevant, a late plugin needs no cooperation, and a re-exec'd one
+# replaces its own key. Per-process: each container serves what it has loaded.
+#
+# Fragments are inlined, never <script src> / @import - a second request would
+# land after hydration, defeating the point.
+#
+# Contract:
+#   * ASSET_REGISTRY_ATTR, ASSET_ROUTE_ATTR, the entry shape and the paths are
+#     the interop surface. Everything else is implementation owned by whichever
+#     plugin created the route - a stale copy silently serves everyone, hence
+#     ASSET_IMPL_VERSION and byte-identity.
+#   * `key` must be a module-level constant. Derive it from a build id or a
+#     function id and a re-exec registers a SECOND entry - duplicated output,
+#     not just a leaked closure.
+#   * `order` breaks ties: lower composes first, so on custom.css it loses the
+#     cascade and on loader.js it wraps innermost. Default 0. Use it instead of
+#     encoding priority in the key, which would only work if every plugin
+#     renamed at once.
+#   * Producers run SYNCHRONOUSLY on the event loop, on every request, and
+#     BEFORE the ETag is compared - so a 304 costs exactly what a 200 costs.
+#     "Cheap" is per-call work, not payload size: memoise anything that
+#     parses, formats or regexes and return a prebuilt string. No I/O, no
+#     locks, no sleeps. Budget tens of microseconds, not milliseconds.
+#   * To withdraw, return "" - there is no unregister. A disabled plugin still
+#     gets function.disable_started (it fires before is_active flips), but a
+#     DELETED one never sees its own deletion, so disable before deleting or
+#     the fragment serves until that process restarts.
+#   * Reach is the SPA only. A plugin serving its own HTML page loads neither
+#     asset and must inject its own.
+# ===========================================================================
+LOADER_PATH = "/static/loader.js"
+CUSTOM_CSS_PATH = "/static/custom.css"
+SHARED_ASSET_TYPES = {
+    LOADER_PATH: "application/javascript; charset=utf-8",
+    CUSTOM_CSS_PATH: "text/css; charset=utf-8",
+}
+ASSET_REGISTRY_ATTR = "_owui_static_fragments"  # {path: {key: entry}}
+ASSET_ROUTE_ATTR = "_owui_shared_asset"  # set to the path the route serves
+ASSET_IMPL_ATTR = "_owui_shared_asset_impl"  # implementation version of the route
+# Bump when this block changes behaviour: newer evicts older, so the fleet
+# converges on one implementation instead of whichever plugin booted first.
+ASSET_IMPL_VERSION = 4
+
+# Producer failures are reported once per (path, key, exception type) - compose
+# runs on every page load, so an unconditional warning would be a firehose.
+_ASSET_WARNED: set = set()
+
+
+def asset_fragments(app: Any, path: str) -> dict:
+    registry = getattr(app.state, ASSET_REGISTRY_ATTR, None)
+    if not isinstance(registry, dict):
+        registry = {}
+        app.state.__setattr__(ASSET_REGISTRY_ATTR, registry)
+    bucket = registry.get(path)
+    if not isinstance(bucket, dict):
+        bucket = {}
+        registry[path] = bucket
+    return bucket
+
+
+def asset_sort_key(item):
+    """(order, key). Coerced defensively: a non-int order from a third-party
+    plugin would raise inside sorted(), outside the per-fragment guard, and
+    take down the whole asset."""
+    key, entry = item
+    try:
+        order = int(entry.get("order", 0))
+    except (TypeError, ValueError):
+        order = 0
+    return (order, key)
+
+
+def asset_strip_block(content: str, start_marker: str, end_marker: str) -> str:
+    """Remove every marker-wrapped block, leaving other content untouched."""
+    while start_marker in content:
+        start = content.find(start_marker)
+        end = content.find(end_marker, start)
+        if end == -1:
+            # No end marker: the block was appended last, so drop to EOF.
+            content = content[:start]
+            break
+        end += len(end_marker)
+        if content[end : end + 1] == "\n":
+            end += 1
+        content = content[:start] + content[end:]
+    return content
+
+
+def asset_compose(app: Any, path: str) -> str:
+    """Disk file plus every registered fragment, in (order, key) order."""
+    import logging
+
+    try:
+        from open_webui.env import STATIC_DIR
+
+        target = Path(STATIC_DIR) / path.rsplit("/", 1)[-1]
+        body = (
+            ""
+            if (target.is_symlink() or not target.is_file())
+            else target.read_text(encoding="utf-8")
+        )
+    except Exception:
+        body = ""
+
+    ordered = sorted(asset_fragments(app, path).items(), key=asset_sort_key)
+    # Strip first: an older file-writing build may have left a block on disk.
+    for _key, entry in ordered:
+        body = asset_strip_block(body, entry["start"], entry["end"])
+    body = body.rstrip()
+
+    for key, entry in ordered:
+        try:
+            block = (entry["js"]() or "").strip()
+        except Exception as exc:
+            mark = (path, key, type(exc).__name__)
+            if mark not in _ASSET_WARNED:
+                if len(_ASSET_WARNED) > 256:
+                    _ASSET_WARNED.clear()
+                _ASSET_WARNED.add(mark)
+                logging.getLogger("owui-shared-assets").warning(
+                    "fragment %r failed for %s - it will be omitted",
+                    key,
+                    path,
+                    exc_info=True,
+                )
+            continue
+        if block:
+            body = (body + "\n\n" if body else "") + block
+    return body + "\n" if body else ""
+
+
+def asset_register(
+    app: Any, path: str, key: str, start: str, end: str, producer, order: int = 0
+) -> None:
+    """Publish a fragment and ensure the route exists. Idempotent, and safe
+    from any plugin in any order."""
+    from starlette.responses import Response
+    from starlette.routing import Mount, Route
+
+    asset_fragments(app, path)[key] = {
+        "start": start,
+        "end": end,
+        "js": producer,
+        "order": order,
+    }
+
+    for existing in app.routes:
+        if getattr(existing, ASSET_ROUTE_ATTR, None) != path:
+            continue
+        if getattr(existing, ASSET_IMPL_ATTR, 0) >= ASSET_IMPL_VERSION:
+            return  # an equal or newer implementation already owns the route
+        break  # ours is newer - fall through and replace it
+
+    # Replaces a single-owner route from an older build, or an older impl of
+    # this block. Fragments live on app.state, so nothing is lost.
+    app.routes[:] = [r for r in app.routes if getattr(r, "path", "") != path]
+    media_type = SHARED_ASSET_TYPES.get(path, "text/plain; charset=utf-8")
+
+    async def serve_asset(request):
+        content = asset_compose(app, path)
+        etag = (
+            '"owui-'
+            # usedforsecurity=False: this is a cache validator, not a security
+            # primitive, and a bare md5() raises ValueError on a FIPS host -
+            # which would 500 the asset for every visitor.
+            + hashlib.md5(
+                (path + "\x00" + content).encode("utf-8"), usedforsecurity=False
+            ).hexdigest()
+            + '"'
+        )
+        # no-cache, NOT no-store: a response the browser may not store has no
+        # validator, so If-None-Match is never sent and the 304 below is dead
+        # code. no-cache still forbids reuse without revalidation, so a stale
+        # body is impossible either way. Note a proxy may re-add no-store for
+        # these paths, which puts the 304 back to sleep - that is deployment
+        # policy, not this block's business.
+        headers = {
+            "Cache-Control": "no-cache, must-revalidate, private",
+            "ETag": etag,
+        }
+        if request.headers.get("if-none-match") == etag:
+            return Response(status_code=304, headers=headers)
+        # Starlette only auto-appends charset for text/*, so JS would ship
+        # undeclared and readers guessing latin-1 get mojibake.
+        return Response(content, media_type=media_type, headers=headers)
+
+    insert_at = len(app.routes)
+    for position, existing in enumerate(app.routes):
+        if isinstance(existing, Mount) and getattr(existing, "name", "") == "static":
+            insert_at = position
+            break
+    shared = Route(path, serve_asset, methods=["GET"])
+    setattr(shared, ASSET_ROUTE_ATTR, path)
+    setattr(shared, ASSET_IMPL_ATTR, ASSET_IMPL_VERSION)
+    app.routes.insert(insert_at, shared)
+
+
+# =========================== end shared asset block ========================
 
 
 class Event:
@@ -165,69 +373,89 @@ class Event:
             // nothing changed, so repeat fetches are cheap.
             function fetchThemeFromServer() {
                 var _fetchVersion = _themeVersion;  // Capture before async fetch
-                fetch('__THEME_ROUTE__/theme.css', { cache: 'no-cache' })
-                    .then(function(r) {
-                        if (r.ok && r.status !== 204) {
-                            var tag = r.headers.get('ETag');
-                            return r.text().then(function(t) { return { body: t, tag: tag }; });
-                        }
-                        return { body: '', tag: null };
-                    })
-                    .then(function(res) {
-                        if (_themeVersion > _fetchVersion) return; // A newer update superseded this fetch
-                        if (_disabled) return; // Disable fired while fetch was in-flight
-                        var css = res.body;
-                        _lastCssTag = res.tag; // Only record the tag when actually applied
-                        if (css && css.trim()) {
-                            _owuiThemeCss = css;
-                            // Write-through to localStorage (Watchtower recovery fallback)
-                            try { localStorage.setItem('owui_dev_theme_v1_css', css); } catch(x) {}
-                            enforceTheme();
-                        } else {
-                            // Server returned empty — theme is inactive, clear stale cache
-                            _owuiThemeCss = null;
-                            try { localStorage.removeItem('owui_dev_theme_v1_css'); } catch(x) {}
-                            var _staleStyle = document.getElementById('owui-dev-live-theme');
-                            if (_staleStyle) _staleStyle.remove();
-                        }
-                    }).catch(function() {});
-                fetch('__THEME_ROUTE__/state.json', { cache: 'no-cache' })
-                    .then(function(r) {
-                        if (r.ok && r.status !== 204) {
-                            var tag = r.headers.get('ETag');
-                            return r.text().then(function(t) { return { body: t, tag: tag }; });
-                        }
-                        return { body: '', tag: null };
-                    })
-                    .then(function(res) {
-                        if (_themeVersion > _fetchVersion) return; // A newer update superseded this fetch
-                        if (_disabled) return; // Disable fired while fetch was in-flight
-                        var state = res.body;
-                        _lastStateTag = res.tag; // Only record the tag when actually applied
-                        if (state && state.trim() && state !== '{}') {
-                            _owuiThemeState = state;
-                            _parsedState = null;  // Invalidate — state source changed
-                            // Write-through to localStorage (Watchtower recovery fallback)
-                            try { localStorage.setItem('owui_dev_theme_v1', state); } catch(x) {}
-                            initCanvas();
-                            enforceTheme();
-                        } else {
-                            // Server returned empty — theme is inactive, clear stale cache
-                            _owuiThemeState = null;
-                            _parsedState = null;  // Invalidate cached parse
-                            try { localStorage.removeItem('owui_dev_theme_v1'); } catch(x) {}
-                        }
-                    }).catch(function() {});
+                // Body + ETag, or null when the request itself failed. A null
+                // must stay distinguishable from an empty body: empty means
+                // "the server has no theme", a network error means "we learned
+                // nothing" — treating the second as the first would wipe a
+                // perfectly good theme on one dropped request.
+                function readAsset(url) {
+                    return fetch(url, { cache: 'no-cache' })
+                        .then(function(r) {
+                            if (r.ok && r.status !== 204) {
+                                var tag = r.headers.get('ETag');
+                                return r.text().then(function(t) { return { body: t, tag: tag }; });
+                            }
+                            return { body: '', tag: null };
+                        })
+                        .catch(function() { return null; });
+                }
+                // Both halves are applied together in ONE synchronous block.
+                // They used to be two independent promise chains that each
+                // wrote localStorage and repainted on their own, so between the
+                // faster and the slower response the page ran the CSS of one
+                // theme against the state of another — a canvas from the
+                // outgoing theme over the incoming theme's colours, for as long
+                // as the gap lasted. Rapid theme swaps made those windows
+                // overlap and the mismatch could persist across several rounds.
+                Promise.all([
+                    readAsset('__THEME_ROUTE__/theme.css'),
+                    readAsset('__THEME_ROUTE__/state.json')
+                ]).then(function(results) {
+                    if (_themeVersion > _fetchVersion) return; // A newer update superseded this fetch
+                    if (_disabled) return; // Disable fired while fetch was in-flight
+                    var cssRes = results[0], stateRes = results[1];
+                    if (!cssRes || !stateRes) return; // A half failed — apply neither
+
+                    var css = cssRes.body;
+                    var state = stateRes.body;
+                    // Record both tags only here, where both halves are known
+                    // good. Updating one alone would let the next broadcast's
+                    // skip check match on a pair this client never applied.
+                    _lastCssTag = cssRes.tag;
+                    _lastStateTag = stateRes.tag;
+
+                    if (css && css.trim()) {
+                        _owuiThemeCss = css;
+                        // Write-through to localStorage (Watchtower recovery fallback)
+                        try { localStorage.setItem('owui_dev_theme_v1_css', css); } catch(x) {}
+                    } else {
+                        // Server returned empty — theme is inactive, clear stale cache
+                        _owuiThemeCss = null;
+                        try { localStorage.removeItem('owui_dev_theme_v1_css'); } catch(x) {}
+                        var _staleStyle = document.getElementById('owui-dev-live-theme');
+                        if (_staleStyle) _staleStyle.remove();
+                    }
+
+                    if (state && state.trim() && state !== '{}') {
+                        _owuiThemeState = state;
+                        _parsedState = null;  // Invalidate — state source changed
+                        // Write-through to localStorage (Watchtower recovery fallback)
+                        try { localStorage.setItem('owui_dev_theme_v1', state); } catch(x) {}
+                    } else {
+                        // Server returned empty — theme is inactive, clear stale cache
+                        _owuiThemeState = null;
+                        _parsedState = null;  // Invalidate cached parse
+                        try { localStorage.removeItem('owui_dev_theme_v1'); } catch(x) {}
+                    }
+
+                    // Once, after BOTH halves are in place. initCanvas() reads
+                    // the state and enforceTheme() reads the css, so calling
+                    // either from inside a half is what published the mismatch.
+                    // Both are no-ops when their source was cleared above.
+                    initCanvas();
+                    enforceTheme();
+                });
             }
 
             // Fetch server-side CSS and state — keeps ALL users in sync with admin's theme
             // Skip on the designer page (it manages its own state directly)
             if (!window.__THEME_DESIGNER__ && _themeActive) {
-            // Check for state JSON embedded in index.html (injected by server)
-            var embeddedState = document.getElementById('owui-theme-state');
-            if (embeddedState) {
-                try { _owuiThemeState = embeddedState.textContent; } catch(x) {}
-            }
+            // State JSON inlined into this loader fragment by the server. This
+            // used to be a <script id="owui-theme-state"> block written into
+            // index.html; the composed /static/loader.js carries it now, so it
+            // is rebuilt on every page load instead of only on the next event().
+            var embeddedState = __EMBEDDED_STATE__;
+            if (embeddedState) { _owuiThemeState = embeddedState; }
 
             // Seed in-memory CSS from localStorage immediately so the synchronous
             // initial refresh() below has the latest data (localStorage is shared
@@ -240,11 +468,12 @@ class Event:
                 if (lsState) _owuiThemeState = lsState;
             } catch(x) {}
 
-            // Fetch CSS + state from server (always needed — index.html has a safe
-            // subset without structural/gradient, and embedded state may be stale:
-            // it's only updated on the next event() call, not on every theme save.
-            // The embedded copies are still useful for the synchronous initial
-            // paint; this fetch overrides them with the latest data.)
+            // Fetch CSS + state from server (always needed — /static/custom.css
+            // carries only the safe subset, without structural/gradient. Both
+            // composed assets track the latest save now that they are built per
+            // request, so this fetch is about completing the CSS rather than
+            // correcting a stale copy; it still runs to pick up the deferred
+            // structural + gradient rules once the canvas is up.)
             fetchThemeFromServer();
             }
 
@@ -261,10 +490,12 @@ class Event:
                 if (_disabled) return;
                 const savedCss = _owuiThemeCss || localStorage.getItem('owui_dev_theme_v1_css');
                 if (savedCss) {
-                    // Remove server-embedded CSS FIRST — it's a stale subset that can conflict
-                    // with the full live CSS (especially custom CSS with !important rules).
-                    // Removing before creating owui-dev-live-theme prevents a childList
-                    // mutation with both style elements present (double-styled state).
+                    // Legacy cleanup only. Pre-registry builds wrote a stale CSS
+                    // subset into index.html as <style id="owui-server-theme">,
+                    // which could outlive a save and fight the full live CSS.
+                    // The server strips it once on startup and the safe subset
+                    // now ships via /static/custom.css (composed per request, so
+                    // never stale), leaving this a no-op on current installs.
                     var serverStyle = document.getElementById('owui-server-theme');
                     if (serverStyle) serverStyle.remove();
 
@@ -905,8 +1136,11 @@ class Event:
             
             const observer = new MutationObserver((mutations) => {
                 let trigger = false;
+                // owui-server-theme is no longer a signal that a theme exists —
+                // the server subset ships as a <link> to /static/custom.css that
+                // is present regardless. The inlined state above covers it.
                 if (!document.getElementById('owui-dev-live-theme') &&
-                    (document.getElementById('owui-server-theme') || _owuiThemeCss || _owuiThemeState)) {
+                    (_owuiThemeCss || _owuiThemeState)) {
                     trigger = true;
                 }
                 mutations.forEach(m => {
@@ -920,24 +1154,51 @@ class Event:
             observer.observe(document.documentElement, { attributes: true, attributeFilter:['class', 'data-theme'] });
             if (document.head) observer.observe(document.head, { childList: true });
             
+            // Cross-tab sync. The two theme keys are NOT written together: the
+            // designer stores its state synchronously in injectLive() but defers
+            // the css write until its POST comes back, so the browser fires two
+            // storage events a full network round trip apart (~500ms locally).
+            // Repainting on each one separately published the state of the new
+            // theme against the css of the old one for that whole gap — the
+            // exact hybrid seen while swapping themes with the app open beside
+            // the designer.
+            //
+            // So: coalesce, and re-read from the server rather than trusting a
+            // half-updated localStorage. fetchThemeFromServer() applies css and
+            // state atomically, which is the only place a coherent pair exists.
+            var _storageSyncTimer = null;
             window.addEventListener('storage', (e) => {
                 const triggerKeys =['theme', 'owui_dev_theme_v1_css', 'owui_dev_theme_v1'];
-                if (triggerKeys.includes(e.key) && e.newValue) {
-                    if (e.key === 'theme') {
-                        document.documentElement.setAttribute('data-theme', e.newValue);
-                    }
-                    // Update the in-memory caches — enforceTheme()/getParsedState()
-                    // prefer them over localStorage, so without this the refresh
-                    // below would re-apply the STALE in-memory CSS/state.
-                    if (e.key === 'owui_dev_theme_v1_css') {
-                        _owuiThemeCss = e.newValue;
-                    }
-                    if (e.key === 'owui_dev_theme_v1') {
-                        _owuiThemeState = e.newValue;
-                        _parsedState = null;  // Invalidate cached parse
-                    }
-                    refresh();
+                if (!triggerKeys.includes(e.key) || !e.newValue) return;
+                if (e.key === 'theme') {
+                    // Mode switch — cheap, unambiguous, apply immediately.
+                    document.documentElement.setAttribute('data-theme', e.newValue);
                 }
+                // The designer owns its own editing state; another tab's
+                // write-through must never repaint it out from under the admin.
+                if (window.__THEME_DESIGNER__) {
+                    if (e.key === 'theme') refresh();
+                    return;
+                }
+                // Deliberately DO NOT copy the incoming value into the in-memory
+                // caches. Doing so half-updates the pair the moment one key
+                // arrives, and any repaint that happens before the refetch below
+                // then publishes that half — including the repaint this handler
+                // triggers itself, because setting data-theme above fires the
+                // MutationObserver on <html>, which calls refresh(). That is how
+                // a canvas could be torn down while the CSS of the outgoing
+                // theme stayed on screen for the length of this debounce.
+                //
+                // Leaving the caches alone keeps the last COHERENT pair live and
+                // renderable until the refetch replaces both together. The
+                // written-through localStorage values stay untouched and remain
+                // the offline fallback for the next cold load.
+                clearTimeout(_storageSyncTimer);
+                _storageSyncTimer = setTimeout(function() {
+                    if (_disabled) return;
+                    // The only place a coherent pair exists: applied atomically.
+                    fetchThemeFromServer();
+                }, 300);
             });
 
             window.addEventListener('popstate', refresh);
@@ -1188,56 +1449,115 @@ class Event:
             except OSError: pass
             raise
 
-    def _inject_bootloader(self, theme_active_override=None) -> bool:
-        """Inject the theme bootloader into index.html.
+    # -- shared static-asset fragments ---------------------------------------
 
-        Args:
-            theme_active_override: If not None, overrides the default active=True
-                for the __THEME_ACTIVE__ flag in the injected script. Used during
-                function.disable_started to keep the bootloader (and SSE) alive while
-                preventing theme application on fresh page loads.
+    # Marker pairs wrapping this plugin's block inside each composed asset, so
+    # asset_compose can strip a previous build's block before re-appending.
+    LOADER_BLOCK_START = "// owui-theme-designer-pro:start"
+    LOADER_BLOCK_END = "// owui-theme-designer-pro:end"
+    CSS_BLOCK_START = "/* owui-theme-designer-pro:start */"
+    CSS_BLOCK_END = "/* owui-theme-designer-pro:end */"
 
-        Returns True when the bootloader is present in index.html afterwards,
-        False on failure (index.html missing/unwritable) so event() can leave
-        _injected unset and retry on the next event.
+    # Fixed literal, never derived from a build/function id — the shared-asset
+    # contract requires a stable key, because a key that changes per re-exec
+    # registers a SECOND entry and the output is emitted twice.
+    ASSET_KEY = "theme-designer-pro"
+
+    # asset_compose sorts fragments by (order, key); higher composes last. On
+    # custom.css that is the CSS cascade between plugins, and this plugin's
+    # custom-CSS section is documented as last = highest priority (Section 13),
+    # so it claims a high order explicitly rather than relying on where
+    # "theme-designer-pro" happens to fall alphabetically. On loader.js the
+    # same value makes this bootloader the outermost wrapper.
+    ASSET_ORDER = 100
+
+    @staticmethod
+    def _strip_canvas_scripts(state_str: str) -> str:
+        """Drop only the canvasScript bodies from a delivered state JSON string.
+
+        Measured on the largest Canvas FX script in the presets repo across four
+        modes, the scripts are 93% of the inlined state (129 KB of 139 KB) and
+        would make the loader fragment ~205 KB. asset_compose rebuilds and
+        md5-hashes the entire composed body on EVERY request — the ETag is
+        compared only after the producer has already run, so a 304 revalidation
+        costs almost exactly as much server CPU as a 200 (measured: 3.87 ms vs
+        4.08 ms per request). Inlining the scripts would therefore charge every
+        page load of every user for a background animation that nobody can
+        perceive starting one round trip later.
+
+        Nothing flash-sensitive is lost. enforceTheme() reads CSS, not state,
+        and that CSS arrives via the render-blocking /static/custom.css.
+        _cssSections stays inlined (9 KB) because the auth page assembles its
+        CSS from it before the fetch lands. initCanvas() simply finds no script
+        on its first pass and starts the canvas when /state.json arrives.
         """
-        path = self._find_index_file()
-        if not path:
-            return False
-
         try:
-            with Event._get_index_lock():
-                with open(path, "r", encoding="utf-8") as f:
-                    content = f.read()
+            data = _json.loads(state_str)
+            if not isinstance(data, dict):
+                return state_str
+            stripped = False
+            for config in data.values():
+                # _cssSections is a sibling of the mode dicts and has no
+                # canvasScript, so it falls through untouched.
+                if isinstance(config, dict) and config.get("canvasScript"):
+                    config.pop("canvasScript", None)
+                    stripped = True
+            if not stripped:
+                return state_str
+            return _json.dumps(data, separators=(",", ":"))
+        except Exception:
+            return state_str  # Unparseable state is served as-is by design
 
-                content = self._strip_bootloader(content)
+    _bootloader_body_cache = None
 
-                if "owui-theme-bootloader" not in content:
-                    if "</head>" not in content:
-                        return False  # Malformed/partial index.html
-                    new_content = content.replace(
-                        "</head>", self._get_bootloader_script(theme_active_override) + "</head>"
-                    )
-                    Event._atomic_write(path, new_content)
-                    log.info(
-                        "[Theme Pro] Successfully injected bootloader into %s", path
-                    )
-                return True
-        except Exception as e:
-            log.warning("[Theme Pro] Error injecting bootloader into %s: %s", path, e)
-            return False
+    @classmethod
+    def _bootloader_body(cls) -> str:
+        """BOOTLOADER_SCRIPT with its HTML comment + <script> wrapper removed.
 
-    def _get_bootloader_script(self, theme_active_override=None) -> str:
-        """Return the bootloader script with the correct route URL substituted.
+        The registry inlines fragments into a real .js response, so the HTML
+        wrapper the index.html injection needed would be a syntax error here.
 
-        Args:
-            theme_active_override: If not None, overrides the default active=True
-                for the __THEME_ACTIVE__ flag. Used during function.disable_started
-                to keep SSE alive while preventing theme application.
+        Memoised: this is a pure function of a class constant, but it runs a
+        DOTALL regex over ~40 KB and sits on the per-request producer path.
+        Uncached it measured 2.07 ms per call and was 85% of the entire loader
+        fragment cost.
         """
-        active = theme_active_override if theme_active_override is not None else True
-        return self.BOOTLOADER_SCRIPT.replace(
-            "__THEME_ROUTE__", self._get_route_base()
+        if cls._bootloader_body_cache is None:
+            cls._bootloader_body_cache = _re.sub(
+                r"^\s*<!--.*?-->\s*<script[^>]*>\s*|\s*</script>\s*$",
+                "",
+                cls.BOOTLOADER_SCRIPT.strip(),
+                flags=_re.DOTALL,
+            )
+        return cls._bootloader_body_cache
+
+    def _loader_fragment(self) -> str:
+        """Producer for the /static/loader.js fragment.
+
+        Runs inside the request handler on every page load, so the whole result
+        is memoised and the steady state is a tuple compare. The two stat()s
+        behind _get_state_delivery are the only syscalls; its ETag stands in for
+        the state and sections mtimes plus the valves that affect delivery.
+
+        Stays published while the function is disabled, with __THEME_ACTIVE__
+        false: the bootloader strips the theme from a fresh load but keeps the
+        SSE connection, which is how a later re-enable reaches open tabs. The
+        CSS fragment is what goes empty on disable.
+        """
+        active = not Event._function_disabled
+        delivery = self._get_state_delivery() if active else None
+        cache_key = (
+            active,
+            self._get_route_base(),
+            self.valves.enable_canvas_api_access,
+            delivery[1] if delivery else None,  # state delivery ETag
+        )
+        cached = Event._loader_fragment_cache
+        if cached and cached[0] == cache_key:
+            return cached[1]
+
+        js = self._bootloader_body().replace(
+            "__THEME_ROUTE__", cache_key[1]
         ).replace(
             "__CANVAS_API_ACCESS__",
             "true" if self.valves.enable_canvas_api_access else "false",
@@ -1245,6 +1565,144 @@ class Event:
             "__THEME_ACTIVE__",
             "true" if active else "false",
         )
+
+        # State inlined as a JS string literal, minus the canvas scripts. Was a
+        # <script type="application/json"> block in index.html; composing it per
+        # request means it tracks the latest save instead of the last event().
+        # ensure_ascii (json.dumps default) escapes U+2028/U+2029, which are raw
+        # line terminators in JS.
+        embedded = "null"
+        if delivery:
+            embedded = _json.dumps(self._strip_canvas_scripts(delivery[0]))
+        js = js.replace("__EMBEDDED_STATE__", embedded)
+
+        fragment = f"{self.LOADER_BLOCK_START}\n{js}\n{self.LOADER_BLOCK_END}"
+        Event._loader_fragment_cache = (cache_key, fragment)
+        return fragment
+
+    def _safe_subset_css(self) -> str:
+        """The CSS safe to apply at first paint: vars + custom.
+
+        Structural transparency and gradient rules are deferred to the
+        bootloader — applied before the canvas is painting, they flash the page
+        through to the background colour. Prefers the structured sections file
+        and falls back to marker regexes for legacy flat-CSS saves.
+
+        Cached like the /theme.css and /state.json deliveries, and for the same
+        reason twice over: this runs inside the request handler on every page
+        load, and the shared-registry contract requires producers to be cheap
+        and do no I/O. Uncached, every visitor would pay a sections read plus a
+        JSON parse, or two DOTALL passes over the whole blob on the legacy path.
+        """
+        try:
+            css_mtime = self._get_css_path().stat().st_mtime_ns
+        except OSError:
+            return ""
+        try:
+            sections_mtime = self._get_sections_path().stat().st_mtime_ns
+        except OSError:
+            sections_mtime = None
+        # sidebar_transparency cannot reach this subset today (it rewrites
+        # /*[FX]*/ rules inside structural + gradient, both dropped here) but is
+        # keyed on anyway — a stale safe subset is a far worse failure than an
+        # occasional extra recompute on a valve nobody changes at runtime.
+        cache_key = (
+            css_mtime,
+            sections_mtime,
+            self.valves.sidebar_transparency,
+            self.valves.overlay_transparency,
+        )
+        cached = Event._safe_css_cache
+        if cached and cached[0] == cache_key:
+            return cached[1]
+
+        try:
+            raw = self._load_css()
+        except OSError:
+            raw = None  # Vanished between stat() and read (reset race)
+        if not raw:
+            return ""
+
+        sections = self._load_sections()
+        if sections:
+            # Raw sections, not _postprocess_sections(): the sidebar valve only
+            # rewrites structural + gradient, and the synthetic 'extra' section
+            # bundles the mobile sidebar upgrade in with the overlay glass. That
+            # sidebar rule is itself a transparency rule and belongs with the
+            # deferred structural block, so only the overlay part is applied
+            # below — matching what the pre-1.7.0 embedded subset shipped.
+            safe_css = (
+                sections["vars"]
+                + "/* structural rules deferred to bootloader */\n"
+                + "/* gradient rules deferred to bootloader */\n"
+                + sections["custom"]
+            )
+        else:
+            safe_css = _re.sub(
+                r"/\*\[OWUI_STRUCTURAL_START\]\*/.*?/\*\[OWUI_STRUCTURAL_END\]\*/",
+                "/* structural rules deferred to bootloader */",
+                raw,
+                flags=_re.DOTALL,
+            )
+            safe_css = _re.sub(
+                r"/\*\[OWUI_GRADIENT_START\]\*/.*?/\*\[OWUI_GRADIENT_END\]\*/",
+                "/* gradient rules deferred to bootloader */",
+                safe_css,
+                flags=_re.DOTALL,
+            )
+
+        # The overlay valve APPENDS glass rules for portaled overlays, so unlike
+        # the sidebar valve it has to be baked in here or overlays pop from
+        # opaque to glass the moment the bootloader's /theme.css fetch lands.
+        if self.valves.overlay_transparency != "opaque":
+            safe_css = self._apply_overlay_transparency(safe_css)
+
+        Event._safe_css_cache = (cache_key, safe_css)
+        return safe_css
+
+    def _custom_css_fragment(self) -> str:
+        """Producer for the /static/custom.css fragment.
+
+        Returns "" while the function is disabled — that empty return is the
+        withdrawal mechanism the shared registry defines, and it replaces the
+        old "strip the <style> block out of index.html" pass.
+        """
+        if Event._function_disabled:
+            return ""
+        safe_css = self._safe_subset_css()
+        if not safe_css.strip():
+            return ""
+        # No </style escaping needed any more: this is served as a real
+        # stylesheet, not inlined into an HTML <style> element where the parser
+        # would end the block early.
+        return f"{self.CSS_BLOCK_START}\n{safe_css}\n{self.CSS_BLOCK_END}"
+
+    def _publish_fragments(self, app) -> bool:
+        """(Re)point both shared fragments at this instance and ensure the
+        routes exist. Idempotent — safe to call on every event."""
+        try:
+            asset_register(
+                app,
+                LOADER_PATH,
+                self.ASSET_KEY,
+                self.LOADER_BLOCK_START,
+                self.LOADER_BLOCK_END,
+                self._loader_fragment,
+                order=self.ASSET_ORDER,
+            )
+            asset_register(
+                app,
+                CUSTOM_CSS_PATH,
+                self.ASSET_KEY,
+                self.CSS_BLOCK_START,
+                self.CSS_BLOCK_END,
+                self._custom_css_fragment,
+                order=self.ASSET_ORDER,
+            )
+            return True
+        except Exception:
+            log.exception("[Theme Pro] Could not publish static-asset fragments")
+            return False
 
     # -- CSS file persistence ------------------------------------------------
 
@@ -1291,7 +1749,7 @@ class Event:
 
     # Structured CSS sections — the same theme CSS broken into the four marker
     # regions. Persisted alongside the flat CSS so consumers (bootloader auth
-    # stripping, index.html safe subset) assemble what they need instead of
+    # stripping, custom.css safe subset) assemble what they need instead of
     # regex-slicing the concatenated blob. Concatenating the four sections in
     # this order reproduces the flat CSS exactly.
     SECTION_KEYS = ("vars", "structural", "gradient", "custom")
@@ -1438,154 +1896,57 @@ class Event:
         """
         css = self._get_css_delivery()
         state = self._get_state_delivery()
+        # Warm the composed-asset producer too: it runs inside the request
+        # handler, so the first page load after a save would otherwise rebuild
+        # the safe subset on the event loop.
+        self._safe_subset_css()
         return {
             "cssTag": css[1] if css else None,
             "stateTag": state[1] if state else None,
         }
 
-    def _inject_theme_css(self) -> bool:
-        """Inject the saved theme CSS into index.html as an inline <style>.
+    _legacy_index_cleaned = False
 
-        Strips the STRUCTURAL section (transparency rules for canvas/gradient)
-        from the inline version — those rules make everything transparent, which
-        causes a white flash before the canvas script loads. The bootloader
-        applies the full CSS after canvas is ready.
+    def _clean_legacy_index_injection(self) -> None:
+        """One-shot removal of blocks written into index.html by pre-registry builds.
 
-        Returns True on success (including "no saved CSS — nothing to inject"),
-        False on failure (index.html missing/unwritable) so event() can leave
-        _injected unset and retry on the next event.
+        Up to v1.6.2 this function injected the bootloader, a <style
+        id="owui-server-theme"> subset and a <script id="owui-theme-state">
+        block straight into index.html. Those blocks survive an upgrade (the
+        file lives on the container filesystem, not in the image), so without
+        this pass an upgraded install would run two bootloaders and keep
+        applying a frozen CSS subset that no save can ever refresh.
+
+        This is the only remaining writer to index.html, it runs once per
+        process, and it only ever removes. Both marker strippers use while
+        loops, so duplicates accumulated by older builds all go.
         """
-        try:
-            css = self._load_css()
-        except OSError as e:
-            # Data dir unreadable/uncreatable (read-only fs, disk full) — an
-            # exception here must not propagate out of event() into OWUI's
-            # event dispatch.
-            log.warning("[Theme Pro] Could not read theme CSS: %s", e)
-            return False
-        if not css:
-            return True  # Fresh install — nothing to inject is not a failure
+        if Event._legacy_index_cleaned:
+            return
+        Event._legacy_index_cleaned = True
 
-        path = self._find_index_file()
-        if not path:
-            return False
-
-        # Omit structural transparency + gradient rules — they need canvas/
-        # gradient to be running first, which the bootloader handles after
-        # async fetch. Prefer assembling the safe subset from the structured
-        # sections file; fall back to marker regexes for legacy saves that
-        # only have the flat CSS on disk.
-        sections = self._load_sections()
-        if sections:
-            safe_css = (
-                sections["vars"]
-                + "/* structural rules deferred to bootloader */\n"
-                + "/* gradient rules deferred to bootloader */\n"
-                + sections["custom"]
-            )
-        else:
-            safe_css = _re.sub(
-                r"/\*\[OWUI_STRUCTURAL_START\]\*/.*?/\*\[OWUI_STRUCTURAL_END\]\*/",
-                "/* structural rules deferred to bootloader */",
-                css,
-                flags=_re.DOTALL,
-            )
-            safe_css = _re.sub(
-                r"/\*\[OWUI_GRADIENT_START\]\*/.*?/\*\[OWUI_GRADIENT_END\]\*/",
-                "/* gradient rules deferred to bootloader */",
-                safe_css,
-                flags=_re.DOTALL,
-            )
-
-        # Apply the overlay-transparency valve to the embedded copy too —
-        # it APPENDS glass rules for portaled overlays, so unlike the sidebar
-        # valve (which rewrites /*[FX]*/ rules inside the stripped STRUCTURAL
-        # block) it must be baked in here or overlays pop from opaque to
-        # glass once the bootloader's /theme.css fetch lands.
-        if self.valves.overlay_transparency != "opaque":
-            safe_css = self._apply_overlay_transparency(safe_css)
-
-        # Prevent CSS from breaking out of the inline <style> block: the HTML
-        # parser ends the element at any '</style' (case-insensitive), turning
-        # the rest of the CSS into markup for every visitor. '\/' is a valid
-        # CSS escape for '/', so the rules stay intact. The state JSON below
-        # gets the same treatment for '</'.
-        safe_css = _re.sub(r"(?i)</(?=style)", lambda m: "<\\/", safe_css)
-
-        STYLE_ID = "owui-server-theme"
-        START_MARKER = f'<style id="{STYLE_ID}">'
-        END_MARKER = "</style><!-- /owui-server-theme -->"
-        STATE_START = '<script type="application/json" id="owui-theme-state">'
-        STATE_END = "</script><!-- /owui-theme-state -->"
-
-        try:
-            with Event._get_index_lock():
-                with open(path, "r", encoding="utf-8") as f:
-                    content = f.read()
-
-                content = self._strip_all_theme_blocks(content)
-
-                style_block = f"{START_MARKER}\n{safe_css}\n{END_MARKER}\n"
-
-                # Also embed state JSON for FOUC-free canvas init (no async fetch needed)
-                state_json = self._load_state() or "{}"
-                # Enforce Canvas FX valve: strip canvas data so remote clients can't see it
-                state_json = self._postprocess_state(state_json)
-                # Merge CSS sections so auth pages can assemble their CSS from the
-                # embedded state before the /state.json fetch lands
-                state_json = self._state_with_sections(state_json)
-                # Prevent </script> in JSON values from breaking the HTML parse
-                safe_state_json = state_json.replace("</", "<\\/")
-                state_block = f"{STATE_START}{safe_state_json}{STATE_END}\n"
-
-                if "</head>" in content:
-                    inject_block = style_block + state_block
-                    new_content = content.replace("</head>", inject_block + "</head>")
-                    Event._atomic_write(path, new_content)
-                    log.info("[Theme Pro] Injected server theme CSS + state into %s", path)
-                    return True
-                return False  # No </head> — malformed/partial index.html
-        except Exception as e:
-            log.warning("[Theme Pro] Error injecting theme CSS into %s: %s", path, e)
-            return False
-
-    def _strip_theme_css_from_index(self) -> None:
-        """Remove the server theme CSS and state JSON blocks from index.html."""
         path = self._find_index_file()
         if not path:
             return
-
         try:
             with Event._get_index_lock():
                 with open(path, "r", encoding="utf-8") as f:
                     content = f.read()
-
-                cleaned = self._strip_all_theme_blocks(content)
-                changed = cleaned != content
-                content = cleaned
-
-                if changed:
-                    Event._atomic_write(path, content)
-                    log.info("[Theme Pro] Stripped server theme assets from %s", path)
-        except Exception as e:
-            log.warning("[Theme Pro] Error stripping theme assets from %s: %s", path, e)
-
-    def _strip_bootloader_from_index(self) -> None:
-        """Remove the bootloader block from index.html (full reset only)."""
-        path = self._find_index_file()
-        if not path:
-            return
-
-        try:
-            with Event._get_index_lock():
-                with open(path, "r", encoding="utf-8") as f:
-                    content = f.read()
-                cleaned = self._strip_bootloader(content)
+                cleaned = self._strip_all_theme_blocks(self._strip_bootloader(content))
                 if cleaned != content:
                     Event._atomic_write(path, cleaned)
-                    log.info("[Theme Pro] Stripped bootloader on reset")
+                    log.info(
+                        "[Theme Pro] Removed legacy index.html injection from %s — "
+                        "the bootloader and theme CSS now ship via the shared "
+                        "static-asset registry",
+                        path,
+                    )
         except Exception as e:
-            log.warning("[Theme Pro] Error stripping bootloader from %s: %s", path, e)
+            log.warning(
+                "[Theme Pro] Could not clean legacy index.html injection from %s: %s",
+                path,
+                e,
+            )
 
     # -- route registration --------------------------------------------------
 
@@ -1640,9 +2001,9 @@ class Event:
 
         route_base = self._get_route_base()
 
-        # NOTE: _injected is NOT reset here. Route registration can happen
+        # NOTE: _published is NOT reset here. Route registration can happen
         # without needing a full bootloader + CSS re-injection cycle.
-        # event() controls the _injected flag directly for: startup, valve
+        # event() controls the _published flag directly for: startup, valve
         # changes, function enable/disable, and URL changes.
 
         # Persist SSE client set on app.state so it survives function re-saves/hot-reloads.
@@ -2000,14 +2361,11 @@ class Event:
                     library_path.unlink()
                     log.info("[Theme Pro] Deleted theme gallery file")
                 self._delete_sections()
-                # index.html work runs in a thread: the flock can wait on
-                # another process and must not stall the event loop.
-                await asyncio.to_thread(self._strip_theme_css_from_index)
-                await asyncio.to_thread(self._strip_bootloader_from_index)
-                # Reset stripped the bootloader + CSS from index.html — clear the
-                # injected flag so the next event() re-injects them. Otherwise a
-                # theme saved after reset never reaches freshly loaded pages.
-                Event._injected = False
+                # No index.html work: the CSS fragment producer reads through
+                # _get_css_delivery(), which now finds no file and returns "",
+                # so the next request composes a custom.css without our block.
+                # The loader fragment stays published so SSE survives the reset
+                # and a theme saved afterwards still reaches loaded pages.
                 Event._broadcast_disable()  # Push disable to all SSE clients (strip + reload)
                 return JSONResponse({"status": "reset"})
 
@@ -2056,11 +2414,11 @@ class Event:
 
             # Broadcast the update via SSE unless the client explicitly suppressed it
             # (e.g. library-only sync from syncLibrary()).
-            # NOTE: index.html injection is handled by event() on startup/valve change.
-            # The POST handler only broadcasts via SSE for live updates — no need to
-            # rewrite index.html on every slider adjustment (was causing disk thrash
-            # and duplicate block accumulation). The broadcast is a version token;
-            # clients refetch /theme.css + /state.json (post-processed at delivery).
+            # NOTE: the composed static assets need no work here — their producers
+            # read through the mtime-keyed delivery caches, so the save above is
+            # already visible to the next request for /static/custom.css. The
+            # broadcast is a version token; clients refetch /theme.css +
+            # /state.json (post-processed at delivery).
             if not body.get("suppress_broadcast", False):
                 # Prime delivery caches off-loop so the broadcast carries the
                 # new ETags and post-save fetches hit a warm cache.
@@ -3231,8 +3589,8 @@ class Event:
                     <div class="doc-inner">
                         <p>Theme Designer Pro is an <b>Event Function</b> that registers a standalone admin page at <code>{ROUTE_BASE}</code>. Admins access the designer by navigating directly to that URL (configurable via the <b>Designer URL</b> valve). It uses a multi-layer schema separating core color logic from manual overrides, custom CSS, and structural transparency, and persists themes server-side so they apply to <b>all users</b> in real-time.</p>
                         <ul>
-                            <li><b>Admin-Only Design Page:</b> Only administrators can access the designer page. The generated theme is served to all users via a bootloader script injected into <code>index.html</code>.</li>
-                            <li><b>Persistence Engine:</b> Themes are persisted server-side in <code>DATA_DIR/theme/</code> as <code>open_theme_designer.css</code>, <code>open_theme_designer.json</code>, <code>open_theme_designer_sections.json</code> (structured CSS sections), and <code>open_theme_designer_library.json</code>. On page load, the server embeds a safe subset of theme CSS inline into <code>index.html</code> (with structural/gradient rules stripped to prevent a white flash before canvas loads). The bootloader then fetches the full CSS from <code>{ROUTE_BASE}/theme.css</code> and applies it — including the deferred structural/gradient rules. State JSON is also embedded directly into <code>index.html</code> &mdash; eliminating an async fetch for state data. The system uses <code>localStorage</code> only as a write-through backup for offline/Watchtower recovery scenarios.</li>
+                            <li><b>Admin-Only Design Page:</b> Only administrators can access the designer page. The generated theme is served to all users via a bootloader script published into <code>/static/loader.js</code> through the shared static-asset registry.</li>
+                            <li><b>Persistence Engine:</b> Themes are persisted server-side in <code>DATA_DIR/theme/</code> as <code>open_theme_designer.css</code>, <code>open_theme_designer.json</code>, <code>open_theme_designer_sections.json</code> (structured CSS sections), and <code>open_theme_designer_library.json</code>. On page load, the server composes a safe subset of theme CSS into <code>/static/custom.css</code> (with structural/gradient rules stripped to prevent a white flash before canvas loads), which Open WebUI already loads as a render-blocking stylesheet. The bootloader then fetches the full CSS from <code>{ROUTE_BASE}/theme.css</code> and applies it — including the deferred structural/gradient rules. State JSON is inlined into the same <code>/static/loader.js</code> fragment &mdash; eliminating an async fetch for state data. Both assets are composed per request, so they always reflect the latest save rather than the last <code>event()</code>. The system uses <code>localStorage</code> only as a write-through backup for offline/Watchtower recovery scenarios.</li>
                             <li><b>Live Push via SSE:</b> Theme changes are broadcast to <b>all connected users in real-time</b> using Server-Sent Events (SSE). When the admin edits the theme, a lightweight version token is pushed to every open browser tab — across container tabs, different browsers, and different devices — and each client refetches the latest CSS and state from the server (with ETag revalidation, so unchanged files cost a cheap 304) with no page refresh required. The SSE channel at <code>{ROUTE_BASE}/events</code> auto-reconnects on connection loss (retry interval: 3 seconds) and survives function hot-reloads. Connections are capped per worker; over-cap clients receive a long retry interval and stay themed via normal page-load fetches until a slot frees up.</li>
                             <li><b>SSE Heartbeat:</b> The server sends a keep-alive heartbeat every 15 seconds to detect stale connections. If a client disconnects (closes the tab, loses network), the server-side queue is automatically cleaned up.</li>
                             <li><b>SSE Hot-Reload Persistence:</b> SSE connections survive function re-saves (hot-reloads). The client list is stored on the ASGI app's state object, which persists across module reloads. This means re-saving the function code in the admin panel does <b>not</b> break live push to existing tabs.</li>
@@ -3289,7 +3647,7 @@ class Event:
                         <ul>
                             <li><b>Toggle:</b> Click the <b>Live / Draft</b> switch in the header to enter Draft mode. A pulsing amber dot and <b>DRAFT</b> badge indicate you're in draft mode.</li>
                             <li><b>Local-Only:</b> In Draft mode, theme CSS and state are <b>not</b> synced to the server or pushed to other users via SSE. However, library data (snapshots, presets) continues to sync to the server normally — only the CSS and state are sent as empty stubs, preventing draft theme content from leaking. The designer page <i>is</i> your preview surface.</li>
-                            <li><b>Draft Isolation:</b> In Draft mode, the <code>syncToServer()</code> function is gated off — theme CSS and state are written to <code>sessionStorage</code> (tab-scoped) but never pushed to the server or broadcast via SSE. The <code>syncLibrary()</code> function still runs to keep presets in sync, but sends empty CSS/state and sets <code>suppress_broadcast: true</code>. Since other tabs read theme data from the server (via embedded index.html data or SSE), and <code>sessionStorage</code> is invisible to other tabs, draft changes remain fully isolated to the designer tab.</li>
+                            <li><b>Draft Isolation:</b> In Draft mode, the <code>syncToServer()</code> function is gated off — theme CSS and state are written to <code>sessionStorage</code> (tab-scoped) but never pushed to the server or broadcast via SSE. The <code>syncLibrary()</code> function still runs to keep presets in sync, but sends empty CSS/state and sets <code>suppress_broadcast: true</code>. Since other tabs read theme data from the server (via the composed loader fragment or SSE), and <code>sessionStorage</code> is invisible to other tabs, draft changes remain fully isolated to the designer tab.</li>
                         </ul>
                         <h4>Publishing</h4>
                         <ul>
@@ -4108,7 +4466,7 @@ self.onmessage = function(e) {
                             <li><b>Custom CSS Snippet</b> — your raw CSS (last = highest cascade priority)</li>
                         </ol>
                         <p style="font-size: 0.68rem; color: var(--text-muted); margin-top: 6px;">Because Custom CSS is injected last, it always wins any cascade tie — this is why a gradient <code>background-image</code> in Custom CSS will override the Gradient Builder's output.</p>
-                        <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85; margin-top: 10px;"><b>Structured sections:</b> Internally the CSS is generated as four separate sections — <code>vars</code> (palette + manual overrides), <code>structural</code>, <code>gradient</code>, and <code>custom</code> — and saved to the server both as the flat blob above (served at <code>/theme.css</code> and shown in the Code tab) and as a sections JSON file. Consumers assemble only the sections they need: the bootloader picks sections per the "Show on Auth Pages" toggles (delivered inside <code>state.json</code> under the <code>_cssSections</code> key, plus an <code>extra</code> section holding valve-appended rules that are never auth-gated), and the server embeds only <code>vars</code> + <code>custom</code> into <code>index.html</code> as the flash-free safe subset. The <code>/*[OWUI_*]*/</code> marker comments still appear in the flat output and remain the fallback slicing mechanism for themes saved by older versions.</p>
+                        <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85; margin-top: 10px;"><b>Structured sections:</b> Internally the CSS is generated as four separate sections — <code>vars</code> (palette + manual overrides), <code>structural</code>, <code>gradient</code>, and <code>custom</code> — and saved to the server both as the flat blob above (served at <code>/theme.css</code> and shown in the Code tab) and as a sections JSON file. Consumers assemble only the sections they need: the bootloader picks sections per the "Show on Auth Pages" toggles (delivered inside <code>state.json</code> under the <code>_cssSections</code> key, plus an <code>extra</code> section holding valve-appended rules that are never auth-gated), and the server composes only <code>vars</code> + <code>custom</code> into <code>/static/custom.css</code> as the flash-free safe subset. The <code>/*[OWUI_*]*/</code> marker comments still appear in the flat output and remain the fallback slicing mechanism for themes saved by older versions.</p>
                             </div>
                         </details>
                     </div>
@@ -4169,7 +4527,7 @@ self.onmessage = function(e) {
                             <li><b>Liability Waiver:</b> The author of Theme Designer Pro (@G30) shall not be held liable for any material breach of license, legal action, or service termination resulting from the use or misuse of this function on a hosted or distributed Open WebUI instance.</li>
                             <li><b>Safe Harbor:</b> If your deployment is for personal use, internal team use (with permission), or for an organization of 50 or fewer active users, you are generally exempt from these strict branding restrictions.</li>
                         </ul>
-                        <p style="font-size:0.75rem; margin-top:12px; opacity:0.8;">This function is provided "as is" without warranty of any kind. By using Theme Designer Pro, you acknowledge that modifying system files (index.html) may have security implications. Use only on trusted instances.</p>
+                        <p style="font-size:0.75rem; margin-top:12px; opacity:0.8;">This function is provided "as is" without warranty of any kind. By using Theme Designer Pro, you acknowledge that serving instance-wide CSS and JavaScript may have security implications. Use only on trusted instances.</p>
                     </div>
                 </details>
 
@@ -4240,7 +4598,7 @@ self.onmessage = function(e) {
                         <ul>
                             <li><b>Server-Sent Events (SSE)</b> — live push to connected browsers via <code>{ROUTE_BASE}/events</code></li>
                             <li><b>HTTP fetch</b> — bootloader fetches <code>{ROUTE_BASE}/theme.css</code> and <code>{ROUTE_BASE}/state.json</code> on every page load</li>
-                            <li><b>index.html injection</b> — theme CSS baked into the HTML for instant first paint</li>
+                            <li><b>Static-asset composition</b> — theme CSS served as a render-blocking stylesheet for instant first paint</li>
                         </ul>
                         <p>Reverse proxies that <b>buffer responses</b> (the default for nginx) will hold SSE events in memory and never flush them to the client. This causes themes to appear only on the admin's browser while other users and devices see no changes, even after hard reloading.</p>
 
@@ -4294,7 +4652,7 @@ SetEnv proxy-sendcl 0</code></pre>
                         <p>If themes aren't propagating to other users/devices:</p>
                         <ul>
                             <li><b>Step 1:</b> On the non-working device, navigate directly to <code>https://your-instance{ROUTE_BASE}/theme.css</code> — if it returns CSS content, the server is working and the issue is in the delivery layer (proxy buffering or missing bootloader).</li>
-                            <li><b>Step 2:</b> On the non-working device, View Page Source and search for <code>owui-theme-bootloader</code> — if missing, the bootloader wasn't injected into <code>index.html</code> (send a chat message to trigger <code>event()</code>).</li>
+                            <li><b>Step 2:</b> On the non-working device, open <code>/static/loader.js</code> directly and search for <code>owui-theme-designer-pro:start</code> — if missing, this worker has not published its fragment yet (send a chat message to trigger <code>event()</code>).</li>
                             <li><b>Step 3:</b> In DevTools → Network tab, check for an active <code>EventSource</code> connection to <code>{ROUTE_BASE}/events</code> — if it's failing or immediately closing, your proxy is likely buffering or blocking SSE.</li>
                         </ul>
                     </div>
@@ -4308,8 +4666,25 @@ SetEnv proxy-sendcl 0</code></pre>
                             <li><b>Live push is worker-local.</b> SSE client connections are held in process memory. A theme save handled by Worker A will only broadcast to clients connected to Worker A. Clients on Workers B/C/D will not receive live push events.</li>
                             <li><b>Page-load fetch still works.</b> The bootloader fetches <code>{ROUTE_BASE}/theme.css</code> and <code>{ROUTE_BASE}/state.json</code> from disk on every page load, which works correctly across all workers. Themes propagate on the next page load/refresh.</li>
                             <li><b>Redis fixes this.</b> If <code>REDIS_URL</code> is set in your environment (which Open WebUI already uses for WebSocket relay), Theme Designer Pro automatically uses Redis pub/sub to broadcast SSE events across all workers. No additional configuration is needed beyond setting <code>REDIS_URL</code>.</li>
+                            <li><b>The composed assets are per worker.</b> Each worker builds its own <code>/static/loader.js</code> and <code>/static/custom.css</code> from what it has loaded, so a worker only serves the theme once it has run this function at least once. Open WebUI publishes <code>system.startup.completed</code> in every worker's lifespan, so in practice all of them publish during boot.</li>
                         </ul>
                         <p><b>TL;DR:</b> Single-worker deployments (the default) work perfectly. Multi-worker deployments get live push across workers automatically if <code>REDIS_URL</code> is set; otherwise, themes propagate on page refresh.</p>
+                    </div>
+                </details>
+
+                <details class="doc-accordion">
+                    <summary>17c. Sharing <code>loader.js</code> and <code>custom.css</code> With Other Plugins <i data-icon="chevron"></i></summary>
+                    <div class="doc-inner">
+                        <p>Open WebUI loads exactly two admin-extensible assets on every page: <code>/static/loader.js</code> (the only hook that runs before the SvelteKit bundle hydrates) and <code>/static/custom.css</code> (a render-blocking stylesheet). Any plugin that wants to reach the page before it paints needs one of them, and neither can have a single owner.</p>
+                        <p>Since v1.7.0 Theme Designer Pro no longer writes into <code>index.html</code>. It publishes a fragment into a shared registry on <code>app.state</code>, and a route composes every registered plugin's fragment into the response <b>per request</b>. Consequences worth knowing:</p>
+                        <ul>
+                            <li><b>Order does not matter.</b> A plugin that loads after this one needs no cooperation from it, and vice versa. Fragments are composed fresh on every request, not written once at install.</li>
+                            <li><b>Your own edits to those files survive.</b> If you have hand-written content in <code>static/custom.css</code> or <code>static/loader.js</code>, it is served first, followed by each plugin's fragment. Only the block between this plugin's own markers is ever replaced.</li>
+                            <li><b>Cascade position is explicit.</b> Fragments compose in <code>(order, key)</code> order, and this plugin registers at <code>order=100</code> so its custom CSS keeps the last word, as documented in Section 13. A plugin at a lower order composes earlier and loses ties at equal specificity.</li>
+                            <li><b>A broken plugin cannot blank the page.</b> If another plugin's fragment raises while composing, it is skipped and logged; every other fragment still ships.</li>
+                            <li><b>Nothing persists on disk.</b> Disabling the function withdraws its CSS immediately. If you <i>delete</i> the function without disabling it first, its fragment keeps serving until the container restarts, because Open WebUI dispatches the deletion event after the row is gone and a deleted function never receives it. Disable, then delete.</li>
+                        </ul>
+                        <p>Upgrading from 1.6.2 or earlier removes the old <code>index.html</code> blocks automatically on the first event. See Section 19 if you want to verify by hand.</p>
                     </div>
                 </details>
 
@@ -4318,11 +4693,11 @@ SetEnv proxy-sendcl 0</code></pre>
                     <div class="doc-inner">
                         <p>Common issues and their solutions.</p>
                         <ul>
-                            <li><b>Python permission error when injecting the bootloader.</b> The event function must have write access to your Open WebUI <code>index.html</code> file. If you are running a highly restricted bare-metal deployment or custom volume mappings, the function cannot inject the persistence script.</li>
+                            <li><b>Read-only filesystem.</b> No longer an issue: the bootloader and theme CSS are composed in memory and served from a route, so the function never needs write access to the frontend build directory. The one exception is the one-shot cleanup of a legacy <code>index.html</code> injection left by versions up to 1.6.2, which logs a warning and moves on if the file is not writable.</li>
                             <li><b>Canvas FX animations are lagging.</b> Heavy mathematically complex animations can drain resources. Ensure your browser supports <code>OffscreenCanvas</code> (indicated by the green <b>Background Worker</b> badge in the designer UI). Note: the badge is a pre-launch prediction (browser capability plus a static scan of the script source) &mdash; a script that only fails at runtime still falls back to the main thread without the badge changing. If your script runs on the main thread, keep animations simple. Even with Web Workers, massive particle counts or heavy calculations can still consume significant CPU/GPU resources.</li>
                             <li><b>My theme doesn't apply to other users.</b> Most commonly caused by <b>reverse proxy buffering</b> — see Section 17 above. Also ensure the admin has synced the theme via the designer (not Draft mode). The bootloader serves the theme to all users on page load from <code>{ROUTE_BASE}/theme.css</code>. If the theme files are missing from <code>DATA_DIR/theme/</code>, the bootloader has nothing to serve. Verify the endpoint works by navigating directly to <code>{ROUTE_BASE}/theme.css</code> in your browser — it should return CSS content.</li>
                             <li><b>Theme changes aren't appearing live on other devices/browsers.</b> This is almost always caused by <b>nginx or another reverse proxy buffering SSE responses</b>. See Section 17 for the fix. The function sends <code>X-Accel-Buffering: no</code> automatically, but nginx must have <code>proxy_buffering off</code> in the location block for this header to be respected. Quick diagnostic: open DevTools → Network tab on the non-working device and check if the <code>EventSource</code> connection to <code>{ROUTE_BASE}/events</code> is active and receiving heartbeat pings every 15 seconds.</li>
-                            <li><b>Theme reverts after disabling the function.</b> Toggling the function OFF triggers the <code>function.disable_started</code> lifecycle event, which broadcasts a <code>theme-disable</code> SSE event to strip the theme from all clients. The bootloader and CSS in <code>index.html</code> are also cleaned up. When re-enabled, the <code>function.enable_started</code> event re-injects everything automatically. On Open WebUI older than v0.11.0 these lifecycle events don't exist, so the theme instead <i>persists</i> after disabling &mdash; follow the Uninstallation steps in Section 19 for complete removal.</li>
+                            <li><b>Theme reverts after disabling the function.</b> Toggling the function OFF triggers the <code>function.disable_started</code> lifecycle event, which broadcasts a <code>theme-disable</code> SSE event to strip the theme from all clients. The CSS fragment is withdrawn from <code>/static/custom.css</code> at the same time, while the loader fragment stays published in an inactive state so its SSE connection survives. When re-enabled, the <code>function.enable_started</code> event republishes everything automatically. On Open WebUI older than v0.11.0 these lifecycle events don't exist, so the theme instead <i>persists</i> after disabling &mdash; follow the Uninstallation steps in Section 19 for complete removal.</li>
                             <li><b>Function toggle cleanup details.</b> The <code>theme-disable</code> SSE event removes all 6 injected DOM elements by ID: <code>owui-dev-live-theme</code> (main CSS), <code>owui-server-theme</code> (server-injected CSS), <code>owui-theme-style</code> (legacy), <code>owui-theme-canvas-bg</code> (canvas), <code>owui-theme-bg-color</code> (background div), and <code>owui-canvas-script-runner</code> (canvas script). It also clears the in-memory theme state and localStorage cache to prevent re-injection by the MutationObserver.</li>
                             <li><b>Live push stopped working after re-saving the function.</b> This should not happen — SSE connections are persisted on <code>app.state</code> and survive function hot-reloads. If you do experience this, verify the SSE endpoint is accessible at <code>{ROUTE_BASE}/events</code>. The server sends a heartbeat every 15 seconds — if the connection is truly dead, the EventSource will auto-reconnect after 3 seconds.</li>
                             <li><b>Draft mode is fully sandboxed.</b> Theme CSS and state data use <code>sessionStorage</code> (tab-scoped), <code>syncToServer()</code> is gated off entirely, and mode changes (Dark/Light/System/etc.) are only applied locally to the designer page's <code>&lt;html&gt;</code> element — <code>localStorage.setItem('theme')</code> is skipped, so other tabs and the admin's live session are never affected.</li>
@@ -4334,7 +4709,7 @@ SetEnv proxy-sendcl 0</code></pre>
                 <details class="doc-accordion">
                     <summary>19. Uninstallation &amp; Complete Removal <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
-                        <p>Toggling the function OFF in the admin panel automatically strips the bootloader and theme CSS from <code>index.html</code> and broadcasts a cleanup event to all connected clients. <b>In most cases, no manual removal is needed.</b> However, if the cleanup didn't complete (e.g., the server crashed mid-toggle), follow these steps for a complete manual removal:</p>
+                        <p>Toggling the function OFF in the admin panel automatically withdraws the theme CSS from <code>/static/custom.css</code>, marks the bootloader inactive, and broadcasts a cleanup event to all connected clients. <b>In most cases, no manual removal is needed.</b> However, if the cleanup didn't complete (e.g., the server crashed mid-toggle), follow these steps for a complete manual removal:</p>
                         <h4>Step 1: Purge Browser LocalStorage</h4>
                         <p>The easiest way is to use the <b>Factory Reset</b> button in the <b>Danger Zone</b> section below (Section 21). Alternatively, open your Open WebUI instance, press <b>F12</b> to open Developer Tools, go to the <b>Console</b> tab, and paste:</p>
                         <div style="position: relative;">
@@ -4358,8 +4733,8 @@ location.reload();</code></pre>
                         </ul>
                         <h4>Step 3: Remove the Server Bootloader</h4>
                         <ul>
-                            <li><b>The Docker Way (Simplest):</b> Restart or update your container (e.g., <code>docker compose down &amp;&amp; docker compose up -d</code>). This replaces the patched <code>index.html</code> with a fresh copy from the image.</li>
-                            <li><b>The Manual Way:</b> Open the <code>index.html</code> file on your server (commonly at <code>/app/build/index.html</code>) and delete the entire block wrapped in the <code>&lt;!-- OWUI Theme Pro Bootloader --&gt;</code> markers.</li>
+                            <li><b>The Docker Way (Simplest):</b> Restart your container. Fragments live in process memory, so a restart clears anything left behind by a function that was deleted before being disabled.</li>
+                            <li><b>Upgrading from 1.6.2 or earlier:</b> Older versions wrote directly into <code>index.html</code>. Version 1.7.0 removes those blocks once, automatically, on its first event. To check by hand, look for <code>&lt;!-- OWUI Theme Pro Bootloader --&gt;</code> in <code>/app/build/index.html</code>; it should be gone.</li>
                         </ul>
                         <h4>Step 4: Disable or Remove the Event Function</h4>
                         <p>In the Open WebUI admin panel, navigate to Functions and disable or delete the Theme Designer Pro event function.</p>
@@ -4851,13 +5226,30 @@ location.reload();</code></pre>
         }).catch(e => showToast('Publish error: ' + e.message));
     }
 
-    function syncToServer(css, sections) {
+    function syncToServer(css, sections, stateStr) {
         // Draft mode: skip server sync (changes stay local only)
         if (_draftMode) return;
+        // Capture the state NOW, alongside the css we were handed — never
+        // re-read it when the debounce fires.
+        //
+        // localStorage is a SHARED, externally-written channel: every tab on
+        // this origin runs a bootloader whose fetchThemeFromServer() writes the
+        // server's current state straight into 'owui_dev_theme_v1' as its
+        // offline-recovery fallback. An admin with the main app open next to
+        // the designer — the normal way this page is used — therefore has a
+        // second writer racing the 250ms debounce window.
+        //
+        // Reading the key inside the timer let that writer win: the POST went
+        // out as {css: <the theme just applied>, state: <the PREVIOUS theme>},
+        // the server persisted the mismatch and broadcast it, and every client
+        // including the designer snapped back to the old theme a beat after
+        // showing the new one. That is the "it flashes, then reverts, then
+        // seems to fix itself" report — the flash was the only moment the new
+        // theme was ever real.
+        const state = stateStr || localStorage.getItem('owui_dev_theme_v1') || '{}';
         // Debounce: wait 250ms of inactivity before POSTing
         clearTimeout(_syncTimer);
         _syncTimer = setTimeout(() => {
-            const state = localStorage.getItem('owui_dev_theme_v1') || '{}';
             // Sequence + queue: rapid consecutive saves (fast theme swaps) must
             // not race. The queue serializes POSTs so the server persists them
             // in order — an earlier request committing after a later one would
@@ -4867,7 +5259,7 @@ location.reload();</code></pre>
             const mySeq = ++_syncSeq;
             // 'sections' is the structured {vars, structural, gradient, custom}
             // breakdown of the same CSS — the server persists it so consumers
-            // (bootloader auth stripping, index.html safe subset) can assemble
+            // (bootloader auth stripping, custom.css safe subset) can assemble
             // exactly the sections they need instead of regex-slicing the blob.
             _syncQueue = _syncQueue.then(() => fetch('{ROUTE_BASE}', {
                 method: 'POST',
@@ -6786,7 +7178,11 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                         _activeGradientRef: activeGradientRef
                     });
                     Storage.setRaw('theme', stateStr);
-                    syncToServer(css, s);
+                    // Hand the state we just serialized straight to the sync —
+                    // see syncToServer(): re-reading it from localStorage when
+                    // the debounce fires lets another tab's write-through
+                    // replace it with the server's previous state.
+                    syncToServer(css, s, stateStr);
                     
                     // Keep data-theme synced for accurate rendering
                     const pTheme = localStorage.getItem('theme');
@@ -12578,16 +12974,12 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 </body>
 </html>"""
 
-        # Extract JS body from BOOTLOADER_SCRIPT (strip HTML tags/comment)
-        bootloader_js = _re.sub(
-            r"^\s*<!--.*?-->\s*<script[^>]*>\s*|\s*</script>\s*$",
-            "",
-            self.BOOTLOADER_SCRIPT.strip(),
-            flags=_re.DOTALL,
-        )
-        # Replace placeholders (same substitutions as _get_bootloader_script)
+        # Same substitutions as _loader_fragment, minus the embedded state:
+        # the designer page manages its own state directly (the bootloader's
+        # fetch/state path is gated on !window.__THEME_DESIGNER__), so the
+        # placeholder resolves to null rather than shipping a second copy.
         route_base = self._get_route_base()
-        bootloader_js = bootloader_js.replace(
+        bootloader_js = self._bootloader_body().replace(
             "__THEME_ROUTE__", route_base
         ).replace(
             "__CANVAS_API_ACCESS__",
@@ -12595,6 +12987,9 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         ).replace(
             "__THEME_ACTIVE__",
             "true",
+        ).replace(
+            "__EMBEDDED_STATE__",
+            "null",
         )
 
         # Build valve config for frontend injection
@@ -12740,13 +13135,15 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
     # -- entry point ---------------------------------------------------------
 
-    _injected = False  # Class-level flag to avoid re-injecting on every event
+    _published = False  # Set once the shared-asset fragments are published in this process
     _function_disabled = False  # Set True when function.disable_started fires; blocks route handlers
     # Delivery caches for /theme.css and /state.json: (cache_key, body, etag).
     # Keyed on source-file mtimes + valve settings, so saves and valve changes
     # invalidate naturally; per-process (each worker warms its own copy).
     _css_delivery_cache = None
     _state_delivery_cache = None
+    _safe_css_cache = None  # (cache_key, css) for the first-paint-safe subset
+    _loader_fragment_cache = None  # (cache_key, fragment) for the composed loader.js block
     _toggle_seq = 0  # Monotonic counter — incremented on every enable_started/disable_started lifecycle event
     _disable_seq = 0  # Sequence number of the last function.disable_started event
     _reenabling = False  # Set by function.enable_started; triggers SSE broadcast on next inject
@@ -13155,30 +13552,33 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         # dispatch pre-toggle lifecycle events).
         # This is our last chance to clean up before we stop receiving events.
         #
-        # Strategy: strip theme from index.html and broadcast disable.
-        #   1. Strip inline CSS from index.html (no flash of old theme)
-        #   2. Re-inject bootloader with __THEME_ACTIVE__=false (keeps SSE alive
-        #      so theme-update broadcast on re-enable reaches all connected clients)
-        #   3. Broadcast theme-disable to strip theme from all open tabs
+        # Strategy: withdraw the CSS fragment and broadcast disable.
+        #   1. Set _function_disabled — both producers read it at compose time,
+        #      so the very next request composes a custom.css without our block
+        #      (the shared registry's withdrawal mechanism) and a loader.js with
+        #      __THEME_ACTIVE__=false. No file rewrite, nothing to strip.
+        #   2. The loader fragment stays published deliberately: an inactive
+        #      bootloader still holds its SSE connection, which is how the
+        #      theme-update broadcast on re-enable reaches all connected clients.
+        #   3. Broadcast theme-disable to strip theme from all open tabs.
         if __event_name__ == "function.disable_started":
             subject = event.get("subject", {})
             if subject.get("id") == __id__:
                 Event._toggle_seq += 1
                 Event._disable_seq = Event._toggle_seq
                 log.info(
-                    "[Theme Pro] Function is being disabled (seq=%d) — stripping theme, keeping SSE alive",
+                    "[Theme Pro] Function is being disabled (seq=%d) — withdrawing CSS fragment, keeping SSE alive",
                     Event._toggle_seq,
                 )
-                # Threaded: flock + index.html rewrites must not block the loop
-                await asyncio.to_thread(self._strip_theme_css_from_index)
-                await asyncio.to_thread(
-                    self._inject_bootloader, theme_active_override=False
-                )
-                Event._broadcast_disable()
-                Event._injected = False
                 Event._function_disabled = True
+                # Republish so the closures are pointed at this instance before
+                # events stop arriving; both now read _function_disabled.
+                if __app__ is not None:
+                    self._publish_fragments(__app__)
+                Event._broadcast_disable()
+                Event._published = False
                 log.info(
-                    "[Theme Pro] Cleanup complete — CSS stripped, bootloader set inactive, clients notified"
+                    "[Theme Pro] Cleanup complete — CSS withdrawn, bootloader set inactive, clients notified"
                 )
                 return  # Nothing else to do on this event
 
@@ -13186,8 +13586,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         # When the admin toggles this function back ON, Open WebUI dispatches
         # 'function.enable_started' synchronously BEFORE committing
         # is_active=True (the not-yet-active function is included via
-        # extra_function_ids). Ensure _injected is False so the main logic
-        # below re-injects the bootloader and theme CSS into index.html
+        # extra_function_ids). Ensure _published is False so the main logic
+        # below republishes the fragments and rebroadcasts to open tabs
         # immediately.
         if __event_name__ == "function.enable_started":
             subject = event.get("subject", {})
@@ -13202,7 +13602,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                         "[Theme Pro] Function is being re-enabled (seq=%d, last_disable=%d) — triggering re-injection",
                         my_seq, Event._disable_seq,
                     )
-                    Event._injected = False  # Guarantees should_inject=True below
+                    Event._published = False  # Forces the republish + broadcast below
                     Event._reenabling = True  # Triggers broadcast to connected clients
                     Event._function_disabled = False
                 else:
@@ -13226,9 +13626,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         )
 
         # Register routes on first call or when the designer URL valve changes.
-        # Previously this ran unconditionally and reset _injected=False, which
-        # forced full bootloader + CSS re-injection (4-6 file I/O ops) on every
-        # single chat event. Now guarded to only run when actually needed.
+        # Guarded because _register_route rewrites app.routes; the fragment
+        # publish below is cheap enough to run unguarded.
         _current_route = self._get_route_base()
         if __app__ is not None and (
             Event._routes_registered_url is None
@@ -13236,9 +13635,12 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         ):
             self._register_route(__app__)
             Event._routes_registered_url = _current_route
-            # URL change requires re-injection with the new route base
+            # A URL change rewrites __THEME_ROUTE__ inside the loader fragment.
+            # The producer picks that up on its own at the next compose, but
+            # clearing the flag also rebroadcasts so already-loaded tabs move
+            # their SSE connection to the new route instead of retrying a 404.
             if url_changed:
-                Event._injected = False
+                Event._published = False
 
         # --- Redis pub/sub subscriber for multi-worker SSE broadcasting ---
         # Started here in event() (async context) rather than _register_route (sync)
@@ -13369,61 +13771,62 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             and Event._last_overlay_transparency != self.valves.overlay_transparency
         )
 
-        # Capture whether this is the first injection cycle (after disable, startup,
-        # or class reload). Used below to trigger an SSE broadcast so connected clients
-        # receive the theme immediately without needing a page refresh.
-        _was_not_injected = not Event._injected
+        # One-shot: remove blocks an older, index.html-writing build left behind.
+        # Threaded — the flock can wait on another process and must not stall
+        # the loop. Self-guarded, so this is a no-op after the first call.
+        if not Event._legacy_index_cleaned:
+            await asyncio.to_thread(self._clean_legacy_index_injection)
 
-        # Inject bootloader + theme CSS on first event, startup, OR valve change.
-        # Since POST handler no longer writes to index.html, event() is the sole writer.
-        # Always run injection — the while-loop stripping makes it idempotent.
-        should_inject = (
-            __event_name__ == "system.startup.completed"
-            or _was_not_injected
-            or canvas_valve_changed
-            or sidebar_valve_changed
-            or overlay_valve_changed
-            or url_changed
+        # Capture whether fragments have been published in this process yet
+        # (first event after startup, a disable, or a class reload). Used below
+        # to trigger an SSE broadcast so connected clients receive the theme
+        # immediately without needing a page refresh.
+        _was_not_published = not Event._published
+
+        # Publish unconditionally. This replaced a read-modify-write of
+        # index.html under a cross-process flock, which had to be guarded on
+        # "did anything actually change?"; re-pointing the two fragments is two
+        # dict writes plus a route scan, so the guard is not worth its own bugs.
+        # Re-pointing on every event is also what makes a hot reload converge:
+        # the registry ends up holding the NEW instance's producer.
+        # No valve branches either — the producers read self.valves at compose
+        # time, so a valve change is already reflected on the next request.
+        _published_ok = (
+            self._publish_fragments(__app__) if __app__ is not None else False
         )
 
-        if should_inject:
-            # _inject_bootloader() strips any existing bootloader block first
-            # (marker-based, URL-agnostic), so a designer_url change is handled
-            # by the normal inject cycle — no separate pre-strip pass needed.
-            # Threaded: flock + index.html rewrites must not block the loop.
-            _boot_ok = await asyncio.to_thread(self._inject_bootloader)
-            _css_ok = await asyncio.to_thread(self._inject_theme_css)
+        if _published_ok:
             # Broadcast theme state to connected clients when:
-            # - First injection cycle after disable/startup (_was_not_injected)
-            # - Function was just re-enabled (_reenabling flag from function.enable_started)
+            # - First publish cycle after disable/startup (_was_not_published)
+            # - Function was just re-enabled (_reenabling from function.enable_started)
             # - A valve changed (admin toggled a setting)
             _reenabling = Event._reenabling
             Event._reenabling = False
-            if _was_not_injected or _reenabling or canvas_valve_changed or sidebar_valve_changed or overlay_valve_changed:
+            if _was_not_published or _reenabling or canvas_valve_changed or sidebar_valve_changed or overlay_valve_changed:
                 # Token + ETag broadcast — clients refetch /theme.css + /state.json
                 # (valve post-processing applies at delivery), unless the tags show
                 # they already hold this exact version. Priming runs off-loop.
                 _etags = await asyncio.to_thread(self._prime_delivery_caches)
                 Event._broadcast_update(_etags)
                 _reasons = []
-                if _was_not_injected: _reasons.append("first injection cycle")
+                if _was_not_published: _reasons.append("first publish cycle")
                 if _reenabling: _reasons.append("function re-enabled")
                 if canvas_valve_changed: _reasons.append(f"Canvas FX → {self.valves.enable_canvas_fx}")
                 if sidebar_valve_changed: _reasons.append(f"sidebar → {self.valves.sidebar_transparency}")
                 if overlay_valve_changed: _reasons.append(f"overlay → {self.valves.overlay_transparency}")
                 log.info("[Theme Pro] Valve change (%s) — pushed to SSE clients", ", ".join(_reasons))
-            # Only latch _injected on success — a transient failure (e.g.
-            # index.html briefly absent during a container recreate) leaves
-            # the flag unset so the next event retries instead of silently
-            # serving an unthemed index.html until the next valve change.
-            if _boot_ok and _css_ok:
-                log.info("[Theme Pro] Injection tasks completed")
-                Event._injected = True
-            else:
-                log.warning(
-                    "[Theme Pro] Injection incomplete (bootloader=%s, css=%s) — will retry on next event",
-                    _boot_ok, _css_ok,
+            if _was_not_published:
+                log.info(
+                    "[Theme Pro] Published loader.js + custom.css fragments to the shared static-asset registry"
                 )
+            Event._published = True
+        elif __app__ is not None:
+            # Only latch on success — a transient failure leaves the flag unset
+            # so the next event retries instead of silently serving an unthemed
+            # instance until something else happens to republish.
+            log.warning(
+                "[Theme Pro] Fragment publish failed — will retry on next event"
+            )
 
         # Always track the current valve state for next comparison
         Event._last_designer_url = self.valves.designer_url

@@ -139,7 +139,7 @@ The Theme Designer Pro Open WebUI **tool** — invoked via AI chat, renders insi
 
 ### ⚡ Event Function ([`event-function/`](event-function/))
 
-The Theme Designer Pro **event function** — a standalone admin page variant with server-side persistence and real-time SSE push to all connected users. Designed for **server administrators** who want instance-wide theming. See [`event-function/README.md`](event-function/README.md) for installation and how it differs from the tool.
+The Theme Designer Pro **event function** — a standalone admin page variant with server-side persistence and real-time SSE push to all connected users. Designed for **server administrators** who want instance-wide theming. Themes are served through Open WebUI's shared `/static/loader.js` and `/static/custom.css`, composed per request, so it coexists with other plugins and never writes to the frontend build. See [`event-function/README.md`](event-function/README.md) for installation and how it differs from the tool.
 
 ### 🚀 Launcher Tool ([`tools/theme_designer_pro_launcher.py`](tools/theme_designer_pro_launcher.py))
 

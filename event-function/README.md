@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — standalone admin page with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.6.0-blue)
+![Version](https://img.shields.io/badge/version-1.7.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.10.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -44,7 +44,7 @@ Unlike the [Tool variant](../tools/) which runs inside an AI chat iframe, this v
 
 ## ✨ Key Features
 
-- ⚡ **Server-Side Persistence:** Themes are saved to `DATA_DIR/theme/` on the server and injected into `index.html` — every user sees the same theme instantly, across all browsers and devices.
+- ⚡ **Server-Side Persistence:** Themes are saved to `DATA_DIR/theme/` on the server and served through Open WebUI's shared static assets (`/static/loader.js` + `/static/custom.css`) — every user sees the same theme instantly, across all browsers and devices. Nothing is written to the frontend build.
 - 📡 **Real-Time SSE Push:** When you save a theme, all connected Open WebUI clients receive the update in real-time via Server-Sent Events. No page refresh required. Multi-worker deployments are supported via automatic Redis pub/sub broadcasting.
 - 📝 **Draft Mode:** Preview theme changes locally in your browser before publishing to all users. Draft mode isolates changes in `sessionStorage` — other users see nothing until you publish. The designer communicates with the bootloader via a `owui-theme-updated` CustomEvent for live preview without touching `localStorage`. Click **Publish** to push to all users, or discard to revert.
 - 🌈 **OKLCH Color Engine:** Harness Tailwind v4's OKLCH color spaces. Adjust Hue, Chroma, and Lightness to generate mathematically perfect, accessible tonal ramps. Hit **✦ Randomize** to generate random base colors instantly, or **◎ Extract** to upload/paste an image and calculate dominant colors using hue-histogram analysis. Locked variables are protected from both. _(Pro-Tip: Double-click any slider label to instantly reset it to its default value)._
@@ -78,7 +78,7 @@ Unlike the [Tool variant](../tools/) which runs inside an AI chat iframe, this v
 - 📱 **Fully Responsive:** The designer adapts to mobile screens with three responsive breakpoints (≤768px tablets, ≤480px phones, ≤390px iPhone SE) including icon-only mode for narrow header buttons.
 - 💾 **Session Persistence:** The designer remembers which tab you were on via `sessionStorage`, so refreshing the page returns you to exactly where you left off.
 - ⏪ **Legacy Data Migration:** Automatically detects legacy data structures and gracefully migrates saved snapshots and active themes to the latest format without data loss.
-- 🔌 **Function Lifecycle Integration:** Toggling the function OFF in the admin panel triggers a clean `function.disable_started` lifecycle event that strips the theme from `index.html`, broadcasts `theme-disable` to all connected clients, and clears `localStorage` — no page refresh needed. Toggling back ON triggers `function.enable_started`, which re-injects the bootloader and broadcasts the theme to all clients immediately. Requires Open WebUI v0.11.0 or newer (pre-toggle lifecycle events).
+- 🔌 **Function Lifecycle Integration:** Toggling the function OFF in the admin panel triggers a clean `function.disable_started` lifecycle event that withdraws the theme CSS from the shared `custom.css`, broadcasts `theme-disable` to all connected clients, and clears `localStorage` — no page refresh needed. The loader fragment stays published in an inactive state so its SSE connection survives. Toggling back ON triggers `function.enable_started`, which republishes and broadcasts the theme to all clients immediately. Requires Open WebUI v0.11.0 or newer (pre-toggle lifecycle events).
 - ☢️ **Safe Nuclear & Factory Resets:** "Reset Mode" and "Global Reset" buttons safely clear all custom styling and restore Open WebUI to its original look. Confirmation dialogs offer pre-wipe backups. Factory Reset under the Documentation tab's Danger Zone permanently wipes all data.
 
 ---
@@ -248,7 +248,7 @@ Valves are configured in the Admin Panel under **Functions → Theme Designer Pr
 
 | Valve | Type | Default | Description |
 |---|---|---|---|
-| **Designer URL** | `str` | `/api/v1/theme-designer` | URL path where the designer and all its sub-routes are served. Must start with `/api/v1/` — paths outside this prefix are auto-corrected to prevent the SPA catch-all from intercepting the route (a warning is logged). Changing this value triggers a route re-registration and bootloader re-injection with the new URL. |
+| **Designer URL** | `str` | `/api/v1/theme-designer` | URL path where the designer and all its sub-routes are served. Must start with `/api/v1/` — paths outside this prefix are auto-corrected to prevent the SPA catch-all from intercepting the route (a warning is logged). Changing this value triggers a route re-registration; the loader fragment picks up the new URL on its next compose. |
 
 > **Note:** All Valves default to their most permissive values — the event function behaves identically to an un-valved installation out of the box. Admins only need to configure Valves if they want to restrict specific features.
 
@@ -288,14 +288,16 @@ The designer includes **22 comprehensive documentation sections** accessible via
 
 ## 🚀 How It Works (Under the Hood)
 
-Theme Designer Pro uses a unique server-side injection architecture. Unlike the Tool variant which operates through an iframe and browser `localStorage`, the Event Function persists themes on the server and pushes changes to every connected client.
+Theme Designer Pro persists themes on the server and pushes changes to every connected client. Unlike the Tool variant, which operates through an iframe and browser `localStorage`, the Event Function publishes into Open WebUI's two admin-extensible static assets and composes them per request.
 
-1. **Event-Driven Injection:**
-   The `event()` entry point runs on every Open WebUI event (chat messages, system events). On first invocation or after `system.startup.completed`, it injects a bootloader script and theme CSS into the server's `index.html`. The injection is idempotent — `while` loop stripping ensures duplicate blocks from prior runs are cleaned before re-injection.
+> **Changed in 1.7.0.** Earlier versions wrote a bootloader and a `<style>` block directly into the frontend's `index.html`, under a cross-process file lock. That is gone. See [Shared Static Assets](#-shared-static-assets-170) below.
 
-2. **The Bootloader (Injected into `index.html`):**
+1. **Event-Driven Publishing:**
+   The `event()` entry point runs on every Open WebUI event (chat messages, system events) and re-points two *fragments* at the current function instance: one for `/static/loader.js`, one for `/static/custom.css`. Publishing is idempotent and costs two dict writes, so it runs unconditionally — which is also what makes a hot reload converge. Nothing touches the filesystem.
+
+2. **The Bootloader (composed into `/static/loader.js`):**
    A self-contained JavaScript block (~900 lines) that runs on every page load. It handles:
-   - **Theme state loading:** Reads config from `localStorage` + embedded `<script#owui-theme-state>` data, fetches `/theme.css` and `/state.json` from the server. Uses a monotonic version counter to prevent stale fetch responses from overwriting fresher SSE data.
+   - **Theme state loading:** Reads config from `localStorage` + the state inlined into the loader fragment, then fetches `/theme.css` and `/state.json` from the server. Both are applied **atomically** — CSS and state never land separately, so the page can never render one theme's colors against another's canvas. Uses a monotonic version counter to prevent stale fetch responses from overwriting fresher SSE data.
    - **SSE client:** Connects to the `/events` endpoint to receive real-time `theme-update` and `theme-disable` messages. When an update arrives, it applies the new CSS/state immediately — no page refresh needed. Uses native `EventSource` auto-reconnect with a 3-second retry interval. Includes iOS PWA resilience — re-opens the connection when the app returns to foreground after WebKit silently kills it.
    - **Socket interceptor:** Wraps the `WebSocket` constructor to attach a `message` listener on each new instance, intercepting Socket.IO v4 frames containing `chat:completion` usage data. Walks the payload recursively (up to 4 levels deep) to find `usage` objects with token counts. Dispatches `owui-canvas-context` CustomEvents with `{ exactTokens, promptTokens, completionTokens, source: 'socket' }` — zero coupling with the context observer.
    - **Context observer:** `MutationObserver` on `#messages-container` that scans `.chat-user` and `.chat-assistant` elements for DOM-based token estimation (debounced every ~2s). Navigation-aware — re-attaches when the active chat changes. Sends zero-state when navigating away from chat.
@@ -307,9 +309,11 @@ Theme Designer Pro uses a unique server-side injection architecture. Unlike the 
    - `open_theme_designer.css` — the generated CSS served at `{designer_url}/theme.css`
    - `open_theme_designer.json` — the full theme state served at `{designer_url}/state.json`
    - `open_theme_designer_sections.json` — the structured CSS sections (`vars` / `structural` / `gradient` / `custom`) that consumers assemble selectively (auth-page stripping, flash-free inline subset)
-   - `open_theme_designer_library.json` — the preset library All `index.html` file operations use `fcntl.flock()` for cross-process serialization — critical because Open WebUI fires multiple concurrent `event()` calls during startup.
+   - `open_theme_designer_library.json` — the preset library
 
-   **FOUC prevention:** The injector embeds a safe subset of theme CSS _inline_ into `index.html` (with structural/gradient rules stripped to prevent a white flash before the canvas script loads). State JSON is also embedded directly into `index.html` as a `<script#owui-theme-state>` element — eliminating an async fetch for initial state data. The bootloader then fetches the full CSS from the server and applies the deferred rules. As a **Watchtower recovery** fallback, the bootloader also writes theme data through to `localStorage` — if `index.html` is replaced by a container image update (e.g., Watchtower), the server re-injects the bootloader on the next `event()` call, and the `localStorage` copy lets it re-apply the theme immediately even before the server files are refetched.
+   Delivery is cached on file mtime plus the valves that affect post-processing, so the steady-state cost of serving either composed asset is a `stat()`.
+
+   **FOUC prevention:** `/static/custom.css` carries a safe subset of the theme (palette variables + custom CSS, with structural and gradient rules deferred so the page doesn't flash through to the background before the canvas starts). Open WebUI already loads that file as a render-blocking stylesheet, so the subset applies before first paint. The bootloader then fetches the full CSS and applies the deferred rules. Canvas FX scripts are deliberately **not** inlined — they are the bulk of the state, and the composed asset is rebuilt and hashed on every request, so they arrive with the `/state.json` fetch a moment later. As a **Watchtower recovery** fallback the bootloader writes theme data through to `localStorage`, so a client can re-apply the last known theme before the server files are refetched.
 
 4. **SSE Push Architecture:**
    When the designer saves a theme, the POST handler writes CSS + state to disk and calls `_broadcast_update()`, which pushes a lightweight version token (with ETags) to all connected SSE clients (`_sse_clients`); each client then refetches `/theme.css` and `/state.json`, with ETag revalidation so unchanged files cost a cheap 304. SSE clients are stored on `app.state` to survive function hot-reloads. The `theme-disable` event type is broadcast when the admin toggles the function OFF. In multi-worker deployments, `_redis_publish()` broadcasts to the `theme_pro_sse` Redis pub/sub channel, ensuring all workers relay updates to their local SSE clients.
@@ -321,10 +325,36 @@ Theme Designer Pro uses a unique server-side injection architecture. Unlike the 
    The bootloader assembles auth-page CSS from the structured sections delivered inside `state.json` (under the `_cssSections` key), honoring each feature’s independent "Show on Auth Pages" toggle (colors, custom CSS, canvas, gradient). For themes saved by older versions without sections, it falls back to slicing the flat CSS by `/*[OWUI_*]*/` marker comments.
 
 7. **Function Lifecycle Integration:**
-   When the admin toggles the function OFF, Open WebUI dispatches `function.disable_started` synchronously, before the toggle is committed. Theme Designer Pro uses this to strip theme CSS from `index.html`, re-inject the bootloader with `__THEME_ACTIVE__=false` (keeping SSE alive for the disable broadcast), and broadcast `theme-disable` to all connected clients. When toggled back ON, `function.enable_started` triggers re-injection and broadcasts the saved theme to all clients immediately. These pre-toggle lifecycle events exist in Open WebUI v0.11.0 and newer; on older builds the toggle simply takes effect without live cleanup/re-injection.
+   When the admin toggles the function OFF, Open WebUI dispatches `function.disable_started` synchronously, before the toggle is committed. Theme Designer Pro sets a flag both fragment producers read at compose time, so the very next request serves a `custom.css` without its block and a `loader.js` with `__THEME_ACTIVE__=false` — keeping SSE alive for the disable broadcast — and broadcasts `theme-disable` to all connected clients. When toggled back ON, `function.enable_started` republishes and broadcasts the saved theme to all clients immediately. These pre-toggle lifecycle events exist in Open WebUI v0.11.0 and newer; on older builds the toggle simply takes effect without live cleanup/re-injection.
 
 8. **Hot Reload Behavior:**
-   When the event function is re-saved in the admin panel, `_register_route()` fires and resets `Event._injected = False`. The next `event()` call detects this and re-runs the full injection pipeline. Route registration inserts ASGI routes *before* the SPA catch-all to ensure they take priority.
+   When the event function is re-saved in the admin panel, the next `event()` call republishes both fragments, leaving the registry holding the *new* instance's producers. Route registration inserts ASGI routes *before* the SPA catch-all to ensure they take priority.
+
+---
+
+## 🧱 Shared Static Assets (1.7.0)
+
+Open WebUI ships two intentionally-empty files that it loads on **every** page as admin extension points:
+
+| Path | How it loads | Why it matters |
+|---|---|---|
+| `/static/loader.js` | `<script defer>` | The only hook that runs before the SvelteKit bundle hydrates |
+| `/static/custom.css` | `<link rel="stylesheet">` | Render-blocking, so it applies before first paint |
+
+Neither can have a single owner — any plugin wanting to reach the page pre-paint needs one of them. Theme Designer Pro therefore uses a **shared registry**, designed with [@Classic298](https://github.com/Classic298), that every participating plugin can publish into:
+
+- Each plugin registers a *fragment* on `app.state`; a route composes all registered fragments into the response **per request**.
+- Load order is irrelevant. A plugin that loads later needs no cooperation from one that loaded earlier, and a re-exec'd plugin replaces its own entry.
+- Any content **you** have hand-written into those two files is preserved and served first; only the block between a plugin's own markers is ever replaced.
+- Composition order is `(order, key)`. Theme Designer Pro registers at `order=100` so its custom CSS keeps the last word in the cascade, matching the documented CSS output order.
+- A fragment whose producer raises is skipped and logged — one broken plugin cannot blank a page-wide asset.
+- Producers run synchronously on the request path, so everything Theme Designer Pro publishes is memoised; the steady-state cost is a `stat()`.
+
+The registry block is kept **byte-identical** across participating plugins, and carries an implementation version so a newer copy evicts an older one and the fleet converges on one implementation rather than whichever plugin booted first.
+
+**What this replaced.** Up to 1.6.2 this function read-modify-wrote the frontend's `index.html` under a cross-process `fcntl` lock to inject its bootloader and a `<style>` block. That is gone entirely, along with the class of bugs that came with writing to a file the application also owns (duplicate block accumulation, stale embedded CSS that no save could refresh, and the need for write access to the frontend build). It also means themes now track the latest save on every page load rather than only after the next `event()`.
+
+**Scope.** The two assets reach the SPA — the chat UI and the auth pages. The designer page is its own document and does not load them; it manages its own styling directly.
 
 ---
 
@@ -389,7 +419,7 @@ The fallback is automatic — Worker errors are caught, the Worker is terminated
 ## ❓ Troubleshooting & FAQ
 
 - **My theme disappears after a container recreate.**
-  - _Reason:_ `docker compose up --force-recreate` replaces the container filesystem — `index.html` returns to stock. The theme auto-re-injects on the next `event()` call (any chat message or system event). A simple `docker restart` preserves the injected `index.html`.
+  - _Reason:_ Fragments live in process memory, so a fresh container serves the stock (empty) `loader.js` and `custom.css` until the function publishes again. Open WebUI dispatches `system.startup.completed` during boot, which republishes automatically; if you catch a page load inside that window, reload it.
 
 - **Valve changes aren't taking effect.**
   - _Reason:_ Saving valves in the admin panel doesn't trigger `event()` directly. Send any chat message or wait for the next system event — the function detects the valve change on the next `event()` invocation.
@@ -404,14 +434,17 @@ The fallback is automatic — Worker errors are caught, the Worker is terminated
 - **Canvas FX animations are lagging.**
   - _Fix:_ Heavy animations can drain resources. Ensure your browser supports `OffscreenCanvas` (indicated by the green "Background Worker" badge in the UI). If it says "Main Thread (Fallback)", keep animations simple.
 
-- **Multiple bootloader blocks in `index.html`.**
-  - _Reason:_ This was a historical bug caused by `if` checks instead of `while` loops for stripping. It's been fixed — the current code uses `while` loops. If you encounter duplicates from an old version, restarting the container or triggering a re-injection will clean them up.
+- **Leftover blocks in `index.html` after upgrading from 1.6.2 or earlier.**
+  - _Reason:_ Older versions wrote directly into `index.html`, and that file survives an upgrade. Version 1.7.0 removes those blocks once, automatically, on its first event, and logs that it did. Nothing writes to `index.html` any more.
+
+- **A theme I deleted keeps being served.**
+  - _Reason:_ Deleting the function without disabling it first leaves its fragment in memory — Open WebUI dispatches `function.deleted` after the row is gone, so the plugin never receives it. Disable, then delete. A container restart also clears it.
 
 - **Theme works but not on the auth/login page.**
   - _Check:_ Ensure the "Show on Auth Pages" toggles are enabled for each feature you want on auth pages (Colors, CSS, Canvas, Gradient). Also verify the `enable_auth_page_theming` valve is `true`.
 
 - **Theme reverts after disabling the function.**
-  - _Reason:_ Toggling the function OFF triggers the `function.disable_started` lifecycle event, which broadcasts a `theme-disable` SSE event to strip the theme from all clients. The bootloader and CSS in `index.html` are also cleaned up. When re-enabled, the `function.enable_started` event re-injects everything automatically. On Open WebUI older than v0.11.0 these lifecycle events don't exist, so the theme instead _persists_ after disabling — follow the Uninstallation steps below for complete removal.
+  - _Reason:_ Toggling the function OFF triggers the `function.disable_started` lifecycle event, which broadcasts a `theme-disable` SSE event to strip the theme from all clients and withdraws the CSS fragment from `custom.css`. When re-enabled, the `function.enable_started` event republishes everything automatically. On Open WebUI older than v0.11.0 these lifecycle events don't exist, so the theme instead _persists_ after disabling — follow the Uninstallation steps below for complete removal.
 
 - **SSE connection keeps reconnecting.**
   - _Reason:_ SSE connections are long-lived. Some reverse proxies (Nginx, Cloudflare) terminate idle connections. Configure your proxy to allow long-lived connections on the `/events` endpoint, or increase proxy timeout settings.
@@ -423,7 +456,7 @@ The fallback is automatic — Worker errors are caught, the Worker is terminated
 
 ## 🗑️ Uninstallation & Complete Removal
 
-Because the event function injects a bootloader into `index.html`, **simply disabling it won't fully remove theming.** Follow these steps for complete removal:
+Disabling the function withdraws its theme immediately, but your saved themes and preset library stay on the server. Follow these steps for complete removal:
 
 **Step 1: Factory Reset (Purge All Data)**
 
@@ -437,19 +470,34 @@ Delete the theme data files from your container:
 docker exec <container_name> rm -f /app/backend/data/theme/open_theme_designer.*
 ```
 
-**Step 3: Remove Bootloader from `index.html`**
+**Step 3: Disable the Function (before deleting it)**
 
-Restart or recreate your container to restore a clean `index.html`:
-
-```bash
-docker compose down && docker compose up -d
-```
-
-> A simple restart (`docker restart`) preserves the existing filesystem — the injected bootloader remains. Use `down && up` or `--force-recreate` to get a fresh `index.html` from the image.
+Toggle the function **OFF** in the Admin Panel first. That withdraws its fragment immediately. Deleting it while still enabled leaves the fragment serving until the process restarts, because Open WebUI dispatches `function.deleted` after the row is gone and the plugin never receives its own deletion.
 
 **Step 4: Remove the Function**
 
-Delete the function from the Admin Panel under **Functions**.
+Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build — 1.7.0 never writes there.
+
+> Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
+
+---
+
+## 📝 What's New in 1.7.0
+
+**Themes no longer patch `index.html`.** The bootloader and theme CSS are published into Open WebUI's shared `/static/loader.js` and `/static/custom.css` and composed per request. See [Shared Static Assets](#-shared-static-assets-170). Upgrading is automatic: leftover blocks from 1.6.2 and earlier are removed once, on the first event.
+
+Consequences worth knowing:
+
+- The frontend build directory no longer needs to be writable.
+- Themes reflect the latest save on every page load, instead of waiting for the next `event()`.
+- The whole class of duplicate-block and stale-embedded-CSS bugs is gone, because nothing is written.
+- Canvas FX scripts are no longer inlined into the page; they arrive with the `/state.json` fetch, so a background animation starts a fraction of a second later than before. Colors, layout and gradients are unaffected and still apply before first paint.
+
+**Save-path fixes** (all pre-existing, most visible when the designer is open beside the main app):
+
+- Saving a theme could persist the *previous* theme's state. The designer re-read its state from `localStorage` when its debounced POST fired, and any other tab's write-through could land in that window — so the POST paired the new CSS with the old state. The state is now captured at call time.
+- The client applied `/theme.css` and `/state.json` from two independent fetches, so the page could render one theme's colors against another's canvas until the slower response arrived. Both are now applied atomically, and a failed half aborts the pair instead of being read as "no theme".
+- Cross-tab `storage` events repainted on each key separately. Because the designer writes its two keys a network round trip apart, that published a half-updated pair. Storage events now coalesce into a single re-read of a coherent pair from the server, and no longer repaint the designer page out from under the admin.
 
 ---
 
@@ -462,7 +510,7 @@ Delete the function from the Admin Panel under **Functions**.
 - **Liability Waiver:** The author of Theme Designer Pro (@g30) shall not be held liable for any material breach of license, legal action, or service termination resulting from use or misuse of this tool.
 - **Safe Harbor:** If your deployment is for personal use, internal team use (with permission), or for an organization of 50 or fewer active users, you are generally exempt from strict branding restrictions.
 
-This tool is provided "as is" without warranty of any kind. By using Theme Designer Pro, you acknowledge that modifying system files (`index.html`) may have implications. Use only on trusted instances.
+This tool is provided "as is" without warranty of any kind. By using Theme Designer Pro, you acknowledge that serving instance-wide CSS and JavaScript may have implications. Use only on trusted instances.
 
 _For more information, see the official [Open WebUI License Guide](https://github.com/open-webui/docs/blob/main/docs/license.mdx)._
 
@@ -480,7 +528,7 @@ Even with Web Workers, highly intensive animations (massive particle counts, hea
 
 ## 💡 Maintenance & Stability (PSA)
 
-Open WebUI is a fast-moving project. Because this event function relies on `index.html` injection and DOM observation to persist themes, future UI updates to Open WebUI may require adjustments. Use the export button to back up your favorite themes regularly!
+Open WebUI is a fast-moving project. Because this event function relies on the shared static assets and DOM observation to persist themes, future UI updates to Open WebUI may require adjustments. Use the export button to back up your favorite themes regularly!
 
 ---
 
@@ -514,13 +562,11 @@ graph TD
         RegisterRoute --> FindSPA{"Find SPA catch-all"}:::backend
         FindSPA --> InsertRoutes["Insert 6 ASGI routes"]:::backend
 
-        InjectPipeline --> InjectBoot["_inject_bootloader()"]:::helper
-        InjectBoot --> FindIndex["_find_index_file()"]:::helper
-        FindIndex --> GetLock["_get_index_lock() — fcntl.flock"]:::helper
-        GetLock --> WriteHTML["Strip old + inject new bootloader"]:::backend
-
-        InjectPipeline --> InjectCSS["_inject_theme_css()"]:::helper
-        InjectCSS --> GetLock
+        InjectPipeline --> Publish["_publish_fragments()"]:::helper
+        Publish --> RegLoader["register loader.js fragment"]:::helper
+        Publish --> RegCss["register custom.css fragment"]:::helper
+        RegLoader --> Compose["Composed per request"]:::backend
+        RegCss --> Compose
 
         InsertRoutes --> RoutePage(["GET /theme-designer"]):::endpoint
         InsertRoutes --> RouteSave(["POST /theme-designer"]):::endpoint
@@ -550,8 +596,8 @@ graph TD
     end
 
     %% --- INJECTED BOOTLOADER ---
-    subgraph Bootloader ["Injected Bootloader: Open WebUI index.html"]
-        WriteHTML -.->|"Injected"| BootInit["Bootloader IIFE"]:::bootloader
+    subgraph Bootloader ["Bootloader: composed into /static/loader.js"]
+        Compose -.->|"served"| BootInit["Bootloader IIFE"]:::bootloader
 
         BootInit --> LoadState["Load state from server + localStorage"]:::bootloader
         BootInit --> SSEConnect["Connect to /events SSE"]:::bootloader
@@ -588,7 +634,6 @@ graph TD
         RouteCSS --> CSSFile
         RouteState --> StateFile
         RouteLib --> LibFile[("open_theme_designer_library.json")]:::storage
-        GetLock --> LockFile[(".index.lock")]:::storage
     end
 
     %% --- DESIGNER UI ---
@@ -622,11 +667,11 @@ graph TD
 
 ## ⚠️ Important Notes & System Requirements
 
-- **Required Open WebUI Version:** `0.10.0` or higher (event functions were introduced in v0.10.0).
+- **Required Open WebUI Version:** `0.11.0` or higher — 1.7.0 relies on the pre-toggle lifecycle events and on `/static/loader.js` + `/static/custom.css` being loaded by the frontend.
 - **Admin access required** — the designer page and save endpoint enforce admin authentication.
-- **Server write access** — the event function must have write access to `index.html` (automatic in default Docker deployments) and `DATA_DIR/theme/` for persistence files.
+- **Server write access** — only `DATA_DIR/theme/` is needed, for the persistence files. As of 1.7.0 the function never writes to the frontend build, so a read-only frontend is fine. (One exception: on first run after upgrading from 1.6.2 or earlier it tries once to remove that version's leftover `index.html` blocks, and logs a warning and continues if it can't.)
 - **No sandbox flags needed** — unlike the Tool variant, no "Same Origin" iframe configuration is required.
-- **No additional Python dependencies** — uses only what Open WebUI provides (`pydantic`, `starlette`, `fcntl`).
+- **No additional Python dependencies** — uses only what Open WebUI provides (`pydantic`, `starlette`).
 - **Multi-worker deployments** — SSE broadcasting works across workers automatically when `REDIS_URL` is set (which Open WebUI already uses for WebSocket relay). No additional configuration needed.
 
 ---
