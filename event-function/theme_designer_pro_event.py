@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.7.0
+version: 1.7.1
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -21,7 +21,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.7.0"
+VERSION = "1.7.1"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -5150,6 +5150,22 @@ location.reload();</code></pre>
     let _syncTimer = null;
     let _syncSeq = 0;  // Monotonic save counter — guards css_cache against stale responses
     let _syncQueue = Promise.resolve();  // Serializes POSTs so saves reach the server in order
+    // Mirrors the admin's function ON/OFF toggle, driven by the badge's SSE
+    // connection further down. The save endpoint answers 503 while the function
+    // is disabled, so posting into that window would lose the edit silently.
+    let _functionDisabled = false;
+    // Set when a save was withheld (or rejected) because the function was off,
+    // so local state is ahead of the server and must be republished on re-enable.
+    let _pendingWhileDisabled = false;
+    let _disabledNoticeAt = 0;
+    function noticeSaveBlocked() {
+        // Editing fires a save per control change; one notice every few seconds
+        // is informative, one per keystroke is noise.
+        const now = Date.now();
+        if (now - _disabledNoticeAt < 4000) return;
+        _disabledNoticeAt = now;
+        showToast('⏸️ Function is disabled — changes are kept locally and will publish when you turn it back on');
+    }
     let _draftMode = false;  // When true, syncToServer is suppressed
 
     function setDraftMode(on) {
@@ -5229,6 +5245,14 @@ location.reload();</code></pre>
     function syncToServer(css, sections, stateStr) {
         // Draft mode: skip server sync (changes stay local only)
         if (_draftMode) return;
+        // Function toggled off: the POST would come back 503 and the edit would
+        // be dropped on the floor with only a generic "sync failed" toast. Hold
+        // it instead and republish when the function comes back.
+        if (_functionDisabled) {
+            _pendingWhileDisabled = true;
+            noticeSaveBlocked();
+            return;
+        }
         // Capture the state NOW, alongside the css we were handed — never
         // re-read it when the debounce fires.
         //
@@ -5279,6 +5303,14 @@ location.reload();</code></pre>
                         if (mySeq !== _syncSeq) return; // Superseded by a newer save
                         try { Storage.setRaw('css_cache', (d && d.css) ? d.css : css); } catch(x) {}
                     }).catch(() => {});
+                } else if (r.status === 503) {
+                    // The function was toggled off while this POST was in
+                    // flight. Latch the state the badge SSE would have set a
+                    // moment later, so the next edit is held rather than
+                    // fired into another rejection.
+                    _functionDisabled = true;
+                    _pendingWhileDisabled = true;
+                    noticeSaveBlocked();
                 } else {
                     console.warn('[Theme Pro] Server sync failed');
                     showToast('⚠️ Server sync failed — changes may not be saved');
@@ -12254,7 +12286,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         // ── 0. Theme Active/Draft/Disabled badge — live via SSE + draft + function toggle ──
         const badge = document.getElementById('inactive-badge');
         const badgeText = document.getElementById('inactive-badge-text');
-        let _badgeFunctionDisabled = false;  // Updated by SSE when function is toggled off
+        // Single source of truth, shared with syncToServer: the badge is not the
+        // only thing that has to react to the function being toggled off.
 
         // state: 'active' | 'draft' | 'inactive'
         function setBadgeState(state) {
@@ -12275,7 +12308,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         }
         // Compute badge state from current conditions
         function updateBadge() {
-            if (_badgeFunctionDisabled) { setBadgeState('inactive'); return; }
+            if (_functionDisabled) { setBadgeState('inactive'); return; }
             if (typeof _draftMode !== 'undefined' && _draftMode) { setBadgeState('draft'); return; }
             setBadgeState('active');
         }
@@ -12290,8 +12323,25 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         function initBadgeSSE() {
             try {
                 const badgeEs = new EventSource('{ROUTE_BASE}/events?_badge=' + Date.now());
-                badgeEs.addEventListener('theme-update', () => { _badgeFunctionDisabled = false; updateBadge(); });
-                badgeEs.addEventListener('theme-disable', () => { _badgeFunctionDisabled = true; updateBadge(); });
+                badgeEs.addEventListener('theme-update', () => {
+                    const wasDisabled = _functionDisabled;
+                    _functionDisabled = false;
+                    updateBadge();
+                    // Re-enabled with edits the server never accepted. Without
+                    // this the admin's last change is silently discarded: the
+                    // re-enable broadcast makes every client fetch the theme
+                    // from BEFORE the function was switched off, while the
+                    // designer still shows the newer one it could not save.
+                    if (wasDisabled && _pendingWhileDisabled) {
+                        _pendingWhileDisabled = false;
+                        showToast('▶️ Function re-enabled — publishing the theme you selected while it was off');
+                        // injectLive() with no arguments regenerates the CSS and
+                        // sections from current state and routes them through
+                        // syncToServer, which is now unblocked.
+                        try { injectLive(); } catch (err) { console.warn('[Theme Pro] Republish failed:', err); }
+                    }
+                });
+                badgeEs.addEventListener('theme-disable', () => { _functionDisabled = true; updateBadge(); });
                 badgeEs.onerror = () => { /* EventSource auto-reconnects */ };
                 window.addEventListener('beforeunload', () => badgeEs.close());
             } catch(e) { console.warn('[Theme Pro] Badge SSE error:', e); }

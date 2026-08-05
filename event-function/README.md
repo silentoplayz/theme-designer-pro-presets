@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — standalone admin page with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.7.0-blue)
+![Version](https://img.shields.io/badge/version-1.7.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.10.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -479,6 +479,18 @@ Toggle the function **OFF** in the Admin Panel first. That withdraws its fragmen
 Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build — 1.7.0 never writes there.
 
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
+
+---
+
+## 📝 What's New in 1.7.1
+
+**Theme changes made while the function is disabled are no longer lost.** The save endpoint answers `503` whenever the function is toggled off, which is intended — a disabled function should not persist themes. But the designer went on accepting edits, fired each one into a rejection, and reported it as a generic "server sync failed". Toggling the function back on then made every client fetch the theme from *before* it was switched off, while the designer still displayed the newer one it had never managed to save.
+
+The designer already knew the function was off (its status badge has its own SSE connection), it just wasn't acting on it. Now:
+
+- Saves are held rather than fired into a `503`, with a message that says the function is disabled and the change is kept locally.
+- Toggling the function back on republishes the theme you selected while it was off, and says so.
+- A `503` arriving mid-flight (toggled off while a save was already in flight) latches the same state instead of reporting a network error.
 
 ---
 
