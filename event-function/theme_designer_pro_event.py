@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.7.1
+version: 1.7.2
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -21,7 +21,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.7.1"
+VERSION = "1.7.2"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -424,6 +424,13 @@ class Event:
                         try { localStorage.removeItem('owui_dev_theme_v1_css'); } catch(x) {}
                         var _staleStyle = document.getElementById('owui-dev-live-theme');
                         if (_staleStyle) _staleStyle.remove();
+                        // This is the path a backgrounded PWA takes: iOS kills
+                        // the SSE connection, so the theme-disable broadcast
+                        // never arrives and the first the client hears of it is
+                        // this empty response on resume. Drop the shared
+                        // stylesheet's copy of the palette here too, or the
+                        // colours linger with nothing left to override them.
+                        refreshSharedCustomCss();
                     }
 
                     if (state && state.trim() && state !== '{}') {
@@ -483,6 +490,35 @@ class Event:
             function themeToMode(theme) {
                 if (theme === 'system') return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
                 return { 'oled-dark': 'oled', her: 'her', light: 'light', dark: 'dark' }[theme] || 'dark';
+            }
+
+            // Re-fetch Open WebUI's shared /static/custom.css stylesheet.
+            //
+            // That file is composed per request from every plugin's fragment
+            // plus whatever the admin wrote there by hand, and this function's
+            // share of it is the flash-free subset: the palette variables and
+            // custom CSS. While a theme is active that does not matter, because
+            // enforceTheme() appends owui-dev-live-theme last and wins the
+            // cascade. But when the theme is switched OFF there is no live
+            // element left to override it, and the <link> keeps the last
+            // content the browser fetched — so the palette stays applied until
+            // a full page load. On a phone PWA that can be a very long time.
+            //
+            // The link cannot simply be removed: it belongs to Open WebUI and
+            // carries other plugins' fragments. Re-pointing it at the same path
+            // with a cache-busting query re-fetches the freshly composed file,
+            // which no longer contains this plugin's block while preserving
+            // everyone else's.
+            function refreshSharedCustomCss() {
+                try {
+                    var links = document.querySelectorAll('link[rel="stylesheet"]');
+                    for (var i = 0; i < links.length; i++) {
+                        var href = links[i].getAttribute('href') || '';
+                        if (href.indexOf('/static/custom.css') !== 0) continue;
+                        links[i].setAttribute('href', '/static/custom.css?_t=' + Date.now());
+                        return;
+                    }
+                } catch(x) {}
             }
 
             var _refreshPending = false;
@@ -1268,6 +1304,11 @@ class Event:
                             var el = document.getElementById(id);
                             if (el) el.remove();
                         });
+                        // The palette also lives in the shared stylesheet, which
+                        // is not ours to delete — re-fetch it so our block drops
+                        // out. Without this the colours survive a disable until
+                        // the next full page load.
+                        refreshSharedCustomCss();
                         // NOTE: SSE stays open — if admin re-enables, theme-update will re-apply
                     }
 

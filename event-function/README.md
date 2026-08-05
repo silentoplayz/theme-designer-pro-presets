@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — standalone admin page with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.7.1-blue)
+![Version](https://img.shields.io/badge/version-1.7.2-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.10.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -479,6 +479,16 @@ Toggle the function **OFF** in the Admin Panel first. That withdraws its fragmen
 Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build — 1.7.0 never writes there.
 
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
+
+---
+
+## 📝 What's New in 1.7.2
+
+**Disabling the function now clears the theme on clients that were not watching.** Regression introduced in 1.7.0: the flash-free palette subset moved from an inline `<style>` block into the shared `/static/custom.css`. The disable handler strips its own elements by id, but that stylesheet belongs to Open WebUI and carries other plugins' fragments and any CSS you wrote there yourself, so it cannot simply be removed — and a `<link>` is only re-fetched on a full page load. The result was a partially themed UI (palette colours, no canvas or gradient) surviving a disable indefinitely.
+
+Most visible on a phone PWA: iOS kills the SSE connection when the app is backgrounded, so the `theme-disable` broadcast never arrives and the client only learns of it on resume.
+
+The bootloader now re-points that stylesheet at a cache-busting URL when the theme is switched off, re-fetching the freshly composed file without this plugin's block. Other plugins' fragments and your own hand-written CSS are preserved. This runs both on the `theme-disable` broadcast and on any fetch that comes back empty, which is the path a resuming PWA takes.
 
 ---
 
