@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.7.3
+version: 1.7.4
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -21,7 +21,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.7.3"
+VERSION = "1.7.4"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -5129,6 +5129,49 @@ location.reload();</code></pre>
         });
     }
 
+    // --- CSS value sanitizers ---
+    //
+    // Theme data is NOT all admin-authored. Community themes, "Install All",
+    // and per-theme update checks fetch JSON from arbitrary updateUrls, and
+    // normalizeModeData() merges it with a plain spread — no type or content
+    // validation. The repo's CI schema guards contributions to the preset
+    // repo, not what an installed theme points its updateUrl at.
+    //
+    // Those values then reach CSS in two places, and the second is the
+    // dangerous one:
+    //   1. style="" attributes in diff/preview markup (admin's browser only)
+    //   2. the GENERATED THEME CSS — saved server-side, served at /theme.css
+    //      and composed into /static/custom.css for EVERY user of the
+    //      instance. An override value of `red } html { background:
+    //      url(https://evil.tld/x) } .z {` escapes its rule block and injects
+    //      instance-wide CSS: selector-based exfiltration, UI spoofing,
+    //      hiding content. Admins can already write arbitrary CSS in the
+    //      Style Overrides tab deliberately; a colour swatch silently
+    //      carrying CSS is a different thing.
+    //
+    // The charset excludes quotes, ; : {} <> \ @ * — blocking rule-block
+    // breakout and appended declarations — while every legitimate colour form
+    // passes unchanged, including modern slash-alpha syntax like
+    // `rgb(0 0 0 / 50%)` and `oklch(0.5 0.1 250 / 0.5)`.
+    //
+    // '/' has to be allowed for that alpha syntax, which would otherwise
+    // re-open url(https://…) exfiltration — custom properties accept almost
+    // any token sequence, so a value smuggled into --color-gray-500 resolves
+    // wherever that var() is used. url( is therefore rejected outright.
+    function _cssTok(v, fallback) {
+        const s = String(v == null ? '' : v);
+        const ok = s && s.length <= 64
+            && /^[\w#(),.%\s/-]+$/.test(s)
+            && !/url\s*\(/i.test(s)
+            && !/image-set\s*\(/i.test(s);
+        if (ok) return s;
+        return fallback === undefined ? 'transparent' : fallback;
+    }
+    function _cssNum(v, fallback) {
+        const n = Number(v);
+        return isFinite(n) ? n : (fallback === undefined ? 0 : fallback);
+    }
+
     // --- Utility Helpers ---
     // Keys that the bootloader's `storage` event listener watches — must use sessionStorage in draft mode
     const _BOOTLOADER_WATCHED_KEYS = new Set(['theme', 'css_cache']);
@@ -5594,6 +5637,100 @@ location.reload();</code></pre>
         return c;
     }
 
+    // Per-field validation applied on every import path. normalizeModeData()
+    // used to merge foreign JSON with a bare spread, so an imported theme could
+    // carry any type in any field — including strings crafted to break out of
+    // the CSS rules those fields are interpolated into. The consumers sanitize
+    // too (see the CSS value sanitizers), but fixing it here stops bad data at
+    // the door instead of relying on every future call site to remember.
+    //
+    // Deliberately NOT validated: customCSS, canvasScript and manualOverrides.
+    // Those are arbitrary CSS/JS by design — that is the whole feature, and
+    // Canvas FX carries its own security warning. Constraining them here would
+    // break legitimate themes without closing anything.
+    //
+    // Numeric bounds match the designer's own sliders (h 0-360, c 0-150,
+    // l/intensity/positions 0-100), which the 100-theme preset corpus fits
+    // inside. Out-of-range or wrong-typed values fall back to the default
+    // rather than being dropped, so a partially malformed theme still loads.
+    const _MODE_ENUMS = {
+        gradientType: ['linear', 'radial', 'conic', 'mesh'],
+        gradientRadialShape: ['circle', 'ellipse'],
+        gradientRadialSize: ['closest-side', 'closest-corner', 'farthest-side', 'farthest-corner']
+    };
+    const _MODE_NUM_BOUNDS = {
+        h: [0, 360], c: [0, 150], l: [0, 100],
+        gradientAngle: [0, 360], gradientIntensity: [0, 100],
+        gradientRadialPosX: [0, 100], gradientRadialPosY: [0, 100],
+        gradientAnimationSpeed: [0, 600]
+    };
+
+    function _num(v, lo, hi, dflt) {
+        const n = Number(v);
+        if (!isFinite(n)) return dflt;
+        return Math.max(lo, Math.min(hi, n));
+    }
+
+    function validateModeData(d) {
+        const def = DEFAULT_MODE_DATA;
+        Object.keys(_MODE_NUM_BOUNDS).forEach(k => {
+            if (d[k] === undefined) return;
+            const [lo, hi] = _MODE_NUM_BOUNDS[k];
+            d[k] = _num(d[k], lo, hi, def[k]);
+        });
+        Object.keys(_MODE_ENUMS).forEach(k => {
+            if (d[k] === undefined) return;
+            if (!_MODE_ENUMS[k].includes(d[k])) d[k] = def[k];
+        });
+        ['paletteEnabled', 'customCssEnabled', 'autoScope', 'canvasEnabled',
+         'manualOverridesEnabled', 'gradientEnabled', 'gradientAnimation',
+         'gradientShowAuth', 'themeShowAuth', 'customCssShowAuth', 'canvasShowAuth'
+        ].forEach(k => { if (d[k] !== undefined) d[k] = !!d[k]; });
+        ['customCSS', 'canvasScript', 'manualOverrides'].forEach(k => {
+            if (d[k] !== undefined && typeof d[k] !== 'string') d[k] = def[k];
+        });
+        // Colour-valued fields: constrained to the CSS colour grammar, unlike
+        // the free-form CSS fields above.
+        if (d.gradientMeshBgColor !== undefined) {
+            d.gradientMeshBgColor = _cssTok(d.gradientMeshBgColor, def.gradientMeshBgColor);
+        }
+        if (d.overrides !== undefined) {
+            if (!d.overrides || typeof d.overrides !== 'object' || Array.isArray(d.overrides)) {
+                d.overrides = {};
+            } else {
+                const clean = {};
+                Object.keys(d.overrides).forEach(k => {
+                    // Only real custom-property names, only colour-shaped values.
+                    if (!/^--[\w-]{1,64}$/.test(k)) return;
+                    const v = _cssTok(d.overrides[k], null);
+                    if (v !== null) clean[k] = v;
+                });
+                d.overrides = clean;
+            }
+        }
+        if (d.locks !== undefined) {
+            if (!d.locks || typeof d.locks !== 'object' || Array.isArray(d.locks)) d.locks = {};
+            else Object.keys(d.locks).forEach(k => { d.locks[k] = !!d.locks[k]; });
+        }
+        if (d.gradientStops !== undefined) {
+            d.gradientStops = Array.isArray(d.gradientStops) ? d.gradientStops
+                .filter(s => s && typeof s === 'object')
+                .slice(0, 32)
+                .map(s => ({ color: _cssTok(s.color, '#000000'), position: _num(s.position, 0, 100, 0) })) : [];
+        }
+        if (d.gradientMeshPoints !== undefined) {
+            d.gradientMeshPoints = Array.isArray(d.gradientMeshPoints) ? d.gradientMeshPoints
+                .filter(pt => pt && typeof pt === 'object')
+                .slice(0, 32)
+                .map(pt => ({
+                    color: _cssTok(pt.color, '#000000'),
+                    x: _num(pt.x, 0, 100, 50), y: _num(pt.y, 0, 100, 50),
+                    spread: _num(pt.spread, 0, 100, 50)
+                })) : [];
+        }
+        return d;
+    }
+
     function normalizeModeData(d, { forExport = false } = {}) {
         if (!d) return d;
         // Format normalization (handles JSON Viewer and other non-standard formats)
@@ -5609,7 +5746,7 @@ location.reload();</code></pre>
             d.locks = o;
         }
         delete d.variables;
-        const result = { ...createDefaultModeData(), ...d };
+        const result = validateModeData({ ...createDefaultModeData(), ...d });
         if (forExport) delete result.manualOverridesEnabled;
         return result;
     }
@@ -5716,6 +5853,12 @@ location.reload();</code></pre>
         return GRADIENT_PROP_KEYS.every(k => {
             const av = a[k], bv = b[k];
             if (GRADIENT_CLONE_KEYS.has(k)) return JSON.stringify(av || []) === JSON.stringify(bv || []);
+            // null/undefined and false mean the same thing for these flags, but
+            // `(av ?? '')` turns null into '' and then '' !== false. Real themes
+            // carry gradientAnimation as either null or false, so an
+            // un-normalized mode compared against a normalized one reported a
+            // difference that does not exist and showed a spurious "Diff" badge.
+            if (typeof av === 'boolean' || typeof bv === 'boolean') return !!av === !!bv;
             return (av ?? '') === (bv ?? '');
         });
     }
@@ -6281,7 +6424,10 @@ function startAnimation() {
 
     function getVariablesMap(config, mode) {
         const vars = {};
-        const h = config.h, c = config.c / 1000, l = config.l / 100;
+        // Sanitized: this map becomes the palette block of the theme CSS that
+        // is served to every user, and config can originate from an imported
+        // or auto-updated third-party theme. See the CSS value sanitizers.
+        const h = _cssNum(config.h, 0), c = _cssNum(config.c, 0) / 1000, l = _cssNum(config.l, 0) / 100;
         const ov = config.overrides || {};
         const deltaL = l - 0.20;
         const dm = mode || getActiveDataMode();
@@ -6294,7 +6440,8 @@ function startAnimation() {
             const stepOverride = getDefaultStepColor(step, config.c, config.l, dm);
             if (stepOverride) computedVal = stepOverride;
 
-            vars[`--color-gray-${step}`] = ov[`--color-gray-${step}`] || computedVal;
+            const raw = ov[`--color-gray-${step}`];
+            vars[`--color-gray-${step}`] = raw ? _cssTok(raw, computedVal) : computedVal;
         });
         return vars;
     }
@@ -6810,20 +6957,24 @@ function startAnimation() {
         if (!modeData.gradientEnabled) return '';
 
         const gType = modeData.gradientType || 'linear';
-        const intensity = modeData.gradientIntensity != null ? modeData.gradientIntensity : 85;
+        const intensity = _cssNum(modeData.gradientIntensity, 85);
 
         // === MESH GRADIENT ===
         if (gType === 'mesh') {
             const points = modeData.gradientMeshPoints || [];
             if (points.length < 2) return '';
-            const bgColor = modeData.gradientMeshBgColor || '#0a0a12';
+            // bgColor bypasses adjustHexIntensity (which would normalize it via
+            // hex parsing), so it needs sanitizing on its own; the geometry
+            // fields are interpolated raw. All of it can come from an imported
+            // theme and lands in instance-wide CSS.
+            const bgColor = _cssTok(modeData.gradientMeshBgColor, '#0a0a12');
             const meshLayers = points.map(p => {
                 const c = adjustHexIntensity(p.color, intensity);
-                return `radial-gradient(at ${p.x}% ${p.y}%, ${c} 0%, transparent ${p.spread}%)`;
+                return `radial-gradient(at ${_cssNum(p.x, 50)}% ${_cssNum(p.y, 50)}%, ${c} 0%, transparent ${_cssNum(p.spread, 50)}%)`;
             }).join(', ');
 
 
-            const speed = modeData.gradientAnimationSpeed || 8;
+            const speed = _cssNum(modeData.gradientAnimationSpeed, 8);
 
             {
                 let animCss = '';
@@ -6844,18 +6995,21 @@ function startAnimation() {
 
         // intensity already declared above for mesh check
         const sortedStops = [...modeData.gradientStops].sort((a, b) => a.position - b.position);
+        // Stop colours are safe by construction — adjustHexIntensity rebuilds
+        // them from parsed RGB — but positions and the shape/size keywords are
+        // interpolated raw and can come from an imported theme.
         const stopsStr = sortedStops
-            .map(s => `${adjustHexIntensity(s.color, intensity)} ${s.position}%`)
+            .map(s => `${adjustHexIntensity(s.color, intensity)} ${_cssNum(s.position, 0)}%`)
             .join(', ');
 
         let gradientFunc;
         // gType already declared above for mesh check
-        const angle = modeData.gradientAngle != null ? modeData.gradientAngle : 135;
+        const angle = _cssNum(modeData.gradientAngle, 135);
         if (gType === 'radial') {
-            const rShape = modeData.gradientRadialShape || 'ellipse';
-            const rSize = modeData.gradientRadialSize || 'farthest-corner';
-            const rPosX = modeData.gradientRadialPosX ?? 50;
-            const rPosY = modeData.gradientRadialPosY ?? 50;
+            const rShape = _cssTok(modeData.gradientRadialShape, 'ellipse');
+            const rSize = _cssTok(modeData.gradientRadialSize, 'farthest-corner');
+            const rPosX = _cssNum(modeData.gradientRadialPosX, 50);
+            const rPosY = _cssNum(modeData.gradientRadialPosY, 50);
             gradientFunc = `radial-gradient(${rShape} ${rSize} at ${rPosX}% ${rPosY}%, ${stopsStr})`;
         } else {
             gradientFunc = `linear-gradient(${angle}deg, ${stopsStr})`;
@@ -6866,7 +7020,7 @@ function startAnimation() {
         let animCss = '';
         let keyframesCss = '';
         if (modeData.gradientAnimation) {
-            const speed = modeData.gradientAnimationSpeed || 8;
+            const speed = _cssNum(modeData.gradientAnimationSpeed, 8);
             animCss = `  background-size: 300% 300% !important;\n  animation: owui-gradient-shift ${speed}s ease infinite !important;`;
             keyframesCss = `\n@keyframes owui-gradient-shift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n`;
         }
@@ -9204,14 +9358,15 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     function _esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
     function _rampSwatches(config) {
-        // Generate 12 mini color swatches from OKLCH config
-        const h = config.h, c = (config.c || 0) / 1000, l = (config.l || 0) / 100;
+        // Generate 12 mini color swatches from OKLCH config. Update diffs feed
+        // this REMOTE data, so h and override values are attacker-influenced.
+        const h = _cssNum(config.h, 0), c = _cssNum(config.c, 0) / 1000, l = _cssNum(config.l, 0) / 100;
         const ov = config.overrides || {};
         const deltaL = l - 0.20;
         return steps.map(step => {
             const baseL = lightnessMap[step];
             const targetL = Math.max(0.00, Math.min(0.98, baseL + deltaL));
-            const computedVal = ov[`--color-gray-${step}`] || `oklch(${targetL.toFixed(3)} ${c.toFixed(3)} ${c === 0 ? 0 : h})`;
+            const computedVal = _cssTok(ov[`--color-gray-${step}`], '') || `oklch(${targetL.toFixed(3)} ${c.toFixed(3)} ${c === 0 ? 0 : h})`;
             return `<div class="swatch" style="background:${computedVal}"></div>`;
         }).join('');
     }
@@ -9368,22 +9523,24 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         const s = entry.src, t = entry.tgt;
         let h = '';
         // Gradient preview bars
+        // Every field is sanitized: this renders in the update diff too, where
+        // the data is a REMOTE theme fetched from an arbitrary updateUrl.
         const makeGradientCSS = (data) => {
             if (data.type === 'mesh' && data.meshPoints && data.meshPoints.length >= 2) {
-                const layers = data.meshPoints.map(p => `radial-gradient(at ${p.x}% ${p.y}%, ${p.color} 0%, transparent ${p.spread}%)`).join(', ');
-                return `${data.meshBgColor || '#0a0a12'}; background-image: ${layers}`;
+                const layers = data.meshPoints.map(p => `radial-gradient(at ${_cssNum(p.x, 50)}% ${_cssNum(p.y, 50)}%, ${_cssTok(p.color)} 0%, transparent ${_cssNum(p.spread, 50)}%)`).join(', ');
+                return `${_cssTok(data.meshBgColor, '#0a0a12')}; background-image: ${layers}`;
             }
             if (!data.stops || data.stops.length === 0) return 'transparent';
-            const stopStr = data.stops.map(st => `${st.color} ${st.position}%`).join(', ');
+            const stopStr = data.stops.map(st => `${_cssTok(st.color)} ${_cssNum(st.position, 0)}%`).join(', ');
             if (data.type === 'radial') {
-                const rShape = data.radialShape || 'ellipse';
-                const rSize = data.radialSize || 'farthest-corner';
-                const rPosX = data.radialPosX ?? 50;
-                const rPosY = data.radialPosY ?? 50;
+                const rShape = _cssTok(data.radialShape, 'ellipse');
+                const rSize = _cssTok(data.radialSize, 'farthest-corner');
+                const rPosX = _cssNum(data.radialPosX, 50);
+                const rPosY = _cssNum(data.radialPosY, 50);
                 return `radial-gradient(${rShape} ${rSize} at ${rPosX}% ${rPosY}%, ${stopStr})`;
             }
-            if (data.type === 'conic') return `conic-gradient(from ${data.angle}deg, ${stopStr})`;
-            return `linear-gradient(${data.angle}deg, ${stopStr})`;
+            if (data.type === 'conic') return `conic-gradient(from ${_cssNum(data.angle, 135)}deg, ${stopStr})`;
+            return `linear-gradient(${_cssNum(data.angle, 135)}deg, ${stopStr})`;
         };
         h += `<div class="sync-diff-gradient-row">`;
         h += `<span class="gradient-label">Source</span>`;
@@ -9393,9 +9550,11 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         h += `<div class="sync-diff-gradient-bar" style="background:${makeGradientCSS(t)};"></div>`;
         h += `</div>`;
         // Property table
+        // _esc/_cssNum: type and angle render into element context and can be
+        // remote strings on the update-diff path.
         const props = [
-            ['Type', s.type, t.type],
-            ['Angle', s.angle + '°', t.angle + '°'],
+            ['Type', _esc(s.type || ''), _esc(t.type || '')],
+            ['Angle', _cssNum(s.angle, 135) + '°', _cssNum(t.angle, 135) + '°'],
             ['Stops', (s.stops || []).length, (t.stops || []).length],
             ['Animated', s.anim ? 'Yes' : 'No', t.anim ? 'Yes' : 'No']
         ];
@@ -11364,8 +11523,10 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     const MODE_ORDER = ['dark', 'light', 'oled', 'her'];
 
     function oklchToCSS(h, c, l) {
-        // catalog uses c as 0-100 scale, convert to 0-1 for oklch()
-        return `oklch(${l}% ${c / 100} ${h})`;
+        // catalog uses c as 0-100 scale, convert to 0-1 for oklch().
+        // Coerced: h/c come from the remote community catalog and this lands
+        // in a style attribute on the card.
+        return `oklch(${_cssNum(l, 50)}% ${_cssNum(c, 0) / 100} ${_cssNum(h, 0)})`;
     }
 
     async function loadCommunityThemes(force) {

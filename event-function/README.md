@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — standalone admin page with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.7.3-blue)
+![Version](https://img.shields.io/badge/version-1.7.4-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.10.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -479,6 +479,23 @@ Toggle the function **OFF** in the Admin Panel first. That withdraws its fragmen
 Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build — 1.7.0 never writes there.
 
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
+
+---
+
+## 📝 What's New in 1.7.4
+
+**Security: CSS injection from imported themes.** Theme data was interpolated into CSS without sanitizing. That was safe while every theme was hand-authored locally, but community themes, "Install All", and per-theme update checks all fetch JSON from arbitrary `updateUrl`s, and the importer merged that JSON with a plain spread — no type or content validation. The preset repo's CI schema guards contributions *to the repo*; it never runs on what an installed theme points its update URL at.
+
+Two scopes were affected:
+
+- **Instance-wide (serious).** Colour-override values and several gradient fields flowed verbatim into the *generated theme CSS* — the stylesheet saved server-side and served to every user at `/theme.css` and via `/static/custom.css`. A crafted override value escaped its rule block and injected arbitrary CSS for everyone, enabling selector-based data exfiltration, UI spoofing, and content hiding.
+- **Admin's browser.** The community themes browser and the theme update diff rendered remote values into `style=""` attributes, allowing attribute breakout in the admin's own session.
+
+Fixed at both ends: values are validated on import, and sanitized again at every point they become CSS. Legitimate colour syntax is unaffected, including `#hex`, named colours, `rgb()`/`rgba()`, `oklch()`, `var(--x)`, `color-mix()`, and modern slash-alpha forms like `rgb(0 0 0 / 50%)`. `customCSS`, `canvasScript` and `manualOverrides` are deliberately left free-form — arbitrary CSS/JS there is the intended feature.
+
+Verified against the full preset corpus: 33 themes, 132 modes, generated CSS byte-identical before and after.
+
+**Also fixed:** `compareGradientProps` treated `null` and `false` as different values for boolean flags, so a theme loaded without normalization compared against a normalized one showed a "Diff" badge for a difference that did not exist.
 
 ---
 
