@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — standalone admin page with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.7.5-blue)
+![Version](https://img.shields.io/badge/version-1.7.6-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.10.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -479,6 +479,16 @@ Toggle the function **OFF** in the Admin Panel first. That withdraws its fragmen
 Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build — 1.7.0 never writes there.
 
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
+
+---
+
+## 📝 What's New in 1.7.6
+
+Two authorization fixes.
+
+**Revoked tokens are now rejected.** The admin check verified a token's signature and expiry but never asked whether it had been *revoked*. Open WebUI revokes tokens on sign-out and on OIDC back-channel logout, and its own `get_current_user` checks this between decoding the token and loading the user. Theme Designer Pro skipped that step, so a token belonging to a session an admin had explicitly signed out of kept working against the designer and its save endpoint until it expired on its own. Revocation exists precisely for the case where a session is believed compromised, so ignoring it was the wrong default. The check now runs, fails closed on error, and is skipped only on Open WebUI builds that predate the feature.
+
+**Allowed Import Domains now covers automated fetches.** The valve only ever wrapped the manual "Load from URL" button. Community theme installs and theme update checks fetch from URLs supplied by the catalog or by the installed theme itself, and those bypassed the allowlist entirely — the paths where the URL is *not* chosen by the admin, and therefore the ones that most needed gating. All remote theme fetches now share one host check. Blocked hosts are never contacted, so a restrictive allowlist also stops update checks beaconing to third-party hosts. The check runs after GitHub blob-to-raw rewriting, so the host validated is the host actually contacted. An empty valve still means unrestricted, as documented.
 
 ---
 

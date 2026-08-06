@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.7.5
+version: 1.7.6
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -21,7 +21,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.7.5"
+VERSION = "1.7.6"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -2043,6 +2043,31 @@ class Event:
             return JSONResponse({"error": "Invalid token"}, status_code=401)
         if not data or "id" not in data:
             return JSONResponse({"error": "Invalid token"}, status_code=401)
+
+        # Honour token revocation, the way upstream's get_current_user does
+        # between decoding and loading the user. decode_token only verifies the
+        # signature and the exp claim, so without this a token that was
+        # explicitly revoked — an admin signing out, or an OIDC back-channel
+        # logout — keeps working against these routes until it expires on its
+        # own. Revocation exists precisely for the case where a session is
+        # believed compromised, so silently ignoring it is the wrong default.
+        #
+        # Fails CLOSED on an unexpected error, but treats the function being
+        # absent as "this build has no revocation" and continues: older Open
+        # WebUI releases have no is_valid_token, and refusing every request
+        # there would lock admins out of their own designer.
+        try:
+            from open_webui.utils.auth import is_valid_token
+        except ImportError:
+            is_valid_token = None
+        if is_valid_token is not None:
+            try:
+                _redis = getattr(getattr(request.app, "state", None), "redis", None)
+                if not await is_valid_token(data, _redis):
+                    return JSONResponse({"error": "Invalid token"}, status_code=401)
+            except Exception:
+                log.warning("[Theme Pro] Token revocation check failed — denying request")
+                return JSONResponse({"error": "Invalid token"}, status_code=401)
 
         user = await Users.get_user_by_id(data["id"])
         if not user or user.role != "admin":
@@ -11529,8 +11554,30 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     }
 
     // Fetch full theme data on-demand (called when user clicks "Update" on a manifest-checked theme)
+    // Shared host gate for every remote theme fetch.
+    //
+    // The Allowed Import Domains valve used to wrap only the manual "Load from
+    // URL" button, so the two paths that fetch without the admin typing a URL —
+    // community installs and theme update checks — ignored it completely. An
+    // admin who restricts imports to their own host would reasonably expect
+    // that to cover the case where an installed theme silently pulls new code
+    // from a third party, which is the one that actually needs gating.
+    //
+    // Checked AFTER toRawGitHub(), so the host tested is the host contacted.
+    // An unparseable URL is refused rather than passed to fetch().
+    function assertImportHostAllowed(rawUrl) {
+        const allow = (window.__THEME_PRO_CONFIG__ || {}).allowedImportDomains || [];
+        if (!allow.length) return;  // Empty valve = no restriction, as documented
+        let hostname;
+        try { hostname = new URL(rawUrl, window.location.origin).hostname; }
+        catch (e) { throw new Error('Invalid URL'); }
+        const ok = allow.some(d => hostname === d || hostname.endsWith('.' + d));
+        if (!ok) throw new Error(`Domain "${hostname}" is not in the allowed import list`);
+    }
+
     async function fetchThemeData(updateUrl) {
         const fetchUrl = toRawGitHub(updateUrl);
+        assertImportHostAllowed(fetchUrl);
         const res = await fetch(fetchUrl);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const remote = await res.json();
