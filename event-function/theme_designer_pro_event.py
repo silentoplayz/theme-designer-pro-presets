@@ -5302,6 +5302,16 @@ location.reload();</code></pre>
         return fallback === undefined ? 0 : fallback;
     }
 
+    // getAttribute returns null when the attribute is absent, and Number(null) is
+    // 0 — a perfectly finite index that points at the FIRST theme in the library.
+    // A missing attribute must read as "no index", never as index zero.
+    function _attrIndex(el, name) {
+        const raw = el && el.getAttribute(name);
+        if (raw === null || raw === undefined || raw === '') return null;
+        const n = Number(raw);
+        return Number.isInteger(n) && n >= 0 ? n : null;
+    }
+
     // --- Utility Helpers ---
     // Keys that the bootloader's `storage` event listener watches — must use sessionStorage in draft mode
     const _BOOTLOADER_WATCHED_KEYS = new Set(['theme', 'css_cache']);
@@ -5867,6 +5877,60 @@ location.reload();</code></pre>
         return d;
     }
 
+    // Gradient presets are their own import type — a separate file format, with
+    // their own import button and their own server-side collection — so they
+    // never passed through validateModeData and nothing else validated them
+    // either. Every one of their render sites was therefore rendering raw remote
+    // values, and patching the render sites one at a time is how five of them
+    // ended up sanitized and five did not. This is the door.
+    function sanitizeGradientPreset(p) {
+        if (!p || typeof p !== 'object') return null;
+        const clean = {
+            name: typeof p.name === 'string' ? p.name.slice(0, 120) : '',
+            type: _MODE_ENUMS.gradientType.includes(p.type) ? p.type : 'linear',
+            angle: _num(p.angle, 0, 360, 135),
+            intensity: _num(p.intensity, 0, 100, 85),
+            animation: !!p.animation,
+            speed: _num(p.speed, 2, 30, 8),
+            radialPosX: _num(p.radialPosX, 0, 100, 50),
+            radialPosY: _num(p.radialPosY, 0, 100, 50),
+            radialShape: _MODE_ENUMS.gradientRadialShape.includes(p.radialShape) ? p.radialShape : 'ellipse',
+            radialSize: _MODE_ENUMS.gradientRadialSize.includes(p.radialSize) ? p.radialSize : 'farthest-corner',
+            meshBgColor: _cssTok(p.meshBgColor, '#0a0a12'),
+        };
+        if (!clean.name) return null;
+        if (Array.isArray(p.stops)) {
+            clean.stops = p.stops.filter(s => s && typeof s === 'object').slice(0, 32)
+                .map(s => ({ color: _cssTok(s.color, '#000000'), position: _num(s.position, 0, 100, 0) }));
+        }
+        if (Array.isArray(p.meshPoints)) {
+            clean.meshPoints = p.meshPoints.filter(pt => pt && typeof pt === 'object').slice(0, 32)
+                .map(pt => ({
+                    color: _cssTok(pt.color, '#000000'),
+                    x: _num(pt.x, 0, 100, 50), y: _num(pt.y, 0, 100, 50),
+                    spread: _num(pt.spread, 10, 80, 50)
+                }));
+        }
+        if (!clean.stops && !clean.meshPoints) return null;
+        return clean;
+    }
+
+    function sanitizeGradientPresets(list) {
+        return Array.isArray(list) ? list.map(sanitizeGradientPreset).filter(Boolean) : [];
+    }
+
+    // Snapshots arriving from the server library are as untrusted as an import:
+    // they may have been written by an older build, before the values in them
+    // were validated at all.
+    function sanitizeSnapshotList(list) {
+        if (!Array.isArray(list)) return [];
+        list.forEach(s => {
+            if (!s || typeof s !== 'object') return;
+            MODES.forEach(m => { if (s[m] && typeof s[m] === 'object') s[m] = validateModeData(s[m]); });
+        });
+        return list;
+    }
+
     function normalizeModeData(d, { forExport = false } = {}) {
         if (!d) return d;
         // Format normalization (handles JSON Viewer and other non-standard formats)
@@ -5909,31 +5973,22 @@ location.reload();</code></pre>
         showStatus(statusEl, fetchMsg, 'loading');
 
         try {
-            // Auto-convert GitHub URLs to raw content URLs
-            let fetchUrl = url;
-            // github.com/user/repo/blob/branch/path → raw.githubusercontent.com/user/repo/branch/path
-            const ghBlobMatch = fetchUrl.match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/(.+)$/);
-            if (ghBlobMatch) {
-                fetchUrl = `https://raw.githubusercontent.com/${ghBlobMatch[1]}/${ghBlobMatch[2]}/${ghBlobMatch[3]}`;
-            }
-            // github.com/user/repo/raw/branch/path → raw.githubusercontent.com/user/repo/branch/path
-            const ghRawMatch = fetchUrl.match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/raw\/(.+)$/);
-            if (ghRawMatch) {
-                fetchUrl = `https://raw.githubusercontent.com/${ghRawMatch[1]}/${ghRawMatch[2]}/${ghRawMatch[3]}`;
-            }
-            // gist.github.com/user/id/raw/... is already fine, but gist.github.com/user/id → needs /raw
-            const gistMatch = fetchUrl.match(/^https?:\/\/gist\.github\.com\/([^/]+)\/([a-f0-9]+)\/?$/);
-            if (gistMatch) {
-                fetchUrl = `https://gist.githubusercontent.com/${gistMatch[1]}/${gistMatch[2]}/raw`;
-            }
+            // Rewrite through the shared helper, then gate on the rewritten URL.
+            // The allowlist check lives here rather than in a wrapper around this
+            // function so that it runs AFTER the empty/invalid-input checks above
+            // (a blank field used to report a bogus "domain not allowed" error
+            // naming the admin's own instance) and so that the host verified is
+            // the one this function is about to contact.
+            const fetchUrl = toRawGitHub(url);
+            assertImportHostAllowed(fetchUrl);
 
             const res = await fetch(fetchUrl);
+            // fetch follows redirects, so the check above only proves the FIRST
+            // host was allowed. An allowlisted host answering 302 would otherwise
+            // deliver a payload from anywhere.
+            if (res.redirected) assertImportHostAllowed(res.url);
             if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-            const contentLength = parseInt(res.headers.get('content-length') || '0', 10);
-            const MAX_URL_SIZE = 2 * 1024 * 1024; // 2MB — matches local file import limit
-            if (contentLength > MAX_URL_SIZE) throw new Error(`File too large (${(contentLength / 1024 / 1024).toFixed(1)}MB). Maximum is 2MB.`);
-            const text = await res.text();
-            if (text.length > MAX_URL_SIZE) throw new Error(`File too large (${(text.length / 1024 / 1024).toFixed(1)}MB). Maximum is 2MB.`);
+            const text = await readCappedText(res);
             const fileName = url.split('/').pop().split('?')[0] || defaultName;
 
             let isJson = fileName.endsWith('.json');
@@ -6135,10 +6190,14 @@ function startAnimation() {
                     || (lib.gradient_presets && lib.gradient_presets.length > 0);
 
                 if (hasServerData) {
-                    if (lib.snapshots && lib.snapshots.length > 0) saveSnapshots(lib.snapshots);
+                    // Validated at the door, like import. This path overwrites the
+                    // whole library on every page load, so skipping it left the
+                    // render-time sanitizers as the only defence for exactly the
+                    // themes written by an older build.
+                    if (lib.snapshots && lib.snapshots.length > 0) saveSnapshots(sanitizeSnapshotList(lib.snapshots));
                     if (lib.canvas_presets && lib.canvas_presets.length > 0) { CANVAS_PRESETS.splice(0, CANVAS_PRESETS.length, ...lib.canvas_presets); Storage.set('canvas', CANVAS_PRESETS); }
                     if (lib.css_presets && lib.css_presets.length > 0) { CSS_PRESETS.splice(0, CSS_PRESETS.length, ...lib.css_presets); Storage.set('css', CSS_PRESETS); }
-                    if (lib.gradient_presets && lib.gradient_presets.length > 0) { CUSTOM_GRADIENT_PRESETS.splice(0, CUSTOM_GRADIENT_PRESETS.length, ...lib.gradient_presets); Storage.set('gradients', CUSTOM_GRADIENT_PRESETS); }
+                    if (lib.gradient_presets && lib.gradient_presets.length > 0) { const g = sanitizeGradientPresets(lib.gradient_presets); CUSTOM_GRADIENT_PRESETS.splice(0, CUSTOM_GRADIENT_PRESETS.length, ...g); Storage.set('gradients', CUSTOM_GRADIENT_PRESETS); }
                     if (typeof renderSnapshots === 'function') renderSnapshots();
                     if (typeof renderCanvasPresets === 'function') renderCanvasPresets();
                     if (typeof renderCssPresets === 'function') renderCssPresets();
@@ -6454,11 +6513,24 @@ function startAnimation() {
     tooltipEl.className = 'owui-tooltip';
     document.body.appendChild(tooltipEl);
     let activeTooltipTarget = null;
+    // Rich-tooltip markup, keyed. Producers rebuild their whole list on every
+    // render, so each one clears its own prefix first rather than growing forever.
+    const _ttHtmlStore = new Map();
+    function _ttRegister(key, html) { _ttHtmlStore.set(key, html); return key; }
+    function _ttClearPrefix(prefix) {
+        [..._ttHtmlStore.keys()].forEach(k => { if (k.startsWith(prefix)) _ttHtmlStore.delete(k); });
+    }
 
     document.body.addEventListener('mouseover', (e) => {
-        const target = e.target.closest('[data-tooltip], [data-tooltip-html]');
+        const target = e.target.closest('[data-tooltip], [data-tooltip-key]');
         if (!target) return;
-        const htmlContent = target.getAttribute('data-tooltip-html');
+        // Rich tooltips are looked up by key, never round-tripped through an
+        // attribute. The markup used to be escaped into data-tooltip-html and read
+        // back with getAttribute — but the HTML parser DECODES entities when it
+        // builds the attribute value, so getAttribute handed back the very markup
+        // the escaping had neutralised, and it went straight into innerHTML. A
+        // theme name of "<img src=x onerror=...>" executed on hover.
+        const htmlContent = _ttHtmlStore.get(target.getAttribute('data-tooltip-key'));
         const text = htmlContent || target.getAttribute('data-tooltip');
         if (!text) return;
 
@@ -7075,14 +7147,29 @@ function startAnimation() {
     }
 
     function adjustHexIntensity(hex, intensity) {
-        hex = hex.replace('#', '');
-        if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
-        let [r, g, b] = parseHex(hex);
-        const factor = intensity / 100;
+        // Callers pass stop colours straight from theme data. A non-string value
+        // used to throw here and take the whole theme's CSS generation with it,
+        // and any non-hex colour (rgb(), oklch(), var()) produced "#NaNNaNNaN",
+        // since parseHex returns NaN and NaN.toString(16) is "NaN". Intensity
+        // only means anything for hex, so everything else passes through.
+        const tok = _cssTok(hex, '#000000');
+        let h = tok.replace('#', '');
+        if (h.length === 3) h = h.split('').map(c => c + c).join('');
+        if (!/^[0-9a-fA-F]{6}$/.test(h)) return tok;
+        let [r, g, b] = parseHex(h);
+        const factor = _cssNum(intensity, 100) / 100;
         r = Math.max(0, Math.min(255, Math.round(128 + (r - 128) * factor)));
         g = Math.max(0, Math.min(255, Math.round(128 + (g - 128) * factor)));
         b = Math.max(0, Math.min(255, Math.round(128 + (b - 128) * factor)));
         return '#' + [r, g, b].map(c => c.toString(16).padStart(2, '0')).join('');
+    }
+
+    // One clamp, reading the same bounds validateModeData enforces. Written out
+    // twice by hand it kept only the floor, so a value that skipped validation
+    // rendered as `animation: 600s` while the slider showed its 30 maximum.
+    function gradientSpeed(modeData) {
+        const [lo, hi] = _MODE_NUM_BOUNDS.gradientAnimationSpeed;
+        return _num(modeData.gradientAnimationSpeed, lo, hi, 8);
     }
 
     function buildGradientStructuralCss({ selector, baseColor, animCss, keyframesCss, comment, bodyBg }) {
@@ -7114,7 +7201,7 @@ function startAnimation() {
             }).join(', ');
 
 
-            const speed = Math.max(2, _cssNum(modeData.gradientAnimationSpeed, 8));
+            const speed = gradientSpeed(modeData);
 
             {
                 let animCss = '';
@@ -7166,7 +7253,7 @@ function startAnimation() {
         let animCss = '';
         let keyframesCss = '';
         if (modeData.gradientAnimation) {
-            const speed = Math.max(2, _cssNum(modeData.gradientAnimationSpeed, 8));
+            const speed = gradientSpeed(modeData);
             animCss = `  background-size: 300% 300% !important;\n  animation: owui-gradient-shift ${speed}s ease infinite !important;`;
             keyframesCss = `\n@keyframes owui-gradient-shift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n`;
         }
@@ -8163,15 +8250,15 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 const meshStopsList = $('mesh-stops-list');
                 if (meshStopsList && !window._meshSpreadSliderActive) {
                     meshStopsList.innerHTML = points.map((p, i) => `
-                        <div class="mesh-stop-row ${i === window._selectedMeshPoint ? 'selected' : ''}" data-index="${i}" onclick="window.selectMeshPoint(${i})" role="listitem" tabindex="0" aria-label="Mesh point ${i + 1}: ${p.color} at ${p.x}%, ${p.y}%">
+                        <div class="mesh-stop-row ${i === window._selectedMeshPoint ? 'selected' : ''}" data-index="${i}" onclick="window.selectMeshPoint(${i})" role="listitem" tabindex="0" aria-label="Mesh point ${i + 1}: ${_escAttr(_cssTok(p.color))} at ${_cssNum(p.x, 50)}%, ${_cssNum(p.y, 50)}%">
                             <div class="gradient-drag-handle" data-tooltip="Drag to reorder">
                                 ${ICONS.dragHandle}
                             </div>
                             <div class="gradient-stop-swatch" style="background: ${_cssTok(p.color)};">
-                                <input type="color" value="${p.color}" aria-label="Mesh point ${i + 1} color" onchange="window.updateMeshStop(${i}, {color: this.value})" oninput="this.parentElement.style.background = this.value; window.updateMeshStop(${i}, {color: this.value})">
+                                <input type="color" value="${_escAttr(_cssTok(p.color))}" aria-label="Mesh point ${i + 1} color" onchange="window.updateMeshStop(${i}, {color: this.value})" oninput="this.parentElement.style.background = this.value; window.updateMeshStop(${i}, {color: this.value})">
                             </div>
-                            <input type="range" class="gradient-stop-slider" min="10" max="80" value="${p.spread}" aria-label="Mesh point ${i + 1} spread" onpointerdown="window._meshSpreadSliderActive = true" oninput="window.updateMeshStop(${i}, {spread: parseInt(this.value)}); this.nextElementSibling.innerText = this.value + '%'" onchange="window._meshSpreadSliderActive = false; window.updateMeshStop(${i}, {spread: parseInt(this.value)})">
-                            <span class="gradient-stop-pos">${p.spread}%</span>
+                            <input type="range" class="gradient-stop-slider" min="10" max="80" value="${_cssNum(p.spread, 50)}" aria-label="Mesh point ${i + 1} spread" onpointerdown="window._meshSpreadSliderActive = true" oninput="window.updateMeshStop(${i}, {spread: parseInt(this.value)}); this.nextElementSibling.innerText = this.value + '%'" onchange="window._meshSpreadSliderActive = false; window.updateMeshStop(${i}, {spread: parseInt(this.value)})">
+                            <span class="gradient-stop-pos">${_cssNum(p.spread, 50)}%</span>
                             <button class="gradient-stop-delete" onclick="event.stopPropagation(); window.removeMeshStop(${i})" ${points.length <= 2 ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''} data-tooltip="Remove stop" aria-label="Remove mesh point ${i + 1}">×</button>
                         </div>
                     `).join('');
@@ -8208,10 +8295,10 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                         ${ICONS.dragHandle}
                     </div>
                     <div class="gradient-stop-swatch" style="background: ${_cssTok(stop.color)};">
-                        <input type="color" value="${stop.color}" aria-label="Stop ${i + 1} color" onchange="window.updateGradientStop(${i}, {color: this.value})" oninput="this.parentElement.style.background = this.value">
+                        <input type="color" value="${_escAttr(_cssTok(stop.color))}" aria-label="Stop ${i + 1} color" onchange="window.updateGradientStop(${i}, {color: this.value})" oninput="this.parentElement.style.background = this.value">
                     </div>
-                    <input type="range" class="gradient-stop-slider" min="0" max="100" value="${stop.position}" aria-label="Stop ${i + 1} position" onpointerdown="window._gradientSliderActive = true" oninput="window.updateGradientStop(${i}, {position: parseInt(this.value)}); this.nextElementSibling.innerText = this.value + '%'" onchange="window._gradientSliderActive = false; window.updateGradientStop(${i}, {position: parseInt(this.value)})">
-                    <span class="gradient-stop-pos">${stop.position}%</span>
+                    <input type="range" class="gradient-stop-slider" min="0" max="100" value="${_cssNum(stop.position, 0)}" aria-label="Stop ${i + 1} position" onpointerdown="window._gradientSliderActive = true" oninput="window.updateGradientStop(${i}, {position: parseInt(this.value)}); this.nextElementSibling.innerText = this.value + '%'" onchange="window._gradientSliderActive = false; window.updateGradientStop(${i}, {position: parseInt(this.value)})">
+                    <span class="gradient-stop-pos">${_cssNum(stop.position, 0)}%</span>
                     <button class="gradient-stop-dup" onclick="window.duplicateGradientStop(${i})" ${stops.length >= 16 ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''} data-tooltip="Duplicate stop" aria-label="Duplicate color stop ${i + 1}">⧉</button>
                     <button class="gradient-stop-delete" onclick="window.removeGradientStop(${i})" ${stops.length <= 2 && config.gradientEnabled ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''} data-tooltip="Remove stop" aria-label="Remove color stop ${i + 1}">×</button>
                 </div>
@@ -8253,6 +8340,11 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                         const rPosX = config.gradientRadialPosX ?? 50;
                         const rPosY = config.gradientRadialPosY ?? 50;
                         gradFunc = `radial-gradient(${rShape} ${rSize} at ${rPosX}% ${rPosY}%, ${stopsStr})`;
+                    } else if (gType === 'conic') {
+                        // buildGradientCss emits a real conic gradient, so a linear
+                        // preview here would show the admin something other than
+                        // what every user receives.
+                        gradFunc = `conic-gradient(from ${_cssNum(config.gradientAngle, 135)}deg, ${stopsStr})`;
                     } else gradFunc = `linear-gradient(90deg, ${stopsStr})`;
                     previewBar.style.backgroundImage = gradFunc;
                     previewBar.classList.remove('empty');
@@ -8313,21 +8405,28 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
         function buildSwatchHtml(preset) {
             let gradStr, bgColorStyle = '';
+            // sanitizeGradientPreset covers presets at the door; these calls are
+            // the second layer, for presets already in a library from before it.
             if (preset.type === 'mesh' && preset.meshPoints) {
                 const layers = preset.meshPoints.map(p =>
-                    `radial-gradient(at ${p.x}% ${p.y}%, ${p.color} 0%, transparent ${p.spread}%)`
+                    `radial-gradient(at ${_cssNum(p.x, 50)}% ${_cssNum(p.y, 50)}%, ${_cssTok(p.color)} 0%, transparent ${_cssNum(p.spread, 50)}%)`
                 ).join(', ');
                 gradStr = layers;
-                bgColorStyle = `background-color:${preset.meshBgColor || '#0a0a12'};`;
+                bgColorStyle = `background-color:${_cssTok(preset.meshBgColor, '#0a0a12')};`;
             } else {
                 const stops = preset.stops || [];
                 if (stops.length === 0) return { gradStr: 'none', bgColorStyle: '' };
-                const sorted = [...stops].sort((a, b) => a.position - b.position);
-                // Gradient PRESETS are a separate import type that
-                // validateModeData never touches, and this lands in a style
-                // attribute that syncLibrary then persists server-side.
+                const sorted = [...stops].sort((a, b) => _cssNum(a.position, 0) - _cssNum(b.position, 0));
                 const stopsStr = sorted.map(s => `${_cssTok(s.color)} ${_cssNum(s.position, 0)}%`).join(', ');
-                gradStr = `linear-gradient(90deg, ${stopsStr})`;
+                if (preset.type === 'radial') {
+                    gradStr = `radial-gradient(${_cssTok(preset.radialShape, 'ellipse')} ${_cssTok(preset.radialSize, 'farthest-corner')} at ${_cssNum(preset.radialPosX, 50)}% ${_cssNum(preset.radialPosY, 50)}%, ${stopsStr})`;
+                } else if (preset.type === 'conic') {
+                    gradStr = `conic-gradient(from ${_cssNum(preset.angle, 135)}deg, ${stopsStr})`;
+                } else {
+                    // Linear swatches stay at 90deg on purpose: the chip is a wide
+                    // strip and the preset's own angle would clip it to a corner.
+                    gradStr = `linear-gradient(90deg, ${stopsStr})`;
+                }
             }
             return { gradStr, bgColorStyle };
         }
@@ -8337,7 +8436,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         let html = allEntries.map(entry => {
             const { gradStr, bgColorStyle } = buildSwatchHtml(entry.preset);
             const isActive = gradRef && gradRef.type === entry.type && (entry.type === 'builtin' ? gradRef.id === entry.id : gradRef.index === entry.index);
-            const escapedName = entry.preset.name.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            const escapedName = _escAttr(entry.preset.name);
             const onclick = entry.type === 'builtin' ? `window.applyGradientPreset('${entry.id}')` : `window.applyCustomGradientPreset(${entry.index})`;
             const customActions = entry.type === 'custom' ? `
                     <div class="snapshot-action edit-snapshot" onclick="event.stopPropagation(); window.requestRenameGradientPreset(${entry.index})" data-tooltip="Rename preset">✎</div>
@@ -8688,15 +8787,19 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         showToast('Stops distributed evenly');
     };
 
+    // The single funnel through which every gradient preset — built-in, imported
+    // file, imported URL, server library — becomes live mode data. Validating
+    // here covers all of them at once, including presets that predate
+    // sanitizeGradientPreset and are already sitting in a user's library.
     function presetToGradientData(p) {
-        return {
+        return validateModeData({
             gradientEnabled: true, gradientType: p.type || 'linear', gradientAngle: p.angle ?? 135,
             gradientStops: p.stops || [], gradientAnimation: !!p.animation,
             gradientIntensity: p.intensity ?? 85, gradientAnimationSpeed: p.speed || 8,
             gradientRadialPosX: p.radialPosX ?? 50, gradientRadialPosY: p.radialPosY ?? 50,
             gradientRadialShape: p.radialShape || 'ellipse', gradientRadialSize: p.radialSize || 'farthest-corner',
             gradientMeshPoints: p.meshPoints || [], gradientMeshBgColor: p.meshBgColor || '#0a0a12',
-        };
+        });
     }
 
     function applyGradient(preset, ref) {
@@ -10929,10 +11032,11 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             } else if (data.name && (data.stops || data.meshPoints)) {
                 presets = [data];
             }
-            presets.forEach(p => {
-                if (!p.name || (!p.stops && !p.meshPoints)) return;
+            presets.forEach(raw => {
+                const p = sanitizeGradientPreset(raw);
+                if (!p) return;
                 if (isGradientDuplicate(p)) { skipped++; return; }
-                CUSTOM_GRADIENT_PRESETS.push(structuredClone(p)); imported++;
+                CUSTOM_GRADIENT_PRESETS.push(p); imported++;
             });
             return { imported, skipped };
         }
@@ -11530,13 +11634,53 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     // --- Theme Update System ---
     const MANIFEST_URL = 'https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/manifest.json';
 
+    // The one URL rewriter. loadFromUrl used to carry its own copy with an extra
+    // gist rule, and the allowlist checked this one — so a gist URL was approved
+    // on gist.github.com and then fetched from gist.githubusercontent.com, a host
+    // the admin never listed. Any rewrite rule added here must stay here, because
+    // the host this returns is the host the allowlist verdict is about.
     function toRawGitHub(url) {
         if (!url) return url;
         const ghBlob = url.match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/(.+)$/);
         if (ghBlob) return `https://raw.githubusercontent.com/${ghBlob[1]}/${ghBlob[2]}/${ghBlob[3]}`;
         const ghRaw = url.match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/raw\/(.+)$/);
         if (ghRaw) return `https://raw.githubusercontent.com/${ghRaw[1]}/${ghRaw[2]}/${ghRaw[3]}`;
+        // gist.github.com/user/id/raw/... already serves raw; a bare gist needs /raw
+        const gist = url.match(/^https?:\/\/gist\.github\.com\/([^/]+)\/([a-f0-9]+)\/?$/);
+        if (gist) return `https://gist.githubusercontent.com/${gist[1]}/${gist[2]}/raw`;
         return url;
+    }
+
+    // Every remote fetch caps its response the way the manual import always has.
+    // Without this, one hostile updateUrl could hang or OOM the admin tab during
+    // an automatic "Check for Updates" sweep across the whole library.
+    const MAX_REMOTE_BYTES = 2 * 1024 * 1024;
+    // "Install All" ships every theme in one document, so it gets its own ceiling.
+    const MAX_BUNDLE_BYTES = 16 * 1024 * 1024;
+
+    async function readCappedText(res, cap = MAX_REMOTE_BYTES) {
+        const asMb = n => (n / 1024 / 1024).toFixed(1);
+        const declared = parseInt(res.headers.get('content-length') || '0', 10);
+        if (declared > cap) throw new Error(`Response too large (${asMb(declared)}MB). Maximum is ${asMb(cap)}MB.`);
+        const text = await res.text();
+        // content-length is optional and can lie, so the decoded body is checked too
+        if (text.length > cap) throw new Error(`Response too large (${asMb(text.length)}MB). Maximum is ${asMb(cap)}MB.`);
+        return text;
+    }
+
+    // Theme Pro's own manifest, catalog and bundle endpoints still go through the
+    // allowlist. They are third-party hosts from the instance's point of view:
+    // the manifest supplies the updateUrls the update flow then follows, and
+    // "Install All" installs whole theme bodies straight from the bundle. An
+    // admin who restricts imports to an internal mirror expects that to stop the
+    // outbound traffic too, not just the manual button.
+    async function fetchGatedJson(url, cap) {
+        const fetchUrl = toRawGitHub(url);
+        assertImportHostAllowed(fetchUrl);
+        const res = await fetch(fetchUrl);
+        if (res.redirected) assertImportHostAllowed(res.url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return JSON.parse(await readCappedText(res, cap));
     }
 
     const semverCompare = (a, b) => {
@@ -11551,9 +11695,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
     async function fetchManifest() {
         try {
-            const res = await fetch(MANIFEST_URL);
-            if (!res.ok) return null;
-            const data = await res.json();
+            const data = await fetchGatedJson(MANIFEST_URL);
             if (data.manifestVersion && data.themes) return data;
             return null;
         } catch { return null; }
@@ -11662,7 +11804,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         try { hostname = new URL(rawUrl, window.location.origin).hostname.toLowerCase(); }
         catch (e) { throw new Error('Invalid URL'); }
         const ok = allow.some(d => hostname === d || hostname.endsWith('.' + d));
-        if (!ok) throw new Error(`Domain "${hostname}" is not in the allowed import list`);
+        if (!ok) throw new Error(`Domain "${hostname}" is not in the allowed import list. Allowed: ${allow.join(', ')}`);
     }
 
     async function fetchThemeData(updateUrl) {
@@ -11675,7 +11817,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         // pre-flight passed. Re-validate where we actually landed.
         if (res.redirected) assertImportHostAllowed(res.url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const remote = await res.json();
+        const remote = JSON.parse(await readCappedText(res));
         if (!remote.dark || !remote.light) throw new Error('Invalid theme format');
         return remote;
     }
@@ -11684,24 +11826,12 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         try {
             showToast('Downloading theme update...');
             const remote = await fetchThemeData(updateUrl);
-            // The manifest path only compared versions, so this is the first
-            // point where the actual payload is known. Confirm before
-            // installing JavaScript that will run for every user — without
-            // this, a manifest-listed theme could add a script with no notice
-            // anywhere in the flow.
-            if (!(opts && opts.skipCanvasConfirm) && updateAddsCanvasCode(getSnapshots()[index], remote)) {
-                const name = (getSnapshots()[index] || {}).name || 'This theme';
-                if (!window.confirm(
-                    `${name} adds or changes a Canvas FX script (JavaScript).\n\n` +
-                    `It will run in the browser of every user on this instance. ` +
-                    `Only continue if you trust the source.\n\nInstall this update?`
-                )) {
-                    showToast('Update cancelled');
-                    return false;
-                }
-            }
-            applyThemeUpdate(index, remote);
-            return true;
+            // The confirmation lives in applyThemeUpdate, which every update path
+            // funnels through. Putting it here instead covered only the manifest
+            // path, so the batch and per-row buttons — the ones that already hold
+            // the payload, i.e. where the risk is KNOWN rather than merely
+            // possible — installed scripts with no prompt at all.
+            return applyThemeUpdate(index, remote, opts);
         } catch(e) {
             showToast(`Error: ${e.message}`);
             return false;
@@ -11738,9 +11868,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
         try {
             // Fetch rich catalog (has per-mode data, features, importUrl)
-            const res = await fetch(CATALOG_URL);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
+            const data = await fetchGatedJson(CATALOG_URL);
             if (!data.themes || !Array.isArray(data.themes)) throw new Error('Invalid catalog');
             _communityCatalog = data;
             // Also load manifest for update version checking
@@ -12002,9 +12130,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
             const BUNDLE_URL = 'https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/themes-all.json';
             try {
-                const res = await fetch(BUNDLE_URL);
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const bundle = await res.json();
+                const bundle = await fetchGatedJson(BUNDLE_URL, MAX_BUNDLE_BYTES);
                 if (!bundle.themes || !Array.isArray(bundle.themes)) throw new Error('Invalid bundle format');
 
                 // Re-check installed URLs (snapshots may have changed)
@@ -12110,7 +12236,23 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         }
         
         let html = '';
-        
+
+        // Clear the previous run's batch state unconditionally. It used to be
+        // rebuilt only inside the `updates.length > 0` branch below, so a later
+        // check that found nothing left the "Retry Failed" button live and wired
+        // to stale indices — which snapshot deletion may have re-pointed at a
+        // different theme.
+        window._pendingBatchUpdates = {};
+        window._pendingBatchIndices = [];
+        window._pendingBatchMeta = {};
+        const _updateAllBtnReset = $('update-all-btn');
+        if (_updateAllBtnReset) {
+            _updateAllBtnReset.style.display = 'none';
+            _updateAllBtnReset.disabled = false;
+            _updateAllBtnReset.innerText = 'Update All';
+            _updateAllBtnReset.style.opacity = '1';
+        }
+
         if (updates.length > 0) {
             html += `<div style="font-size: 0.7rem; font-weight: 700; color: #10b981; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Updates Available (${updates.length})</div>`;
             updates.forEach((u, idx) => {
@@ -12134,7 +12276,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 if (u.viaManifest) {
                     html += `<button class="btn btn-primary js-apply-manifest-update" style="background:#10b981; padding: 6px 14px; font-size: 0.68rem;" data-index="${u.index}" data-url="${_escAttr(u.remoteUpdateUrl || '')}">Update</button>`;
                 } else {
-                    html += `<button class="btn btn-primary" style="background:#10b981; padding: 6px 14px; font-size: 0.68rem;" onclick="applyThemeUpdate(${u.index}, window._pendingBatchUpdates[${u.index}]); this.innerText='Updated!'; this.disabled=true; this.style.opacity='0.5';">Update</button>`;
+                    html += `<button class="btn btn-primary js-apply-batch-update" style="background:#10b981; padding: 6px 14px; font-size: 0.68rem;" data-index="${u.index}">Update</button>`;
                 }
                 html += `</div></div>`;
                 // Collapsible diff panel
@@ -12142,9 +12284,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 html += `</div>`;
             });
             // Store remote data for non-manifest batch buttons
-            window._pendingBatchUpdates = {};
             window._pendingBatchIndices = updates.map(u => u.index);
-            window._pendingBatchMeta = {};
             updates.forEach(u => {
                 if (u.viaManifest) {
                     window._pendingBatchMeta[u.index] = u.remoteUpdateUrl;
@@ -12159,17 +12299,26 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             const risks = updates.map(u => canvasUpdateRisk(u.local, u.remote));
             const fxCount = risks.filter(r => r === 'adds').length;
             const unknownCount = risks.filter(r => r === 'unknown').length;
-            if (fxCount > 0 || unknownCount > 0) {
+            // Remote CSS is the widest channel into the instance-wide stylesheet.
+            // The single-update modal warned about it; this banner did not, so
+            // "Update All" was the one path where it landed in silence.
+            const cssCount = updates.filter(u => updateAddsRemoteCss(u.local, u.remote)).length;
+            if (fxCount > 0 || unknownCount > 0 || cssCount > 0) {
                 let msg = '';
                 if (fxCount > 0) {
                     msg += `${fxCount} of these update${fxCount > 1 ? 's' : ''} add${fxCount > 1 ? '' : 's'} or change${fxCount > 1 ? '' : 's'} a <b>Canvas FX script</b> (JavaScript) that will run in the browser of <b>every user</b> on this instance.`;
+                }
+                if (cssCount > 0) {
+                    if (msg) msg += '<br><br>';
+                    msg += `${cssCount} of these update${cssCount > 1 ? 's change' : ' changes'} <b>custom CSS</b>, which is applied instance-wide and can restyle or overlay any part of the interface.`;
                 }
                 if (unknownCount > 0) {
                     // Version-only manifest matches: the body has not been
                     // downloaded, so "no script" is not something we know.
                     if (msg) msg += '<br><br>';
-                    msg += `${unknownCount} update${unknownCount > 1 ? 's have' : ' has'} not been downloaded yet, so ${unknownCount > 1 ? 'they' : 'it'} may also add a Canvas FX script. You will be asked to confirm before any script is installed.`;
+                    msg += `${unknownCount} update${unknownCount > 1 ? 's have' : ' has'} not been downloaded yet, so ${unknownCount > 1 ? 'they' : 'it'} may also add a Canvas FX script.`;
                 }
+                msg += ` You will be asked to confirm each of these before it is installed.`;
                 html += `<div style="background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.3); border-radius:10px; padding:10px 12px; margin-top:12px; font-size:0.68rem; color:var(--text-muted); text-align:left;">`
                      + `<b style="color:#ef4444;">&#9888;&#65039; Security Warning</b><br>${msg} Review each diff before updating.`
                      + `</div>`;
@@ -12221,26 +12370,61 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 showToast(`Ignored v${lv} → v${rv}`);
                 return;
             }
+            const markApplied = (btn) => {
+                btn.innerText = 'Updated!';
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+            };
             const updBtn = e.target.closest('.js-apply-manifest-update');
             if (updBtn) {
-                const idx = Number(updBtn.getAttribute('data-index'));
+                const idx = _attrIndex(updBtn, 'data-index');
                 const url = updBtn.getAttribute('data-url') || '';
-                if (!isFinite(idx)) return;
-                const ok = await applyManifestUpdate(idx, url);
-                if (ok) {
-                    updBtn.innerText = 'Updated!';
-                    updBtn.disabled = true;
-                    updBtn.style.opacity = '0.5';
-                }
+                if (idx === null) return;
+                if (await applyManifestUpdate(idx, url)) markApplied(updBtn);
+                return;
+            }
+            // Non-manifest rows already hold the payload. This used to be an
+            // inline onclick that marked itself "Updated!" unconditionally, so a
+            // declined confirmation still read as success.
+            const batchBtn = e.target.closest('.js-apply-batch-update');
+            if (batchBtn) {
+                const idx = _attrIndex(batchBtn, 'data-index');
+                if (idx === null) return;
+                const remote = (window._pendingBatchUpdates || {})[idx];
+                if (!remote) return;
+                if (applyThemeUpdate(idx, remote)) markApplied(batchBtn);
                 return;
             }
         });
     })();
 
-    window.applyThemeUpdate = function(index, remoteData) {
+    window.applyThemeUpdate = function(index, remoteData, opts) {
         const snapshots = getSnapshots();
-        if (!snapshots[index]) return;
-        
+        if (!snapshots[index]) return false;
+
+        // Every update path ends here, so this is where the gate belongs. Callers
+        // that have already shown the warning and taken an explicit click for it
+        // (the single-update modal) pass alreadyConfirmed; nothing else does.
+        if (!(opts && opts.alreadyConfirmed)) {
+            const reasons = [];
+            if (updateAddsCanvasCode(snapshots[index], remoteData)) {
+                reasons.push('adds or changes a Canvas FX script (JavaScript), which will run in the browser of every user on this instance');
+            }
+            if (updateAddsRemoteCss(snapshots[index], remoteData)) {
+                reasons.push('changes custom CSS, which is applied instance-wide and can restyle or overlay any part of the interface');
+            }
+            if (reasons.length) {
+                const name = snapshots[index].name || 'This theme';
+                if (!window.confirm(
+                    `${name} ${reasons.join(', and ')}.\n\n` +
+                    `Only continue if you trust the source.\n\nInstall this update?`
+                )) {
+                    showToast('Update cancelled');
+                    return false;
+                }
+            }
+        }
+
         // Normalize the remote data through the same pipeline as import
         MODES.forEach(m => { if (remoteData[m]) remoteData[m] = normalizeModeData(remoteData[m]); });
 
@@ -12275,6 +12459,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             pushState();
             renderSnapshots();
         }
+        return true;
     };
 
     let pendingUpdate = null;
@@ -12467,12 +12652,20 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     // ships new code. Reporting that as 'none' made the warning silently dead
     // for exactly the themes it was written for — the ones in the community
     // manifest. Unknown must surface as a caution, not as an all-clear.
+    // Remote theme JSON is unnormalized at this point — checkThemeUpdate returns
+    // it straight from the network and normalizeModeData does not run until the
+    // update is applied. `(v || '').trim()` therefore threw on any non-string
+    // truthy value, and the throw took the whole update modal down with it.
+    function _remoteText(v) {
+        return typeof v === 'string' ? v.trim() : '';
+    }
+
     function canvasUpdateRisk(local, remote) {
         if (!remote) return 'unknown';
         const adds = MODES.some(m => {
             const r = remote[m], l = local && local[m];
-            const rs = (r && r.canvasScript || '').trim();
-            const ls = (l && l.canvasScript || '').trim();
+            const rs = _remoteText(r && r.canvasScript);
+            const ls = _remoteText(l && l.canvasScript);
             // A changed script is the obvious case. Flipping canvasEnabled from
             // false to true is the subtle one: the script is unchanged, so a
             // text comparison sees nothing, but execution is gated on
@@ -12502,8 +12695,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             if (!r) return false;
             const pairs = [['customCSS', 'customCssEnabled'], ['manualOverrides', 'manualOverridesEnabled']];
             return pairs.some(([txt, flag]) => {
-                const rs = (r[txt] || '').trim();
-                const ls = (l && l[txt] || '').trim();
+                const rs = _remoteText(r[txt]);
+                const ls = _remoteText(l && l[txt]);
                 if (rs && rs !== ls) return true;
                 return !!(rs && r[flag] && !(l && l[flag]));
             });
@@ -12528,9 +12721,13 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     }
 
     window.checkSingleUpdate = async (index) => {
+      // Anything that throws while building the modal used to leave the admin
+      // staring at the "Checking for update..." toast with no modal and no error,
+      // because nothing between here and showModal() was guarded.
+      try {
         showToast('Checking for update...');
         const result = await checkThemeUpdate(index);
-        
+
         if (!result) {
             showToast('✓ Theme is up to date!');
             return;
@@ -12568,8 +12765,12 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             diffToggleWrap.style.display = 'none';
             diffPanel.style.display = 'none';
         }
-        
+
         showModal('update-modal');
+      } catch (e) {
+        console.error('Update check failed:', e);
+        showToast(`Error: ${e.message}`);
+      }
     };
     
     $('update-skip-btn').addEventListener('click', () => {
@@ -12596,8 +12797,12 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     
     $('update-confirm-btn').addEventListener('click', () => {
         if (pendingUpdate && !pendingUpdate.error) {
-            applyThemeUpdate(pendingUpdate.index, pendingUpdate.remote);
-            showToast(`Updated "${pendingUpdate.local.name}" to v${pendingUpdate.remoteVersion}!`);
+            // The modal rendered the Canvas FX / custom-CSS warning above this
+            // button, so clicking it IS the confirmation. Prompting again here
+            // would be the same question twice.
+            if (applyThemeUpdate(pendingUpdate.index, pendingUpdate.remote, { alreadyConfirmed: true })) {
+                showToast(`Updated "${pendingUpdate.local.name}" to v${pendingUpdate.remoteVersion}!`);
+            }
         }
         hideModal('update-modal');
         pendingUpdate = null;
@@ -12618,22 +12823,26 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         for (const idx of indices) {
             const remote = window._pendingBatchUpdates[idx];
             const manifestUrl = window._pendingBatchMeta[idx];
-            if (remote) {
-                applyThemeUpdate(idx, remote);
-                okCount++;
-            } else if (manifestUrl) {
-                if (await applyManifestUpdate(idx, manifestUrl)) okCount++;
-                else failed.push(idx);
-            }
+            let ok = false;
+            if (remote) ok = applyThemeUpdate(idx, remote);
+            else if (manifestUrl) ok = await applyManifestUpdate(idx, manifestUrl);
+            else continue;
+            if (ok) okCount++;
+            else failed.push(idx);
         }
+
+        // Retry must mean retry the FAILURES. Leaving every index in the pending
+        // list re-fetched and re-prompted the ones that had already succeeded,
+        // and re-applied them against snapshot indices that may have shifted.
+        window._pendingBatchIndices = failed.slice();
 
         // Only mark the rows that actually updated.
         const listEl = $('update-results-list');
         if (listEl) {
             listEl.querySelectorAll('button.btn-primary').forEach(btn => {
                 const row = btn.closest('[data-update-index]');
-                const rowIdx = row ? Number(row.getAttribute('data-update-index')) : NaN;
-                if (failed.includes(rowIdx)) return;  // leave it actionable
+                const rowIdx = row ? _attrIndex(row, 'data-update-index') : null;
+                if (rowIdx === null || failed.includes(rowIdx)) return;  // leave it actionable
                 btn.innerText = 'Updated!';
                 btn.disabled = true;
                 btn.style.opacity = '0.5';
@@ -12744,14 +12953,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                                     if (themeData[m].autoScope === undefined) themeData[m].autoScope = true;
                                     if (themeData[m].canvasEnabled === undefined) themeData[m].canvasEnabled = false;
                                     if (themeData[m].canvasScript === undefined) themeData[m].canvasScript = "";
-                                    // Validate at the door here too. This path
-                                    // assigns straight from localStorage, so a
-                                    // theme installed under an older build
-                                    // re-entered live state unchecked and left
-                                    // the render-time sanitizers as the only
-                                    // defence. Runs after the legacy backfills
-                                    // above so their defaults are validated too.
-                                    themeData[m] = validateModeData(themeData[m]);
                                 }
                             });
 
@@ -12759,6 +12960,17 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                             const migrated = migrateLegacyTheme(s);
                             MODES.forEach(m => { themeData[m] = migrated[m]; });
                         }
+                        // Validate at the door, after BOTH arms. This path assigns
+                        // straight from localStorage, so a theme installed under an
+                        // older build re-entered live state unchecked and left the
+                        // render-time sanitizers as the only defence. It sat inside
+                        // the modern arm only, and migrateLegacyTheme builds its
+                        // modes with a bare object spread — so the legacy blob, the
+                        // older format and therefore the likelier one to predate
+                        // any validation, was the arm that skipped it.
+                        MODES.forEach(m => {
+                            if (themeData[m]) themeData[m] = validateModeData(themeData[m]);
+                        });
                     }
                     
                     const pTheme = localStorage.getItem('theme');
@@ -12971,30 +13183,13 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             // Hide URL input fields
             ['import-url-input', 'import-css-url-input', 'import-canvas-url-input', 'import-gradient-url-input']
                 .forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
-        } else if (cfg.allowedImportDomains && cfg.allowedImportDomains.length > 0) {
-            // Domain allowlist — wrap loadFromUrl with the SAME check the
-            // automated fetch paths use.
-            //
-            // This used to be a second, independent implementation, and the two
-            // disagreed on both axes that matter. It measured the host BEFORE
-            // toRawGitHub() rewriting, so with the allowlist set to github.com a
-            // blob URL passed here while the fetch actually went to
-            // raw.githubusercontent.com (and the reverse setting inverted the
-            // verdict). And its catch fell through to the original loader on an
-            // unparseable URL, i.e. failed OPEN, where the shared helper throws.
-            const _origLoadFromUrl = loadFromUrl;
-            loadFromUrl = function(opts) {
-                const url = (document.getElementById(opts.urlInputId)?.value || '').trim();
-                try {
-                    // Check the rewritten URL — the host that will be contacted.
-                    assertImportHostAllowed(toRawGitHub(url));
-                } catch (e) {
-                    showImportBlocked(opts, `⛔ ${e.message}. Allowed: ${cfg.allowedImportDomains.join(', ')}`);
-                    return;
-                }
-                return _origLoadFromUrl.call(this, opts);
-            };
         }
+        // The domain allowlist is NOT wrapped around loadFromUrl. It lives inside
+        // it, next to the fetch, alongside the same check every automated path
+        // runs — assertImportHostAllowed reads the config directly, so there is
+        // nothing to install here. A wrapper had to duplicate the URL rewriting
+        // to know which host to judge, and duplicating it is what let the two
+        // disagree; it also ran ahead of the empty/invalid-URL messages.
 
         // ── 4. Auto Sync — show/hide 'Sync All' toggle in footer ──
         if (cfg.autoSync) {
@@ -13190,6 +13385,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             scrollArea.style.display = 'block';
             container.style.display = 'grid';
             
+            _ttClearPrefix('snap:');
             container.innerHTML = filteredSnapshots.map((s) => {
                 const i = s._origIndex;
                 const isMatch = s && s[dm] && isModeMatch(s[dm], themeData[dm]);
@@ -13219,10 +13415,10 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                     if (s.updateUrl) ttHtml += `<span class="tt-tag tt-tag-url">Linked</span>`;
                     ttHtml += `</div>`;
                 }
-                const tooltipHtml = ttHtml.replace(/"/g, '&quot;');
+                const ttKey = _ttRegister(`snap:${i}`, ttHtml);
 
                 return `
-                <div class="preset-btn ${active ? 'active-theme' : ''}" onclick="loadSnapshot(${i})" data-tooltip-html="${tooltipHtml}">
+                <div class="preset-btn ${active ? 'active-theme' : ''}" onclick="loadSnapshot(${i})" data-tooltip-key="${ttKey}">
                     <div class="snapshot-action edit-snapshot" onclick="event.stopPropagation(); requestRename(${i})" data-tooltip="Edit theme">✎</div>
                     <div class="snapshot-action update-snapshot" onclick="event.stopPropagation(); updateSnapshot(${i})" data-tooltip="Overwrite with current values">💾</div>
                     <div class="snapshot-action delete-snapshot" onclick="event.stopPropagation(); requestDelete(${i})" data-tooltip="Delete theme">×</div>
