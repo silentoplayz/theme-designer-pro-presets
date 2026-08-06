@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.7.2
+version: 1.7.3
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -21,7 +21,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.7.2"
+VERSION = "1.7.3"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -2407,7 +2407,9 @@ class Event:
                 # so the next request composes a custom.css without our block.
                 # The loader fragment stays published so SSE survives the reset
                 # and a theme saved afterwards still reaches loaded pages.
-                Event._broadcast_disable()  # Push disable to all SSE clients (strip + reload)
+                # "reset", not "disabled": the function is still running, and
+                # the designer must not latch its save-hold on this broadcast.
+                Event._broadcast_disable("reset")
                 return JSONResponse({"status": "reset"})
 
             # Library-only sync (no CSS/state to save — e.g., draft mode preset import)
@@ -5198,6 +5200,7 @@ location.reload();</code></pre>
     // Set when a save was withheld (or rejected) because the function was off,
     // so local state is ahead of the server and must be republished on re-enable.
     let _pendingWhileDisabled = false;
+    let _pendingLibraryWhileDisabled = false;  // Same, for the preset library
     let _disabledNoticeAt = 0;
     function noticeSaveBlocked() {
         // Editing fires a save per control change; one notice every few seconds
@@ -5371,6 +5374,14 @@ location.reload();</code></pre>
     // --- Server-Side Library Sync (presets, snapshots) ---
     let _libTimer = null;
     function syncLibrary() {
+        // Same hold as syncToServer: while the function is off the endpoint
+        // answers 503, so an import or snapshot made now would be lost with a
+        // misleading "sync failed" toast. Held and replayed on re-enable.
+        if (_functionDisabled) {
+            _pendingLibraryWhileDisabled = true;
+            noticeSaveBlocked();
+            return;
+        }
         clearTimeout(_libTimer);
         _libTimer = setTimeout(() => {
             const library = JSON.stringify({
@@ -5388,7 +5399,13 @@ location.reload();</code></pre>
                 body: JSON.stringify({ css: '', state: '', library, suppress_broadcast: true })
             }).then(r => {
                 if (r.ok) console.log('[Theme Pro] Library synced to server');
-                else {
+                else if (r.status === 503) {
+                    // Function toggled off while this POST was in flight —
+                    // latch, same as syncToServer's mid-flight branch.
+                    _functionDisabled = true;
+                    _pendingLibraryWhileDisabled = true;
+                    noticeSaveBlocked();
+                } else {
                     console.warn('[Theme Pro] Library sync failed');
                     showToast('⚠️ Library sync failed — presets may not be saved');
                 }
@@ -12381,8 +12398,24 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                         // syncToServer, which is now unblocked.
                         try { injectLive(); } catch (err) { console.warn('[Theme Pro] Republish failed:', err); }
                     }
+                    if (wasDisabled && _pendingLibraryWhileDisabled) {
+                        _pendingLibraryWhileDisabled = false;
+                        try { syncLibrary(); } catch (err) { console.warn('[Theme Pro] Library republish failed:', err); }
+                    }
                 });
-                badgeEs.addEventListener('theme-disable', () => { _functionDisabled = true; updateBadge(); });
+                badgeEs.addEventListener('theme-disable', (e) => {
+                    // A Global Reset broadcasts theme-disable too — clients
+                    // strip the theme, but the function is still running and
+                    // saves still work. Only a real toggle may latch the
+                    // save-hold; latching on a reset would hold every save
+                    // with no theme-update ever coming to release them.
+                    // Old servers send the bare string 'disable': JSON.parse
+                    // throws, and the catch correctly treats it as a disable.
+                    var reason = 'disabled';
+                    try { reason = (JSON.parse(e.data || '') || {}).reason || 'disabled'; } catch(x) {}
+                    if (reason === 'reset') return;
+                    _functionDisabled = true; updateBadge();
+                });
                 badgeEs.onerror = () => { /* EventSource auto-reconnects */ };
                 window.addEventListener('beforeunload', () => badgeEs.close());
             } catch(e) { console.warn('[Theme Pro] Badge SSE error:', e); }
@@ -13554,9 +13587,17 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 pass  # Drop if client is backed up
 
     @classmethod
-    def _broadcast_disable(cls):
-        """Push a theme-disable event to all SSE clients (strip theme + reload)."""
-        msg = "event: theme-disable\ndata: disable\n\n"
+    def _broadcast_disable(cls, reason="disabled"):
+        """Push a theme-disable event to all SSE clients (strip theme + reload).
+
+        reason distinguishes a function toggle ("disabled") from a Global Reset
+        ("reset"). Clients strip the theme identically in both cases, but the
+        designer's save-hold must only latch on a real disable: after a reset
+        the function is still running and saves must keep working — latching
+        would hold every save while no theme-update can ever arrive to release
+        them, deadlocking the designer until a page reload.
+        """
+        msg = f'event: theme-disable\ndata: {{"reason":"{reason}"}}\n\n'
         cls._redis_publish(msg)
         for q in list(cls._sse_clients):
             try:

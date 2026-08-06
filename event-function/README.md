@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — standalone admin page with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.7.2-blue)
+![Version](https://img.shields.io/badge/version-1.7.3-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.10.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -479,6 +479,15 @@ Toggle the function **OFF** in the Admin Panel first. That withdraws its fragmen
 Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build — 1.7.0 never writes there.
 
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
+
+---
+
+## 📝 What's New in 1.7.3
+
+Two fixes from a full audit pass:
+
+- **Global Reset no longer jams saving.** A reset broadcasts the same `theme-disable` event as a function toggle, and since 1.7.1 the designer responded by holding every subsequent save — waiting for a re-enable that would never come, because the function was running the whole time. The broadcast now carries a `reason`, and the designer only holds saves on a real disable. Older payloads are treated as a real disable, so mixed versions fail safe.
+- **The preset library gets the same disabled-state protection as themes.** Importing presets or saving snapshots while the function was toggled off fired into a `503` with a misleading "sync failed" toast and the data was lost. Library syncs are now held and replayed on re-enable, including the mid-flight case.
 
 ---
 
