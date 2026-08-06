@@ -719,16 +719,13 @@ class Event:
                     var msgCount = messageEls.length;
                     var totalChars = 0;
 
-                    // Measure user message text
                     container.querySelectorAll('.chat-user').forEach(function(el) {
                         totalChars += (el.textContent || '').length;
                     });
-                    // Measure assistant message text
                     container.querySelectorAll('.chat-assistant').forEach(function(el) {
                         totalChars += (el.textContent || '').length;
                     });
 
-                    // Only send if data actually changed
                     if (totalChars !== _lastChars || msgCount !== _lastMsgCount) {
                         _lastChars = totalChars;
                         _lastMsgCount = msgCount;
@@ -768,7 +765,6 @@ class Event:
                                     _lastMsgCount = 0;
                                     sendFn({ type: 'context', messages: 0, chars: 0, estimatedTokens: 0 });
                                 }
-                                // Start polling for re-attach, but only if not already polling
                                 if (!_polling) {
                                     _polling = true;
                                     _pollTimer = setTimeout(setup, 1000);
@@ -778,13 +774,11 @@ class Event:
                         _navObserver.observe(document.body, { childList: true, subtree: false });
                     }
 
-                    // Initial scan
                     scan();
                 }
 
                 setup();
 
-                // Return cleanup function
                 return function() {
                     window.removeEventListener('owui-canvas-context', _onCustom);
                     if (_observer) _observer.disconnect();
@@ -898,7 +892,6 @@ class Event:
                                 ev.preventDefault(); // Suppress console error for the re-thrown ReferenceError
                                 worker.terminate();
                                 URL.revokeObjectURL(objectURL);
-                                // Clean up DOM elements created for Worker mode
                                 if (canvas && canvas.parentNode) canvas.remove();
                                 if (bg && bg.parentNode) bg.remove();
                                 // Re-run cleanups registered by the failed worker attempt
@@ -906,7 +899,6 @@ class Event:
                                     window.owuiCanvasCleanups.forEach(function(fn) { try { fn(); } catch(x) {} });
                                     window.owuiCanvasCleanups = [];
                                 }
-                                // Re-create DOM elements and run in fallback mode
                                 initCanvas(true); // force fallback
                             };
 
@@ -1035,7 +1027,6 @@ class Event:
                                         if (_mouseDirty && _fbHandler) { _fbHandler({ data: { type: 'mousemove', x: _mouseX, y: _mouseY } }); _mouseDirty = false; }
                                     })();
 
-                                    // Debounce resize
                                     let _resizeTimer = 0;
                                     const _onResize = () => {
                                         clearTimeout(_resizeTimer);
@@ -1297,7 +1288,6 @@ class Event:
                                 localStorage.removeItem(k);
                             });
                         } catch(x) {}
-                        // Remove ALL injected elements (styles, canvas, bg, script runner)
                         ['owui-dev-live-theme', 'owui-server-theme', 'owui-theme-style',
                          'owui-theme-canvas-bg', 'owui-theme-bg-color', 'owui-canvas-script-runner'
                         ].forEach(function(id) {
@@ -1335,11 +1325,9 @@ class Event:
                     // and re-fetch fresh state to pick up any edits made while inactive.
                     document.addEventListener('visibilitychange', function() {
                         if (document.visibilityState !== 'visible') return;
-                        // Reconnect SSE if the connection died while backgrounded
                         if (es.readyState === EventSource.CLOSED) {
                             connectSSE();
                         }
-                        // Re-fetch latest CSS and state from server (may have changed while inactive)
                         fetchThemeFromServer();
                     });
                 } catch(e) { console.warn('Theme Pro SSE:', e); }
@@ -1422,7 +1410,6 @@ class Event:
         if Event._cached_index_path is not None:
             return Event._cached_index_path
 
-        # Use the authoritative FRONTEND_BUILD_DIR from Open WebUI config
         try:
             from open_webui.env import FRONTEND_BUILD_DIR
 
@@ -1917,7 +1904,6 @@ class Event:
             raw = None  # File vanished/unreadable between stat() and read (reset race)
         if not raw:
             return None
-        # Enforce Canvas FX valve: strip canvas data from served state
         state = self._postprocess_state(raw)
         # Merge valve-postprocessed CSS sections (_cssSections) so the
         # bootloader assembles auth-page CSS without regex-slicing
@@ -2450,7 +2436,6 @@ class Event:
                         pass
                 self._save_state(state)
 
-            # Save library data if provided (presets, snapshots)
             library = body.get("library", "")
             if library and isinstance(library, str):
                 self._save_library(library)
@@ -5254,7 +5239,6 @@ location.reload();</code></pre>
         if (draftDot) draftDot.style.display = on ? 'inline-block' : 'none';
         if (sw) sw.setAttribute('data-tooltip', on ? 'Click to exit Draft and push changes live to all users' : 'Click to enter Draft mode \u2014 changes will stay local until you Publish');
         sessionStorage.setItem('owui_theme_draft_mode', on ? '1' : '0');
-        // Update the status badge (Active ↔ Draft)
         if (window._updateThemeBadge) window._updateThemeBadge();
     }
 
@@ -5315,7 +5299,6 @@ location.reload();</code></pre>
         // seems to fix itself" report — the flash was the only moment the new
         // theme was ever real.
         const state = stateStr || localStorage.getItem('owui_dev_theme_v1') || '{}';
-        // Debounce: wait 250ms of inactivity before POSTing
         clearTimeout(_syncTimer);
         _syncTimer = setTimeout(() => {
             // Sequence + queue: rapid consecutive saves (fast theme swaps) must
@@ -5626,7 +5609,6 @@ location.reload();</code></pre>
             d.locks = o;
         }
         delete d.variables;
-        // Fill defaults from DEFAULT_MODE_DATA
         const result = { ...createDefaultModeData(), ...d };
         if (forExport) delete result.manualOverridesEnabled;
         return result;
@@ -5874,12 +5856,10 @@ function startAnimation() {
                     || (lib.gradient_presets && lib.gradient_presets.length > 0);
 
                 if (hasServerData) {
-                    // Server has data — use it as source of truth
                     if (lib.snapshots && lib.snapshots.length > 0) saveSnapshots(lib.snapshots);
                     if (lib.canvas_presets && lib.canvas_presets.length > 0) { CANVAS_PRESETS.splice(0, CANVAS_PRESETS.length, ...lib.canvas_presets); Storage.set('canvas', CANVAS_PRESETS); }
                     if (lib.css_presets && lib.css_presets.length > 0) { CSS_PRESETS.splice(0, CSS_PRESETS.length, ...lib.css_presets); Storage.set('css', CSS_PRESETS); }
                     if (lib.gradient_presets && lib.gradient_presets.length > 0) { CUSTOM_GRADIENT_PRESETS.splice(0, CUSTOM_GRADIENT_PRESETS.length, ...lib.gradient_presets); Storage.set('gradients', CUSTOM_GRADIENT_PRESETS); }
-                    // Re-render preset UIs
                     if (typeof renderSnapshots === 'function') renderSnapshots();
                     if (typeof renderCanvasPresets === 'function') renderCanvasPresets();
                     if (typeof renderCssPresets === 'function') renderCssPresets();
@@ -5996,7 +5976,6 @@ function startAnimation() {
             activeGradientRef
         }));
         
-        // Limit stack size (e.g., 50 states)
         if (historyStack.length > TIMING.historyLimit) {
             historyStack.shift();
         } else {
@@ -6212,7 +6191,6 @@ function startAnimation() {
         }
         tooltipEl.classList.add('visible');
 
-        // Add multiline class for community cards (long descriptions)
         if (target.classList.contains('community-card')) {
             tooltipEl.classList.add('multiline');
         } else {
@@ -6232,7 +6210,6 @@ function startAnimation() {
             const hex = target.value || text;
             applyTooltipColor(hex);
         } else {
-            // Reset styles to defaults for regular tooltips
             resetTooltipStyles(tooltipEl);
         }
         
@@ -7872,11 +7849,9 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                     }
                 }
 
-                // Point count
                 const countEl = $('mesh-stop-count');
                 if (countEl) countEl.innerText = `${points.length}/16 points`;
 
-                // Hint
                 const hint = $('mesh-hint');
                 if (hint) hint.textContent = points.length >= 16 ? 'Maximum 16 points reached' : 'Click to add \u00b7 Drag to move \u00b7 Double-click to remove';
 
@@ -8014,25 +7989,21 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         }));
         let allEntries = [...builtInEntries, ...customEntries];
 
-        // Apply type filter
         const typeFilter = typeof activeGradientTypeFilter !== 'undefined' ? activeGradientTypeFilter : 'all';
         if (typeFilter !== 'all') {
             allEntries = allEntries.filter(e => (e.preset.type || 'linear') === typeFilter);
         }
 
-        // Apply search
         if (searchTerm) {
             allEntries = allEntries.filter(e => e.preset.name.toLowerCase().includes(searchTerm));
         }
 
-        // Apply sort
         if (sortState === 'asc') {
             allEntries.sort((a, b) => a.preset.name.localeCompare(b.preset.name));
         } else if (sortState === 'desc') {
             allEntries.sort((a, b) => b.preset.name.localeCompare(a.preset.name));
         }
 
-        // Update count
         const totalCount = Object.keys(GRADIENT_PRESETS).length + CUSTOM_GRADIENT_PRESETS.length;
         const isFiltered = searchTerm || typeFilter !== 'all';
         const countWrap = $('gradient-quick-count-wrap');
@@ -8311,7 +8282,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         const currentType = themeData[dm].gradientType || 'linear';
         const sourceLabel = document.getElementById('transfer-source-label');
         if (sourceLabel) sourceLabel.textContent = currentType.charAt(0).toUpperCase() + currentType.slice(1);
-        // Hide current type, show others, reset checkboxes
         ['linear', 'radial', 'mesh'].forEach(t => {
             const label = document.getElementById('transfer-target-' + t);
             if (label) {
@@ -8922,7 +8892,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     };
     $('factory-reset-btn').onclick = () => showModal('factory-reset-modal');
     $('confirm-factory-reset-btn').onclick = () => {
-        // Export backup if checkbox is checked
         const backupCb = $('factory-backup-cb');
         if (backupCb && backupCb.checked) {
             downloadAllBackups();
@@ -8993,7 +8962,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         }
     }
 
-    // Attach option toggle change listeners on initialization
     ['palette', 'overrides', 'css', 'canvas', 'gradient', 'auth'].forEach(opt => {
         const cb = $(`sync-opt-${opt}`);
         if (cb) {
@@ -9114,7 +9082,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             return cb && cb.checked && !cb.disabled;
         });
 
-        // Reset diff data
         syncDiffData = { palette: [], overrides: [], css: [], canvas: [], gradient: [], auth: [] };
 
         if (targetModes.length === 0) {
@@ -9290,7 +9257,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         let h = '';
         h += `<div class="sync-diff-ramp-row"><span class="sync-diff-ramp-label">From</span><div class="sync-diff-ramp">${_rampSwatches(srcConf)}</div></div>`;
         h += `<div class="sync-diff-ramp-row"><span class="sync-diff-ramp-label">To</span><div class="sync-diff-ramp">${_rampSwatches(tgtConf)}</div></div>`;
-        // Delta values
         const fmt = (v) => v != null && !isNaN(v) ? Number(v).toFixed(1) : '—';
         const dH = (s.h != null && t.h != null) ? (t.h - s.h).toFixed(1) : null;
         const dC = (s.c != null && t.c != null) ? (t.c - s.c).toFixed(1) : null;
@@ -9357,7 +9323,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         h += `<span class="summary-action" id="${id}-action">▸ View Diff</span>`;
         h += `</div>`;
 
-        // Build diff lines
         const srcSet = new Set(srcLines);
         const tgtSet = new Set(tgtLines);
 
@@ -9536,7 +9501,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         $('confirm-sync-btn').innerText = confirmText;
         $('sync-cancel-btn').innerText = cancelText;
 
-        // Populate targets
         const container = $('sync-target-container');
         container.innerHTML = '';
         MODES.forEach(m => {
@@ -9571,7 +9535,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             container.appendChild(pill);
         });
 
-        // Default all sync settings to checked
         ['palette', 'overrides', 'css', 'canvas', 'gradient', 'auth'].forEach(opt => {
             const cb = $(`sync-opt-${opt}`);
             if (cb) cb.checked = true;
@@ -10170,7 +10133,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     const exportAllBackupsBtn = document.getElementById('export-all-backups-btn');
     if (exportAllBackupsBtn) {
         exportAllBackupsBtn.onclick = () => {
-            // Populate dynamic item counts
             const descEl = $('export-all-backups-desc');
             if (descEl) {
                 const tCount = getSnapshots().length;
@@ -11793,7 +11755,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             return;
         }
         
-        // Build results list
         let html = '';
         
         if (updates.length > 0) {
@@ -11802,7 +11763,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 const rowId = `batch-upd-row-${idx}`;
                 const diffId = `batch-upd-diff-${idx}`;
                 html += `<div class="update-result-row" id="${rowId}" style="background: var(--bg-deep); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; overflow: hidden;">`;
-                // Header row
                 html += `<div style="display:flex; align-items:center; justify-content:space-between; padding: 10px 12px;">`;
                 html += `<div><div style="font-size: 0.78rem; font-weight: 700; color: var(--text-main);">${_esc(u.local.name)}</div><div style="font-size: 0.65rem; color: var(--text-muted);">v${_esc(u.localVersion)} → <span style="color:#10b981;">v${_esc(u.remoteVersion)}</span></div></div>`;
                 html += `<div style="display:flex; gap:6px; align-items:center;">`;
@@ -12028,21 +11988,18 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         const panel = document.getElementById(diffId);
         if (!panel) return;
 
-        // Toggle off
         if (panel.style.display !== 'none') {
             panel.style.display = 'none';
             btn.textContent = '▸ Diff';
             return;
         }
 
-        // Already rendered?
         if (panel.dataset.loaded) {
             panel.style.display = 'block';
             btn.textContent = '▾ Diff';
             return;
         }
 
-        // Need to load diff data
         const snapshots = getSnapshots();
         const local = snapshots[snapIndex];
         if (!local) return;
@@ -12364,7 +12321,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 badgeText.textContent = 'Theme Inactive';
             }
         }
-        // Compute badge state from current conditions
         function updateBadge() {
             if (_functionDisabled) { setBadgeState('inactive'); return; }
             if (typeof _draftMode !== 'undefined' && _draftMode) { setBadgeState('draft'); return; }
@@ -12373,7 +12329,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         // Expose globally so setDraftMode() can trigger updates
         window._updateThemeBadge = updateBadge;
 
-        // Set initial state from server-rendered config
         updateBadge();
 
         // Open a dedicated SSE connection for live badge updates.
@@ -12560,7 +12515,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
         const h = apply.h, c = apply.c, l = apply.l;
 
-        // Determine target modes
         const allModes = ['dark', 'oled', 'light', 'her'];
         const targetModes = (apply.mode && apply.mode !== 'all') ? [apply.mode] : allModes;
 
@@ -12585,7 +12539,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             ];
         }
 
-        // Apply to targeted modes
         targetModes.forEach(m => {
             const modeL = (m === 'oled') ? 0 : l;
             const src = createDefaultModeData({ h: h, c: c, l: modeL });
@@ -12605,7 +12558,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
         commitChange({ clearRef: true, push: true });
 
-        // Show confirmation toast
         const desc = apply.description || `H:${h}° C:${c} L:${l}`;
         const modeLabel = (apply.mode && apply.mode !== 'all') ? ` (${apply.mode} mode)` : '';
         const features = apply.gradient !== false ? '🌈 Palette + Gradient' : '🎨 Palette';
@@ -12652,7 +12604,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             });
             if (needsSave) saveSnapshots(snapshots);
 
-            // Search filtering
             const searchInput = document.getElementById('theme-search-input');
             const searchQuery = (searchInput ? searchInput.value : '').trim().toLowerCase();
             let filteredSnapshots = snapshots.map((s, i) => ({ ...s, _origIndex: i }));
@@ -12665,7 +12616,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 });
             }
 
-            // Tag filtering
             if (typeof activeTagFilter !== 'undefined' && activeTagFilter !== 'all') {
                 const modes = MODES;
                 filteredSnapshots = filteredSnapshots.filter(s => {
@@ -12680,7 +12630,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 });
             }
 
-            // Sorting
             if (typeof activeSort !== 'undefined' && activeSort !== 'default') {
                 filteredSnapshots.sort((a, b) => {
                     const nameA = (a.name || '').toLowerCase();
@@ -12854,7 +12803,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         const repoInput = document.getElementById('theme-repo-input');
         const updateInput = document.getElementById('theme-update-input');
         
-        // Try to pull metadata from the last saved snapshot or keep defaults
         const lastMeta = Storage.get('metadata', {});
         if (descInput) descInput.value = lastMeta.description || '';
         if (authorInput) authorInput.value = lastMeta.author || '';
@@ -13116,7 +13064,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             "null",
         )
 
-        # Build valve config for frontend injection
         valve_config = {
             "enableCanvasFx": self.valves.enable_canvas_fx,
             "enableCanvasApiAccess": self.valves.enable_canvas_api_access,
@@ -13751,7 +13698,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         if Event._function_disabled:
             return
 
-        # Detect if the designer_url valve has changed since last run
         url_changed = (
             Event._last_designer_url is not None
             and Event._last_designer_url != self.valves.designer_url
@@ -13782,7 +13728,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         if __app__ is not None:
             _WORKER_ID = str(os.getpid())
             redis_url = os.environ.get("REDIS_URL", "")
-            # Check if subscriber task exists and is still alive (not destroyed/done)
             _existing_task = getattr(__app__.state, "_theme_redis_task", None)
             _sub_alive = _existing_task is not None and not _existing_task.done()
             # Never (re)spawn once shutdown cleanup ran: shutdown events are
@@ -13885,19 +13830,16 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 except Exception as exc:
                     log.warning("[Theme Pro] Could not start Redis subscriber: %s", exc)
 
-        # Detect if the enable_canvas_fx valve has changed since last run
         canvas_valve_changed = (
             Event._last_enable_canvas_fx is not None
             and Event._last_enable_canvas_fx != self.valves.enable_canvas_fx
         )
 
-        # Detect if the sidebar_transparency valve has changed since last run
         sidebar_valve_changed = (
             Event._last_sidebar_transparency is not None
             and Event._last_sidebar_transparency != self.valves.sidebar_transparency
         )
 
-        # Detect if the overlay_transparency valve has changed since last run
         overlay_valve_changed = (
             Event._last_overlay_transparency is not None
             and Event._last_overlay_transparency != self.valves.overlay_transparency
