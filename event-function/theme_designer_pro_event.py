@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.7.6
+version: 1.7.7
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -21,7 +21,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.7.6"
+VERSION = "1.7.7"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -291,7 +291,22 @@ class Event:
         # ── Security ──
         enable_canvas_api_access: bool = Field(
             default=False,
-            description="Pass the user's auth token to Canvas FX scripts. Required for context-aware scripts that make API calls. When disabled (default), scripts cannot make authenticated requests.",
+            description=(
+                "⚠️ **Gives every Canvas FX script each viewer's own Open WebUI auth token.** "
+                "Not just yours: Canvas FX scripts are JavaScript that runs on **every user's page**, "
+                "so with this ON a script receives whichever user is viewing and can call the API "
+                "as them — read their chats, change their settings, act with their permissions.\n\n"
+                "Worth knowing before enabling:\n"
+                "- Scripts that reference `document` run on the **main thread**, where a Web Worker's "
+                "isolation does not apply.\n"
+                "- Themes you import or install from the community can carry scripts, and an installed "
+                "theme can **replace its script later** through its update URL. Enabling this means "
+                "trusting every one of those authors on an ongoing basis, not just today.\n\n"
+                "Only turn this on if you wrote or fully audited every Canvas FX script in every "
+                "installed theme. Leave OFF (the default) unless a script genuinely needs authenticated "
+                "API calls — with it off, `env.authToken` is an empty string and everything else about "
+                "Canvas FX works normally."
+            ),
         )
         enable_url_import: bool = Field(
             default=True,
@@ -3874,7 +3889,7 @@ class Event:
                                 <tr style="border-bottom: 1px solid var(--border);">
                                     <td><code>init</code></td>
                                     <td><code>{ canvas, width, height, env }</code></td>
-                                    <td>Fired once on startup. <code>canvas</code> is an <code>OffscreenCanvas</code> transferred via <code>postMessage</code>. Call <code>canvas.getContext('2d')</code> for 2D drawing, or <code>canvas.getContext('webgl2')</code> (with <code>'webgl'</code> fallback) for GPU-accelerated shader rendering. <code>width</code> and <code>height</code> are the initial viewport dimensions. <code>env</code> provides runtime context: <code>{ authToken, baseUrl, locale, timezone }</code>.</td>
+                                    <td>Fired once on startup. <code>canvas</code> is an <code>OffscreenCanvas</code> transferred via <code>postMessage</code>. Call <code>canvas.getContext('2d')</code> for 2D drawing, or <code>canvas.getContext('webgl2')</code> (with <code>'webgl'</code> fallback) for GPU-accelerated shader rendering. <code>width</code> and <code>height</code> are the initial viewport dimensions. <code>env</code> provides runtime context: <code>{ authToken, baseUrl, locale, timezone }</code>. <b>authToken is the token of whichever user is viewing the page</b>, and is an empty string unless an admin has enabled the Canvas API Access valve &mdash; a script given it can call the Open WebUI API as that user.</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid var(--border);">
                                     <td><code>resize</code></td>

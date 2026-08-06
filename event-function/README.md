@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — standalone admin page with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.7.6-blue)
+![Version](https://img.shields.io/badge/version-1.7.7-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.10.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -240,7 +240,7 @@ Valves are configured in the Admin Panel under **Functions → Theme Designer Pr
 
 | Valve | Type | Default | Description |
 |---|---|---|---|
-| **Enable Canvas API Access** | `bool` | `false` | Pass the user's auth token to Canvas FX scripts. Required for context-aware scripts that make authenticated API calls. When disabled (default), scripts cannot make authenticated requests. |
+| **Enable Canvas API Access** | `bool` | `false` | ⚠️ Gives every Canvas FX script **each viewer's own auth token**, not just yours. Canvas FX scripts run on every user's page, so a script can call the API as whoever is viewing. Scripts referencing `document` run on the main thread, outside a Worker's isolation, and an installed theme can replace its script later via its update URL — enabling this trusts every theme author on an ongoing basis. Only enable if you wrote or audited every installed script. When disabled (default), `env.authToken` is an empty string and everything else works. |
 | **Enable URL Import** | `bool` | `true` | Allow importing themes, CSS snippets, and canvas scripts from remote URLs. When disabled, all URL import buttons are hidden. |
 | **Allowed Import Domains** | `str` | `""` | Comma-separated allowlist of domains for URL imports (e.g., `raw.githubusercontent.com, openwebui.com`). Empty = allow all. Only applies when Enable URL Import is `true`. |
 
@@ -403,7 +403,7 @@ setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);
 // NO DOM access (no document, window, alert, localStorage)
 ```
 
-> **Note:** The `init` message includes an `env` object with `{ authToken, baseUrl, locale, timezone }`. The `authToken` field is only populated when the admin enables the `enable_canvas_api_access` valve — otherwise it's an empty string.
+> **Note:** The `init` message includes an `env` object with `{ authToken, baseUrl, locale, timezone }`. `authToken` is **the token of whichever user is viewing the page**, not the admin's, and is an empty string unless the `enable_canvas_api_access` valve is enabled. A script that receives it can call the Open WebUI API with that user's permissions, so treat any script you did not write as untrusted before turning the valve on.
 
 ### Dual Execution Modes
 
@@ -479,6 +479,14 @@ Toggle the function **OFF** in the Admin Panel first. That withdraws its fragmen
 Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build — 1.7.0 never writes there.
 
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
+
+---
+
+## 📝 What's New in 1.7.7
+
+**Clearer warning on the Canvas API Access valve.** No behaviour change — the valve still defaults to off and works exactly as before. The old description said it passes "the user's auth token", which reads as though it means the admin's. It does not: Canvas FX scripts run on every user's page, so the token handed to a script is *that viewer's*, and a script holding it can call the Open WebUI API with their permissions.
+
+The description now says so plainly, and adds the two things that make the decision ongoing rather than one-off: scripts referencing `document` run on the main thread where a Worker's isolation does not apply, and an installed theme can replace its script later through its update URL. The Canvas FX protocol documentation and the valve reference table carry the same correction.
 
 ---
 
