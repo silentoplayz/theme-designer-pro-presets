@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.7.4
+version: 1.7.5
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -21,7 +21,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.7.4"
+VERSION = "1.7.5"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -933,7 +933,24 @@ class Event:
                                 }, 150);
                             };
                             // Bridge: receive forwarded mousemove from child iframes (they can't bubble to parent window)
-                            const _onIframeMsg = (e) => { if (e.data && e.data.type === 'owui-canvas-mousemove') { _mouseX = e.data.x; _mouseY = e.data.y; _mouseDirty = true; } };
+                            const _onIframeMsg = (e) => {
+                                if (!e.data || e.data.type !== 'owui-canvas-mousemove') return;
+                                // Coerce: this listener accepts messages from ANY frame, and
+                                // Open WebUI renders untrusted content in sandboxed iframes
+                                // (artifacts, HTML previews) whose origin is "null", so an
+                                // origin allowlist cannot meaningfully gate it. A non-numeric
+                                // x/y would be forwarded into worker.postMessage() inside the
+                                // rAF pump, and a non-cloneable value throws there — killing
+                                // mouse tracking for the rest of the session. Coordinates are
+                                // the entire payload, so validating them is the whole fix.
+                                // typeof, not Number(): coercing a Symbol or an
+                                // object with a throwing valueOf raises inside the
+                                // listener. The real sender always posts numbers.
+                                const mx = e.data.x, my = e.data.y;
+                                if (typeof mx !== 'number' || typeof my !== 'number') return;
+                                if (!isFinite(mx) || !isFinite(my)) return;
+                                _mouseX = mx; _mouseY = my; _mouseDirty = true;
+                            };
                             
                             window.addEventListener('mousemove', _onMouse);
                             window.addEventListener('resize', _onResize);
@@ -1036,7 +1053,24 @@ class Event:
                                         }, 150);
                                     };
                                     // Bridge: receive forwarded mousemove from child iframes (they can't bubble to parent window)
-                                    const _onIframeMsg = (e) => { if (e.data && e.data.type === 'owui-canvas-mousemove') { _mouseX = e.data.x; _mouseY = e.data.y; _mouseDirty = true; } };
+                                    const _onIframeMsg = (e) => {
+                                if (!e.data || e.data.type !== 'owui-canvas-mousemove') return;
+                                // Coerce: this listener accepts messages from ANY frame, and
+                                // Open WebUI renders untrusted content in sandboxed iframes
+                                // (artifacts, HTML previews) whose origin is "null", so an
+                                // origin allowlist cannot meaningfully gate it. A non-numeric
+                                // x/y would be forwarded into worker.postMessage() inside the
+                                // rAF pump, and a non-cloneable value throws there — killing
+                                // mouse tracking for the rest of the session. Coordinates are
+                                // the entire payload, so validating them is the whole fix.
+                                // typeof, not Number(): coercing a Symbol or an
+                                // object with a throwing valueOf raises inside the
+                                // listener. The real sender always posts numbers.
+                                const mx = e.data.x, my = e.data.y;
+                                if (typeof mx !== 'number' || typeof my !== 'number') return;
+                                if (!isFinite(mx) || !isFinite(my)) return;
+                                _mouseX = mx; _mouseY = my; _mouseDirty = true;
+                            };
                                     
                                     window.addEventListener('mousemove', _onMouse);
                                     window.addEventListener('resize', _onResize);
@@ -4870,6 +4904,7 @@ location.reload();</code></pre>
             <div class="section-title" style="justify-content:center; margin-bottom: 8px;">Update Available</div>
             <p id="update-modal-info" style="font-size: 0.78rem; color:var(--text-muted); margin-bottom:20px; line-height:1.6; text-align:center;"></p>
             <div id="update-modal-details" style="background: var(--bg-deep); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; font-size: 0.72rem; line-height: 1.7; color: var(--text-muted);"></div>
+            <div id="update-canvas-warning" style="display:none; background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.3); border-radius:12px; padding:12px; margin-bottom:12px; text-align:left;"></div>
             <div id="update-diff-toggle-wrap" style="text-align: center; margin-bottom: 12px; display: none;">
                 <button class="btn" id="update-diff-toggle-btn" style="font-size: 0.65rem; opacity: 0.7; padding: 5px 14px;">▸ View Changes</button>
             </div>
@@ -11955,6 +11990,17 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 }
             });
             
+            // Batch updates skip the per-theme modal, so the Canvas FX warning
+            // has to ride along here too — otherwise "Update All" is the one
+            // path that installs new executable code with no notice at all.
+            const fxCount = updates.filter(u => updateAddsCanvasCode(u.local, u.remote)).length;
+            if (fxCount > 0) {
+                html += `<div style="background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.3); border-radius:10px; padding:10px 12px; margin-top:12px; font-size:0.68rem; color:var(--text-muted); text-align:left;">`
+                     + `<b style="color:#ef4444;">&#9888;&#65039; Security Warning</b><br>`
+                     + `${fxCount} of these update${fxCount > 1 ? 's' : ''} add${fxCount > 1 ? '' : 's'} or change${fxCount > 1 ? '' : 's'} a <b>Canvas FX script</b> (JavaScript) that will run in the browser of <b>every user</b> on this instance. Review each diff before updating.`
+                     + `</div>`;
+            }
+
             // Show "Update All" button when 2+ updates are available
             const updateAllBtn = $('update-all-btn');
             if (updateAllBtn) {
@@ -12195,6 +12241,32 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         btn.textContent = '▾ Diff';
     };
     
+    // Does an update introduce or change executable Canvas FX code?
+    //
+    // This matters more than an ordinary content change. A Canvas FX script is
+    // JavaScript that runs on EVERY user's page, not just the admin's; scripts
+    // referencing `document` are routed to the main thread, where a Worker's
+    // isolation does not apply; and with the Canvas API Access valve enabled it
+    // is handed the viewer's auth token. A theme that was benign when installed
+    // can turn hostile later simply by changing what its updateUrl serves, and
+    // until now that arrived as one unremarkable row in a collapsed diff.
+    function updateAddsCanvasCode(local, remote) {
+        return MODES.some(m => {
+            const r = remote && remote[m], l = local && local[m];
+            const rs = (r && r.canvasScript || '').trim();
+            if (!rs) return false;
+            return rs !== ((l && l.canvasScript || '').trim());
+        });
+    }
+
+    function renderCanvasUpdateWarning(el, local, remote) {
+        if (!el) return;
+        if (!updateAddsCanvasCode(local, remote)) { el.style.display = 'none'; el.innerHTML = ''; return; }
+        el.style.display = 'block';
+        el.innerHTML = `<div style="color:#ef4444; font-size:0.7rem; font-weight:bold; margin-bottom:4px; display:flex; align-items:center; gap:6px;"><span>&#9888;&#65039;</span> Security Warning</div>`
+            + `<p style="font-size:0.65rem; color:var(--text-muted); margin:0;">This update adds or changes a <b>Canvas FX animation script</b> (JavaScript). It will run in the browser of <b>every user</b> on this instance. Review the Canvas FX diff below and only update if you trust the source.</p>`;
+    }
+
     window.checkSingleUpdate = async (index) => {
         showToast('Checking for update...');
         const result = await checkThemeUpdate(index);
@@ -12219,6 +12291,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         if (result.remote.author) detailsHtml += `<div style="display:flex; justify-content:space-between;"><span>Author</span><span style="color:var(--text-main);">${_esc(result.remote.author)}</span></div>`;
         if (result.remote.description) detailsHtml += `<div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border); font-style:italic;">${_esc(result.remote.description)}</div>`;
         details.innerHTML = detailsHtml;
+
+        renderCanvasUpdateWarning($('update-canvas-warning'), result.local, result.remote);
 
         // Build diff view
         const diffToggleWrap = $('update-diff-toggle-wrap');

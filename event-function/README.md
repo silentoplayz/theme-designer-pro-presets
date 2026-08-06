@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — standalone admin page with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.7.4-blue)
+![Version](https://img.shields.io/badge/version-1.7.5-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.10.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -479,6 +479,16 @@ Toggle the function **OFF** in the Admin Panel first. That withdraws its fragmen
 Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build — 1.7.0 never writes there.
 
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
+
+---
+
+## 📝 What's New in 1.7.5
+
+**Theme updates that add or change a Canvas FX script now warn you.** A Canvas FX script is JavaScript that runs in the browser of *every user* on the instance, not just the admin's; scripts that reference `document` run on the main thread rather than in a Worker; and with the Canvas API Access valve enabled they receive the viewer's auth token.
+
+Importing a theme has always warned about this. Updating one did not. A theme that was benign when installed could later serve a hostile script simply by changing what its `updateUrl` returns, and that arrived as one unremarkable row inside a collapsed diff. Both the single-update modal and the "Update All" batch results now show an explicit security warning when an update introduces or replaces a script. Unchanged scripts, whitespace-only differences, and updates that *remove* a script do not warn, so the warning stays meaningful.
+
+**Hardened the cross-frame mouse bridge.** The Canvas FX iframe bridge accepted `postMessage` coordinates from any frame without validating them. Open WebUI renders untrusted content in sandboxed iframes whose origin is `"null"`, so an origin allowlist cannot gate this — the coordinates are the entire payload, so they are now type-checked instead. Previously a non-numeric value could be forwarded into the Worker and throw inside the animation-frame loop, ending mouse tracking for the rest of the session.
 
 ---
 
