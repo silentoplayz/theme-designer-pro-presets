@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.7.7
+version: 1.7.8
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -21,7 +21,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.7.7"
+VERSION = "1.7.8"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -5233,18 +5233,73 @@ location.reload();</code></pre>
     // re-open url(https://…) exfiltration — custom properties accept almost
     // any token sequence, so a value smuggled into --color-gray-500 resolves
     // wherever that var() is used. url( is therefore rejected outright.
+    // Escape for an HTML attribute value. _esc() goes through textContent, which
+    // escapes &<> but NOT quotes, so it is safe for element content and unsafe
+    // for attributes: a remote string containing a double quote closes the
+    // attribute and everything after it is parsed as markup.
+    function _escAttr(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+            .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Balanced-paren check. An unbalanced '(' is the one way a value inside the
+    // allowed charset can still escape its declaration: per CSS syntax an open
+    // paren consumes tokens until a matching ')' or EOF, swallowing the ';' and
+    // the '}' that close the rule and everything after them. Measured: one
+    // override of `rgb(` collapsed a three-rule stylesheet to a single parsed
+    // rule, taking out the rest of the instance-wide theme.
+    function _parensBalanced(s) {
+        let depth = 0;
+        for (let i = 0; i < s.length; i++) {
+            const ch = s[i];
+            if (ch === '(') depth++;
+            else if (ch === ')') { depth--; if (depth < 0) return false; }
+        }
+        return depth === 0;
+    }
+
     function _cssTok(v, fallback) {
-        const s = String(v == null ? '' : v);
-        const ok = s && s.length <= 64
+        // Only strings and finite numbers are colour-shaped. Coercing anything
+        // else produced literals like "false"/"0"/"[object Object]" that pass
+        // the charset and get emitted as a CSS value.
+        const t = typeof v;
+        if (!(t === 'string' || (t === 'number' && isFinite(v)))) {
+            return fallback === undefined ? 'transparent' : fallback;
+        }
+        const s = String(v);
+        const ok = s.length <= 64
+            // At least one non-whitespace char: a whitespace-only value is a
+            // LEGAL empty custom-property value, which makes every
+            // color: var(--x) that reads it resolve to unset and strips colour
+            // from the UI for every user.
+            && /\S/.test(s)
             && /^[\w#(),.%\s/-]+$/.test(s)
             && !/url\s*\(/i.test(s)
-            && !/image-set\s*\(/i.test(s);
+            && !/image-set\s*\(/i.test(s)
+            && _parensBalanced(s);
         if (ok) return s;
         return fallback === undefined ? 'transparent' : fallback;
     }
+
+    // Number(null) is 0 and Number('') is 0, and isFinite(0) is true, so a
+    // plain Number() guard silently turns "unset" into zero — which is how
+    // `gradientAngle != null ? ... : 135` became 0deg and `gradientIntensity`
+    // became 0, flattening every gradient stop to grey. Only real numbers and
+    // numeric strings count; everything else takes the fallback.
+    function _toFiniteNumber(v) {
+        if (typeof v === 'number') return isFinite(v) ? v : null;
+        if (typeof v === 'string' && v.trim() !== '') {
+            const n = Number(v);
+            return isFinite(n) ? n : null;
+        }
+        return null;  // null, undefined, '', boolean, array, object
+    }
+
     function _cssNum(v, fallback) {
-        const n = Number(v);
-        return isFinite(n) ? n : (fallback === undefined ? 0 : fallback);
+        const n = _toFiniteNumber(v);
+        if (n !== null) return n;
+        return fallback === undefined ? 0 : fallback;
     }
 
     // --- Utility Helpers ---
@@ -5737,12 +5792,18 @@ location.reload();</code></pre>
         h: [0, 360], c: [0, 150], l: [0, 100],
         gradientAngle: [0, 360], gradientIntensity: [0, 100],
         gradientRadialPosX: [0, 100], gradientRadialPosY: [0, 100],
-        gradientAnimationSpeed: [0, 600]
+        // Matches the sl-gradient-speed slider (min 2). Zero is not a
+        // valid duration here: `animation: 0s` with background-size 300%
+        // freezes a 3x-zoomed gradient instead of animating it.
+        gradientAnimationSpeed: [2, 30]
     };
 
     function _num(v, lo, hi, dflt) {
-        const n = Number(v);
-        if (!isFinite(n)) return dflt;
+        // Shares _toFiniteNumber with _cssNum so "unset" means the default here
+        // too. A bare Number() wrote 0 into saved snapshots for any field a
+        // theme serialized as null, and that corruption survived export.
+        const n = _toFiniteNumber(v);
+        if (n === null) return dflt;
         return Math.max(lo, Math.min(hi, n));
     }
 
@@ -6102,7 +6163,10 @@ function startAnimation() {
     const lightnessMap = { 50: 0.98, 100: 0.94, 200: 0.92, 300: 0.85, 400: 0.77, 500: 0.69, 600: 0.51, 700: 0.42, 800: 0.32, 850: 0.27, 900: 0.20, 950: 0.16 };
 
     function renderTonalRampHTML(config, dataMode) {
-        const h = config.h, c = config.c / 1000, l = config.l / 100;
+        // Sanitized like _rampSwatches: this renders every library card from
+        // getSnapshots(), which reads localStorage verbatim, so a theme
+        // installed under an older build can still carry hostile values.
+        const h = _cssNum(config.h, 0), c = _cssNum(config.c, 0) / 1000, l = _cssNum(config.l, 0) / 100;
         const ov = config.overrides || {};
         const deltaL = l - 0.20;
 
@@ -6114,7 +6178,8 @@ function startAnimation() {
             const stepOverride = getDefaultStepColor(step, config.c, config.l, dataMode);
             if (stepOverride) val = stepOverride;
 
-            return ov[`--color-gray-${step}`] || val;
+            const raw = ov[`--color-gray-${step}`];
+            return raw ? _cssTok(raw, val) : val;
         });
 
         return colors.map(col => `<div style="flex:1; height:100%; background:${col};"></div>`).join('');
@@ -7049,7 +7114,7 @@ function startAnimation() {
             }).join(', ');
 
 
-            const speed = _cssNum(modeData.gradientAnimationSpeed, 8);
+            const speed = Math.max(2, _cssNum(modeData.gradientAnimationSpeed, 8));
 
             {
                 let animCss = '';
@@ -7086,6 +7151,12 @@ function startAnimation() {
             const rPosX = _cssNum(modeData.gradientRadialPosX, 50);
             const rPosY = _cssNum(modeData.gradientRadialPosY, 50);
             gradientFunc = `radial-gradient(${rShape} ${rSize} at ${rPosX}% ${rPosY}%, ${stopsStr})`;
+        } else if (gType === 'conic') {
+            // The generator previously fell through to linear for conic while
+            // the update-diff preview rendered a real conic-gradient, so the
+            // preview and the CSS actually served to users disagreed. The
+            // gradientType enum admits 'conic', so honour it here.
+            gradientFunc = `conic-gradient(from ${angle}deg, ${stopsStr})`;
         } else {
             gradientFunc = `linear-gradient(${angle}deg, ${stopsStr})`;
         }
@@ -7095,7 +7166,7 @@ function startAnimation() {
         let animCss = '';
         let keyframesCss = '';
         if (modeData.gradientAnimation) {
-            const speed = _cssNum(modeData.gradientAnimationSpeed, 8);
+            const speed = Math.max(2, _cssNum(modeData.gradientAnimationSpeed, 8));
             animCss = `  background-size: 300% 300% !important;\n  animation: owui-gradient-shift ${speed}s ease infinite !important;`;
             keyframesCss = `\n@keyframes owui-gradient-shift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n`;
         }
@@ -8074,7 +8145,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
                     // Render dots (skip during drag)
                     if (!window._meshDragActive) {
-                        meshPad.innerHTML = points.map((p, i) => `<div class="mesh-dot ${i === window._selectedMeshPoint ? 'selected' : ''}" data-index="${i}" style="left:${p.x}%;top:${p.y}%;background:${p.color};"></div>`).join('');
+                        meshPad.innerHTML = points.map((p, i) => `<div class="mesh-dot ${i === window._selectedMeshPoint ? 'selected' : ''}" data-index="${i}" style="left:${_cssNum(p.x, 50)}%;top:${_cssNum(p.y, 50)}%;background:${_cssTok(p.color)};"></div>`).join('');
                     }
                 }
 
@@ -8096,7 +8167,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                             <div class="gradient-drag-handle" data-tooltip="Drag to reorder">
                                 ${ICONS.dragHandle}
                             </div>
-                            <div class="gradient-stop-swatch" style="background: ${p.color};">
+                            <div class="gradient-stop-swatch" style="background: ${_cssTok(p.color)};">
                                 <input type="color" value="${p.color}" aria-label="Mesh point ${i + 1} color" onchange="window.updateMeshStop(${i}, {color: this.value})" oninput="this.parentElement.style.background = this.value; window.updateMeshStop(${i}, {color: this.value})">
                             </div>
                             <input type="range" class="gradient-stop-slider" min="10" max="80" value="${p.spread}" aria-label="Mesh point ${i + 1} spread" onpointerdown="window._meshSpreadSliderActive = true" oninput="window.updateMeshStop(${i}, {spread: parseInt(this.value)}); this.nextElementSibling.innerText = this.value + '%'" onchange="window._meshSpreadSliderActive = false; window.updateMeshStop(${i}, {spread: parseInt(this.value)})">
@@ -8136,7 +8207,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                     <div class="gradient-drag-handle" data-tooltip="Drag to reorder">
                         ${ICONS.dragHandle}
                     </div>
-                    <div class="gradient-stop-swatch" style="background: ${stop.color};">
+                    <div class="gradient-stop-swatch" style="background: ${_cssTok(stop.color)};">
                         <input type="color" value="${stop.color}" aria-label="Stop ${i + 1} color" onchange="window.updateGradientStop(${i}, {color: this.value})" oninput="this.parentElement.style.background = this.value">
                     </div>
                     <input type="range" class="gradient-stop-slider" min="0" max="100" value="${stop.position}" aria-label="Stop ${i + 1} position" onpointerdown="window._gradientSliderActive = true" oninput="window.updateGradientStop(${i}, {position: parseInt(this.value)}); this.nextElementSibling.innerText = this.value + '%'" onchange="window._gradientSliderActive = false; window.updateGradientStop(${i}, {position: parseInt(this.value)})">
@@ -8252,7 +8323,10 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 const stops = preset.stops || [];
                 if (stops.length === 0) return { gradStr: 'none', bgColorStyle: '' };
                 const sorted = [...stops].sort((a, b) => a.position - b.position);
-                const stopsStr = sorted.map(s => `${s.color} ${s.position}%`).join(', ');
+                // Gradient PRESETS are a separate import type that
+                // validateModeData never touches, and this lands in a style
+                // attribute that syncLibrary then persists server-side.
+                const stopsStr = sorted.map(s => `${_cssTok(s.color)} ${_cssNum(s.position, 0)}%`).join(', ');
                 gradStr = `linear-gradient(90deg, ${stopsStr})`;
             }
             return { gradStr, bgColorStyle };
@@ -11491,12 +11565,9 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         if (!snap || !snap.updateUrl) return null;
         
         try {
-            const fetchUrl = toRawGitHub(snap.updateUrl);
-            const res = await fetch(fetchUrl);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const remote = await res.json();
-            
-            if (!remote.dark || !remote.light) throw new Error('Invalid theme format');
+            // Was a bare fetch, which skipped the import allowlist entirely on
+            // the path that actually installs third-party themes.
+            const remote = await fetchThemeData(snap.updateUrl);
             
             const localVer = snap.version || '0.0.0';
             const remoteVer = remote.version || '0.0.0';
@@ -11581,10 +11652,14 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     // Checked AFTER toRawGitHub(), so the host tested is the host contacted.
     // An unparseable URL is refused rather than passed to fetch().
     function assertImportHostAllowed(rawUrl) {
-        const allow = (window.__THEME_PRO_CONFIG__ || {}).allowedImportDomains || [];
+        const allow = ((window.__THEME_PRO_CONFIG__ || {}).allowedImportDomains || [])
+            // URL.hostname is always lowercased by the parser, so an admin who
+            // types "Raw.GithubUserContent.com" would otherwise block every
+            // import with a misleading "not in the allowed list" error.
+            .map(d => String(d || '').trim().toLowerCase()).filter(Boolean);
         if (!allow.length) return;  // Empty valve = no restriction, as documented
         let hostname;
-        try { hostname = new URL(rawUrl, window.location.origin).hostname; }
+        try { hostname = new URL(rawUrl, window.location.origin).hostname.toLowerCase(); }
         catch (e) { throw new Error('Invalid URL'); }
         const ok = allow.some(d => hostname === d || hostname.endsWith('.' + d));
         if (!ok) throw new Error(`Domain "${hostname}" is not in the allowed import list`);
@@ -11594,16 +11669,37 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         const fetchUrl = toRawGitHub(updateUrl);
         assertImportHostAllowed(fetchUrl);
         const res = await fetch(fetchUrl);
+        // fetch follows redirects by default, so the pre-flight check above only
+        // proves the FIRST host was allowed. Verified: an allowlisted host
+        // answering 302 delivered a payload from an arbitrary origin while the
+        // pre-flight passed. Re-validate where we actually landed.
+        if (res.redirected) assertImportHostAllowed(res.url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const remote = await res.json();
         if (!remote.dark || !remote.light) throw new Error('Invalid theme format');
         return remote;
     }
 
-    window.applyManifestUpdate = async function(index, updateUrl) {
+    window.applyManifestUpdate = async function(index, updateUrl, opts) {
         try {
             showToast('Downloading theme update...');
             const remote = await fetchThemeData(updateUrl);
+            // The manifest path only compared versions, so this is the first
+            // point where the actual payload is known. Confirm before
+            // installing JavaScript that will run for every user — without
+            // this, a manifest-listed theme could add a script with no notice
+            // anywhere in the flow.
+            if (!(opts && opts.skipCanvasConfirm) && updateAddsCanvasCode(getSnapshots()[index], remote)) {
+                const name = (getSnapshots()[index] || {}).name || 'This theme';
+                if (!window.confirm(
+                    `${name} adds or changes a Canvas FX script (JavaScript).\n\n` +
+                    `It will run in the browser of every user on this instance. ` +
+                    `Only continue if you trust the source.\n\nInstall this update?`
+                )) {
+                    showToast('Update cancelled');
+                    return false;
+                }
+            }
             applyThemeUpdate(index, remote);
             return true;
         } catch(e) {
@@ -12020,18 +12116,23 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             updates.forEach((u, idx) => {
                 const rowId = `batch-upd-row-${idx}`;
                 const diffId = `batch-upd-diff-${idx}`;
-                html += `<div class="update-result-row" id="${rowId}" style="background: var(--bg-deep); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; overflow: hidden;">`;
+                // data-update-index lets applyAllBatchUpdates leave failed rows
+                // actionable instead of marking every row "Updated!".
+                html += `<div class="update-result-row" id="${rowId}" data-update-index="${u.index}" style="background: var(--bg-deep); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; overflow: hidden;">`;
                 html += `<div style="display:flex; align-items:center; justify-content:space-between; padding: 10px 12px;">`;
                 html += `<div><div style="font-size: 0.78rem; font-weight: 700; color: var(--text-main);">${_esc(u.local.name)}</div><div style="font-size: 0.65rem; color: var(--text-muted);">v${_esc(u.localVersion)} → <span style="color:#10b981;">v${_esc(u.remoteVersion)}</span></div></div>`;
                 html += `<div style="display:flex; gap:6px; align-items:center;">`;
                 // Diff toggle
                 html += `<button class="btn" style="padding:4px 10px; font-size:0.6rem; opacity:0.7;" onclick="window._toggleBatchDiff('${diffId}', this, ${u.index}, ${u.viaManifest ? 'true' : 'false'})">▸ Diff</button>`;
-                // Ignore button
-                const escUrl = (u.local.updateUrl || '').replace(/'/g, "\\'");
-                html += `<button class="btn" style="padding:4px 10px; font-size:0.6rem; color:var(--text-muted);" onclick="ignoreUpdate('${escUrl}','${u.localVersion}','${u.remoteVersion}'); document.getElementById('${rowId}').style.opacity='0.3'; document.getElementById('${rowId}').style.pointerEvents='none'; showToast('Ignored v${_esc(u.localVersion)} → v${_esc(u.remoteVersion)}')">Ignore</button>`;
+                // Ignore button. The url and both version strings come from
+                // remote theme JSON; they are carried as escaped data-*
+                // attributes and read by the delegated handler below, never
+                // interpolated into an onclick where a double quote would
+                // close the attribute and inject a live event handler.
+                html += `<button class="btn js-ignore-update" style="padding:4px 10px; font-size:0.6rem; color:var(--text-muted);" data-row="${_escAttr(rowId)}" data-url="${_escAttr(u.local.updateUrl || '')}" data-lv="${_escAttr(u.localVersion)}" data-rv="${_escAttr(u.remoteVersion)}">Ignore</button>`;
                 // Update button
                 if (u.viaManifest) {
-                    html += `<button class="btn btn-primary" style="background:#10b981; padding: 6px 14px; font-size: 0.68rem;" onclick="(async()=>{const ok=await applyManifestUpdate(${u.index},'${u.remoteUpdateUrl}');if(ok){this.innerText='Updated!';this.disabled=true;this.style.opacity='0.5';}})()">Update</button>`;
+                    html += `<button class="btn btn-primary js-apply-manifest-update" style="background:#10b981; padding: 6px 14px; font-size: 0.68rem;" data-index="${u.index}" data-url="${_escAttr(u.remoteUpdateUrl || '')}">Update</button>`;
                 } else {
                     html += `<button class="btn btn-primary" style="background:#10b981; padding: 6px 14px; font-size: 0.68rem;" onclick="applyThemeUpdate(${u.index}, window._pendingBatchUpdates[${u.index}]); this.innerText='Updated!'; this.disabled=true; this.style.opacity='0.5';">Update</button>`;
                 }
@@ -12055,11 +12156,22 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             // Batch updates skip the per-theme modal, so the Canvas FX warning
             // has to ride along here too — otherwise "Update All" is the one
             // path that installs new executable code with no notice at all.
-            const fxCount = updates.filter(u => updateAddsCanvasCode(u.local, u.remote)).length;
-            if (fxCount > 0) {
+            const risks = updates.map(u => canvasUpdateRisk(u.local, u.remote));
+            const fxCount = risks.filter(r => r === 'adds').length;
+            const unknownCount = risks.filter(r => r === 'unknown').length;
+            if (fxCount > 0 || unknownCount > 0) {
+                let msg = '';
+                if (fxCount > 0) {
+                    msg += `${fxCount} of these update${fxCount > 1 ? 's' : ''} add${fxCount > 1 ? '' : 's'} or change${fxCount > 1 ? '' : 's'} a <b>Canvas FX script</b> (JavaScript) that will run in the browser of <b>every user</b> on this instance.`;
+                }
+                if (unknownCount > 0) {
+                    // Version-only manifest matches: the body has not been
+                    // downloaded, so "no script" is not something we know.
+                    if (msg) msg += '<br><br>';
+                    msg += `${unknownCount} update${unknownCount > 1 ? 's have' : ' has'} not been downloaded yet, so ${unknownCount > 1 ? 'they' : 'it'} may also add a Canvas FX script. You will be asked to confirm before any script is installed.`;
+                }
                 html += `<div style="background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.3); border-radius:10px; padding:10px 12px; margin-top:12px; font-size:0.68rem; color:var(--text-muted); text-align:left;">`
-                     + `<b style="color:#ef4444;">&#9888;&#65039; Security Warning</b><br>`
-                     + `${fxCount} of these update${fxCount > 1 ? 's' : ''} add${fxCount > 1 ? '' : 's'} or change${fxCount > 1 ? '' : 's'} a <b>Canvas FX script</b> (JavaScript) that will run in the browser of <b>every user</b> on this instance. Review each diff before updating.`
+                     + `<b style="color:#ef4444;">&#9888;&#65039; Security Warning</b><br>${msg} Review each diff before updating.`
                      + `</div>`;
             }
 
@@ -12089,6 +12201,41 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         $('update-results-list').innerHTML = html;
         showModal('update-results-modal');
     });
+
+    // Delegated handlers for the update-results rows. These replace inline
+    // onclick attributes that interpolated remote-controlled updateUrl and
+    // version strings into executable context; the values now travel as
+    // escaped data-* attributes and are read back as plain strings here.
+    (function bindUpdateResultActions() {
+        const list = $('update-results-list');
+        if (!list) return;
+        list.addEventListener('click', async (e) => {
+            const ignoreBtn = e.target.closest('.js-ignore-update');
+            if (ignoreBtn) {
+                const url = ignoreBtn.getAttribute('data-url') || '';
+                const lv = ignoreBtn.getAttribute('data-lv') || '';
+                const rv = ignoreBtn.getAttribute('data-rv') || '';
+                const row = document.getElementById(ignoreBtn.getAttribute('data-row') || '');
+                ignoreUpdate(url, lv, rv);
+                if (row) { row.style.opacity = '0.3'; row.style.pointerEvents = 'none'; }
+                showToast(`Ignored v${lv} → v${rv}`);
+                return;
+            }
+            const updBtn = e.target.closest('.js-apply-manifest-update');
+            if (updBtn) {
+                const idx = Number(updBtn.getAttribute('data-index'));
+                const url = updBtn.getAttribute('data-url') || '';
+                if (!isFinite(idx)) return;
+                const ok = await applyManifestUpdate(idx, url);
+                if (ok) {
+                    updBtn.innerText = 'Updated!';
+                    updBtn.disabled = true;
+                    updBtn.style.opacity = '0.5';
+                }
+                return;
+            }
+        });
+    })();
 
     window.applyThemeUpdate = function(index, remoteData) {
         const snapshots = getSnapshots();
@@ -12312,21 +12459,72 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     // is handed the viewer's auth token. A theme that was benign when installed
     // can turn hostile later simply by changing what its updateUrl serves, and
     // until now that arrived as one unremarkable row in a collapsed diff.
-    function updateAddsCanvasCode(local, remote) {
-        return MODES.some(m => {
-            const r = remote && remote[m], l = local && local[m];
+    // 'none' | 'adds' | 'unknown'.
+    //
+    // 'unknown' is the important state: the manifest check compares versions
+    // only and sets remote = null because theme bodies are fetched lazily, so
+    // for a manifest-matched update we genuinely cannot tell yet whether it
+    // ships new code. Reporting that as 'none' made the warning silently dead
+    // for exactly the themes it was written for — the ones in the community
+    // manifest. Unknown must surface as a caution, not as an all-clear.
+    function canvasUpdateRisk(local, remote) {
+        if (!remote) return 'unknown';
+        const adds = MODES.some(m => {
+            const r = remote[m], l = local && local[m];
             const rs = (r && r.canvasScript || '').trim();
-            if (!rs) return false;
-            return rs !== ((l && l.canvasScript || '').trim());
+            const ls = (l && l.canvasScript || '').trim();
+            // A changed script is the obvious case. Flipping canvasEnabled from
+            // false to true is the subtle one: the script is unchanged, so a
+            // text comparison sees nothing, but execution is gated on
+            // canvasEnabled AND canvasScript everywhere else, so a dormant
+            // payload shipped earlier starts running on this update.
+            if (rs && rs !== ls) return true;
+            if (rs && !!(r && r.canvasEnabled) && !(l && l.canvasEnabled)) return true;
+            return false;
+        });
+        return adds ? 'adds' : 'none';
+    }
+
+    function updateAddsCanvasCode(local, remote) {
+        return canvasUpdateRisk(local, remote) === 'adds';
+    }
+
+    // customCSS and manualOverrides are deliberately free-form: arbitrary CSS is
+    // the feature. But they are also the widest channel into the stylesheet
+    // served to every user, and a remote update could rewrite them while the
+    // warning stayed silent because no canvasScript changed. Selector-based
+    // exfiltration and UI spoofing live here, so a changed value warrants the
+    // same notice as a script.
+    function updateAddsRemoteCss(local, remote) {
+        if (!remote) return false;
+        return MODES.some(m => {
+            const r = remote[m], l = local && local[m];
+            if (!r) return false;
+            const pairs = [['customCSS', 'customCssEnabled'], ['manualOverrides', 'manualOverridesEnabled']];
+            return pairs.some(([txt, flag]) => {
+                const rs = (r[txt] || '').trim();
+                const ls = (l && l[txt] || '').trim();
+                if (rs && rs !== ls) return true;
+                return !!(rs && r[flag] && !(l && l[flag]));
+            });
         });
     }
 
     function renderCanvasUpdateWarning(el, local, remote) {
         if (!el) return;
-        if (!updateAddsCanvasCode(local, remote)) { el.style.display = 'none'; el.innerHTML = ''; return; }
+        const risk = canvasUpdateRisk(local, remote);
+        const cssChanged = updateAddsRemoteCss(local, remote);
+        if (risk !== 'adds' && !cssChanged) { el.style.display = 'none'; el.innerHTML = ''; return; }
+        const parts = [];
+        if (risk === 'adds') {
+            parts.push(`This update adds or changes a <b>Canvas FX animation script</b> (JavaScript). It will run in the browser of <b>every user</b> on this instance.`);
+        }
+        if (cssChanged) {
+            parts.push(`This update changes <b>custom CSS</b>, which is applied instance-wide and can restyle or overlay any part of the interface.`);
+        }
         el.style.display = 'block';
         el.innerHTML = `<div style="color:#ef4444; font-size:0.7rem; font-weight:bold; margin-bottom:4px; display:flex; align-items:center; gap:6px;"><span>&#9888;&#65039;</span> Security Warning</div>`
-            + `<p style="font-size:0.65rem; color:var(--text-muted); margin:0;">This update adds or changes a <b>Canvas FX animation script</b> (JavaScript). It will run in the browser of <b>every user</b> on this instance. Review the Canvas FX diff below and only update if you trust the source.</p>`;
+            + `<p style="font-size:0.65rem; color:var(--text-muted); margin:0;">${parts.join(' ')} Review the diff below and only update if you trust the source.</p>`;
     }
 
     window.checkSingleUpdate = async (index) => {
@@ -12409,35 +12607,51 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         const indices = window._pendingBatchIndices || [];
         if (indices.length === 0) return;
         
+        // Track outcomes. applyManifestUpdate returns false when the fetch is
+        // refused (the import allowlist now rejects disallowed hosts) or the
+        // admin declines the Canvas FX confirmation. Reporting a flat success
+        // count regardless told the admin seven themes updated while nothing
+        // had changed — and with the allowlist configured that is the expected
+        // path, not a rare network blip.
+        let okCount = 0;
+        const failed = [];
         for (const idx of indices) {
             const remote = window._pendingBatchUpdates[idx];
             const manifestUrl = window._pendingBatchMeta[idx];
             if (remote) {
                 applyThemeUpdate(idx, remote);
+                okCount++;
             } else if (manifestUrl) {
-                await applyManifestUpdate(idx, manifestUrl);
+                if (await applyManifestUpdate(idx, manifestUrl)) okCount++;
+                else failed.push(idx);
             }
         }
-        
-        // Mark all individual Update buttons in the results list as done
+
+        // Only mark the rows that actually updated.
         const listEl = $('update-results-list');
         if (listEl) {
             listEl.querySelectorAll('button.btn-primary').forEach(btn => {
+                const row = btn.closest('[data-update-index]');
+                const rowIdx = row ? Number(row.getAttribute('data-update-index')) : NaN;
+                if (failed.includes(rowIdx)) return;  // leave it actionable
                 btn.innerText = 'Updated!';
                 btn.disabled = true;
                 btn.style.opacity = '0.5';
             });
         }
-        
-        // Disable the Update All button
+
         const updateAllBtn = $('update-all-btn');
         if (updateAllBtn) {
-            updateAllBtn.innerText = 'All Updated!';
-            updateAllBtn.disabled = true;
-            updateAllBtn.style.opacity = '0.5';
+            updateAllBtn.innerText = failed.length ? 'Retry Failed' : 'All Updated!';
+            updateAllBtn.disabled = failed.length === 0;
+            updateAllBtn.style.opacity = failed.length ? '1' : '0.5';
         }
-        
-        showToast(`Updated ${indices.length} theme(s)!`);
+
+        if (failed.length) {
+            showToast(`⚠️ Updated ${okCount} of ${indices.length} — ${failed.length} could not be applied`);
+        } else {
+            showToast(`Updated ${okCount} theme(s)!`);
+        }
     };
 
     // App Initialization
@@ -12530,6 +12744,14 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                                     if (themeData[m].autoScope === undefined) themeData[m].autoScope = true;
                                     if (themeData[m].canvasEnabled === undefined) themeData[m].canvasEnabled = false;
                                     if (themeData[m].canvasScript === undefined) themeData[m].canvasScript = "";
+                                    // Validate at the door here too. This path
+                                    // assigns straight from localStorage, so a
+                                    // theme installed under an older build
+                                    // re-entered live state unchecked and left
+                                    // the render-time sanitizers as the only
+                                    // defence. Runs after the legacy backfills
+                                    // above so their defaults are validated too.
+                                    themeData[m] = validateModeData(themeData[m]);
                                 }
                             });
 
@@ -12750,20 +12972,26 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             ['import-url-input', 'import-css-url-input', 'import-canvas-url-input', 'import-gradient-url-input']
                 .forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
         } else if (cfg.allowedImportDomains && cfg.allowedImportDomains.length > 0) {
-            // Domain allowlist — wrap loadFromUrl with domain check
+            // Domain allowlist — wrap loadFromUrl with the SAME check the
+            // automated fetch paths use.
+            //
+            // This used to be a second, independent implementation, and the two
+            // disagreed on both axes that matter. It measured the host BEFORE
+            // toRawGitHub() rewriting, so with the allowlist set to github.com a
+            // blob URL passed here while the fetch actually went to
+            // raw.githubusercontent.com (and the reverse setting inverted the
+            // verdict). And its catch fell through to the original loader on an
+            // unparseable URL, i.e. failed OPEN, where the shared helper throws.
             const _origLoadFromUrl = loadFromUrl;
             loadFromUrl = function(opts) {
                 const url = (document.getElementById(opts.urlInputId)?.value || '').trim();
                 try {
-                    const hostname = new URL(url).hostname;
-                    const allowed = cfg.allowedImportDomains.some(d =>
-                        hostname === d || hostname.endsWith('.' + d)
-                    );
-                    if (!allowed) {
-                        showImportBlocked(opts, `⛔ Domain "${hostname}" is not in the allowed list. Allowed: ${cfg.allowedImportDomains.join(', ')}`);
-                        return;
-                    }
-                } catch (e) { /* let the original handle invalid URL errors */ }
+                    // Check the rewritten URL — the host that will be contacted.
+                    assertImportHostAllowed(toRawGitHub(url));
+                } catch (e) {
+                    showImportBlocked(opts, `⛔ ${e.message}. Allowed: ${cfg.allowedImportDomains.join(', ')}`);
+                    return;
+                }
                 return _origLoadFromUrl.call(this, opts);
             };
         }

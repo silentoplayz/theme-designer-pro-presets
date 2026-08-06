@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — standalone admin page with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.7.7-blue)
+![Version](https://img.shields.io/badge/version-1.7.8-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.10.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -479,6 +479,22 @@ Toggle the function **OFF** in the Admin Panel first. That withdraws its fragmen
 Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build — 1.7.0 never writes there.
 
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
+
+---
+
+## 📝 What's New in 1.7.8
+
+A review pass over the 1.7.4 hardening found that some of it was wrong, and found more of the same class of problem elsewhere.
+
+**Fixed a regression introduced in 1.7.4.** The sanitizer's numeric guard used `Number()`, and `Number(null)` is `0` — a finite number, so the guard accepted it. Every numeric theme field left unset therefore became `0` instead of falling back to its default. In practice: gradient angles snapped to `0deg`, `intensity` collapsed to grey, and animated gradients froze at `0s`. Any theme relying on a default for one of those fields rendered wrong from 1.7.4 onward. Unset now correctly means unset.
+
+**Closed the remaining injection paths.** 1.7.4 sanitized the generated stylesheet; three surfaces in the admin's own browser were still rendering remote values raw. Theme names and versions went into inline `onclick` handlers in the update list, where a crafted name executed as JavaScript — those values now travel through escaped `data-` attributes read by a delegated handler, so they are never in executable position at all. The tonal-ramp preview, gradient preset swatches, and mesh dots also sanitize now. Separately, theme data restored from `localStorage` skipped the validation that import performs, so a value blocked at import survived a reload; both paths validate now.
+
+**The Canvas FX update warning was unreachable on the catalog path.** 1.7.5 added a warning for updates that add or change a Canvas FX script. It compared script bodies, but manifest updates do not carry bodies — so it always concluded "no script change" and stayed silent on exactly the path where a hostile script would arrive. Manifest updates now report the risk as *unknown* rather than *none*, and confirm before installing once the payload is in hand. An update that flips an existing script from disabled to enabled also warns now; previously only a changed body did.
+
+**Allowed Import Domains no longer has a bypass.** The check existed twice, and the older copy failed *open* on a URL it could not parse and matched hosts case-sensitively, so `EVIL.COM` passed an allowlist written in lowercase. It also checked the URL before GitHub blob-to-raw rewriting, so the host validated was not always the host contacted. There is now one implementation, it runs on the rewritten URL, and it re-checks after redirects — an allowed host can no longer redirect to a blocked one.
+
+**Also fixed:** conic gradients fell through to a linear gradient in one CSS builder; "Update All" reported success for updates that failed, and now reports what actually happened with a Retry Failed action; updates that change instance-wide `customCSS` or `manualOverrides` warn, where previously only script changes did.
 
 ---
 
