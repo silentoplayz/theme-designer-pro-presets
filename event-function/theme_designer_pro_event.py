@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.7.9
+version: 1.8.0
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -21,7 +21,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.7.9"
+VERSION = "1.8.0"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -3017,6 +3017,19 @@ class Event:
         /* Tonal Ramp Animation Upgrades */
         .ramp-block { display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; flex:1; height:100%; cursor:pointer; transition: 0.15s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); position: relative; user-select: none; }
         .ramp-block:hover { transform: scale(1.1) translateY(-2px); z-index: 10; box-shadow: 0 10px 20px -5px rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.2); }
+        .contrast-report { display: flex; flex-direction: column; gap: 7px; margin-top: 10px; margin-bottom: 32px; }
+        .contrast-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 2px; }
+        .contrast-sub { font-size: 0.6rem; color: var(--text-muted); }
+        .contrast-row { display: flex; align-items: center; gap: 10px; font-size: 0.7rem; }
+        .contrast-swatch { flex: 0 0 auto; width: 32px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.62rem; border: 1px solid var(--border); }
+        .contrast-label { flex: 1 1 auto; color: var(--text-main); }
+        .contrast-steps { display: block; font-size: 0.56rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
+        .contrast-ratio { flex: 0 0 auto; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); font-size: 0.64rem; }
+        .contrast-badge { flex: 0 0 auto; font-size: 0.56rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; letter-spacing: 0.04em; white-space: nowrap; }
+        .contrast-ok { background: rgba(34,197,94,0.15); color: #22c55e; }
+        .contrast-warn { background: rgba(234,179,8,0.16); color: #eab308; }
+        .contrast-bad { background: rgba(239,68,68,0.15); color: #ef4444; }
+        .contrast-note { font-size: 0.6rem; color: var(--text-muted); line-height: 1.45; margin-top: 2px; }
         body.light-mode .ramp-block { border-color: var(--lm-border-subtle); }
         body.light-mode .ramp-block:hover { border-color: var(--lm-bg-hover); box-shadow: 0 10px 20px -5px var(--lm-bg-hover); }
 
@@ -3401,7 +3414,14 @@ class Event:
 
 
             <div class="section-title" style="margin-top: 32px;">OKLCH Tonal Ramp</div>
-            <div id="ramp-gray" style="display: flex; height: 52px; margin-top: 10px; gap: 6px; margin-bottom: 32px;"></div>
+            <div id="ramp-gray" style="display: flex; height: 52px; margin-top: 10px; gap: 6px; margin-bottom: 16px;"></div>
+
+            <div class="section-title" style="margin-top: 20px;">Accessibility Contrast</div>
+            <!-- Deliberately NOT aria-live: this repaints on every colour-picker
+                 drag frame, so a live region would flood a screen reader with the
+                 whole report dozens of times a second. It is a labelled region
+                 instead, read on demand. -->
+            <div id="contrast-report" class="contrast-report" role="region" aria-label="Accessibility contrast report"></div>
 
 
 
@@ -3790,6 +3810,12 @@ class Event:
                             <li><b>Locking Variables:</b> Clicking the lock (🔒) icon pins a variable. Locked variables are protected and will NOT be overwritten if you change the OKLCH sliders, randomize the theme, or extract a palette from an image. Use the bulk <b>Lock All</b> / <b>Unlock All</b> buttons to quickly pin or release the entire variable set at once.</li>
                             <li><b>Click-to-Copy:</b> Click any variable name (e.g., <i>gray-900</i>) to instantly copy its CSS declaration (<code>--color-gray-900: #hex;</code>) to your clipboard.</li>
                             <li><b>Contrast Preview:</b> Each color swatch features an <b>Aa</b> contrast preview badge for at-a-glance legibility assessment. The badge text color automatically adjusts based on the swatch's lightness to remain readable.</li>
+                        </ul>
+                        <h4>Accessibility Contrast Report</h4>
+                        <p>Directly under the tonal ramp, the <b>Accessibility Contrast</b> panel scores the four text-on-background pairs Open WebUI actually renders for the current mode: main and muted text on the page background, main text on panels, and main text on the sidebar. Each row shows a foreground-on-background swatch, the <a href="https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html" target="_blank" rel="noopener">WCAG 2.1</a> contrast ratio, and a rating badge — <b>AAA</b> (≥7:1), <b>AA</b> (≥4.5:1), <b>AA large</b> (≥3:1, valid for large or bold text only), or <b>Fail</b>. A summary reports how many of the four clear AA. It recomputes live as you move a slider, edit an override, or switch modes.</p>
+                        <ul>
+                            <li><b>Measured on the solid background.</b> With a Canvas FX or gradient background active, the visible backdrop is an animation that has no single contrast value; the report scores against the solid palette color, which is the fallback every user still sees.</li>
+                            <li><b>Washed-out palettes.</b> If a palette is bright enough that the built-in contrast protection engages, the panel notes it — protection shifts text color at runtime, so the rendered result can be more legible than the raw palette scores.</li>
                         </ul>
                         <h4>Manual Variable Overrides</h4>
                         <p>Below the color picker grid, you'll find the <b>Manual Variable Overrides</b> code block. This feature is inspired by the legacy Open WebUI Theming system fork and gives power users direct control over CSS custom properties.</p>
@@ -5766,6 +5792,33 @@ location.reload();</code></pre>
         return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     }
 
+    // WCAG 2.x contrast. getLuminance() above is the cheap Rec.601 perceptual
+    // estimate used to pick a swatch's text colour; the AA/AAA thresholds are
+    // defined against gamma-correct relative luminance, which is what these
+    // compute. Kept separate on purpose — do not fold one into the other.
+    function _srgbToLinear(c) {
+        c = c / 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    }
+    function relativeLuminance(hex) {
+        const [r, g, b] = parseHex(hex);
+        return 0.2126 * _srgbToLinear(r) + 0.7152 * _srgbToLinear(g) + 0.0722 * _srgbToLinear(b);
+    }
+    function contrastRatio(hexA, hexB) {
+        const la = relativeLuminance(hexA), lb = relativeLuminance(hexB);
+        if (!isFinite(la) || !isFinite(lb)) return NaN;
+        const hi = Math.max(la, lb), lo = Math.min(la, lb);
+        return (hi + 0.05) / (lo + 0.05);
+    }
+    // WCAG 2.1: normal text needs 4.5 (AA) / 7 (AAA); large text (>=18pt, or
+    // 14pt bold) needs only 3 (AA) / 4.5 (AAA). The designer's text-on-surface
+    // pairs are body copy, so they are rated as normal text, with aaLarge kept
+    // so a pair that clears only the large-text bar can say so instead of just
+    // "Fail".
+    function contrastVerdict(ratio) {
+        return { ratio: ratio, aaa: ratio >= 7, aa: ratio >= 4.5, aaLarge: ratio >= 3 };
+    }
+
     // No default step color overrides needed — the OKLCH palette generator
     // produces values that exactly match Open WebUI's @theme defaults when
     // using default settings (h=250, c=0, l=20/0).
@@ -6718,6 +6771,145 @@ function startAnimation() {
         };
     }
 
+    // One manual-override line -> { name, value }, or null if it is not one.
+    // Mirrors the guards in generateThemeSections' formatOverrideLine (skip
+    // blanks and comments, require a leading --, reject braces as a CSS scope
+    // breakout) and additionally requires a value, which the report needs and a
+    // malformed declaration would not supply.
+    function _parseOverrideLine(line) {
+        const trimmed = String(line == null ? '' : line).trim();
+        if (!trimmed || trimmed.startsWith('/*') || trimmed.startsWith('//') || trimmed.startsWith('*')) return null;
+        if (!trimmed.startsWith('--') || /[{}]/.test(trimmed)) return null;
+        const body = trimmed.endsWith(';') ? trimmed.slice(0, -1) : trimmed;
+        const i = body.indexOf(':');
+        if (i < 1) return null;
+        const name = body.slice(0, i).trim();
+        const value = body.slice(i + 1).trim();
+        return (name && value) ? { name, value } : null;
+    }
+
+    // The palette values that actually SHIP, which is what a contrast report has
+    // to measure. getVariablesMap alone misses two things generateThemeSections
+    // does:
+    //   - paletteEnabled === false emits the mode's DEFAULT ramp, not the admin's
+    //     h/c/l, so scoring the sliders would describe a palette nobody receives.
+    //   - manual overrides are injected after the palette with !important, so
+    //     they win outright. An admin who sets --color-gray-900 there was being
+    //     shown a rating for the colour it replaced.
+    function _shippedVars(config, dataMode) {
+        let vars;
+        if (config.paletteEnabled === false) {
+            vars = {};
+            steps.forEach(step => { vars[`--color-gray-${step}`] = getDefaultColorForStep(dataMode, step); });
+        } else {
+            vars = getVariablesMap(config, dataMode);
+        }
+        let overridden = 0;
+        if (config.manualOverridesEnabled && config.manualOverrides && config.manualOverrides.trim()) {
+            config.manualOverrides.split('\n').forEach(line => {
+                const p = _parseOverrideLine(line);
+                // hasOwnProperty, not `in`: only real palette steps, never an
+                // inherited key like __proto__ smuggled in through an override.
+                if (p && Object.prototype.hasOwnProperty.call(vars, p.name)) {
+                    vars[p.name] = p.value;
+                    overridden++;
+                }
+            });
+        }
+        return { vars, overridden, usingDefaults: config.paletteEnabled === false };
+    }
+
+    // The text/background pairs Open WebUI actually renders, expressed in the
+    // gray steps the palette controls. These mirror the bg/text mapping in
+    // generateThemeSections: dark & oled read text from the light end of the
+    // ramp on dark backgrounds; light & her do the reverse. Body and sidebar are
+    // the two backgrounds the generated CSS sets directly (bgBody / bgSidebar);
+    // the elevated-surface row covers the steps Open WebUI's own components pull
+    // from the ramp. Each row names its steps so the comparison is checkable
+    // rather than something the admin has to take on trust.
+    function _contrastPairs(dataMode) {
+        const dark = (dataMode === 'dark' || dataMode === 'oled');
+        const g = n => `--color-gray-${n}`;
+        return [
+            { label: 'Main text on background', fg: dark ? g(50) : g(950), bg: dark ? g(900) : g(50) },
+            { label: 'Muted text on background', fg: dark ? g(400) : g(600), bg: dark ? g(900) : g(50) },
+            { label: 'Main text on elevated surfaces', fg: dark ? g(50) : g(950), bg: dark ? g(850) : g(100) },
+            { label: 'Main text on sidebar', fg: dark ? g(50) : g(950), bg: dark ? g(950) : g(50) },
+        ];
+    }
+
+    // Report the palette's own contrast — the admin's colour choices, resolved
+    // exactly as the ramp resolves them. It is deliberately measured against
+    // the SOLID palette background: with a Canvas FX or gradient background
+    // active the visible backdrop is an animation WCAG cannot score, and the
+    // solid colour is the guaranteed fallback every user still sees.
+    function renderContrastReport(config, dataMode, washedOut) {
+        const el = $('contrast-report');
+        if (!el) return;
+        const shipped = _shippedVars(config, dataMode);
+        const activeVars = shipped.vars;
+        const pairs = _contrastPairs(dataMode);
+        let passAA = 0, scored = 0, unknown = 0;
+        const rows = pairs.map(p => {
+            const fgHex = _resolveReportColor(activeVars[p.fg]);
+            const bgHex = _resolveReportColor(activeVars[p.bg]);
+            const ratio = (fgHex && bgHex) ? contrastRatio(fgHex, bgHex) : NaN;
+            const v = contrastVerdict(ratio);
+            const ok = isFinite(ratio);
+            if (ok) { scored++; if (v.aa) passAA++; } else { unknown++; }
+            const level = !ok ? 'Unknown' : v.aaa ? 'AAA' : v.aa ? 'AA' : v.aaLarge ? 'AA large' : 'Fail';
+            const cls = !ok ? 'warn' : v.aa ? 'ok' : v.aaLarge ? 'warn' : 'bad';
+            const ratioTxt = ok ? ratio.toFixed(2) + ':1' : '—';
+            // An unresolved colour gets no swatch fill — showing it as black
+            // would look like a measurement rather than a gap in one.
+            const swatchStyle = (fgHex && bgHex)
+                ? `background:${_cssTok(bgHex)};color:${_cssTok(fgHex)};`
+                : 'background:transparent;color:var(--text-muted);';
+            const stepOf = v => String(v).replace('--color-gray-', '');
+            return `<div class="contrast-row">
+                    <span class="contrast-swatch" style="${swatchStyle}">Aa</span>
+                    <span class="contrast-label">${_esc(p.label)}<span class="contrast-steps">${_esc(stepOf(p.fg))} on ${_esc(stepOf(p.bg))}</span></span>
+                    <span class="contrast-ratio">${_esc(ratioTxt)}</span>
+                    <span class="contrast-badge contrast-${cls}">${_esc(level)}</span>
+                </div>`;
+        }).join('');
+        const total = pairs.length;
+        const allAA = scored > 0 && passAA === scored;
+        let summaryCls, summaryTxt;
+        if (scored === 0) {
+            summaryCls = 'warn';
+            summaryTxt = 'Contrast could not be measured';
+        } else {
+            summaryCls = allAA ? 'ok' : (passAA >= scored - 1 ? 'warn' : 'bad');
+            summaryTxt = allAA
+                ? (unknown ? `${scored} of ${total} pairs measured, all pass AA` : `All ${total} pairs pass AA`)
+                : `${passAA}/${scored} measured pairs pass AA`;
+        }
+        const notes = [];
+        if (shipped.usingDefaults) {
+            notes.push('The palette is switched off for this mode, so the theme ships this mode’s default ramp. These ratings describe those defaults, not the sliders above.');
+        }
+        if (shipped.overridden) {
+            notes.push(`${shipped.overridden} value${shipped.overridden > 1 ? 's' : ''} above come${shipped.overridden > 1 ? '' : 's'} from <b>Manual Variable Overrides</b>, which take priority over the palette — so ${shipped.overridden > 1 ? 'they are' : 'it is'} what users actually receive.`);
+        }
+        if (washedOut && (washedOut.dark || washedOut.light)) {
+            notes.push('This palette is very washed out — the built-in contrast protection shifts text colour at runtime to keep it legible, so users may see better contrast than the palette alone scores here.');
+        }
+        if (unknown) {
+            notes.push(`${unknown} pair${unknown > 1 ? 's use' : ' uses'} a colour that only resolves inside the live page — such as <code>var(--…)</code> — so ${unknown > 1 ? 'they' : 'it'} cannot be measured here.`);
+        }
+        const note = notes.length
+            ? `<div class="contrast-note">${notes.join('<br><br>')}</div>`
+            : '';
+        el.innerHTML = `
+            <div class="contrast-head">
+                <span class="contrast-badge contrast-${summaryCls}">${_esc(summaryTxt)}</span>
+                <span class="contrast-sub">WCAG contrast, solid background</span>
+            </div>
+            ${rows}
+            ${note}`;
+    }
+
     function updatePalette() {
         const dm = getActiveDataMode();
         const config = themeData[dm];
@@ -6739,7 +6931,10 @@ function startAnimation() {
         // Ramp
         const activeVars = getVariablesMap(config);
         const dataMode = dm;
-        const washedOut = detectWashedOut(dataMode, activeVars);
+        // Palette map for the ramp below (it shows the generated ramp), but the
+        // washout check reads the values that actually ship — see the note in
+        // forceLocalIframeTheme.
+        const washedOut = detectWashedOut(dataMode, _shippedVars(config, dataMode).vars);
         document.body.classList.toggle('washed-out', washedOut.dark || washedOut.light);
 
         const gRamp = $('ramp-gray');
@@ -6757,6 +6952,10 @@ function startAnimation() {
                 return `<div class="ramp-block" data-hex="${hex}" style="background: ${activeVars[`--color-gray-${s}`]}; color: ${textColor};" onclick="navigator.clipboard.writeText('${hex}').then(()=>showToast('Copied ${hex}'))" data-tooltip="Copy ${hex}">${s}</div>`;
             }).join('');
         }
+
+        // Accessibility contrast report. Wrapped so a fault here can never take
+        // down palette rendering — this whole function repaints the editor.
+        try { renderContrastReport(config, dataMode, washedOut); } catch (e) { console.warn('Theme Pro: contrast report failed', e); }
 
         // Sync Custom CSS Editor
         const syncCheck = (id, val) => { const el = $(id); if (el) el.checked = val; };
@@ -7100,12 +7299,67 @@ function startAnimation() {
     const _hexCanvas = document.createElement('canvas');
     _hexCanvas.width = 1; _hexCanvas.height = 1;
     const _hexCtx = _hexCanvas.getContext('2d');
+    // Resolved-colour memo. oklchToHex sits on the palette repaint path, which
+    // runs on every colour-picker drag frame, and getImageData() forces a
+    // GPU→CPU readback. The ramp resolves 12 steps per frame and the contrast
+    // report reads back several of those same values, so a shared memo makes the
+    // report's lookups free instead of adding readbacks. Bounded: a hue drag
+    // produces a fresh set of values every frame, so this must not grow forever.
+    const _hexMemo = new Map();
+    const _HEX_MEMO_MAX = 512;
+
+    function _memoHex(key, compute) {
+        const hit = _hexMemo.get(key);
+        if (hit !== undefined) return hit;   // null is a real cached value
+        const val = compute();
+        if (_hexMemo.size >= _HEX_MEMO_MAX) _hexMemo.clear();
+        _hexMemo.set(key, val);
+        return val;
+    }
+
+    // #abc → #aabbcc. parseHex() slices fixed offsets, so a 3-digit hex would
+    // otherwise parse to NaN and every consumer of it would read as unknown.
+    function _expandHex(h) {
+        return /^#[0-9a-fA-F]{3}$/.test(h)
+            ? '#' + h.slice(1).split('').map(c => c + c).join('')
+            : h;
+    }
+
     function oklchToHex(str) {
-        if (str.startsWith('#')) return str;
-        _hexCtx.fillStyle = '#000000'; _hexCtx.fillStyle = str;
-        _hexCtx.fillRect(0, 0, 1, 1);
-        const data = _hexCtx.getImageData(0, 0, 1, 1).data;
-        return "#" +[data[0], data[1], data[2]].map(x => x.toString(16).padStart(2, '0')).join('');
+        if (str.startsWith('#')) return _expandHex(str);
+        return _memoHex(str, () => {
+            // clearRect first: the scratch canvas is 1x1 and reused across every
+            // call, so a translucent value composited over whatever the previous
+            // call left behind and resolved differently depending on call order.
+            _hexCtx.clearRect(0, 0, 1, 1);
+            _hexCtx.fillStyle = '#000000'; _hexCtx.fillStyle = str;
+            _hexCtx.fillRect(0, 0, 1, 1);
+            const data = _hexCtx.getImageData(0, 0, 1, 1).data;
+            return "#" +[data[0], data[1], data[2]].map(x => x.toString(16).padStart(2, '0')).join('');
+        });
+    }
+
+    // Resolve for the contrast report: the hex, or null when this browser cannot
+    // resolve the value on its own.
+    //
+    // _cssTok deliberately allows var() and color-mix(), and var() can NEVER
+    // resolve here — a detached scratch canvas has no element to inherit the
+    // custom property from. Assigning an unparseable value to fillStyle is
+    // ignored, so it silently kept the '#000000' baseline and the report scored
+    // a perfectly good override as pure black, i.e. reported a false Fail.
+    // Probing with two different sentinels separates the cases: a value that
+    // parsed reads back identically both times, one that did not tracks
+    // whichever sentinel preceded it.
+    function _resolveReportColor(str) {
+        if (!str || typeof str !== 'string') return null;
+        if (/^#[0-9a-fA-F]{3}$/.test(str) || /^#[0-9a-fA-F]{6}$/.test(str)) return _expandHex(str);
+        return _memoHex('probe ' + str, () => {
+            _hexCtx.fillStyle = '#000000'; _hexCtx.fillStyle = str;
+            const first = _hexCtx.fillStyle;
+            _hexCtx.fillStyle = '#ffffff'; _hexCtx.fillStyle = str;
+            if (first !== _hexCtx.fillStyle) return null;
+            return oklchToHex(str);
+        });
     }
 
     function getEffectiveLightness(colorStr) {
@@ -7482,9 +7736,13 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         const dm = getActiveDataMode();
         const config = themeData[dm];
         const dataMode = dm;
-        const activeVars = getVariablesMap(config);
-        
-        const washedOut = detectWashedOut(dataMode, activeVars);
+        // Shipped values, not the raw palette: manual overrides are injected
+        // after the palette with !important and end up in the same vars section
+        // this page is themed from, so an override is able to light up the
+        // background while the palette still reads dark. Checking the palette
+        // meant the protection stayed off in exactly that case and left
+        // near-white text on a near-white designer UI.
+        const washedOut = detectWashedOut(dataMode, _shippedVars(config, dataMode).vars);
 
         let darkTextMain = washedOut.dark ? "#18181b" : "var(--color-gray-50, #fafafa)";
         let darkTextMuted = washedOut.dark ? "#52525b" : "var(--color-gray-400, #a1a1aa)";

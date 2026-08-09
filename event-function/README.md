@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — standalone admin page with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.7.9-blue)
+![Version](https://img.shields.io/badge/version-1.8.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.10.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -481,6 +481,33 @@ Toggle the function **OFF** in the Admin Panel first. That withdraws its fragmen
 Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build — 1.7.0 never writes there.
 
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
+
+---
+
+## 📝 What's New in 1.8.0
+
+**Accessibility contrast checking.** The palette editor now shows a live WCAG contrast report directly under the tonal ramp. Because a Theme Designer Pro theme is applied to *every* user on the instance, a palette that renders text unreadable is an instance-wide accessibility problem — and until now nothing surfaced it.
+
+The report scores the four text-on-background pairs Open WebUI renders for the active mode: main and muted text on the page background, main text on elevated surfaces, and main text on the sidebar. Each row shows a foreground-on-background swatch, the contrast ratio, the palette steps being compared (`50 on 900`, so you can check the comparison rather than take the label on trust), and a badge — **AAA** (≥7:1), **AA** (≥4.5:1), **AA large** (≥3:1, valid for large or bold text only), or **Fail**. A summary reports how many pairs clear AA. It recomputes the instant you move a slider, edit an override, or switch modes.
+
+It measures the colors that **actually ship**, which is not simply the palette:
+
+- **Manual Variable Overrides are applied first.** They are injected after the palette with `!important` and win outright, so a rating that ignored them would describe a color the override replaced. A note tells you how many measured values came from overrides.
+- **A disabled palette reports the mode's defaults**, because that is what the theme emits when Enable Palette is off — not your slider values.
+- **Colors that only resolve in the live page** — `var(--…)`, for instance — are reported as **Unknown** rather than scored. They resolve to black on the off-screen canvas used for measurement, which would otherwise produce a confident, false "Fail".
+- **Contrast is measured against the solid background.** With a Canvas FX or gradient background active the visible backdrop is an animation WCAG cannot score, and the solid color is the fallback every user still sees.
+- **Washed-out palettes are flagged**, since the built-in protection shifts text color at runtime and users may see better contrast than the palette alone scores.
+
+The ratios use gamma-correct WCAG 2.x relative luminance, verified against the standard's reference boundaries: black on white is 21:1, `#767676` on white is 4.54:1 (the classic AA-normal edge), `#595959` on white is 7.0:1.
+
+**Also fixed in this release, both pre-existing:**
+
+- **The built-in contrast protection now sees Manual Variable Overrides.** It judged whether a palette was washed out by reading the palette alone, but overrides land in the same variables the designer page is themed from. An override such as `--color-gray-950: #ffffff` lightened the background while the check still read the palette's dark value, so protection stayed off and the designer could draw near-white text on a near-white background.
+- **Three-digit hex overrides work properly.** `#abc` was never expanded to `#aabbcc`. Because the palette's color-picker inputs require six digits, a short-hex override made the picker display **black** instead of your color, and its "Aa" legibility badge picked the wrong text color. Colors with alpha also resolve consistently now; the scratch canvas used for resolution was never cleared, so a translucent value could blend into whatever the previous lookup left behind.
+
+Resolved colors are cached, so the report reads values the tonal ramp already resolved rather than forcing its own round-trips to the GPU — dragging a color slider does less of that work per frame than it did in 1.7.9.
+
+This release adds no valves and does not change a single byte of the generated theme CSS.
 
 ---
 
