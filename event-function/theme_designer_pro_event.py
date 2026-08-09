@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.7.8
+version: 1.7.9
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -21,7 +21,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.7.8"
+VERSION = "1.7.9"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -1392,6 +1392,18 @@ class Event:
     def __init__(self):
         self.valves = self.Valves()
 
+    def _valves_snapshot(self):
+        """A hashable, order-stable snapshot of every valve value.
+
+        Used to detect that ANY valve changed — the existing per-valve flags
+        only cover the three that alter a live SSE broadcast, but nearly every
+        valve changes the composed loader.js (it embeds the whole config), so
+        a peer worker has to re-read on any of them.
+        """
+        v = self.valves
+        data = v.model_dump() if hasattr(v, "model_dump") else v.dict()
+        return tuple(sorted(data.items()))
+
     # -- URL validation -------------------------------------------------------
 
     def _get_route_base(self) -> str:
@@ -1757,6 +1769,10 @@ class Event:
     def _publish_fragments(self, app) -> bool:
         """(Re)point both shared fragments at this instance and ensure the
         routes exist. Idempotent — safe to call on every event."""
+        # The producers registered below read THIS instance's self.valves at
+        # compose time, so record which instance that is: a peer valve-sync has
+        # to refresh the valves on the same object, or it updates a dead copy.
+        Event._current_instance = self
         try:
             asset_register(
                 app,
@@ -13944,6 +13960,10 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     _last_enable_canvas_fx = None  # Track Canvas FX valve to broadcast changes
     _last_sidebar_transparency = None  # Track sidebar transparency valve to broadcast changes
     _last_overlay_transparency = None  # Track overlay transparency valve to broadcast changes
+    # Cross-worker valve convergence (multi-container / Redis only).
+    _current_instance = None  # Live instance whose producers are registered — the valve-sync target
+    _last_valves_snapshot = None  # All valve values at the last event(), to detect ANY change
+    _function_id = None  # This function's __id__, captured for DB valve re-reads
     _sse_clients: set = (
         set()
     )  # Active SSE connections — aliased to app.state in _register_route()
@@ -14226,7 +14246,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             pass  # Redis unavailable — local broadcast still runs below
 
     @classmethod
-    def _broadcast_update(cls, etags: dict | None = None):
+    def _broadcast_update(cls, etags: dict | None = None, local_only: bool = False):
         """Push a theme-update notification to all connected SSE clients.
 
         The payload carries a version token — clients refetch /theme.css and
@@ -14236,6 +14256,10 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         debounced save. When etags (from _prime_delivery_caches) are provided
         they ride along, letting clients that already applied that exact
         version skip the refetch entirely.
+
+        local_only skips the Redis re-publish: set when this broadcast is
+        itself the result of receiving a peer's message, so it reaches this
+        worker's own clients without echoing back onto the channel.
         """
         import time
 
@@ -14247,7 +14271,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 data["stateTag"] = etags["stateTag"]
         payload = _json.dumps(data, separators=(",", ":"))
         msg = f"event: theme-update\ndata: {payload}\n\n"
-        cls._redis_publish(msg)
+        if not local_only:
+            cls._redis_publish(msg)
         for q in list(cls._sse_clients):
             try:
                 q.put_nowait(msg)
@@ -14272,6 +14297,84 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 q.put_nowait(msg)
             except asyncio.QueueFull:
                 pass
+
+    # --- Cross-worker valve convergence -------------------------------------
+    # An admin changes a valve on ONE worker; Open WebUI reloads the function
+    # there, but every other worker keeps its cached instance with the old
+    # values until its own next dispatched event. All valves alter rendered
+    # output (the loader.js fragment embeds the whole config), so peers can
+    # serve a stale theme for that window. The worker that saw the change tells
+    # the others to re-read from the DB. Redis-only: a single-worker install
+    # already holds the fresh valves, so _redis_publish is a no-op there.
+    #
+    # Framed as an SSE comment (":") so a peer still on an older build, whose
+    # subscriber forwards raw channel traffic straight to browsers, delivers an
+    # ignored keep-alive rather than a malformed event. Our own subscriber
+    # intercepts it before any client sees it.
+    _CTRL_PREFIX = ":owui-theme-ctrl "
+
+    @classmethod
+    def _broadcast_valve_sync(cls):
+        """Signal peer workers that a valve changed and they should re-read it."""
+        cls._redis_publish(f"{cls._CTRL_PREFIX}valvesync\n\n")
+
+    @staticmethod
+    def _read_valves_from_db(inst, function_id):
+        """Read + validate this function's stored valves; None on any failure.
+
+        Fail-safe by construction: a missing Open WebUI API, an unreadable row,
+        or data that no longer validates all resolve to None, and the caller
+        then leaves the current valves untouched — behaviour identical to
+        pre-1.7.9, where the worker converges on its own next event.
+        """
+        try:
+            from open_webui.models.functions import Functions
+
+            stored = Functions.get_function_valves_by_id(function_id)
+        except Exception:
+            return None
+        if not isinstance(stored, dict):
+            return None
+        try:
+            return inst.Valves(**stored)
+        except Exception:
+            return None
+
+    @classmethod
+    async def _handle_peer_valve_sync(cls, app):
+        """Apply a peer's valve change to this worker's live instance.
+
+        The blocking DB read and cache priming run off-loop; the app-state
+        mutations (route re-registration, fragment republish) run on-loop, the
+        same order event() uses, so they interleave cooperatively with event()
+        instead of racing it in a thread.
+        """
+        inst = cls._current_instance
+        if inst is None or not cls._function_id:
+            return
+        new_valves = await asyncio.to_thread(
+            cls._read_valves_from_db, inst, cls._function_id
+        )
+        if new_valves is None:
+            return
+        inst.valves = new_valves
+        snap = inst._valves_snapshot()
+        if snap == cls._last_valves_snapshot:
+            return  # already holding this value — nothing to converge
+        cls._last_valves_snapshot = snap
+        if app is not None:
+            route = inst._get_route_base()
+            if route != cls._routes_registered_url:
+                inst._register_route(app)
+                cls._routes_registered_url = route
+            inst._publish_fragments(app)
+        etags = await asyncio.to_thread(inst._prime_delivery_caches)
+        # local_only: this refetch nudge is the downstream of a peer's message;
+        # echoing it back to Redis would ripple across the cluster.
+        cls._broadcast_update(etags, local_only=True)
+        log.info(
+            "[Theme Pro] Applied peer valve change — refreshed valves, re-primed, notified local clients"
+        )
 
     @classmethod
     async def _shutdown_cleanup(cls, app):
@@ -14323,6 +14426,12 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         __app__=None,
         **kwargs,
     ) -> None:
+        # Capture the function id for peer valve re-reads. Set on every event
+        # (cheap) so it is known before the first valve change, and even on the
+        # shutdown/disable branches that return early below.
+        if __id__:
+            Event._function_id = __id__
+
         # --- Server shutdown cleanup ---
         # Open WebUI publishes system.shutdown.* from its lifespan exit while
         # the event loop is still running — the only reliable shutdown hook
@@ -14504,6 +14613,17 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                                         if sender_id == _WORKER_ID:
                                             continue
                                         raw = raw[newline + 1:]
+                                    # Internal control messages never reach browsers.
+                                    if raw.startswith(Event._CTRL_PREFIX):
+                                        if raw[len(Event._CTRL_PREFIX):].strip() == "valvesync":
+                                            try:
+                                                await Event._handle_peer_valve_sync(__app__)
+                                            except Exception:
+                                                log.warning(
+                                                    "[Theme Pro] Peer valve sync failed",
+                                                    exc_info=True,
+                                                )
+                                        continue
                                     for q in list(Event._sse_clients):
                                         try:
                                             q.put_nowait(raw)
@@ -14565,6 +14685,18 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             Event._last_overlay_transparency is not None
             and Event._last_overlay_transparency != self.valves.overlay_transparency
         )
+
+        # Any valve change (not just the three that drive a live broadcast) tells
+        # peer workers to re-read from the DB — they hold a cached instance that
+        # Open WebUI only reloads on the worker where the change was made. First
+        # event of the process is skipped (snapshot is None): startup is not a
+        # change, and peers load their own valves on their own startup.
+        _valves_now = self._valves_snapshot()
+        if (
+            Event._last_valves_snapshot is not None
+            and _valves_now != Event._last_valves_snapshot
+        ):
+            Event._broadcast_valve_sync()
 
         # One-shot: remove blocks an older, index.html-writing build left behind.
         # Threaded — the flock can wait on another process and must not stall
@@ -14628,4 +14760,5 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         Event._last_enable_canvas_fx = self.valves.enable_canvas_fx
         Event._last_sidebar_transparency = self.valves.sidebar_transparency
         Event._last_overlay_transparency = self.valves.overlay_transparency
+        Event._last_valves_snapshot = _valves_now
 

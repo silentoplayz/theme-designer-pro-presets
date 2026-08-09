@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — standalone admin page with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.7.8-blue)
+![Version](https://img.shields.io/badge/version-1.7.9-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.10.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -318,6 +318,8 @@ Theme Designer Pro persists themes on the server and pushes changes to every con
 4. **SSE Push Architecture:**
    When the designer saves a theme, the POST handler writes CSS + state to disk and calls `_broadcast_update()`, which pushes a lightweight version token (with ETags) to all connected SSE clients (`_sse_clients`); each client then refetches `/theme.css` and `/state.json`, with ETag revalidation so unchanged files cost a cheap 304. SSE clients are stored on `app.state` to survive function hot-reloads. The `theme-disable` event type is broadcast when the admin toggles the function OFF. In multi-worker deployments, `_redis_publish()` broadcasts to the `theme_pro_sse` Redis pub/sub channel, ensuring all workers relay updates to their local SSE clients.
 
+   **Valve convergence (multi-worker):** Open WebUI reloads a function's valves only on the worker that served the change, so peers hold stale valves until their own next event. The changing worker detects that *any* valve differs from its last snapshot and publishes an internal `valvesync` control message on the same Redis channel. Peers intercept it before it reaches a browser, re-read their valves via `Functions.get_function_valves_by_id`, re-prime their delivery caches, and nudge their local clients — re-registering routes if `designer_url` moved. The control message is framed as an SSE comment, so a peer on an older build that forwards raw channel traffic delivers a harmless keep-alive. The whole path is fail-safe: a peer that cannot read or validate the stored valves keeps what it has and converges on its own next event, exactly as before this mechanism existed.
+
 5. **Structural Transparency (CSS):**
    The generated CSS makes UI containers transparent so Canvas FX and gradient backgrounds show through. Transparency is scoped to `.app`, `#theme-designer-container` (the designer page root), and `#auth-page` using `:where()` selectors for zero specificity. Portaled UI (dropdown menus, modals, submenus) lives outside `.app` on `document.body` — never made transparent — so no override rules are needed.
 
@@ -479,6 +481,18 @@ Toggle the function **OFF** in the Admin Panel first. That withdraws its fragmen
 Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build — 1.7.0 never writes there.
 
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
+
+---
+
+## 📝 What's New in 1.7.9
+
+**Valve changes now converge across a multi-container deployment.** This only matters if you run Open WebUI as more than one container behind Redis; a single-container install is unaffected and takes no new code paths.
+
+The problem: when you change a valve (say, overlay transparency, or the Canvas API access toggle), Open WebUI reloads the function on the *one* container that served your request. Every other container keeps its cached copy with the old value until something else happens to dispatch an event to it. Because nearly every valve changes what the composed `loader.js` serves, those other containers could keep serving the previous setting to their users for that window. It self-healed, but the window was real.
+
+Now the container that saw the change signals its peers over the Redis channel the function already uses for live theme updates, and each peer re-reads its valves from the database and re-primes. The signal is a distinct control message that never reaches a browser, and it is framed as an SSE comment so that during a rolling upgrade a peer still running 1.7.8 treats it as a harmless keep-alive rather than a malformed event. If a peer cannot read the database, or reads something that no longer validates, it simply keeps its current valves — exactly the pre-1.7.9 behaviour, where it converges on its own next event. A `designer_url` change re-registers routes on the peers too, so even moving the designer path propagates.
+
+There are no valve, UI, or theme-format changes in this release, and the designer page itself is byte-for-byte identical to 1.7.8.
 
 ---
 
