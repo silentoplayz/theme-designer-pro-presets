@@ -7953,10 +7953,10 @@ ${selector} #sidebar { background-color: var(${bgSidebar}) !important; }
         
         const updates = results.filter(r => r && !r.error);
         const errors = results.filter(r => r && r.error);
-        const upToDate = updatable.length - updates.length - errors.length;
+        const up-to-date = updatable.length - updates.length - errors.length;
         
         if (updates.length === 0 && errors.length === 0) {
-            showToast(`✓ All ${upToDate} theme(s) are up to date!`);
+            showToast(`✓ All ${up-to-date} theme(s) are up to date!`);
             return;
         }
         
@@ -7999,8 +7999,8 @@ ${selector} #sidebar { background-color: var(${bgSidebar}) !important; }
             }
         }
         
-        if (upToDate > 0) {
-            html += `<div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 12px; text-align:center;">✓ ${upToDate} theme(s) up to date</div>`;
+        if (up-to-date > 0) {
+            html += `<div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 12px; text-align:center;">✓ ${up-to-date} theme(s) up to date</div>`;
         }
         
         if (errors.length > 0) {
@@ -8294,8 +8294,8 @@ ${selector} #sidebar { background-color: var(${bgSidebar}) !important; }
         if (!cfg.enableGradientBuilder) hiddenTabs.push('bg');
 
         hiddenTabs.forEach(tabKey => {
-            const tabEl = document.querySelector(`.tab[data-tab="${tabKey}"]`);
-            if (tabEl) tabEl.style.display = 'none';
+            const table = document.querySelector(`.tab[data-tab="${tabKey}"]`);
+            if (table) table.style.display = 'none';
         });
 
         // If the currently active tab was hidden, fall back to Design Studio

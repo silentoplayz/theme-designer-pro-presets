@@ -1595,7 +1595,7 @@ class Event:
                 return state_str
             return _json.dumps(data, separators=(",", ":"))
         except Exception:
-            return state_str  # Unparseable state is served as-is by design
+            return state_str  # Unparsable state is served as-is by design
 
     _bootloader_body_cache = None
 
@@ -2331,7 +2331,7 @@ class Event:
                     headers=sse_headers,
                 )
 
-            # One shared heartbeat task fans keep-alives into every client
+            # One shared heartbeat task fans keep-alive into every client
             # queue, replacing a per-connection wait_for timeout — per-client
             # timers get expensive with tens of thousands of connections.
             # Stored on app.state so it survives function hot-reloads;
@@ -7344,7 +7344,7 @@ function startAnimation() {
     //
     // _cssTok deliberately allows var() and color-mix(), and var() can NEVER
     // resolve here — a detached scratch canvas has no element to inherit the
-    // custom property from. Assigning an unparseable value to fillStyle is
+    // custom property from. Assigning an unparsable value to fillStyle is
     // ignored, so it silently kept the '#000000' baseline and the report scored
     // a perfectly good override as pure black, i.e. reported a false Fail.
     // Probing with two different sentinels separates the cases: a value that
@@ -12066,7 +12066,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     // from a third party, which is the one that actually needs gating.
     //
     // Checked AFTER toRawGitHub(), so the host tested is the host contacted.
-    // An unparseable URL is refused rather than passed to fetch().
+    // An unparsable URL is refused rather than passed to fetch().
     function assertImportHostAllowed(rawUrl) {
         const allow = ((window.__THEME_PRO_CONFIG__ || {}).allowedImportDomains || [])
             // URL.hostname is always lowercased by the parser, so an admin who
@@ -12502,10 +12502,10 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         
         const updates = results.filter(r => r && !r.error);
         const errors = results.filter(r => r && r.error);
-        const upToDate = updatable.length - updates.length - errors.length;
+        const up-to-date = updatable.length - updates.length - errors.length;
         
         if (updates.length === 0 && errors.length === 0) {
-            showToast(`✓ All ${upToDate} theme(s) are up to date!`);
+            showToast(`✓ All ${up-to-date} theme(s) are up to date!`);
             return;
         }
         
@@ -12608,8 +12608,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             }
         }
         
-        if (upToDate > 0) {
-            html += `<div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 12px; text-align:center;">✓ ${upToDate} theme(s) up to date</div>`;
+        if (up-to-date > 0) {
+            html += `<div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 12px; text-align:center;">✓ ${up-to-date} theme(s) up to date</div>`;
         }
         
         if (errors.length > 0) {
@@ -13393,8 +13393,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         if (!cfg.enableGradientBuilder) hiddenTabs.push('bg');
 
         hiddenTabs.forEach(tabKey => {
-            const tabEl = document.querySelector(`.tab[data-tab="${tabKey}"]`);
-            if (tabEl) tabEl.style.display = 'none';
+            const table = document.querySelector(`.tab[data-tab="${tabKey}"]`);
+            if (table) table.style.display = 'none';
         });
 
         // ── Community Themes section visibility ──
