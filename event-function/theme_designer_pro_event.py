@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.8.0
+version: 1.8.1
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -21,7 +21,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.8.0"
+VERSION = "1.8.1"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -7583,6 +7583,8 @@ function startAnimation() {
         };
         
         const getBgRules = (mode, selector, bgBody, bgSidebar) => {
+            const gEx = ':not(button):not(a):not(input):not(select):not(label):not(span)';
+            const gWhere = ['[class^="bg-gray-"]', '[class*=" bg-gray-"]', '[class^="dark:bg-gray-"]', '[class*=" dark:bg-gray-"]'].map(s => s + gEx).join(', ');
             const config = themeData[mode];
             const hasCanvas = config.canvasEnabled && config.canvasScript && config.canvasScript.trim();
             const hasGradient = config.gradientEnabled && (
@@ -7595,9 +7597,9 @@ ${selector} body { background-color: var(${bgBody}) !important; }
 ${hasCanvas ? `${selector} #owui-theme-bg-color { background-color: transparent !important; }` : ''}
 ${selector} .app, ${selector} #theme-designer-container, ${selector} #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
 ${selector} .app > div, ${selector} #theme-designer-container > *, ${selector} #auth-page > div, ${selector} main { background-color: transparent !important; background-image: none !important; }
-${selector} .app :where([class*="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span)) { background-color: transparent !important; background-image: none !important; }
-${selector} #theme-designer-container :where([class*="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span)) { background-color: transparent !important; background-image: none !important; }
-${selector} #auth-page :where([class*="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+${selector} .app :where(${gWhere}) { background-color: transparent !important; background-image: none !important; }
+${selector} #theme-designer-container :where(${gWhere}) { background-color: transparent !important; background-image: none !important; }
+${selector} #auth-page :where(${gWhere}):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
 ${selector} .app :where(.message-content) { background-color: transparent !important; }
 ${selector} .app :where(nav, .sticky, [class*="bg-gradient"]) { background-color: transparent !important; background-image: none !important; }
 ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; }
@@ -14364,6 +14366,14 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         # Selector fragment: background-bearing elements inside portals (exclude interactive widgets + app internals)
         iex = ':not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *)'
 
+        def _where(util):
+            toks = [f'div[class^="{util}"]', f'div[class*=" {util}"]',
+                    f'div[class^="dark:{util}"]', f'div[class*=" dark:{util}"]']
+            return ':where(' + ', '.join(t + iex for t in toks) + ')'
+
+        wgray = _where('bg-gray-')
+        wwhite = _where('bg-white')
+
         def _decl(color_var):
             return (
                 f'  background-color: color-mix(in srgb, var({color_var}) 25%, transparent) !important;\n'
@@ -14372,17 +14382,17 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             )
 
         rules = [
-            ([f'.dark body > div{pex} :where(div[class*="bg-gray-"]{iex})',
-              f'[data-theme="dark"] body > div{pex} :where(div[class*="bg-gray-"]{iex})',
-              f'[data-theme="oled-dark"] body > div{pex} :where(div[class*="bg-gray-"]{iex})'],
+            ([f'.dark body > div{pex} {wgray}',
+              f'[data-theme="dark"] body > div{pex} {wgray}',
+              f'[data-theme="oled-dark"] body > div{pex} {wgray}'],
              '--color-gray-950'),
-            ([f':root:not(.dark):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) body > div{pex} :where(div[class*="bg-white"]{iex})',
-              f':root:not(.dark):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) body > div{pex} :where(div[class*="bg-gray-"]{iex})'],
+            ([f':root:not(.dark):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) body > div{pex} {wwhite}',
+              f':root:not(.dark):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) body > div{pex} {wgray}'],
              '--color-gray-50'),
-            ([f'.her body > div{pex} :where(div[class*="bg-white"]{iex})',
-              f'[data-theme="her"] body > div{pex} :where(div[class*="bg-white"]{iex})',
-              f'.her body > div{pex} :where(div[class*="bg-gray-"]{iex})',
-              f'[data-theme="her"] body > div{pex} :where(div[class*="bg-gray-"]{iex})'],
+            ([f'.her body > div{pex} {wwhite}',
+              f'[data-theme="her"] body > div{pex} {wwhite}',
+              f'.her body > div{pex} {wgray}',
+              f'[data-theme="her"] body > div{pex} {wgray}'],
              '--color-gray-50'),
         ]
 
@@ -14392,9 +14402,9 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
         # System mode media queries
         for scheme, color_var in [('dark', '--color-gray-950'), ('light', '--color-gray-50')]:
-            media_sels = [f'  [data-theme="system"] body > div{pex} :where(div[class*="bg-gray-"]{iex})']
+            media_sels = [f'  [data-theme="system"] body > div{pex} {wgray}']
             if scheme == 'light':
-                media_sels.insert(0, f'  [data-theme="system"] body > div{pex} :where(div[class*="bg-white"]{iex})')
+                media_sels.insert(0, f'  [data-theme="system"] body > div{pex} {wwhite}')
             css += f'@media (prefers-color-scheme: {scheme}) {{\n'
             css += ',\n'.join(media_sels) + ' {\n' + _decl(color_var) + '  }\n}\n'
         return css
