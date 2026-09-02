@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — standalone admin page with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.8.0-blue)
+![Version](https://img.shields.io/badge/version-1.8.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.10.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -481,6 +481,27 @@ Toggle the function **OFF** in the Admin Panel first. That withdraws its fragmen
 Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build — 1.7.0 never writes there.
 
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
+
+---
+
+## 📝 What's New in 1.8.1
+
+**List rows and menu items no longer render as dark blocks over a Canvas FX or gradient background.** Knowledge collections in the chat input's **More** menu, the **Download** and **Move** submenus inside a chat's ellipsis menu, and the chat rows in the search modal all sat as opaque slabs on top of the animated background, while the panel around them stayed correctly translucent.
+
+The structural transparency rules matched any element whose `class` attribute contained `bg-gray-` anywhere. Tailwind writes state variants into that attribute as literal text, so `hover:bg-gray-50/40` and `dark:[&>button:hover]:bg-gray-800/60` matched exactly as readily as a real background utility. Elements that have no background at all until you hover them were being handed one permanently, backdrop blur and all. On Open WebUI's current `dev` branch, 452 elements carry a gray background only inside a hover variant.
+
+Both transparency layers now match a background utility at a token boundary instead of anywhere in the string:
+
+```css
+[class^="bg-gray-"], [class*=" bg-gray-"],
+[class^="dark:bg-gray-"], [class*=" dark:bg-gray-"]
+```
+
+A base utility either starts the attribute or follows a space, while a variant is always preceded by its own prefix, so the two separate exactly. No list of exceptions is required, and nothing that genuinely carries a background loses its glass treatment. Panels, modals and dropdown containers keep precisely what they had in 1.8.0.
+
+**Hover highlights return inside the app.** The same over-match applied to the `.app` rule, which sets `background-color: transparent !important`. Since `!important` beats a Tailwind hover rule whatever its specificity, any row whose highlight lives in a hover variant had that highlight suppressed. Those rows now behave the way Open WebUI intends.
+
+This release adds no valves and changes no theme settings.
 
 ---
 
