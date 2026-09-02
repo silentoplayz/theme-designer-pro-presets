@@ -2152,6 +2152,12 @@
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/astral_glassmorphism.css"
     },
     {
+      "name": "Font Menu",
+      "file": "font_menu.css",
+      "dateAdded": "2026-09-02T17:09:06-04:00",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/font_menu.css"
+    },
+    {
       "name": "Gradient Background",
       "file": "gradient_background.css",
       "dateAdded": "2026-07-18T00:31:39-04:00",
