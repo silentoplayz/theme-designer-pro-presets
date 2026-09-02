@@ -2,7 +2,7 @@
 
 [![Build Bundles](https://github.com/silentoplayz/theme-designer-pro-presets/actions/workflows/build-bundles.yml/badge.svg)](https://github.com/silentoplayz/theme-designer-pro-presets/actions/workflows/build-bundles.yml)
 ![Canvas FX](https://img.shields.io/badge/Canvas_FX-84_animations-blue)
-![CSS Presets](https://img.shields.io/badge/CSS-10_presets-purple)
+![CSS Presets](https://img.shields.io/badge/CSS-11_presets-purple)
 ![Themes](https://img.shields.io/badge/Themes-33_themes-green)
 ![Gradients](https://img.shields.io/badge/Gradients-13_presets-orange)
 

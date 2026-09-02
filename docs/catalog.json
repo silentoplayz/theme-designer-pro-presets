@@ -2164,6 +2164,12 @@
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/matrix_colors.css"
     },
     {
+      "name": "Ocean Waves Companion",
+      "file": "ocean_waves_companion.css",
+      "dateAdded": "2026-09-02T10:47:57-04:00",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/ocean_waves_companion.css"
+    },
+    {
       "name": "Pink Hues",
       "file": "pink_hues.css",
       "dateAdded": "2026-07-18T00:31:39-04:00",
