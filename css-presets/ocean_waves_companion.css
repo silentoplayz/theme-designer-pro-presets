@@ -1,0 +1,82 @@
+/* ─────────────────────────────────────────────────────────────
+   Ocean Waves — companion Style Overrides
+   Paste into: Style Overrides → Dark (repeat for OLED), Auto-Scope OFF.
+   Every colour is lifted from canvas-fx/ocean_waves.js, so the
+   interface and the animation share one palette.
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+	--ow-foam: 150 200 220;      /* BUBBLE_COLOR */
+	--ow-caustic: 120 200 220;   /* CAUSTIC_COLOR */
+	--ow-crest: 195 65% 62%;     /* crest highlight, lightened to read as text */
+	--ow-deep: 200 70% 15%;      /* HUE_DEEP / LIGHTNESS_DEEP */
+
+	/* Selection reads as caustic light passing over the text */
+	& ::selection {
+		background-color: rgb(var(--ow-caustic) / 0.28);
+		color: #eaf6fb;
+	}
+
+	/* Scrollbars in foam rather than neutral graphite */
+	& ::-webkit-scrollbar-thumb {
+		background-color: rgb(var(--ow-foam) / 0.26);
+		border-color: transparent;
+	}
+	& ::-webkit-scrollbar-thumb:hover {
+		background-color: rgb(var(--ow-foam) / 0.44);
+	}
+
+	/* Hairlines take the water hue. Token-boundary match, so hover:
+	   and group-hover: variants keep their own colours. */
+	& .app :where(
+		[class^="border-gray-"], [class*=" border-gray-"],
+		[class^="dark:border-gray-"], [class*=" dark:border-gray-"],
+		[class^="border-white"], [class*=" border-white"]
+	):not(:hover):not(:focus-within) {
+		border-color: rgb(var(--ow-caustic) / 0.15);
+	}
+
+	& .app hr {
+		border-color: rgb(var(--ow-caustic) / 0.12);
+	}
+
+	/* Focus ring in caustic light instead of Tailwind blue */
+	& .app :focus-visible {
+		outline-color: rgb(var(--ow-caustic) / 0.85);
+	}
+
+	/* Links take the crest colour */
+	& .app .markdown-prose a {
+		color: hsl(var(--ow-crest));
+		text-decoration-color: rgb(var(--ow-caustic) / 0.45);
+	}
+
+	/* Code sits in deeper water */
+	& .app .markdown-prose pre {
+		background-color: hsl(var(--ow-deep) / 0.55);
+		border: 1px solid rgb(var(--ow-caustic) / 0.16);
+	}
+	& .app .markdown-prose code:not(pre code) {
+		background-color: rgb(var(--ow-caustic) / 0.10);
+		color: #cfeaf5;
+	}
+
+	/* Sidebar: a caustic edge, and the open chat lit like a crest */
+	& #sidebar {
+		border-right: 1px solid rgb(var(--ow-caustic) / 0.12);
+	}
+	& #sidebar-chat-item.selected {
+		background-color: rgb(var(--ow-caustic) / 0.13);
+		box-shadow: inset 2px 0 0 rgb(var(--ow-caustic) / 0.55);
+	}
+
+	/* The composer reads as glass resting on the surface */
+	& #message-input-container {
+		background-color: hsl(var(--ow-deep) / 0.30);
+		backdrop-filter: blur(14px) saturate(1.2);
+		-webkit-backdrop-filter: blur(14px) saturate(1.2);
+	}
+	& #message-input-container:not(:hover):not(:focus-within) {
+		border-color: rgb(var(--ow-caustic) / 0.22);
+	}
+}
