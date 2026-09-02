@@ -1964,7 +1964,7 @@
     {
       "name": "Ocean Waves",
       "file": "ocean_waves.js",
-      "description": "Layered horizontal wave patterns at different depths, creating an ocean surface viewed from below. Deep blues and teals with varying opacity. Mouse position creates a swell/disturbance in the nearest wave layer.",
+      "description": "Layered horizontal wave patterns at different depths, creating an ocean surface viewed from below. Each layer rolls at its own speed and frequency, with a lit crest line tracing the swell. Foam bubbles drift up through the water column and soft caustic patches wander across the scene. Deep blues and teals with varying opacity.",
       "dateAdded": "2026-07-18T00:31:39-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/ocean_waves.js"
     },
