@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.8.2
+version: 1.8.3
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -22,7 +22,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.8.2"
+VERSION = "1.8.3"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -13357,6 +13357,16 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             // Load saved state + Migrate legacy formats gracefully
             try {
                 if(localStorage) {
+                    // Start from the server's saved theme, the way the main
+                    // app's bootloader refreshes this key: a copy left by an
+                    // earlier visit would otherwise be saved back over a newer
+                    // theme the moment the page renders in Live mode.
+                    const serverState = window.__THEME_PRO_SAVED_STATE__;
+                    if (typeof serverState === 'string') {
+                        Storage.setRaw('theme', serverState);
+                    } else if (serverState === null) {
+                        Storage.remove('theme');
+                    }
                     const saved = Storage.getRaw('theme');
                     if (saved) {
                         const s = JSON.parse(saved);
@@ -14233,9 +14243,21 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             "overlayTransparency": self.valves.overlay_transparency,
         }
         safe_config = _json.dumps(valve_config).replace("</", "<\\/")
+        # The designer starts from the theme the server is serving, as the
+        # main app's bootloader does. Its own localStorage copy can predate a
+        # save made from another browser, and Live mode saves whatever it
+        # starts from straight back to every user. null means no saved theme.
+        try:
+            saved_state = self._load_state()
+        except OSError:
+            saved_state = None  # Reset race / unreadable data dir
+        if not saved_state or saved_state.strip() in ("", "{}"):
+            saved_state = None
+        safe_saved_state = _json.dumps(saved_state).replace("</", "<\\/")
         config_tag = (
             '<script id="owui-valve-config">'
             f"window.__THEME_PRO_CONFIG__={safe_config};"
+            f"window.__THEME_PRO_SAVED_STATE__={safe_saved_state};"
             "</script>"
         )
 
