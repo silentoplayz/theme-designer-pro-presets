@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.8.3
+version: 1.8.4
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -22,7 +22,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.8.3"
+VERSION = "1.8.4"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -2777,6 +2777,10 @@ class Event:
         body.light-mode .control-group { background: var(--bg-control-light); border-color: var(--border); }
         body.light-mode input[type="range"] { background: var(--border); }
         body.light-mode input[type="range"]::-webkit-slider-thumb { border-color: var(--accent); background: white; }
+        /* Same reason as the switches: keep the slider tracks visible under theme CSS. */
+        #tool-body input[type="range"] { background: #000 !important; border: none !important; border-radius: 3px !important; backdrop-filter: none !important; box-shadow: none !important; }
+        #tool-body.light-mode input[type="range"] { background: var(--border) !important; }
+        #tool-body.washed-out input[type="range"] { background: var(--lm-bg-hover) !important; }
         body.light-mode .preset-btn { background: var(--bg-surface); border-color: var(--border); }
         body.light-mode .btn { background: var(--bg-surface); color: var(--text-main); border-color: var(--border); }
         body.light-mode .btn:hover { background: var(--bg-deep); }
@@ -3449,6 +3453,12 @@ class Event:
         .cb-input:checked::after { transform: translateX(16px); }
         body.light-mode .cb-input { background: var(--lm-border-subtle); border-color: var(--lm-shadow); }
         body.light-mode .cb-input:checked { background: var(--accent); border-color: var(--accent); }
+        /* Theme custom CSS often styles every input with !important. The designer
+           previews it on this page too, so its switches would lose their on state. */
+        #tool-body .cb-input { background: rgba(255,255,255,0.1) !important; border: 1px solid rgba(255,255,255,0.08) !important; border-radius: 9px !important; backdrop-filter: none !important; box-shadow: none !important; }
+        #tool-body .cb-input:checked { background: var(--accent) !important; border-color: var(--accent) !important; }
+        #tool-body.light-mode .cb-input { background: var(--lm-border-subtle) !important; border-color: var(--lm-shadow) !important; }
+        #tool-body.light-mode .cb-input:checked { background: var(--accent) !important; border-color: var(--accent) !important; }
         .search-wrap { position: relative; display: flex; align-items: center; overflow: hidden; }
         .search-icon-overlay { position: absolute; left: 8px; pointer-events: none; opacity: 0.4; }
         .search-input-expand { width: 0; padding: 0; border: 1px solid transparent; background: transparent; color: var(--text-main); font-size: 0.65rem; border-radius: var(--radius-md); outline: none; transition: all 0.3s ease; opacity: 0; font-family: inherit; }
@@ -7745,6 +7755,8 @@ function startAnimation() {
                 (config.gradientType !== 'mesh' && config.gradientStops && config.gradientStops.length >= 2)
             );
             if (hasCanvas || hasGradient) {
+                // The code block header is the one sticky element with content
+                // scrolling under it; cleared, its label sits on top of the code.
                 return `
 ${selector} body { background-color: var(${bgBody}) !important; }
 ${hasCanvas ? `${selector} #owui-theme-bg-color { background-color: transparent !important; }` : ''}
@@ -7754,7 +7766,7 @@ ${selector} .app :where(${gWhere}) { background-color: transparent !important; b
 ${selector} #theme-designer-container :where(${gWhere}) { background-color: transparent !important; background-image: none !important; }
 ${selector} #auth-page :where(${gWhere}):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
 ${selector} .app :where(.message-content) { background-color: transparent !important; }
-${selector} .app :where(nav, .sticky, [class*="bg-gradient"]) { background-color: transparent !important; background-image: none !important; }
+${selector} .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]) { background-color: transparent !important; background-image: none !important; }
 ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; }
 `;
             } else {
