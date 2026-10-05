@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — standalone admin page with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.8.4-blue)
+![Version](https://img.shields.io/badge/version-1.8.5-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -481,6 +481,16 @@ Toggle the function **OFF** in the Admin Panel first. That withdraws its fragmen
 Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build — 1.7.0 never writes there.
 
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
+
+---
+
+## 📝 What's New in 1.8.5
+
+**Theme rules no longer style the page's root element in dark, OLED and Her modes.** Open WebUI marks each mode on the page's root element twice, with a class and with a `data-theme` attribute, and the theme's mode selectors list both. The rules that style elements inside the page put that list in front of the element they target, which scoped only the `data-theme` half. The class half matched the root element itself, so in those modes, the root element picked up rules meant for the sidebar, the chat area and the chat input. With a gradient theme, the root element carried the sidebar's tint and the chat input's fade. Each rule now reaches only the elements it names. The rules keep the same CSS priority, so a theme's own custom CSS wins exactly where it did before. Custom CSS written in Raw mode with `:root` in front of a selector gets the same fix. A theme saved before this update picks up the change the next time you open the designer.
+
+**The heading of section 17c in the built-in documentation fits on one line again.** Its words had spread across the whole row around the two file names.
+
+This release adds no valves and changes no theme settings.
 
 ---
 
