@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.8.4
+version: 1.8.5
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -22,7 +22,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.8.4"
+VERSION = "1.8.5"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -4980,7 +4980,7 @@ SetEnv proxy-sendcl 0</code></pre>
                 </details>
 
                 <details class="doc-accordion">
-                    <summary>17c. Sharing <code>loader.js</code> and <code>custom.css</code> With Other Plugins <i data-icon="chevron"></i></summary>
+                    <summary><span>17c. Sharing <code>loader.js</code> and <code>custom.css</code> With Other Plugins</span> <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
                         <p>Open WebUI loads exactly two admin-extensible assets on every page: <code>/static/loader.js</code> (the only hook that runs before the SvelteKit bundle hydrates) and <code>/static/custom.css</code> (a render-blocking stylesheet). Any plugin that wants to reach the page before it paints needs one of them, and neither can have a single owner.</p>
                         <p>Since v1.7.0 Theme Designer Pro no longer writes into <code>index.html</code>. It publishes a fragment into a shared registry on <code>app.state</code>, and a route composes every registered plugin's fragment into the response <b>per request</b>. Consequences worth knowing:</p>
@@ -7738,7 +7738,7 @@ function startAnimation() {
                     let scoped = cleanedCss.replace(/:root/gi, '&');
                     return `\n/*[OWUI_CUSTOM_START]*/\n/* Custom CSS (Auto-Scoped) */\n${selector} {\n${scoped}\n}\n${keyframes}\n/*[OWUI_CUSTOM_END]*/\n`;
                 } else {
-                    let scoped = cssText.replace(/:root/gi, selector);
+                    let scoped = cssText.replace(/:root/gi, `:is(${selector})`);
                     return `\n/*[OWUI_CUSTOM_START]*/\n/* Custom CSS (Raw) */\n${scoped}\n/*[OWUI_CUSTOM_END]*/\n`;
                 }
             }
@@ -7785,11 +7785,16 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             return `@media (prefers-color-scheme: ${modeId}) {\n${inner}\n}\n`;
         };
 
+        // 'scope' is 'sel' as one compound selector, for use in front of a
+        // descendant: a selector list there only scopes its last entry and
+        // styles <html> itself with the rest. Its specificity equals the
+        // data-theme entry that matched descendants before, so precedence
+        // against theme custom CSS is unchanged.
         const modes =[
-            { id: 'light', name: 'LIGHT MODE', sel: ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"])', bgBody: '--color-gray-50', bgSidebar: '--color-gray-50' },
-            { id: 'dark', name: 'DARK MODE', sel: 'html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"]', bgBody: '--color-gray-900', bgSidebar: '--color-gray-950' },
-            { id: 'oled', name: 'OLED DARK MODE', sel: 'html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"]', bgBody: '--color-gray-900', bgSidebar: '--color-gray-950' },
-            { id: 'her', name: 'HER MODE', sel: 'html.her, html[data-theme="her"]', bgBody: '--color-gray-50', bgSidebar: '--color-gray-50' }
+            { id: 'light', name: 'LIGHT MODE', sel: ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"])', scope: ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"])', bgBody: '--color-gray-50', bgSidebar: '--color-gray-50' },
+            { id: 'dark', name: 'DARK MODE', sel: 'html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"]', scope: ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"])))', bgBody: '--color-gray-900', bgSidebar: '--color-gray-950' },
+            { id: 'oled', name: 'OLED DARK MODE', sel: 'html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"]', scope: 'html[data-theme="oled-dark"]', bgBody: '--color-gray-900', bgSidebar: '--color-gray-950' },
+            { id: 'her', name: 'HER MODE', sel: 'html.her, html[data-theme="her"]', scope: ':is(html[data-theme="her"], html:where(.her))', bgBody: '--color-gray-50', bgSidebar: '--color-gray-50' }
         ];
 
         // Helper: format manual override lines with !important
@@ -7865,12 +7870,12 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
             // Background overrides (inside STRUCTURAL markers)
             structuralCss += `/* --- ${m.name} Background Overrides --- */\n`;
-            structuralCss += getBgRules(m.id, m.sel, m.bgBody, m.bgSidebar);
+            structuralCss += getBgRules(m.id, m.scope, m.bgBody, m.bgSidebar);
             structuralCss += wrapSystemMedia(m.id, () => getBgRules(m.id, 'html[data-theme="system"]', m.bgBody, m.bgSidebar));
 
             // Accumulate gradient + custom CSS for output after structural block
-            gradientCss += buildGradientCss(modeData, m.sel);
-            gradientCss += wrapSystemMedia(m.id, (sel) => buildGradientCss(modeData, sel));
+            gradientCss += buildGradientCss(modeData, m.scope);
+            gradientCss += wrapSystemMedia(m.id, () => buildGradientCss(modeData, ':root[data-theme="system"]'));
             customCss += buildCustomCss(modeData, m.sel);
             customCss += wrapSystemMedia(m.id, () => buildCustomCss(modeData, 'html[data-theme="system"]'));
         });
