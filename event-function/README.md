@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — standalone admin page with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.8.2-blue)
+![Version](https://img.shields.io/badge/version-1.8.3-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -481,6 +481,16 @@ Toggle the function **OFF** in the Admin Panel first. That withdraws its fragmen
 Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build — 1.7.0 never writes there.
 
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
+
+---
+
+## 📝 What's New in 1.8.3
+
+**Opening the designer no longer overwrites the live theme.** The designer kept its working copy of the theme in your browser and, in Live mode, saved that copy to the server as soon as the page opened. The main app refreshes that copy every time it loads, but the designer page never did. So a browser that hadn't loaded the main app since the last save pushed its own older copy over the theme every user sees. Opening the designer URL directly in a new browser reset the theme to the defaults. A second admin, or one admin on a second computer, put back whichever theme that browser saw last.
+
+The designer now starts from the theme the server is serving, the same way the main app does. When no theme is saved, it starts from the defaults. Draft mode works as before, and your edits stay in the tab until you publish them.
+
+This release adds no valves and changes no theme settings.
 
 ---
 
