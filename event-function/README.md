@@ -2,9 +2,9 @@
 
 > Instance-wide theme designer for Open WebUI — standalone admin page with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.8.1-blue)
+![Version](https://img.shields.io/badge/version-1.8.2-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.10.0-orange)
+![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
 
 ---
@@ -481,6 +481,22 @@ Toggle the function **OFF** in the Admin Panel first. That withdraws its fragmen
 Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build — 1.7.0 never writes there.
 
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
+
+---
+
+## 📝 What's New in 1.8.2
+
+**Theme changes now reach every container.** If you run Open WebUI on more than one container with Redis, a theme save, a function toggle or a valve change made through one container used to show up on that container alone. Open tabs on the other containers were never told, and pages loaded from them kept the old state until that container restarted. All of these now reach every container within a few seconds. A single-container install behaves exactly as before.
+
+Three things were in the way:
+
+- **Every container ignored the others' live updates.** Each update sent over Redis carried the sender's process ID, so the sender could skip its own message. Inside a container the server is usually the first process and gets the same process ID in every container, so each one took the other containers' updates for its own and dropped them. The tag now includes the container's hostname.
+- **Turning the function off or saving new code stayed on one container.** Theme Designer Pro now uses the live reload add-on from Classic298's [Shared Assets Protocol](https://github.com/Classic298/open-webui-plugins/tree/main/shared-assets-protocol). Turning the function off or on, or saving new code, reaches every container, and each container loads the new code from the database.
+- **The 1.7.9 valve sync never worked.** It read the valves with a database call that is asynchronous in every Open WebUI release this function supports, so the other containers got back an unfinished result and kept their old valves. The read now waits for the database. A designer URL change also moves the designer page on every container now, and the old URL stops serving it.
+
+**After you install 1.8.2,** a container still running 1.8.1 can't hear the new code. It picks up 1.8.2 the next time it handles any event, such as a new chat, or when it restarts. From then on, every update reaches it without help. A container that starts while the function is off also needs one event before it hears the function being turned back on.
+
+This release adds no valves and changes no theme settings.
 
 ---
 
