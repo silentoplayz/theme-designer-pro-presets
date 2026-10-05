@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — standalone admin page with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.8.3-blue)
+![Version](https://img.shields.io/badge/version-1.8.4-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -481,6 +481,16 @@ Toggle the function **OFF** in the Admin Panel first. That withdraws its fragmen
 Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build — 1.7.0 never writes there.
 
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
+
+---
+
+## 📝 What's New in 1.8.4
+
+**Code block headers stay solid over a Canvas FX or gradient background.** To let the background show through the chat's top bar, the theme clears the background of every sticky element in Open WebUI. The header above a code block, the bar with the language label and the **Copy** button, is sticky too. Once you scrolled partway into a long code block, the label and buttons sat on top of the code lines passing underneath. That header now keeps Open WebUI's own background, and the chat's top bar stays see-through. A theme saved before this update gets the change the next time you open the designer, which saves the theme again as it loads.
+
+**The designer's switches and sliders read correctly under any theme.** Most community themes style every text field with a background marked `!important`. The designer previews your theme on its own page, so that rule also reached its switches and sliders. A switch that was on drew with a dark track and looked off, and the slider tracks almost disappeared. The designer's own controls now keep their colors.
+
+This release adds no valves and changes no theme settings.
 
 ---
 
