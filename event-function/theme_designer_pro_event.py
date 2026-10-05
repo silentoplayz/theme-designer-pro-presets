@@ -1,10 +1,10 @@
 """
 title: Theme Designer Pro
-description: Instance-wide theme designer for Open WebUI. Replaces the built-in dark, light, OLED, and her modes with fully custom themes for all users. Registers an interactive UI at /api/v1/theme-designer and persists themes server-side, publishing them through the shared static-asset registry so every user sees the admin's theme from the first paint.
+description: Instance-wide theme designer for Open WebUI. Replaces the built-in dark, light, OLED, and her modes with fully custom themes for all users. Registers an interactive UI at /api/v1/theme-designer and persists themes server-side, publishing them through the Shared Assets Protocol so every user sees the admin's theme from the first paint.
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.8.1
+version: 1.8.2
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -14,6 +14,7 @@ import json as _json
 import logging
 import os
 import re as _re
+import socket
 import asyncio
 
 from pathlib import Path
@@ -21,50 +22,209 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.8.1"
+VERSION = "1.8.2"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
 log = logging.getLogger(__name__)
 
 
+import asyncio
+import logging
+import uuid
+from typing import Any, Optional
+
+from open_webui.utils.json_codec import JSONCodec
+
+ASSET_KEY = "theme-designer-pro"  # fixed, used for asset_register too
+
+# ===========================================================================
+# Live reload broadcast
+# ---------------------------------------------------------------------------
+# Each load publishes over Redis; a peer whose cached code differs from the
+# database re-executes it. register(app) is yours and must be idempotent; gate
+# each producer on reload_active(app).
+# ===========================================================================
+RELOAD_STATE_ATTR = "_owui_live_reload"  # {key: {active, exec_id, listener}}
+RELOAD_EXEC_ID = uuid.uuid4().hex  # new on every exec of this source
+# Open WebUI executes each function as module "function_<id>".
+RELOAD_FUNCTION_ID = __name__.removeprefix("function_")
+
+reload_log = logging.getLogger("owui-live-reload")
+# asyncio only keeps weak references to tasks.
+reload_tasks: set = set()
+
+
+def reload_state(app: Any) -> dict:
+    registry = getattr(app.state, RELOAD_STATE_ATTR, None)
+    if not isinstance(registry, dict):
+        registry = {}
+        app.state.__setattr__(RELOAD_STATE_ATTR, registry)
+    return registry.setdefault(ASSET_KEY, {})
+
+
+def reload_active(app: Any) -> bool:
+    return bool(reload_state(app).get("active"))
+
+
+def reload_channel() -> str:
+    from open_webui.env import REDIS_KEY_PREFIX
+
+    return f"{REDIS_KEY_PREFIX}:live-reload:{ASSET_KEY}"
+
+
+def reload_mark_loaded(app: Any) -> None:
+    register(app)
+    state = reload_state(app)
+    state["active"] = True
+    state["exec_id"] = RELOAD_EXEC_ID
+
+
+async def reload_publish(app: Any, active: bool) -> None:
+    redis = getattr(app.state, "redis", None)
+    if redis is None:
+        return
+    try:
+        await redis.publish(reload_channel(), JSONCodec.dumps({"active": active}))
+    except Exception as e:
+        reload_log.warning("[%s] publish failed: %s", ASSET_KEY, type(e).__name__)
+
+
+async def reload_ensure_listener(app: Any) -> None:
+    state = reload_state(app)
+    if state.get("listener") is not None:
+        return
+    redis = getattr(app.state, "redis", None)
+    if redis is None:
+        return
+
+    from types import SimpleNamespace
+
+    from open_webui.models.functions import Functions
+    from open_webui.utils.plugin import (
+        get_function_module_from_cache,
+        get_functions_cache,
+    )
+
+    # Mark before awaiting so a concurrent event() can't double-subscribe.
+    state["listener"] = True
+    try:
+        pubsub = redis.pubsub()
+        await pubsub.subscribe(reload_channel())
+    except Exception as e:
+        state["listener"] = None
+        reload_log.warning("[%s] subscribe failed: %s", ASSET_KEY, type(e).__name__)
+        return
+
+    async def listen():
+        try:
+            async for message in pubsub.listen():
+                if message.get("type") != "message":
+                    continue
+                if not JSONCodec.loads(message["data"])["active"]:
+                    state["active"] = False
+                    continue
+                was_active = state.get("active")
+                # Enable broadcasts arrive before is_active commits; bootstrap trusts this flag.
+                state["active"] = True
+                context = SimpleNamespace(app=app)
+                if not was_active:
+                    # Force a fresh exec so its bootstrap registers again.
+                    get_functions_cache(context).pop(RELOAD_FUNCTION_ID, None)
+                try:
+                    function_module, _, _ = await get_function_module_from_cache(
+                        context, RELOAD_FUNCTION_ID
+                    )
+                    # Peers never see a valves save; re-read them like Open WebUI's dispatch does.
+                    if hasattr(function_module, "Valves"):
+                        valves = await Functions.get_function_valves_by_id(
+                            RELOAD_FUNCTION_ID
+                        )
+                        function_module.valves = function_module.Valves(
+                            **(valves or {})
+                        )
+                except Exception as e:
+                    reload_log.warning(
+                        "[%s] reload from db failed: %s", ASSET_KEY, type(e).__name__
+                    )
+        except Exception as e:
+            reload_log.warning("[%s] listener stopped: %s", ASSET_KEY, type(e).__name__)
+
+    state["listener"] = asyncio.create_task(listen())
+
+
+def reload_bootstrap() -> None:
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        return
+
+    async def bootstrap():
+        try:
+            from open_webui.main import app
+            from open_webui.models.functions import Functions
+
+            own = await Functions.get_function_by_id(RELOAD_FUNCTION_ID)
+            # Loading a disabled function (e.g. for its valves) must not switch it on.
+            if own is None or not (own.is_active or reload_active(app)):
+                return
+            reload_mark_loaded(app)
+            await reload_ensure_listener(app)
+            await reload_publish(app, True)
+        except Exception as e:
+            reload_log.warning("[%s] bootstrap failed: %s", ASSET_KEY, type(e).__name__)
+
+    task = loop.create_task(bootstrap())
+    reload_tasks.add(task)
+    task.add_done_callback(reload_tasks.discard)
+
+
+async def reload_on_event(
+    app: Any, event: Optional[dict], event_name: Optional[str]
+) -> None:
+    await reload_ensure_listener(app)
+    state = reload_state(app)
+
+    is_own = ((event or {}).get("subject") or {}).get("id") == RELOAD_FUNCTION_ID
+    if is_own and event_name == "function.disable_started":
+        state["active"] = False
+        await reload_publish(app, False)
+        return
+    if is_own and event_name == "function.valves_updated":
+        await reload_publish(app, True)
+
+    current = state.get("active") and state.get("exec_id") == RELOAD_EXEC_ID
+    if current and event_name != "system.startup.completed":
+        return
+    reload_mark_loaded(app)
+    await reload_publish(app, True)
+
+
+# =========================== end live reload block =========================
+
+
+import hashlib
+from pathlib import Path
+from typing import Any
+
 # ===========================================================================
 # Shared static-asset registry
 # --- KEEP BYTE-IDENTICAL IN EVERY PLUGIN THAT USES IT ----------------------
 # ---------------------------------------------------------------------------
-# app.html loads /static/loader.js and /static/custom.css on every page, and
-# loader.js is the only hook running before the SvelteKit bundle hydrates. Two
-# URLs, many plugins - so none may own either. Each publishes a fragment into
-# one app.state registry and the route composes them PER REQUEST, so load order
-# is irrelevant, a late plugin needs no cooperation, and a re-exec'd one
-# replaces its own key. Per-process: each container serves what it has loaded.
-#
-# Fragments are inlined, never <script src> / @import - a second request would
-# land after hydration, defeating the point.
+# Each plugin publishes a fragment into one app.state registry and the route
+# composes them per request, so load order is irrelevant. Per-process: each
+# container serves what it has loaded.
 #
 # Contract:
 #   * ASSET_REGISTRY_ATTR, ASSET_ROUTE_ATTR, the entry shape and the paths are
-#     the interop surface. Everything else is implementation owned by whichever
-#     plugin created the route - a stale copy silently serves everyone, hence
-#     ASSET_IMPL_VERSION and byte-identity.
-#   * `key` must be a module-level constant. Derive it from a build id or a
-#     function id and a re-exec registers a SECOND entry - duplicated output,
-#     not just a leaked closure.
-#   * `order` breaks ties: lower composes first, so on custom.css it loses the
-#     cascade and on loader.js it wraps innermost. Default 0. Use it instead of
-#     encoding priority in the key, which would only work if every plugin
-#     renamed at once.
-#   * Producers run SYNCHRONOUSLY on the event loop, on every request, and
-#     BEFORE the ETag is compared - so a 304 costs exactly what a 200 costs.
-#     "Cheap" is per-call work, not payload size: memoise anything that
-#     parses, formats or regexes and return a prebuilt string. No I/O, no
-#     locks, no sleeps. Budget tens of microseconds, not milliseconds.
-#   * To withdraw, return "" - there is no unregister. A disabled plugin still
-#     gets function.disable_started (it fires before is_active flips), but a
-#     DELETED one never sees its own deletion, so disable before deleting or
-#     the fragment serves until that process restarts.
-#   * Reach is the SPA only. A plugin serving its own HTML page loads neither
-#     asset and must inject its own.
+#     the interop surface. The route owner's copy serves everyone.
+#   * `key` must be a module-level constant, or a re-exec adds a second entry.
+#   * Lower `order` composes first (default 0). Never encode priority in the key.
+#   * Producers run on the event loop for every request, 304s included: return
+#     a prebuilt string, no I/O, no locks.
+#   * Return "" to withdraw. A deleted plugin never sees its own deletion, so
+#     disable it first.
+#   * Inline fragments only: <script src> / @import lands after hydration.
 # ===========================================================================
 LOADER_PATH = "/static/loader.js"
 CUSTOM_CSS_PATH = "/static/custom.css"
@@ -75,12 +235,10 @@ SHARED_ASSET_TYPES = {
 ASSET_REGISTRY_ATTR = "_owui_static_fragments"  # {path: {key: entry}}
 ASSET_ROUTE_ATTR = "_owui_shared_asset"  # set to the path the route serves
 ASSET_IMPL_ATTR = "_owui_shared_asset_impl"  # implementation version of the route
-# Bump when this block changes behaviour: newer evicts older, so the fleet
-# converges on one implementation instead of whichever plugin booted first.
+# Bump on any behaviour change: the newest copy takes over the route.
 ASSET_IMPL_VERSION = 4
 
-# Producer failures are reported once per (path, key, exception type) - compose
-# runs on every page load, so an unconditional warning would be a firehose.
+# Warn once per (path, key, exception type): compose runs on every page load.
 _ASSET_WARNED: set = set()
 
 
@@ -97,9 +255,7 @@ def asset_fragments(app: Any, path: str) -> dict:
 
 
 def asset_sort_key(item):
-    """(order, key). Coerced defensively: a non-int order from a third-party
-    plugin would raise inside sorted(), outside the per-fragment guard, and
-    take down the whole asset."""
+    """(order, key); a non-int order falls back to 0 so it cannot break sorted()."""
     key, entry = item
     try:
         order = int(entry.get("order", 0))
@@ -170,8 +326,7 @@ def asset_compose(app: Any, path: str) -> str:
 def asset_register(
     app: Any, path: str, key: str, start: str, end: str, producer, order: int = 0
 ) -> None:
-    """Publish a fragment and ensure the route exists. Idempotent, and safe
-    from any plugin in any order."""
+    """Publish a fragment and ensure the route exists. Idempotent."""
     from starlette.responses import Response
     from starlette.routing import Mount, Route
 
@@ -189,8 +344,7 @@ def asset_register(
             return  # an equal or newer implementation already owns the route
         break  # ours is newer - fall through and replace it
 
-    # Replaces a single-owner route from an older build, or an older impl of
-    # this block. Fragments live on app.state, so nothing is lost.
+    # Fragments live on app.state, so replacing the route loses nothing.
     app.routes[:] = [r for r in app.routes if getattr(r, "path", "") != path]
     media_type = SHARED_ASSET_TYPES.get(path, "text/plain; charset=utf-8")
 
@@ -198,28 +352,20 @@ def asset_register(
         content = asset_compose(app, path)
         etag = (
             '"owui-'
-            # usedforsecurity=False: this is a cache validator, not a security
-            # primitive, and a bare md5() raises ValueError on a FIPS host -
-            # which would 500 the asset for every visitor.
+            # Cache validator only; a bare md5() raises on FIPS hosts.
             + hashlib.md5(
                 (path + "\x00" + content).encode("utf-8"), usedforsecurity=False
             ).hexdigest()
             + '"'
         )
-        # no-cache, NOT no-store: a response the browser may not store has no
-        # validator, so If-None-Match is never sent and the 304 below is dead
-        # code. no-cache still forbids reuse without revalidation, so a stale
-        # body is impossible either way. Note a proxy may re-add no-store for
-        # these paths, which puts the 304 back to sleep - that is deployment
-        # policy, not this block's business.
+        # no-cache, not no-store: no-store would disable the 304 below.
         headers = {
             "Cache-Control": "no-cache, must-revalidate, private",
             "ETag": etag,
         }
         if request.headers.get("if-none-match") == etag:
             return Response(status_code=304, headers=headers)
-        # Starlette only auto-appends charset for text/*, so JS would ship
-        # undeclared and readers guessing latin-1 get mojibake.
+        # Starlette only adds charset for text/*.
         return Response(content, media_type=media_type, headers=headers)
 
     insert_at = len(app.routes)
@@ -1391,6 +1537,8 @@ class Event:
 
     def __init__(self):
         self.valves = self.Valves()
+        Event.instance = self
+        reload_bootstrap()
 
     def _valves_snapshot(self):
         """A hashable, order-stable snapshot of every valve value.
@@ -1620,7 +1768,7 @@ class Event:
             )
         return cls._bootloader_body_cache
 
-    def _loader_fragment(self) -> str:
+    def _loader_fragment(self, active: bool) -> str:
         """Producer for the /static/loader.js fragment.
 
         Runs inside the request handler on every page load, so the whole result
@@ -1633,7 +1781,6 @@ class Event:
         SSE connection, which is how a later re-enable reaches open tabs. The
         CSS fragment is what goes empty on disable.
         """
-        active = not Event._function_disabled
         delivery = self._get_state_delivery() if active else None
         cache_key = (
             active,
@@ -1752,12 +1899,11 @@ class Event:
     def _custom_css_fragment(self) -> str:
         """Producer for the /static/custom.css fragment.
 
-        Returns "" while the function is disabled — that empty return is the
-        withdrawal mechanism the shared registry defines, and it replaces the
-        old "strip the <style> block out of index.html" pass.
+        The producer in _publish_fragments returns "" in its place while the
+        function is off — that empty return is the withdrawal mechanism the
+        Shared Assets Protocol defines, and it replaces the old "strip the
+        <style> block out of index.html" pass.
         """
-        if Event._function_disabled:
-            return ""
         safe_css = self._safe_subset_css()
         if not safe_css.strip():
             return ""
@@ -1768,11 +1914,11 @@ class Event:
 
     def _publish_fragments(self, app) -> bool:
         """(Re)point both shared fragments at this instance and ensure the
-        routes exist. Idempotent — safe to call on every event."""
-        # The producers registered below read THIS instance's self.valves at
-        # compose time, so record which instance that is: a peer valve-sync has
-        # to refresh the valves on the same object, or it updates a dead copy.
-        Event._current_instance = self
+        routes exist. Idempotent — safe to call on every event.
+
+        The producers read Event.instance, the object Open WebUI holds and
+        refreshes valves on, and live_reload's on/off state at compose time.
+        """
         try:
             asset_register(
                 app,
@@ -1780,7 +1926,7 @@ class Event:
                 self.ASSET_KEY,
                 self.LOADER_BLOCK_START,
                 self.LOADER_BLOCK_END,
-                self._loader_fragment,
+                lambda: Event.instance._loader_fragment(reload_active(app)),
                 order=self.ASSET_ORDER,
             )
             asset_register(
@@ -1789,7 +1935,9 @@ class Event:
                 self.ASSET_KEY,
                 self.CSS_BLOCK_START,
                 self.CSS_BLOCK_END,
-                self._custom_css_fragment,
+                lambda: Event.instance._custom_css_fragment()
+                if reload_active(app)
+                else "",
                 order=self.ASSET_ORDER,
             )
             return True
@@ -2162,6 +2310,10 @@ class Event:
         paths_to_clean = [ROUTE_PATH, route_base]
         if Event._last_designer_url:
             paths_to_clean.append(Event._last_designer_url.rstrip("/"))
+        # A peer valve sync moves routes without an event(), so
+        # _last_designer_url can lag; the registered path never does.
+        if Event._routes_registered_url:
+            paths_to_clean.append(Event._routes_registered_url)
         for path in paths_to_clean:
             stale_paths.update(
                 {
@@ -2185,7 +2337,7 @@ class Event:
         # -- GET /api/v1/theme-designer (admin only) -------------------------
 
         async def theme_designer_page(request: Request):
-            if Event._function_disabled:
+            if not reload_active(request.app):
                 return JSONResponse(
                     {"error": "Theme Designer Pro is currently disabled"},
                     status_code=503,
@@ -2201,7 +2353,7 @@ class Event:
         # -- POST /api/v1/theme-designer (admin only) ------------------------
 
         async def save_theme_css(request: Request):
-            if Event._function_disabled:
+            if not reload_active(request.app):
                 return JSONResponse(
                     {"error": "Theme Designer Pro is currently disabled"},
                     status_code=503,
@@ -2247,7 +2399,7 @@ class Event:
             assembly is blocking (stat + read + regex post-processing on a
             cache miss), so it runs off-loop via to_thread.
             """
-            if Event._function_disabled:
+            if not reload_active(request.app):
                 return PlainTextResponse(
                     "", media_type="text/css", headers={"Cache-Control": "no-store"}
                 )
@@ -2280,7 +2432,7 @@ class Event:
             Delivery assembly (canvas strip + sections merge + hash) is
             blocking on a cache miss, so it runs off-loop via to_thread.
             """
-            if Event._function_disabled:
+            if not reload_active(request.app):
                 return PlainTextResponse(
                     "{}",
                     media_type="application/json",
@@ -2399,7 +2551,7 @@ class Event:
 
         async def serve_theme_library(request):
             """Serve saved preset/snapshot library JSON (admin only)."""
-            if Event._function_disabled:
+            if not reload_active(request.app):
                 return JSONResponse(
                     {"error": "Theme Designer Pro is currently disabled"},
                     status_code=503,
@@ -4810,6 +4962,7 @@ SetEnv proxy-sendcl 0</code></pre>
                             <li><b>Live push is worker-local.</b> SSE client connections are held in process memory. A theme save handled by Worker A will only broadcast to clients connected to Worker A. Clients on Workers B/C/D will not receive live push events.</li>
                             <li><b>Page-load fetch still works.</b> The bootloader fetches <code>{ROUTE_BASE}/theme.css</code> and <code>{ROUTE_BASE}/state.json</code> from disk on every page load, which works correctly across all workers. Themes propagate on the next page load/refresh.</li>
                             <li><b>Redis fixes this.</b> If <code>REDIS_URL</code> is set in your environment (which Open WebUI already uses for WebSocket relay), Theme Designer Pro automatically uses Redis pub/sub to broadcast SSE events across all workers. No additional configuration is needed beyond setting <code>REDIS_URL</code>.</li>
+                            <li><b>Turning the function off or on, saving new code, and changing valves reach every worker too.</b> With Redis, each worker hears about the change and loads it within a few seconds. A worker still running a version older than 1.8.2, or one that started while the function was off, catches up the next time it handles any event.</li>
                             <li><b>The composed assets are per worker.</b> Each worker builds its own <code>/static/loader.js</code> and <code>/static/custom.css</code> from what it has loaded, so a worker only serves the theme once it has run this function at least once. Open WebUI publishes <code>system.startup.completed</code> in every worker's lifespan, so in practice all of them publish during boot.</li>
                         </ul>
                         <p><b>TL;DR:</b> Single-worker deployments (the default) work perfectly. Multi-worker deployments get live push across workers automatically if <code>REDIS_URL</code> is set; otherwise, themes propagate on page refresh.</p>
@@ -14204,7 +14357,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     # -- entry point ---------------------------------------------------------
 
     _published = False  # Set once the shared-asset fragments are published in this process
-    _function_disabled = False  # Set True when function.disable_started fires; blocks route handlers
     # Delivery caches for /theme.css and /state.json: (cache_key, body, etag).
     # Keyed on source-file mtimes + valve settings, so saves and valve changes
     # invalidate naturally; per-process (each worker warms its own copy).
@@ -14212,8 +14364,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     _state_delivery_cache = None
     _safe_css_cache = None  # (cache_key, css) for the first-paint-safe subset
     _loader_fragment_cache = None  # (cache_key, fragment) for the composed loader.js block
-    _toggle_seq = 0  # Monotonic counter — incremented on every enable_started/disable_started lifecycle event
-    _disable_seq = 0  # Sequence number of the last function.disable_started event
     _reenabling = False  # Set by function.enable_started; triggers SSE broadcast on next inject
     _routes_registered_url = None  # Route base the routes were registered under
     _last_designer_url = None  # Track URL changes to re-register routes
@@ -14221,9 +14371,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     _last_sidebar_transparency = None  # Track sidebar transparency valve to broadcast changes
     _last_overlay_transparency = None  # Track overlay transparency valve to broadcast changes
     # Cross-worker valve convergence (multi-container / Redis only).
-    _current_instance = None  # Live instance whose producers are registered — the valve-sync target
+    instance = None  # Live instance the producers and peer valve sync read
     _last_valves_snapshot = None  # All valve values at the last event(), to detect ANY change
-    _function_id = None  # This function's __id__, captured for DB valve re-reads
     _sse_clients: set = (
         set()
     )  # Active SSE connections — aliased to app.state in _register_route()
@@ -14231,6 +14380,9 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     # unauthenticated, so this bounds worst-case memory/FD usage; over-cap
     # clients degrade gracefully to reconnect-later + refetch-on-focus.
     _SSE_MAX_CLIENTS = 8192
+    # Tags this process's own Redis messages so its subscriber skips them. The
+    # PID alone repeats across containers, where the server is often PID 1.
+    _WORKER_ID = f"{socket.gethostname()}:{os.getpid()}"
 
     @staticmethod
     def _strip_canvas_from_state(state_str: str) -> str:
@@ -14508,7 +14660,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 socket_timeout=2,
                 **_extra,
             )
-            r.publish("theme_pro_sse", f"wid:{os.getpid()}\n{msg}")
+            r.publish("theme_pro_sse", f"wid:{cls._WORKER_ID}\n{msg}")
             r.close()
         except Exception:
             pass  # Redis unavailable — local broadcast still runs below
@@ -14587,18 +14739,19 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         cls._redis_publish(f"{cls._CTRL_PREFIX}valvesync\n\n")
 
     @staticmethod
-    def _read_valves_from_db(inst, function_id):
+    async def _read_valves_from_db(inst, function_id):
         """Read + validate this function's stored valves; None on any failure.
 
         Fail-safe by construction: a missing Open WebUI API, an unreadable row,
         or data that no longer validates all resolve to None, and the caller
         then leaves the current valves untouched — behaviour identical to
-        pre-1.7.9, where the worker converges on its own next event.
+        pre-1.7.9, where the worker converges on its own next event. No stored
+        valves means the defaults, as in Open WebUI's own dispatch.
         """
         try:
             from open_webui.models.functions import Functions
 
-            stored = Functions.get_function_valves_by_id(function_id)
+            stored = await Functions.get_function_valves_by_id(function_id) or {}
         except Exception:
             return None
         if not isinstance(stored, dict):
@@ -14612,17 +14765,18 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     async def _handle_peer_valve_sync(cls, app):
         """Apply a peer's valve change to this worker's live instance.
 
-        The blocking DB read and cache priming run off-loop; the app-state
-        mutations (route re-registration, fragment republish) run on-loop, the
-        same order event() uses, so they interleave cooperatively with event()
-        instead of racing it in a thread.
+        Also runs after live_reload executes this code on a worker that no
+        event reaches, which is how that worker gets its valves and routes.
+
+        Cache priming runs off-loop; the app-state mutations (route
+        re-registration, fragment republish) run on-loop, the same order
+        event() uses, so they interleave cooperatively with event() instead of
+        racing it in a thread.
         """
-        inst = cls._current_instance
-        if inst is None or not cls._function_id:
+        inst = cls.instance
+        if inst is None or (app is not None and not reload_active(app)):
             return
-        new_valves = await asyncio.to_thread(
-            cls._read_valves_from_db, inst, cls._function_id
-        )
+        new_valves = await cls._read_valves_from_db(inst, RELOAD_FUNCTION_ID)
         if new_valves is None:
             return
         inst.valves = new_valves
@@ -14686,6 +14840,135 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 except (asyncio.QueueEmpty, asyncio.QueueFull):
                     pass
 
+    def _ensure_redis_subscriber(self, app):
+        """Start the Redis pub/sub subscriber for multi-worker SSE broadcasting.
+
+        Called from event() and register() (async context) rather than
+        _register_route (sync) to avoid 'Task was destroyed' errors from
+        transient startup event loops. The _sub_alive guard ensures the task
+        is only created once, or recreated if the previous one died or was
+        started by an older exec of this code.
+        """
+        redis_url = os.environ.get("REDIS_URL", "")
+        _existing_task = getattr(app.state, "_theme_redis_task", None)
+        _sub_alive = _existing_task is not None and not _existing_task.done()
+        # A subscriber started by an older exec of this code would hand peer
+        # valve syncs to that exec's dead class, so a new exec replaces it.
+        if _sub_alive and getattr(app.state, "_theme_redis_exec", None) != RELOAD_EXEC_ID:
+            _existing_task.cancel()
+            _sub_alive = False
+        # Never (re)spawn once shutdown cleanup ran: shutdown events are
+        # dispatched fire-and-forget, so this code can execute mid-teardown
+        # after the old subscriber was cancelled (_sub_alive False again) —
+        # a respawned task would be orphaned at loop close.
+        _shutting_down = getattr(app.state, "_theme_shutting_down", False)
+        if redis_url and not _sub_alive and not _shutting_down:
+            try:
+                import redis.asyncio as aioredis
+                import inspect as _insp
+
+                # Detect if redis-py supports maint_notifications (v7+)
+                _redis_extra = {}
+                try:
+                    if 'maint_notifications' in _insp.signature(aioredis.from_url).parameters:
+                        _redis_extra['maint_notifications'] = False
+                    else:
+                        import logging as _logging
+                        _logging.getLogger('redis.connection').setLevel(_logging.WARNING)
+                except Exception:
+                    pass
+
+                async def _redis_subscriber():
+                    """Listen on Redis channel and forward messages to local SSE clients.
+                    Reconnects automatically on timeout or connection loss."""
+                    while True:
+                        r = None
+                        pubsub = None
+                        # Set when the loop/interpreter is dying: skip every
+                        # remaining await (logging included) so finalization
+                        # stays silent instead of raising into the GC.
+                        _teardown = False
+                        try:
+                            r = aioredis.from_url(
+                                redis_url,
+                                socket_timeout=None,
+                                socket_connect_timeout=10,
+                                **_redis_extra,
+                            )
+                            pubsub = r.pubsub()
+                            await pubsub.subscribe("theme_pro_sse")
+                            log.info("[Theme Pro] Redis subscriber connected on channel 'theme_pro_sse'")
+                            async for message in pubsub.listen():
+                                if message["type"] != "message":
+                                    continue
+                                raw = message["data"]
+                                if isinstance(raw, bytes):
+                                    raw = raw.decode("utf-8")
+                                if raw.startswith("wid:"):
+                                    newline = raw.index("\n")
+                                    sender_id = raw[4:newline]
+                                    if sender_id == Event._WORKER_ID:
+                                        continue
+                                    raw = raw[newline + 1:]
+                                # Internal control messages never reach browsers.
+                                if raw.startswith(Event._CTRL_PREFIX):
+                                    if raw[len(Event._CTRL_PREFIX):].strip() == "valvesync":
+                                        try:
+                                            await Event._handle_peer_valve_sync(app)
+                                        except Exception:
+                                            log.warning(
+                                                "[Theme Pro] Peer valve sync failed",
+                                                exc_info=True,
+                                            )
+                                    continue
+                                for q in list(Event._sse_clients):
+                                    try:
+                                        q.put_nowait(raw)
+                                    except asyncio.QueueFull:
+                                        pass
+                        except asyncio.CancelledError:
+                            break
+                        except GeneratorExit:
+                            # GC is finalizing this coroutine after the loop
+                            # already closed (shutdown cleanup never ran —
+                            # e.g. hard kill). Any await here raises straight
+                            # into the finalizer; bail out silently.
+                            _teardown = True
+                            raise
+                        except Exception as exc:
+                            # During finalization redis-py can convert the
+                            # thrown GeneratorExit into an ordinary
+                            # ConnectionError, landing here with no loop to
+                            # sleep on. Only log + retry on a live loop.
+                            try:
+                                asyncio.get_running_loop()
+                            except RuntimeError:
+                                _teardown = True
+                                return
+                            log.warning("[Theme Pro] Redis subscriber lost connection: %s — reconnecting in 5s", exc)
+                            await asyncio.sleep(5)
+                        finally:
+                            # Close connections to prevent FD/connection leaks on
+                            # reconnect. redis-py >= 5 renamed close() to aclose()
+                            # and deprecated close() — feature-detect to stay quiet
+                            # on new versions and compatible with old ones.
+                            # BaseException: a re-delivered CancelledError during
+                            # shutdown must not skip closing the second connection.
+                            if not _teardown:
+                                if pubsub:
+                                    try:
+                                        await (pubsub.aclose() if hasattr(pubsub, "aclose") else pubsub.close())
+                                    except BaseException: pass
+                                if r:
+                                    try:
+                                        await (r.aclose() if hasattr(r, "aclose") else r.close())
+                                    except BaseException: pass
+
+                app.state._theme_redis_task = asyncio.get_running_loop().create_task(_redis_subscriber())
+                app.state._theme_redis_exec = RELOAD_EXEC_ID
+            except Exception as exc:
+                log.warning("[Theme Pro] Could not start Redis subscriber: %s", exc)
+
     async def event(
         self,
         event: dict,
@@ -14694,12 +14977,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         __app__=None,
         **kwargs,
     ) -> None:
-        # Capture the function id for peer valve re-reads. Set on every event
-        # (cheap) so it is known before the first valve change, and even on the
-        # shutdown/disable branches that return early below.
-        if __id__:
-            Event._function_id = __id__
-
         # --- Server shutdown cleanup ---
         # Open WebUI publishes system.shutdown.* from its lifespan exit while
         # the event loop is still running — the only reliable shutdown hook
@@ -14722,42 +14999,38 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 await Event._shutdown_cleanup(__app__)
             return  # No injection/broadcast work during shutdown
 
+        if __app__ is None:
+            return
+
+        # On/off, code saves and valve saves reach every worker through
+        # live_reload, which also flips reload_active() for the producers and
+        # route handlers.
+        await reload_on_event(__app__, event, __event_name__)
+        is_own = ((event or {}).get("subject") or {}).get("id") == RELOAD_FUNCTION_ID
+
         # --- Pre-disable cleanup ---
         # When the admin toggles this function OFF, Open WebUI dispatches
         # 'function.disable_started' synchronously BEFORE committing
         # is_active=False (Open WebUI v0.11.0+; earlier builds never
         # dispatch pre-toggle lifecycle events).
-        # This is our last chance to clean up before we stop receiving events.
         #
-        # Strategy: withdraw the CSS fragment and broadcast disable.
-        #   1. Set _function_disabled — both producers read it at compose time,
-        #      so the very next request composes a custom.css without our block
-        #      (the shared registry's withdrawal mechanism) and a loader.js with
-        #      __THEME_ACTIVE__=false. No file rewrite, nothing to strip.
-        #   2. The loader fragment stays published deliberately: an inactive
-        #      bootloader still holds its SSE connection, which is how the
-        #      theme-update broadcast on re-enable reaches all connected clients.
-        #   3. Broadcast theme-disable to strip theme from all open tabs.
-        if __event_name__ == "function.disable_started":
-            subject = event.get("subject", {})
-            if subject.get("id") == __id__:
-                Event._toggle_seq += 1
-                Event._disable_seq = Event._toggle_seq
-                log.info(
-                    "[Theme Pro] Function is being disabled (seq=%d) — withdrawing CSS fragment, keeping SSE alive",
-                    Event._toggle_seq,
-                )
-                Event._function_disabled = True
-                # Republish so the closures are pointed at this instance before
-                # events stop arriving; both now read _function_disabled.
-                if __app__ is not None:
-                    self._publish_fragments(__app__)
-                Event._broadcast_disable()
-                Event._published = False
-                log.info(
-                    "[Theme Pro] Cleanup complete — CSS withdrawn, bootloader set inactive, clients notified"
-                )
-                return  # Nothing else to do on this event
+        # live_reload has already switched the function off on every worker,
+        # so the next request composes a custom.css without our block and a
+        # loader.js with __THEME_ACTIVE__=false. The loader fragment stays
+        # published deliberately: an inactive bootloader still holds its SSE
+        # connection, which is how the theme-update broadcast on re-enable
+        # reaches all connected clients. What is left is to broadcast
+        # theme-disable, which strips the theme from all open tabs.
+        if is_own and __event_name__ == "function.disable_started":
+            log.info(
+                "[Theme Pro] Function is being disabled — CSS fragment withdrawn, SSE kept alive"
+            )
+            Event._broadcast_disable()
+            Event._published = False
+            log.info(
+                "[Theme Pro] Cleanup complete — CSS withdrawn, bootloader set inactive, clients notified"
+            )
+            return  # Nothing else to do on this event
 
         # --- Pre-enable re-injection ---
         # When the admin toggles this function back ON, Open WebUI dispatches
@@ -14766,34 +15039,12 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         # extra_function_ids). Ensure _published is False so the main logic
         # below republishes the fragments and rebroadcasts to open tabs
         # immediately.
-        if __event_name__ == "function.enable_started":
-            subject = event.get("subject", {})
-            if subject.get("id") == __id__:
-                Event._toggle_seq += 1
-                my_seq = Event._toggle_seq
-                # Only clear the disabled flag if no newer disabling event has
-                # arrived since this enabling was queued (prevents race when
-                # the admin toggles rapidly: OFF→ON→OFF can interleave).
-                if my_seq > Event._disable_seq:
-                    log.info(
-                        "[Theme Pro] Function is being re-enabled (seq=%d, last_disable=%d) — triggering re-injection",
-                        my_seq, Event._disable_seq,
-                    )
-                    Event._published = False  # Forces the republish + broadcast below
-                    Event._reenabling = True  # Triggers broadcast to connected clients
-                    Event._function_disabled = False
-                else:
-                    log.info(
-                        "[Theme Pro] Stale function.enable_started (seq=%d) superseded by disable (seq=%d) — ignoring",
-                        my_seq, Event._disable_seq,
-                    )
-                    return  # A newer disable already won; do not re-inject
+        if is_own and __event_name__ == "function.enable_started":
+            log.info("[Theme Pro] Function is being re-enabled — triggering re-injection")
+            Event._published = False  # Forces the republish + broadcast below
+            Event._reenabling = True  # Triggers broadcast to connected clients
 
-        # If the function is disabled, skip all injection / broadcast work.
-        # Do NOT unconditionally clear _function_disabled here — only the
-        # explicit function.enable_started lifecycle event (above) is allowed
-        # to clear it, after verifying its sequence number.
-        if Event._function_disabled:
+        if not reload_active(__app__):
             return
 
         url_changed = (
@@ -14805,7 +15056,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         # Guarded because _register_route rewrites app.routes; the fragment
         # publish below is cheap enough to run unguarded.
         _current_route = self._get_route_base()
-        if __app__ is not None and (
+        if (
             Event._routes_registered_url is None
             or _current_route != Event._routes_registered_url
         ):
@@ -14818,126 +15069,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             if url_changed:
                 Event._published = False
 
-        # --- Redis pub/sub subscriber for multi-worker SSE broadcasting ---
-        # Started here in event() (async context) rather than _register_route (sync)
-        # to avoid 'Task was destroyed' errors from transient startup event loops.
-        # Runs on every event() call with __app__ — the _sub_alive guard ensures
-        # the task is only created once (or recreated if the previous one died).
-        if __app__ is not None:
-            _WORKER_ID = str(os.getpid())
-            redis_url = os.environ.get("REDIS_URL", "")
-            _existing_task = getattr(__app__.state, "_theme_redis_task", None)
-            _sub_alive = _existing_task is not None and not _existing_task.done()
-            # Never (re)spawn once shutdown cleanup ran: shutdown events are
-            # dispatched fire-and-forget, so this code can execute mid-teardown
-            # after the old subscriber was cancelled (_sub_alive False again) —
-            # a respawned task would be orphaned at loop close.
-            _shutting_down = getattr(__app__.state, "_theme_shutting_down", False)
-            if redis_url and not _sub_alive and not _shutting_down:
-                try:
-                    import redis.asyncio as aioredis
-                    import inspect as _insp
-
-                    # Detect if redis-py supports maint_notifications (v7+)
-                    _redis_extra = {}
-                    try:
-                        if 'maint_notifications' in _insp.signature(aioredis.from_url).parameters:
-                            _redis_extra['maint_notifications'] = False
-                        else:
-                            import logging as _logging
-                            _logging.getLogger('redis.connection').setLevel(_logging.WARNING)
-                    except Exception:
-                        pass
-
-                    async def _redis_subscriber():
-                        """Listen on Redis channel and forward messages to local SSE clients.
-                        Reconnects automatically on timeout or connection loss."""
-                        while True:
-                            r = None
-                            pubsub = None
-                            # Set when the loop/interpreter is dying: skip every
-                            # remaining await (logging included) so finalization
-                            # stays silent instead of raising into the GC.
-                            _teardown = False
-                            try:
-                                r = aioredis.from_url(
-                                    redis_url,
-                                    socket_timeout=None,
-                                    socket_connect_timeout=10,
-                                    **_redis_extra,
-                                )
-                                pubsub = r.pubsub()
-                                await pubsub.subscribe("theme_pro_sse")
-                                log.info("[Theme Pro] Redis subscriber connected on channel 'theme_pro_sse'")
-                                async for message in pubsub.listen():
-                                    if message["type"] != "message":
-                                        continue
-                                    raw = message["data"]
-                                    if isinstance(raw, bytes):
-                                        raw = raw.decode("utf-8")
-                                    if raw.startswith("wid:"):
-                                        newline = raw.index("\n")
-                                        sender_id = raw[4:newline]
-                                        if sender_id == _WORKER_ID:
-                                            continue
-                                        raw = raw[newline + 1:]
-                                    # Internal control messages never reach browsers.
-                                    if raw.startswith(Event._CTRL_PREFIX):
-                                        if raw[len(Event._CTRL_PREFIX):].strip() == "valvesync":
-                                            try:
-                                                await Event._handle_peer_valve_sync(__app__)
-                                            except Exception:
-                                                log.warning(
-                                                    "[Theme Pro] Peer valve sync failed",
-                                                    exc_info=True,
-                                                )
-                                        continue
-                                    for q in list(Event._sse_clients):
-                                        try:
-                                            q.put_nowait(raw)
-                                        except asyncio.QueueFull:
-                                            pass
-                            except asyncio.CancelledError:
-                                break
-                            except GeneratorExit:
-                                # GC is finalizing this coroutine after the loop
-                                # already closed (shutdown cleanup never ran —
-                                # e.g. hard kill). Any await here raises straight
-                                # into the finalizer; bail out silently.
-                                _teardown = True
-                                raise
-                            except Exception as exc:
-                                # During finalization redis-py can convert the
-                                # thrown GeneratorExit into an ordinary
-                                # ConnectionError, landing here with no loop to
-                                # sleep on. Only log + retry on a live loop.
-                                try:
-                                    asyncio.get_running_loop()
-                                except RuntimeError:
-                                    _teardown = True
-                                    return
-                                log.warning("[Theme Pro] Redis subscriber lost connection: %s — reconnecting in 5s", exc)
-                                await asyncio.sleep(5)
-                            finally:
-                                # Close connections to prevent FD/connection leaks on
-                                # reconnect. redis-py >= 5 renamed close() to aclose()
-                                # and deprecated close() — feature-detect to stay quiet
-                                # on new versions and compatible with old ones.
-                                # BaseException: a re-delivered CancelledError during
-                                # shutdown must not skip closing the second connection.
-                                if not _teardown:
-                                    if pubsub:
-                                        try:
-                                            await (pubsub.aclose() if hasattr(pubsub, "aclose") else pubsub.close())
-                                        except BaseException: pass
-                                    if r:
-                                        try:
-                                            await (r.aclose() if hasattr(r, "aclose") else r.close())
-                                        except BaseException: pass
-
-                    __app__.state._theme_redis_task = asyncio.get_running_loop().create_task(_redis_subscriber())
-                except Exception as exc:
-                    log.warning("[Theme Pro] Could not start Redis subscriber: %s", exc)
+        self._ensure_redis_subscriber(__app__)
 
         canvas_valve_changed = (
             Event._last_enable_canvas_fx is not None
@@ -15030,3 +15162,18 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         Event._last_overlay_transparency = self.valves.overlay_transparency
         Event._last_valves_snapshot = _valves_now
 
+
+def register(app: Any) -> None:
+    inst = Event.instance
+    inst._publish_fragments(app)
+
+    # live_reload can execute this code on a worker that no event reaches, so
+    # load its valves, routes and Redis subscriber the way a peer valve sync
+    # does. Runs as a task: the valves are read from the database.
+    async def load():
+        inst._ensure_redis_subscriber(app)
+        await Event._handle_peer_valve_sync(app)
+
+    task = asyncio.get_running_loop().create_task(load())
+    reload_tasks.add(task)
+    task.add_done_callback(reload_tasks.discard)
