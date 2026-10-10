@@ -3669,7 +3669,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
     document.documentElement.setAttribute('data-tdp-scope', 'me');
     var hasTheme = !!cfg.personalHasTheme;
     // Until the user changes something, saves wait (see syncToServer).
-    window.__TDP_HOLD_SAVES__ = !hasTheme;
+    if (window.__TDP_HOLD_SAVES__ === undefined) window.__TDP_HOLD_SAVES__ = !hasTheme;
 
     function post(body) {
         return fetch('{ROUTE_BASE}/me', {
@@ -6809,6 +6809,12 @@ location.reload();</code></pre>
         // Personal mode holds saves until the theme actually changes, so
         // opening the designer, or switching it between modes, never turns
         // the instance theme into the user's own.
+        // Decided here, not in the personal block at the end of the page:
+        // the designer's first sync runs while the page is still loading.
+        if (window.__TDP_HOLD_SAVES__ === undefined) {
+            const cfg = window.__THEME_PRO_CONFIG__ || {};
+            window.__TDP_HOLD_SAVES__ = cfg.scope === 'me' && !cfg.personalHasTheme;
+        }
         if (window.__TDP_HOLD_SAVES__) {
             const st = stateStr || Storage.getRaw('theme') || '{}';
             if (window.__TDP_START_STATE__ === undefined) window.__TDP_START_STATE__ = st;
@@ -15697,9 +15703,16 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         if user_id:
             for old, new in self.PERSONAL_DESIGNER_KEYS:
                 html_content = html_content.replace(old, new)
+            # The styles go in the head, with the page marked as personal from
+            # the start, so the instance-only controls never show while it loads.
+            style, _, script = self.PERSONAL_DESIGNER_BLOCK.partition("</style>")
             html_content = html_content.replace(
-                "</body>", self.PERSONAL_DESIGNER_BLOCK + "</body>", 1
+                '<html lang="en" id="tool-html">',
+                '<html lang="en" id="tool-html" data-tdp-scope="me">',
+                1,
             )
+            html_content = html_content.replace("</head>", style + "</style></head>", 1)
+            html_content = html_content.replace("</body>", script + "</body>", 1)
 
         final_html = (
             html_content.replace("{VERSION}", VERSION)
