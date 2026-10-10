@@ -1445,8 +1445,15 @@ class Event:
             if (!window.__THEME_DESIGNER__) {
                 try {
                     // --- SSE handler functions (shared between initial and reconnected EventSource) ---
+                    // Tells the Themes tab in Settings whether the function is on.
+                    function announceFunctionOff(off) {
+                        if (!!window.__owuiThemeFunctionOff === off) return;
+                        window.__owuiThemeFunctionOff = off;
+                        try { window.dispatchEvent(new Event('owui-theme-function-state')); } catch(x) {}
+                    }
                     function handleThemeUpdate(e) {
                         _disabled = false;  // Re-enable if admin turned it back on
+                        announceFunctionOff(false);
                         // The broadcast carries only a version token (+ delivery
                         // ETags) — clients refetch the post-processed CSS + state.
                         // This keeps SSE frames tiny (previously every save pushed
@@ -1467,7 +1474,12 @@ class Event:
                             fetchThemeFromServer();
                         }, Math.random() * 2000);
                     }
-                    function handleThemeDisable() {
+                    function handleThemeDisable(e) {
+                        // A Global Reset strips the theme the same way, but the
+                        // function stays on, so only a real disable hides the tab.
+                        var reason = 'disabled';
+                        try { reason = (JSON.parse((e && e.data) || '') || {}).reason || 'disabled'; } catch(x) {}
+                        if (reason !== 'reset') announceFunctionOff(true);
                         // Admin disabled or reset — set disable flag, clear state, strip DOM
                         _disabled = true;
                         _themeVersion++;  // Invalidate any in-flight fetch callbacks
@@ -1946,10 +1958,25 @@ class Event:
         }).observe(nav, { attributes: true, attributeFilter: ['aria-selected'], subtree: true });
     }
 
+    // Theme Designer Pro was turned off while this page was open: take the tab
+    // and the designer away, and give the dialog back the tab it had open.
+    function withdraw(nav) {
+        if (isOpen(nav)) close(nav, nav.querySelector('[data-tdp-was]'));
+        var host = nav.nextElementSibling;
+        var panel = host && host.querySelector(':scope > .tdp-settings-panel');
+        if (panel) panel.remove();
+        var tab = nav.querySelector('.tdp-settings-tab');
+        if (tab) tab.remove();
+    }
+
     function render() {
         scheduled = false;
         var nav = document.getElementById('settings-tabs-container');
         if (!nav) return;
+        if (window.__owuiThemeFunctionOff) {
+            withdraw(nav);
+            return;
+        }
         var anchor = anchorFor(nav);
         var tab = nav.querySelector('.tdp-settings-tab');
         if (!anchor) {
@@ -1979,6 +2006,7 @@ class Event:
 
     function start() {
         new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true });
+        window.addEventListener('owui-theme-function-state', schedule);
         schedule();
     }
 
