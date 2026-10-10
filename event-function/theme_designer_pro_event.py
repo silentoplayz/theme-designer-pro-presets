@@ -2593,6 +2593,20 @@ class Event:
             Event._personal_delivery_cache.pop((user_id, kind), None)
         log.info("[Theme Pro] Removed a personal theme; that user is back on the instance theme")
 
+    def _delete_user_themes(self, user_id: str) -> bool:
+        """Remove everything a deleted account kept here: its personal theme
+        and its library. True when there was something to remove."""
+        import shutil
+
+        folder = self._get_css_path(user_id).parent
+        for kind in ("css", "state"):
+            Event._personal_delivery_cache.pop((user_id, kind), None)
+        if not folder.is_dir():
+            return False
+        shutil.rmtree(folder, ignore_errors=True)
+        log.info("[Theme Pro] Removed the personal theme and library of a deleted account")
+        return True
+
     def _prime_delivery_caches(self) -> dict:
         """Recompute both delivery caches; return their ETags for broadcasting.
 
@@ -16021,6 +16035,13 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
         if not reload_active(__app__):
             return
+
+        # A deleted account's personal theme and library go with it, whether
+        # personal themes are on or not.
+        if __event_name__ == "user.deleted":
+            subject = (event or {}).get("subject") or {}
+            if subject.get("id") and subject.get("type", "user") == "user":
+                await asyncio.to_thread(self._delete_user_themes, str(subject["id"]))
 
         url_changed = (
             Event._last_designer_url is not None
