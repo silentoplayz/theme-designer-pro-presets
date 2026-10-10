@@ -2853,25 +2853,40 @@ class Event:
                     {"error": "Theme Designer Pro is currently disabled"},
                     status_code=503,
                 )
+            apply_token = request.query_params.get("apply")
             # ?scope=me opens the designer on the signed-in user's own theme.
             if request.query_params.get("scope") == "me":
                 if not event_instance.valves.allow_personal_themes:
-                    return JSONResponse(
-                        {"error": "Personal themes are turned off on this instance"},
-                        status_code=403,
-                    )
+                    message = "Personal themes are turned off on this instance"
+                    # Opened in a frame (the Settings tab, the Launcher tool in
+                    # a chat), a sentence reads better than raw JSON.
+                    if "text/html" in request.headers.get("accept", ""):
+                        return HTMLResponse(
+                            content=Event._notice_page(
+                                message + ".",
+                                "An admin can turn on Allow Personal Themes in Theme Designer Pro's valves.",
+                            ),
+                            status_code=403,
+                            headers={"Cache-Control": "no-store"},
+                        )
+                    return JSONResponse({"error": message}, status_code=403)
                 user = await event_instance._require_user(request)
                 if hasattr(user, "status_code"):
                     return user
                 return HTMLResponse(
-                    content=event_instance._build_html(user_id=user.id),
+                    content=event_instance._build_html(
+                        user_id=user.id,
+                        apply=event_instance._read_apply_token(apply_token, user.id, personal=True),
+                    ),
                     headers={"Cache-Control": "no-store"},
                 )
-            auth = await event_instance._require_admin(request)
-            if auth is not True:
-                return auth  # Returns the JSONResponse error
+            user = await event_instance._signed_in_user(request, ("admin",))
+            if hasattr(user, "status_code"):
+                return user  # Returns the JSONResponse error
             return HTMLResponse(
-                content=event_instance._build_html(),
+                content=event_instance._build_html(
+                    apply=event_instance._read_apply_token(apply_token, user.id, personal=False),
+                ),
                 headers={"Cache-Control": "no-store"},
             )
 
@@ -3403,6 +3418,57 @@ class Event:
     _consult_last = {}  # user id -> time of their last request
     CONSULT_INTERVAL = 3.0  # seconds between one user's requests
 
+    # A theme the chat asked for. The Theme Designer Pro Launcher tool signs the
+    # values with WEBUI_SECRET_KEY, for one user and five minutes, and the
+    # designer applies them on load. Unsigned values in the URL are ignored, so
+    # a link alone can never restyle anyone's theme.
+    APPLY_TOKEN_PREFIX = "tdp-apply.v1."
+
+    @staticmethod
+    def _apply_token_key() -> bytes | None:
+        try:
+            from open_webui.env import WEBUI_SECRET_KEY
+        except ImportError:
+            return None
+        return WEBUI_SECRET_KEY.encode("utf-8") if WEBUI_SECRET_KEY else None
+
+    @classmethod
+    def _read_apply_token(cls, token, user_id: str, personal: bool) -> dict | None:
+        """The theme a Launcher token carries for this user and this designer,
+        or None: missing, forged, expired, someone else's, or the other scope."""
+        import base64
+        import hmac
+        import time as _time
+
+        key = cls._apply_token_key()
+        if not token or not key or not str(token).startswith(cls.APPLY_TOKEN_PREFIX):
+            return None
+        body, _, sig = str(token)[len(cls.APPLY_TOKEN_PREFIX):].partition(".")
+        expected = base64.urlsafe_b64encode(
+            hmac.new(key, (cls.APPLY_TOKEN_PREFIX + body).encode("ascii"), hashlib.sha256).digest()
+        ).decode("ascii").rstrip("=")
+        if not sig or not hmac.compare_digest(sig, expected):
+            return None
+        try:
+            data = _json.loads(base64.urlsafe_b64decode(body + "=" * (-len(body) % 4)))
+        except Exception:
+            return None
+        if not isinstance(data, dict) or data.get("u") != user_id:
+            return None
+        if not isinstance(data.get("x"), (int, float)) or data["x"] < _time.time():
+            return None
+        if (data.get("s") == "me") != personal:
+            return None
+        theme = cls._parse_consult(_json.dumps({
+            "hue": data.get("h"), "chroma": data.get("c"), "lightness": data.get("l"),
+            "gradient": bool(data.get("g")), "name": data.get("n") or "",
+        }))
+        if not theme:
+            return None
+        mode = data.get("m")
+        theme["mode"] = mode if mode in ("dark", "oled", "light", "her") else "all"
+        return theme
+
     async def _consult_model(self, request):
         """(model id, task params) for the AI Consultant, or (None, None).
 
@@ -3703,7 +3769,27 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
 </script>
 """
 
-    def _build_html(self, user_id: str | None = None) -> str:
+    @staticmethod
+    def _notice_page(title: str, detail: str) -> str:
+        """A small page, light or dark with the browser, for a designer that
+        can't open: fits inside a Settings tab or a chat's frame."""
+        import html as _html
+
+        return (
+            '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
+            '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+            "<title>Theme Designer Pro</title><style>"
+            ":root{color-scheme:light dark}"
+            "body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;"
+            "font-family:-apple-system,BlinkMacSystemFont,Inter,ui-sans-serif,system-ui,sans-serif;"
+            "background:transparent;color:CanvasText;text-align:center;padding:24px;box-sizing:border-box}"
+            "p{margin:4px 0;font-size:14px}p+p{font-size:12px;opacity:.7}"
+            "</style></head><body><div>"
+            f"<p>{_html.escape(title)}</p><p>{_html.escape(detail)}</p>"
+            "</div></body></html>"
+        )
+
+    def _build_html(self, user_id: str | None = None, apply: dict | None = None) -> str:
         """Assemble the full Theme Designer HTML with current valve config.
 
         With user_id, the designer edits that user's personal theme.
@@ -15411,6 +15497,12 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     setupDelegation();
     setupVariableGridDelegation();
     commitChange({ clearRef: false, snapshots: true }); // Seed undo history with initial state
+    // A theme the chat asked for through the Theme Designer Pro Launcher tool,
+    // applied once the designer has loaded the theme it starts from.
+    const _applyOnLoad = (window.__THEME_PRO_CONFIG__ || {}).applyOnLoad;
+    if (_applyOnLoad) {
+        AiConsultant.apply(_applyOnLoad, _applyOnLoad.mode && _applyOnLoad.mode !== 'all' ? [_applyOnLoad.mode] : MODES.slice());
+    }
 
     // Forward mousemove events to parent window for Canvas FX mouse tracking.
     // Iframes capture mouse events in their own window — they don't bubble to parent.
@@ -15472,6 +15564,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             # "me": the signed-in user's personal theme; "instance": everyone's.
             "scope": "me" if user_id else "instance",
             "enableAiConsultant": self.valves.enable_ai_consultant,
+            # A theme the chat asked for, checked by _read_apply_token.
+            "applyOnLoad": apply,
             "personalHasTheme": bool(user_id) and self._get_css_path(user_id).exists(),
         }
         if user_id:
