@@ -4069,6 +4069,9 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
             flex-shrink: 0;
             z-index: 100;
             gap: 16px;
+            /* When the header is narrower than its contents, as in a chat
+               column, a group moves to a second row instead of squeezing. */
+            flex-wrap: wrap;
         }
         .header h1 { font-size: 1rem; margin: 0; font-weight: 800; display: flex; align-items: center; gap: 12px; letter-spacing: -0.02em; white-space: nowrap; flex-shrink: 0; }
 
@@ -4082,7 +4085,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         .content-area { padding: 20px 12px; display: flex; flex-direction: column; gap: 20px; flex: 1; overflow-y: auto; overflow-x: hidden; max-width: 1920px; margin: 0 auto; width: 100%; box-sizing: border-box; min-height: 0; }
         .section-title { font-size: 0.95rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2.5px; font-weight: 800; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
         
-        .mode-toggle { display: flex; background: rgba(0,0,0,0.2); padding: 3px; border-radius: 10px; border: 1px solid var(--border); gap: 2px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+        .mode-toggle { display: flex; background: rgba(0,0,0,0.2); padding: 3px; border-radius: 10px; border: 1px solid var(--border); gap: 2px; flex: 1; min-width: max-content; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .mode-toggle::-webkit-scrollbar { display: none; }
         .mode-btn { flex: 1; padding: 8px 10px; border-radius: 7px; border: none; background: transparent; color: var(--text-muted); font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; min-width: 0; }
         .mode-btn.active { background: var(--bg-elevated); color: var(--text-main); box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); }
@@ -7889,7 +7892,7 @@ function startAnimation() {
         }
     }
 
-    function showToast(msg) {
+    function showToast(msg, duration = TIMING.toastDuration) {
         const toast = document.getElementById('action-toast');
         if (toast) {
             toast.innerText = msg;
@@ -7897,8 +7900,16 @@ function startAnimation() {
             clearTimeout(toast._hideTimer);
             toast._hideTimer = setTimeout(() => {
                 toast.classList.remove('show');
-            }, TIMING.toastDuration);
+            }, duration);
         }
+    }
+
+    // A mode's Custom CSS Snippet comes after the Gradient Builder's output,
+    // so a background gradient in it hides the builder's gradient.
+    function customCssHidesGradient(md) {
+        const css = (md.customCSS || '').toLowerCase();
+        return md.customCssEnabled !== false && !!css &&
+            /linear-gradient|radial-gradient|conic-gradient/.test(css) && /background/.test(css);
     }
 
     // --- AI Consultant ---
@@ -7952,6 +7963,10 @@ function startAnimation() {
             });
             commitChange({ clearRef: false });
             const name = theme.name || `H ${theme.hue}° C ${theme.chroma} L ${theme.lightness}`;
+            if (withGradient && modes.some(m => themeData[m] && customCssHidesGradient(themeData[m]))) {
+                showToast(`✨ ${name}: palette applied. The gradient is saved too, but your Custom CSS Snippet sets its own background, so it won't show. See the Gradient tab.`, 8000);
+                return;
+            }
             showToast(`✨ ${name}${withGradient ? ' — palette and gradient' : ' — palette'}. Fine-tune it below.`);
         }
 
@@ -9888,9 +9903,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         // Detect Custom CSS gradient conflict
         const conflictWarning = $('gradient-conflict-warning');
         if (conflictWarning) {
-            const css = (config.customCSS || '').toLowerCase();
-            const hasConflict = config.gradientEnabled && config.customCssEnabled !== false && css &&
-                (/linear-gradient|radial-gradient|conic-gradient/.test(css) && /background/.test(css));
+            const hasConflict = config.gradientEnabled && customCssHidesGradient(config);
             conflictWarning.style.display = hasConflict ? 'block' : 'none';
         }
 

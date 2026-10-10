@@ -58,7 +58,7 @@ Anything else opens the designer without applying anything. The chat's **Pop out
 |---|---|---|
 | **Designer Url** | `/api/v1/theme-designer` | Where the event function serves the designer. Must match the event function's own **Designer Url** valve. |
 | **Iframe Height** | `800` | Height of the designer in the chat, in pixels. |
-| **Iframe Scale** | `1.0` | Size of the designer inside the chat. At `1.0`, the mode buttons in the designer's header crowd together in a narrow chat column; `0.8` gives them room. |
+| **Iframe Scale** | `1.0` | Size of the designer inside the chat. Lower values, such as `0.8`, show more of it at a smaller size. |
 
 ---
 
