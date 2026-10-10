@@ -419,6 +419,10 @@ class Event:
             default=True,
             description="Add a Themes tab to the Admin section of Open WebUI's Settings, after Interface, that opens this designer inside Settings. The designer stays available at its own URL either way.",
         )
+        allow_personal_themes: bool = Field(
+            default=False,
+            description="Let every user design a personal theme from a Themes tab in their own Settings. A personal theme replaces the instance theme for that user only and follows them to every browser, within the limits the other valves set. Off: everyone sees the instance theme.",
+        )
         auto_sync: bool = Field(
             default=False,
             description="Skip the Selective Sync modal when loading presets or syncing. When enabled, a 'Sync All' toggle appears in the designer footer — turn it on to propagate changes to all modes, or leave it off to apply only to the active mode.\n\n---\n\n#### 🎨 Visual Style",
@@ -2206,43 +2210,65 @@ class Event:
 
     # -- CSS file persistence ------------------------------------------------
 
-    def _get_css_path(self) -> Path:
-        """Return the path to the persisted theme CSS file."""
+    def _get_css_path(self, user_id: str | None = None) -> Path:
+        """Return the path to the persisted theme CSS file.
+
+        With user_id, the user's personal theme, kept in its own folder under
+        theme/users/. That folder is only created when the user first saves.
+        """
         try:
             from open_webui.env import DATA_DIR
 
             css_dir = Path(DATA_DIR) / "theme"
         except ImportError:
             css_dir = Path("/app/backend/data/theme")
+        if user_id:
+            return css_dir / "users" / Event._user_dir_name(user_id) / CSS_FILE_NAME
         css_dir.mkdir(parents=True, exist_ok=True)
         return css_dir / CSS_FILE_NAME
 
-    def _save_css(self, css: str) -> None:
+    @staticmethod
+    def _user_dir_name(user_id: str) -> str:
+        """A folder name for a user id: the id itself when it is a plain token
+        (Open WebUI's are UUIDs), otherwise its hash, so no id can reach
+        outside theme/users/."""
+        safe = str(user_id)
+        if safe and len(safe) <= 64 and all(c.isalnum() or c in "-_" for c in safe):
+            return safe
+        return hashlib.sha256(safe.encode("utf-8")).hexdigest()
+
+    @staticmethod
+    def _write(path: Path, content: str) -> None:
+        """Atomic write that creates a personal theme's folder on first save."""
+        path.parent.mkdir(parents=True, exist_ok=True)
+        Event._atomic_write(path, content)
+
+    def _save_css(self, css: str, user_id: str | None = None) -> None:
         """Write theme CSS to disk atomically."""
-        path = self._get_css_path()
-        Event._atomic_write(path, css)
+        path = self._get_css_path(user_id)
+        Event._write(path, css)
         log.info("[Theme Pro] Saved theme CSS to %s (%d bytes)", path, len(css))
 
-    def _load_css(self) -> str | None:
+    def _load_css(self, user_id: str | None = None) -> str | None:
         """Read theme CSS from disk, or None if not found."""
-        path = self._get_css_path()
+        path = self._get_css_path(user_id)
         if path.exists():
             return path.read_text(encoding="utf-8")
         return None
 
-    def _get_state_path(self) -> Path:
+    def _get_state_path(self, user_id: str | None = None) -> Path:
         """Return the path to the persisted theme state JSON file."""
-        return self._get_css_path().with_name("open_theme_designer.json")
+        return self._get_css_path(user_id).with_name("open_theme_designer.json")
 
-    def _save_state(self, state: str) -> None:
+    def _save_state(self, state: str, user_id: str | None = None) -> None:
         """Write theme state JSON to disk atomically."""
-        path = self._get_state_path()
-        Event._atomic_write(path, state)
+        path = self._get_state_path(user_id)
+        Event._write(path, state)
         log.info("[Theme Pro] Saved theme state to %s (%d bytes)", path, len(state))
 
-    def _load_state(self) -> str | None:
+    def _load_state(self, user_id: str | None = None) -> str | None:
         """Read theme state JSON from disk, or None if not found."""
-        path = self._get_state_path()
+        path = self._get_state_path(user_id)
         if path.exists():
             return path.read_text(encoding="utf-8")
         return None
@@ -2254,23 +2280,23 @@ class Event:
     # this order reproduces the flat CSS exactly.
     SECTION_KEYS = ("vars", "structural", "gradient", "custom")
 
-    def _get_sections_path(self) -> Path:
+    def _get_sections_path(self, user_id: str | None = None) -> Path:
         """Return the path to the persisted CSS sections JSON file."""
-        return self._get_css_path().with_name("open_theme_designer_sections.json")
+        return self._get_css_path(user_id).with_name("open_theme_designer_sections.json")
 
-    def _save_sections(self, sections: dict) -> None:
+    def _save_sections(self, sections: dict, user_id: str | None = None) -> None:
         """Write structured CSS sections to disk atomically."""
-        path = self._get_sections_path()
-        Event._atomic_write(path, _json.dumps(sections))
+        path = self._get_sections_path(user_id)
+        Event._write(path, _json.dumps(sections))
         log.info("[Theme Pro] Saved CSS sections to %s", path)
 
-    def _load_sections(self) -> dict | None:
+    def _load_sections(self, user_id: str | None = None) -> dict | None:
         """Read structured CSS sections from disk, or None if missing/invalid.
 
         None means "no sections available" — callers fall back to regex-slicing
         the flat CSS (themes saved by pre-sections designer builds).
         """
-        path = self._get_sections_path()
+        path = self._get_sections_path(user_id)
         if not path.exists():
             return None
         try:
@@ -2283,26 +2309,26 @@ class Event:
             return None
         return {k: data[k] for k in self.SECTION_KEYS}
 
-    def _delete_sections(self) -> None:
+    def _delete_sections(self, user_id: str | None = None) -> None:
         """Remove the sections file (stale-prevention when only flat CSS is saved)."""
-        path = self._get_sections_path()
+        path = self._get_sections_path(user_id)
         if path.exists():
             path.unlink()
             log.info("[Theme Pro] Deleted CSS sections file")
 
-    def _get_library_path(self) -> Path:
+    def _get_library_path(self, user_id: str | None = None) -> Path:
         """Return the path to the persisted preset/snapshot library file."""
-        return self._get_css_path().with_name("open_theme_designer_library.json")
+        return self._get_css_path(user_id).with_name("open_theme_designer_library.json")
 
-    def _save_library(self, library: str) -> None:
+    def _save_library(self, library: str, user_id: str | None = None) -> None:
         """Write preset/snapshot library JSON to disk atomically."""
-        path = self._get_library_path()
-        Event._atomic_write(path, library)
+        path = self._get_library_path(user_id)
+        Event._write(path, library)
         log.info("[Theme Pro] Saved library to %s (%d bytes)", path, len(library))
 
-    def _load_library(self) -> str | None:
+    def _load_library(self, user_id: str | None = None) -> str | None:
         """Read preset/snapshot library JSON from disk, or None if not found."""
-        path = self._get_library_path()
+        path = self._get_library_path(user_id)
         if path.exists():
             return path.read_text(encoding="utf-8")
         return None
@@ -2385,6 +2411,68 @@ class Event:
         Event._state_delivery_cache = (cache_key, state, etag)
         return state, etag
 
+    _personal_delivery_cache = {}  # (user_id, kind) -> (cache_key, body, etag)
+    _PERSONAL_CACHE_MAX = 512
+
+    def _get_personal_delivery(self, user_id: str, kind: str):
+        """(body, etag) of a user's personal theme.css or state.json, or None.
+
+        The same valve post-processing as the instance theme: personal themes
+        stay within the limits the admin sets (canvas, sidebar, overlays).
+        Cached per user on file mtimes and valves, like the instance delivery.
+        """
+        css_path = self._get_css_path(user_id)
+        path = css_path if kind == "css" else self._get_state_path(user_id)
+        try:
+            mtime = path.stat().st_mtime_ns
+        except OSError:
+            return None
+        try:
+            sections_mtime = self._get_sections_path(user_id).stat().st_mtime_ns
+        except OSError:
+            sections_mtime = None
+        cache_key = (
+            mtime,
+            sections_mtime,
+            self.valves.enable_canvas_fx,
+            self.valves.sidebar_transparency,
+            self.valves.overlay_transparency,
+        )
+        cached = Event._personal_delivery_cache.get((user_id, kind))
+        if cached and cached[0] == cache_key:
+            return cached[1], cached[2]
+        try:
+            raw = path.read_text(encoding="utf-8")
+        except OSError:
+            return None
+        if not raw:
+            return None
+        if kind == "css":
+            body = self._postprocess_css(raw)
+        else:
+            body = self._state_with_sections(self._postprocess_state(raw), user_id)
+        etag = '"' + hashlib.md5(body.encode("utf-8"), usedforsecurity=False).hexdigest() + '"'
+        if len(Event._personal_delivery_cache) >= Event._PERSONAL_CACHE_MAX:
+            Event._personal_delivery_cache.pop(next(iter(Event._personal_delivery_cache)))
+        Event._personal_delivery_cache[(user_id, kind)] = (cache_key, body, etag)
+        return body, etag
+
+    def _delete_personal_theme(self, user_id: str) -> None:
+        """Remove a user's personal theme, keeping their library: the user is
+        back on the instance theme, with their saved themes still there."""
+        for path in (
+            self._get_css_path(user_id),
+            self._get_state_path(user_id),
+            self._get_sections_path(user_id),
+        ):
+            try:
+                path.unlink()
+            except FileNotFoundError:
+                pass
+        for kind in ("css", "state"):
+            Event._personal_delivery_cache.pop((user_id, kind), None)
+        log.info("[Theme Pro] Removed a personal theme; that user is back on the instance theme")
+
     def _prime_delivery_caches(self) -> dict:
         """Recompute both delivery caches; return their ETags for broadcasting.
 
@@ -2452,6 +2540,19 @@ class Event:
     @staticmethod
     async def _require_admin(request) -> bool:
         """Manual admin auth check — bypasses FastAPI DI which fails in APIRoute closures."""
+        user = await Event._signed_in_user(request, ("admin",))
+        return True if not hasattr(user, "status_code") else user
+
+    @staticmethod
+    async def _require_user(request):
+        """The signed-in user (admin or user role), or the JSONResponse refusing
+        the request. Pending accounts are refused, as Open WebUI refuses them."""
+        return await Event._signed_in_user(request, ("admin", "user"))
+
+    @staticmethod
+    async def _signed_in_user(request, roles):
+        """The user behind the request's token when their role is in roles,
+        otherwise a JSONResponse to return instead."""
         from starlette.responses import JSONResponse
 
         try:
@@ -2508,10 +2609,13 @@ class Event:
                 return JSONResponse({"error": "Invalid token"}, status_code=401)
 
         user = await Users.get_user_by_id(data["id"])
-        if not user or user.role != "admin":
-            return JSONResponse({"error": "Admin access required"}, status_code=403)
+        if not user or user.role not in roles:
+            return JSONResponse(
+                {"error": "Admin access required" if roles == ("admin",) else "Access denied"},
+                status_code=403,
+            )
 
-        return True  # Auth passed
+        return user
 
     def _register_route(self, app) -> None:
         """Register theme designer routes before the SPA catch-all mount.
@@ -2581,6 +2685,10 @@ class Event:
                     path + "/state.json",
                     path + "/events",
                     path + "/library.json",
+                    path + "/me",
+                    path + "/me/theme.css",
+                    path + "/me/state.json",
+                    path + "/me/library.json",
                 }
             )
         app.routes[:] = [
@@ -2600,6 +2708,20 @@ class Event:
                 return JSONResponse(
                     {"error": "Theme Designer Pro is currently disabled"},
                     status_code=503,
+                )
+            # ?scope=me opens the designer on the signed-in user's own theme.
+            if request.query_params.get("scope") == "me":
+                if not event_instance.valves.allow_personal_themes:
+                    return JSONResponse(
+                        {"error": "Personal themes are turned off on this instance"},
+                        status_code=403,
+                    )
+                user = await event_instance._require_user(request)
+                if hasattr(user, "status_code"):
+                    return user
+                return HTMLResponse(
+                    content=event_instance._build_html(user_id=user.id),
+                    headers={"Cache-Control": "no-store"},
                 )
             auth = await event_instance._require_admin(request)
             if auth is not True:
@@ -2644,6 +2766,107 @@ class Event:
             if auth is not True:
                 return auth
             return await event_instance._handle_css_save(request)
+
+        # -- POST /api/v1/theme-designer/me (the signed-in user's own theme) --
+
+        def _save_request_refusal(request: Request):
+            """The checks every save shares, or None when the request may go on."""
+            if not reload_active(request.app):
+                return JSONResponse(
+                    {"error": "Theme Designer Pro is currently disabled"},
+                    status_code=503,
+                )
+            # Same CSRF guard and size cap as the instance save above.
+            ctype = request.headers.get("content-type", "")
+            if not ctype.lower().startswith("application/json"):
+                return JSONResponse(
+                    {"error": "Content-Type must be application/json"},
+                    status_code=415,
+                )
+            try:
+                if int(request.headers.get("content-length") or 0) > 64 * 1024 * 1024:
+                    return JSONResponse(
+                        {"error": "Request body exceeds 64MB limit"},
+                        status_code=413,
+                    )
+            except ValueError:
+                pass
+            return None
+
+        async def save_personal_theme(request: Request):
+            refusal = _save_request_refusal(request)
+            if refusal is not None:
+                return refusal
+            if not event_instance.valves.allow_personal_themes:
+                return JSONResponse(
+                    {"error": "Personal themes are turned off on this instance"},
+                    status_code=403,
+                )
+            user = await event_instance._require_user(request)
+            if hasattr(user, "status_code"):
+                return user
+            return await event_instance._handle_css_save(request, user_id=user.id)
+
+        # -- GET /api/v1/theme-designer/me/{theme.css,state.json,library.json} --
+        # The signed-in user's personal theme. Signed out, turned off, or no
+        # personal theme saved: an empty body, which the bootloader reads as
+        # "use the instance theme".
+
+        async def _personal_user(request: Request):
+            if not reload_active(request.app) or not event_instance.valves.allow_personal_themes:
+                return None
+            user = await event_instance._require_user(request)
+            return None if hasattr(user, "status_code") else user
+
+        def _personal_response(delivery, media_type, empty):
+            # Personal, so never stored by a shared cache.
+            if delivery is None:
+                return PlainTextResponse(
+                    empty, media_type=media_type, headers={"Cache-Control": "no-store"}
+                )
+            body, etag = delivery
+            headers = {"Cache-Control": "private, no-cache, must-revalidate", "ETag": etag}
+            return body, etag, headers
+
+        async def serve_personal_css(request: Request):
+            user = await _personal_user(request)
+            delivery = None
+            if user is not None:
+                delivery = await asyncio.to_thread(event_instance._get_personal_delivery, user.id, "css")
+            out = _personal_response(delivery, "text/css", "")
+            if not isinstance(out, tuple):
+                return out
+            body, etag, headers = out
+            if request.headers.get("if-none-match") == etag:
+                return PlainTextResponse("", status_code=304, headers=headers)
+            return PlainTextResponse(content=body, media_type="text/css", headers=headers)
+
+        async def serve_personal_state(request: Request):
+            user = await _personal_user(request)
+            delivery = None
+            if user is not None:
+                delivery = await asyncio.to_thread(event_instance._get_personal_delivery, user.id, "state")
+            out = _personal_response(delivery, "application/json", "{}")
+            if not isinstance(out, tuple):
+                return out
+            body, etag, headers = out
+            if request.headers.get("if-none-match") == etag:
+                return PlainTextResponse("", status_code=304, headers=headers)
+            return PlainTextResponse(content=body, media_type="application/json", headers=headers)
+
+        async def serve_personal_library(request: Request):
+            user = await _personal_user(request)
+            library = None
+            if user is not None:
+                try:
+                    library = await asyncio.to_thread(event_instance._load_library, user.id)
+                except OSError:
+                    library = None
+            return PlainTextResponse(
+                library or "{}",
+                media_type="application/json",
+                headers={"Cache-Control": "no-store"},
+            )
 
         # -- GET /api/v1/theme-designer/theme.css (public — CSS is visual) ---
 
@@ -2767,6 +2990,13 @@ class Event:
                 )
 
             queue = asyncio.Queue(maxsize=8)
+            # Signed-in pages also hear about their own personal theme. The
+            # stream stays open to everyone, so a failed check only means no
+            # personal updates on it.
+            if event_instance.valves.allow_personal_themes:
+                user = await event_instance._require_user(request)
+                if not hasattr(user, "status_code"):
+                    queue._tdp_user = user.id
             Event._sse_clients.add(queue)
 
             async def event_stream():
@@ -2841,12 +3071,26 @@ class Event:
         app.routes.insert(spa_idx + 3, state_route)
         app.routes.insert(spa_idx + 4, sse_route)
         app.routes.insert(spa_idx + 5, library_route)
+        for offset, personal_route in enumerate(
+            (
+                Route(route_base + "/me", save_personal_theme, methods=["POST"]),
+                Route(route_base + "/me/theme.css", serve_personal_css, methods=["GET"]),
+                Route(route_base + "/me/state.json", serve_personal_state, methods=["GET"]),
+                Route(route_base + "/me/library.json", serve_personal_library, methods=["GET"]),
+            ),
+            start=6,
+        ):
+            app.routes.insert(spa_idx + offset, personal_route)
         log.info(
             "[Theme Pro] Registered routes at %s (position %d)", route_base, spa_idx
         )
 
-    async def _handle_css_save(self, request) -> "JSONResponse":
-        """Handle POST to save or reset theme CSS + state."""
+    async def _handle_css_save(self, request, user_id: str | None = None) -> "JSONResponse":
+        """Handle POST to save or reset theme CSS + state.
+
+        With user_id, the save is that user's personal theme: it goes to their
+        own folder, and only their own open pages hear about it.
+        """
         from starlette.responses import JSONResponse
 
         try:
@@ -2874,6 +3118,12 @@ class Event:
                     return JSONResponse(
                         {"error": "sections exceeds 5MB limit"}, status_code=413
                     )
+
+            if is_reset and user_id:
+                # A personal reset puts the user back on the instance theme.
+                await asyncio.to_thread(self._delete_personal_theme, user_id)
+                Event._broadcast_personal(user_id)
+                return JSONResponse({"status": "reset"})
 
             if is_reset:
                 path = self._get_css_path()
@@ -2903,14 +3153,14 @@ class Event:
             if not css:
                 library = body.get("library", "")
                 if library and isinstance(library, str):
-                    self._save_library(library)
+                    self._save_library(library, user_id)
                     return JSONResponse({"status": "ok", "library_only": True})
                 return JSONResponse({"status": "ok", "noop": True})
 
             if not isinstance(css, str):
                 return JSONResponse({"error": "css must be a string"}, status_code=400)
 
-            self._save_css(css)
+            self._save_css(css, user_id)
 
             # Persist the structured sections alongside the flat CSS. When the
             # payload has no valid sections (older designer build still cached
@@ -2920,9 +3170,9 @@ class Event:
             if isinstance(sections, dict) and all(
                 isinstance(sections.get(k), str) for k in self.SECTION_KEYS
             ):
-                self._save_sections({k: sections[k] for k in self.SECTION_KEYS})
+                self._save_sections({k: sections[k] for k in self.SECTION_KEYS}, user_id)
             else:
-                self._delete_sections()
+                self._delete_sections(user_id)
 
             if state and isinstance(state, str):
                 # '_cssSections' is a delivery-time key (merged into state.json
@@ -2935,11 +3185,11 @@ class Event:
                             state = _json.dumps(_parsed, separators=(",", ":"))
                     except Exception:
                         pass
-                self._save_state(state)
+                self._save_state(state, user_id)
 
             library = body.get("library", "")
             if library and isinstance(library, str):
-                self._save_library(library)
+                self._save_library(library, user_id)
 
             # Broadcast the update via SSE unless the client explicitly suppressed it
             # (e.g. library-only sync from syncLibrary()).
@@ -2948,7 +3198,11 @@ class Event:
             # already visible to the next request for /static/custom.css. The
             # broadcast is a version token; clients refetch /theme.css +
             # /state.json (post-processed at delivery).
-            if not body.get("suppress_broadcast", False):
+            if user_id:
+                # Only the owner's open pages show a personal theme.
+                if not body.get("suppress_broadcast", False):
+                    Event._broadcast_personal(user_id)
+            elif not body.get("suppress_broadcast", False):
                 # Prime delivery caches off-loop so the broadcast carries the
                 # new ETags and post-save fetches hit a warm cache.
                 _etags = await asyncio.to_thread(self._prime_delivery_caches)
@@ -2971,8 +3225,11 @@ class Event:
 
     # -- HTML assembly -------------------------------------------------------
 
-    def _build_html(self) -> str:
-        """Assemble the full Theme Designer HTML with current valve config."""
+    def _build_html(self, user_id: str | None = None) -> str:
+        """Assemble the full Theme Designer HTML with current valve config.
+
+        With user_id, the designer edits that user's personal theme.
+        """
         html_content = r"""<!DOCTYPE html>
 <html lang="en" id="tool-html">
 <head>
@@ -14951,7 +15208,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         out["extra"] = extra
         return out
 
-    def _state_with_sections(self, state: str) -> str:
+    def _state_with_sections(self, state: str, user_id: str | None = None) -> str:
         """Merge valve-postprocessed CSS sections into a state JSON string.
 
         Injected at delivery time under the reserved '_cssSections' key so the
@@ -14960,7 +15217,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         (legacy flat-CSS saves — bootloader falls back to marker regexes) or
         the state isn't parseable JSON (served as-is by design).
         """
-        sections = self._load_sections()
+        sections = self._load_sections(user_id)
         if not sections:
             return state
         try:
@@ -15103,6 +15360,30 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 q.put_nowait(msg)
             except asyncio.QueueFull:
                 pass  # Drop if client is backed up
+
+    # Redis relay prefix for a personal-theme update, followed by the user id.
+    _PERSONAL_PREFIX = "personal:"
+
+    @classmethod
+    def _broadcast_personal(cls, user_id: str, local_only: bool = False):
+        """Tell one user's open pages that their personal theme changed.
+
+        Nobody else's page is told, on this worker or, through Redis, on any
+        other. The pages refetch their own theme, as they do on theme-update.
+        """
+        msg = "event: personal-theme-update\ndata: {}\n\n"
+        if not local_only:
+            cls._redis_publish(f"{cls._PERSONAL_PREFIX}{user_id}\n{msg}")
+        cls._deliver_personal(user_id, msg)
+
+    @classmethod
+    def _deliver_personal(cls, user_id: str, msg: str):
+        for q in list(cls._sse_clients):
+            if getattr(q, "_tdp_user", None) == user_id:
+                try:
+                    q.put_nowait(msg)
+                except asyncio.QueueFull:
+                    pass
 
     @classmethod
     def _broadcast_disable(cls, reason="disabled"):
@@ -15316,6 +15597,11 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                                     if sender_id == Event._WORKER_ID:
                                         continue
                                     raw = raw[newline + 1:]
+                                # A personal update goes only to that user's pages.
+                                if raw.startswith(Event._PERSONAL_PREFIX):
+                                    uid, _, rest = raw[len(Event._PERSONAL_PREFIX):].partition("\n")
+                                    Event._deliver_personal(uid, rest)
+                                    continue
                                 # Internal control messages never reach browsers.
                                 if raw.startswith(Event._CTRL_PREFIX):
                                     if raw[len(Event._CTRL_PREFIX):].strip() == "valvesync":
