@@ -45,7 +45,7 @@ theme-designer-pro-presets/
 ├── scripts/                 # Build, validation, and manifest tooling
 ├── themes/                  # Complete theme presets (.json)
 ├── tools/                   # Theme Designer Pro tools + documentation
-│   ├── theme_designer_pro.py          # Standalone tool (individual users)
+│   ├── theme_designer_pro.py          # Standalone tool (legacy, no longer updated)
 │   ├── theme_designer_pro_launcher.py # Launcher companion (event function)
 │   └── README.md
 ├── .gitignore
@@ -133,13 +133,13 @@ Centralized theme update manifest listing every theme with its current version a
 
 ### 🛠️ Tool ([`tools/`](tools/))
 
-The Theme Designer Pro Open WebUI **tool** — invoked via AI chat, renders inside an iframe artifact, and persists themes in browser localStorage. Designed for **individual users** who want personal theme customization without requiring admin access. See [`tools/README.md`](tools/README.md) for installation, features, valve configuration, and usage instructions.
+The Theme Designer Pro Open WebUI **tool** — invoked via AI chat, renders inside an iframe artifact, and persists themes in browser localStorage. See [`tools/README.md`](tools/README.md).
 
-> **Note:** Active development is focused on the Event Function. The standalone Tool remains fully functional but is in maintenance mode.
+> **Legacy:** the Tool gets no more updates. Use the Event Function, which since 1.10.0 also gives every user a personal theme, saved with their account rather than in one browser.
 
 ### ⚡ Event Function ([`event-function/`](event-function/))
 
-The Theme Designer Pro **event function** — a standalone admin page variant with server-side persistence and real-time SSE push to all connected users. Designed for **server administrators** who want instance-wide theming. Themes are served through Open WebUI's shared `/static/loader.js` and `/static/custom.css`, composed per request, so it coexists with other plugins and never writes to the frontend build. See [`event-function/README.md`](event-function/README.md) for installation and how it differs from the tool.
+The Theme Designer Pro **event function** — the maintained version, with server-side persistence and real-time SSE push to all connected users. Admins design the instance theme from a **Themes** tab in Settings, and with **Allow Personal Themes** on, every user designs their own personal theme from a **Themes** tab of their own. Themes are served through Open WebUI's shared `/static/loader.js` and `/static/custom.css`, composed per request, so it coexists with other plugins and never writes to the frontend build. See [`event-function/README.md`](event-function/README.md) for installation and how it differs from the tool.
 
 ### 🚀 Launcher Tool ([`tools/theme_designer_pro_launcher.py`](tools/theme_designer_pro_launcher.py))
 

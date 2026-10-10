@@ -3,12 +3,12 @@ title: Theme Designer Pro
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.6.8
+version: 1.6.9
 license: MIT
 required_open_webui_version: 0.9.0
-description: A standalone theming tool for individual Open WebUI users. Themes are
-  stored per-browser via localStorage. For instance-wide, admin-managed theming with
-  server-side persistence, see the Theme Designer Pro Event Function instead.
+description: Legacy, no longer updated. Use the Theme Designer Pro Event Function
+  instead, which now gives every user a personal theme saved with their account,
+  as well as the admin's instance theme. This tool stores themes per browser.
 """
 
 from fastapi.responses import HTMLResponse
@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 import logging
 import os
 
-VERSION = "1.6.8"
+VERSION = "1.6.9"
 
 
 class Tools:

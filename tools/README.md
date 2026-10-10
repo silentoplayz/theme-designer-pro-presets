@@ -2,32 +2,29 @@
 
 > Create, preview, manage, and apply custom colors for your Open WebUI instance in real-time — no code, no Docker rebuilds, no hassle.
 
-![Version](https://img.shields.io/badge/version-1.6.8-blue)
+![Version](https://img.shields.io/badge/version-1.6.9-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.9.0-orange)
 ![Type](https://img.shields.io/badge/type-Tool-purple)
 
 ---
 
-> [!IMPORTANT]
-> **Tool vs. Event Function — Which should you use?**
+> [!CAUTION]
+> **This Tool is legacy and gets no more updates. Use the [Theme Designer Pro Event Function](../event-function/) instead.**
 >
-> Theme Designer Pro is available in two forms that target different audiences:
+> Since version 1.10.0, the Event Function does what this Tool did, and more:
 >
-> | | **Tool** (this file) | **Event Function** |
+> | | **Tool** (this file, legacy) | **Event Function** |
 > |---|---|---|
-> | **Target audience** | Individual users | Server administrators |
-> | **Storage** | Browser `localStorage` (per-user, per-browser) | Server-side file persistence (instance-wide) |
-> | **Theme scope** | Personal — only affects your own browser | Global — applies to all users on the instance |
-> | **Requires admin** | No | Yes |
+> | **Personal themes** | Per browser, in `localStorage` | Saved with each user's account, on every browser and device |
+> | **Instance theme for everyone** | No | Yes |
+> | **Where you design** | Inside a chat, as a tool call | A **Themes** tab in Settings |
 > | **SSE live push** | No | Yes |
-> | **Development status** | Maintenance mode | Actively developed |
+> | **Development status** | Legacy — no longer updated | Actively developed |
 >
-> **Both versions share the same core functionality** — OKLCH palette engine, Canvas FX, gradient builder, custom CSS, and snapshot library.
+> **Moving over:** ask your admin to install the Event Function and turn on its **Allow Personal Themes** valve. Then open **Settings**, choose **Themes** in the *Personal* section, and the designer offers to start your personal theme from the one this Tool left in your browser. Accept before you clear that browser's site data, or export your theme as JSON from this Tool first.
 >
-> If you're an **admin** looking for instance-wide theming, use the **[Event Function](../event-function/)** with the optional **[Launcher Tool](theme_designer_pro_launcher.py)** companion to open it directly from chat.
->
-> If you're a **regular user** who wants personal theme customization without admin access, this Tool version is for you.
+> This Tool keeps working as it is, but it won't be fixed or updated. Its AI-driven theming (`apply_theme()`) isn't in the Event Function yet.
 
 ---
 
