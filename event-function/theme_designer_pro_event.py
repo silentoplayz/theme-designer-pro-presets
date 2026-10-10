@@ -1,10 +1,10 @@
 """
 title: Theme Designer Pro
-description: Instance-wide theme designer for Open WebUI. Replaces the built-in dark, light, OLED, and her modes with fully custom themes for all users. Registers an interactive UI at /api/v1/theme-designer and persists themes server-side, publishing them through the Shared Assets Protocol so every user sees the admin's theme from the first paint.
+description: Instance-wide theme designer for Open WebUI. Replaces the built-in dark, light, OLED, and her modes with fully custom themes for all users. Registers an interactive UI at /api/v1/theme-designer, also opened from a Themes tab in Open WebUI's Admin Settings, and persists themes server-side, publishing them through the Shared Assets Protocol so every user sees the admin's theme from the first paint.
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.8.5
+version: 1.9.0
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -22,7 +22,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.8.5"
+VERSION = "1.9.0"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -409,6 +409,10 @@ class Event:
         draft_mode_default: bool = Field(
             default=False,
             description="Open the designer in Draft mode by default. When enabled, the designer starts in Draft mode on every fresh page load, preventing accidental live changes.",
+        )
+        show_in_admin_settings: bool = Field(
+            default=True,
+            description="Add a Themes tab to the Admin section of Open WebUI's Settings, after Interface, that opens this designer inside Settings. The designer stays available at its own URL either way.",
         )
         auto_sync: bool = Field(
             default=False,
@@ -1768,6 +1772,224 @@ class Event:
             )
         return cls._bootloader_body_cache
 
+    # Adds the designer to the Admin section of Open WebUI's Settings dialog.
+    # The dialog's tabs are fixed in its own code, so this adds a tab of its
+    # own after Interface and shows the designer page in a frame in place of
+    # the dialog's panel while that tab is open.
+    ADMIN_TAB_SCRIPT = r"""
+(function () {
+    'use strict';
+    if (window.__owuiTdpSettingsTab) return;
+    window.__owuiTdpSettingsTab = true;
+
+    var ROUTE = '__THEME_ROUTE__';
+    var LABEL = 'Theme Designer Pro';
+    // The tab's own name, short like the dialog's other tabs.
+    var TAB_LABEL = 'Themes';
+    var PANEL_ID = 'tab-admin-theme-designer';
+    // Words the dialog's search box finds this tab by.
+    var KEYWORDS = 'themes designer pro colors colours palette css canvas fx gradient appearance';
+    // Heroicons' swatch.
+    var ICON = '<svg class="size-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 0 0 5.304 0l6.401-6.402M6.75 21A3.75 3.75 0 0 1 3 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 0 0 3.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008Z"/></svg>';
+    var STYLE = [
+        '.tdp-settings-panel{display:none;position:relative;flex:1 1 auto;min-height:0;flex-direction:column}',
+        '[data-tdp-open]>.tdp-settings-panel{display:flex}',
+        '[data-tdp-open]>:not(.tdp-settings-panel){display:none!important}',
+        '.tdp-settings-panel iframe{flex:1 1 auto;width:100%;min-height:0;border:0;border-radius:.75rem;background:transparent}',
+        '.tdp-settings-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--color-gray-500,#9b9b9b);pointer-events:none}',
+        // The dialog's own tab keeps its selected look while this one is open; drop it.
+        '#settings-tabs-container[data-tdp-active] [data-tdp-was]{font-weight:400;color:var(--color-gray-600,#676767);background:transparent}',
+        'html.dark #settings-tabs-container[data-tdp-active] [data-tdp-was]{color:var(--color-gray-400,#b4b4b4)}'
+    ].join('');
+    // tabButtonClass in SettingsModal.svelte, read from the dialog's own tabs when it has them.
+    var activeClass = 'flex items-center gap-1.5 h-7 px-2 md:w-full shrink-0 rounded-lg text-xs text-left transition-colors duration-75 font-medium text-gray-900 dark:text-white bg-gray-50 dark:bg-white/[0.04]';
+    var inactiveClass = 'flex items-center gap-1.5 h-7 px-2 md:w-full shrink-0 rounded-lg text-xs text-left transition-colors duration-75 text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300';
+    var classesRead = false;
+    var scheduled = false;
+
+    function ensureStyle() {
+        if (document.getElementById('owui-tdp-settings-style')) return;
+        var style = document.createElement('style');
+        style.id = 'owui-tdp-settings-style';
+        style.textContent = STYLE;
+        document.head.appendChild(style);
+    }
+
+    function nativeTabs(nav) {
+        return nav.querySelectorAll('button[role="tab"]:not(.tdp-settings-tab)');
+    }
+
+    function readClasses(nav) {
+        if (classesRead) return;
+        var tabs = nativeTabs(nav);
+        var active = null, inactive = null;
+        for (var i = 0; i < tabs.length; i++) {
+            if (tabs[i].hasAttribute('data-tdp-was')) continue;
+            if (tabs[i].getAttribute('aria-selected') === 'true') active = active || tabs[i].className;
+            else inactive = inactive || tabs[i].className;
+        }
+        if (active && inactive) {
+            activeClass = active;
+            inactiveClass = inactive;
+            classesRead = true;
+        }
+    }
+
+    function searchText(nav) {
+        var input = nav.querySelector('#search-input-settings-modal');
+        return input ? input.value.trim().toLowerCase() : '';
+    }
+
+    function matches(query) {
+        return query.split(/\s+/).every(function (word) { return KEYWORDS.indexOf(word) !== -1; });
+    }
+
+    // After the admin Interface tab; while searching, after the last admin tab
+    // the search left, or last in the list when it left none.
+    function anchorFor(nav) {
+        var query = searchText(nav);
+        if (query && !matches(query)) return null;
+        var interfaceTab = nav.querySelector('button[role="tab"][aria-controls="tab-admin-interface"]');
+        if (interfaceTab) return interfaceTab;
+        if (!query) return null;
+        var admin = nav.querySelectorAll('button[role="tab"][aria-controls^="tab-admin-"]:not(.tdp-settings-tab)');
+        if (admin.length) return admin[admin.length - 1];
+        return nav.querySelector('.tabs');
+    }
+
+    function isOpen(nav) {
+        return nav.hasAttribute('data-tdp-active');
+    }
+
+    function makeTab() {
+        var tab = document.createElement('button');
+        tab.type = 'button';
+        tab.setAttribute('role', 'tab');
+        tab.setAttribute('aria-controls', PANEL_ID);
+        tab.innerHTML = ICON + '<span>' + TAB_LABEL + '</span>';
+        tab.addEventListener('click', function () {
+            var nav = document.getElementById('settings-tabs-container');
+            if (nav) open(nav);
+        });
+        return tab;
+    }
+
+    function makePanel() {
+        var panel = document.createElement('div');
+        panel.className = 'tdp-settings-panel';
+        panel.id = PANEL_ID;
+        panel.setAttribute('role', 'tabpanel');
+        var loading = document.createElement('div');
+        loading.className = 'tdp-settings-loading';
+        loading.textContent = 'Loading ' + LABEL + '…';
+        var frame = document.createElement('iframe');
+        frame.title = LABEL;
+        frame.src = ROUTE + '?embed=settings';
+        frame.addEventListener('load', function () { loading.remove(); });
+        panel.appendChild(loading);
+        panel.appendChild(frame);
+        return panel;
+    }
+
+    // The panel stays in the dialog once loaded, hidden while another tab is
+    // open, so coming back is instant and keeps the designer where you left it.
+    function open(nav) {
+        var host = nav.nextElementSibling;
+        if (!host || isOpen(nav)) return;
+        readClasses(nav);
+        var tabs = nativeTabs(nav);
+        for (var i = 0; i < tabs.length; i++) {
+            if (tabs[i].getAttribute('aria-selected') === 'true') {
+                tabs[i].setAttribute('aria-selected', 'false');
+                tabs[i].setAttribute('data-tdp-was', '');
+            }
+        }
+        var panel = host.querySelector(':scope > .tdp-settings-panel');
+        if (!panel) host.appendChild(makePanel());
+        host.setAttribute('data-tdp-open', '');
+        nav.setAttribute('data-tdp-active', '');
+        render();
+    }
+
+    // `clicked` is the dialog tab that closed it; picking the tab that was
+    // open before does not change the dialog's choice, so give it back its state.
+    function close(nav, clicked) {
+        var host = nav.nextElementSibling;
+        if (host) host.removeAttribute('data-tdp-open');
+        nav.removeAttribute('data-tdp-active');
+        var was = nav.querySelectorAll('[data-tdp-was]');
+        for (var i = 0; i < was.length; i++) {
+            was[i].removeAttribute('data-tdp-was');
+            if (was[i] === clicked) was[i].setAttribute('aria-selected', 'true');
+        }
+        render();
+    }
+
+    function watch(nav) {
+        if (nav.__tdpWatched) return;
+        nav.__tdpWatched = true;
+        nav.addEventListener('click', function (evt) {
+            var tab = evt.target.closest && evt.target.closest('button[role="tab"]');
+            if (tab && !tab.classList.contains('tdp-settings-tab') && isOpen(nav)) close(nav, tab);
+        }, true);
+        nav.addEventListener('input', schedule);
+        // The dialog picked another tab on its own, as the search box's Enter does.
+        new MutationObserver(function () {
+            if (!isOpen(nav)) return;
+            var tabs = nativeTabs(nav);
+            for (var i = 0; i < tabs.length; i++) {
+                if (tabs[i].getAttribute('aria-selected') === 'true' && !tabs[i].hasAttribute('data-tdp-was')) {
+                    close(nav, null);
+                    return;
+                }
+            }
+        }).observe(nav, { attributes: true, attributeFilter: ['aria-selected'], subtree: true });
+    }
+
+    function render() {
+        scheduled = false;
+        var nav = document.getElementById('settings-tabs-container');
+        if (!nav) return;
+        var anchor = anchorFor(nav);
+        var tab = nav.querySelector('.tdp-settings-tab');
+        if (!anchor) {
+            if (tab) tab.remove();
+            return;
+        }
+        ensureStyle();
+        watch(nav);
+        readClasses(nav);
+        if (!tab) tab = makeTab();
+        var open = isOpen(nav);
+        var className = (open ? activeClass : inactiveClass) + ' tdp-settings-tab';
+        if (tab.className !== className) tab.className = className;
+        tab.setAttribute('aria-selected', open ? 'true' : 'false');
+        if (anchor.classList.contains('tabs')) {
+            if (anchor.lastElementChild !== tab) anchor.appendChild(tab);
+        } else if (anchor.nextElementSibling !== tab) {
+            anchor.after(tab);
+        }
+    }
+
+    function schedule() {
+        if (scheduled) return;
+        scheduled = true;
+        requestAnimationFrame(render);
+    }
+
+    function start() {
+        new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true });
+        schedule();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', start, { once: true });
+    } else {
+        start();
+    }
+})();
+"""
+
     def _loader_fragment(self, active: bool) -> str:
         """Producer for the /static/loader.js fragment.
 
@@ -1787,6 +2009,7 @@ class Event:
             self._get_route_base(),
             self.valves.enable_canvas_api_access,
             delivery[1] if delivery else None,  # state delivery ETag
+            self.valves.show_in_admin_settings,
         )
         cached = Event._loader_fragment_cache
         if cached and cached[0] == cache_key:
@@ -1811,6 +2034,9 @@ class Event:
         if delivery:
             embedded = _json.dumps(self._strip_canvas_scripts(delivery[0]))
         js = js.replace("__EMBEDDED_STATE__", embedded)
+
+        if active and self.valves.show_in_admin_settings:
+            js += "\n" + self.ADMIN_TAB_SCRIPT.strip().replace("__THEME_ROUTE__", cache_key[1])
 
         fragment = f"{self.LOADER_BLOCK_START}\n{js}\n{self.LOADER_BLOCK_END}"
         Event._loader_fragment_cache = (cache_key, fragment)
@@ -2720,6 +2946,30 @@ class Event:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Theme Designer Pro</title>
+    <script>
+        // Opened from the Theme Designer Pro tab in Open WebUI's Settings.
+        (function () {
+            if (!/(?:^|&)embed=settings(?:&|$)/.test(location.search.slice(1))) return;
+            var root = document.documentElement;
+            root.classList.add('owui-skin');
+            // Overlay Transparency: a clear page lets the dialog's glass show through.
+            if ('{OVERLAY_TRANSPARENCY}' === 'opaque') return;
+            root.classList.add('owui-skin-glass');
+            // A frame whose color scheme differs from the page around it gets an
+            // opaque backdrop, so take the dialog's, and whether it is dark.
+            function match() {
+                try {
+                    var outer = window.parent.document.documentElement;
+                    root.style.colorScheme = window.parent.getComputedStyle(outer).colorScheme || '';
+                    root.classList.toggle('owui-parent-dark', outer.classList.contains('dark'));
+                } catch (e) {}
+            }
+            match();
+            try {
+                new MutationObserver(match).observe(window.parent.document.documentElement, { attributes: true, attributeFilter: ['class', 'style', 'data-theme'] });
+            } catch (e) {}
+        })();
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -3484,6 +3734,43 @@ class Event:
         .doc-table-compact th { text-align: left; padding: 8px 10px; font-weight: 800; color: var(--text-main); }
         .doc-table-compact td { padding: 8px 10px; }
     </style>
+    <style id="owui-skin">
+        /* Open WebUI's look for the header row, for the designer inside its
+           Settings dialog. Only with html.owui-skin; the designer at its own
+           address is unchanged, and below the header it keeps its own look.
+           --sk-* are dark first, light under .light-mode. */
+        html.owui-skin body#tool-body {
+            --sk-strong: var(--color-gray-100, #ececec);
+            --sk-label: var(--color-gray-400, #b4b4b4);
+            --sk-hover: rgba(255, 255, 255, 0.04);
+        }
+        html.owui-skin body#tool-body.light-mode {
+            --sk-strong: var(--color-gray-900, #171717);
+            --sk-label: var(--color-gray-600, #676767);
+            --sk-hover: var(--color-gray-50, #f9f9f9);
+        }
+        /* The dialog's tab already names the page. */
+        html.owui-skin body .header h1 { display: none; }
+        html.owui-skin body .inactive-badge { font-size: 0.6875rem; font-weight: 500; letter-spacing: 0; text-transform: none; padding: 0.125rem 0.5rem; border-radius: 9999px; }
+        html.owui-skin body .mode-toggle { background: transparent; border: 0; padding: 0; gap: 0.125rem; }
+        html.owui-skin body .mode-btn { padding: 0.25rem 0.625rem; font-size: 0.75rem; font-weight: 400; border-radius: 0.5rem; border: 0; box-shadow: none; color: var(--sk-label); }
+        html.owui-skin body .mode-btn:hover { color: var(--sk-strong); }
+        html.owui-skin body .mode-btn.active { font-weight: 500; color: var(--sk-strong); background: var(--sk-hover); border: 0; box-shadow: none; }
+        html.owui-skin body .header-json-btn { font-family: inherit; font-size: 0.75rem; font-weight: 400; padding: 0.25rem 0.625rem; border: 0; border-radius: 0.5rem; background: transparent; color: var(--sk-label); }
+        html.owui-skin body .header-json-btn:hover { background: var(--sk-hover); color: var(--sk-strong); border: 0; }
+        /* Overlay Transparency set to translucent: the page is clear, so the
+           dialog's frosted glass shows through, as it does on Open WebUI's
+           other overlays. Only while the designer's light or dark look matches
+           the dialog's; editing the other mode keeps the solid page, so its
+           text stays readable. The designer paints its root element too. */
+        html#tool-html.owui-skin-glass.owui-parent-dark:has(> body#tool-body:not(.light-mode)),
+        html#tool-html.owui-skin-glass:not(.owui-parent-dark):has(> body#tool-body.light-mode) { background: transparent !important; }
+        /* Apart from the :has() rule, so a browser without :has() still clears these. */
+        html.owui-skin-glass.owui-parent-dark body#tool-body:not(.light-mode),
+        html.owui-skin-glass.owui-parent-dark body#tool-body:not(.light-mode) .container,
+        html.owui-skin-glass:not(.owui-parent-dark) body#tool-body.light-mode,
+        html.owui-skin-glass:not(.owui-parent-dark) body#tool-body.light-mode .container { background: transparent !important; }
+    </style>
 </head>
 <body id="tool-body">
 
@@ -3887,7 +4174,7 @@ class Event:
                 <details class="doc-accordion">
                     <summary>1. Getting Started & Architecture <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
-                        <p>Theme Designer Pro is an <b>Event Function</b> that registers a standalone admin page at <code>{ROUTE_BASE}</code>. Admins access the designer by navigating directly to that URL (configurable via the <b>Designer URL</b> valve). It uses a multi-layer schema separating core color logic from manual overrides, custom CSS, and structural transparency, and persists themes server-side so they apply to <b>all users</b> in real-time.</p>
+                        <p>Theme Designer Pro is an <b>Event Function</b> that registers a standalone admin page at <code>{ROUTE_BASE}</code>. Admins open the designer from the <b>Themes</b> tab in the Admin section of Open WebUI&rsquo;s Settings, after Interface, or by going to that URL directly (configurable via the <b>Designer URL</b> valve). The <b>Show In Admin Settings</b> valve turns the tab off. It uses a multi-layer schema separating core color logic from manual overrides, custom CSS, and structural transparency, and persists themes server-side so they apply to <b>all users</b> in real-time.</p>
                         <ul>
                             <li><b>Admin-Only Design Page:</b> Only administrators can access the designer page. The generated theme is served to all users via a bootloader script published into <code>/static/loader.js</code> through the shared static-asset registry.</li>
                             <li><b>Persistence Engine:</b> Themes are persisted server-side in <code>DATA_DIR/theme/</code> as <code>open_theme_designer.css</code>, <code>open_theme_designer.json</code>, <code>open_theme_designer_sections.json</code> (structured CSS sections), and <code>open_theme_designer_library.json</code>. On page load, the server composes a safe subset of theme CSS into <code>/static/custom.css</code> (with structural/gradient rules stripped to prevent a white flash before canvas loads), which Open WebUI already loads as a render-blocking stylesheet. The bootloader then fetches the full CSS from <code>{ROUTE_BASE}/theme.css</code> and applies it — including the deferred structural/gradient rules. State JSON is inlined into the same <code>/static/loader.js</code> fragment &mdash; eliminating an async fetch for state data. Both assets are composed per request, so they always reflect the latest save rather than the last <code>event()</code>. The system uses <code>localStorage</code> only as a write-through backup for offline/Watchtower recovery scenarios.</li>
@@ -3905,7 +4192,7 @@ class Event:
                             <li><b>Session Persistence:</b> The designer utilizes <code>sessionStorage</code> to remember exactly which tab you were working in. If you navigate away and return to the designer, it will restore your last active tab automatically.</li>
                             <li><b>Legacy Data Migration:</b> Upgrading from an older version? The designer automatically detects legacy data structures and gracefully migrates your saved snapshots and active themes to the latest format without data loss.</li>
                             <li><b>Live Cross-UI Detection:</b> The designer actively listens to your environment. If you change the Open WebUI theme natively (via OS settings or keyboard shortcuts) while the designer is open, it will instantly switch its internal mode tab to match your live environment.</li>
-                            <li><b>Valves:</b> Admins can configure feature gating (enable/disable Canvas FX, Custom CSS, Gradient Builder, the Community Themes browser, auth page theming, and URL imports), UX policy (Draft mode by default, Auto Sync), visual style (sidebar and overlay transparency), security (Canvas API access, allowed import domains), and the designer URL via Valves in the function settings. The <b>Sidebar Transparency</b> valve controls the chat sidebar&rsquo;s background style &mdash; choose between <code>opaque</code> (solid background, best readability), <code>translucent</code> (frosted glass with backdrop-blur), or <code>transparent</code> (fully see-through). On mobile devices, <code>transparent</code> is automatically upgraded to <code>translucent</code> for readability. The <b>Overlay Transparency</b> valve controls portaled overlay UI (settings modal, dropdown menus, integration menus) &mdash; choose between <code>opaque</code> (solid, default) or <code>translucent</code> (frosted glass). Both valves work independently of whether Canvas FX or gradients are active. Valve changes take effect on the next <code>event()</code> trigger (any chat message, or a server startup) and are then broadcast to all connected users via SSE. The <b>Designer URL</b> valve must start with <code>/api/v1/</code> &mdash; if it doesn't, the system auto-corrects it to prevent the SPA catch-all from intercepting the route.</li>
+                            <li><b>Valves:</b> Admins can configure feature gating (enable/disable Canvas FX, Custom CSS, Gradient Builder, the Community Themes browser, auth page theming, and URL imports), UX policy (Draft mode by default, the Themes tab in Settings, Auto Sync), visual style (sidebar and overlay transparency), security (Canvas API access, allowed import domains), and the designer URL via Valves in the function settings. The <b>Sidebar Transparency</b> valve controls the chat sidebar&rsquo;s background style &mdash; choose between <code>opaque</code> (solid background, best readability), <code>translucent</code> (frosted glass with backdrop-blur), or <code>transparent</code> (fully see-through). On mobile devices, <code>transparent</code> is automatically upgraded to <code>translucent</code> for readability. The <b>Overlay Transparency</b> valve controls portaled overlay UI (settings modal, dropdown menus, integration menus) &mdash; choose between <code>opaque</code> (solid, default) or <code>translucent</code> (frosted glass). Both valves work independently of whether Canvas FX or gradients are active. Valve changes take effect on the next <code>event()</code> trigger (any chat message, or a server startup) and are then broadcast to all connected users via SSE. The <b>Designer URL</b> valve must start with <code>/api/v1/</code> &mdash; if it doesn't, the system auto-corrects it to prevent the SPA catch-all from intercepting the route.</li>
                             <li><b>Self-Adapting UI &amp; Contrast Protection:</b> The Theme Designer Pro interface dynamically themes <i>itself</i> based on the colors you pick. It includes built-in contrast protection, automatically shifting text and border colors to remain legible if you create ultra-washed-out palettes.</li>
                             <li><b>Fully Responsive:</b> The designer interface seamlessly adapts to mobile screens so you can tweak your theme on the go.</li>
                             <li><b>Canvas FX Security:</b> Canvas FX scripts are arbitrary JavaScript executed in all users' browsers. Only administrators can set Canvas FX scripts through the designer. <b>Never paste untrusted scripts</b> — always review Canvas FX code before enabling it, especially scripts obtained from third parties.</li>
@@ -4727,7 +5014,7 @@ self.onmessage = function(e) {
                             <li><b>Zero-specificity transparency:</b> The broad <code>[class*="bg-gray-"]</code> transparency rule is wrapped in CSS <code>:where()</code>, giving it zero specificity contribution. This means <i>any</i> selector with normal specificity can override it.</li>
                             <li><b>Element exclusions:</b> Interactive elements like <code>button</code>, <code>a</code>, <code>input</code>, <code>select</code>, <code>label</code>, and <code>span</code> are excluded from transparency entirely via <code>:not()</code> filters. This protects toggle knobs (<code>bg-white</code> circles), styled buttons, and other small UI widgets. Dropdown menus, modal dialogs, and listbox selectors &mdash; which are <b>portaled</b> outside the <code>.app</code> wrapper &mdash; are naturally unaffected because the transparency rules only target elements within <code>.app</code>, <code>#theme-designer-container</code>, and <code>#auth-page</code> scope.</li>
                             <li><b>Sidebar backdrop:</b> Nested <code>[class*="bg-gray-"]</code> elements inside <code>#sidebar</code> become transparent like the rest of the app, but stay readable because the sidebar itself keeps its own solid background (<code>--color-gray-950</code> by default). The <b>Sidebar Transparency</b> valve controls that backdrop: <code>opaque</code> (the default) keeps it solid, while <code>translucent</code> and <code>transparent</code> swap it for a frosted-glass or fully see-through backdrop so Canvas FX and gradient backgrounds show through.</li>
-                            <li><b>Overlay translucency:</b> Portaled overlay elements (settings modal, dropdown menus, user menus) can optionally use a frosted glass effect via the <b>Overlay Transparency</b> valve. When set to <code>translucent</code>, the system appends CSS rules targeting <code>div[class*="bg-gray-"]</code> and <code>div[class*="bg-white"]</code> elements inside portals using <code>color-mix()</code> and <code>backdrop-filter</code>. Elements inside <code>.app</code> and <code>#theme-designer-container</code> are explicitly excluded via <code>:not(.app *)</code> to prevent regressions in the main UI.</li>
+                            <li><b>Overlay translucency:</b> Portaled overlay elements (settings modal, dropdown menus, user menus) can optionally use a frosted glass effect via the <b>Overlay Transparency</b> valve. When set to <code>translucent</code>, the system appends CSS rules targeting <code>div[class*="bg-gray-"]</code> and <code>div[class*="bg-white"]</code> elements inside portals using <code>color-mix()</code> and <code>backdrop-filter</code>. Elements inside <code>.app</code> and <code>#theme-designer-container</code> are explicitly excluded via <code>:not(.app *)</code> to prevent regressions in the main UI. When the designer is open in the <b>Themes</b> tab of Settings, its own page turns clear too, so the glass shows behind it, as long as the designer&rsquo;s light or dark look matches Open WebUI&rsquo;s. Editing the other mode keeps the page solid so its text stays readable.</li>
                         </ul>
                         <p style="font-size: 0.7rem; color: var(--text-muted); line-height: 1.5;"><b>Note:</b> The <code>[class*="bg-white"]</code> attribute selector is intentionally <b>not</b> included in the structural transparency rules. Elements with <code>bg-white</code> classes in Open WebUI are almost always interactive widgets (toggle indicators, button styling, card backgrounds), not structural layout wrappers. However, it <b>is</b> included in the overlay translucency rules since overlay panels in light mode use <code>bg-white</code> as their primary background class.</p>
 
@@ -14383,6 +14670,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             html_content.replace("{VERSION}", VERSION)
             .replace("{BOOTLOADER_SRC}", bootloader_js)
             .replace("{ROUTE_BASE}", route_base)
+            .replace("{OVERLAY_TRANSPARENCY}", self.valves.overlay_transparency)
             .replace("{SAVE_METADATA_GRID}", save_meta)
             .replace("{RENAME_METADATA_GRID}", rename_meta)
             .replace("{SYNC_OPTIONS}", sync_html)
