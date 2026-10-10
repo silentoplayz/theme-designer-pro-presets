@@ -77,8 +77,8 @@ class Tools:
         return APPLY_TOKEN_PREFIX + body + "." + sig
 
     async def open_theme_designer(
-        self, my_theme: bool = False, __user__: dict = {}, __event_emitter__=None
-    ) -> HTMLResponse:
+        self, my_theme: bool = False, __user__: dict = {}
+    ) -> tuple:
         """
         Open the Theme Designer Pro designer inside the chat.
 
@@ -94,7 +94,12 @@ class Tools:
         """
         personal = __user__.get("role") != "admin" or bool(my_theme)
         url = self._designer_url(personal)
-        return await self._embed(url, url, __event_emitter__)
+        return await self._embed(
+            url,
+            url,
+            "The designer is open in the chat, on "
+            + ("the user's own personal theme." if personal else "the instance theme every user sees."),
+        )
 
     async def apply_theme(
         self,
@@ -106,8 +111,7 @@ class Tools:
         mode: str = "all",
         everyone: bool = False,
         __user__: dict = {},
-        __event_emitter__=None,
-    ) -> HTMLResponse:
+    ) -> tuple:
         """
         Apply a color theme the user describes, by translating it into OKLCH values, then open the designer for fine-tuning.
 
@@ -142,10 +146,14 @@ class Tools:
             self._designer_url(personal, token),
             # The pop-out link opens the designer without re-applying the theme.
             self._designer_url(personal),
-            __event_emitter__,
+            "The designer is open in the chat and applies "
+            + (f'"{theme["n"]}"' if theme["n"] else "the theme")
+            + " as it loads, to "
+            + ("the user's own personal theme" if personal else "the instance theme every user sees")
+            + ". They can fine-tune it there.",
         )
 
-    async def _embed(self, frame_url: str, popout_url: str, __event_emitter__=None) -> HTMLResponse:
+    async def _embed(self, frame_url: str, popout_url: str, result: str) -> tuple:
         """The designer in a frame, shown in the chat."""
         h = self.valves.iframe_height
         scale = self.valves.iframe_scale
@@ -197,6 +205,16 @@ class Tools:
             border-radius: 12px;
         }}
 
+        .notice {{
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #a1a1aa;
+            padding: 12px 14px;
+            border: 1px solid #27272a;
+            border-radius: 12px;
+        }}
+
         .designer-frame {{
             width: {inner_w_pct}%;
             height: {inner_h}px;
@@ -219,30 +237,28 @@ class Tools:
             Pop out
         </a>
     </div>
-    <div class="frame-container">
+    <div class="notice" id="tdp-sandbox-notice" hidden>
+        To open the designer here, turn on <b>Settings &gt; Interface &gt; iframe Sandbox Allow Same Origin</b>,
+        then ask again. You can also use <b>Pop out</b> above.
+    </div>
+    <div class="frame-container" id="tdp-frame">
         <iframe
             src="{frame_url}"
             class="designer-frame"
             allow="clipboard-read; clipboard-write"
         ></iframe>
     </div>
+    <script>
+        // Without that setting, this frame has no origin, so the browser
+        // sends the designer no sign-in and it could only show an error.
+        if (window.origin === 'null') {{
+            document.getElementById('tdp-frame').remove();
+            document.getElementById('tdp-sandbox-notice').hidden = false;
+        }}
+    </script>
 </body>
 </html>"""
 
-        # Emit the embed directly so the designer renders in BOTH native and legacy
-        # function-calling modes. Returning an HTMLResponse alone only renders in
-        # legacy mode — the native tool handler attaches embeds to
-        # `function_call_output` items that the frontend never maps to
-        # `message.embeds`. Emitting the event ourselves sets `message.embeds` on
-        # the current message regardless of the function-calling mode.
-        if __event_emitter__:
-            await __event_emitter__(
-                {
-                    "type": "embeds",
-                    "data": {
-                        "embeds": [content],
-                    },
-                }
-            )
-
-        return HTMLResponse(headers=headers, content=content)
+        # Open WebUI shows an inline HTMLResponse as an embed in both function
+        # calling modes; the text beside it is what the model reads.
+        return HTMLResponse(headers=headers, content=content), result
