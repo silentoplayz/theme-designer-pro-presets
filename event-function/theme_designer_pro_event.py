@@ -499,11 +499,17 @@ class Event:
             // __THEME_ACTIVE__=false to keep SSE alive while stripping the theme.
             // When active, this is always true.
             var _themeActive = __THEME_ACTIVE__;
+            // Personal themes: a signed-in user's own theme, when the admin allows them.
+            var _personalEnabled = __PERSONAL_THEMES__;
+            // This browser's copy of the user's personal theme, stamped with the
+            // account it belongs to, so a second account here never sees it.
+            var PERSONAL_KEYS = ['owui_tdp_personal_css', 'owui_tdp_personal_state', 'owui_tdp_personal_uid'];
             if (!_themeActive) {
                 try {
                     localStorage.removeItem('owui_dev_theme_v1_css');
                     localStorage.removeItem('owui_dev_theme_v1');
                     localStorage.removeItem('owui_theme_valve_no_canvas');
+                    PERSONAL_KEYS.forEach(function(k) { localStorage.removeItem(k); });
                 } catch(x) {}
                 ['owui-dev-live-theme', 'owui-server-theme', 'owui-theme-style',
                  'owui-theme-canvas-bg', 'owui-theme-bg-color', 'owui-canvas-script-runner'
@@ -545,6 +551,22 @@ class Event:
             // foreground resume. cache: 'no-cache' forces conditional
             // revalidation (If-None-Match) — the server answers 304 when
             // nothing changed, so repeat fetches are cheap.
+            // True while this page shows the signed-in user's personal theme.
+            var _personal = false;
+
+            // The signed-in account, read from Open WebUI's sign-in token, or
+            // null: signed out, on the sign-in page, or personal themes off.
+            function personalUser() {
+                if (!_personalEnabled || window.location.pathname.startsWith('/auth')) return null;
+                try {
+                    var token = localStorage.getItem('token');
+                    if (!token) return null;
+                    var part = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+                    var claims = JSON.parse(atob(part));
+                    return claims && claims.id ? String(claims.id) : null;
+                } catch(x) { return null; }
+            }
+
             function fetchThemeFromServer() {
                 var _fetchVersion = _themeVersion;  // Capture before async fetch
                 // Body + ETag, or null when the request itself failed. A null
@@ -552,8 +574,13 @@ class Event:
                 // "the server has no theme", a network error means "we learned
                 // nothing" — treating the second as the first would wipe a
                 // perfectly good theme on one dropped request.
-                function readAsset(url) {
-                    return fetch(url, { cache: 'no-cache' })
+                function readAsset(url, signedIn) {
+                    var init = { cache: 'no-cache' };
+                    // Personal routes read the account from the sign-in token.
+                    if (signedIn) {
+                        try { init.headers = { Authorization: 'Bearer ' + (localStorage.getItem('token') || '') }; } catch(x) {}
+                    }
+                    return fetch(url, init)
                         .then(function(r) {
                             if (r.ok && r.status !== 204) {
                                 var tag = r.headers.get('ETag');
@@ -571,14 +598,54 @@ class Event:
                 // outgoing theme over the incoming theme's colours, for as long
                 // as the gap lasted. Rapid theme swaps made those windows
                 // overlap and the mismatch could persist across several rounds.
-                Promise.all([
-                    readAsset('__THEME_ROUTE__/theme.css'),
-                    readAsset('__THEME_ROUTE__/state.json')
-                ]).then(function(results) {
+                function readInstance() {
+                    return Promise.all([
+                        readAsset('__THEME_ROUTE__/theme.css'),
+                        readAsset('__THEME_ROUTE__/state.json')
+                    ]);
+                }
+                // A signed-in user's personal theme wins; with none saved (or
+                // personal themes off) both come back empty and the instance
+                // theme applies, as it always has.
+                var uid = personalUser();
+                var pick = !uid ? readInstance().then(function(r) { return { results: r, personal: false }; })
+                    : Promise.all([
+                        readAsset('__THEME_ROUTE__/me/theme.css', true),
+                        readAsset('__THEME_ROUTE__/me/state.json', true)
+                    ]).then(function(mine) {
+                        if (!mine[0] || !mine[1]) return null; // Network error: learned nothing
+                        if (mine[0].body && mine[0].body.trim()) return { results: mine, personal: true, uid: uid };
+                        return readInstance().then(function(r) { return { results: r, personal: false }; });
+                    });
+                pick.then(function(picked) {
+                    if (!picked) return;
+                    var results = picked.results;
                     if (_themeVersion > _fetchVersion) return; // A newer update superseded this fetch
                     if (_disabled) return; // Disable fired while fetch was in-flight
                     var cssRes = results[0], stateRes = results[1];
                     if (!cssRes || !stateRes) return; // A half failed — apply neither
+                    _personal = picked.personal;
+                    if (_personal) {
+                        // The personal copy is kept apart from the instance one,
+                        // which stays as it was for this browser's other accounts.
+                        _lastCssTag = cssRes.tag;
+                        _lastStateTag = stateRes.tag;
+                        _owuiThemeCss = cssRes.body;
+                        var pState = stateRes.body && stateRes.body.trim() && stateRes.body !== '{}' ? stateRes.body : null;
+                        _owuiThemeState = pState;
+                        _parsedState = null;
+                        try {
+                            localStorage.setItem('owui_tdp_personal_uid', picked.uid);
+                            localStorage.setItem('owui_tdp_personal_css', cssRes.body);
+                            if (pState) localStorage.setItem('owui_tdp_personal_state', pState);
+                            else localStorage.removeItem('owui_tdp_personal_state');
+                        } catch(x) {}
+                        initCanvas();
+                        enforceTheme();
+                        return;
+                    }
+                    // No personal theme for this account: drop any copy of one.
+                    try { PERSONAL_KEYS.forEach(function(k) { localStorage.removeItem(k); }); } catch(x) {}
 
                     var css = cssRes.body;
                     var state = stateRes.body;
@@ -643,10 +710,31 @@ class Event:
             // across all tabs for the same origin and is updated by SSE handlers).
             // This prevents stale embedded CSS from persisting on duplicated tabs.
             try {
+                // The Theme Designer Pro Tool kept each browser's theme under
+                // these same keys, and the first fetch below overwrites them
+                // with the instance theme. Keep that theme aside once, so the
+                // personal designer can offer to start from it.
+                if (!localStorage.getItem('owui_tdp_seen')) {
+                    var oldState = localStorage.getItem('owui_dev_theme_v1');
+                    var oldCss = localStorage.getItem('owui_dev_theme_v1_css');
+                    if (oldState) localStorage.setItem('owui_tdp_tool_state', oldState);
+                    if (oldCss) localStorage.setItem('owui_tdp_tool_css', oldCss);
+                    localStorage.setItem('owui_tdp_seen', '1');
+                }
                 var lsCss = localStorage.getItem('owui_dev_theme_v1_css');
                 if (lsCss) _owuiThemeCss = lsCss;
                 var lsState = localStorage.getItem('owui_dev_theme_v1');
                 if (lsState) _owuiThemeState = lsState;
+                // This account's personal theme, from this browser's copy, so it
+                // is in place before Open WebUI draws its interface.
+                var me = personalUser();
+                if (localStorage.getItem('owui_tdp_personal_uid') !== me) {
+                    PERSONAL_KEYS.forEach(function(k) { localStorage.removeItem(k); });
+                } else if (localStorage.getItem('owui_tdp_personal_css')) {
+                    _owuiThemeCss = localStorage.getItem('owui_tdp_personal_css');
+                    _owuiThemeState = localStorage.getItem('owui_tdp_personal_state') || null;
+                    _personal = true;
+                }
             } catch(x) {}
 
             // Fetch CSS + state from server (always needed — /static/custom.css
@@ -1403,7 +1491,7 @@ class Event:
             // state atomically, which is the only place a coherent pair exists.
             var _storageSyncTimer = null;
             window.addEventListener('storage', (e) => {
-                const triggerKeys =['theme', 'owui_dev_theme_v1_css', 'owui_dev_theme_v1'];
+                const triggerKeys =['theme', 'owui_dev_theme_v1_css', 'owui_dev_theme_v1', 'owui_tdp_personal_css', 'owui_tdp_personal_state'];
                 if (!triggerKeys.includes(e.key) || !e.newValue) return;
                 if (e.key === 'theme') {
                     // Mode switch — cheap, unambiguous, apply immediately.
@@ -1504,7 +1592,7 @@ class Event:
                             window.owuiCanvasCleanups = [];
                         }
                         try {
-                            ['owui_dev_theme_v1_css', 'owui_dev_theme_v1'].forEach(function(k) {
+                            ['owui_dev_theme_v1_css', 'owui_dev_theme_v1'].concat(PERSONAL_KEYS).forEach(function(k) {
                                 localStorage.removeItem(k);
                             });
                         } catch(x) {}
@@ -1527,6 +1615,12 @@ class Event:
                         es = new EventSource('__THEME_ROUTE__/events?_=' + Date.now());
                         es.addEventListener('theme-update', handleThemeUpdate);
                         es.addEventListener('theme-disable', handleThemeDisable);
+                        // Sent only to this account's pages when its personal theme changes.
+                        es.addEventListener('personal-theme-update', function() {
+                            _disabled = false;
+                            ++_themeVersion;
+                            fetchThemeFromServer();
+                        });
                         es.onerror = function() { /* EventSource auto-reconnects */ };
                     }
 
@@ -2047,6 +2141,7 @@ class Event:
             self.valves.enable_canvas_api_access,
             delivery[1] if delivery else None,  # state delivery ETag
             self.valves.show_in_admin_settings,
+            self.valves.allow_personal_themes,
         )
         cached = Event._loader_fragment_cache
         if cached and cached[0] == cache_key:
@@ -2060,6 +2155,9 @@ class Event:
         ).replace(
             "__THEME_ACTIVE__",
             "true" if active else "false",
+        ).replace(
+            "__PERSONAL_THEMES__",
+            "true" if self.valves.allow_personal_themes else "false",
         )
 
         # State inlined as a JS string literal, minus the canvas scripts. Was a
@@ -14813,6 +14911,10 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         ).replace(
             "__THEME_ACTIVE__",
             "true",
+        ).replace(
+            # The designer applies the theme it is editing itself.
+            "__PERSONAL_THEMES__",
+            "false",
         ).replace(
             "__EMBEDDED_STATE__",
             "null",
