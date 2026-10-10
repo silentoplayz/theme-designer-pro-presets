@@ -24,7 +24,7 @@
 > | **Community Themes browser** | Yes — curated themes with one-click install | No |
 > | **Sidebar / overlay transparency** | Yes — admin-controlled visual style valves | No |
 > | **Multi-worker support** | Yes — automatic Redis pub/sub for multi-worker SSE | No |
-> | **AI-driven theming** | Not yet | Yes (`apply_theme()` tool method) |
+> | **AI-driven theming** | Yes — the **AI** button in the designer | Yes (`apply_theme()` tool method) |
 > | **Development status** | Actively developed | Legacy — no longer updated |
 >
 > **Use this Event Function.** Since 1.10.0 it covers the Tool's personal themes too: an admin turns on **Allow Personal Themes**, and every user gets a **Themes** tab in their own Settings. A personal theme follows the user to every browser, instead of living in one. The [Tool variant](../tools/) is legacy and gets no more updates. Users moving from it can start their personal theme from the one the Tool left in their browser.
@@ -145,6 +145,7 @@ The [Launcher Tool](../tools/theme_designer_pro_launcher.py) is a lightweight co
    - Switch to the **Style Overrides** tab to write raw CSS tweaks
    - Switch to the **Canvas FX** tab to inject interactive JavaScript background animations
    - Switch to the **Gradient** tab to design gradient backgrounds using the visual builder
+   - Use the **AI** header button to describe a theme in words, such as "warm copper"; a model on your instance picks its palette and, when it suits, a matching gradient, for every mode or only the one you're editing
    - Use the **JSON** header button to inspect or copy your full theme state
    - Use the **Updates** header button to check all your themes for available updates
 3. **Draft vs. Live:** Toggle the **Draft** button in the header to preview changes locally before publishing. While in Draft mode, only your browser sees the changes. Click **Publish** to push to all users.
@@ -217,6 +218,7 @@ Valves are configured in the Admin Panel under **Functions → Theme Designer Pr
 | **Enable Canvas FX** | `bool` | `true` | Allow Canvas FX (JavaScript background animations). When disabled, the Canvas FX tab is hidden and running animations are suppressed — canvas data is stripped from the saved state and a canvas-stripped update is broadcast. |
 | **Enable Custom CSS** | `bool` | `true` | Allow the Style Overrides (custom CSS) editor. When disabled, the Style Overrides tab is hidden in the designer UI. |
 | **Enable Gradient Builder** | `bool` | `true` | Allow the Gradient Background builder. When disabled, the Gradient tab is hidden in the designer UI. |
+| **Enable AI Consultant** | `bool` | `true` | Show the **AI** button in the designer, which turns a description into a theme's colors and gradient. Admins can always use it; users can when personal themes are on. Each request is one call to the model in **AI Consultant Model**, or the task model. |
 | **Enable Community Themes** | `bool` | `true` | Show the Community Themes browser in the Themes tab. When disabled, the community themes grid is hidden and no manifest is fetched. |
 
 #### 🖌️ UX Policy
@@ -248,6 +250,7 @@ Valves are configured in the Admin Panel under **Functions → Theme Designer Pr
 
 | Valve | Type | Default | Description |
 |---|---|---|---|
+| **AI Consultant Model** | `str` | `""` | The model the AI Consultant asks, by its ID. Empty: the task model set under **Admin Settings > Interface**, local first, then external. |
 | **Designer URL** | `str` | `/api/v1/theme-designer` | URL path where the designer and all its sub-routes are served. Must start with `/api/v1/` — paths outside this prefix are auto-corrected to prevent the SPA catch-all from intercepting the route (a warning is logged). Changing this value triggers a route re-registration; the loader fragment picks up the new URL on its next compose. |
 
 > **Note:** All Valves default to their most permissive values — the event function behaves identically to an un-valved installation out of the box. Admins only need to configure Valves if they want to restrict specific features.
@@ -369,6 +372,7 @@ All routes are registered under the configurable `designer_url` base (default: `
 | GET | `{designer_url}` | Admin | Serves the Theme Designer Pro HTML page |
 | GET | `{designer_url}?scope=me` | Signed in | Serves the designer on the signed-in user's personal theme (403 while personal themes are off) |
 | POST | `{designer_url}` | Admin | Saves CSS + state + library, broadcasts SSE update |
+| POST | `{designer_url}/consult` | Admin, or signed in with personal themes on | The AI Consultant: `{"description": "..."}` in, `{"hue", "chroma", "lightness", "gradient", "name", "model"}` out. One request every few seconds per user |
 | POST | `{designer_url}/me` | Signed in | Saves the user's personal theme or library; `{"reset": true}` removes the theme and keeps the library |
 | GET | `{designer_url}/theme.css` | Public | Serves generated theme CSS (empty if inactive or missing) |
 | GET | `{designer_url}/state.json` | Public | Serves saved theme state JSON (`{}` if inactive or missing) |
@@ -378,7 +382,7 @@ All routes are registered under the configurable `designer_url` base (default: `
 | GET | `{designer_url}/events` | Public | SSE endpoint for real-time push updates; a signed-in page also hears about its own personal theme |
 | GET | `{designer_url}/library.json` | Admin | Serves the preset library (themes, canvas, CSS, gradients) |
 
-Personal themes are stored per account in `DATA_DIR/theme/users/<user id>/`, with the same file names as the instance theme.
+Personal themes are stored per account in `DATA_DIR/theme/users/<user id>/`, with the same file names as the instance theme. When an account is deleted, its folder is removed.
 
 > **Graceful degradation:** Missing CSS or state files return an empty `200` (`""` or `{}`), never a 500. Corrupted JSON is served as-is — the client handles parse errors.
 
@@ -515,6 +519,10 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 **A personal theme starts from the instance theme, and only saves once the user changes something,** so opening the tab, or switching it between Dark and Light, leaves them on the instance theme and its later updates. The personal designer has no Draft mode, since only its owner sees the result. It has no Global Reset either: **Use instance theme** removes the personal theme and keeps the user's saved themes.
 
 **Moving from the Theme Designer Pro Tool.** The Tool kept each browser's theme under the same browser keys this function uses for its own copy of the instance theme, so the first page load would overwrite it. This release keeps that theme aside the first time it loads in a browser. When the user then opens their personal **Themes** tab, the designer offers to start their personal theme from it. The Tool itself is now legacy: it gets no more updates, and its README points here.
+
+**The AI Consultant from the Theme Designer Pro Tool is here too.** The new **AI** button in the designer's header opens a short form: describe the theme you want, such as "warm copper" or "calm ocean at night", and a model on your instance picks its hue, chroma and lightness, plus a matching gradient when the description suits one. You can apply it to every mode or only the one you're editing, then fine-tune it with the sliders. It works in the instance designer and in the personal one, so users can use it on their own theme. Where the Tool replaced each mode's whole settings, this changes only the palette and gradient, so custom CSS, Canvas FX and locked colors stay. It asks the model in the new **AI Consultant Model** valve, or the task model under **Admin Settings > Interface**, local first, then external. The **Enable AI Consultant** valve turns it off.
+
+**A deleted account's personal theme goes with it.** When an account is deleted, from the Users page or by SCIM, its personal theme and library are removed from `DATA_DIR/theme/users/`.
 
 **Personal themes stay off until you turn them on.** With the valve off, nothing changes for anyone. Turning it off later puts everyone back on the instance theme, and keeps their personal themes for if you turn it back on.
 

@@ -19,12 +19,13 @@
 > | **Personal themes** | Per browser, in `localStorage` | Saved with each user's account, on every browser and device |
 > | **Instance theme for everyone** | No | Yes |
 > | **Where you design** | Inside a chat, as a tool call | A **Themes** tab in Settings |
+> | **AI Color Consultant** | Yes, as a tool call | Yes, the designer's **AI** button |
 > | **SSE live push** | No | Yes |
 > | **Development status** | Legacy — no longer updated | Actively developed |
 >
 > **Moving over:** ask your admin to install the Event Function and turn on its **Allow Personal Themes** valve. Then open **Settings**, choose **Themes** in the *Personal* section, and the designer offers to start your personal theme from the one this Tool left in your browser. Accept before you clear that browser's site data, or export your theme as JSON from this Tool first.
 >
-> This Tool keeps working as it is, but it won't be fixed or updated. Its AI-driven theming (`apply_theme()`) isn't in the Event Function yet.
+> This Tool keeps working as it is, but it won't be fixed or updated. Its AI-driven theming is in the Event Function too, as the designer's **AI** button.
 
 ---
 
