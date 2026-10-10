@@ -44,9 +44,11 @@ theme-designer-pro-presets/
 ├── schemas/                 # JSON schemas for validation
 ├── scripts/                 # Build, validation, and manifest tooling
 ├── themes/                  # Complete theme presets (.json)
-├── tools/                   # Theme Designer Pro tools + documentation
-│   ├── theme_designer_pro.py          # Standalone tool (legacy, no longer updated)
-│   ├── theme_designer_pro_launcher.py # Launcher companion (event function)
+├── launcher/                # Launcher companion tool for the event function + documentation
+│   ├── theme_designer_pro_launcher.py
+│   └── README.md
+├── tools/                   # Theme Designer Pro tool (legacy, no longer updated) + documentation
+│   ├── theme_designer_pro.py
 │   └── README.md
 ├── .gitignore
 ├── CONTRIBUTING.md
@@ -55,7 +57,7 @@ theme-designer-pro-presets/
 └── README.md
 ```
 
-> **Looking for the theming tools?** The Theme Designer Pro tool lives in [`tools/`](tools/), the event function lives in [`event-function/`](event-function/), and the companion launcher tool is at [`tools/theme_designer_pro_launcher.py`](tools/theme_designer_pro_launcher.py).
+> **Looking for the theming tools?** The Theme Designer Pro tool lives in [`tools/`](tools/), the event function lives in [`event-function/`](event-function/), and the companion launcher tool lives in [`launcher/`](launcher/).
 
 ---
 
@@ -141,9 +143,9 @@ The Theme Designer Pro Open WebUI **tool** — invoked via AI chat, renders insi
 
 The Theme Designer Pro **event function** — the maintained version, with server-side persistence and real-time SSE push to all connected users. Admins design the instance theme from a **Themes** tab in Settings, and with **Allow Personal Themes** on, every user designs their own personal theme from a **Themes** tab of their own. Themes are served through Open WebUI's shared `/static/loader.js` and `/static/custom.css`, composed per request, so it coexists with other plugins and never writes to the frontend build. See [`event-function/README.md`](event-function/README.md) for installation and how it differs from the tool.
 
-### 🚀 Launcher Tool ([`tools/theme_designer_pro_launcher.py`](tools/theme_designer_pro_launcher.py))
+### 🚀 Launcher Tool ([`launcher/`](launcher/))
 
-A lightweight **companion tool** for the Event Function that brings the designer into an Open WebUI chat. Ask it to open the designer, or describe a theme (_"a warm copper theme"_) and the chat model applies it, as the legacy Tool did. Users get their own personal theme; admins can also change the instance theme. Requires the Event Function to be installed and running.
+A lightweight **companion tool** for the Event Function that brings the designer into an Open WebUI chat. Ask it to open the designer, or describe a theme (_"a warm copper theme"_) and the chat model applies it, as the legacy Tool did. Users get their own personal theme; admins can also change the instance theme. Requires the Event Function to be installed and running, and **iframe Sandbox Allow Same Origin** turned on in each user's **Settings > Interface**. See [`launcher/README.md`](launcher/README.md).
 
 ---
 

@@ -29,7 +29,7 @@
 >
 > **Use this Event Function.** Since 1.10.0 it covers the Tool's personal themes too: an admin turns on **Allow Personal Themes**, and every user gets a **Themes** tab in their own Settings. A personal theme follows the user to every browser, instead of living in one. The [Tool variant](../tools/) is legacy and gets no more updates. Users moving from it can start their personal theme from the one the Tool left in their browser.
 >
-> Add the optional **[Launcher Tool](../tools/theme_designer_pro_launcher.py)** companion to open the designer from a chat, or to describe a theme in a chat and have it applied, as the Tool did.
+> Add the optional **[Launcher Tool](../launcher/)** companion to open the designer from a chat, or to describe a theme in a chat and have it applied, as the Tool did.
 
 ---
 
@@ -123,17 +123,12 @@ You can also import individual presets by pasting any file's GitHub URL directly
 
 ### Optional: Launcher Companion Tool
 
-The [Launcher Tool](../tools/theme_designer_pro_launcher.py) is a lightweight companion that brings the designer into an Open WebUI chat.
+The [Launcher Tool](../launcher/) is a lightweight companion that brings the designer into an Open WebUI chat:
 
-1. Go to **Workspace** > **Tools** > **Create New Tool**
-2. Copy the contents of [`theme_designer_pro_launcher.py`](../tools/theme_designer_pro_launcher.py) and paste it in
-3. Save, and turn the tool on for a chat. Then ask:
-   - _"Open Theme Designer Pro"_ opens the designer inside the chat. Users get their own personal theme, which needs **Allow Personal Themes** on; admins get the instance theme, or their own when they ask for it.
-   - _"Give me a warm copper theme"_ has the chat model pick the colors, as the Tool's AI Color Consultant did, and opens the designer with them applied. It changes the user's own personal theme. An admin who asks for it _"for everyone"_ changes the instance theme instead.
+- _"Open Theme Designer Pro"_ opens the designer inside the chat. Users get their own personal theme, which needs **Allow Personal Themes** on; admins get the instance theme, or their own when they ask for it.
+- _"Give me a warm copper theme"_ has the chat model pick the colors, as the Tool's AI Color Consultant did, and opens the designer with them applied. It changes the user's own personal theme. An admin who asks for it _"for everyone"_ changes the instance theme instead.
 
-A theme from a chat applies when the designer opens, within five minutes of the request; reopening the chat after that shows the designer without applying it again. The Launcher signs the values with Open WebUI's `WEBUI_SECRET_KEY` for that one user, so a link can't change anyone else's theme, or anyone's theme later on. The chat's **Pop out** link opens the designer without applying it again.
-
-> **Note:** The Launcher Tool requires the Event Function to be installed and running. It has its own `designer_url` valve that must match the Event Function's `designer_url` valve.
+Everyone who uses it needs **Settings > Interface > iframe Sandbox Allow Same Origin** turned on, or the chat shows a note naming the setting instead of the designer. The [Launcher's README](../launcher/README.md) covers installing it, that setting, and why a link can't change anyone's theme.
 
 ---
 
@@ -254,7 +249,7 @@ Valves are configured in the Admin Panel under **Functions → Theme Designer Pr
 
 | Valve | Type | Default | Description |
 |---|---|---|---|
-| **AI Consultant Model** | `str` | `""` | The model the AI Consultant asks, by its ID. Empty: the task model set under **Admin Settings > Interface**, local first, then external. |
+| **AI Consultant Model** | `str` | `""` | The model the AI Consultant asks, by its ID. Empty: the task model set under **Admin Settings > Interface**, local first, then external. Open WebUI asks it as the signed-in person, so for users to use the AI button, they need access to this model, as they do for a task model. |
 | **Designer URL** | `str` | `/api/v1/theme-designer` | URL path where the designer and all its sub-routes are served. Must start with `/api/v1/` — paths outside this prefix are auto-corrected to prevent the SPA catch-all from intercepting the route (a warning is logged). Changing this value triggers a route re-registration; the loader fragment picks up the new URL on its next compose. |
 
 > **Note:** All Valves default to their most permissive values — the event function behaves identically to an un-valved installation out of the box. Admins only need to configure Valves if they want to restrict specific features.
