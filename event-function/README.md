@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.9.1-blue)
+![Version](https://img.shields.io/badge/version-1.10.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -14,25 +14,22 @@
 >
 > Theme Designer Pro is available in two forms that target different audiences:
 >
-> | | **Event Function** (this file) | **Tool** |
+> | | **Event Function** (this file) | **Tool** (legacy) |
 > |---|---|---|
-> | **Target audience** | Server administrators | Individual users |
-> | **Storage** | Server-side file persistence (instance-wide) | Browser `localStorage` (per-user, per-browser) |
-> | **Theme scope** | Global — applies to all users on the instance | Personal — only affects your own browser |
-> | **Requires admin** | Yes | No |
-> | **SSE live push** | Yes — all connected clients update in real-time | No |
+> | **Instance theme** | Yes — the admin's theme for every user | No |
+> | **Personal themes** | Yes — each user's own theme, saved with their account, once the admin turns on **Allow Personal Themes** | Per browser only, in `localStorage` |
+> | **Where you design** | A **Themes** tab in Settings, or the designer URL | Inside a chat, as a tool call |
+> | **SSE live push** | Yes — every open page updates in real time | No |
 > | **Draft mode** | Yes — preview before publishing | No |
 > | **Community Themes browser** | Yes — curated themes with one-click install | No |
 > | **Sidebar / overlay transparency** | Yes — admin-controlled visual style valves | No |
 > | **Multi-worker support** | Yes — automatic Redis pub/sub for multi-worker SSE | No |
-> | **AI-driven theming** | No | Yes (`apply_theme()` tool method) |
-> | **Development status** | Actively developed | Maintenance mode |
+> | **AI-driven theming** | Not yet | Yes (`apply_theme()` tool method) |
+> | **Development status** | Actively developed | Legacy — no longer updated |
 >
-> **Both versions share the same core functionality** — OKLCH palette engine, Canvas FX, gradient builder, custom CSS, and snapshot library.
+> **Use this Event Function.** Since 1.10.0 it covers the Tool's personal themes too: an admin turns on **Allow Personal Themes**, and every user gets a **Themes** tab in their own Settings. A personal theme follows the user to every browser, instead of living in one. The [Tool variant](../tools/) is legacy and gets no more updates. Users moving from it can start their personal theme from the one the Tool left in their browser.
 >
-> If you're an **admin** looking for instance-wide theming, this Event Function is for you. Add the optional **[Launcher Tool](../tools/theme_designer_pro_launcher.py)** companion to open the designer directly from chat.
->
-> If you're a **regular user** who wants personal theme customization without admin access, use the **[Tool variant](../tools/)**.
+> Add the optional **[Launcher Tool](../tools/theme_designer_pro_launcher.py)** companion to open the designer directly from chat.
 
 ---
 
@@ -139,6 +136,7 @@ The [Launcher Tool](../tools/theme_designer_pro_launcher.py) is a lightweight co
 ## 🛠️ Usage Instructions
 
 1. **Open the Designer:** In Open WebUI, open **Settings** and choose **Themes** in the Admin section, after **Interface**. You can also go straight to the designer URL (default: `/api/v1/theme-designer`), which shows it full screen.
+   - **Personal themes:** with **Allow Personal Themes** on, every user, admins included, also gets a **Themes** tab in the *Personal* section of Settings, after **Interface**. It opens the same designer on their own theme, which only they see. Until they change something, they see the instance theme; their first change saves their personal theme. **Use instance theme** removes it again and keeps their saved themes.
 2. **Design your Theme:**
    - Use the **Segmented Toggle** to switch between System, Dark, OLED, Light, and Her mode design views
    - Use the **Themes** tab to browse, install, and manage community themes and saved snapshots
@@ -227,6 +225,7 @@ Valves are configured in the Admin Panel under **Functions → Theme Designer Pr
 |---|---|---|---|
 | **Enable Auth Page Theming** | `bool` | `true` | Allow theming the login/signup pages. When disabled, all "Show on Auth Pages" toggles are hidden and forced off. |
 | **Draft Mode Default** | `bool` | `false` | Open the designer in Draft mode by default. When enabled, the designer starts in Draft mode on every fresh page load, preventing accidental live changes. |
+| **Allow Personal Themes** | `bool` | `false` | Let every user design a personal theme from a **Themes** tab in their own Settings. A personal theme replaces the instance theme for that user only and follows them to every browser. The other valves still apply to it: Canvas FX, Custom CSS, the gradient builder, community themes, URL import and the transparency styles. Off: everyone sees the instance theme. |
 | **Show In Admin Settings** | `bool` | `true` | Add a **Themes** tab to the Admin section of Open WebUI's Settings, after **Interface**, that opens the designer inside Settings. The designer stays available at its own URL either way. |
 | **Auto Sync** | `bool` | `false` | Skip the Selective Sync modal when loading presets or syncing. When enabled, a "Sync All" toggle appears in the designer footer — turn it on to propagate changes to all modes, or leave it off to apply only to the active mode. |
 
@@ -368,13 +367,20 @@ All routes are registered under the configurable `designer_url` base (default: `
 | Method | Path | Auth | Description |
 |---|---|---|---|
 | GET | `{designer_url}` | Admin | Serves the Theme Designer Pro HTML page |
+| GET | `{designer_url}?scope=me` | Signed in | Serves the designer on the signed-in user's personal theme (403 while personal themes are off) |
 | POST | `{designer_url}` | Admin | Saves CSS + state + library, broadcasts SSE update |
-| GET | `{designer_url}/theme.css` | Public | Serves generated theme CSS (204 if inactive or missing) |
-| GET | `{designer_url}/state.json` | Public | Serves saved theme state JSON (204 if inactive or missing) |
-| GET | `{designer_url}/events` | Public | SSE endpoint for real-time push updates |
+| POST | `{designer_url}/me` | Signed in | Saves the user's personal theme or library; `{"reset": true}` removes the theme and keeps the library |
+| GET | `{designer_url}/theme.css` | Public | Serves generated theme CSS (empty if inactive or missing) |
+| GET | `{designer_url}/state.json` | Public | Serves saved theme state JSON (`{}` if inactive or missing) |
+| GET | `{designer_url}/me/theme.css` | Signed in | The user's personal theme CSS (empty when they have none, or personal themes are off) |
+| GET | `{designer_url}/me/state.json` | Signed in | The user's personal theme state (`{}` when they have none) |
+| GET | `{designer_url}/me/library.json` | Signed in | The user's own preset library |
+| GET | `{designer_url}/events` | Public | SSE endpoint for real-time push updates; a signed-in page also hears about its own personal theme |
 | GET | `{designer_url}/library.json` | Admin | Serves the preset library (themes, canvas, CSS, gradients) |
 
-> **Graceful degradation:** Missing CSS or state files return HTTP 204 (no content), not 500 errors. Corrupted JSON is served as-is — the client handles parse errors.
+Personal themes are stored per account in `DATA_DIR/theme/users/<user id>/`, with the same file names as the instance theme.
+
+> **Graceful degradation:** Missing CSS or state files return an empty `200` (`""` or `{}`), never a 500. Corrupted JSON is served as-is — the client handles parse errors.
 
 ---
 
@@ -462,6 +468,12 @@ The fallback is automatic — Worker errors are caught, the Worker is terminated
 - **The Themes tab doesn't show in Settings.**
   - _Check:_ The tab is in the **Admin** section, so only admins see it, and the **Show In Admin Settings** valve must be on. It also hides while the Settings search box holds words that don't match it, such as "web".
 
+- **Users don't get a Themes tab of their own.**
+  - _Check:_ Turn on **Allow Personal Themes**. Each user's tab appears in the *Personal* section of Settings, after **Interface**, after they reload the page.
+
+- **A user sees the instance theme, not the one they designed.**
+  - _Check:_ A personal theme is saved on the user's first change in their own **Themes** tab, so merely opening it leaves them on the instance theme. If they clicked **Use instance theme**, their personal theme was removed; their saved themes are still in their gallery. Turning **Allow Personal Themes** off puts everyone back on the instance theme, without deleting anyone's personal theme.
+
 ---
 
 ## 🗑️ Uninstallation & Complete Removal
@@ -489,6 +501,22 @@ Toggle the function **OFF** in the Admin Panel first. That withdraws its fragmen
 Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build — 1.7.0 never writes there.
 
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
+
+---
+
+## 📝 What's New in 1.10.0
+
+**Every user can have a personal theme.** Turn on the new **Allow Personal Themes** valve, and every user, admins included, gets a **Themes** tab in the *Personal* section of Settings, right after **Interface**. It opens the same designer on their own theme:
+- **Only they see it.** It replaces the instance theme for them alone, and everyone else keeps the instance theme.
+- **It follows the account, not the browser.** It's saved on the server with their account, so it shows on every browser and device they sign in from. Saving it updates their other open pages live, and nobody else's.
+- **It shows before Open WebUI draws its interface,** from a copy in the browser, the same way the instance theme does.
+- **It stays within your valves.** Canvas FX, Custom CSS, the gradient builder, community themes, URL import and the transparency styles apply as they do for the instance theme.
+
+**A personal theme starts from the instance theme, and only saves once the user changes something,** so opening the tab, or switching it between Dark and Light, leaves them on the instance theme and its later updates. The personal designer has no Draft mode, since only its owner sees the result. It has no Global Reset either: **Use instance theme** removes the personal theme and keeps the user's saved themes.
+
+**Moving from the Theme Designer Pro Tool.** The Tool kept each browser's theme under the same browser keys this function uses for its own copy of the instance theme, so the first page load would overwrite it. This release keeps that theme aside the first time it loads in a browser. When the user then opens their personal **Themes** tab, the designer offers to start their personal theme from it. The Tool itself is now legacy: it gets no more updates, and its README points here.
+
+**Personal themes stay off until you turn them on.** With the valve off, nothing changes for anyone. Turning it off later puts everyone back on the instance theme, and keeps their personal themes for if you turn it back on.
 
 ---
 
