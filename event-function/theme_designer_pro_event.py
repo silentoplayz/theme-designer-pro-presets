@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.9.0
+version: 1.9.1
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -22,7 +22,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.9.0"
+VERSION = "1.9.1"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -47,8 +47,13 @@ ASSET_KEY = "theme-designer-pro"  # fixed, used for asset_register too
 # ===========================================================================
 RELOAD_STATE_ATTR = "_owui_live_reload"  # {key: {active, exec_id, listener}}
 RELOAD_EXEC_ID = uuid.uuid4().hex  # new on every exec of this source
-# Open WebUI executes each function as module "function_<id>".
+# Open WebUI executes each function as module "function_<id>", or on newer
+# builds "function_<id>_<32 hex digits>"; the id is what is left of either.
 RELOAD_FUNCTION_ID = __name__.removeprefix("function_")
+if len(RELOAD_FUNCTION_ID) > 33 and RELOAD_FUNCTION_ID[-33] == "_" and all(
+    c in "0123456789abcdef" for c in RELOAD_FUNCTION_ID[-32:]
+):
+    RELOAD_FUNCTION_ID = RELOAD_FUNCTION_ID[:-33]
 
 reload_log = logging.getLogger("owui-live-reload")
 # asyncio only keeps weak references to tasks.
