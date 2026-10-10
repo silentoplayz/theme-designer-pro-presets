@@ -3323,6 +3323,139 @@ class Event:
 
     # -- HTML assembly -------------------------------------------------------
 
+    # The designer, editing one user's personal theme: its own storage keys and
+    # save routes, and controls that make sense for a theme only its owner sees.
+    PERSONAL_DESIGNER_KEYS = (
+        ("'owui_dev_theme_v1", "'owui_tdp_me_theme_v1"),
+        ("'owui_theme_snapshots'", "'owui_tdp_me_snapshots'"),
+        ("'owui_canvas_presets'", "'owui_tdp_me_canvas_presets'"),
+        ("'owui_css_presets'", "'owui_tdp_me_css_presets'"),
+        ("'owui_gradient_presets'", "'owui_tdp_me_gradient_presets'"),
+        ("'owui_theme_last_metadata'", "'owui_tdp_me_last_metadata'"),
+        ("'owui_canvas_last_mode'", "'owui_tdp_me_canvas_last_mode'"),
+        ("'owui_canvas_last_script'", "'owui_tdp_me_canvas_last_script'"),
+        ("'owui_theme_draft_mode'", "'owui_tdp_me_draft_mode'"),
+        ("fetch('{ROUTE_BASE}', ", "fetch('{ROUTE_BASE}/me', "),
+        ("'{ROUTE_BASE}/library.json'", "'{ROUTE_BASE}/me/library.json'"),
+    )
+
+    PERSONAL_DESIGNER_BLOCK = r"""
+<style id="tdp-personal-style">
+html[data-tdp-scope="me"] #inactive-badge,
+html[data-tdp-scope="me"] #draft-toggle-wrap,
+html[data-tdp-scope="me"] #draft-publish-btn,
+html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
+.tdp-personal-badge { display: flex; align-items: center; gap: 6px; background: color-mix(in srgb, var(--accent) 10%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); color: var(--accent); font-size: 0.7rem; font-weight: 700; padding: 5px 12px; border-radius: 8px; white-space: nowrap; }
+.tdp-tool-offer { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 12px auto 0; width: calc(100% - 24px); max-width: 1920px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-deep); color: var(--text-main); font-size: 0.8rem; }
+.tdp-tool-offer span { flex: 1; min-width: 12rem; }
+</style>
+<script>
+(function () {
+    var cfg = window.__THEME_PRO_CONFIG__ || {};
+    if (cfg.scope !== 'me') return;
+    document.documentElement.setAttribute('data-tdp-scope', 'me');
+    var hasTheme = !!cfg.personalHasTheme;
+    // Until the user changes something, saves wait (see syncToServer).
+    window.__TDP_HOLD_SAVES__ = !hasTheme;
+
+    function post(body) {
+        return fetch('{ROUTE_BASE}/me', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+    }
+
+    function badge() {
+        var old = document.getElementById('inactive-badge');
+        if (!old || document.getElementById('tdp-personal-badge')) return;
+        var el = document.createElement('span');
+        el.className = 'tdp-personal-badge';
+        el.id = 'tdp-personal-badge';
+        el.setAttribute('data-tooltip', 'Only you see this theme. Everyone else keeps the instance theme.');
+        el.textContent = 'My theme';
+        old.parentNode.insertBefore(el, old.nextSibling);
+    }
+
+    // Back to the instance theme: the personal theme goes, the user's saved
+    // themes stay, and every page they have open follows.
+    function useInstanceButton() {
+        var reset = document.getElementById('nuclear-btn');
+        if (!reset || document.getElementById('tdp-use-instance-btn')) return;
+        var btn = document.createElement('button');
+        btn.className = 'btn btn-danger';
+        btn.id = 'tdp-use-instance-btn';
+        btn.textContent = 'Use instance theme';
+        btn.setAttribute('data-tooltip', 'Remove your personal theme and go back to the theme everyone else sees');
+        btn.hidden = !hasTheme;
+        btn.addEventListener('click', function () {
+            if (!window.confirm('Remove your personal theme and use the instance theme again? Your saved themes stay in your gallery.')) return;
+            post({ reset: true }).then(function () { location.reload(); });
+        });
+        reset.parentNode.insertBefore(btn, reset.nextSibling);
+    }
+    window.addEventListener('tdp-personal-saving', function () {
+        hasTheme = true;
+        var btn = document.getElementById('tdp-use-instance-btn');
+        if (btn) btn.hidden = false;
+        var offer = document.getElementById('tdp-tool-offer');
+        if (offer) offer.remove();
+    });
+
+    // A theme the Theme Designer Pro Tool left in this browser, kept aside by
+    // the bootloader before the instance theme replaced it.
+    function toolOffer() {
+        if (hasTheme) return;
+        var state, css;
+        try {
+            state = localStorage.getItem('owui_tdp_tool_state');
+            css = localStorage.getItem('owui_tdp_tool_css');
+            if (localStorage.getItem('owui_tdp_tool_dismissed')) return;
+        } catch (e) { return; }
+        if (!state || !css || state === window.__THEME_PRO_SAVED_STATE__) return;
+        var tabs = document.querySelector('.tabs');
+        if (!tabs) return;
+        var bar = document.createElement('div');
+        bar.className = 'tdp-tool-offer';
+        bar.id = 'tdp-tool-offer';
+        bar.setAttribute('role', 'region');
+        bar.setAttribute('aria-label', 'Theme from the Theme Designer Pro Tool');
+        var text = document.createElement('span');
+        text.textContent = 'This browser has a theme you made with the Theme Designer Pro Tool. Start your personal theme from it?';
+        var use = document.createElement('button');
+        use.className = 'btn btn-primary';
+        use.textContent = 'Start from it';
+        use.addEventListener('click', function () {
+            use.disabled = true;
+            post({ css: css, state: state }).then(function (r) {
+                if (r.ok) location.reload();
+                else { use.disabled = false; if (typeof showToast === 'function') showToast('⚠️ Could not save that theme'); }
+            });
+        });
+        var no = document.createElement('button');
+        no.className = 'btn';
+        no.textContent = 'Not now';
+        no.addEventListener('click', function () {
+            try { localStorage.setItem('owui_tdp_tool_dismissed', '1'); } catch (e) {}
+            bar.remove();
+        });
+        bar.appendChild(text);
+        bar.appendChild(use);
+        bar.appendChild(no);
+        tabs.parentNode.insertBefore(bar, tabs);
+    }
+
+    function start() {
+        badge();
+        useInstanceButton();
+        toolOffer();
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
+    else start();
+})();
+</script>
+"""
+
     def _build_html(self, user_id: str | None = None) -> str:
         """Assemble the full Theme Designer HTML with current valve config.
 
@@ -6336,6 +6469,16 @@ location.reload();</code></pre>
     function syncToServer(css, sections, stateStr) {
         // Draft mode: skip server sync (changes stay local only)
         if (_draftMode) return;
+        // Personal mode holds saves until the theme actually changes, so
+        // opening the designer, or switching it between modes, never turns
+        // the instance theme into the user's own.
+        if (window.__TDP_HOLD_SAVES__) {
+            const st = stateStr || Storage.getRaw('theme') || '{}';
+            if (window.__TDP_START_STATE__ === undefined) window.__TDP_START_STATE__ = st;
+            if (st === window.__TDP_START_STATE__) return;
+            window.__TDP_HOLD_SAVES__ = false;
+            window.dispatchEvent(new Event('tdp-personal-saving'));
+        }
         // Function toggled off: the POST would come back 503 and the edit would
         // be dropped on the floor with only a generic "sync failed" toast. Hold
         // it instead and republish when the function comes back.
@@ -14937,14 +15080,23 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             "autoSync": self.valves.auto_sync,
             "sidebarTransparency": self.valves.sidebar_transparency,
             "overlayTransparency": self.valves.overlay_transparency,
+            # "me": the signed-in user's personal theme; "instance": everyone's.
+            "scope": "me" if user_id else "instance",
+            "personalHasTheme": bool(user_id) and self._get_css_path(user_id).exists(),
         }
+        if user_id:
+            # Personal designs follow the admin's Draft choice no further:
+            # saves only ever change the user's own theme.
+            valve_config["draftModeDefault"] = False
         safe_config = _json.dumps(valve_config).replace("</", "<\\/")
         # The designer starts from the theme the server is serving, as the
         # main app's bootloader does. Its own localStorage copy can predate a
         # save made from another browser, and Live mode saves whatever it
         # starts from straight back to every user. null means no saved theme.
         try:
-            saved_state = self._load_state()
+            # A personal designer starts from the user's own theme, or from the
+            # instance theme until they have one.
+            saved_state = (self._load_state(user_id) if user_id else None) or self._load_state()
         except OSError:
             saved_state = None  # Reset race / unreadable data dir
         if not saved_state or saved_state.strip() in ("", "{}"):
@@ -15057,6 +15209,13 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                         'save-json-valid-badge', 'save-json-collapse-btn', 'save-json-cancel-btn', 'Close without saving',
                         [('save-json-discard-btn', 'Cancel', 'btn'), ('save-json-save-btn', 'Save as New Theme', 'btn btn-primary')]),
         ])
+
+        if user_id:
+            for old, new in self.PERSONAL_DESIGNER_KEYS:
+                html_content = html_content.replace(old, new)
+            html_content = html_content.replace(
+                "</body>", self.PERSONAL_DESIGNER_BLOCK + "</body>", 1
+            )
 
         final_html = (
             html_content.replace("{VERSION}", VERSION)
