@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.9.0-blue)
+![Version](https://img.shields.io/badge/version-1.9.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -317,7 +317,7 @@ Theme Designer Pro persists themes on the server and pushes changes to every con
    **FOUC prevention:** `/static/custom.css` carries a safe subset of the theme (palette variables + custom CSS, with structural and gradient rules deferred so the page doesn't flash through to the background before the canvas starts). Open WebUI already loads that file as a render-blocking stylesheet, so the subset applies before first paint. The bootloader then fetches the full CSS and applies the deferred rules. Canvas FX scripts are deliberately **not** inlined — they are the bulk of the state, and the composed asset is rebuilt and hashed on every request, so they arrive with the `/state.json` fetch a moment later. As a **Watchtower recovery** fallback the bootloader writes theme data through to `localStorage`, so a client can re-apply the last known theme before the server files are refetched.
 
 4. **SSE Push Architecture:**
-   When the designer saves a theme, the POST handler writes CSS + state to disk and calls `_broadcast_update()`, which pushes a lightweight version token (with ETags) to all connected SSE clients (`_sse_clients`); each client then refetches `/theme.css` and `/state.json`, with ETag revalidation so unchanged files cost a cheap 304. SSE clients are stored on `app.state` to survive function hot-reloads. The `theme-disable` event type is broadcast when the admin toggles the function OFF. In multi-worker deployments, `_redis_publish()` broadcasts to the `theme_pro_sse` Redis pub/sub channel, ensuring all workers relay updates to their local SSE clients.
+   When the designer saves a theme, the POST handler writes CSS + state to disk and calls `_broadcast_update()`, which pushes a lightweight version token (with ETags) to all connected SSE clients (`_sse_clients`); each client then refetches `/theme.css` and `/state.json`, with ETag revalidation so unchanged files cost a cheap 304. SSE clients are stored on `app.state` to survive function hot-reloads. The `theme-disable` event type is broadcast when the admin toggles the function OFF. In multi-worker deployments, `_redis_publish()` broadcasts to the `<REDIS_KEY_PREFIX>:theme_pro_sse` Redis pub/sub channel (for example `open-webui:theme_pro_sse`), ensuring all workers relay updates to their local SSE clients.
 
    **Valve convergence (multi-worker):** Open WebUI reloads a function's valves only on the worker that served the change, so peers hold stale valves until their own next event. The changing worker detects that *any* valve differs from its last snapshot and publishes an internal `valvesync` control message on the same Redis channel. Peers intercept it before it reaches a browser, re-read their valves via `Functions.get_function_valves_by_id`, re-prime their delivery caches, and nudge their local clients — re-registering routes if `designer_url` moved. The control message is framed as an SSE comment, so a peer on an older build that forwards raw channel traffic delivers a harmless keep-alive. The whole path is fail-safe: a peer that cannot read or validate the stored valves keeps what it has and converges on its own next event, exactly as before this mechanism existed.
 
@@ -489,6 +489,18 @@ Toggle the function **OFF** in the Admin Panel first. That withdraws its fragmen
 Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build — 1.7.0 never writes there.
 
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
+
+---
+
+## 📝 What's New in 1.9.1
+
+**Turning the function off works again on newer Open WebUI builds.** Open WebUI's development branch now loads each function under a module name with a random suffix, `function_<id>_<hex>` instead of `function_<id>`. The function worked out its own ID from that name, so on those builds it got the wrong one. It never recognized its own "being disabled" event, kept serving the theme after you turned it off, and logged `reload from db failed`. It now finds its ID under either name. Released Open WebUI versions up to v0.11.4 were not affected.
+
+**Turning the function off hides the Themes tab in Settings.** Every open page drops the tab and the designer inside it, without a refresh. If the tab was open, Settings goes back to the tab you were on before. A Global Reset leaves the tab, since the function stays on.
+
+**Two instances sharing one Redis server no longer hear each other.** Live updates between workers travel on a Redis channel that had the same name on every instance. Redis channels ignore the database number, so a second Open WebUI on the same Redis server, even on another database, received this one's theme updates and disables. A Global Reset on one stripped the theme from the other's open pages until they were refreshed. The channel is now named under each instance's `REDIS_KEY_PREFIX`, as Open WebUI names its own keys.
+
+This release adds no valves and changes no theme settings.
 
 ---
 
@@ -811,7 +823,7 @@ graph TD
     %% --- SSE PUSH ---
     subgraph SSELayer ["Real-Time Push: Server-Sent Events"]
         Broadcast --> RedisPublish["_redis_publish()"]:::redis
-        RedisPublish -.->|"Multi-worker"| RedisChannel[("Redis: theme_pro_sse")]:::redis
+        RedisPublish -.->|"Multi-worker"| RedisChannel[("Redis: {prefix}:theme_pro_sse")]:::redis
         RedisChannel -.-> OtherWorkers(("Other Workers")):::redis
         Broadcast --> SSEClients[("Local SSE Clients")]:::sse
         SSEClients --> Client1(("Browser 1")):::frontend
