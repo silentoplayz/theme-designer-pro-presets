@@ -18,18 +18,18 @@
 > |---|---|---|
 > | **Instance theme** | Yes — the admin's theme for every user | No |
 > | **Personal themes** | Yes — each user's own theme, saved with their account, once the admin turns on **Allow Personal Themes** | Per browser only, in `localStorage` |
-> | **Where you design** | A **Themes** tab in Settings, or the designer URL | Inside a chat, as a tool call |
+> | **Where you design** | A **Themes** tab in Settings, the designer URL, or a chat through the Launcher Tool | Inside a chat, as a tool call |
 > | **SSE live push** | Yes — every open page updates in real time | No |
 > | **Draft mode** | Yes — preview before publishing | No |
 > | **Community Themes browser** | Yes — curated themes with one-click install | No |
 > | **Sidebar / overlay transparency** | Yes — admin-controlled visual style valves | No |
 > | **Multi-worker support** | Yes — automatic Redis pub/sub for multi-worker SSE | No |
-> | **AI-driven theming** | Yes — the **AI** button in the designer | Yes (`apply_theme()` tool method) |
+> | **AI-driven theming** | Yes — the **AI** button in the designer, or describing a theme in a chat with the Launcher Tool | Yes (`apply_theme()` tool method) |
 > | **Development status** | Actively developed | Legacy — no longer updated |
 >
 > **Use this Event Function.** Since 1.10.0 it covers the Tool's personal themes too: an admin turns on **Allow Personal Themes**, and every user gets a **Themes** tab in their own Settings. A personal theme follows the user to every browser, instead of living in one. The [Tool variant](../tools/) is legacy and gets no more updates. Users moving from it can start their personal theme from the one the Tool left in their browser.
 >
-> Add the optional **[Launcher Tool](../tools/theme_designer_pro_launcher.py)** companion to open the designer directly from chat.
+> Add the optional **[Launcher Tool](../tools/theme_designer_pro_launcher.py)** companion to open the designer from a chat, or to describe a theme in a chat and have it applied, as the Tool did.
 
 ---
 
@@ -123,11 +123,15 @@ You can also import individual presets by pasting any file's GitHub URL directly
 
 ### Optional: Launcher Companion Tool
 
-The [Launcher Tool](../tools/theme_designer_pro_launcher.py) is a lightweight companion that opens the designer page directly inside an Open WebUI chat via iframe — no need to navigate to the URL manually.
+The [Launcher Tool](../tools/theme_designer_pro_launcher.py) is a lightweight companion that brings the designer into an Open WebUI chat.
 
 1. Go to **Workspace** > **Tools** > **Create New Tool**
 2. Copy the contents of [`theme_designer_pro_launcher.py`](../tools/theme_designer_pro_launcher.py) and paste it in
-3. Save — now you can ask your AI: _"Open Theme Designer Pro"_ and it renders inside the chat
+3. Save, and turn the tool on for a chat. Then ask:
+   - _"Open Theme Designer Pro"_ opens the designer inside the chat. Users get their own personal theme, which needs **Allow Personal Themes** on; admins get the instance theme, or their own when they ask for it.
+   - _"Give me a warm copper theme"_ has the chat model pick the colors, as the Tool's AI Color Consultant did, and opens the designer with them applied. It changes the user's own personal theme. An admin who asks for it _"for everyone"_ changes the instance theme instead.
+
+A theme from a chat applies when the designer opens, within five minutes of the request; reopening the chat after that shows the designer without applying it again. The Launcher signs the values with Open WebUI's `WEBUI_SECRET_KEY` for that one user, so a link can't change anyone else's theme, or anyone's theme later on. The chat's **Pop out** link opens the designer without applying it again.
 
 > **Note:** The Launcher Tool requires the Event Function to be installed and running. It has its own `designer_url` valve that must match the Event Function's `designer_url` valve.
 
@@ -370,7 +374,8 @@ All routes are registered under the configurable `designer_url` base (default: `
 | Method | Path | Auth | Description |
 |---|---|---|---|
 | GET | `{designer_url}` | Admin | Serves the Theme Designer Pro HTML page |
-| GET | `{designer_url}?scope=me` | Signed in | Serves the designer on the signed-in user's personal theme (403 while personal themes are off) |
+| GET | `{designer_url}?scope=me` | Signed in | Serves the designer on the signed-in user's personal theme (403 while personal themes are off: a short page for a browser, JSON otherwise) |
+| GET | `{designer_url}?apply=…` | As above | Opens the designer with a theme from a chat applied. Only a token the Launcher Tool signed for the same user, within five minutes, is applied; anything else is ignored |
 | POST | `{designer_url}` | Admin | Saves CSS + state + library, broadcasts SSE update |
 | POST | `{designer_url}/consult` | Admin, or signed in with personal themes on | The AI Consultant: `{"description": "..."}` in, `{"hue", "chroma", "lightness", "gradient", "name", "model"}` out. One request every few seconds per user |
 | POST | `{designer_url}/me` | Signed in | Saves the user's personal theme or library; `{"reset": true}` removes the theme and keeps the library |
@@ -521,6 +526,8 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 **Moving from the Theme Designer Pro Tool.** The Tool kept each browser's theme under the same browser keys this function uses for its own copy of the instance theme, so the first page load would overwrite it. This release keeps that theme aside the first time it loads in a browser. When the user then opens their personal **Themes** tab, the designer offers to start their personal theme from it. The Tool itself is now legacy: it gets no more updates, and its README points here.
 
 **The AI Consultant from the Theme Designer Pro Tool is here too.** The new **AI** button in the designer's header opens a short form: describe the theme you want, such as "warm copper" or "calm ocean at night", and a model on your instance picks its hue, chroma and lightness, plus a matching gradient when the description suits one. You can apply it to every mode or only the one you're editing, then fine-tune it with the sliders. It works in the instance designer and in the personal one, so users can use it on their own theme. Where the Tool replaced each mode's whole settings, this changes only the palette and gradient, so custom CSS, Canvas FX and locked colors stay. It asks the model in the new **AI Consultant Model** valve, or the task model under **Admin Settings > Interface**, local first, then external. The **Enable AI Consultant** valve turns it off.
+
+**Describe a theme in a chat again.** The Launcher Tool, now 1.1.0, brings back the Tool's `apply_theme`. Ask for _"a warm copper theme"_ in a chat with it turned on, and the chat model picks the colors and opens the designer with them applied, to fine-tune. It changes your own personal theme; an admin who asks for it _"for everyone"_ changes the instance theme. The Launcher also stopped being admin-only: users who ask to open the designer get their own personal theme.
 
 **A deleted account's personal theme goes with it.** When an account is deleted, from the Users page or by SCIM, its personal theme and library are removed from `DATA_DIR/theme/users/`.
 

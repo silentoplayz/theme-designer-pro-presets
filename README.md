@@ -143,7 +143,7 @@ The Theme Designer Pro **event function** — the maintained version, with serve
 
 ### 🚀 Launcher Tool ([`tools/theme_designer_pro_launcher.py`](tools/theme_designer_pro_launcher.py))
 
-A lightweight **companion tool** for the Event Function that opens the designer page directly inside an Open WebUI chat via iframe — no need to navigate to the URL manually. Admin-only. Requires the Event Function to be installed and running.
+A lightweight **companion tool** for the Event Function that brings the designer into an Open WebUI chat. Ask it to open the designer, or describe a theme (_"a warm copper theme"_) and the chat model applies it, as the legacy Tool did. Users get their own personal theme; admins can also change the instance theme. Requires the Event Function to be installed and running.
 
 ---
 

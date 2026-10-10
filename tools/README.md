@@ -23,9 +23,9 @@
 > | **SSE live push** | No | Yes |
 > | **Development status** | Legacy — no longer updated | Actively developed |
 >
-> **Moving over:** ask your admin to install the Event Function and turn on its **Allow Personal Themes** valve. Then open **Settings**, choose **Themes** in the *Personal* section, and the designer offers to start your personal theme from the one this Tool left in your browser. Accept before you clear that browser's site data, or export your theme as JSON from this Tool first.
+> **Moving over:** ask your admin to install the Event Function and turn on its **Allow Personal Themes** valve, and, if you like describing themes in a chat, the [Launcher Tool](theme_designer_pro_launcher.py). Then open **Settings**, choose **Themes** in the *Personal* section, and the designer offers to start your personal theme from the one this Tool left in your browser. Accept before you clear that browser's site data, or export your theme as JSON from this Tool first.
 >
-> This Tool keeps working as it is, but it won't be fixed or updated. Its AI-driven theming is in the Event Function too, as the designer's **AI** button.
+> This Tool keeps working as it is, but it won't be fixed or updated. Its AI-driven theming is in the Event Function too: the designer's **AI** button, and in a chat through the Launcher Tool's `apply_theme`.
 
 ---
 
