@@ -1899,20 +1899,24 @@ class Event:
 
     var ROUTE = '__THEME_ROUTE__';
     var LABEL = 'Theme Designer Pro';
-    // The tab's own name, short like the dialog's other tabs.
+    // Each tab's own name, short like the dialog's other tabs.
     var TAB_LABEL = 'Themes';
-    var PANEL_ID = 'tab-admin-theme-designer';
-    // Words the dialog's search box finds this tab by.
+    // The Personal tab edits the signed-in user's own theme, the Admin tab the
+    // instance theme. Each sits after Interface in its section.
+    var SPECS = [];
+    if (__TAB_PERSONAL__) SPECS.push({ key: 'personal', panelId: 'tab-theme-designer', after: 'tab-interface', admin: false, src: ROUTE + '?embed=settings&scope=me', title: LABEL + ', my theme' });
+    if (__TAB_ADMIN__) SPECS.push({ key: 'admin', panelId: 'tab-admin-theme-designer', after: 'tab-admin-interface', admin: true, src: ROUTE + '?embed=settings', title: LABEL });
+    // Words the dialog's search box finds these tabs by.
     var KEYWORDS = 'themes designer pro colors colours palette css canvas fx gradient appearance';
     // Heroicons' swatch.
     var ICON = '<svg class="size-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 0 0 5.304 0l6.401-6.402M6.75 21A3.75 3.75 0 0 1 3 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 0 0 3.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008Z"/></svg>';
     var STYLE = [
         '.tdp-settings-panel{display:none;position:relative;flex:1 1 auto;min-height:0;flex-direction:column}',
-        '[data-tdp-open]>.tdp-settings-panel{display:flex}',
+        '[data-tdp-open="personal"]>.tdp-settings-panel[data-tdp-key="personal"],[data-tdp-open="admin"]>.tdp-settings-panel[data-tdp-key="admin"]{display:flex}',
         '[data-tdp-open]>:not(.tdp-settings-panel){display:none!important}',
         '.tdp-settings-panel iframe{flex:1 1 auto;width:100%;min-height:0;border:0;border-radius:.75rem;background:transparent}',
         '.tdp-settings-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--color-gray-500,#9b9b9b);pointer-events:none}',
-        // The dialog's own tab keeps its selected look while this one is open; drop it.
+        // The dialog's own tab keeps its selected look while ours is open; drop it.
         '#settings-tabs-container[data-tdp-active] [data-tdp-was]{font-weight:400;color:var(--color-gray-600,#676767);background:transparent}',
         'html.dark #settings-tabs-container[data-tdp-active] [data-tdp-was]{color:var(--color-gray-400,#b4b4b4)}'
     ].join('');
@@ -1959,74 +1963,83 @@ class Event:
         return query.split(/\s+/).every(function (word) { return KEYWORDS.indexOf(word) !== -1; });
     }
 
-    // After the admin Interface tab; while searching, after the last admin tab
-    // the search left, or last in the list when it left none.
-    function anchorFor(nav) {
+    // After its section's Interface tab; while searching, after the last tab
+    // of its section the search left, or last in the list when it left none.
+    function anchorFor(nav, spec) {
         var query = searchText(nav);
         if (query && !matches(query)) return null;
-        var interfaceTab = nav.querySelector('button[role="tab"][aria-controls="tab-admin-interface"]');
-        if (interfaceTab) return interfaceTab;
+        var after = nav.querySelector('button[role="tab"][aria-controls="' + spec.after + '"]');
+        if (after) return after;
         if (!query) return null;
-        var admin = nav.querySelectorAll('button[role="tab"][aria-controls^="tab-admin-"]:not(.tdp-settings-tab)');
-        if (admin.length) return admin[admin.length - 1];
-        return nav.querySelector('.tabs');
+        var section = [].filter.call(nativeTabs(nav), function (tab) {
+            return (tab.getAttribute('aria-controls') || '').indexOf('tab-admin-') === 0 ? spec.admin : !spec.admin;
+        });
+        if (section.length) return section[section.length - 1];
+        // An admin tab never shows for someone the dialog gives no admin tabs.
+        return spec.admin && !nav.querySelector('button[role="tab"][aria-controls^="tab-admin-"]') && !nav.__tdpAdminSeen ? null : nav.querySelector('.tabs');
     }
 
-    function isOpen(nav) {
-        return nav.hasAttribute('data-tdp-active');
+    // The key of the tab of ours that is open, or ''.
+    function openKey(nav) {
+        return nav.getAttribute('data-tdp-active') || '';
     }
 
-    function makeTab() {
+    function makeTab(spec) {
         var tab = document.createElement('button');
         tab.type = 'button';
         tab.setAttribute('role', 'tab');
-        tab.setAttribute('aria-controls', PANEL_ID);
+        tab.setAttribute('aria-controls', spec.panelId);
+        tab.setAttribute('data-tdp-key', spec.key);
         tab.innerHTML = ICON + '<span>' + TAB_LABEL + '</span>';
         tab.addEventListener('click', function () {
             var nav = document.getElementById('settings-tabs-container');
-            if (nav) open(nav);
+            if (nav) open(nav, spec);
         });
         return tab;
     }
 
-    function makePanel() {
+    function makePanel(spec) {
         var panel = document.createElement('div');
         panel.className = 'tdp-settings-panel';
-        panel.id = PANEL_ID;
+        panel.id = spec.panelId;
+        panel.setAttribute('data-tdp-key', spec.key);
         panel.setAttribute('role', 'tabpanel');
         var loading = document.createElement('div');
         loading.className = 'tdp-settings-loading';
         loading.textContent = 'Loading ' + LABEL + '…';
         var frame = document.createElement('iframe');
-        frame.title = LABEL;
-        frame.src = ROUTE + '?embed=settings';
+        frame.title = spec.title;
+        frame.src = spec.src;
         frame.addEventListener('load', function () { loading.remove(); });
         panel.appendChild(loading);
         panel.appendChild(frame);
         return panel;
     }
 
-    // The panel stays in the dialog once loaded, hidden while another tab is
+    // A panel stays in the dialog once loaded, hidden while another tab is
     // open, so coming back is instant and keeps the designer where you left it.
-    function open(nav) {
+    function open(nav, spec) {
         var host = nav.nextElementSibling;
-        if (!host || isOpen(nav)) return;
+        if (!host || openKey(nav) === spec.key) return;
         readClasses(nav);
-        var tabs = nativeTabs(nav);
-        for (var i = 0; i < tabs.length; i++) {
-            if (tabs[i].getAttribute('aria-selected') === 'true') {
-                tabs[i].setAttribute('aria-selected', 'false');
-                tabs[i].setAttribute('data-tdp-was', '');
+        // Switching between our two tabs keeps the dialog's tab marked as the
+        // one to go back to.
+        if (!openKey(nav)) {
+            var tabs = nativeTabs(nav);
+            for (var i = 0; i < tabs.length; i++) {
+                if (tabs[i].getAttribute('aria-selected') === 'true') {
+                    tabs[i].setAttribute('aria-selected', 'false');
+                    tabs[i].setAttribute('data-tdp-was', '');
+                }
             }
         }
-        var panel = host.querySelector(':scope > .tdp-settings-panel');
-        if (!panel) host.appendChild(makePanel());
-        host.setAttribute('data-tdp-open', '');
-        nav.setAttribute('data-tdp-active', '');
+        if (!host.querySelector(':scope > .tdp-settings-panel[data-tdp-key="' + spec.key + '"]')) host.appendChild(makePanel(spec));
+        host.setAttribute('data-tdp-open', spec.key);
+        nav.setAttribute('data-tdp-active', spec.key);
         render();
     }
 
-    // `clicked` is the dialog tab that closed it; picking the tab that was
+    // `clicked` is the dialog tab that closed ours; picking the tab that was
     // open before does not change the dialog's choice, so give it back its state.
     function close(nav, clicked) {
         var host = nav.nextElementSibling;
@@ -2045,12 +2058,12 @@ class Event:
         nav.__tdpWatched = true;
         nav.addEventListener('click', function (evt) {
             var tab = evt.target.closest && evt.target.closest('button[role="tab"]');
-            if (tab && !tab.classList.contains('tdp-settings-tab') && isOpen(nav)) close(nav, tab);
+            if (tab && !tab.classList.contains('tdp-settings-tab') && openKey(nav)) close(nav, tab);
         }, true);
         nav.addEventListener('input', schedule);
         // The dialog picked another tab on its own, as the search box's Enter does.
         new MutationObserver(function () {
-            if (!isOpen(nav)) return;
+            if (!openKey(nav)) return;
             var tabs = nativeTabs(nav);
             for (var i = 0; i < tabs.length; i++) {
                 if (tabs[i].getAttribute('aria-selected') === 'true' && !tabs[i].hasAttribute('data-tdp-was')) {
@@ -2061,15 +2074,32 @@ class Event:
         }).observe(nav, { attributes: true, attributeFilter: ['aria-selected'], subtree: true });
     }
 
-    // Theme Designer Pro was turned off while this page was open: take the tab
-    // and the designer away, and give the dialog back the tab it had open.
+    // Theme Designer Pro was turned off while this page was open: take the tabs
+    // and the designers away, and give the dialog back the tab it had open.
     function withdraw(nav) {
-        if (isOpen(nav)) close(nav, nav.querySelector('[data-tdp-was]'));
+        if (openKey(nav)) close(nav, nav.querySelector('[data-tdp-was]'));
         var host = nav.nextElementSibling;
-        var panel = host && host.querySelector(':scope > .tdp-settings-panel');
-        if (panel) panel.remove();
-        var tab = nav.querySelector('.tdp-settings-tab');
-        if (tab) tab.remove();
+        if (host) [].forEach.call(host.querySelectorAll(':scope > .tdp-settings-panel'), function (panel) { panel.remove(); });
+        [].forEach.call(nav.querySelectorAll('.tdp-settings-tab'), function (tab) { tab.remove(); });
+    }
+
+    function place(nav, spec) {
+        var anchor = anchorFor(nav, spec);
+        var tab = nav.querySelector('.tdp-settings-tab[data-tdp-key="' + spec.key + '"]');
+        if (!anchor) {
+            if (tab) tab.remove();
+            return;
+        }
+        if (!tab) tab = makeTab(spec);
+        var isOpen = openKey(nav) === spec.key;
+        var className = (isOpen ? activeClass : inactiveClass) + ' tdp-settings-tab';
+        if (tab.className !== className) tab.className = className;
+        tab.setAttribute('aria-selected', isOpen ? 'true' : 'false');
+        if (anchor.classList.contains('tabs')) {
+            if (anchor.lastElementChild !== tab) anchor.appendChild(tab);
+        } else if (anchor.nextElementSibling !== tab) {
+            anchor.after(tab);
+        }
     }
 
     function render() {
@@ -2080,25 +2110,12 @@ class Event:
             withdraw(nav);
             return;
         }
-        var anchor = anchorFor(nav);
-        var tab = nav.querySelector('.tdp-settings-tab');
-        if (!anchor) {
-            if (tab) tab.remove();
-            return;
-        }
+        // Remembered so a search that hides every admin tab keeps ours for an admin.
+        if (nav.querySelector('button[role="tab"][aria-controls^="tab-admin-"]')) nav.__tdpAdminSeen = true;
         ensureStyle();
         watch(nav);
         readClasses(nav);
-        if (!tab) tab = makeTab();
-        var open = isOpen(nav);
-        var className = (open ? activeClass : inactiveClass) + ' tdp-settings-tab';
-        if (tab.className !== className) tab.className = className;
-        tab.setAttribute('aria-selected', open ? 'true' : 'false');
-        if (anchor.classList.contains('tabs')) {
-            if (anchor.lastElementChild !== tab) anchor.appendChild(tab);
-        } else if (anchor.nextElementSibling !== tab) {
-            anchor.after(tab);
-        }
+        SPECS.forEach(function (spec) { place(nav, spec); });
     }
 
     function schedule() {
@@ -2170,8 +2187,13 @@ class Event:
             embedded = _json.dumps(self._strip_canvas_scripts(delivery[0]))
         js = js.replace("__EMBEDDED_STATE__", embedded)
 
-        if active and self.valves.show_in_admin_settings:
-            js += "\n" + self.ADMIN_TAB_SCRIPT.strip().replace("__THEME_ROUTE__", cache_key[1])
+        if active and (self.valves.show_in_admin_settings or self.valves.allow_personal_themes):
+            js += "\n" + (
+                self.ADMIN_TAB_SCRIPT.strip()
+                .replace("__THEME_ROUTE__", cache_key[1])
+                .replace("__TAB_ADMIN__", "true" if self.valves.show_in_admin_settings else "false")
+                .replace("__TAB_PERSONAL__", "true" if self.valves.allow_personal_themes else "false")
+            )
 
         fragment = f"{self.LOADER_BLOCK_START}\n{js}\n{self.LOADER_BLOCK_END}"
         Event._loader_fragment_cache = (cache_key, fragment)
