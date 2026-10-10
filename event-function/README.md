@@ -1,8 +1,8 @@
 # ⚡ Theme Designer Pro (Event Function)
 
-> Instance-wide theme designer for Open WebUI — standalone admin page with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
+> Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.8.5-blue)
+![Version](https://img.shields.io/badge/version-1.9.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -36,7 +36,7 @@
 
 ---
 
-Theme Designer Pro (Event Function) is a professional-grade theming engine for Open WebUI. It registers a standalone admin page at a configurable URL (default: `/api/v1/theme-designer`), persists themes server-side, and pushes changes to all connected clients in real-time via Server-Sent Events. Powered by the modern OKLCH color space, it generates perceptually uniform color palettes across Dark, OLED, Light, and Her modes simultaneously.
+Theme Designer Pro (Event Function) is a professional-grade theming engine for Open WebUI. It registers an admin page at a configurable URL (default: `/api/v1/theme-designer`), which admins can also open from a **Themes** tab in Open WebUI's Settings, persists themes server-side, and pushes changes to all connected clients in real-time via Server-Sent Events. Powered by the modern OKLCH color space, it generates perceptually uniform color palettes across Dark, OLED, Light, and Her modes simultaneously.
 
 Unlike the [Tool variant](../tools/) which runs inside an AI chat iframe, this variant runs as a native ASGI route — no iframe sandbox flags needed, no "Same Origin" configuration required.
 
@@ -138,7 +138,7 @@ The [Launcher Tool](../tools/theme_designer_pro_launcher.py) is a lightweight co
 
 ## 🛠️ Usage Instructions
 
-1. **Navigate to the Designer:** Open your browser and go to your Open WebUI instance's designer URL (default: `/api/v1/theme-designer`)
+1. **Open the Designer:** In Open WebUI, open **Settings** and choose **Themes** in the Admin section, after **Interface**. You can also go straight to the designer URL (default: `/api/v1/theme-designer`), which shows it full screen.
 2. **Design your Theme:**
    - Use the **Segmented Toggle** to switch between System, Dark, OLED, Light, and Her mode design views
    - Use the **Themes** tab to browse, install, and manage community themes and saved snapshots
@@ -227,6 +227,7 @@ Valves are configured in the Admin Panel under **Functions → Theme Designer Pr
 |---|---|---|---|
 | **Enable Auth Page Theming** | `bool` | `true` | Allow theming the login/signup pages. When disabled, all "Show on Auth Pages" toggles are hidden and forced off. |
 | **Draft Mode Default** | `bool` | `false` | Open the designer in Draft mode by default. When enabled, the designer starts in Draft mode on every fresh page load, preventing accidental live changes. |
+| **Show In Admin Settings** | `bool` | `true` | Add a **Themes** tab to the Admin section of Open WebUI's Settings, after **Interface**, that opens the designer inside Settings. The designer stays available at its own URL either way. |
 | **Auto Sync** | `bool` | `false` | Skip the Selective Sync modal when loading presets or syncing. When enabled, a "Sync All" toggle appears in the designer footer — turn it on to propagate changes to all modes, or leave it off to apply only to the active mode. |
 
 #### 🎨 Visual Style
@@ -454,6 +455,13 @@ The fallback is automatic — Worker errors are caught, the Worker is terminated
 - **Multi-worker deployment: themes only update on some users.**
   - _Fix:_ Set `REDIS_URL` in your environment (which Open WebUI already uses for WebSocket relay). Theme Designer Pro automatically uses Redis pub/sub to broadcast SSE events across all workers. No additional configuration needed.
 
+- **The log says `REDIS_URL must start with redis://, rediss:// or unix://`.**
+  - _Reason:_ The value isn't a Redis URL, most often because it's wrapped in quotes. In a Docker Compose `environment:` list, quotes become part of the value, so `- REDIS_URL="redis://redis:6379/0"` passes `"redis://redis:6379/0"`, quotes included. Open WebUI itself quietly runs without Redis on that value, and a quoted `WEBSOCKET_MANAGER="redis"` turns off its Redis WebSocket relay the same way.
+  - _Fix:_ Remove the quotes (`- REDIS_URL=redis://redis:6379/0`), or use the mapping form (`REDIS_URL: "redis://redis:6379/0"`), where quotes are YAML's and get removed. Theme Designer Pro logs the warning once and keeps live push within each worker until the value is fixed.
+
+- **The Themes tab doesn't show in Settings.**
+  - _Check:_ The tab is in the **Admin** section, so only admins see it, and the **Show In Admin Settings** valve must be on. It also hides while the Settings search box holds words that don't match it, such as "web".
+
 ---
 
 ## 🗑️ Uninstallation & Complete Removal
@@ -481,6 +489,16 @@ Toggle the function **OFF** in the Admin Panel first. That withdraws its fragmen
 Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build — 1.7.0 never writes there.
 
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
+
+---
+
+## 📝 What's New in 1.9.0
+
+**The designer opens inside Open WebUI's Settings.** Admins get a **Themes** tab in the Admin section of Settings, right after **Interface**, so the designer is one click from the rest of the instance's settings instead of a URL to remember. The tab shows the same designer, in a frame filling the panel. Its header row is styled like Open WebUI: the page title is left to the tab, and the mode buttons and the **Updates**, **JSON** and **Docs** buttons are smaller and borderless. Everything below the header looks as it does at the designer's own URL. Edits save live as before, so Settings restyles around the designer while you work. Switching to another tab and back keeps the designer where you left it. The search box in Settings finds the tab by words such as "theme", "designer", "palette" or "canvas". The new **Show In Admin Settings** valve, on by default, turns the tab off. The designer stays available at its own URL either way.
+
+**The Themes tab follows the Overlay Transparency valve.** With the valve set to `translucent`, the designer's page in Settings turns clear, so Settings' frosted glass shows behind it as it does on Open WebUI's other overlays. The page stays solid while you edit a mode whose light or dark look differs from Open WebUI's, so its text stays readable.
+
+**A `REDIS_URL` that isn't a Redis URL is reported once, not every 5 seconds** ([#9](https://github.com/silentoplayz/theme-designer-pro-presets/issues/9)). When the value was wrapped in quotes, as a Docker Compose `environment:` list passes `- REDIS_URL="redis://..."`, the function retried the connection every 5 seconds and logged `Redis subscriber lost connection` each time, forever. It now checks the value once, logs a single warning that names the likely cause without logging any password, and keeps live push within each worker. See Troubleshooting for the fix.
 
 ---
 
