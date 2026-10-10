@@ -402,6 +402,10 @@ class Event:
             default=True,
             description="Allow the Gradient Background builder. When disabled, the Gradient tab is hidden.",
         )
+        enable_ai_consultant: bool = Field(
+            default=True,
+            description="Show the AI Consultant in the designer: describe a theme in words, and a model on this instance picks its colors and gradient. Admins can always use it; users can when personal themes are on. Each request is one call to the model set in AI Consultant Model, or the task model.",
+        )
         enable_community_themes: bool = Field(
             default=True,
             description="Show the Community Themes browser in the Themes tab. When disabled, the community themes grid is hidden and no manifest is fetched.\n\n---\n\n#### 🖌️ UX Policy",
@@ -484,6 +488,10 @@ class Event:
                 "Change this to serve the designer at a custom path. "
                 "Requires a server restart or event trigger to take effect."
             ),
+        )
+        ai_consultant_model: str = Field(
+            default="",
+            description="The model the AI Consultant asks, by its ID. Empty: the task model set under Admin Settings > Interface, local first, then external.",
         )
 
     BOOTLOADER_SCRIPT = """
@@ -2601,6 +2609,7 @@ class Event:
         folder = self._get_css_path(user_id).parent
         for kind in ("css", "state"):
             Event._personal_delivery_cache.pop((user_id, kind), None)
+        Event._consult_last.pop(user_id, None)
         if not folder.is_dir():
             return False
         shutil.rmtree(folder, ignore_errors=True)
@@ -2823,6 +2832,7 @@ class Event:
                     path + "/me/theme.css",
                     path + "/me/state.json",
                     path + "/me/library.json",
+                    path + "/consult",
                 }
             )
         app.routes[:] = [
@@ -2940,6 +2950,23 @@ class Event:
             if hasattr(user, "status_code"):
                 return user
             return await event_instance._handle_css_save(request, user_id=user.id)
+
+        # -- POST /api/v1/theme-designer/consult (AI Consultant) ---------------
+
+        async def ai_consult(request: Request):
+            refusal = _save_request_refusal(request)
+            if refusal is not None:
+                return refusal
+            if not event_instance.valves.enable_ai_consultant:
+                return JSONResponse({"error": "The AI Consultant is turned off"}, status_code=403)
+            user = await event_instance._require_user(request)
+            if hasattr(user, "status_code"):
+                return user
+            # Users design only their own theme, so they consult only when they
+            # can have one.
+            if user.role != "admin" and not event_instance.valves.allow_personal_themes:
+                return JSONResponse({"error": "Access denied"}, status_code=403)
+            return await event_instance._handle_consult(request, user)
 
         # -- GET /api/v1/theme-designer/me/{theme.css,state.json,library.json} --
         # The signed-in user's personal theme. Signed out, turned off, or no
@@ -3211,6 +3238,7 @@ class Event:
                 Route(route_base + "/me/theme.css", serve_personal_css, methods=["GET"]),
                 Route(route_base + "/me/state.json", serve_personal_state, methods=["GET"]),
                 Route(route_base + "/me/library.json", serve_personal_library, methods=["GET"]),
+                Route(route_base + "/consult", ai_consult, methods=["POST"]),
             ),
             start=6,
         ):
@@ -3356,6 +3384,189 @@ class Event:
         except Exception as e:
             log.exception("[Theme Pro] Error saving CSS")
             return JSONResponse({"error": "Failed to save theme data"}, status_code=500)
+
+    # -- AI Consultant ---------------------------------------------------------
+
+    CONSULT_PROMPT = (
+        "You design color themes for Open WebUI. Read the user's description and answer "
+        "with one JSON object and nothing else:\n"
+        '{"hue": 0-360, "chroma": 0-40, "lightness": 5-30, "gradient": true or false, "name": "Theme Name"}\n'
+        "hue: the color angle. 0 red, 25 orange, 50 yellow, 90 chartreuse, 120 green, "
+        "165 teal, 210 blue, 260 indigo, 290 purple, 330 pink or magenta.\n"
+        "chroma: how colorful. 3 to 8 muted, nearly gray; 10 to 20 balanced; 25 to 40 vivid.\n"
+        "lightness: the base lightness of the dark modes. 5 to 10 very dark, 12 to 18 standard, "
+        "20 to 30 lighter.\n"
+        "gradient: true when the description suggests an atmospheric or rich background, "
+        "otherwise false.\n"
+        "name: two to four words, in title case."
+    )
+    _consult_last = {}  # user id -> time of their last request
+    CONSULT_INTERVAL = 3.0  # seconds between one user's requests
+
+    async def _consult_model(self, request):
+        """(model id, task params) for the AI Consultant, or (None, None).
+
+        The AI Consultant Model valve when it names a model this instance has;
+        otherwise Open WebUI's task model, as its own background tasks use it.
+        """
+        models = getattr(request.app.state, "MODELS", None) or {}
+        wanted = (self.valves.ai_consultant_model or "").strip()
+        if wanted:
+            return (wanted, None) if wanted in models else (None, None)
+        try:
+            from open_webui.models.config import Config
+
+            # The local task model, or the external one when only that is set.
+            base = next(
+                (
+                    m
+                    for m in (
+                        await Config.get("task.model.default"),
+                        await Config.get("task.model.external"),
+                    )
+                    if m and m in models
+                ),
+                None,
+            )
+        except Exception:
+            return None, None
+        if not base:
+            return None, None
+        try:
+            from open_webui.routers.tasks import get_task_model_generation_config
+
+            return await get_task_model_generation_config(base, models)
+        except ImportError:
+            from open_webui.utils.task import get_task_model_id
+
+            return (
+                get_task_model_id(
+                    base,
+                    await Config.get("task.model.default"),
+                    await Config.get("task.model.external"),
+                    models,
+                ),
+                None,
+            )
+
+    @staticmethod
+    def _completion_text(result) -> str:
+        """The text of a chat completion, whatever shape Open WebUI returned it in."""
+        data = result
+        body = getattr(result, "body", None)
+        if isinstance(body, (bytes, bytearray)):
+            try:
+                data = _json.loads(body)
+            except ValueError:
+                return ""
+        if not isinstance(data, dict):
+            return ""
+        choices = data.get("choices")
+        if isinstance(choices, list) and choices:
+            return str(((choices[0] or {}).get("message") or {}).get("content") or "")
+        message = data.get("message")
+        if isinstance(message, dict):
+            return str(message.get("content") or "")
+        return ""
+
+    @staticmethod
+    def _parse_consult(text: str) -> dict | None:
+        """The theme in a model's answer, range-checked, or None."""
+        text = _re.sub(r"<think>.*?</think>", "", text or "", flags=_re.S)
+        start, end = text.find("{"), text.rfind("}")
+        if start == -1 or end <= start:
+            return None
+        try:
+            data = _json.loads(text[start : end + 1])
+        except ValueError:
+            return None
+        if not isinstance(data, dict):
+            return None
+
+        def number(key, low, high):
+            try:
+                return max(low, min(high, int(round(float(data.get(key))))))
+            except (TypeError, ValueError):
+                return None
+
+        hue, chroma, lightness = number("hue", 0, 360), number("chroma", 0, 40), number("lightness", 0, 50)
+        if hue is None or chroma is None or lightness is None:
+            return None
+        gradient = data.get("gradient")
+        name = " ".join(str(data.get("name") or "").split())[:60]
+        return {
+            "hue": hue,
+            "chroma": chroma,
+            "lightness": lightness,
+            "gradient": gradient if isinstance(gradient, bool) else str(gradient).lower() == "true",
+            "name": name,
+        }
+
+    async def _handle_consult(self, request, user) -> "JSONResponse":
+        """Ask a model on this instance to turn a description into a theme."""
+        import time as _time
+        from starlette.responses import JSONResponse
+
+        try:
+            body = await request.json()
+        except Exception:
+            body = None
+        description = " ".join(str((body or {}).get("description") or "").split())[:500]
+        if not description:
+            return JSONResponse({"error": "Describe the theme you want"}, status_code=400)
+
+        now = _time.monotonic()
+        last = Event._consult_last.get(user.id)
+        if last is not None and now - last < Event.CONSULT_INTERVAL:
+            return JSONResponse({"error": "Wait a few seconds between requests"}, status_code=429)
+        if len(Event._consult_last) >= 1024:
+            Event._consult_last.pop(next(iter(Event._consult_last)))
+        Event._consult_last[user.id] = now
+
+        model_id, params = await self._consult_model(request)
+        if not model_id:
+            return JSONResponse(
+                {"error": "No model to ask: set AI Consultant Model in this function's valves, or a task model under Admin Settings > Interface"},
+                status_code=409,
+            )
+        payload = {
+            "model": model_id,
+            "messages": [
+                {"role": "system", "content": self.CONSULT_PROMPT},
+                {"role": "user", "content": description},
+            ],
+            "stream": False,
+            "metadata": {"task": "theme_designer_pro_consultant"},
+        }
+        models = getattr(request.app.state, "MODELS", None) or {}
+        try:
+            from open_webui.routers.pipelines import process_pipeline_inlet_filter
+
+            payload = await process_pipeline_inlet_filter(request, payload, user, models)
+        except ImportError:
+            pass
+        except Exception as exc:
+            log.warning("[Theme Pro] A pipeline filter refused the AI Consultant request: %s", exc)
+            return JSONResponse({"error": "A pipeline filter refused the request"}, status_code=400)
+        if params:
+            try:
+                from open_webui.routers.tasks import apply_task_model_params
+
+                payload = apply_task_model_params(payload, models, model_id, params)
+            except ImportError:
+                pass
+        try:
+            from open_webui.utils.chat import generate_chat_completion
+
+            result = await generate_chat_completion(request, form_data=payload, user=user)
+        except Exception:
+            log.exception("[Theme Pro] The AI Consultant's model failed")
+            return JSONResponse({"error": "The model could not answer"}, status_code=502)
+        theme = self._parse_consult(self._completion_text(result))
+        if not theme:
+            return JSONResponse({"error": "The model's answer had no theme in it — try again or describe it differently"}, status_code=502)
+        theme["model"] = model_id
+        return JSONResponse(theme, headers={"Cache-Control": "no-store"})
 
     # -- HTML assembly -------------------------------------------------------
 
@@ -4361,6 +4572,10 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                 <span style="font-size: 13px; line-height: 1;">⟳</span>
                 <span class="btn-label">Updates</span>
             </button>
+            <button class="header-json-btn" id="ai-consult-btn" data-tooltip="Describe a theme in words and let a model pick its colors" aria-haspopup="dialog">
+                <span style="font-size: 13px; line-height: 1;">✨</span>
+                <span class="btn-label">AI</span>
+            </button>
             <button class="header-json-btn" id="json-view-btn" data-tooltip="View current theme as JSON">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1"/><path d="M16 3h1a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2 2 2 0 0 0-2 2v5a2 2 0 0 1-2 2h-1"/></svg>
                 <span class="btn-label">JSON</span>
@@ -4731,7 +4946,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                 <details class="doc-accordion">
                     <summary>1. Getting Started & Architecture <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
-                        <p>Theme Designer Pro is an <b>Event Function</b> that registers a standalone admin page at <code>{ROUTE_BASE}</code>. Admins open the designer from the <b>Themes</b> tab in the Admin section of Open WebUI&rsquo;s Settings, after Interface, or by going to that URL directly (configurable via the <b>Designer URL</b> valve). The <b>Show In Admin Settings</b> valve turns the tab off. With the <b>Allow Personal Themes</b> valve on, every user also gets a <b>Themes</b> tab in the <i>Personal</i> section of Settings, which opens this designer on their own theme: saved per account in <code>DATA_DIR/theme/users/</code>, seen only by them, and within the limits the other valves set. It uses a multi-layer schema separating core color logic from manual overrides, custom CSS, and structural transparency, and persists themes server-side so they apply to <b>all users</b> in real-time.</p>
+                        <p>Theme Designer Pro is an <b>Event Function</b> that registers a standalone admin page at <code>{ROUTE_BASE}</code>. Admins open the designer from the <b>Themes</b> tab in the Admin section of Open WebUI&rsquo;s Settings, after Interface, or by going to that URL directly (configurable via the <b>Designer URL</b> valve). The <b>Show In Admin Settings</b> valve turns the tab off. With the <b>Allow Personal Themes</b> valve on, every user also gets a <b>Themes</b> tab in the <i>Personal</i> section of Settings, which opens this designer on their own theme: saved per account in <code>DATA_DIR/theme/users/</code>, seen only by them, and within the limits the other valves set. The <b>AI</b> header button describes a theme in words and lets a model on the instance pick its palette and gradient. It uses a multi-layer schema separating core color logic from manual overrides, custom CSS, and structural transparency, and persists themes server-side so they apply to <b>all users</b> in real-time.</p>
                         <ul>
                             <li><b>Admin-Only Design Page:</b> Only administrators can access the designer page. The generated theme is served to all users via a bootloader script published into <code>/static/loader.js</code> through the shared static-asset registry.</li>
                             <li><b>Persistence Engine:</b> Themes are persisted server-side in <code>DATA_DIR/theme/</code> as <code>open_theme_designer.css</code>, <code>open_theme_designer.json</code>, <code>open_theme_designer_sections.json</code> (structured CSS sections), and <code>open_theme_designer_library.json</code>. On page load, the server composes a safe subset of theme CSS into <code>/static/custom.css</code> (with structural/gradient rules stripped to prevent a white flash before canvas loads), which Open WebUI already loads as a render-blocking stylesheet. The bootloader then fetches the full CSS from <code>{ROUTE_BASE}/theme.css</code> and applies it — including the deferred structural/gradient rules. State JSON is inlined into the same <code>/static/loader.js</code> fragment &mdash; eliminating an async fetch for state data. Both assets are composed per request, so they always reflect the latest save rather than the last <code>event()</code>. The system uses <code>localStorage</code> only as a write-through backup for offline/Watchtower recovery scenarios.</li>
@@ -4749,7 +4964,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                             <li><b>Session Persistence:</b> The designer utilizes <code>sessionStorage</code> to remember exactly which tab you were working in. If you navigate away and return to the designer, it will restore your last active tab automatically.</li>
                             <li><b>Legacy Data Migration:</b> Upgrading from an older version? The designer automatically detects legacy data structures and gracefully migrates your saved snapshots and active themes to the latest format without data loss.</li>
                             <li><b>Live Cross-UI Detection:</b> The designer actively listens to your environment. If you change the Open WebUI theme natively (via OS settings or keyboard shortcuts) while the designer is open, it will instantly switch its internal mode tab to match your live environment.</li>
-                            <li><b>Valves:</b> Admins can configure feature gating (enable/disable Canvas FX, Custom CSS, Gradient Builder, the Community Themes browser, auth page theming, and URL imports), UX policy (Draft mode by default, the Themes tab in Settings, personal themes, Auto Sync), visual style (sidebar and overlay transparency), security (Canvas API access, allowed import domains), and the designer URL via Valves in the function settings. The <b>Sidebar Transparency</b> valve controls the chat sidebar&rsquo;s background style &mdash; choose between <code>opaque</code> (solid background, best readability), <code>translucent</code> (frosted glass with backdrop-blur), or <code>transparent</code> (fully see-through). On mobile devices, <code>transparent</code> is automatically upgraded to <code>translucent</code> for readability. The <b>Overlay Transparency</b> valve controls portaled overlay UI (settings modal, dropdown menus, integration menus) &mdash; choose between <code>opaque</code> (solid, default) or <code>translucent</code> (frosted glass). Both valves work independently of whether Canvas FX or gradients are active. Valve changes take effect on the next <code>event()</code> trigger (any chat message, or a server startup) and are then broadcast to all connected users via SSE. The <b>Designer URL</b> valve must start with <code>/api/v1/</code> &mdash; if it doesn't, the system auto-corrects it to prevent the SPA catch-all from intercepting the route.</li>
+                            <li><b>Valves:</b> Admins can configure feature gating (enable/disable Canvas FX, Custom CSS, Gradient Builder, the Community Themes browser, auth page theming, and URL imports), UX policy (Draft mode by default, the Themes tab in Settings, personal themes, Auto Sync), the AI Consultant and the model it asks, visual style (sidebar and overlay transparency), security (Canvas API access, allowed import domains), and the designer URL via Valves in the function settings. The <b>Sidebar Transparency</b> valve controls the chat sidebar&rsquo;s background style &mdash; choose between <code>opaque</code> (solid background, best readability), <code>translucent</code> (frosted glass with backdrop-blur), or <code>transparent</code> (fully see-through). On mobile devices, <code>transparent</code> is automatically upgraded to <code>translucent</code> for readability. The <b>Overlay Transparency</b> valve controls portaled overlay UI (settings modal, dropdown menus, integration menus) &mdash; choose between <code>opaque</code> (solid, default) or <code>translucent</code> (frosted glass). Both valves work independently of whether Canvas FX or gradients are active. Valve changes take effect on the next <code>event()</code> trigger (any chat message, or a server startup) and are then broadcast to all connected users via SSE. The <b>Designer URL</b> valve must start with <code>/api/v1/</code> &mdash; if it doesn't, the system auto-corrects it to prevent the SPA catch-all from intercepting the route.</li>
                             <li><b>Self-Adapting UI &amp; Contrast Protection:</b> The Theme Designer Pro interface dynamically themes <i>itself</i> based on the colors you pick. It includes built-in contrast protection, automatically shifting text and border colors to remain legible if you create ultra-washed-out palettes.</li>
                             <li><b>Fully Responsive:</b> The designer interface seamlessly adapts to mobile screens so you can tweak your theme on the go.</li>
                             <li><b>Canvas FX Security:</b> Canvas FX scripts are arbitrary JavaScript executed in all users' browsers. Only administrators can set Canvas FX scripts through the designer. <b>Never paste untrusted scripts</b> — always review Canvas FX code before enabling it, especially scripts obtained from third parties.</li>
@@ -7593,6 +7808,144 @@ function startAnimation() {
             }, TIMING.toastDuration);
         }
     }
+
+    // --- AI Consultant ---
+    // Describe a theme in words; a model on this instance answers with a hue,
+    // chroma and lightness, which become the palette and, when the model
+    // suggests one, a matching gradient. Ported from the Theme Designer Pro
+    // Tool's apply_theme(), except that it changes only the palette and
+    // gradient, so a mode's custom CSS and Canvas FX survive.
+    const AiConsultant = (() => {
+        const cfg = window.__THEME_PRO_CONFIG__ || {};
+        let modal = null;
+
+        function hslToHex(hue, sat, lit) {
+            sat /= 100; lit /= 100;
+            const f = n => {
+                const k = (n + hue / 30) % 12;
+                return lit - sat * Math.min(lit, 1 - lit) * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+            };
+            const toHex = v => Math.round(v * 255).toString(16).padStart(2, '0');
+            return '#' + toHex(f(0)) + toHex(f(8)) + toHex(f(4));
+        }
+
+        // The Tool's four-stop gradient for a hue.
+        function gradientStops(hue) {
+            return [
+                { color: hslToHex(hue, 15, 4), position: 0 },
+                { color: hslToHex(hue, 25, 12), position: 33 },
+                { color: hslToHex(hue, 20, 7), position: 66 },
+                { color: hslToHex(hue, 15, 4), position: 100 },
+            ];
+        }
+
+        function apply(theme, modes) {
+            const withGradient = theme.gradient && cfg.enableGradientBuilder !== false;
+            modes.forEach(m => {
+                const md = themeData[m];
+                if (!md) return;
+                md.h = theme.hue;
+                md.c = theme.chroma;
+                md.l = m === 'oled' ? 0 : theme.lightness;
+                md.paletteEnabled = true;
+                if (withGradient) {
+                    md.gradientEnabled = true;
+                    md.gradientType = 'linear';
+                    md.gradientAngle = 135;
+                    md.gradientStops = gradientStops(theme.hue);
+                    md.gradientIntensity = 100;
+                    activeGradientRef[m] = null;
+                }
+                activeThemeRef[m] = null;
+            });
+            commitChange({ clearRef: false });
+            const name = theme.name || `H ${theme.hue}° C ${theme.chroma} L ${theme.lightness}`;
+            showToast(`✨ ${name}${withGradient ? ' — palette and gradient' : ' — palette'}. Fine-tune it below.`);
+        }
+
+        function close() {
+            if (modal) modal.style.display = 'none';
+        }
+
+        function build() {
+            modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.id = 'ai-consult-modal';
+            modal.setAttribute('role', 'dialog');
+            modal.setAttribute('aria-modal', 'true');
+            modal.setAttribute('aria-labelledby', 'ai-consult-title');
+            modal.innerHTML =
+                '<div class="control-group modal-panel modal-panel-info" style="text-align:left;">' +
+                '<div class="section-title" id="ai-consult-title" style="margin-bottom:8px;">AI Consultant</div>' +
+                '<p style="font-size:0.75rem;color:var(--text-muted);margin:0 0 14px;line-height:1.6;">Describe the theme you want, like “warm copper” or “calm ocean at night”. A model on this instance picks the colors, and you can fine-tune them after.</p>' +
+                '<textarea id="ai-consult-input" class="modal-input" rows="3" maxlength="500" placeholder="A warm copper theme" style="resize:vertical;margin-bottom:12px;"></textarea>' +
+                '<label class="toggle-label" style="margin-bottom:14px;"><input type="checkbox" class="cb-input" id="ai-consult-one-mode"> <span id="ai-consult-one-mode-label">Only the mode I\'m editing</span></label>' +
+                '<div id="ai-consult-status" role="status" style="font-size:0.72rem;min-height:1.2em;margin-bottom:12px;color:var(--text-muted);"></div>' +
+                '<div style="display:flex;gap:12px;"><button class="btn" id="ai-consult-cancel" style="flex:1;">Cancel</button>' +
+                '<button class="btn btn-primary" id="ai-consult-go" style="flex:1;">Create theme</button></div>' +
+                '</div>';
+            document.body.appendChild(modal);
+            modal.addEventListener('click', e => { if (e.target === modal) close(); });
+            modal.addEventListener('keydown', e => {
+                if (e.key === 'Escape') close();
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) submit();
+            });
+            modal.querySelector('#ai-consult-cancel').addEventListener('click', close);
+            modal.querySelector('#ai-consult-go').addEventListener('click', submit);
+        }
+
+        function submit() {
+            const input = modal.querySelector('#ai-consult-input');
+            const status = modal.querySelector('#ai-consult-status');
+            const go = modal.querySelector('#ai-consult-go');
+            const description = input.value.trim();
+            if (!description) { status.textContent = 'Describe the theme you want first.'; input.focus(); return; }
+            const modes = modal.querySelector('#ai-consult-one-mode').checked ? [getActiveDataMode()] : MODES.slice();
+            go.disabled = true;
+            status.style.color = 'var(--text-muted)';
+            status.textContent = 'Asking the model…';
+            fetch('{ROUTE_BASE}/consult', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ description })
+            }).then(r => r.json().catch(() => ({})).then(d => ({ ok: r.ok, d })))
+                .then(({ ok, d }) => {
+                    go.disabled = false;
+                    if (!ok) {
+                        status.style.color = 'var(--color-danger)';
+                        status.textContent = (d && d.error) || 'The AI Consultant could not answer.';
+                        return;
+                    }
+                    status.textContent = '';
+                    close();
+                    apply(d, modes);
+                })
+                .catch(() => {
+                    go.disabled = false;
+                    status.style.color = 'var(--color-danger)';
+                    status.textContent = 'The server could not be reached.';
+                });
+        }
+
+        function open() {
+            if (!modal) build();
+            const label = modal.querySelector('#ai-consult-one-mode-label');
+            label.textContent = 'Only the ' + getActiveDataMode() + ' mode';
+            modal.querySelector('#ai-consult-status').textContent = '';
+            modal.style.display = 'flex';
+            modal.querySelector('#ai-consult-input').focus();
+        }
+
+        function init() {
+            const btn = document.getElementById('ai-consult-btn');
+            if (!btn) return;
+            if (!cfg.enableAiConsultant) { btn.remove(); return; }
+            btn.addEventListener('click', open);
+        }
+
+        return { init, apply, gradientStops };
+    })();
+    AiConsultant.init();
 
     // Custom Tooltip Engine
     const tooltipEl = document.createElement('div');
@@ -15118,6 +15471,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             "overlayTransparency": self.valves.overlay_transparency,
             # "me": the signed-in user's personal theme; "instance": everyone's.
             "scope": "me" if user_id else "instance",
+            "enableAiConsultant": self.valves.enable_ai_consultant,
             "personalHasTheme": bool(user_id) and self._get_css_path(user_id).exists(),
         }
         if user_id:
