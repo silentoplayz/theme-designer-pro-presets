@@ -4,6 +4,8 @@ The Launcher is a companion Tool for the [Theme Designer Pro event function](../
 
 Everyone gets their own personal theme this way, and admins can also change the instance theme that every user sees.
 
+The Launcher is on the Open WebUI community platform as [Theme Designer Pro Launcher](https://openwebui.com/posts/467b9ac8-731b-4d60-bafe-9fb4e2dfda35).
+
 ---
 
 ## 💬 What you can ask
@@ -31,7 +33,7 @@ A theme from a chat changes only the palette and the gradient. Your custom CSS, 
 ## 📦 Install
 
 1. Go to **Workspace** > **Tools** > **Create New Tool**.
-2. Copy the contents of [`theme_designer_pro_launcher.py`](theme_designer_pro_launcher.py), paste it in, and save.
+2. Copy the contents of [`theme_designer_pro_launcher.py`](theme_designer_pro_launcher.py), or the code on the Launcher's [community page](https://openwebui.com/posts/467b9ac8-731b-4d60-bafe-9fb4e2dfda35), paste it in, and save.
 3. **Share it with your users.** A Tool an admin creates is private until you give users or groups access to it in the Tool's access settings.
 4. Turn it on for a chat from the tools button in the message box. To have it on by default, add it to a model under **Workspace** > **Models** > the model > **Tools**.
 
