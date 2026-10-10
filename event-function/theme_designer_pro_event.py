@@ -15003,9 +15003,24 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             )
         return ""
 
+    @staticmethod
+    def _sse_channel() -> str:
+        """The Redis channel that relays SSE messages between workers.
+
+        Named under the instance's REDIS_KEY_PREFIX, like Open WebUI's own
+        keys: Redis pub/sub ignores the database number, so two instances
+        sharing one Redis server on different databases would otherwise hear
+        each other's theme updates and disables.
+        """
+        try:
+            from open_webui.env import REDIS_KEY_PREFIX
+        except ImportError:
+            REDIS_KEY_PREFIX = "open-webui"
+        return f"{REDIS_KEY_PREFIX}:theme_pro_sse" if REDIS_KEY_PREFIX else "theme_pro_sse"
+
     @classmethod
     def _redis_publish(cls, msg: str):
-        """Publish a message to the Redis theme_pro_sse channel (best-effort).
+        """Publish a message to the Redis SSE relay channel (best-effort).
 
         The blocking publish is dispatched to the default thread-pool executor
         when an event loop is running — a stalled Redis connection must never
@@ -15045,7 +15060,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 socket_timeout=2,
                 **_extra,
             )
-            r.publish("theme_pro_sse", f"wid:{cls._WORKER_ID}\n{msg}")
+            r.publish(cls._sse_channel(), f"wid:{cls._WORKER_ID}\n{msg}")
             r.close()
         except Exception:
             pass  # Redis unavailable — local broadcast still runs below
@@ -15281,8 +15296,9 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                                 **_redis_extra,
                             )
                             pubsub = r.pubsub()
-                            await pubsub.subscribe("theme_pro_sse")
-                            log.info("[Theme Pro] Redis subscriber connected on channel 'theme_pro_sse'")
+                            channel = Event._sse_channel()
+                            await pubsub.subscribe(channel)
+                            log.info("[Theme Pro] Redis subscriber connected on channel '%s'", channel)
                             async for message in pubsub.listen():
                                 if message["type"] != "message":
                                     continue
