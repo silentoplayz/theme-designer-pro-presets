@@ -5258,7 +5258,7 @@ SetEnv proxy-sendcl 0</code></pre>
                         <ul>
                             <li><b>Live push is worker-local.</b> SSE client connections are held in process memory. A theme save handled by Worker A will only broadcast to clients connected to Worker A. Clients on Workers B/C/D will not receive live push events.</li>
                             <li><b>Page-load fetch still works.</b> The bootloader fetches <code>{ROUTE_BASE}/theme.css</code> and <code>{ROUTE_BASE}/state.json</code> from disk on every page load, which works correctly across all workers. Themes propagate on the next page load/refresh.</li>
-                            <li><b>Redis fixes this.</b> If <code>REDIS_URL</code> is set in your environment (which Open WebUI already uses for WebSocket relay), Theme Designer Pro automatically uses Redis pub/sub to broadcast SSE events across all workers. No additional configuration is needed beyond setting <code>REDIS_URL</code>.</li>
+                            <li><b>Redis fixes this.</b> If <code>REDIS_URL</code> is set in your environment (which Open WebUI already uses for WebSocket relay), Theme Designer Pro automatically uses Redis pub/sub to broadcast SSE events across all workers. No additional configuration is needed beyond setting <code>REDIS_URL</code>. The value must be the URL itself. In a Docker Compose <code>environment:</code> list, write <code>- REDIS_URL=redis://redis:6379/0</code> without quotes, because quotes there become part of the value. When <code>REDIS_URL</code> doesn&rsquo;t start with <code>redis://</code>, <code>rediss://</code> or <code>unix://</code>, Theme Designer Pro logs one warning saying so and keeps live push within each worker.</li>
                             <li><b>Turning the function off or on, saving new code, and changing valves reach every worker too.</b> With Redis, each worker hears about the change and loads it within a few seconds. A worker still running a version older than 1.8.2, or one that started while the function was off, catches up the next time it handles any event.</li>
                             <li><b>The composed assets are per worker.</b> Each worker builds its own <code>/static/loader.js</code> and <code>/static/custom.css</code> from what it has loaded, so a worker only serves the theme once it has run this function at least once. Open WebUI publishes <code>system.startup.completed</code> in every worker's lifespan, so in practice all of them publish during boot.</li>
                         </ul>
@@ -14945,6 +14945,36 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             state = self._strip_canvas_from_state(state)
         return state
 
+    _redis_url_warned = None  # The unusable REDIS_URL already reported, so it is logged once
+
+    @classmethod
+    def _redis_url(cls) -> str:
+        """REDIS_URL when redis-py can use it, else "".
+
+        A value it cannot parse is a setup mistake, not a dropped connection,
+        so it is reported once instead of retried every few seconds. The usual
+        cause is quotes in a Docker Compose `environment:` list, where
+        `- REDIS_URL="redis://..."` keeps the quotes as part of the value.
+        Open WebUI quietly runs without Redis on such a value; the warning says
+        why live updates stay within one worker.
+        """
+        url = os.environ.get("REDIS_URL", "").strip()
+        if not url or url.lower().startswith(("redis://", "rediss://", "unix://")):
+            return url
+        if cls._redis_url_warned != url:
+            cls._redis_url_warned = url
+            # The part before :// (or the first character) shows the problem
+            # without logging a password.
+            head = url.split("://", 1)[0][:16] if "://" in url else url[:1]
+            log.warning(
+                "[Theme Pro] REDIS_URL must start with redis://, rediss:// or unix://, "
+                "but it starts with %r. If the value is wrapped in quotes, remove them: "
+                "in a Docker Compose `environment:` list, quotes become part of the value. "
+                "Until then, live theme updates only reach browsers on the same worker.",
+                head,
+            )
+        return ""
+
     @classmethod
     def _redis_publish(cls, msg: str):
         """Publish a message to the Redis theme_pro_sse channel (best-effort).
@@ -14953,7 +14983,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         when an event loop is running — a stalled Redis connection must never
         freeze the server's event loop (broadcasts fire from async handlers).
         """
-        if not os.environ.get("REDIS_URL", ""):
+        if not cls._redis_url():
             return
         try:
             loop = asyncio.get_running_loop()
@@ -14967,7 +14997,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     @classmethod
     def _redis_publish_sync(cls, msg: str):
         """Blocking Redis publish — call via _redis_publish, not directly."""
-        redis_url = os.environ.get("REDIS_URL", "")
+        redis_url = cls._redis_url()
         if not redis_url:
             return
         try:
@@ -15176,7 +15206,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         is only created once, or recreated if the previous one died or was
         started by an older exec of this code.
         """
-        redis_url = os.environ.get("REDIS_URL", "")
+        redis_url = Event._redis_url()
         _existing_task = getattr(app.state, "_theme_redis_task", None)
         _sub_alive = _existing_task is not None and not _existing_task.done()
         # A subscriber started by an older exec of this code would hand peer
