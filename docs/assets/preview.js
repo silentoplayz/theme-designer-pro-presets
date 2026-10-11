@@ -925,25 +925,35 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   if (!canvas.transferControlToOffscreen) { report('Live Canvas FX preview needs a browser with OffscreenCanvas support.'); return; }
   var src;
   try { src = JSON.parse(el.textContent); } catch (e) { return; }
-  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-  var url = URL.createObjectURL(new Blob([src], { type: 'application/javascript' }));
-  var worker;
-  try { worker = new Worker(url); } catch (e) { report('Could not start the animation worker: ' + e.message); return; }
-  worker.onerror = function (e) { report('Script error: ' + (e.message || 'the animation failed to run.')); };
-  var off = canvas.transferControlToOffscreen();
-  var wpost = function (m, t) { try { worker.postMessage(m, t); } catch (e) {} };
-  wpost({ type: 'init', canvas: off, width: window.innerWidth, height: window.innerHeight, env: { authToken: '', baseUrl: '', locale: navigator.language, timezone: '' } }, [off]);
-  var pend = null, raf = null;
-  var pump = function () { raf = null; if (pend) { wpost(pend); pend = null; } };
-  var qm = function (x, y) { pend = { type: 'mousemove', x: x, y: y }; if (!raf) raf = requestAnimationFrame(pump); };
-  var xy = function (e) { try { return { x: e.clientX, y: e.clientY }; } catch (err) { return null; } };
-  window.addEventListener('mousemove', function (e) { var p = xy(e); if (p) qm(p.x, p.y); }, { passive: true });
-  window.addEventListener('click', function (e) { var p = xy(e); if (p) wpost({ type: 'click', x: p.x, y: p.y }); }, true);
-  window.addEventListener('mousedown', function (e) { var p = xy(e); if (p) wpost({ type: 'mousedown', x: p.x, y: p.y }); }, true);
-  window.addEventListener('mouseup', function (e) { var p = xy(e); if (p) wpost({ type: 'mouseup', x: p.x, y: p.y }); }, true);
-  window.addEventListener('touchstart', function (e) { try { var t = e.touches[0]; if (t) wpost({ type: 'mousedown', x: t.clientX, y: t.clientY }); } catch (err) {} }, { passive: true });
-  window.addEventListener('touchmove', function (e) { try { var t = e.touches[0]; if (t) qm(t.clientX, t.clientY); } catch (err) {} }, { passive: true });
-  window.addEventListener('resize', function () { wpost({ type: 'resize', width: window.innerWidth, height: window.innerHeight }); });
+  // A frame that was just added can run this before it has a size, and a
+  // script started at 0x0 can divide by it, so wait until it has one
+  var started = false;
+  var start = function () {
+    if (started || !window.innerWidth || !window.innerHeight) return;
+    started = true;
+    window.removeEventListener('resize', start);
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    var url = URL.createObjectURL(new Blob([src], { type: 'application/javascript' }));
+    var worker;
+    try { worker = new Worker(url); } catch (e) { report('Could not start the animation worker: ' + e.message); return; }
+    worker.onerror = function (e) { report('Script error: ' + (e.message || 'the animation failed to run.')); };
+    var off = canvas.transferControlToOffscreen();
+    var wpost = function (m, t) { try { worker.postMessage(m, t); } catch (e) {} };
+    wpost({ type: 'init', canvas: off, width: window.innerWidth, height: window.innerHeight, env: { authToken: '', baseUrl: '', locale: navigator.language, timezone: '' } }, [off]);
+    var pend = null, raf = null;
+    var pump = function () { raf = null; if (pend) { wpost(pend); pend = null; } };
+    var qm = function (x, y) { pend = { type: 'mousemove', x: x, y: y }; if (!raf) raf = requestAnimationFrame(pump); };
+    var xy = function (e) { try { return { x: e.clientX, y: e.clientY }; } catch (err) { return null; } };
+    window.addEventListener('mousemove', function (e) { var p = xy(e); if (p) qm(p.x, p.y); }, { passive: true });
+    window.addEventListener('click', function (e) { var p = xy(e); if (p) wpost({ type: 'click', x: p.x, y: p.y }); }, true);
+    window.addEventListener('mousedown', function (e) { var p = xy(e); if (p) wpost({ type: 'mousedown', x: p.x, y: p.y }); }, true);
+    window.addEventListener('mouseup', function (e) { var p = xy(e); if (p) wpost({ type: 'mouseup', x: p.x, y: p.y }); }, true);
+    window.addEventListener('touchstart', function (e) { try { var t = e.touches[0]; if (t) wpost({ type: 'mousedown', x: t.clientX, y: t.clientY }); } catch (err) {} }, { passive: true });
+    window.addEventListener('touchmove', function (e) { try { var t = e.touches[0]; if (t) qm(t.clientX, t.clientY); } catch (err) {} }, { passive: true });
+    window.addEventListener('resize', function () { if (window.innerWidth && window.innerHeight) wpost({ type: 'resize', width: window.innerWidth, height: window.innerHeight }); });
+  };
+  window.addEventListener('resize', start);
+  (function wait() { start(); if (!started) requestAnimationFrame(wait); })();
 })();
 </script>` : ''}
 <script>
