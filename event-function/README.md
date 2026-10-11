@@ -229,6 +229,7 @@ Valves are configured in the Admin Panel under **Functions → Theme Designer Pr
 | **Draft Mode Default** | `bool` | `false` | Open the designer in Draft mode by default. When enabled, the designer starts in Draft mode on every fresh page load, preventing accidental live changes. |
 | **Allow Personal Themes** | `bool` | `false` | Let every user design a personal theme from a **Themes** tab in their own Settings. A personal theme replaces the instance theme for that user only and follows them to every browser. The other valves still apply to it: Canvas FX, Custom CSS, the gradient builder, community themes, URL import and the transparency styles. Off: everyone sees the instance theme. |
 | **Show In Admin Settings** | `bool` | `true` | Add a **Themes** tab to the Admin section of Open WebUI's Settings, after **Interface**, that opens the designer inside Settings. The designer stays available at its own URL either way. |
+| **Show In Admin Panel** | `bool` | `false` | Add a **Themes** page to the Admin Panel's top bar, between **Functions** and **Settings**, that opens the instance designer there. **Settings** opens its dialog over it, and any other page of the bar closes it. The designer stays available at its own URL, and in Settings, either way. |
 | **Auto Sync** | `bool` | `false` | Skip the Selective Sync modal when loading presets or syncing. When enabled, a "Sync All" toggle appears in the designer footer — turn it on to propagate changes to all modes, or leave it off to apply only to the active mode. |
 
 #### 🎨 Visual Style
@@ -253,7 +254,7 @@ Valves are configured in the Admin Panel under **Functions → Theme Designer Pr
 | **AI Consultant Model** | `str` | `""` | The model the AI Consultant asks, by its ID. Empty: the task model set under **Admin Settings > Interface**, local first, then external. Open WebUI asks it as the signed-in person, so for users to use the AI button, they need access to this model, as they do for a task model. |
 | **Designer URL** | `str` | `/api/v1/theme-designer` | URL path where the designer and all its sub-routes are served. Must start with `/api/v1/` — paths outside this prefix are auto-corrected to prevent the SPA catch-all from intercepting the route (a warning is logged). Changing this value triggers a route re-registration; the loader fragment picks up the new URL on its next compose. |
 
-> **Note:** Most valves default to their most permissive values. **Allow Personal Themes** and **Enable Canvas API Access** start off, and **Draft Mode Default** and **Auto Sync** start off too. Admins only need to change a valve to restrict a feature or turn one of those on.
+> **Note:** Most valves default to their most permissive values. **Allow Personal Themes**, **Show In Admin Panel** and **Enable Canvas API Access** start off, and **Draft Mode Default** and **Auto Sync** start off too. Admins only need to change a valve to restrict a feature or turn one of those on.
 
 > [!IMPORTANT]
 > Most valve changes take effect on the **next `event()` call** (i.e., any chat message or function event). Saving valve values alone doesn't trigger re-injection — it happens the next time the event function runs. The exception is the function **ON/OFF toggle** in the admin panel, which triggers `function.disable_started`/`function.enable_started` lifecycle events that take effect immediately (on Open WebUI v0.11.0 or newer).
@@ -519,11 +520,13 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 
 The Docs page now has a solid background, so the designer no longer shows through behind the text.
 
+**The designer as a page of the Admin Panel.** Turn on the new **Show In Admin Panel** valve, and the Admin Panel's top bar gets a **Themes** page between **Functions** and **Settings**, with the instance designer filling it. **Settings** opens its dialog over it, and any other page of the bar closes it. It's off by default, and the **Themes** tab in Settings stays either way.
+
 **Turn off theme update checks.** The new **Enable Theme Update Checks** valve, on by default, covers every update request the designer makes: the **Updates** button, each theme's own update check, and the **Update** badges in Community Themes. Turned off, it hides the button and the per-theme check. The designer then makes none of these requests to GitHub or to a theme's update URL. The Community Themes browser keeps its own valve.
 
 **A theme from the Theme Designer Pro Tool lands in your gallery.** The personal **Themes** tab offers to start your personal theme from the one the Tool left in your browser. **Start from it** now also saves that theme to your theme gallery as "From the Theme Designer Pro Tool", and makes it the gallery's active theme. Before, **Use instance theme** removed it for good, and the offer came back on the next page load. Now the theme stays in your gallery, and the offer doesn't return in that browser.
 
-**Designers open in several tabs stay in step.** Each designer kept the theme and the gallery it loaded, so a change saved in one tab, such as a Global Reset, didn't show in another until you reloaded it. Worse, editing in the stale tab saved its older copy over the change. Now every other open designer reloads when one saves the theme or its gallery. That covers designers at the designer URL, in Settings, or in another window. A designer waits while it's saving or has a dialog open, and keeps a draft in Draft mode. Open WebUI's own pages already updated live and still do.
+**Designers open in several tabs stay in step.** Each designer kept the theme and the gallery it loaded, so a change saved in one tab, such as a Global Reset, didn't show in another until you reloaded it. Worse, editing in the stale tab saved its older copy over the change. Now every other open designer reloads when one saves the theme or its gallery. That covers designers at the designer URL, in Settings, on the Admin Panel's **Themes** page, or in another window. A designer waits while it's saving or has a dialog open, and keeps a draft in Draft mode. Open WebUI's own pages already updated live and still do.
 
 **Fixes the documentation review turned up:**
 - **Factory Reset in a personal Themes tab** now removes that user's library too. Before, it removed only the personal theme, and the library came back on the next load.
