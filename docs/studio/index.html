@@ -133,6 +133,12 @@
             <input type="search" id="fx-search" placeholder="Search animations" autocomplete="off" spellcheck="false">
           </label>
           <div class="fx-pick" id="fx-pick" role="listbox" aria-label="Canvas FX animations"></div>
+          <details class="fx-settings hidden" id="fx-settings">
+            <summary><span>Animation settings</span><span class="fx-settings-count" id="fx-settings-count"></span></summary>
+            <p class="studio-hint">The script's own settings. Changes go into the theme you download.</p>
+            <div class="fx-settings-body" id="fx-settings-body"></div>
+            <button type="button" class="chip" id="fx-settings-reset" style="height:28px">Reset to the script's values</button>
+          </details>
         </div>
         <p class="studio-hint hidden" id="bg-note"></p>
       </section>

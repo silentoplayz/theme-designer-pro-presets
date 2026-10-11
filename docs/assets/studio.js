@@ -147,7 +147,7 @@
         m.h = src.h; m.c = src.c;
         if (k !== 'oled' && state.mode !== 'oled') m.l = src.l;
         copyBackground(src, m);
-        state.refs[k] = Object.assign({}, ref());
+        state.refs[k] = clone(ref());
       });
     }
     queueSave();
@@ -308,12 +308,233 @@
       renderGradientPicker();
       renderFxList();
     }
+    renderSettings();
     const note = $('bg-note');
     const r = ref();
     const fromPreset = state.preset && bgKind(m) !== 'none' && !r.gradient && !r.fx;
     note.textContent = fromPreset ? 'This background comes from the preset you started from.' : '';
     note.classList.toggle('hidden', !fromPreset);
   }
+
+  // ---- Animation settings ----
+  // A script's CONFIG object, or the constants at its top, read as sliders,
+  // switches and colors. A change rewrites that one value in the script, so
+  // the downloaded theme carries the tuned script. The mode's ref keeps the
+  // script as it was picked (base) and the changes made to it (cfg).
+
+  const NUM = '-?(?:\\d+\\.?\\d*|\\.\\d+)(?:e-?\\d+)?';
+  const LIT = `(${NUM}|true|false|'#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{3})'|"#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{3})")`;
+  const OBJ_ENTRY = new RegExp(`^(\\s*([A-Za-z_$][\\w$]*)\\s*:\\s*)${LIT}(\\s*(?:,|$).*)$`);
+  const INLINE_ENTRY = new RegExp(`([A-Za-z_$][\\w$]*)\\s*:\\s*${LIT}(?=\\s*[,}])`, 'g');
+  const CONST_ENTRY = new RegExp(`^((?:const|let|var)\\s+([A-Z][A-Z0-9_]*)\\s*=\\s*)${LIT}(\\s*;.*)$`);
+  const SECTION = /^\s*\/\/\s*[-─═=]{2,}\s*(.*?)\s*[-─═=]*\s*$/;
+  const MAX_SETTINGS = 80;
+
+  function labelOf(key) {
+    const words = key.includes('_') ? key.toLowerCase().split('_') : key.replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase().split(' ');
+    const text = words.filter(Boolean).join(' ');
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
+
+  // A range stated in the comment wins; otherwise one sized to the default
+  function numberRange(v, comment) {
+    const int = Number.isInteger(v);
+    const r = comment.match(/(-?\d*\.?\d+)\s*(?:-|–|—|to|\.\.)\s*(-?\d*\.?\d+)/);
+    let min, max;
+    if (r && Number(r[1]) < Number(r[2])) { min = Number(r[1]); max = Number(r[2]); }
+    else if (v < 0) { min = v * 3; max = -v * 3; }
+    else if (v === 0) { min = 0; max = 1; }
+    else if (!int && v <= 1) { min = 0; max = 1; }
+    else { min = 0; max = int ? Math.max(4, Math.ceil(v * 3)) : Number((v * 3).toPrecision(2)); }
+    min = Math.min(min, v);
+    max = Math.max(max, v);
+    const whole = int && Number.isInteger(min) && Number.isInteger(max);
+    const step = whole ? 1 : Math.pow(10, Math.floor(Math.log10((max - min) / 100)));
+    return { min, max, step };
+  }
+
+  // at: where the value starts in its line, so a change replaces only it
+  function settingOf(line, at, key, raw, rest, section) {
+    const comment = ((rest.match(/\/\/\s*(.*)$/) || [])[1] || '').trim();
+    const e = { line, at, len: raw.length, key, section, hint: comment, label: labelOf(key) };
+    if (raw === 'true' || raw === 'false') {
+      e.kind = 'bool';
+      e.value = raw === 'true';
+    } else if (/^['"]#/.test(raw)) {
+      e.kind = 'color';
+      e.quote = raw[0];
+      const hex = raw.slice(2, -1);
+      e.value = '#' + (hex.length === 3 ? hex.split('').map((ch) => ch + ch).join('') : hex).toLowerCase();
+    } else {
+      e.kind = 'number';
+      e.value = Number(raw);
+      Object.assign(e, numberRange(e.value, comment));
+    }
+    return e;
+  }
+
+  function parseSettings(src) {
+    const lines = String(src || '').split('\n');
+    const out = [];
+    let section = '';
+    const start = lines.findIndex((x) => /^\s*(?:const|let|var)\s+(?:CONFIG|CFG)\s*=\s*\{/.test(x));
+    if (start >= 0 && /\}\s*;?\s*(?:\/\/.*)?$/.test(lines[start])) {
+      // The whole object on one line
+      let m;
+      INLINE_ENTRY.lastIndex = 0;
+      while ((m = INLINE_ENTRY.exec(lines[start])) && out.length < MAX_SETTINGS) {
+        out.push(settingOf(start, m.index + m[0].length - m[2].length, m[1], m[2], '', ''));
+      }
+    } else if (start >= 0) {
+      let depth = 0;
+      for (let i = start; i < lines.length && out.length < MAX_SETTINGS; i++) {
+        if (i > start && depth === 1) {
+          const sec = lines[i].match(SECTION);
+          if (sec && sec[1]) section = sec[1];
+          const m = lines[i].match(OBJ_ENTRY);
+          if (m) out.push(settingOf(i, m[1].length, m[2], m[3], m[4], section));
+        }
+        // Brackets outside comments and strings set what belongs to CONFIG itself
+        const code = lines[i].replace(/(['"`])(?:\\.|(?!\1).)*\1/g, '').replace(/\/\/.*$/, '');
+        depth += (code.match(/[{[]/g) || []).length - (code.match(/[}\]]/g) || []).length;
+        if (i > start && depth <= 0) break;
+      }
+    } else {
+      // The other common layout: constants above the first function
+      for (let i = 0; i < lines.length && out.length < MAX_SETTINGS; i++) {
+        if (/^\s*(?:function|class|async\s+function|self\.onmessage|onmessage)\b/.test(lines[i])) break;
+        const sec = lines[i].match(SECTION);
+        if (sec && sec[1]) section = sec[1];
+        const m = lines[i].match(CONST_ENTRY);
+        if (m) out.push(settingOf(i, m[1].length, m[2], m[3], m[4], section));
+      }
+    }
+    return out;
+  }
+
+  // Only parsed settings, with values of the right kind, are ever written
+  function applySettings(src, cfg) {
+    if (!cfg || !Object.keys(cfg).length) return src;
+    const lines = src.split('\n');
+    // Right to left, so an edit never moves a value still to be edited
+    parseSettings(src).sort((x, y) => x.line - y.line || y.at - x.at).forEach((e) => {
+      if (!Object.prototype.hasOwnProperty.call(cfg, e.key)) return;
+      const v = cfg[e.key];
+      // A value left at its default keeps the line exactly as written
+      if (v === e.value) return;
+      let lit = null;
+      if (e.kind === 'bool' && typeof v === 'boolean') lit = v ? 'true' : 'false';
+      else if (e.kind === 'color' && /^#[0-9a-f]{6}$/i.test(v)) lit = e.quote + v.toLowerCase() + e.quote;
+      else if (e.kind === 'number' && typeof v === 'number' && isFinite(v)) lit = String(Number(v.toFixed(6)));
+      if (lit !== null) lines[e.line] = lines[e.line].slice(0, e.at) + lit + lines[e.line].slice(e.at + e.len);
+    });
+    return lines.join('\n');
+  }
+
+  function tuneBase(k) {
+    const r = state.refs[k] || {};
+    return r.base || state.modes[k].canvasScript;
+  }
+
+  // Linked modes that run the same script are tuned together
+  function tuneTargets() {
+    const base = tuneBase(state.mode);
+    return targets().filter((k) => state.modes[k].canvasEnabled && tuneBase(k) === base);
+  }
+
+  function tune(key, value, fallback) {
+    tuneTargets().forEach((k) => {
+      const r = ref(k);
+      if (!r.base) r.base = state.modes[k].canvasScript;
+      const cfg = Object.assign({}, r.cfg);
+      if (value === fallback) delete cfg[key]; else cfg[key] = value;
+      r.cfg = cfg;
+      state.modes[k].canvasScript = applySettings(r.base, cfg);
+    });
+    render();
+    queueSave();
+  }
+
+  function applyTune(k, cfg) {
+    if (!cfg || typeof cfg !== 'object' || Array.isArray(cfg)) return;
+    const clean = {};
+    Object.keys(cfg).slice(0, MAX_SETTINGS).forEach((key) => {
+      const v = cfg[key];
+      if (/^[A-Za-z_$][\w$]{0,63}$/.test(key) && (typeof v === 'number' || typeof v === 'boolean' || typeof v === 'string')) clean[key] = v;
+    });
+    if (!Object.keys(clean).length) return;
+    const m = state.modes[k];
+    const r = ref(k);
+    r.base = r.base || m.canvasScript;
+    r.cfg = clean;
+    m.canvasScript = applySettings(r.base, clean);
+  }
+
+  function fmtNum(v, step) {
+    const d = step >= 1 ? 0 : Math.min(4, Math.ceil(-Math.log10(step)));
+    return Number(v).toFixed(d);
+  }
+
+  function renderSettings() {
+    const box = $('fx-settings');
+    const m = cur();
+    const list = m.canvasEnabled && m.canvasScript ? parseSettings(tuneBase(state.mode)) : [];
+    box.classList.toggle('hidden', !list.length);
+    if (!list.length) { $('fx-settings-body').innerHTML = ''; return; }
+    const cfg = ref().cfg || {};
+    $('fx-settings-count').textContent = Object.keys(cfg).length ? `${Object.keys(cfg).length} changed` : `${list.length}`;
+    $('fx-settings-reset').disabled = !Object.keys(cfg).length;
+    let section = null;
+    $('fx-settings-body').innerHTML = list.map((e) => {
+      const head = e.section && e.section !== section ? `<p class="fx-set-section">${UI.esc(e.section)}</p>` : '';
+      section = e.section;
+      const v = Object.prototype.hasOwnProperty.call(cfg, e.key) ? cfg[e.key] : e.value;
+      const hint = e.hint ? `<span class="fx-set-hint">${UI.esc(e.hint)}</span>` : '';
+      const key = UI.esc(e.key);
+      if (e.kind === 'bool') {
+        return head + `<label class="switch fx-set"><input type="checkbox" data-key="${key}" ${v ? 'checked' : ''}><span class="switch-ui" aria-hidden="true"></span><span class="fx-set-text">${UI.esc(e.label)}${hint}</span></label>`;
+      }
+      if (e.kind === 'color') {
+        return head + `<label class="fx-set fx-set-color"><input type="color" data-key="${key}" value="${UI.esc(v)}"><span class="fx-set-text">${UI.esc(e.label)}${hint}</span></label>`;
+      }
+      return head + `<label class="field fx-set"><span class="field-label">${UI.esc(e.label)} <output>${fmtNum(v, e.step)}</output></span>${hint}` +
+        `<input class="range" type="range" data-key="${key}" min="${e.min}" max="${e.max}" step="${e.step}" value="${v}"></label>`;
+    }).join('');
+  }
+
+  function settingFor(key) {
+    return parseSettings(tuneBase(state.mode)).find((e) => e.key === key);
+  }
+
+  $('fx-settings-body').addEventListener('input', (e) => {
+    const t = e.target;
+    if (t.type !== 'range') return;
+    const s = settingFor(t.dataset.key);
+    const out = t.closest('.fx-set').querySelector('output');
+    if (s && out) out.textContent = fmtNum(t.value, s.step);
+  });
+
+  $('fx-settings-body').addEventListener('change', (e) => {
+    const t = e.target;
+    const s = t.dataset.key && settingFor(t.dataset.key);
+    if (!s) return;
+    const value = s.kind === 'bool' ? t.checked : s.kind === 'color' ? t.value.toLowerCase() : Number(t.value);
+    tune(s.key, value, s.value);
+    $('fx-settings-count').textContent = Object.keys(ref().cfg || {}).length ? `${Object.keys(ref().cfg).length} changed` : `${parseSettings(tuneBase(state.mode)).length}`;
+    $('fx-settings-reset').disabled = !Object.keys(ref().cfg || {}).length;
+  });
+
+  $('fx-settings-reset').addEventListener('click', () => {
+    tuneTargets().forEach((k) => {
+      const r = ref(k);
+      if (r.base) state.modes[k].canvasScript = r.base;
+      delete r.base;
+      delete r.cfg;
+    });
+    renderSettings();
+    render();
+    queueSave();
+  });
 
   // ---- Details ----
 
@@ -510,6 +731,7 @@
       if (r.gradient) Object.assign(e, { g: r.gradient, gi: m.gradientIntensity, ga: m.gradientAnimation ? 1 : 0 });
       else if (r.fx) e.f = r.fx;
       else if (state.preset && bgKind(m) !== 'none') e.keep = 1;
+      if ((e.f || e.keep) && r.cfg && Object.keys(r.cfg).length) e.t = r.cfg;
       out.m[k] = e;
     });
     return out;
@@ -542,7 +764,7 @@
       m.h = clamp(e.h, 0, 360, m.h);
       m.c = clamp(e.c, 0, 150, m.c);
       m.l = clamp(e.l, 0, 100, m.l);
-      if (e.keep) return;
+      if (e.keep) { applyTune(k, e.t); return; }
       Object.assign(m, { canvasEnabled: false, canvasScript: '', gradientEnabled: false });
       state.refs[k] = {};
       if (e.g) {
@@ -560,18 +782,19 @@
         }
       } else if (e.f) {
         const item = (catalog.canvasFx || []).find((x) => x.file === e.f);
-        if (item && !UI.fxBlocked(item)) pending.push([k, item]);
+        if (item && !UI.fxBlocked(item)) pending.push([k, item, e.t]);
       }
     });
     return pending;
   }
 
   async function loadScripts(pending) {
-    for (const [k, item] of pending) {
+    for (const [k, item, t] of pending) {
       try {
         const script = await UI.fetchCached(item.importUrl, false);
         Object.assign(state.modes[k], { canvasEnabled: true, canvasScript: script, gradientEnabled: false });
         state.refs[k] = { fx: item.file };
+        applyTune(k, t);
       } catch (e) {
         // Leave that mode without its script
       }

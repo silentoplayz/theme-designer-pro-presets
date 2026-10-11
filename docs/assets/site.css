@@ -2046,6 +2046,64 @@ iframe { color-scheme: normal; }
 .fx-row-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fx-row-tag { font-size: 0.72rem; color: var(--faint); white-space: nowrap; }
 
+/* Animation settings: the picked script's CONFIG as controls */
+.fx-settings {
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--bg);
+}
+.fx-settings > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 0.86rem;
+  color: var(--text-2);
+  list-style: none;
+}
+.fx-settings > summary::-webkit-details-marker { display: none; }
+.fx-settings > summary::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  margin-left: auto;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.15s;
+}
+.fx-settings[open] > summary::after { transform: rotate(225deg); }
+.fx-settings > summary:hover { color: var(--text); }
+.fx-settings-count { font-size: 0.72rem; color: var(--faint); font-family: var(--mono); }
+.fx-settings[open] { padding-bottom: 12px; }
+.fx-settings > .studio-hint { padding: 0 12px; margin: 0 0 4px; }
+.fx-settings-body { display: grid; gap: 14px; padding: 8px 12px 14px; }
+.fx-settings > .chip { margin: 0 12px; }
+.fx-settings > .chip:disabled { opacity: 0.45; cursor: default; }
+.fx-set-section {
+  margin: 6px 0 -4px;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.fx-set-hint { display: block; font-size: 0.76rem; color: var(--faint); font-weight: 400; line-height: 1.35; }
+.fx-set.field { gap: 6px; }
+.fx-set-text { display: grid; gap: 2px; min-width: 0; }
+.fx-set-color { display: flex; align-items: center; gap: 10px; }
+.fx-set-color input[type='color'] {
+  flex: none;
+  width: 34px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+}
+
 /* Wide screens: the preview fills the window's height, and the mock lays
    itself out to that shape (mockStage's fill option) */
 @media (min-width: 1081px) {

@@ -153,6 +153,10 @@ function buildCanvasFx() {
     if (!entries[entries.length - 1].description) {
       delete entries[entries.length - 1].description;
     }
+    // Scripts that handle the engine's palette channel
+    if (/case\s*['"]theme['"]|type\s*===?\s*['"]theme['"]/.test(source)) {
+      entries[entries.length - 1].followsTheme = true;
+    }
   }
 
   console.log(`  ✓ canvasFx — ${entries.length} entries`);

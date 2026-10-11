@@ -178,6 +178,7 @@
     if (/webgpu/.test(f)) tags.push('WebGPU');
     else if (/webgl/.test(f) || /\(webgl\)/i.test(item.name || '')) tags.push('WebGL');
     if (/^context_/.test(f)) tags.push('Reacts to chat');
+    if (item.followsTheme) tags.push('Follows your theme');
     if (/^(tap_|touch_)|bubble_pop|ripple_pond/.test(f)) tags.push('Interactive');
     return tags;
   }
@@ -192,6 +193,9 @@
 (function(){
   var c=document.getElementById('c');
   var src=JSON.parse(document.getElementById('src').textContent);
+  // Wait for a size: a script started at 0x0 can divide by it
+  var go=function(){
+  if(!innerWidth||!innerHeight){requestAnimationFrame(go);return}
   var w=innerWidth,h=innerHeight;c.width=w;c.height=h;
   try{
     var url=URL.createObjectURL(new Blob([src],{type:'application/javascript'}));
@@ -204,8 +208,10 @@
     addEventListener('mousedown',function(e){p({type:'mousedown',x:e.clientX,y:e.clientY})},true);
     addEventListener('mouseup',function(e){p({type:'mouseup',x:e.clientX,y:e.clientY})},true);
     addEventListener('click',function(e){p({type:'click',x:e.clientX,y:e.clientY})},true);
-    addEventListener('resize',function(){p({type:'resize',width:innerWidth,height:innerHeight})});
+    addEventListener('resize',function(){if(innerWidth&&innerHeight)p({type:'resize',width:innerWidth,height:innerHeight})});
   }catch(e){}
+  };
+  go();
 })();
 <\/script></body></html>`;
   }
