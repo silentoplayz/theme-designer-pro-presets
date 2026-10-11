@@ -1633,9 +1633,10 @@
     {
       "name": "Aurora Borealis",
       "file": "aurora_borealis.js",
-      "description": "Flowing, undulating aurora-like ribbons of light with green, teal, and purple hues. Ribbons sway gently using sine waves and respond subtly to mouse position by shifting their flow direction.",
+      "description": "Flowing, undulating aurora-like ribbons of light with green, teal, and purple hues. Ribbons sway gently using sine waves and respond subtly to mouse position by shifting their flow direction. Follows your theme's colors when the designer sends them.",
       "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/aurora_borealis.js"
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/aurora_borealis.js",
+      "followsTheme": true
     },
     {
       "name": "Aurora Borealis (WebGL)",
@@ -1710,9 +1711,10 @@
     {
       "name": "Circuit Board",
       "file": "circuit_board.js",
-      "description": "Animated circuit board traces drawn in real-time. Lines travel horizontally and vertically with 90-degree turns. Glowing nodes at junctions/endpoints. Mouse creates signal pulses that race along nearby traces. Subtle cyan/green palette.",
+      "description": "Animated circuit board traces drawn in real-time. Lines travel horizontally and vertically with 90-degree turns. Glowing nodes at junctions/endpoints. Mouse creates signal pulses that race along nearby traces. Subtle cyan/green palette. Follows your theme's colors when the designer sends them.",
       "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/circuit_board.js"
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/circuit_board.js",
+      "followsTheme": true
     },
     {
       "name": "Comet Shower",
@@ -1724,9 +1726,10 @@
     {
       "name": "Constellation Map",
       "file": "constellation_map.js",
-      "description": "Randomly placed stars that form connection lines (like constellation patterns) to nearby stars within a threshold distance. Stars slowly drift across the canvas. Mouse creates a gravitational pull that attracts nearby stars. Connection line opacity is based on inter-star distance.",
+      "description": "Randomly placed stars that form connection lines (like constellation patterns) to nearby stars within a threshold distance. Stars slowly drift across the canvas. Mouse creates a gravitational pull that attracts nearby stars. Connection line opacity is based on inter-star distance. Follows your theme's colors when the designer sends them.",
       "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/constellation_map.js"
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/constellation_map.js",
+      "followsTheme": true
     },
     {
       "name": "Context Mushroom Farm",
@@ -1824,7 +1827,8 @@
       "file": "firefly_meadow.js",
       "description": "A nighttime meadow scene teeming with life. Layered grass silhouettes sway in a gentle breeze at three depth levels. Fireflies drift with species-accurate flash patterns — short bursts separated by long dark intervals, each with a unique rhythm. A crescent moon hangs in the sky casting faint light, stars twinkle overhead, and a ground mist layer hugs the grass line, thickening and thinning with a slow breath-like rhythm. Occasionally a firefly traces a long J-shaped mating flight arc. Mouse position shifts the wind direction, bending the grass.",
       "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/firefly_meadow.js"
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/firefly_meadow.js",
+      "followsTheme": true
     },
     {
       "name": "Fireworks Show",
@@ -1836,9 +1840,10 @@
     {
       "name": "Fluid Ribbons",
       "file": "fluid_ribbons.js",
-      "description": "Graceful, flowing silk-like ribbons that trail across the screen in smooth sine/bezier curves. Ribbons taper from thick centers to thin edges, carry color gradients along their length, attract toward the mouse cursor, and glow at intersection points. Uses ring-buffer position history, Float32Array bulk storage, and delta-time animation.",
+      "description": "Graceful, flowing silk-like ribbons that trail across the screen in smooth sine/bezier curves. Ribbons taper from thick centers to thin edges, carry color gradients along their length, attract toward the mouse cursor, and glow at intersection points. Uses ring-buffer position history, Float32Array bulk storage, and delta-time animation. Follows your theme's colors when the designer sends them.",
       "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/fluid_ribbons.js"
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/fluid_ribbons.js",
+      "followsTheme": true
     },
     {
       "name": "Galaxy Forge",
@@ -1885,9 +1890,10 @@
     {
       "name": "Ink Bloom",
       "file": "ink_bloom.js",
-      "description": "Ink-drop-like blooms that slowly expand and diffuse at random locations, fading out as they grow. Deep, rich colors (indigo, crimson, emerald) with low opacity. Mouse position influences where new blooms appear.",
+      "description": "Ink-drop-like blooms that slowly expand and diffuse at random locations, fading out as they grow. Deep, rich colors (indigo, crimson, emerald) with low opacity. Mouse position influences where new blooms appear. Follows your theme's colors when the designer sends them.",
       "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/ink_bloom.js"
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/ink_bloom.js",
+      "followsTheme": true
     },
     {
       "name": "Isometric Terrain",
@@ -1913,9 +1919,10 @@
     {
       "name": "Lava Lamp",
       "file": "lava_lamp.js",
-      "description": "Large, soft, amorphous blobs that slowly rise, merge, split, and sink like a lava lamp. Warm colors (deep reds, oranges, magentas) with very low opacity and heavy blur. Mouse attracts nearby blobs.",
+      "description": "Large, soft, amorphous blobs that slowly rise, merge, split, and sink like a lava lamp. Warm colors (deep reds, oranges, magentas) with very low opacity and heavy blur. Mouse attracts nearby blobs. Follows your theme's colors when the designer sends them.",
       "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/lava_lamp.js"
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/lava_lamp.js",
+      "followsTheme": true
     },
     {
       "name": "Lightning",
@@ -1983,9 +1990,10 @@
     {
       "name": "Nebula Clouds",
       "file": "nebula_clouds.js",
-      "description": "Soft, slowly drifting colored cloud formations using layered circles with very low opacity and large radii. Colors are deep purples, blues, and pinks. Mouse proximity causes nearby clouds to gently disperse.",
+      "description": "Soft, slowly drifting colored cloud formations using layered circles with very low opacity and large radii. Colors are deep purples, blues, and pinks. Mouse proximity causes nearby clouds to gently disperse. Follows your theme's colors when the designer sends them.",
       "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/nebula_clouds.js"
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/nebula_clouds.js",
+      "followsTheme": true
     },
     {
       "name": "Nebula (WebGL)",
@@ -1997,9 +2005,10 @@
     {
       "name": "Neural Network",
       "file": "neural_network.js",
-      "description": "Visualization of connected nodes in layers with pulses of light traveling along connections. Nodes glow when activated. The network slowly reorganizes. Mouse adds energy to the nearest node, triggering cascading activations.",
+      "description": "Visualization of connected nodes in layers with pulses of light traveling along connections. Nodes glow when activated. The network slowly reorganizes. Mouse adds energy to the nearest node, triggering cascading activations. Follows your theme's colors when the designer sends them.",
       "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/neural_network.js"
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/neural_network.js",
+      "followsTheme": true
     },
     {
       "name": "Northern Lights Curtain",
@@ -2069,7 +2078,8 @@
       "file": "sacred_geometry.js",
       "description": "Slowly rotating, nested geometric shapes — circles inscribed in",
       "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/sacred_geometry.js"
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/sacred_geometry.js",
+      "followsTheme": true
     },
     {
       "name": "Sandstorm",
@@ -2144,9 +2154,10 @@
     {
       "name": "Topographic Map",
       "file": "topographic_map.js",
-      "description": "Smooth, flowing topographic contour lines over a continuously evolving terrain. Bilinear-interpolated gradient fills and organic multi-axis time drift create a fluid, living map feel. Mouse creates a soft hill.",
+      "description": "Smooth, flowing topographic contour lines over a continuously evolving terrain. Bilinear-interpolated gradient fills and organic multi-axis time drift create a fluid, living map feel. Mouse creates a soft hill. Follows your theme's colors when the designer sends them.",
       "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/topographic_map.js"
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/topographic_map.js",
+      "followsTheme": true
     },
     {
       "name": "Touch Garden",
@@ -2167,7 +2178,8 @@
       "file": "voronoi_cells.js",
       "description": "Animated Voronoi diagram where seed points drift slowly. Cell edges",
       "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/voronoi_cells.js"
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/voronoi_cells.js",
+      "followsTheme": true
     },
     {
       "name": "Voronoi Prism (WebGL)",
