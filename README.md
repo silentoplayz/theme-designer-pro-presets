@@ -96,7 +96,7 @@ https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/b
 | Folder | What's in it |
 |---|---|
 | [`themes/`](themes/) | Complete themes as `.json`: a palette and settings for each mode (Dark, OLED, Light and Her), with any Canvas FX, gradient and custom CSS they use. Each has an `updateUrl`, so the designer can check it for updates. |
-| [`canvas-fx/`](canvas-fx/) | Animations as standalone `.js` files. They run behind the interface in a Web Worker on an OffscreenCanvas, and many have a `CONFIG` block of settings you can tune, in the Studio too. Those tagged **Follows your theme** draw in the theme's colors (Theme Designer Pro v1.12.0 or later). |
+| [`canvas-fx/`](canvas-fx/) | Animations as standalone `.js` files. They run behind the interface in a Web Worker on an OffscreenCanvas, and many have a `CONFIG` block of settings you can tune with sliders, in the designer and in the Studio. Those tagged **Follows your theme** draw in the theme's colors (Theme Designer Pro v1.12.0 or later). |
 | [`gradients/`](gradients/) | Gradient presets, sorted by motion (`still/`, `animated/`) and then by type (`linear/`, `radial/`, `mesh/`). |
 | [`css-presets/`](css-presets/) | Styling as plain `.css` files: fonts, colors, spacing, components and effects. |
 | [`bundles/`](bundles/) | The presets combined into single files for one import each. Built by CI; see [`bundles/README.md`](bundles/README.md). |

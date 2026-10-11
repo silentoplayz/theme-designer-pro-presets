@@ -20,7 +20,7 @@ Before submitting a PR, ensure your preset meets these requirements:
 - [ ] **Follows the theme** (recommended): reads the palette from `init` (`e.data.theme`) and from `theme` messages, keeps its own colors as defaults, has a `followTheme` setting, recolors without restarting, and avoids additive blending when `theme.dark` is false. The designer's **📖 Docs** page, under **Theme-Aware Animations**, has the payload and the pattern
 - [ ] **Has a CONFIG block** (strongly recommended) with:
   - Box-decorated borders for visibility
-  - Inline comments with valid ranges for each property, written as `(min-max)`: the [Studio](https://silentoplayz.github.io/theme-designer-pro-presets/studio/) shows each number as a slider and uses that range
+  - Inline comments with valid ranges for each property, written as `(min-max)`: the designer's Animation Settings and the [Studio](https://silentoplayz.github.io/theme-designer-pro-presets/studio/) show each number as a slider and use that range
   - At least 10 tunable properties
   - Descriptive section grouping
 - [ ] **Performs well** — no visible lag on mid-range hardware

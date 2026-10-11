@@ -4788,6 +4788,18 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         .doc-sub-accordion[open] summary { border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); }
         body.light-mode .doc-sub-accordion[open] summary { background: rgba(0,0,0,0.02); }
         .doc-sub-accordion .doc-sub-inner { padding: 18px 18px 8px; }
+        .doc-sub-accordion.canvas-settings { margin: 0; flex-shrink: 0; }
+        .canvas-settings-count { margin-left: 6px; font-size: 0.65rem; font-weight: 600; color: var(--text-muted); }
+        .canvas-settings-note { font-size: 0.72rem; color: var(--text-muted); margin: 0 0 14px; line-height: 1.5; }
+        .canvas-settings-body { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 4px 28px; max-height: 340px; overflow-y: auto; padding-right: 6px; }
+        .canvas-settings-body .fx-set-section { grid-column: 1 / -1; margin: 10px 0 2px; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+        .canvas-settings-body .slider-row { gap: 8px; margin-bottom: 14px; }
+        .canvas-settings-body .slider-row label { font-size: 0.78rem; }
+        .canvas-settings-body .fx-set-hint { display: block; margin-top: -4px; font-size: 0.66rem; font-weight: 500; color: var(--text-muted); opacity: 0.8; line-height: 1.4; }
+        .canvas-settings-body .fx-set-toggle, .canvas-settings-body .fx-set-color { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); cursor: pointer; }
+        .canvas-settings-body .fx-set-text { display: grid; gap: 4px; min-width: 0; }
+        .canvas-settings-body .fx-set-text .fx-set-hint { margin-top: 0; }
+        .canvas-settings-body input[type="color"] { flex: none; width: 34px; height: 24px; padding: 0; border: 1px solid var(--border); border-radius: 6px; background: transparent; cursor: pointer; }
         .doc-inner { padding: 0 0 32px; color: var(--text-muted); font-size: 1.05rem; line-height: 1.85; }
         
         .doc-inner h4 { font-size: 1.1rem; color: var(--text-main); margin: 32px 0 16px; font-weight: 700; }
@@ -5217,7 +5229,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         <div id="tab-canvas" class="tab-content" role="tabpanel" style="display:none; height: 100%;">
             <div class="code-container">
                 <div class="section-title section-title-bar">
-                    <div>Canvas FX <span id="canvas-worker-badge" style="display:none; font-size: 0.55rem; font-weight: 800; padding: 2px 6px; border-radius: 12px; margin-left: 8px; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.05em;"></span><span id="canvas-webgl-badge" style="display:none; font-size: 0.55rem; font-weight: 800; padding: 2px 6px; border-radius: 12px; margin-left: 6px; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.05em; color:#a78bfa; background-color: rgba(167, 139, 250, 0.1);">WebGL</span><span id="canvas-context-badge" style="display:none; font-size: 0.55rem; font-weight: 800; padding: 2px 6px; border-radius: 12px; margin-left: 6px; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.05em; color:#2dd4bf; background-color: rgba(45, 212, 191, 0.1);">Context</span></div>
+                    <div>Canvas FX <span id="canvas-worker-badge" style="display:none; font-size: 0.55rem; font-weight: 800; padding: 2px 6px; border-radius: 12px; margin-left: 8px; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.05em;"></span><span id="canvas-webgl-badge" style="display:none; font-size: 0.55rem; font-weight: 800; padding: 2px 6px; border-radius: 12px; margin-left: 6px; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.05em; color:#a78bfa; background-color: rgba(167, 139, 250, 0.1);">WebGL</span><span id="canvas-context-badge" style="display:none; font-size: 0.55rem; font-weight: 800; padding: 2px 6px; border-radius: 12px; margin-left: 6px; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.05em; color:#2dd4bf; background-color: rgba(45, 212, 191, 0.1);">Context</span><span id="canvas-theme-badge" style="display:none; font-size: 0.55rem; font-weight: 800; padding: 2px 6px; border-radius: 12px; margin-left: 6px; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.05em; color:#f472b6; background-color: rgba(244, 114, 182, 0.1);">Follows Theme</span></div>
                     <div class="flex-center">
                         <label class="toggle-label" data-tooltip="Run animation script in background for this mode"><input type="checkbox" id="toggle-canvas-fx" class="cb-input"> Enabled</label>
                         <label class="toggle-label" data-tooltip="Show animations on Login/Signup pages (Default: Visible)"><input type="checkbox" id="toggle-canvas-auth" class="cb-input"> Show on Auth Pages</label>
@@ -5235,6 +5247,14 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                     </div>
                     <textarea id="canvas-fx-editor" spellcheck="false" placeholder="/* Enter Canvas animation script here.&#10;   When enabled, your script runs safely&#10;   in the background (if supported).&#10;   Open WebUI's structural wrappers will&#10;   turn transparent so the animation is&#10;   fully visible underneath! */"></textarea>
                 </div>
+
+                <details class="doc-sub-accordion canvas-settings" id="canvas-settings" style="display:none;">
+                    <summary><span>Animation Settings <span class="canvas-settings-count" id="canvas-settings-count"></span></span> <i data-icon="chevron"></i></summary>
+                    <div class="doc-sub-inner">
+                        <p class="canvas-settings-note">The script&rsquo;s own settings, read from its <code>CONFIG</code> block or the constants at its top. A change rewrites that value in the script above. Undo takes it back.</p>
+                        <div class="canvas-settings-body" id="canvas-settings-body"></div>
+                    </div>
+                </details>
 
                 <div id="gallery-toolbar-canvas"></div>
             </div>
@@ -5742,7 +5762,8 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                             <li><b>Background Worker Execution:</b> By default, scripts run in a true background Web Worker utilizing <code>OffscreenCanvas</code> (if supported by your browser) to ensure high-performance rendering without blocking the UI thread. Both <b>Canvas 2D</b> and <b>WebGL/WebGL2</b> contexts are supported &mdash; call <code>canvas.getContext('2d')</code> for standard drawing or <code>canvas.getContext('webgl2')</code> for GPU-accelerated shader rendering (see <i>WebGL Rendering</i> below). A script whose source contains the text <code>document</code> anywhere, even in a comment or inside a longer word such as &ldquo;documentation&rdquo;, is sent straight to the main thread. The status badge in the designer shows the <i>predicted</i> execution mode, from the browser&rsquo;s capabilities and that text check: <b style="color:#10b981">Background Worker</b> (OffscreenCanvas), <b style="color:#60a5fa">Main Thread (DOM Access)</b> (the script contains <code>document</code>), or <b style="color:#f59e0b">Main Thread (Fallback)</b> (the browser lacks <code>OffscreenCanvas</code>). If the Worker reports an uncaught error, the engine also moves the script to the main thread; the badge doesn&rsquo;t change in that case, because it shows the prediction, not the live path. Next to it, a <b>WebGL</b> badge appears when the script asks for a WebGL context, and a <b>Context</b> badge when it handles <code>context</code> messages.</li>
                             <li><b>Event Handling:</b> Eleven message types are sent to your script via <code>self.onmessage</code>: <code>init</code>, <code>resize</code>, <code>mousemove</code>, <code>click</code>, <code>mousedown</code>, <code>mouseup</code>, <code>touchstart</code>, <code>touchmove</code>, <code>touchend</code>, <code>context</code>, and <code>theme</code>. Touch events also generate synthetic mouse equivalents for cross-device compatibility.</li>
                             <li><b>Show on Auth Pages:</b> Toggle whether canvas animations appear on Login/Signup screens. Enabled by default. When the <b>Enable Auth Page Theming</b> valve is off, this checkbox is hidden and off in every mode.</li>
-                            <li><b>Preset Gallery:</b> Save, rename, overwrite with the editor&rsquo;s script, delete, and export individual animations, and import native <code>.js</code> animation files by dragging them into the designer. The gallery has search, a sort, and a type filter (All, WebGL, Context, DOM Access).</li>
+                            <li><b>Animation Settings:</b> Under the editor, the script&rsquo;s own settings appear as sliders, switches and color pickers, read from its <code>CONFIG</code> object or the constants at its top. A change rewrites that one value in the script, as if you had typed it, so the animation restarts with it and <b>Undo</b> takes it back. A range written in the setting&rsquo;s comment, such as <code>(0.5-3)</code>, sets the slider&rsquo;s range.</li>
+                            <li><b>Preset Gallery:</b> Save, rename, overwrite with the editor&rsquo;s script, delete, and export individual animations, and import native <code>.js</code> animation files by dragging them into the designer. The gallery has search, a sort, and a type filter (All, WebGL, Context, Follows Theme, DOM Access).</li>
                             <li><b>The Enable Canvas FX valve:</b> turning it off hides this tab, stops animations that are running, and serves every theme with its Canvas FX left out. The scripts stay saved, so turning the valve back on restores them.</li>
                             <li><b>Personal themes:</b> with <b>Allow Personal Themes</b> on, users can add Canvas FX to their own theme. It runs only in their own browser, and the <b>Enable Canvas FX</b> valve covers it too.</li>
                         </ul>
@@ -7055,7 +7076,7 @@ location.reload();</code></pre>
             searchId: 'canvas-search-input', searchToggleId: 'canvas-search-toggle-btn', searchPlaceholder: 'Search scripts...', searchTooltip: 'Search Scripts',
             sortId: 'canvas-sort-btn',
             filter: { btnId: 'canvas-filter-toggle-btn', dropdownId: 'canvas-filter-dropdown', tooltip: 'Filter by Type', options: [
-                { value: 'all', label: 'All Scripts' }, { value: 'webgl', label: 'WebGL' }, { value: 'context', label: 'Context' }, { value: 'dom', label: 'DOM Access' }
+                { value: 'all', label: 'All Scripts' }, { value: 'webgl', label: 'WebGL' }, { value: 'context', label: 'Context' }, { value: 'theme', label: 'Follows Theme' }, { value: 'dom', label: 'DOM Access' }
             ]},
             importId: 'import-canvas-btn', importTooltip: 'Import JS or JSON',
             exportId: 'export-all-canvas-btn', exportTooltip: 'Export All (Backup)',
@@ -9105,6 +9126,11 @@ function startAnimation() {
         if (contextBadge) {
             contextBadge.style.display = (isActiveCanvas && scriptTags.context) ? 'inline-block' : 'none';
         }
+        const themeBadge = $('canvas-theme-badge');
+        if (themeBadge) {
+            themeBadge.style.display = (isActiveCanvas && scriptTags.theme) ? 'inline-block' : 'none';
+        }
+        renderCanvasSettings();
         if (workerBadge) {
             if (isActiveCanvas) {
                 workerBadge.style.display = 'inline-block';
@@ -9246,9 +9272,192 @@ function startAnimation() {
         return {
             webgl: /getContext\s*\(\s*['"]webgl/.test(s),
             context: /(?:case|===)\s*['"]context['"]/.test(s),
+            theme: /(?:case|===)\s*['"]theme['"]/.test(s),
             dom: s.indexOf('document') !== -1,
         };
     }
+
+    // ---- Animation settings ----
+    // A script's CONFIG object, or the constants at its top, read as sliders,
+    // switches and colors (the same parser as the website's Studio). A change
+    // rewrites that one value in the script, exactly like typing it in the
+    // editor, so Undo, the gallery and the live canvas all see an edit.
+
+    const NUM = '-?(?:\\d+\\.?\\d*|\\.\\d+)(?:e-?\\d+)?';
+    const LIT = `(${NUM}|true|false|'#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{3})'|"#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{3})")`;
+    const OBJ_ENTRY = new RegExp(`^(\\s*([A-Za-z_$][\\w$]*)\\s*:\\s*)${LIT}(\\s*(?:,|$).*)$`);
+    const INLINE_ENTRY = new RegExp(`([A-Za-z_$][\\w$]*)\\s*:\\s*${LIT}(?=\\s*[,}])`, 'g');
+    const CONST_ENTRY = new RegExp(`^((?:const|let|var)\\s+([A-Z][A-Z0-9_]*)\\s*=\\s*)${LIT}(\\s*;.*)$`);
+    const SECTION = /^\s*\/\/\s*[-─═=]{2,}\s*(.*?)\s*[-─═=]*\s*$/;
+    const MAX_SETTINGS = 80;
+
+    function labelOf(key) {
+      const words = key.includes('_') ? key.toLowerCase().split('_') : key.replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase().split(' ');
+      const text = words.filter(Boolean).join(' ');
+      return text.charAt(0).toUpperCase() + text.slice(1);
+    }
+
+    // A range stated in the comment wins; otherwise one sized to the default
+    function numberRange(v, comment) {
+      const int = Number.isInteger(v);
+      const r = comment.match(/(-?\d*\.?\d+)\s*(?:-|–|—|to|\.\.)\s*(-?\d*\.?\d+)/);
+      let min, max;
+      if (r && Number(r[1]) < Number(r[2])) { min = Number(r[1]); max = Number(r[2]); }
+      else if (v < 0) { min = v * 3; max = -v * 3; }
+      else if (v === 0) { min = 0; max = 1; }
+      else if (!int && v <= 1) { min = 0; max = 1; }
+      else { min = 0; max = int ? Math.max(4, Math.ceil(v * 3)) : Number((v * 3).toPrecision(2)); }
+      min = Math.min(min, v);
+      max = Math.max(max, v);
+      const whole = int && Number.isInteger(min) && Number.isInteger(max);
+      const step = whole ? 1 : Math.pow(10, Math.floor(Math.log10((max - min) / 100)));
+      return { min, max, step };
+    }
+
+    // at: where the value starts in its line, so a change replaces only it
+    function settingOf(line, at, key, raw, rest, section) {
+      const comment = ((rest.match(/\/\/\s*(.*)$/) || [])[1] || '').trim();
+      const e = { line, at, len: raw.length, key, section, hint: comment, label: labelOf(key) };
+      if (raw === 'true' || raw === 'false') {
+        e.kind = 'bool';
+        e.value = raw === 'true';
+      } else if (/^['"]#/.test(raw)) {
+        e.kind = 'color';
+        e.quote = raw[0];
+        const hex = raw.slice(2, -1);
+        e.value = '#' + (hex.length === 3 ? hex.split('').map((ch) => ch + ch).join('') : hex).toLowerCase();
+      } else {
+        e.kind = 'number';
+        e.value = Number(raw);
+        Object.assign(e, numberRange(e.value, comment));
+      }
+      return e;
+    }
+
+    function parseSettings(src) {
+      const lines = String(src || '').split('\n');
+      const out = [];
+      let section = '';
+      const start = lines.findIndex((x) => /^\s*(?:const|let|var)\s+(?:CONFIG|CFG)\s*=\s*\{/.test(x));
+      if (start >= 0 && /\}\s*;?\s*(?:\/\/.*)?$/.test(lines[start])) {
+        // The whole object on one line
+        let m;
+        INLINE_ENTRY.lastIndex = 0;
+        while ((m = INLINE_ENTRY.exec(lines[start])) && out.length < MAX_SETTINGS) {
+          out.push(settingOf(start, m.index + m[0].length - m[2].length, m[1], m[2], '', ''));
+        }
+      } else if (start >= 0) {
+        let depth = 0;
+        for (let i = start; i < lines.length && out.length < MAX_SETTINGS; i++) {
+          if (i > start && depth === 1) {
+            const sec = lines[i].match(SECTION);
+            if (sec && sec[1]) section = sec[1];
+            const m = lines[i].match(OBJ_ENTRY);
+            if (m) out.push(settingOf(i, m[1].length, m[2], m[3], m[4], section));
+          }
+          // Brackets outside comments and strings set what belongs to CONFIG itself
+          const code = lines[i].replace(/(['"`])(?:\\.|(?!\1).)*\1/g, '').replace(/\/\/.*$/, '');
+          depth += (code.match(/[{[]/g) || []).length - (code.match(/[}\]]/g) || []).length;
+          if (i > start && depth <= 0) break;
+        }
+      } else {
+        // The other common layout: constants above the first function
+        for (let i = 0; i < lines.length && out.length < MAX_SETTINGS; i++) {
+          if (/^\s*(?:function|class|async\s+function|self\.onmessage|onmessage)\b/.test(lines[i])) break;
+          const sec = lines[i].match(SECTION);
+          if (sec && sec[1]) section = sec[1];
+          const m = lines[i].match(CONST_ENTRY);
+          if (m) out.push(settingOf(i, m[1].length, m[2], m[3], m[4], section));
+        }
+      }
+      return out;
+    }
+
+    // Only parsed settings, with values of the right kind, are ever written
+    function applySettings(src, cfg) {
+      if (!cfg || !Object.keys(cfg).length) return src;
+      const lines = src.split('\n');
+      // Right to left, so an edit never moves a value still to be edited
+      parseSettings(src).sort((x, y) => x.line - y.line || y.at - x.at).forEach((e) => {
+        if (!Object.prototype.hasOwnProperty.call(cfg, e.key)) return;
+        const v = cfg[e.key];
+        // A value left at its default keeps the line exactly as written
+        if (v === e.value) return;
+        let lit = null;
+        if (e.kind === 'bool' && typeof v === 'boolean') lit = v ? 'true' : 'false';
+        else if (e.kind === 'color' && /^#[0-9a-f]{6}$/i.test(v)) lit = e.quote + v.toLowerCase() + e.quote;
+        else if (e.kind === 'number' && typeof v === 'number' && isFinite(v)) lit = String(Number(v.toFixed(6)));
+        if (lit !== null) lines[e.line] = lines[e.line].slice(0, e.at) + lit + lines[e.line].slice(e.at + e.len);
+      });
+      return lines.join('\n');
+    }
+
+    function fmtNum(v, step) {
+        const d = step >= 1 ? 0 : Math.min(4, Math.ceil(-Math.log10(step)));
+        return Number(v).toFixed(d);
+    }
+
+    // var, not let: updatePalette() can run before this point at startup
+    var _canvasSettingsKey = null, _canvasSettingsReady = false;
+    function renderCanvasSettings() {
+        const box = $('canvas-settings');
+        if (!box || !_canvasSettingsReady) return;
+        const dm = getActiveDataMode();
+        const script = (themeData[dm] && themeData[dm].canvasScript) || '';
+        const key = dm + '\n' + script;
+        // Palette edits run this on every frame; rebuild only when the script changed
+        if (key === _canvasSettingsKey) return;
+        _canvasSettingsKey = key;
+        const list = script.trim() ? parseSettings(script) : [];
+        box.style.display = list.length ? '' : 'none';
+        $('canvas-settings-count').textContent = list.length ? '(' + list.length + ')' : '';
+        let section = null;
+        $('canvas-settings-body').innerHTML = list.map((e) => {
+            const head = e.section && e.section !== section ? `<div class="fx-set-section">${_esc(e.section)}</div>` : '';
+            section = e.section;
+            const hint = e.hint ? `<span class="fx-set-hint">${_esc(e.hint)}</span>` : '';
+            const key = _escAttr(e.key);
+            if (e.kind === 'bool') {
+                return head + `<label class="fx-set-toggle"><input type="checkbox" class="cb-input" data-key="${key}" ${e.value ? 'checked' : ''}><span class="fx-set-text"><span>${_esc(e.label)}</span>${hint}</span></label>`;
+            }
+            if (e.kind === 'color') {
+                return head + `<label class="fx-set-color"><input type="color" data-key="${key}" value="${_escAttr(e.value)}"><span class="fx-set-text"><span>${_esc(e.label)}</span>${hint}</span></label>`;
+            }
+            return head + `<div class="slider-row"><label><span>${_esc(e.label)}</span> <span class="slider-val">${fmtNum(e.value, e.step)}</span></label>${hint}` +
+                `<input type="range" data-key="${key}" min="${e.min}" max="${e.max}" step="${e.step}" value="${e.value}" aria-label="${_escAttr(e.label)}"></div>`;
+        }).join('');
+    }
+
+    function canvasSettingFor(key) {
+        return parseSettings(themeData[getActiveDataMode()].canvasScript || '').find((e) => e.key === key);
+    }
+
+    $('canvas-settings-body').addEventListener('input', (e) => {
+        const t = e.target;
+        if (t.type !== 'range') return;
+        const s = canvasSettingFor(t.dataset.key);
+        const out = t.closest('.slider-row').querySelector('.slider-val');
+        if (s && out) out.textContent = fmtNum(t.value, s.step);
+    });
+
+    $('canvas-settings-body').addEventListener('change', (e) => {
+        const t = e.target;
+        const s = t.dataset.key && canvasSettingFor(t.dataset.key);
+        if (!s) return;
+        const value = s.kind === 'bool' ? t.checked : s.kind === 'color' ? t.value.toLowerCase() : Number(t.value);
+        const dm = getActiveDataMode();
+        const next = applySettings(themeData[dm].canvasScript || '', { [s.key]: value });
+        if (next === themeData[dm].canvasScript) return;
+        themeData[dm].canvasScript = next;
+        activeThemeRef[dm] = null;
+        activeCanvasRef[dm] = null;
+        // The panel already shows this value, so keep it (and its focus) as it is
+        _canvasSettingsKey = dm + '\n' + next;
+        commitChange({ clearRef: false });
+    });
+
+    _canvasSettingsReady = true;
+    renderCanvasSettings();
 
     function renderCanvasPresets() {
         renderPresetGallery({
