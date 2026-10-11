@@ -13964,13 +13964,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             CANVAS_PRESETS.length = 0;
             Storage.set('canvas', CANVAS_PRESETS);
             syncLibrary();
+            // Only the saved presets go; the live theme's scripts stay
             activeCanvasRef = { dark: null, oled: null, light: null, her: null };
-            MODES.forEach(m => {
-                if (themeData[m].canvasEnabled) {
-                    themeData[m].canvasEnabled = false;
-                    themeData[m].canvasScript = '';
-                }
-            });
             commitChange({ clearRef: false });
         }
     });
@@ -13984,13 +13979,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             CSS_PRESETS.length = 0;
             Storage.set('css', CSS_PRESETS);
             syncLibrary();
+            // Only the saved snippets go; the live theme's custom CSS stays
             activeCssRef = { dark: null, oled: null, light: null, her: null };
-            MODES.forEach(m => {
-                if (themeData[m].customCssEnabled) {
-                    themeData[m].customCssEnabled = false;
-                    themeData[m].customCSS = '';
-                }
-            });
             commitChange({ clearRef: false });
         }
     });
@@ -16647,8 +16637,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     if (confirmDeleteBtn) {
         confirmDeleteBtn.addEventListener('click', () => {
             if (snapshotToDelete === null) return;
-            const dm = getActiveDataMode();
-            const isActuallyActive = activeThemeRef[dm] && activeThemeRef[dm].type === 'snapshot' && activeThemeRef[dm].id === snapshotToDelete;
             const snapshots = getSnapshots();
             snapshots.splice(snapshotToDelete, 1);
             saveSnapshots(snapshots);
@@ -16657,20 +16645,18 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             const deletedIndex = snapshotToDelete;
             snapshotToDelete = null;
 
-            if (isActuallyActive) nuclearReset(true);
-            else {
-                // Adjust activeThemeRef for ALL modes, not just the current one
-                MODES.forEach(m => {
-                    if (activeThemeRef[m] && activeThemeRef[m].type === 'snapshot') {
-                        if (activeThemeRef[m].id === deletedIndex) {
-                            activeThemeRef[m] = null;
-                        } else if (activeThemeRef[m].id > deletedIndex) {
-                            activeThemeRef[m].id--;
-                        }
+            // Only the gallery entry goes. The live theme stays as it is, even
+            // in modes that came from this entry; a Global Reset is its own button.
+            MODES.forEach(m => {
+                if (activeThemeRef[m] && activeThemeRef[m].type === 'snapshot') {
+                    if (activeThemeRef[m].id === deletedIndex) {
+                        activeThemeRef[m] = null;
+                    } else if (activeThemeRef[m].id > deletedIndex) {
+                        activeThemeRef[m].id--;
                     }
-                });
-                renderSnapshots();
-            }
+                }
+            });
+            renderSnapshots();
         });
     }
 
@@ -16851,24 +16837,18 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             Storage.set(storageKey, presets);
             syncLibrary();
             hideModal(deleteModalId);
-            let needsInject = false;
-            // Adjust refs for ALL modes, not just the current one
+            // Adjust refs for ALL modes, not just the current one. Modes using
+            // the deleted preset keep its script or CSS live; only the saved
+            // copy goes.
             MODES.forEach(m => {
                 if (getRefMap()[m] === itemToDelete) {
-                    themeData[m][enabledKey] = false;
-                    themeData[m][contentKey] = "";
                     getRefMap()[m] = null;
-                    needsInject = true;
                 } else if (getRefMap()[m] !== null && getRefMap()[m] > itemToDelete) {
                     getRefMap()[m]--;
                 }
             });
-            if (needsInject) {
-                commitChange({ clearRef: false });
-            } else {
-                window[renderFn]();
-                pushState();
-            }
+            window[renderFn]();
+            pushState();
             itemToDelete = null;
         });
 
