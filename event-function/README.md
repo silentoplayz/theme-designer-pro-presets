@@ -119,7 +119,7 @@ You can also import individual presets by pasting any file's GitHub URL directly
 > **No sandbox flags required.** Unlike the Tool variant, this event function serves a native page via ASGI routes — no iframe, no "Same Origin" configuration needed.
 
 > [!WARNING]
-> **Running behind nginx or another reverse proxy?** You **must** add `proxy_buffering off;` to your nginx location block (or the equivalent for your proxy). Without this, SSE live push events are silently buffered and themes will only appear on the admin's browser — other users and devices will see no changes. This is the **#1 deployment issue**. See the in-app documentation (📖 Docs → Section 17: Reverse Proxy Configuration) for nginx, Caddy, Apache, and Traefik examples.
+> **Running behind nginx or another reverse proxy?** You **must** add `proxy_buffering off;` to your nginx location block (or the equivalent for your proxy). Without this, SSE live push events can be held back, and other users and devices see a theme change only after they reload. This is the **#1 deployment issue**. See the in-app documentation (📖 Docs → Section 21: Reverse Proxy Configuration) for nginx, Caddy, Apache, and Traefik examples.
 
 ### Optional: Launcher Companion Tool
 
@@ -244,7 +244,7 @@ Valves are configured in the Admin Panel under **Functions → Theme Designer Pr
 |---|---|---|---|
 | **Enable Canvas API Access** | `bool` | `false` | ⚠️ Gives every Canvas FX script **each viewer's own auth token**, not just yours. Canvas FX scripts run on every user's page, so a script can call the API as whoever is viewing. Scripts referencing `document` run on the main thread, outside a Worker's isolation, and an installed theme can replace its script later via its update URL — enabling this trusts every theme author on an ongoing basis. Only enable if you wrote or audited every installed script. When disabled (default), `env.authToken` is an empty string and everything else works. |
 | **Enable URL Import** | `bool` | `true` | Allow importing themes, CSS snippets, and canvas scripts from remote URLs. When disabled, all URL import buttons are hidden. |
-| **Allowed Import Domains** | `str` | `""` | Comma-separated allowlist of domains for URL imports (e.g., `raw.githubusercontent.com, openwebui.com`). Empty = allow all. Only applies when Enable URL Import is `true`. |
+| **Allowed Import Domains** | `str` | `""` | Comma-separated allowlist of domains for URL imports (e.g., `raw.githubusercontent.com, openwebui.com`). Empty = allow all. It also covers theme update checks and Community Themes, whether or not Enable URL Import is on. |
 
 #### 🛠️ Advanced
 
@@ -253,7 +253,7 @@ Valves are configured in the Admin Panel under **Functions → Theme Designer Pr
 | **AI Consultant Model** | `str` | `""` | The model the AI Consultant asks, by its ID. Empty: the task model set under **Admin Settings > Interface**, local first, then external. Open WebUI asks it as the signed-in person, so for users to use the AI button, they need access to this model, as they do for a task model. |
 | **Designer URL** | `str` | `/api/v1/theme-designer` | URL path where the designer and all its sub-routes are served. Must start with `/api/v1/` — paths outside this prefix are auto-corrected to prevent the SPA catch-all from intercepting the route (a warning is logged). Changing this value triggers a route re-registration; the loader fragment picks up the new URL on its next compose. |
 
-> **Note:** All Valves default to their most permissive values — the event function behaves identically to an un-valved installation out of the box. Admins only need to configure Valves if they want to restrict specific features.
+> **Note:** Most valves default to their most permissive values. **Allow Personal Themes** and **Enable Canvas API Access** start off, and **Draft Mode Default** and **Auto Sync** start off too. Admins only need to change a valve to restrict a feature or turn one of those on.
 
 > [!IMPORTANT]
 > Most valve changes take effect on the **next `event()` call** (i.e., any chat message or function event). Saving valve values alone doesn't trigger re-injection — it happens the next time the event function runs. The exception is the function **ON/OFF toggle** in the admin panel, which triggers `function.disable_started`/`function.enable_started` lifecycle events that take effect immediately (on Open WebUI v0.11.0 or newer).
@@ -410,9 +410,6 @@ self.onmessage = (e) => {
   }
 };
 
-// Send heartbeat to prevent worker termination
-setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);
-
 // Use requestAnimationFrame for the render loop
 // NO DOM access (no document, window, alert, localStorage)
 ```
@@ -443,7 +440,7 @@ The fallback is automatic — Worker errors are caught, the Worker is terminated
   - _Also check:_ Ensure the `designer_url` valve matches the URL you're navigating to.
 
 - **My theme doesn't apply to other users.**
-  - _Fix:_ Most commonly caused by **reverse proxy buffering** — see in-app Docs → Section 17. Also ensure the admin has synced the theme via the designer (not Draft mode). The bootloader serves the theme to all users on page load from `{designer_url}/theme.css`. If the theme files are missing from `DATA_DIR/theme/`, the bootloader has nothing to serve. Verify the endpoint works by navigating directly to `{designer_url}/theme.css` in your browser — it should return CSS content.
+  - _Fix:_ Most commonly caused by **reverse proxy buffering** — see in-app Docs → Section 21. Also ensure the admin has synced the theme via the designer (not Draft mode). The bootloader serves the theme to all users on page load from `{designer_url}/theme.css`. If the theme files are missing from `DATA_DIR/theme/`, the bootloader has nothing to serve. Verify the endpoint works by navigating directly to `{designer_url}/theme.css` in your browser — it should return CSS content.
 
 - **Canvas FX animations are lagging.**
   - _Fix:_ Heavy animations can drain resources. Ensure your browser supports `OffscreenCanvas` (indicated by the green "Background Worker" badge in the UI). If it says "Main Thread (Fallback)", keep animations simple.
@@ -506,6 +503,25 @@ Toggle the function **OFF** in the Admin Panel first. That withdraws its fragmen
 Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build — 1.7.0 never writes there.
 
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
+
+---
+
+## 📝 What's New in 1.11.0
+
+**The built-in documentation is up to date.** The **📖 Docs** page described Theme Designer Pro as it was around version 1.8, and parts of it had changed since. It now has sections on the valves, the **Themes** tabs in Settings, personal themes, the AI Consultant and theming from a chat with the Launcher Tool. It also corrects statements that no longer matched the code, among them:
+- who can open the designer
+- when valve changes apply, which is as soon as you save them
+- how the theme reaches pages
+- where the Draft switch is
+- how Canvas FX scripts run on the main thread, which is not a sandbox
+- what the update checks fetch
+- which browser keys and server files to remove when uninstalling
+
+The Docs page now has a solid background, so the designer no longer shows through behind the text.
+
+**Turn off theme update checks.** The new **Enable Theme Update Checks** valve, on by default, covers every update request the designer makes: the **Updates** button, each theme's own update check, and the **Update** badges in Community Themes. Turned off, it hides the button and the per-theme check. The designer then makes none of these requests to GitHub or to a theme's update URL. The Community Themes browser keeps its own valve.
+
+**The Gradient tab's conflict warning names the right tab.** It said your Custom CSS Snippet was on the **CSS Output** tab, when it's on **Style Overrides**.
 
 ---
 
