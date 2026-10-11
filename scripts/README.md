@@ -10,6 +10,7 @@ Build, validation, and manifest tooling for the Theme Designer Pro presets.
 | `extract-curated.js` | Generate theme JSON files from the 8 built-in curated presets |
 | `extract-presets.js` | Split bulk export files into individual preset files |
 | `process-submission.js` | Process GitHub Issue theme submissions (used by CI) |
+| `render-previews.js` | Screenshot a theme on the site's mock Open WebUI, one image per mode (used by CI) |
 | `update-badges.js` | Update shields.io badge counts in `README.md` |
 | `validate.js` | Validate all preset files against JSON schemas (via Ajv) and quality rules |
 
@@ -245,6 +246,24 @@ Writes to `$GITHUB_OUTPUT`:
 | `size` | File size in KB (on success) |
 | `errors` | Newline-separated error messages (on failure) |
 | `warnings` | Newline-separated warning messages (on success, if any) |
+
+---
+
+## `render-previews.js`
+
+Opens a theme in the site's Studio (`docs/studio/`) in headless Chrome and saves a screenshot of the mock Open WebUI for each mode the theme defines, after giving any Canvas FX script a few seconds to draw. The submission bot runs it so the PR and the issue show the theme without anyone opening the preview link.
+
+The workflow pushes the screenshots to the `submission-previews` branch, in a folder named after the issue, and links them by commit, so `main` never carries the images.
+
+### Usage
+
+```bash
+npm install --no-save playwright-core@1.56.1
+node scripts/render-previews.js themes/koi_pond.json previews/
+node scripts/render-previews.js --markdown <base-url> previews/
+```
+
+The first command writes `dark.png`, `oled.png`, `light.png` and `her.png` (for the modes present). The second prints a Markdown table of those images under `<base-url>`. It needs Google Chrome installed, which GitHub's Ubuntu runners have. WebGL scripts draw through SwiftShader.
 
 ---
 

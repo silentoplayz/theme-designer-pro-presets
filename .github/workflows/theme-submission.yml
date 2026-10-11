@@ -76,6 +76,47 @@ jobs:
         if: steps.process.outputs.result == 'success'
         run: node scripts/validate.js
 
+      # ── Screenshots of the theme on the mock, one per mode ──
+      # A failed render never blocks the submission; the PR goes out without them
+      - name: Render previews
+        if: steps.process.outputs.result == 'success'
+        id: shots
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FILENAME: ${{ steps.process.outputs.filename }}
+          ISSUE_NUM: ${{ github.event.issue.number }}
+        run: |
+          npm install --no-save --no-audit --no-fund playwright-core@1.56.1
+          node scripts/render-previews.js "themes/${FILENAME}" "${RUNNER_TEMP}/shots"
+
+          # The screenshots live on their own branch, so main never carries them
+          DEST="${RUNNER_TEMP}/previews"
+          git init -q "${DEST}"
+          cd "${DEST}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git fetch -q --depth 1 origin submission-previews 2>/dev/null; then
+            git checkout -q -b submission-previews FETCH_HEAD
+          else
+            git checkout -q --orphan submission-previews
+          fi
+          mkdir -p "${ISSUE_NUM}"
+          cp "${RUNNER_TEMP}"/shots/*.png "${ISSUE_NUM}/"
+          git add "${ISSUE_NUM}"
+          git diff --cached --quiet || git commit -q -m "Previews for #${ISSUE_NUM}"
+          git push -q origin submission-previews
+
+          # Linked by commit, so a later render never changes what the PR shows
+          SHA=$(git rev-parse HEAD)
+          cd "${GITHUB_WORKSPACE}"
+          {
+            echo 'table<<PREVIEWS_EOF'
+            node scripts/render-previews.js --markdown "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SHA}/${ISSUE_NUM}" "${RUNNER_TEMP}/shots"
+            echo 'PREVIEWS_EOF'
+          } >> "$GITHUB_OUTPUT"
+
       - name: Create branch and PR
         if: steps.process.outputs.result == 'success'
         id: pr
@@ -87,6 +128,7 @@ jobs:
           SIZE: ${{ steps.process.outputs.size }}
           ISSUE_NUM: ${{ github.event.issue.number }}
           SUBMITTER: ${{ github.event.issue.user.login }}
+          PREVIEWS: ${{ steps.shots.outputs.table }}
         run: |
           BRANCH="theme-submission/${ISSUE_NUM}-$(echo "${FILENAME}" | sed 's/.json$//')"
 
@@ -109,6 +151,15 @@ jobs:
           PREVIEW_URL="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/studio/#theme=https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SHA}/themes/${FILENAME}"
           echo "preview_url=${PREVIEW_URL}" >> $GITHUB_OUTPUT
 
+          SHOTS=""
+          if [ -n "${PREVIEWS}" ]; then
+            SHOTS="### Screenshots
+
+          ${PREVIEWS}
+
+          "
+          fi
+
           PR_URL=$(gh pr create \
             --base main \
             --head "${BRANCH}" \
@@ -121,7 +172,7 @@ jobs:
           **Modes:** ${MODES}
           **Preview:** [Open it in the Studio](${PREVIEW_URL})
 
-          ---
+          ${SHOTS}---
 
           This PR was automatically generated from a [theme submission](https://github.com/${GITHUB_REPOSITORY}/issues/${ISSUE_NUM}). The theme JSON has been validated and is ready for review.
 
@@ -139,6 +190,8 @@ jobs:
       - name: Comment on success
         if: steps.process.outputs.result == 'success'
         uses: actions/github-script@v7
+        env:
+          PREVIEWS: ${{ steps.shots.outputs.table }}
         with:
           script: |
             const prUrl = `${{ steps.pr.outputs.pr_url }}`;
@@ -165,6 +218,10 @@ jobs:
               `The preview shows your theme on a mock Open WebUI in every mode, without installing anything.`,
               ``
             ];
+
+            if (process.env.PREVIEWS) {
+              body.push(`### Screenshots`, ``, process.env.PREVIEWS, ``);
+            }
 
             if (warnings) {
               body.push(`### ⚠️ Warnings`, ``);
