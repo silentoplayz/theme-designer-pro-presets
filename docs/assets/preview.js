@@ -27,6 +27,9 @@
     const deltaL = paletteOn ? l - 0.2 : 0;
     const ov = (paletteOn && mode && mode.overrides) || {};
 
+    // Not colors: the frame reads these to give Canvas FX the theme's accents
+    vars['--tdp-hue'] = String(h);
+    vars['--tdp-chroma'] = String(paletteOn && mode ? (mode.c || 0) : 0);
     STEPS.forEach((step) => {
       const targetL = Math.max(0, Math.min(0.98, LIGHTNESS_MAP[step] + deltaL));
       const computed = `oklch(${targetL.toFixed(3)} ${c.toFixed(3)} ${c === 0 ? 0 : h})`;
@@ -927,6 +930,41 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   try { src = JSON.parse(el.textContent); } catch (e) { return; }
   // A frame that was just added can run this before it has a size, and a
   // script started at 0x0 can divide by it, so wait until it has one
+  var px = null;
+  var toRgb = function (value) {
+    if (!px) { var c = document.createElement('canvas'); c.width = c.height = 1; px = c.getContext('2d', { willReadFrequently: true }); }
+    px.clearRect(0, 0, 1, 1);
+    px.fillStyle = '#808080';
+    px.fillStyle = value;
+    px.fillRect(0, 0, 1, 1);
+    var d = px.getImageData(0, 0, 1, 1).data;
+    return [d[0], d[1], d[2]];
+  };
+  // The same function as the designer's bootloader (theme_designer_pro_event.py)
+  function buildCanvasTheme(readVar, toRgb, mode, hue, chroma) {
+    var dark = mode === 'dark' || mode === 'oled';
+    var hex = function(c) { return '#' + c.map(function(v) { return (v < 16 ? '0' : '') + v.toString(16); }).join(''); };
+    var ramp = {}, rampRgb = {};
+    [50, 100, 200, 300, 400, 500, 600, 700, 800, 850, 900, 950].forEach(function(s) {
+      rampRgb[s] = toRgb(readVar('--color-gray-' + s) || '#808080');
+      ramp[s] = hex(rampRgb[s]);
+    });
+    // Accents in the theme's hue, as colorful as the theme itself
+    var ac = chroma > 0 ? Math.min(0.18, Math.max(0.06, chroma / 250)) : 0;
+    var al = dark ? 0.74 : 0.56;
+    var accent = function(dh) { return toRgb('oklch(' + al + ' ' + ac.toFixed(3) + ' ' + ((hue + dh + 360) % 360).toFixed(1) + ')'); };
+    var src = {
+      background: rampRgb[dark ? 900 : 50], surface: rampRgb[dark ? 850 : 100],
+      text: rampRgb[dark ? 100 : 900], muted: rampRgb[dark ? 400 : 500],
+      accent: accent(0), accent2: accent(40), accent3: accent(-40)
+    };
+    var colors = {}, rgb = {};
+    Object.keys(src).forEach(function(k) {
+      colors[k] = hex(src[k]);
+      rgb[k] = src[k].map(function(v) { return Math.round(v / 2.55) / 100; });
+    });
+    return { type: 'theme', mode: mode, dark: dark, hue: hue, chroma: chroma / 1000, colors: colors, rgb: rgb, ramp: ramp };
+  }
   var started = false;
   var start = function () {
     if (started || !window.innerWidth || !window.innerHeight) return;
@@ -939,7 +977,24 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     worker.onerror = function (e) { report('Script error: ' + (e.message || 'the animation failed to run.')); };
     var off = canvas.transferControlToOffscreen();
     var wpost = function (m, t) { try { worker.postMessage(m, t); } catch (e) {} };
-    wpost({ type: 'init', canvas: off, width: window.innerWidth, height: window.innerHeight, env: { authToken: '', baseUrl: '', locale: navigator.language, timezone: '' } }, [off]);
+    // The palette channel, as the designer sends it: with init, then on change
+    var lastTheme = '';
+    var theme = function () {
+      try {
+        var cs = getComputedStyle(document.documentElement);
+        var dt = document.documentElement.getAttribute('data-theme');
+        var mode = dt === 'oled-dark' ? 'oled' : dt === 'her' || dt === 'light' ? dt : 'dark';
+        var t = buildCanvasTheme(function (n) { return cs.getPropertyValue(n).trim(); }, toRgb, mode,
+          parseFloat(cs.getPropertyValue('--tdp-hue')) || 0, parseFloat(cs.getPropertyValue('--tdp-chroma')) || 0);
+        lastTheme = JSON.stringify(t);
+        return t;
+      } catch (e) { return null; }
+    };
+    wpost({ type: 'init', canvas: off, width: window.innerWidth, height: window.innerHeight, env: { authToken: '', baseUrl: '', locale: navigator.language, timezone: '' }, theme: theme() }, [off]);
+    window.addEventListener('tdp-palette', function () {
+      var before = lastTheme, t = theme();
+      if (t && lastTheme !== before) wpost(t);
+    });
     var pend = null, raf = null;
     var pump = function () { raf = null; if (pend) { wpost(pend); pend = null; } };
     var qm = function (x, y) { pend = { type: 'mousemove', x: x, y: y }; if (!raf) raf = requestAnimationFrame(pump); };
@@ -1359,7 +1414,9 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       Object.keys(d.vars).forEach(function (k) {
         var v = d.vars[k];
         if (/^--color-gray-\\d+$/.test(k) && typeof v === 'string' && !/[;{}<]/.test(v)) root.style.setProperty(k, v);
+        else if (/^--tdp-(hue|chroma)$/.test(k) && isFinite(Number(v))) root.style.setProperty(k, String(Number(v)));
       });
+      window.dispatchEvent(new Event('tdp-palette'));
     }
   });
 

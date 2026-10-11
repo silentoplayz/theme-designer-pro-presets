@@ -890,6 +890,8 @@ class Event:
                         ['dark', 'light', 'her'].filter(c => c !== target).forEach(c => html.classList.remove(c));
                     }
                 }
+                // Some paths start the canvas before this applies the CSS
+                pushCanvasTheme();
             }
             
             // Token usage interceptor — listens for Socket.IO 'events' messages
@@ -1075,6 +1077,72 @@ class Event:
             let lastCanvasScript = null;
             let lastCanvasWasEnabled = null;
             var _canvasGeneration = 0;
+            // Palette channel for Canvas FX. A script gets the active mode's
+            // colors with 'init' (as e.data.theme) and again as a { type:
+            // 'theme' } message whenever they change: a mode switch, a theme
+            // update, or a palette edit in the designer. A script that does
+            // not handle it never notices, so every existing script keeps
+            // drawing in its own colors.
+            var _canvasThemeSend = null, _lastCanvasTheme = '', _paletteCtx = null;
+            function _colorToRgb(value) {
+                if (!_paletteCtx) {
+                    var c = document.createElement('canvas');
+                    c.width = c.height = 1;
+                    _paletteCtx = c.getContext('2d', { willReadFrequently: true });
+                }
+                var g = _paletteCtx;
+                g.clearRect(0, 0, 1, 1);
+                g.fillStyle = '#808080';
+                g.fillStyle = value;
+                g.fillRect(0, 0, 1, 1);
+                var d = g.getImageData(0, 0, 1, 1).data;
+                return [d[0], d[1], d[2]];
+            }
+            // The same function builds the payload on the website's previews
+            function buildCanvasTheme(readVar, toRgb, mode, hue, chroma) {
+                var dark = mode === 'dark' || mode === 'oled';
+                var hex = function(c) { return '#' + c.map(function(v) { return (v < 16 ? '0' : '') + v.toString(16); }).join(''); };
+                var ramp = {}, rampRgb = {};
+                [50, 100, 200, 300, 400, 500, 600, 700, 800, 850, 900, 950].forEach(function(s) {
+                    rampRgb[s] = toRgb(readVar('--color-gray-' + s) || '#808080');
+                    ramp[s] = hex(rampRgb[s]);
+                });
+                // Accents in the theme's hue, as colorful as the theme itself
+                var ac = chroma > 0 ? Math.min(0.18, Math.max(0.06, chroma / 250)) : 0;
+                var al = dark ? 0.74 : 0.56;
+                var accent = function(dh) { return toRgb('oklch(' + al + ' ' + ac.toFixed(3) + ' ' + ((hue + dh + 360) % 360).toFixed(1) + ')'); };
+                var src = {
+                    background: rampRgb[dark ? 900 : 50], surface: rampRgb[dark ? 850 : 100],
+                    text: rampRgb[dark ? 100 : 900], muted: rampRgb[dark ? 400 : 500],
+                    accent: accent(0), accent2: accent(40), accent3: accent(-40)
+                };
+                var colors = {}, rgb = {};
+                Object.keys(src).forEach(function(k) {
+                    colors[k] = hex(src[k]);
+                    rgb[k] = src[k].map(function(v) { return Math.round(v / 2.55) / 100; });
+                });
+                return { type: 'theme', mode: mode, dark: dark, hue: hue, chroma: chroma / 1000, colors: colors, rgb: rgb, ramp: ramp };
+            }
+            function canvasTheme(mode, config) {
+                var hue = Number(config.h) || 0;
+                var chroma = config.paletteEnabled === false ? 0 : (Number(config.c) || 0);
+                var cs = getComputedStyle(document.documentElement);
+                return buildCanvasTheme(function(name) { return cs.getPropertyValue(name).trim(); }, _colorToRgb, mode, hue, chroma);
+            }
+            function pushCanvasTheme() {
+                if (!_canvasThemeSend) return;
+                var mode = themeToMode(document.documentElement.getAttribute('data-theme') || 'dark');
+                var config = (getParsedState() || {})[mode] || {};
+                // A mode with another script gets its palette with that script's init
+                if (!config.canvasEnabled || config.canvasScript !== lastCanvasScript) return;
+                var t;
+                try { t = canvasTheme(mode, config); } catch(x) { return; }
+                var key = JSON.stringify(t);
+                if (key === _lastCanvasTheme) return;
+                _lastCanvasTheme = key;
+                _canvasThemeSend(t);
+            }
+
             function initCanvas(forceFallback) {
                 var myGen = ++_canvasGeneration;
                 try {
@@ -1122,7 +1190,8 @@ class Event:
                     const isCanvasExpected = config && config.canvasEnabled && config.canvasScript && config.canvasScript.trim() !== '';
                     
                     if (!forceFallback && config && lastCanvasScript === config.canvasScript && lastCanvasWasEnabled === isCanvasExpected) {
-                        if (!isCanvasExpected || existingCanvas) return;
+                        // Same script: a mode switch or palette edit only recolors it
+                        if (!isCanvasExpected || existingCanvas) { pushCanvasTheme(); return; }
                     }
 
                     if (window.owuiCanvasCleanups) {
@@ -1158,6 +1227,9 @@ class Event:
                         const _scriptNeedsDOM = config.canvasScript.indexOf('document') !== -1;
                         const useWorker = !forceFallback && !_scriptNeedsDOM && !!canvas.transferControlToOffscreen;
                         let _canvasSend = null;
+                        let _initTheme = null;
+                        try { _initTheme = canvasTheme(mode, config); } catch(x) {}
+                        _lastCanvasTheme = _initTheme ? JSON.stringify(_initTheme) : '';
                         
                         if (useWorker) {
                             // REAL WORKER MODE (OffscreenCanvas)
@@ -1194,7 +1266,7 @@ class Event:
                                 locale: navigator.language || 'en-US',
                                 timezone: (function() { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(e) { return ''; } })()
                             };
-                            worker.postMessage({ type: 'init', canvas: offscreen, width: window.innerWidth, height: window.innerHeight, env: _env },[offscreen]);
+                            worker.postMessage({ type: 'init', canvas: offscreen, width: window.innerWidth, height: window.innerHeight, env: _env, theme: _initTheme },[offscreen]);
                             
                             // Throttle mousemove via rAF coalescing — on high-refresh displays,
                             // mousemove fires at 120Hz+. Coalescing to once per animation frame
@@ -1441,7 +1513,7 @@ class Event:
                                                 locale: navigator.language || 'en-US',
                                                 timezone: (function() { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(e) { return ''; } })()
                                             };
-                                            finalHandler({ data: { type: 'init', canvas: _canvas, width: window.innerWidth, height: window.innerHeight, env: _fbEnv } });
+                                            finalHandler({ data: { type: 'init', canvas: _canvas, width: window.innerWidth, height: window.innerHeight, env: _fbEnv, theme: ${JSON.stringify(_initTheme)} } });
                                         }
                                     })();
                                 })();
@@ -1456,6 +1528,8 @@ class Event:
                         if (_canvasSend) {
                             var _ctxCleanup = startContextObserver(_canvasSend);
                             window.owuiCanvasCleanups.push(_ctxCleanup);
+                            _canvasThemeSend = _canvasSend;
+                            window.owuiCanvasCleanups.push(function() { _canvasThemeSend = null; _lastCanvasTheme = ''; });
                         }
                     } else {
                         lastCanvasScript = "_DISABLED_";
