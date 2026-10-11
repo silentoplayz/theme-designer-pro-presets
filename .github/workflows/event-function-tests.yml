@@ -1,0 +1,76 @@
+name: Event Function Tests
+
+# Installs the event function on a throwaway Open WebUI and drives real pages
+# in headless Chrome: see tests/event-function/e2e.js.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'event-function/**'
+      - 'tests/event-function/**'
+      - '.github/workflows/event-function-tests.yml'
+  pull_request:
+    paths:
+      - 'event-function/**'
+      - 'tests/event-function/**'
+      - '.github/workflows/event-function-tests.yml'
+  # Weekly, so a new Open WebUI release that breaks the function shows up
+  # even when nothing here changed
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    name: Open WebUI ${{ matrix.open-webui }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        # The latest release, and the oldest one the function supports
+        open-webui: ['main', 'v0.11.4']
+    services:
+      open-webui:
+        image: ghcr.io/open-webui/open-webui:${{ matrix.open-webui }}
+        ports:
+          - 3000:8080
+        env:
+          WEBUI_SECRET_KEY: event-function-tests
+          ENABLE_OLLAMA_API: 'false'
+          ENABLE_OPENAI_API: 'false'
+          OFFLINE_MODE: 'true'
+          ENABLE_VERSION_UPDATE_CHECK: 'false'
+          RAG_EMBEDDING_MODEL_AUTO_UPDATE: 'false'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Drives the runner's installed Chrome, so there's no browser download
+      - name: Install playwright-core
+        run: npm install --no-save --no-audit --no-fund playwright-core@1.56.1
+
+      - name: Wait for Open WebUI
+        run: |
+          for i in $(seq 1 100); do
+            curl -sf http://127.0.0.1:3000/health > /dev/null && exit 0
+            sleep 3
+          done
+          echo "Open WebUI didn't come up"
+          exit 1
+
+      - name: Run the tests
+        env:
+          BASE_URL: http://127.0.0.1:3000
+        run: node tests/event-function/e2e.js
+
+      - name: Open WebUI log
+        if: failure()
+        run: docker logs --tail 300 "${{ job.services.open-webui.id }}"
