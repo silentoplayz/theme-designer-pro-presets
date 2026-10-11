@@ -287,6 +287,42 @@ test('a Canvas FX animation runs on app pages and not where it\'s hidden', async
   if (await auth.$('#owui-theme-canvas-bg')) throw new Error('the canvas runs on the sign-in page');
 });
 
+test('Settings marks the Themes tab whose theme is in use', async ({ admin }) => {
+  await saveTheme(admin, markerTheme('instance'));
+  await removePersonalTheme(admin);
+  const page = await openPage({ token: admin });
+  await page.goto(BASE + '/');
+  await loaderReady(page);
+  await expectParts(page, { vars: 'instance' }, 'instance theme');
+  // Open WebUI's own shortcut for Settings, once the app listens for it
+  await waitFor('Settings to open', async () => {
+    if (await page.$('#settings-tabs-container')) return true;
+    await page.keyboard.press('Control+Period');
+    await new Promise((r) => setTimeout(r, 750));
+    return !!(await page.$('#settings-tabs-container')) || 'closed';
+  });
+  await page.waitForSelector('#settings-tabs-container .tdp-settings-tab[data-tdp-key="admin"]', { timeout: WAIT_MS });
+  const marks = () => page.evaluate(() => {
+    const out = {};
+    document.querySelectorAll('#settings-tabs-container .tdp-settings-tab').forEach((tab) => {
+      out[tab.getAttribute('data-tdp-key')] = { dot: !!tab.querySelector('.tdp-theme-dot'), title: tab.getAttribute('title') || '' };
+    });
+    return out;
+  });
+  await waitFor('the admin tab marked', async () => {
+    const m = await marks();
+    return m.admin && m.admin.dot && m.personal && !m.personal.dot ? true : m;
+  });
+  // The admin's own theme, saved elsewhere, arrives live and moves the mark
+  await saveTheme(admin, markerTheme('personal', {}, ['custom']), true);
+  await expectParts(page, { vars: 'personal' }, 'personal theme');
+  await waitFor('the personal tab marked', async () => {
+    const m = await marks();
+    return m.personal.dot && !m.admin.dot && /replaces this one/.test(m.admin.title) ? true : m;
+  });
+  await removePersonalTheme(admin);
+});
+
 // The instance designer, opened the way the admin's browser opens it
 async function openDesigner(admin) {
   const page = await openPage({ token: admin });
