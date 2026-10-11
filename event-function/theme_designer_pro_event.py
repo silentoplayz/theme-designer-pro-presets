@@ -569,6 +569,9 @@ class Event:
             // nothing changed, so repeat fetches are cheap.
             // True while this page shows the signed-in user's personal theme.
             var _personal = false;
+            // Set once the live stream is open: claims it for the signed-in
+            // account (bindStream, by the SSE code below).
+            var _claimStream = null;
 
             // The signed-in account, read from Open WebUI's sign-in token, or
             // null: signed out, on the sign-in page, or personal themes off.
@@ -1471,7 +1474,11 @@ class Event:
                 // from Open WebUI's init fire multiple times in quick succession.
                 if (_refreshPending) return;
                 _refreshPending = true;
-                requestAnimationFrame(function() { _refreshPending = false; enforceTheme(); initCanvas(); });
+                requestAnimationFrame(function() {
+                    _refreshPending = false; enforceTheme(); initCanvas();
+                    // An account that signed in after the page loaded
+                    if (_claimStream) _claimStream();
+                });
             }
 
             refresh();
@@ -1629,11 +1636,51 @@ class Event:
                         // NOTE: SSE stays open — if admin re-enables, theme-update will re-apply
                     }
 
+                    // EventSource can't send the Authorization header, and Open
+                    // WebUI's token cookie isn't always there for a signed-in
+                    // page (a session cookie after a browser restart, a Secure
+                    // cookie on plain http). Without one the server can't tell
+                    // whose page this is, so saves to this account's personal
+                    // theme on another device never arrived. The stream's first
+                    // message gives its id, and the page claims it with the
+                    // token it signs everything else with.
+                    var _streamId = null, _claimed = null, _claimRetryAt = 0, _hellos = 0;
+                    function bindStream() {
+                        var uid = personalUser();
+                        if (!uid || !_streamId) return;
+                        var key = _streamId + ':' + uid;
+                        if (_claimed === key || Date.now() < _claimRetryAt) return;
+                        _claimed = key;
+                        var token = '';
+                        try { token = localStorage.getItem('token') || ''; } catch(x) {}
+                        var failed = function() {
+                            if (_claimed !== key) return;
+                            _claimed = null;
+                            _claimRetryAt = Date.now() + 30000;
+                        };
+                        fetch('__THEME_ROUTE__/events/bind', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                            body: JSON.stringify({ cid: _streamId })
+                        }).then(function(r) { if (!r.ok) failed(); }).catch(failed);
+                    }
+                    _claimStream = bindStream;
+
                     function connectSSE() {
                         if (es) try { es.close(); } catch(x) {}
                         es = new EventSource('__THEME_ROUTE__/events?_=' + Date.now());
                         es.addEventListener('theme-update', handleThemeUpdate);
                         es.addEventListener('theme-disable', handleThemeDisable);
+                        // Sent first on every connection while personal themes are on
+                        es.addEventListener('hello', function(e) {
+                            try { _streamId = JSON.parse(e.data).cid || null; } catch(x) { _streamId = null; }
+                            _claimed = null;
+                            _claimRetryAt = 0;
+                            bindStream();
+                            // A reconnect: a personal save may have landed while
+                            // the stream was down, and nothing would resend it
+                            if (_hellos++ > 0) fetchThemeFromServer();
+                        });
                         // Sent only to this account's pages when its personal theme changes.
                         es.addEventListener('personal-theme-update', function() {
                             _disabled = false;
@@ -1661,6 +1708,7 @@ class Event:
                         if (es.readyState === EventSource.CLOSED) {
                             connectSSE();
                         }
+                        bindStream();
                         fetchThemeFromServer();
                     });
                 } catch(e) { console.warn('Theme Pro SSE:', e); }
@@ -3032,6 +3080,7 @@ class Event:
                     path + "/theme.css",
                     path + "/state.json",
                     path + "/events",
+                    path + "/events/bind",
                     path + "/library.json",
                     path + "/me",
                     path + "/me/theme.css",
@@ -3319,6 +3368,29 @@ class Event:
                 content=state, media_type="application/json", headers=headers
             )
 
+        # -- POST /api/v1/theme-designer/events/bind (claim a stream) ----------
+
+        async def bind_sse(request: Request):
+            """Tie one open stream to the signed-in user, so their personal
+            theme saves reach it. The page sends the id its stream announced,
+            with the same token it signs every other request with."""
+            if not event_instance.valves.allow_personal_themes:
+                return JSONResponse({"error": "Personal themes are turned off"}, status_code=403)
+            user = await event_instance._require_user(request)
+            if hasattr(user, "status_code"):
+                return user
+            try:
+                body = await request.json()
+            except Exception:
+                body = None
+            cid = body.get("cid") if isinstance(body, dict) else None
+            if not isinstance(cid, str) or not _re.fullmatch(r"[A-Za-z0-9_-]{16,64}", cid):
+                return JSONResponse({"error": "Invalid stream id"}, status_code=400)
+            # The stream may be held by another worker; Redis tells it
+            if not Event._bind_stream(cid, user.id):
+                Event._redis_publish(f"{Event._CTRL_PREFIX}bind {cid} {user.id}\n\n")
+            return JSONResponse({"status": "ok"})
+
         # -- GET /api/v1/theme-designer/events (SSE — live push to all clients) --
 
         SSE_ROUTE = route_base + "/events"
@@ -3374,10 +3446,21 @@ class Event:
             # Signed-in pages also hear about their own personal theme. The
             # stream stays open to everyone, so a failed check only means no
             # personal updates on it.
+            hello = None
             if event_instance.valves.allow_personal_themes:
                 user = await event_instance._require_user(request)
                 if not hasattr(user, "status_code"):
                     queue._tdp_user = user.id
+                # EventSource sends only cookies, and Open WebUI's token cookie
+                # can be missing while the page is signed in by its localStorage
+                # token: a session cookie after a browser restart, a Secure
+                # cookie on plain http, or a sign-in after the page loaded. The
+                # stream's first message names it, and the page claims it with
+                # its own token at POST /events/bind.
+                import secrets
+
+                queue._tdp_cid = secrets.token_urlsafe(18)
+                hello = f'event: hello\ndata: {{"cid":"{queue._tdp_cid}"}}\n\n'
             Event._sse_clients.add(queue)
 
             async def event_stream():
@@ -3388,6 +3471,8 @@ class Event:
                     yield "retry: 3000\n\n"  # Auto-reconnect after 3s
                     yield ": " + "x" * 4096 + "\n\n"  # Flush padding
                     yield ": stream-ready\n\n"
+                    if hello:
+                        yield hello
                     while True:
                         # Pre-formatted SSE strings; heartbeats arrive via the
                         # shared task above, so no per-client timeout needed.
@@ -3459,6 +3544,7 @@ class Event:
                 Route(route_base + "/me/state.json", serve_personal_state, methods=["GET"]),
                 Route(route_base + "/me/library.json", serve_personal_library, methods=["GET"]),
                 Route(route_base + "/consult", ai_consult, methods=["POST"]),
+                Route(route_base + "/events/bind", bind_sse, methods=["POST"]),
             ),
             start=6,
         ):
@@ -5301,7 +5387,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                             <li><b>Who Can Open It:</b> Only administrators can open the instance designer and save the instance theme. With <b>Allow Personal Themes</b> on, every signed-in user can open the same designer on their own theme, at <code>{ROUTE_BASE}?scope=me</code> or from their <b>Themes</b> tab in Settings.</li>
                             <li><b>How the Theme Reaches Pages:</b> Theme Designer Pro never writes to Open WebUI&rsquo;s files. It publishes a script into <code>/static/loader.js</code> and a safe subset of the theme CSS into <code>/static/custom.css</code> through a shared registry, composed fresh on every request (see Section 23). That subset holds the palette and your custom CSS, so they paint before Open WebUI draws its interface, with no flash. The state JSON, without Canvas FX scripts, is inlined into the loader too. On each load, the bootloader fetches <code>{ROUTE_BASE}/theme.css</code> and <code>{ROUTE_BASE}/state.json</code> for the full theme. The background animation starts when <code>state.json</code> arrives. <code>localStorage</code> keeps the last theme seen, applied before that fetch completes and kept as an offline fallback. A personal theme keeps its own copy, tagged with the account it belongs to.</li>
                             <li><b>Theme Files:</b> The instance theme is saved in <code>DATA_DIR/theme/</code> as <code>open_theme_designer.css</code>, <code>open_theme_designer.json</code>, <code>open_theme_designer_sections.json</code> (structured CSS sections) and <code>open_theme_designer_library.json</code>. Personal themes use the same names in <code>DATA_DIR/theme/users/&lt;user id&gt;/</code>.</li>
-                            <li><b>Live Push via SSE:</b> Theme changes are broadcast to <b>all connected users in real time</b> using Server-Sent Events. Each save pushes a short version token to every open tab, and each page refetches the CSS and state after a random delay of up to 2 seconds, or skips it when its ETags show it already has that version. The channel at <code>{ROUTE_BASE}/events</code> reconnects 3 seconds after a drop and survives function hot-reloads. A personal theme save reaches only that user&rsquo;s own pages. With several workers, Redis carries the updates between them (see Section 22). Each worker accepts up to 8,192 connections; a page over that limit retries a minute later and still gets the theme on every load.</li>
+                            <li><b>Live Push via SSE:</b> Theme changes are broadcast to <b>all connected users in real time</b> using Server-Sent Events. Each save pushes a short version token to every open tab, and each page refetches the CSS and state after a random delay of up to 2 seconds, or skips it when its ETags show it already has that version. The channel at <code>{ROUTE_BASE}/events</code> reconnects 3 seconds after a drop and survives function hot-reloads. A personal theme save reaches only that user&rsquo;s own pages, on every device they&rsquo;re signed in on: each page claims its connection with its own sign-in token, so it works even when Open WebUI&rsquo;s sign-in cookie is missing. With several workers, Redis carries the updates between them (see Section 22). Each worker accepts up to 8,192 connections; a page over that limit retries a minute later and still gets the theme on every load.</li>
                             <li><b>Several Designers at Once:</b> Each open designer holds the theme and the gallery in memory. When one saves a change, every other designer showing the same theme reloads, in another tab or window, in Settings, in the Admin Panel or at <code>{ROUTE_BASE}</code>, so none of them can later save an older copy over it. A designer doesn&rsquo;t reload while it&rsquo;s saving or has a dialog open, and waits for that first. It reloads at most once every 5 seconds, so a change made in several saves, as a Global Reset can be, ends in one more reload once that time is up. In Draft mode, it shows a message instead and keeps your draft. The save a designer makes on its own as it opens changes nothing for the others: an identical one is skipped, and any other is marked so they don&rsquo;t reload for it.</li>
                             <li><b>SSE Heartbeat:</b> The server sends a keep-alive heartbeat every 15 seconds to detect stale connections. If a client disconnects (closes the tab, loses network), the server-side queue is automatically cleaned up.</li>
                             <li><b>SSE Hot-Reload Persistence:</b> SSE connections survive function re-saves (hot-reloads). The client list is stored on the ASGI app's state object, which persists across module reloads, so re-saving the function code in the admin panel does <b>not</b> break live push to existing tabs.</li>
@@ -15131,10 +15217,16 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                         if (s.dark && s.light) {
                             const { _activeThemeRef, _activeCanvasRef, _activeCssRef, _activeGradientRef, ...pureThemeData } = s;
                             themeData = pureThemeData;
-                            if (_activeThemeRef) activeThemeRef = _activeThemeRef;
-                            if (_activeCanvasRef) activeCanvasRef = _activeCanvasRef;
-                            if (_activeCssRef) activeCssRef = _activeCssRef;
-                            if (_activeGradientRef) activeGradientRef = _activeGradientRef;
+                            // The server's theme says which gallery entries it
+                            // came from, or that it came from none of them. An
+                            // older copy in this browser must not keep its own
+                            // picks over it: after Use instance theme that left
+                            // the previous personal theme selected.
+                            const fromServer = typeof serverState === 'string' && !_resumingDraft;
+                            if (_activeThemeRef || fromServer) activeThemeRef = _activeThemeRef || createNullModeMap();
+                            if (_activeCanvasRef || fromServer) activeCanvasRef = _activeCanvasRef || createNullModeMap();
+                            if (_activeCssRef || fromServer) activeCssRef = _activeCssRef || createNullModeMap();
+                            if (_activeGradientRef || fromServer) activeGradientRef = _activeGradientRef || createNullModeMap();
                             ensureAllModes(themeData);
                             
                             if (!themeData.dark.locks) themeData.dark.locks = {};
@@ -16083,7 +16175,22 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         try:
             # A personal designer starts from the user's own theme, or from the
             # instance theme until they have one.
-            saved_state = (self._load_state(user_id) if user_id else None) or self._load_state()
+            own_state = self._load_state(user_id) if user_id else None
+            saved_state = own_state or self._load_state()
+            if user_id and not own_state and saved_state:
+                # The instance theme marks which gallery entries it came from
+                # by their position in the admin's galleries. A user's gallery
+                # is their own, so that position picked an unrelated theme of
+                # theirs, after Use instance theme or before their first save.
+                try:
+                    parsed = _json.loads(saved_state)
+                    refs = ("_activeThemeRef", "_activeCanvasRef", "_activeCssRef", "_activeGradientRef")
+                    if isinstance(parsed, dict) and any(k in parsed for k in refs):
+                        for key in refs:
+                            parsed.pop(key, None)
+                        saved_state = _json.dumps(parsed)
+                except ValueError:
+                    pass
         except OSError:
             saved_state = None  # Reset race / unreadable data dir
         if not saved_state or saved_state.strip() in ("", "{}"):
@@ -16664,6 +16771,16 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 pass
 
     @classmethod
+    def _bind_stream(cls, cid: str, user_id: str) -> bool:
+        """Tag this worker's stream cid with user_id. False when another
+        worker holds it."""
+        for q in list(cls._sse_clients):
+            if getattr(q, "_tdp_cid", None) == cid:
+                q._tdp_user = user_id
+                return True
+        return False
+
+    @classmethod
     def _deliver_personal(cls, user_id: str, msg: str):
         for q in list(cls._sse_clients):
             if getattr(q, "_tdp_user", None) == user_id:
@@ -16891,7 +17008,14 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                                     continue
                                 # Internal control messages never reach browsers.
                                 if raw.startswith(Event._CTRL_PREFIX):
-                                    if raw[len(Event._CTRL_PREFIX):].strip() == "valvesync":
+                                    ctrl = raw[len(Event._CTRL_PREFIX):].strip()
+                                    # A page on another worker claimed one of our streams
+                                    if ctrl.startswith("bind "):
+                                        parts = ctrl.split()
+                                        if len(parts) == 3:
+                                            Event._bind_stream(parts[1], parts[2])
+                                        continue
+                                    if ctrl == "valvesync":
                                         try:
                                             await Event._handle_peer_valve_sync(app)
                                         except Exception:
