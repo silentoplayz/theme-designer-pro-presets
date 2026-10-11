@@ -104,6 +104,22 @@
         "customCssShowAuth": {
           "type": "boolean",
           "description": "Show custom CSS on auth/login pages"
+        },
+        "themeAuthOnly": {
+          "type": "boolean",
+          "description": "Show theme colors only on auth/login pages, not in the app"
+        },
+        "customCssAuthOnly": {
+          "type": "boolean",
+          "description": "Show custom CSS only on auth/login pages, not in the app"
+        },
+        "canvasAuthOnly": {
+          "type": "boolean",
+          "description": "Show Canvas FX only on auth/login pages, not in the app"
+        },
+        "gradientAuthOnly": {
+          "type": "boolean",
+          "description": "Show the gradient only on auth/login pages, not in the app"
         }
       }
     }

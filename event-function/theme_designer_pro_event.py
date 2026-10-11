@@ -822,17 +822,19 @@ class Event:
             // @supports block the server marks with --tdp-instance. Where the
             // instance theme doesn't belong, this page's copy of that block is
             // removed (the file itself is untouched) and put back when it does:
-            // a signed-in user's personal theme replaces it, and a sign-in page
-            // whose mode hides the colors or the custom CSS gets only what's
+            // a signed-in user's personal theme replaces it, a sign-in page
+            // whose mode hides the colors or the custom CSS, and an app page
+            // whose mode shows them only on sign-in pages, get only what's
             // allowed there, from the CSS enforceTheme() assembles.
             function instanceSharedCssWanted() {
                 if (_personal) return false;
+                var st = getParsedState();
+                var c = st && st[themeToMode(localStorage.getItem('theme') || 'dark')];
+                if (!c) return true;
                 if (window.location.pathname.startsWith('/auth')) {
-                    var st = getParsedState();
-                    var c = st && st[themeToMode(localStorage.getItem('theme') || 'dark')];
-                    if (c && (c.themeShowAuth === false || c.customCssShowAuth === false)) return false;
+                    return !(c.themeShowAuth === false || c.customCssShowAuth === false);
                 }
-                return true;
+                return !(c.themeAuthOnly === true || c.customCssAuthOnly === true);
             }
             function syncInstanceSharedCss() {
                 var want = instanceSharedCssWanted();
@@ -893,38 +895,50 @@ class Event:
                     var parsedState = getParsedState();
 
                     if (parsedState) {
-                        if (isAuthPage) {
+                        const mode = themeToMode(localStorage.getItem('theme') || 'dark');
+                        const config = parsedState[mode];
+                        // Sign-in pages show what Show on Auth Pages allows; app
+                        // pages leave out what's Only on Auth Pages. A personal
+                        // theme never reaches sign-in pages, so it shows it all.
+                        const authOnly = !!config && !_personal && !isAuthPage &&
+                            (config.themeAuthOnly === true || config.customCssAuthOnly === true ||
+                             config.canvasAuthOnly === true || config.gradientAuthOnly === true);
+                        if (isAuthPage || authOnly) {
                             try {
-                                const mode = themeToMode(localStorage.getItem('theme') || 'dark');
-                                const config = parsedState[mode];
-                            
                                 if (config) {
+                                    var vis = isAuthPage ? {
+                                        theme: config.themeShowAuth !== false, custom: config.customCssShowAuth !== false,
+                                        canvas: config.canvasShowAuth !== false, gradient: config.gradientShowAuth !== false
+                                    } : {
+                                        theme: config.themeAuthOnly !== true, custom: config.customCssAuthOnly !== true,
+                                        canvas: config.canvasAuthOnly !== true, gradient: config.gradientAuthOnly !== true
+                                    };
                                     var sec = parsedState._cssSections;
                                     if (sec && typeof sec.vars === 'string') {
                                         // Structured sections (merged into state.json by the
                                         // server at delivery time): assemble only the sections
                                         // allowed on auth pages — no regex-slicing needed.
                                         var parts = [];
-                                        if (config.themeShowAuth !== false) parts.push(sec.vars);
-                                        if (!(config.canvasShowAuth === false && config.gradientShowAuth === false)) parts.push(sec.structural || '');
-                                        if (config.gradientShowAuth !== false) parts.push(sec.gradient || '');
-                                        if (config.customCssShowAuth !== false) parts.push(sec.custom || '');
+                                        if (vis.theme) parts.push(sec.vars);
+                                        if (vis.canvas || vis.gradient) parts.push(sec.structural || '');
+                                        if (vis.gradient) parts.push(sec.gradient || '');
+                                        if (vis.custom) parts.push(sec.custom || '');
                                         parts.push(sec.extra || ''); // valve-appended rules — never auth-gated
                                         // Re-apply the body::before sanitizer (assembly replaced finalCss)
                                         finalCss = parts.join('').replace(/[^{}]*body\\s*::before\\s*\\{[^}]*\\}/g, '');
                                     } else {
                                         // Legacy fallback: saved theme predates structured
                                         // sections — regex-strip the flat CSS by markers.
-                                        if (config.themeShowAuth === false) {
+                                        if (!vis.theme) {
                                             finalCss = finalCss.replace(/\\/\\*\\[OWUI_VARS_START\\]\\*\\/[\\s\\S]*?\\/\\*\\[OWUI_VARS_END\\]\\*\\//g, '');
                                         }
-                                        if (config.customCssShowAuth === false) {
+                                        if (!vis.custom) {
                                             finalCss = finalCss.replace(/\\/\\*\\[OWUI_CUSTOM_START\\]\\*\\/[\\s\\S]*?\\/\\*\\[OWUI_CUSTOM_END\\]\\*\\//g, '');
                                         }
-                                        if (config.canvasShowAuth === false && config.gradientShowAuth === false) {
+                                        if (!vis.canvas && !vis.gradient) {
                                             finalCss = finalCss.replace(/\\/\\*\\[OWUI_STRUCTURAL_START\\]\\*\\/[\\s\\S]*?\\/\\*\\[OWUI_STRUCTURAL_END\\]\\*\\//g, '');
                                         }
-                                        if (config.gradientShowAuth === false) {
+                                        if (!vis.gradient) {
                                             finalCss = finalCss.replace(/\\/\\*\\[OWUI_GRADIENT_START\\]\\*\\/[\\s\\S]*?\\/\\*\\[OWUI_GRADIENT_END\\]\\*\\//g, '');
                                         }
                                     }
@@ -1231,7 +1245,9 @@ class Event:
                     const config = savedData[mode];
                     
                     const isAuthPage = window.location.pathname.startsWith('/auth');
-                    if (isAuthPage && config && config.canvasShowAuth === false) {
+                    const canvasHidden = !!config && (isAuthPage ? config.canvasShowAuth === false
+                        : (config.canvasAuthOnly === true && !_personal));
+                    if (canvasHidden) {
                         if (window.owuiCanvasCleanups) {
                             window.owuiCanvasCleanups.forEach(fn => fn());
                             window.owuiCanvasCleanups =[];
@@ -1643,13 +1659,14 @@ class Event:
 
             // Open WebUI's sign-in ends in a client-side goto(), which changes
             // the address with history.pushState and fires nothing we listen
-            // to, so each history change checks whose page this is now.
+            // to. Each history change repaints: the account may have changed,
+            // and sign-in pages and app pages can show different parts.
             ['pushState', 'replaceState'].forEach(function(name) {
                 var original = history[name];
                 if (typeof original !== 'function') return;
                 history[name] = function() {
                     var result = original.apply(this, arguments);
-                    setTimeout(checkAccount, 0);
+                    setTimeout(refresh, 0);
                     return result;
                 };
             });
@@ -5240,6 +5257,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                 <div class="flex-center">
                     <label class="toggle-label" data-tooltip="Enable or disable the generated color palette for this mode"><input type="checkbox" id="toggle-palette-enabled" class="cb-input"> Enabled</label>
                     <label class="toggle-label" data-tooltip="Show theme colors on Login/Signup pages (Default: Visible)"><input type="checkbox" id="toggle-theme-auth" class="cb-input"> Show on Auth Pages</label>
+                    <label class="toggle-label" data-tooltip="Show theme colors only on Login/Signup pages, not in the app (needs Show on Auth Pages)"><input type="checkbox" id="toggle-theme-authonly" class="cb-input"> Only on Auth Pages</label>
                 </div>
             </div>
             <div class="control-group">
@@ -5320,6 +5338,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         <label class="toggle-label" data-tooltip="Toggle custom CSS for this mode"><input type="checkbox" id="toggle-custom-css" class="cb-input"> Enabled</label>
                         <label class="toggle-label" data-tooltip="Wraps your CSS in mode selectors. Uncheck if your code uses manual mode prefixes."><input type="checkbox" id="toggle-auto-scope" checked class="cb-input"> Auto-Scope</label>
                         <label class="toggle-label" data-tooltip="Show custom CSS on Login/Signup pages (Default: Visible)"><input type="checkbox" id="toggle-custom-auth" class="cb-input"> Show on Auth Pages</label>
+                    <label class="toggle-label" data-tooltip="Show custom CSS only on Login/Signup pages, not in the app (needs Show on Auth Pages)"><input type="checkbox" id="toggle-custom-authonly" class="cb-input"> Only on Auth Pages</label>
                     </div>
                 </div>
 
@@ -5346,6 +5365,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                     <div class="flex-center">
                         <label class="toggle-label" data-tooltip="Run animation script in background for this mode"><input type="checkbox" id="toggle-canvas-fx" class="cb-input"> Enabled</label>
                         <label class="toggle-label" data-tooltip="Show animations on Login/Signup pages (Default: Visible)"><input type="checkbox" id="toggle-canvas-auth" class="cb-input"> Show on Auth Pages</label>
+                    <label class="toggle-label" data-tooltip="Show animations only on Login/Signup pages, not in the app (needs Show on Auth Pages)"><input type="checkbox" id="toggle-canvas-authonly" class="cb-input"> Only on Auth Pages</label>
                     </div>
                 </div>
                 
@@ -5381,6 +5401,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                     <label class="toggle-label" data-tooltip="Enable gradient background for this mode"><input type="checkbox" id="toggle-gradient-bg" class="cb-input"> Enabled</label>
                     <label class="toggle-label" data-tooltip="Slowly shift gradient position with a looping animation"><input type="checkbox" id="toggle-gradient-animation" class="cb-input"> Animate</label>
                     <label class="toggle-label" data-tooltip="Show gradient on Login/Signup pages (Default: Visible)"><input type="checkbox" id="toggle-gradient-auth" checked class="cb-input"> Show on Auth Pages</label>
+                    <label class="toggle-label" data-tooltip="Show gradient only on Login/Signup pages, not in the app (needs Show on Auth Pages)"><input type="checkbox" id="toggle-gradient-authonly" class="cb-input"> Only on Auth Pages</label>
                 </div>
             </div>
 
@@ -5605,7 +5626,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                             <li><b>Hot Reload:</b> The function hot-reloads when updated in the admin panel; no server restart is needed.</li>
                             <li><b>Auto-Save:</b> Your active theme configuration is saved automatically after every change. Use the <b>Save (+)</b> button only to create named snapshots in your theme gallery.</li>
                             <li><b>Core Palette:</b> The OKLCH color palette is enabled by default for all modes. Use the <b>Enabled</b> toggle in the Core Palette section to disable palette generation for a specific mode if you prefer to manage colors entirely through manual overrides.</li>
-                            <li><b>Auth Pages:</b> You can selectively toggle theme components (Colors, Custom CSS, Canvas FX, and Gradient Background) for the Login/Signup screens using the individual <b>Show on Auth Pages</b> checkboxes. By default, all four components are visible on auth pages. The <b>Enable Auth Page Theming</b> valve hides every one of these checkboxes and turns them off. A personal theme never reaches the auth pages, which always show the instance theme, so the designer in a user&rsquo;s own Settings hides these checkboxes.</li>
+                            <li><b>Auth Pages:</b> You can selectively toggle theme components (Colors, Custom CSS, Canvas FX, and Gradient Background) for the Login/Signup screens using the individual <b>Show on Auth Pages</b> checkboxes. By default, all four components are visible on auth pages. Beside each one, <b>Only on Auth Pages</b> keeps that component off the rest of Open WebUI, so it shows on the Login/Signup screens alone: a gradient or an animation for the sign-in page that stays out of your chats, for example. It needs <b>Show on Auth Pages</b>. The <b>Enable Auth Page Theming</b> valve hides every one of these checkboxes and turns them off. A personal theme never reaches the auth pages, which always show the instance theme, so the designer in a user&rsquo;s own Settings hides these checkboxes.</li>
                             <li><b>Layer Order:</b> The generated CSS applies in this order: <i>OKLCH Palette &rarr; Manual Variable Overrides &rarr; Structural Rules &rarr; Gradient Background &rarr; Custom CSS &rarr; valve rules</i> (overlay glass and the mobile sidebar fix, when those valves are on). Each layer can override the one before it.</li>
                             <li><b>Session Persistence:</b> The designer uses <code>sessionStorage</code> to remember which tab you were working in, and restores it when you come back.</li>
                             <li><b>Legacy Data Migration:</b> Upgrading from an older version? The designer detects legacy data structures and migrates your saved snapshots and active themes to the latest format without data loss.</li>
@@ -5634,7 +5655,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                                     <tr><td><b>Enable AI Consultant</b></td><td>On</td><td>Shows the <b>AI</b> button in the designer (see Section 5).</td></tr>
                                     <tr><td><b>Enable Theme Update Checks</b></td><td>On</td><td>Off: hides the <b>Updates</b> button and each theme&rsquo;s update check, and the designer makes no update requests (see Section 15).</td></tr>
                                     <tr><td><b>Enable Community Themes</b></td><td>On</td><td>Off: hides the Community Themes browser and skips its catalog fetch (see Section 20).</td></tr>
-                                    <tr><td><b>Enable Auth Page Theming</b></td><td>On</td><td>Off: hides every <b>Show on Auth Pages</b> checkbox and turns them off, so login pages keep Open WebUI&rsquo;s own look.</td></tr>
+                                    <tr><td><b>Enable Auth Page Theming</b></td><td>On</td><td>Off: hides every <b>Show on Auth Pages</b> and <b>Only on Auth Pages</b> checkbox and turns them off, so login pages keep Open WebUI&rsquo;s own look.</td></tr>
                                     <tr><td><b>Draft Mode Default</b></td><td>Off</td><td>On: the instance designer opens in Draft mode on every fresh page load (see Section 9).</td></tr>
                                     <tr><td><b>Show In Admin Settings</b></td><td>On</td><td>Adds a <b>Themes</b> tab to the Admin section of Settings (see Section 3).</td></tr>
                                     <tr><td><b>Show In Admin Panel</b></td><td>Off</td><td>Adds a <b>Themes</b> page to the Admin Panel&rsquo;s top bar, between <b>Functions</b> and <b>Settings</b> (see Section 3).</td></tr>
@@ -7127,6 +7148,16 @@ location.reload();</code></pre>
     // This tab, on every save, so the server's broadcast of it reaches every
     // other open designer but doesn't make this one reload.
     const TAB_ORIGIN = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+
+    // Each part's 'Only on Auth Pages' flag, beside its 'Show on Auth Pages'
+    // one: [flag, its show flag, its enabled flag, switch id]
+    const AUTH_ONLY = [
+        ['themeAuthOnly', 'themeShowAuth', 'paletteEnabled', 'toggle-theme-authonly'],
+        ['customCssAuthOnly', 'customCssShowAuth', 'customCssEnabled', 'toggle-custom-authonly'],
+        ['canvasAuthOnly', 'canvasShowAuth', 'canvasEnabled', 'toggle-canvas-authonly'],
+        ['gradientAuthOnly', 'gradientShowAuth', 'gradientEnabled', 'toggle-gradient-authonly']
+    ];
+    const AUTH_ONLY_KEYS = AUTH_ONLY.map(a => a[0]);
     let _lastLocalSave = 0;
     // Saves this page makes on its own as it opens, before anyone touches it,
     // only settle what it loaded; other designers ignore them (settle: true).
@@ -7869,7 +7900,8 @@ location.reload();</code></pre>
         gradientRadialPosX: 50, gradientRadialPosY: 50, gradientRadialShape: 'ellipse', gradientRadialSize: 'farthest-corner',
         gradientMeshPoints: [], gradientMeshBgColor: '#0a0a12',
         gradientAnimationSpeed: 8, gradientShowAuth: true, themeShowAuth: true,
-        customCssShowAuth: true, canvasShowAuth: true
+        customCssShowAuth: true, canvasShowAuth: true,
+        themeAuthOnly: false, customCssAuthOnly: false, canvasAuthOnly: false, gradientAuthOnly: false
     };
 
     function createDefaultModeData(overrides = {}) {
@@ -7994,7 +8026,8 @@ location.reload();</code></pre>
         });
         ['paletteEnabled', 'customCssEnabled', 'autoScope', 'canvasEnabled',
          'manualOverridesEnabled', 'gradientEnabled', 'gradientAnimation',
-         'gradientShowAuth', 'themeShowAuth', 'customCssShowAuth', 'canvasShowAuth'
+         'gradientShowAuth', 'themeShowAuth', 'customCssShowAuth', 'canvasShowAuth',
+         'themeAuthOnly', 'customCssAuthOnly', 'canvasAuthOnly', 'gradientAuthOnly'
         ].forEach(k => { if (d[k] !== undefined) d[k] = !!d[k]; });
         ['customCSS', 'canvasScript', 'manualOverrides'].forEach(k => {
             if (d[k] !== undefined && typeof d[k] !== 'string') d[k] = def[k];
@@ -8227,8 +8260,26 @@ location.reload();</code></pre>
         }
     }
 
+    // 'Only on Auth Pages' needs 'Show on Auth Pages': off with it, and
+    // dimmed while its part is off, like the switch beside it
+    function syncAuthOnlyToggles() {
+        const config = themeData[getActiveDataMode()];
+        if (!config) return;
+        AUTH_ONLY.forEach(([key, showKey, enabledKey, id]) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const shown = config[showKey] !== false;
+            el.checked = shown && config[key] === true;
+            el.disabled = !shown;
+            const on = enabledKey === 'customCssEnabled' ? config[enabledKey] !== false : !!config[enabledKey];
+            const label = el.closest('label');
+            if (label) label.style.opacity = on && shown ? '1' : '0.35';
+        });
+    }
+
     function copyAuthProps(target, source) {
-        for (const k of ['paletteEnabled', 'themeShowAuth', 'customCssShowAuth', 'canvasShowAuth', 'gradientShowAuth']) {
+        for (const k of ['paletteEnabled', 'themeShowAuth', 'customCssShowAuth', 'canvasShowAuth', 'gradientShowAuth',
+                         'themeAuthOnly', 'customCssAuthOnly', 'canvasAuthOnly', 'gradientAuthOnly']) {
             if (source[k] !== undefined) target[k] = source[k];
         }
     }
@@ -8947,7 +8998,8 @@ function startAnimation() {
                (m1.themeShowAuth === true) === (m2.themeShowAuth === true) &&
                (m1.customCssShowAuth === true) === (m2.customCssShowAuth === true) &&
                (m1.canvasShowAuth === true) === (m2.canvasShowAuth === true) &&
-               (m1.gradientShowAuth === true) === (m2.gradientShowAuth === true);
+               (m1.gradientShowAuth === true) === (m2.gradientShowAuth === true) &&
+               AUTH_ONLY_KEYS.every(k => (m1[k] === true) === (m2[k] === true));
     };
 
 
@@ -9281,6 +9333,7 @@ function startAnimation() {
         renderCanvasPresets();
         renderCssPresets();
         renderGradientTab();
+        syncAuthOnlyToggles();
     }
 
     function updateActiveHighlights() {
@@ -10842,12 +10895,16 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     const clearCanvasBtn = document.getElementById('clear-canvas-btn');
     if (clearCanvasBtn) clearCanvasBtn.addEventListener('click', () => clearEditor('canvas-fx-editor', 'canvasScript', activeCanvasRef, 'Canvas Script Cleared'));
 
-    [['toggle-palette-enabled', 'paletteEnabled'],['toggle-custom-css', 'customCssEnabled'],['toggle-auto-scope', 'autoScope'],['toggle-theme-auth', 'themeShowAuth'],['toggle-custom-auth', 'customCssShowAuth'],['toggle-canvas-auth', 'canvasShowAuth'],['toggle-manual-overrides', 'manualOverridesEnabled'],['toggle-gradient-auth', 'gradientShowAuth']
+    [['toggle-palette-enabled', 'paletteEnabled'],['toggle-custom-css', 'customCssEnabled'],['toggle-auto-scope', 'autoScope'],['toggle-theme-auth', 'themeShowAuth'],['toggle-custom-auth', 'customCssShowAuth'],['toggle-canvas-auth', 'canvasShowAuth'],['toggle-manual-overrides', 'manualOverridesEnabled'],['toggle-gradient-auth', 'gradientShowAuth'],
+     ...AUTH_ONLY.map(a => [a[3], a[0]])
     ].forEach(([id, key]) => {
         const el = $(id);
         if (el) el.addEventListener('change', (e) => {
             const dm = getActiveDataMode();
             themeData[dm][key] = e.target.checked;
+            // Hidden from the sign-in pages, a part can't be shown only there
+            const pair = AUTH_ONLY.find(a => a[1] === key);
+            if (pair && !e.target.checked) themeData[dm][pair[0]] = false;
             // Sync dependent toggle opacity
             if (id === 'toggle-palette-enabled') { const a = $('toggle-theme-auth'); if (a) { const l = a.closest('label'); if (l) l.style.opacity = e.target.checked ? '1' : '0.35'; } }
             if (id === 'toggle-custom-css') { ['toggle-auto-scope','toggle-custom-auth'].forEach(did => { const d = $(did); if (d) { const l = d.closest('label'); if (l) l.style.opacity = e.target.checked ? '1' : '0.35'; } }); }
@@ -12322,8 +12379,10 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             if (!gMatch) gradientDiffs++;
 
             // === Auth ===
-            const incomingAuth = [sourceData.themeShowAuth, sourceData.customCssShowAuth, sourceData.canvasShowAuth, sourceData.gradientShowAuth].map(v => v !== false);
-            const currentAuth = [targetData.themeShowAuth, targetData.customCssShowAuth, targetData.canvasShowAuth, targetData.gradientShowAuth].map(v => v !== false);
+            const incomingAuth = [sourceData.themeShowAuth, sourceData.customCssShowAuth, sourceData.canvasShowAuth, sourceData.gradientShowAuth].map(v => v !== false)
+                .concat(AUTH_ONLY_KEYS.map(k => sourceData[k] === true));
+            const currentAuth = [targetData.themeShowAuth, targetData.customCssShowAuth, targetData.canvasShowAuth, targetData.gradientShowAuth].map(v => v !== false)
+                .concat(AUTH_ONLY_KEYS.map(k => targetData[k] === true));
             const aMatch = incomingAuth.every((v, i) => v === currentAuth[i]);
             syncDiffData.auth.push({ mode, match: aMatch, srcAuth: currentAuth, tgtAuth: incomingAuth });
             if (!aMatch) authDiffs++;
@@ -12584,7 +12643,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     }
 
     function _renderAuthDiff(entry) {
-        const labels = ['Theme on Auth', 'CSS on Auth', 'Canvas on Auth', 'Gradient on Auth'];
+        const labels = ['Theme on Auth', 'CSS on Auth', 'Canvas on Auth', 'Gradient on Auth',
+                        'Theme Only on Auth', 'CSS Only on Auth', 'Canvas Only on Auth', 'Gradient Only on Auth'];
         let h = `<table class="sync-diff-prop-table">`;
         h += `<thead><tr><td></td><td>Source</td><td></td><td>Target</td><td></td></tr></thead>`;
         labels.forEach((label, i) => {
@@ -16131,7 +16191,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         // ── 5. Auth page theming — force off + hide toggles + overwrite localStorage ──
         if (!cfg.enableAuthPageTheming) {
             // Hide all "Show on Auth Pages" toggle labels in the UI
-            ['toggle-theme-auth', 'toggle-custom-auth', 'toggle-canvas-auth', 'toggle-gradient-auth']
+            ['toggle-theme-auth', 'toggle-custom-auth', 'toggle-canvas-auth', 'toggle-gradient-auth', ...AUTH_ONLY.map(a => a[3])]
                 .forEach(id => {
                     const el = document.getElementById(id);
                     if (el) {
@@ -16147,6 +16207,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                     themeData[m].customCssShowAuth = false;
                     themeData[m].canvasShowAuth = false;
                     themeData[m].gradientShowAuth = false;
+                    AUTH_ONLY_KEYS.forEach(k => { themeData[m][k] = false; });
                 }
             });
             // Persist to localStorage so the bootloader also respects this
@@ -16158,7 +16219,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         // Hidden, not cleared: a personal theme exported and installed as the
         // instance theme keeps its auth choices. ──
         if (cfg.scope === 'me') {
-            ['toggle-theme-auth', 'toggle-custom-auth', 'toggle-canvas-auth', 'toggle-gradient-auth']
+            ['toggle-theme-auth', 'toggle-custom-auth', 'toggle-canvas-auth', 'toggle-gradient-auth', ...AUTH_ONLY.map(a => a[3])]
                 .forEach(id => {
                     const label = document.getElementById(id)?.closest('label');
                     if (label) label.style.display = 'none';
@@ -16841,7 +16902,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             ('css', 'Custom CSS Snippet', 'All raw styles from Custom CSS tab'),
             ('canvas', 'Canvas FX Script', 'Background animation code &amp; state'),
             ('gradient', 'Gradient Background', 'Color stops, direction, type &amp; animation'),
-            ('auth', 'Auth Page Visibility', "'Show on Auth Pages' toggles for all tabs"),
+            ('auth', 'Auth Page Visibility', "'Show on Auth Pages' and 'Only on Auth Pages' toggles for all tabs"),
         ]
         sync_html = '\n\n'.join(
             f'                <div class="sync-option">\n'
@@ -16977,6 +17038,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                     data[mode]["canvasEnabled"] = False
                     data[mode].pop("canvasScript", None)
                     data[mode].pop("canvasShowAuth", None)
+                    data[mode].pop("canvasAuthOnly", None)
             return _json.dumps(data, separators=(",", ":"))
         except Exception:
             return state_str
