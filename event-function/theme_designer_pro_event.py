@@ -9397,7 +9397,8 @@ function startAnimation() {
         return Number(v).toFixed(d);
     }
 
-    // var, not let: updatePalette() can run before this point at startup
+    // var, not let: updatePalette() can run before this point at startup,
+    // and nothing renders until the whole script has run
     var _canvasSettingsKey = null, _canvasSettingsReady = false;
     function renderCanvasSettings() {
         const box = $('canvas-settings');
@@ -9456,8 +9457,12 @@ function startAnimation() {
         commitChange({ clearRef: false });
     });
 
-    _canvasSettingsReady = true;
-    renderCanvasSettings();
+    // getActiveDataMode() and others are declared further down, so the first
+    // render waits until this whole script has run
+    queueMicrotask(() => {
+        _canvasSettingsReady = true;
+        renderCanvasSettings();
+    });
 
     function renderCanvasPresets() {
         renderPresetGallery({
