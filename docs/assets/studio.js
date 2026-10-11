@@ -130,6 +130,8 @@
     const b = e.target.closest('button[data-mode]');
     if (!b || b.dataset.mode === state.mode) return;
     state.mode = b.dataset.mode;
+    // The Background buttons show the new mode's own choice
+    bgTab = null;
     syncAll();
     render();
   });
