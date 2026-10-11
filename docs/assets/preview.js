@@ -1359,6 +1359,42 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
   <!-- channel/Thread.svelte: a 420px pane beside the channel -->
   <aside class="side-pane thread-pane" id="thread-pane" hidden aria-label="Thread"></aside>
 </div>
+<script type="application/json" id="tdp-state">${JSON.stringify(opts.initialState || null).replace(/</g, '\\u003c')}</script>
+<script>
+// What you change in the mock (renamed, pinned, cloned or moved chats, your
+// status, Chat Controls, channel messages) is sent up as you change it, and a
+// rebuild for another mode or palette hands it back here, so switching modes
+// keeps it. Each part registers a getter and reads its saved value on start.
+(function () {
+  var saved = null;
+  try { saved = JSON.parse(document.getElementById('tdp-state').textContent); } catch (e) {}
+  var parts = {}, queued = false;
+  function post() {
+    queued = false;
+    var out = {};
+    for (var k in parts) { try { out[k] = parts[k](); } catch (e) {} }
+    try { parent.postMessage({ __tdpPreview: true, kind: 'mockstate', state: out }, '*'); } catch (e) {}
+  }
+  window.__tdpState = {
+    saved: saved || {},
+    add: function (name, get) { parts[name] = get; },
+    save: function () { if (!queued) { queued = true; setTimeout(post, 0); } }
+  };
+  // The sidebar's rows are restored as markup before anything binds to them
+  var side = document.querySelector('.sidebar-panel .side-scroll');
+  if (side && saved && typeof saved.side === 'string') side.innerHTML = saved.side;
+  if (side) {
+    window.__tdpState.add('side', function () {
+      var copy = side.cloneNode(true);
+      copy.querySelectorAll('input.rename').forEach(function (i) { i.remove(); });
+      copy.querySelectorAll('.label[hidden]').forEach(function (l) { l.hidden = false; });
+      copy.querySelectorAll('.menu-open').forEach(function (r) { r.classList.remove('menu-open'); });
+      return copy.innerHTML;
+    });
+    new MutationObserver(window.__tdpState.save).observe(side, { subtree: true, childList: true, attributes: true, characterData: true });
+  }
+})();
+</script>
 ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.stringify(opts.canvasScript).replace(/</g, '\\u003c')}</script>
 <script>
 (function () {
@@ -1707,7 +1743,8 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       return;
     }
     if (window.__tdpChannel) window.__tdpChannel.close();
-    navTitle.textContent = chat.title;
+    var row = document.querySelector('.side-scroll [data-chat="' + key + '"] .label');
+    navTitle.textContent = key !== 'new' && row ? row.textContent : chat.title;
     // Navbar.svelte gates Temporary Chat on !chat?.id, so it shows only here
     var navRight = document.getElementById('nav-right');
     if (navRight) navRight.classList.toggle('is-new', key === 'new');
@@ -2456,7 +2493,9 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   // ---- The user menu: w-[calc(var(--sidebar-width)-1rem)] from the panel,
   // w-[15rem] from the rail ----
 
-  var status = null;
+  var ST = window.__tdpState;
+  var status = ST.saved.status || null;
+  ST.add('status', function () { return status; });
   function userMenu(trigger, width) {
     M.show('user', trigger, null, {
       width: width,
@@ -2464,6 +2503,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       onAct: function (act) {
         if (act === 'status') status = { emoji: '🎨', text: 'Designing a theme' };
         if (act === 'clear-status') status = null;
+        ST.save();
       }
     });
   }
@@ -2483,7 +2523,9 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     tempBtn.setAttribute('aria-pressed', on);
   }
   window.__tdpTemp = setTemp;
-  if (tempBtn) tempBtn.addEventListener('click', function () { setTemp(!document.body.classList.contains('temp-chat')); });
+  if (tempBtn) tempBtn.addEventListener('click', function () { setTemp(!document.body.classList.contains('temp-chat')); ST.save(); });
+  if (ST.saved.temp) setTemp(true);
+  ST.add('temp', function () { return document.body.classList.contains('temp-chat'); });
 
   // ---- Chat Controls ----
 
@@ -2566,9 +2608,6 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     var a = p[2];
     if (p[1] === 'range') {
       extra.innerHTML = '<div class="ap-custom"><input type="range" min="' + a[0] + '" max="' + a[1] + '" step="' + a[2] + '" value="' + a[3] + '"><input type="number" min="' + a[0] + '" max="' + a[1] + '" step="any" value="' + a[3] + '"></div>';
-      var r = extra.querySelector('[type=range]'), n = extra.querySelector('[type=number]');
-      r.addEventListener('input', function () { n.value = r.value; });
-      n.addEventListener('input', function () { r.value = n.value; });
     } else if (p[1] === 'text') {
       extra.innerHTML = '<div class="ap-custom"><input type="text" value="' + esc(a[1]) + '" placeholder="' + esc(a[0]) + '"></div>';
     } else {
@@ -2576,8 +2615,34 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     }
   }
 
+  // The pane is saved as markup, with what was typed, picked or slid
+  // written back into it
+  function controlsHtml() {
+    var copy = pane.cloneNode(true);
+    var live = pane.querySelectorAll('input, textarea, select');
+    copy.querySelectorAll('input, textarea, select').forEach(function (el, i) {
+      var v = live[i];
+      if (el.tagName === 'TEXTAREA') el.textContent = v.value;
+      else if (el.tagName === 'SELECT') [].forEach.call(el.options, function (o, j) { if (j === v.selectedIndex) o.setAttribute('selected', ''); else o.removeAttribute('selected'); });
+      else el.setAttribute('value', v.value);
+    });
+    return copy.innerHTML;
+  }
+
   if (pane && ctrlBtn) {
-    buildControls();
+    if (ST.saved.controls && ST.saved.controls.html) pane.innerHTML = ST.saved.controls.html;
+    else buildControls();
+    if (ST.saved.controls && ST.saved.controls.open) pane.hidden = false;
+    ST.add('controls', function () { return { open: !pane.hidden, html: controlsHtml() }; });
+    new MutationObserver(ST.save).observe(pane, { subtree: true, childList: true, attributes: true, characterData: true });
+    pane.addEventListener('change', ST.save);
+    pane.addEventListener('input', function (e) {
+      var t = e.target, other = null;
+      if (t.type === 'range') other = t.nextElementSibling;
+      else if (t.type === 'number') other = t.previousElementSibling;
+      if (other) other.value = t.value;
+      ST.save();
+    });
     ctrlBtn.addEventListener('click', function () {
       pane.hidden = !pane.hidden;
       if (thread) thread.hidden = true;
@@ -2662,6 +2727,13 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   };
 
   var current = null, threadOf = null, replyTo = null, typingTimers = [], typedOnce = {};
+  var ST = window.__tdpState, was = ST.saved.channels;
+  if (was && was.data) { CHANNELS = was.data; nextId = was.nextId; typedOnce = was.typed || {}; }
+  ST.add('channels', function () {
+    return { data: CHANNELS, nextId: nextId, typed: typedOnce, current: current, thread: threadOf ? threadOf.id : null, replyTo: replyTo };
+  });
+  new MutationObserver(ST.save).observe(view, { childList: true, subtree: true });
+  new MutationObserver(ST.save).observe(threadPane, { childList: true, subtree: true });
 
   function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
   function now() {
@@ -2786,7 +2858,6 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
 
   // Someone else in the channel: the typing line, then their message
   function simulateTyping(name) {
-    typedOnce[name] = true;
     var ch = CHANNELS[name], ty = ch.typing;
     var line = view.querySelector('.ch-typing');
     typingTimers.push(setTimeout(function () {
@@ -2797,6 +2868,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     typingTimers.push(setTimeout(function () {
       if (current !== name) return;
       line.classList.remove('show');
+      typedOnce[name] = true;
       ch.msgs.push(m(ty.u, ty.t, ty.hm, ty.text));
       renderChannel(true);
     }, 4200));
@@ -2929,6 +3001,14 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   });
 
   window.__tdpChannel = { open: open, close: close };
+
+  // After the first chat opens (openChat defers it the same way), bring back
+  // the open thread and the reply in progress
+  if (was && was.current) setTimeout(function () {
+    if (current !== was.current) return;
+    if (was.thread) { var t = msgById(was.thread); if (t) openThread(t.parent || t.msg); }
+    if (was.replyTo && msgById(was.replyTo)) setReply(was.replyTo);
+  }, 0);
 })();
 
 // The floating preview toolbar lives in the parent and can change height when
@@ -3032,6 +3112,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   let active = null; // { destroy() }
   let currentMockChat = 'default'; // survives mode-pill rebuilds within one preview
   let currentSidebarCollapsed = false; // ditto, so switching modes keeps the rail state
+  let currentMockState = null; // ditto, for what was changed inside the mock
   let currentTextScale = 1; // UI Scale slider value, reapplied to rebuilt frames
 
   function setStatus(msg) {
@@ -3054,6 +3135,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   function openOverlay(title) {
     currentMockChat = 'default';
     currentSidebarCollapsed = false;
+    currentMockState = null;
     currentTextScale = 1;
     titleEl.textContent = title;
     stage.innerHTML = '';
@@ -3097,6 +3179,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     if (e.data.kind === 'escape') closePreview();
     if (e.data.kind === 'chatchange' && typeof e.data.chat === 'string') currentMockChat = e.data.chat;
     if (e.data.kind === 'sidebarchange') currentSidebarCollapsed = !!e.data.collapsed;
+    if (e.data.kind === 'mockstate' && e.data.state) currentMockState = e.data.state;
     if (e.data.kind === 'status' && typeof e.data.text === 'string') setStatus(e.data.text);
     // a frame just mounted (including after a mode-pill rebuild) — answer it
     if (e.data.kind === 'ready') requestAnimationFrame(() => { sendTopInset(e.source); if (currentTextScale !== 1) sendTextScale(e.source); });
@@ -3196,7 +3279,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       stage.style.background = modeKey === 'oled' ? '#000000' : modeKey === 'light' ? '#ffffff' : '';
       frame = mountMockFrame(
         stage,
-        buildMockSrcdoc({ modeKey, vars: defaultModeVars(modeKey), customCSS: '', transparent: true, initialChat: currentMockChat, initialCollapsed: currentSidebarCollapsed })
+        buildMockSrcdoc({ modeKey, vars: defaultModeVars(modeKey), customCSS: '', transparent: true, initialChat: currentMockChat, initialCollapsed: currentSidebarCollapsed, initialState: currentMockState })
       );
     };
     controlsEl.appendChild(pillGroup(['dark', 'oled', 'light'], defaultMode, renderMode));
@@ -3280,7 +3363,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
         if (frame) frame.remove();
         frame = mountMockFrame(
           stage,
-          buildMockSrcdoc({ modeKey, vars: defaultModeVars(modeKey), customCSS: css, transparent: false, initialChat: currentMockChat, initialCollapsed: currentSidebarCollapsed })
+          buildMockSrcdoc({ modeKey, vars: defaultModeVars(modeKey), customCSS: css, transparent: false, initialChat: currentMockChat, initialCollapsed: currentSidebarCollapsed, initialState: currentMockState })
         );
       };
       controlsEl.appendChild(pillGroup(['dark', 'oled', 'light'], 'dark', renderMode));
@@ -3321,6 +3404,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
             gradient: gLayers,
             initialChat: currentMockChat,
             initialCollapsed: currentSidebarCollapsed,
+            initialState: currentMockState,
           })
         );
       };

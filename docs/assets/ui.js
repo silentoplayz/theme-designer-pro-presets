@@ -375,14 +375,16 @@
     new ResizeObserver(fit).observe(viewport);
     fit();
 
-    // A rebuild (a mode switch, a new palette) reopens the chat or channel
-    // and the sidebar state the last frame was showing
+    // A rebuild (a mode switch, a new palette) reopens the chat or channel,
+    // the sidebar state and the changes made in the last frame
     let chat = 'default';
     let collapsed = false;
+    let mock = null;
     window.addEventListener('message', (e) => {
       if (!frame || e.source !== frame.contentWindow || !e.data || !e.data.__tdpPreview) return;
       if (e.data.kind === 'chatchange' && typeof e.data.chat === 'string') chat = e.data.chat;
       if (e.data.kind === 'sidebarchange') collapsed = !!e.data.collapsed;
+      if (e.data.kind === 'mockstate' && e.data.state) mock = e.data.state;
     });
 
     return {
@@ -390,7 +392,7 @@
       // drawn, so a rebuild never flashes an empty box
       show(opts) {
         const old = frame;
-        const built = Object.assign({ initialChat: chat, initialCollapsed: collapsed }, opts);
+        const built = Object.assign({ initialChat: chat, initialCollapsed: collapsed, initialState: mock }, opts);
         const fresh = window.TDPEngine.mountMockFrame(viewport, window.TDPEngine.buildMockSrcdoc(built));
         fresh.setAttribute('title', title || 'Open WebUI preview');
         frame = fresh;
