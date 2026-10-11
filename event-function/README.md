@@ -523,6 +523,8 @@ The Docs page now has a solid background, so the designer no longer shows throug
 
 **A theme from the Theme Designer Pro Tool lands in your gallery.** The personal **Themes** tab offers to start your personal theme from the one the Tool left in your browser. **Start from it** now also saves that theme to your theme gallery as "From the Theme Designer Pro Tool", and makes it the gallery's active theme. Before, **Use instance theme** removed it for good, and the offer came back on the next page load. Now the theme stays in your gallery, and the offer doesn't return in that browser.
 
+**Designers open in several tabs stay in step.** Each designer kept the theme and the gallery it loaded, so a change saved in one tab, such as a Global Reset, didn't show in another until you reloaded it. Worse, editing in the stale tab saved its older copy over the change. Now every other open designer reloads when one saves the theme or its gallery. That covers designers at the designer URL, in Settings, or in another window. A designer waits while it's saving or has a dialog open, and keeps a draft in Draft mode. Open WebUI's own pages already updated live and still do.
+
 **Fixes the documentation review turned up:**
 - **Factory Reset in a personal Themes tab** now removes that user's library too. Before, it removed only the personal theme, and the library came back on the next load.
 - **Importing a theme from a file or URL asks before applying a Canvas FX script.** Those imports applied the theme live at once, with no warning about its script, while the clipboard import already warned. If you decline, the theme stays in your gallery without being applied. URL imports also skip themes you already have, as file and clipboard imports do.

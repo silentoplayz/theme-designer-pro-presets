@@ -2608,6 +2608,19 @@ class Event:
             Event._personal_delivery_cache.pop((user_id, kind), None)
         log.info("[Theme Pro] Removed a personal theme; that user is back on the instance theme")
 
+    def _is_unchanged_save(self, css, state, sections, library, user_id: str | None) -> bool:
+        """Whether a save would write exactly what's already stored."""
+        if css != self._load_css(user_id):
+            return False
+        if not (isinstance(state, str) and state) or state != self._load_state(user_id):
+            return False
+        valid = isinstance(sections, dict) and all(isinstance(sections.get(k), str) for k in self.SECTION_KEYS)
+        if valid and {k: sections[k] for k in self.SECTION_KEYS} != self._load_sections(user_id):
+            return False
+        if library and isinstance(library, str) and library != self._load_library(user_id):
+            return False
+        return True
+
     def _delete_personal_library(self, user_id: str) -> None:
         """Remove a user's saved themes and presets, for a Factory Reset in
         their personal designer."""
@@ -3291,6 +3304,11 @@ class Event:
             state = body.get("state", "")
             sections = body.get("sections")
             is_reset = body.get("reset", False)
+            # The designer tab that saved, so its own broadcast doesn't make it
+            # reload while every other open designer does.
+            origin = body.get("origin")
+            if not (isinstance(origin, str) and _re.fullmatch(r"[A-Za-z0-9_-]{1,64}", origin)):
+                origin = None
 
             # Size caps — admin-only endpoint, but a runaway payload would be
             # written to disk and trigger a refetch on every connected client.
@@ -3317,7 +3335,7 @@ class Event:
                 # Factory Reset also wipes their library; Use instance theme keeps it.
                 if body.get("wipe_library") is True:
                     await asyncio.to_thread(self._delete_personal_library, user_id)
-                Event._broadcast_personal(user_id)
+                Event._broadcast_personal(user_id, origin=origin)
                 return JSONResponse({"status": "reset"})
 
             if is_reset:
@@ -3348,12 +3366,21 @@ class Event:
             if not css:
                 library = body.get("library", "")
                 if library and isinstance(library, str):
+                    if library == self._load_library(user_id):
+                        return JSONResponse({"status": "ok", "noop": True})
                     self._save_library(library, user_id)
+                    # Open designers hold the library in memory; tell them.
+                    Event._broadcast_library(user_id, origin)
                     return JSONResponse({"status": "ok", "library_only": True})
                 return JSONResponse({"status": "ok", "noop": True})
 
             if not isinstance(css, str):
                 return JSONResponse({"error": "css must be a string"}, status_code=400)
+
+            # The same theme again, as a designer sends when it opens: nothing to
+            # write, and no broadcast to make the other open designers reload.
+            if self._is_unchanged_save(css, state, sections, body.get("library", ""), user_id):
+                return JSONResponse({"status": "ok", "noop": True, "bytes": len(css)})
 
             self._save_css(css, user_id)
 
@@ -3396,12 +3423,12 @@ class Event:
             if user_id:
                 # Only the owner's open pages show a personal theme.
                 if not body.get("suppress_broadcast", False):
-                    Event._broadcast_personal(user_id)
+                    Event._broadcast_personal(user_id, origin=origin)
             elif not body.get("suppress_broadcast", False):
                 # Prime delivery caches off-loop so the broadcast carries the
                 # new ETags and post-save fetches hit a warm cache.
                 _etags = await asyncio.to_thread(self._prime_delivery_caches)
-                Event._broadcast_update(_etags)
+                Event._broadcast_update(_etags, origin=origin)
 
             resp = {"status": "ok", "bytes": len(css)}
             # Return the valve-postprocessed CSS when it differs from what was
@@ -3690,6 +3717,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
     if (window.__TDP_HOLD_SAVES__ === undefined) window.__TDP_HOLD_SAVES__ = !hasTheme;
 
     function post(body) {
+        if (typeof TAB_ORIGIN !== 'undefined') body.origin = TAB_ORIGIN;
         return fetch('{ROUTE_BASE}/me', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -5092,6 +5120,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                             <li><b>How the Theme Reaches Pages:</b> Theme Designer Pro never writes to Open WebUI&rsquo;s files. It publishes a script into <code>/static/loader.js</code> and a safe subset of the theme CSS into <code>/static/custom.css</code> through a shared registry, composed fresh on every request (see Section 23). That subset holds the palette and your custom CSS, so they paint before Open WebUI draws its interface, with no flash. The state JSON, without Canvas FX scripts, is inlined into the loader too. On each load, the bootloader fetches <code>{ROUTE_BASE}/theme.css</code> and <code>{ROUTE_BASE}/state.json</code> for the full theme. The background animation starts when <code>state.json</code> arrives. <code>localStorage</code> keeps the last theme seen, applied before that fetch completes and kept as an offline fallback. A personal theme keeps its own copy, tagged with the account it belongs to.</li>
                             <li><b>Theme Files:</b> The instance theme is saved in <code>DATA_DIR/theme/</code> as <code>open_theme_designer.css</code>, <code>open_theme_designer.json</code>, <code>open_theme_designer_sections.json</code> (structured CSS sections) and <code>open_theme_designer_library.json</code>. Personal themes use the same names in <code>DATA_DIR/theme/users/&lt;user id&gt;/</code>.</li>
                             <li><b>Live Push via SSE:</b> Theme changes are broadcast to <b>all connected users in real time</b> using Server-Sent Events. Each save pushes a short version token to every open tab, and each page refetches the CSS and state after a random delay of up to 2 seconds, or skips it when its ETags show it already has that version. The channel at <code>{ROUTE_BASE}/events</code> reconnects 3 seconds after a drop and survives function hot-reloads. A personal theme save reaches only that user&rsquo;s own pages. With several workers, Redis carries the updates between them (see Section 22). Each worker accepts up to 8,192 connections; a page over that limit retries a minute later and still gets the theme on every load.</li>
+                            <li><b>Several Designers at Once:</b> Each open designer holds the theme and the gallery in memory. When one saves a change, every other designer showing the same theme reloads, in another tab or window, in Settings or at <code>{ROUTE_BASE}</code>, so none of them can later save an older copy over it. A designer doesn&rsquo;t reload while it&rsquo;s saving or has a dialog open, and waits for that first. In Draft mode, it shows a message instead and keeps your draft. Saving the same theme that&rsquo;s already stored, as a designer does when it opens, changes nothing and reloads nobody.</li>
                             <li><b>SSE Heartbeat:</b> The server sends a keep-alive heartbeat every 15 seconds to detect stale connections. If a client disconnects (closes the tab, loses network), the server-side queue is automatically cleaned up.</li>
                             <li><b>SSE Hot-Reload Persistence:</b> SSE connections survive function re-saves (hot-reloads). The client list is stored on the ASGI app's state object, which persists across module reloads, so re-saving the function code in the admin panel does <b>not</b> break live push to existing tabs.</li>
                             <li><b>Turning the Function Off and On:</b> Turning the function off fires <code>function.disable_started</code>. Theme Designer Pro then broadcasts a <code>theme-disable</code> event that strips the theme from every open page. It also withdraws its CSS from <code>/static/custom.css</code> and removes the <b>Themes</b> tabs from open Settings dialogs. The loader stays published but inactive, so its live connection survives. Turning it back on fires <code>function.enable_started</code>, which republishes the CSS, reactivates the loader, and broadcasts the theme to every page. Requires Open WebUI v0.11.0 or newer.</li>
@@ -6534,6 +6563,10 @@ location.reload();</code></pre>
     const STORAGE_KEY = 'owui_dev_theme_v1';
     const steps =[50, 100, 200, 300, 400, 500, 600, 700, 800, 850, 900, 950];
     const MODES = ['dark', 'light', 'oled', 'her'];
+    // This tab, on every save, so the server's broadcast of it reaches every
+    // other open designer but doesn't make this one reload.
+    const TAB_ORIGIN = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+    let _lastLocalSave = 0;
     const $ = (id) => document.getElementById(id);
 
     // --- SVG Icon Constants ---
@@ -6958,7 +6991,7 @@ location.reload();</code></pre>
         fetch('{ROUTE_BASE}', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ css, state, sections })
+            body: JSON.stringify({ css, state, sections, origin: TAB_ORIGIN })
         }).then(r => {
             if (r.ok) {
                 showToast('Published! Theme pushed to all users.');
@@ -6978,6 +7011,7 @@ location.reload();</code></pre>
     function syncToServer(css, sections, stateStr) {
         // Draft mode: skip server sync (changes stay local only)
         if (_draftMode) return;
+        _lastLocalSave = Date.now();
         // Personal mode holds saves until the theme actually changes, so
         // opening the designer, or switching it between modes, never turns
         // the instance theme into the user's own.
@@ -7036,7 +7070,7 @@ location.reload();</code></pre>
             _syncQueue = _syncQueue.then(() => fetch('{ROUTE_BASE}', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ css, state, sections })
+                body: JSON.stringify({ css, state, sections, origin: TAB_ORIGIN })
             }).then(r => {
                 if (r.ok) {
                     console.log('[Theme Pro] CSS + state synced to server');
@@ -7086,6 +7120,7 @@ location.reload();</code></pre>
             noticeSaveBlocked();
             return;
         }
+        _lastLocalSave = Date.now();
         clearTimeout(_libTimer);
         _libTimer = setTimeout(() => {
             const library = JSON.stringify({
@@ -7100,7 +7135,7 @@ location.reload();</code></pre>
             fetch('{ROUTE_BASE}', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ css: '', state: '', library, suppress_broadcast: true })
+                body: JSON.stringify({ css: '', state: '', library, suppress_broadcast: true, origin: TAB_ORIGIN })
             }).then(r => {
                 if (r.ok) console.log('[Theme Pro] Library synced to server');
                 else if (r.status === 503) {
@@ -11252,7 +11287,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             // A personal designer's reset keeps the library unless asked to wipe it.
-            body: JSON.stringify({ css: '', reset: true, wipe_library: true })
+            body: JSON.stringify({ css: '', reset: true, wipe_library: true, origin: TAB_ORIGIN })
         }).then(r => {
             if (r.ok) {
                 console.log('[Theme Pro] Factory reset complete — reloading');
@@ -15035,12 +15070,49 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
         updateBadge();
 
+        // Another open designer, in another tab or window, saved. This page
+        // holds the theme and library in memory, so it reloads to show the
+        // change instead of saving its older copy over it later.
+        const designerCfg = window.__THEME_PRO_CONFIG__ || {};
+        function fromOtherTab(e) {
+            try {
+                const d = JSON.parse(e.data || '{}') || {};
+                return !!d.origin && d.origin !== TAB_ORIGIN;
+            } catch (x) { return false; }
+        }
+        let _reloadPending = false;
+        function reloadForOtherTab() {
+            if (_reloadPending) return;
+            if (typeof _draftMode !== 'undefined' && _draftMode) {
+                showToast('The theme changed in another tab. Your draft stays here, and publishing it replaces that change.', 6000);
+                return;
+            }
+            // Reloaded for this a moment ago: say so rather than reload again.
+            let last = 0;
+            try { last = Number(sessionStorage.getItem('owui_tdp_auto_reload') || 0); } catch (x) {}
+            if (Date.now() - last < 5000) {
+                showToast('The theme changed in another tab. Reload this page to see it.', 6000);
+                return;
+            }
+            _reloadPending = true;
+            // Not while this page is saving, or has a dialog open.
+            (function attempt() {
+                const dialogOpen = [].some.call(document.querySelectorAll('[id$="-modal"]'), m => m.style.display === 'flex');
+                if (Date.now() - _lastLocalSave < 1500 || dialogOpen) { setTimeout(attempt, 1000); return; }
+                try { sessionStorage.setItem('owui_tdp_auto_reload', String(Date.now())); } catch (x) {}
+                location.reload();
+            })();
+        }
+
         // Open a dedicated SSE connection for live badge updates.
         // Deferred until after page load to avoid "interrupted while loading" errors.
         function initBadgeSSE() {
             try {
                 const badgeEs = new EventSource('{ROUTE_BASE}/events?_badge=' + Date.now());
-                badgeEs.addEventListener('theme-update', () => {
+                badgeEs.addEventListener('theme-update', (e) => {
+                    // Saved in another open designer. A personal designer only
+                    // cares while it still shows the instance theme.
+                    if (fromOtherTab(e) && (designerCfg.scope !== 'me' || window.__TDP_HOLD_SAVES__)) reloadForOtherTab();
                     const wasDisabled = _functionDisabled;
                     _functionDisabled = false;
                     updateBadge();
@@ -15072,8 +15144,20 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                     // throws, and the catch correctly treats it as a disable.
                     var reason = 'disabled';
                     try { reason = (JSON.parse(e.data || '') || {}).reason || 'disabled'; } catch(x) {}
-                    if (reason === 'reset') return;
+                    if (reason === 'reset') {
+                        // A Factory Reset in another tab wiped the instance theme.
+                        if (designerCfg.scope !== 'me' || window.__TDP_HOLD_SAVES__) reloadForOtherTab();
+                        return;
+                    }
                     _functionDisabled = true; updateBadge();
+                });
+                badgeEs.addEventListener('personal-theme-update', (e) => {
+                    if (designerCfg.scope === 'me' && fromOtherTab(e)) reloadForOtherTab();
+                });
+                badgeEs.addEventListener('library-update', (e) => {
+                    var d = {};
+                    try { d = JSON.parse(e.data || '{}') || {}; } catch (x) {}
+                    if (d.scope === (designerCfg.scope === 'me' ? 'me' : 'instance') && fromOtherTab(e)) reloadForOtherTab();
                 });
                 badgeEs.onerror = () => { /* EventSource auto-reconnects */ };
                 window.addEventListener('beforeunload', () => badgeEs.close());
@@ -16309,7 +16393,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             pass  # Redis unavailable — local broadcast still runs below
 
     @classmethod
-    def _broadcast_update(cls, etags: dict | None = None, local_only: bool = False):
+    def _broadcast_update(cls, etags: dict | None = None, local_only: bool = False, origin: str | None = None):
         """Push a theme-update notification to all connected SSE clients.
 
         The payload carries a version token — clients refetch /theme.css and
@@ -16332,6 +16416,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 data["cssTag"] = etags["cssTag"]
             if etags.get("stateTag"):
                 data["stateTag"] = etags["stateTag"]
+        if origin:
+            data["origin"] = origin
         payload = _json.dumps(data, separators=(",", ":"))
         msg = f"event: theme-update\ndata: {payload}\n\n"
         if not local_only:
@@ -16346,16 +16432,39 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     _PERSONAL_PREFIX = "personal:"
 
     @classmethod
-    def _broadcast_personal(cls, user_id: str, local_only: bool = False):
+    def _broadcast_personal(cls, user_id: str, local_only: bool = False, origin: str | None = None):
         """Tell one user's open pages that their personal theme changed.
 
         Nobody else's page is told, on this worker or, through Redis, on any
         other. The pages refetch their own theme, as they do on theme-update.
         """
-        msg = "event: personal-theme-update\ndata: {}\n\n"
+        data = _json.dumps({"origin": origin} if origin else {}, separators=(",", ":"))
+        msg = f"event: personal-theme-update\ndata: {data}\n\n"
         if not local_only:
             cls._redis_publish(f"{cls._PERSONAL_PREFIX}{user_id}\n{msg}")
         cls._deliver_personal(user_id, msg)
+
+    @classmethod
+    def _broadcast_library(cls, user_id: str | None, origin: str | None):
+        """Tell open designers the saved themes and presets changed, so one
+        holding an older copy reloads instead of saving it over the new one.
+        Only designers listen for this event; a personal library's goes to its
+        owner's pages alone."""
+        payload = {"scope": "me" if user_id else "instance"}
+        if origin:
+            payload["origin"] = origin
+        data = _json.dumps(payload, separators=(",", ":"))
+        msg = f"event: library-update\ndata: {data}\n\n"
+        if user_id:
+            cls._redis_publish(f"{cls._PERSONAL_PREFIX}{user_id}\n{msg}")
+            cls._deliver_personal(user_id, msg)
+            return
+        cls._redis_publish(msg)
+        for q in list(cls._sse_clients):
+            try:
+                q.put_nowait(msg)
+            except asyncio.QueueFull:
+                pass
 
     @classmethod
     def _deliver_personal(cls, user_id: str, msg: str):
