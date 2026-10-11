@@ -4799,6 +4799,8 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         .canvas-settings-body .fx-set-toggle, .canvas-settings-body .fx-set-color { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); cursor: pointer; }
         .canvas-settings-body .fx-set-text { display: grid; gap: 4px; min-width: 0; }
         .canvas-settings-body .fx-set-text .fx-set-hint { margin-top: 0; }
+        .canvas-settings-reset { margin: 12px 0 10px; border: 1px solid var(--border); }
+        .canvas-settings-reset:disabled { opacity: 0.4; cursor: default; }
         .canvas-settings-body input[type="color"] { flex: none; width: 34px; height: 24px; padding: 0; border: 1px solid var(--border); border-radius: 6px; background: transparent; cursor: pointer; }
         .doc-inner { padding: 0 0 32px; color: var(--text-muted); font-size: 1.05rem; line-height: 1.85; }
         
@@ -5251,8 +5253,9 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                 <details class="doc-sub-accordion canvas-settings" id="canvas-settings" style="display:none;">
                     <summary><span>Animation Settings <span class="canvas-settings-count" id="canvas-settings-count"></span></span> <i data-icon="chevron"></i></summary>
                     <div class="doc-sub-inner">
-                        <p class="canvas-settings-note">The script&rsquo;s own settings, read from its <code>CONFIG</code> block or the constants at its top. A change rewrites that value in the script above. Undo takes it back.</p>
+                        <p class="canvas-settings-note">The script&rsquo;s own settings, read from its <code>CONFIG</code> block or the constants at its top. A change rewrites that value in the script above. <b>Reset</b> or Undo takes it back.</p>
                         <div class="canvas-settings-body" id="canvas-settings-body"></div>
+                        <button type="button" class="owui-code-btn canvas-settings-reset" id="canvas-settings-reset" disabled>Reset to the script&rsquo;s values</button>
                     </div>
                 </details>
 
@@ -5762,7 +5765,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                             <li><b>Background Worker Execution:</b> By default, scripts run in a true background Web Worker utilizing <code>OffscreenCanvas</code> (if supported by your browser) to ensure high-performance rendering without blocking the UI thread. Both <b>Canvas 2D</b> and <b>WebGL/WebGL2</b> contexts are supported &mdash; call <code>canvas.getContext('2d')</code> for standard drawing or <code>canvas.getContext('webgl2')</code> for GPU-accelerated shader rendering (see <i>WebGL Rendering</i> below). A script whose source contains the text <code>document</code> anywhere, even in a comment or inside a longer word such as &ldquo;documentation&rdquo;, is sent straight to the main thread. The status badge in the designer shows the <i>predicted</i> execution mode, from the browser&rsquo;s capabilities and that text check: <b style="color:#10b981">Background Worker</b> (OffscreenCanvas), <b style="color:#60a5fa">Main Thread (DOM Access)</b> (the script contains <code>document</code>), or <b style="color:#f59e0b">Main Thread (Fallback)</b> (the browser lacks <code>OffscreenCanvas</code>). If the Worker reports an uncaught error, the engine also moves the script to the main thread; the badge doesn&rsquo;t change in that case, because it shows the prediction, not the live path. Next to it, a <b>WebGL</b> badge appears when the script asks for a WebGL context, and a <b>Context</b> badge when it handles <code>context</code> messages.</li>
                             <li><b>Event Handling:</b> Eleven message types are sent to your script via <code>self.onmessage</code>: <code>init</code>, <code>resize</code>, <code>mousemove</code>, <code>click</code>, <code>mousedown</code>, <code>mouseup</code>, <code>touchstart</code>, <code>touchmove</code>, <code>touchend</code>, <code>context</code>, and <code>theme</code>. Touch events also generate synthetic mouse equivalents for cross-device compatibility.</li>
                             <li><b>Show on Auth Pages:</b> Toggle whether canvas animations appear on Login/Signup screens. Enabled by default. When the <b>Enable Auth Page Theming</b> valve is off, this checkbox is hidden and off in every mode.</li>
-                            <li><b>Animation Settings:</b> Under the editor, the script&rsquo;s own settings appear as sliders, switches and color pickers, read from its <code>CONFIG</code> object or the constants at its top. A change rewrites that one value in the script, as if you had typed it, so the animation restarts with it and <b>Undo</b> takes it back. A range written in the setting&rsquo;s comment, such as <code>(0.5-3)</code>, sets the slider&rsquo;s range.</li>
+                            <li><b>Animation Settings:</b> Under the editor, the script&rsquo;s own settings appear as sliders, switches and color pickers, read from its <code>CONFIG</code> object or the constants at its top. A change rewrites that one value in the script, as if you had typed it, so the animation restarts with it. <b>Reset to the script&rsquo;s values</b> puts back the script as it was before your first change, and <b>Undo</b> works too. A range written in the setting&rsquo;s comment, such as <code>(0.5-3)</code>, sets the slider&rsquo;s range.</li>
                             <li><b>Preset Gallery:</b> Save, rename, overwrite with the editor&rsquo;s script, delete, and export individual animations, and import native <code>.js</code> animation files by dragging them into the designer. The gallery has search, a sort, and a type filter (All, WebGL, Context, Follows Theme, DOM Access).</li>
                             <li><b>The Enable Canvas FX valve:</b> turning it off hides this tab, stops animations that are running, and serves every theme with its Canvas FX left out. The scripts stay saved, so turning the valve back on restores them.</li>
                             <li><b>Personal themes:</b> with <b>Allow Personal Themes</b> on, users can add Canvas FX to their own theme. It runs only in their own browser, and the <b>Enable Canvas FX</b> valve covers it too.</li>
@@ -9411,7 +9414,6 @@ function startAnimation() {
         _canvasSettingsKey = key;
         const list = script.trim() ? parseSettings(script) : [];
         box.style.display = list.length ? '' : 'none';
-        $('canvas-settings-count').textContent = list.length ? '(' + list.length + ')' : '';
         let section = null;
         $('canvas-settings-body').innerHTML = list.map((e) => {
             const head = e.section && e.section !== section ? `<div class="fx-set-section">${_esc(e.section)}</div>` : '';
@@ -9427,6 +9429,30 @@ function startAnimation() {
             return head + `<div class="slider-row"><label><span>${_esc(e.label)}</span> <span class="slider-val">${fmtNum(e.value, e.step)}</span></label>${hint}` +
                 `<input type="range" data-key="${key}" min="${e.min}" max="${e.max}" step="${e.step}" value="${e.value}" aria-label="${_escAttr(e.label)}"></div>`;
         }).join('');
+        syncCanvasSettingsReset();
+    }
+
+    // The script as it was before its first setting change, per mode, so Reset
+    // can bring it back. Any other change to the script (typing, loading a
+    // preset, Undo) means it no longer applies.
+    var _canvasSettingsBase = {};
+    function canvasSettingsBase(dm) {
+        const b = _canvasSettingsBase[dm];
+        return b && b.current === themeData[dm].canvasScript ? b : null;
+    }
+
+    function syncCanvasSettingsReset() {
+        const dm = getActiveDataMode();
+        const list = parseSettings(themeData[dm].canvasScript || '');
+        const b = canvasSettingsBase(dm);
+        let changed = 0;
+        if (b) {
+            const before = {};
+            parseSettings(b.script).forEach((e) => { before[e.key] = e.value; });
+            changed = list.filter((e) => e.key in before && before[e.key] !== e.value).length;
+        }
+        $('canvas-settings-count').textContent = !list.length ? '' : changed ? `(${list.length} \u00b7 ${changed} changed)` : `(${list.length})`;
+        $('canvas-settings-reset').disabled = !changed;
     }
 
     function canvasSettingFor(key) {
@@ -9447,14 +9473,31 @@ function startAnimation() {
         if (!s) return;
         const value = s.kind === 'bool' ? t.checked : s.kind === 'color' ? t.value.toLowerCase() : Number(t.value);
         const dm = getActiveDataMode();
-        const next = applySettings(themeData[dm].canvasScript || '', { [s.key]: value });
-        if (next === themeData[dm].canvasScript) return;
+        const prev = themeData[dm].canvasScript || '';
+        const next = applySettings(prev, { [s.key]: value });
+        if (next === prev) return;
+        const b = canvasSettingsBase(dm) || (_canvasSettingsBase[dm] = { script: prev, ref: activeCanvasRef[dm] });
+        b.current = next;
         themeData[dm].canvasScript = next;
         activeThemeRef[dm] = null;
         activeCanvasRef[dm] = null;
         // The panel already shows this value, so keep it (and its focus) as it is
         _canvasSettingsKey = dm + '\n' + next;
         commitChange({ clearRef: false });
+        syncCanvasSettingsReset();
+    });
+
+    $('canvas-settings-reset').addEventListener('click', () => {
+        const dm = getActiveDataMode();
+        const b = canvasSettingsBase(dm);
+        if (!b) return;
+        delete _canvasSettingsBase[dm];
+        themeData[dm].canvasScript = b.script;
+        activeThemeRef[dm] = null;
+        // Back to the exact script, so a gallery preset it came from is active again
+        activeCanvasRef[dm] = b.ref || null;
+        commitChange({ clearRef: false });
+        showToast('Animation Settings Reset');
     });
 
     // getActiveDataMode() and others are declared further down, so the first
