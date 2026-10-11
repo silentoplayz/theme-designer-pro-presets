@@ -521,6 +521,8 @@ The Docs page now has a solid background, so the designer no longer shows throug
 
 **Turn off theme update checks.** The new **Enable Theme Update Checks** valve, on by default, covers every update request the designer makes: the **Updates** button, each theme's own update check, and the **Update** badges in Community Themes. Turned off, it hides the button and the per-theme check. The designer then makes none of these requests to GitHub or to a theme's update URL. The Community Themes browser keeps its own valve.
 
+**A theme from the Theme Designer Pro Tool lands in your gallery.** The personal **Themes** tab offers to start your personal theme from the one the Tool left in your browser. **Start from it** now also saves that theme to your theme gallery as "From the Theme Designer Pro Tool", and makes it the gallery's active theme. Before, **Use instance theme** removed it for good, and the offer came back on the next page load. Now the theme stays in your gallery, and the offer doesn't return in that browser.
+
 **The Gradient tab's conflict warning names the right tab.** It said your Custom CSS Snippet was on the **CSS Output** tab, when it's on **Style Overrides**.
 
 ---

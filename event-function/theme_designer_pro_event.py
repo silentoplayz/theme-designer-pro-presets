@@ -3744,9 +3744,44 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         use.textContent = 'Start from it';
         use.addEventListener('click', function () {
             use.disabled = true;
-            post({ css: css, state: state }).then(function (r) {
-                if (r.ok) location.reload();
-                else { use.disabled = false; if (typeof showToast === 'function') showToast('⚠️ Could not save that theme'); }
+            // The Tool's theme also goes into the gallery, so Use instance
+            // theme can't lose it, and becomes the gallery's active theme.
+            var body = { css: css, state: state };
+            try {
+                var parsed = JSON.parse(state);
+                var snap = {
+                    name: 'From the Theme Designer Pro Tool',
+                    description: 'The theme this browser had in the Theme Designer Pro Tool.',
+                    author: '', version: '1.0.0', targetVersion: '', repositoryUrl: '', updateUrl: ''
+                };
+                var refs = {};
+                MODES.forEach(function (m) {
+                    if (!parsed[m]) return;
+                    var mode = JSON.parse(JSON.stringify(parsed[m]));
+                    delete mode.manualOverridesEnabled;
+                    snap[m] = mode;
+                    refs[m] = { type: 'snapshot', id: 0 };
+                });
+                // The Tool's preset references point into its own galleries.
+                parsed._activeThemeRef = refs;
+                ['_activeCanvasRef', '_activeCssRef', '_activeGradientRef'].forEach(function (k) { delete parsed[k]; });
+                var snapshots = getSnapshots();
+                snapshots.unshift(snap);
+                Storage.set('snapshots', snapshots);
+                body.state = JSON.stringify(parsed);
+                body.library = JSON.stringify({
+                    snapshots: snapshots,
+                    canvas_presets: typeof CANVAS_PRESETS !== 'undefined' ? CANVAS_PRESETS : [],
+                    css_presets: typeof CSS_PRESETS !== 'undefined' ? CSS_PRESETS : [],
+                    gradient_presets: typeof CUSTOM_GRADIENT_PRESETS !== 'undefined' ? CUSTOM_GRADIENT_PRESETS : []
+                });
+            } catch (e) { console.warn('Theme Pro:', e); }
+            post(body).then(function (r) {
+                if (r.ok) {
+                    // Handled: it's the personal theme now, and in the gallery.
+                    try { localStorage.setItem('owui_tdp_tool_dismissed', '1'); } catch (e) {}
+                    location.reload();
+                } else { use.disabled = false; if (typeof showToast === 'function') showToast('⚠️ Could not save that theme'); }
             });
         });
         var no = document.createElement('button');
@@ -5126,7 +5161,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                             <li><b>Within Your Valves:</b> Canvas FX, Custom CSS, the Gradient Builder, Community Themes, URL import and the transparency styles apply as they do for the instance theme.</li>
                             <li><b>Saves Wait for a Real Change:</b> A personal theme starts from the instance theme and is saved only once the user changes something. Opening the tab, or switching it between modes, leaves them on the instance theme and its later updates.</li>
                             <li><b>Use Instance Theme:</b> This button removes the personal theme and keeps the user&rsquo;s saved themes and presets. The personal designer has no Draft mode and no Global Reset.</li>
-                            <li><b>Moving From the Legacy Tool:</b> The old Theme Designer Pro Tool kept a theme in each browser. The first time a page loads with this function, that theme is set aside, and when the user opens their personal <b>Themes</b> tab, the designer offers to start their personal theme from it.</li>
+                            <li><b>Moving From the Legacy Tool:</b> The old Theme Designer Pro Tool kept a theme in each browser. The first time a page loads with this function, that theme is set aside, and when the user opens their personal <b>Themes</b> tab, the designer offers to start their personal theme from it. <b>Start from it</b> also saves it to their gallery as &ldquo;From the Theme Designer Pro Tool&rdquo;, so <b>Use instance theme</b> can&rsquo;t lose it, and the offer doesn&rsquo;t come back in that browser.</li>
                             <li><b>Deleted Accounts:</b> When an account is deleted, from the Users page or by SCIM, its personal theme and library are removed, as long as the function is on.</li>
                             <li><b>Turning the Valve Off</b> puts everyone back on the instance theme and keeps their personal themes in case you turn it on again.</li>
                         </ul>
