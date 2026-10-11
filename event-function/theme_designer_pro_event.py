@@ -6437,6 +6437,9 @@ self.onmessage = function(e) {
                         <div class="doc-subheading">🎭 Built-in Community Themes Browser</div>
                         <p>The <b>Themes</b> area includes a curated <b>Community Themes</b> grid, fetched from the presets repository&rsquo;s <code>docs/catalog.json</code> on GitHub. Each card shows the theme&rsquo;s preview colors and metadata with a one-click <b>Install</b> button, which adds the theme to your Theme Gallery; installed themes are marked. When <b>Enable Theme Update Checks</b> is on, the grid also reads <code>manifest.json</code> and a card offers an update if the remote version is newer than your installed copy. An <b>Install All</b> button appears when at least one theme isn&rsquo;t installed, alongside <b>Refresh</b>, search (name, description, author) and an A&ndash;Z sort. The <b>Enable Community Themes</b> valve hides the whole browser and skips its catalog fetch. If you set <b>Allowed Import Domains</b>, include <code>raw.githubusercontent.com</code>, or the grid shows &ldquo;Could not load community themes.&rdquo;</p>
 
+                        <div class="doc-subheading">🔗 Install Links From the Website</div>
+                        <p>Every preset in the <a href="https://silentoplayz.github.io/theme-designer-pro-presets/gallery/" target="_blank" rel="noopener noreferrer">preset gallery</a>, and every theme made in its <a href="https://silentoplayz.github.io/theme-designer-pro-presets/studio/" target="_blank" rel="noopener noreferrer">Studio</a>, has an <b>Install on my Open WebUI</b> button. After a visitor tells the site their Open WebUI address once, the button opens this designer with an address ending in <code>#tdp-import=</code>. A preset opens its own Import dialog with its address filled in, and you choose <b>Load URL</b>, so <b>Enable URL Import</b> and <b>Allowed Import Domains</b> apply as they do to an address typed in by hand. A Studio theme travels inside the link and is offered the way a pasted theme is, with the Canvas FX warning when it has a script. Nothing installs until you confirm, the link leaves the address bar once read, and a preset type whose valve is off is refused.</p>
+
                         <div class="doc-subheading">🚀 Quick Start — Import Everything at Once</div>
                         <p>Open the <b>Import</b> modal in the <b>Themes</b> tab, paste this URL, and click <b>Load URL</b>; all animations, CSS, themes, and gradients are imported in one shot. The Import modals in the Style Overrides, Canvas FX and Gradient tabs take only their own type.</p>
                         <div style="position: relative; margin-bottom: 16px;">
@@ -12667,6 +12670,51 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     
     // Smart Paste Listener (Images OR JSON)
     let pendingClipboardData = null;
+    // Ask before importing theme JSON from the clipboard or from an install
+    // link: duplicates are skipped, and a Canvas FX script gets its warning.
+    function offerJsonImport(text, parsed) {
+        // Check for duplicates before showing the import modal
+        const existingSnaps = getSnapshots();
+        let allDuplicates = false;
+        if (parsed.isLibraryBackup && Array.isArray(parsed.themes)) {
+            allDuplicates = parsed.themes.length > 0 && parsed.themes.every(t => isThemeDuplicate(t, existingSnaps));
+        } else if (parsed.dark && parsed.light && !parsed.canvas_presets && !parsed.css_presets) {
+            allDuplicates = isThemeDuplicate(parsed, existingSnaps);
+        } else if (parsed.h !== undefined) {
+            const legacyTheme = { name: 'clipboard', dark: { h: parsed.h, c: parsed.c, l: parsed.l, overrides: parsed.overrides || {} }, light: { h: parsed.h, c: parsed.c, l: parsed.l, overrides: {} }, oled: { h: parsed.h, c: parsed.c, l: 0, overrides: parsed.overrides || {} }, her: { h: parsed.h, c: parsed.c, l: parsed.l, overrides: {} } };
+            allDuplicates = isThemeDuplicate(legacyTheme, existingSnaps);
+        }
+        if (allDuplicates) {
+            showToast('Theme already exists in your library.');
+            return;
+        }
+
+        pendingClipboardData = text;
+
+        // Detect Canvas FX for Security Warning
+        let hasCanvas = false;
+        if (parsed.themes) {
+            hasCanvas = parsed.themes.some(t => 
+                (t.dark?.canvasScript && t.dark?.canvasEnabled) || 
+                (t.light?.canvasScript && t.light?.canvasEnabled) ||
+                (t.oled?.canvasScript && t.oled?.canvasEnabled) ||
+                (t.her?.canvasScript && t.her?.canvasEnabled)
+            );
+        } else if (parsed.dark || parsed.light || parsed.oled || parsed.her) {
+            hasCanvas = (parsed.dark?.canvasScript && parsed.dark?.canvasEnabled) || 
+                        (parsed.light?.canvasScript && parsed.light?.canvasEnabled) ||
+                        (parsed.oled?.canvasScript && parsed.oled?.canvasEnabled) ||
+                        (parsed.her?.canvasScript && parsed.her?.canvasEnabled);
+        } else if (parsed.canvas_presets) {
+            hasCanvas = true;
+        } else if (parsed.h !== undefined) {
+             hasCanvas = parsed.canvasEnabled && parsed.canvasScript;
+        }
+
+        document.getElementById('canvas-warning').style.display = hasCanvas ? 'block' : 'none';
+        showModal('import-clipboard-modal');
+    }
+
     window.addEventListener('paste', async (e) => {
         // Skip when user is pasting into an input or textarea
         const pasteTarget = document.activeElement;
@@ -12690,47 +12738,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 try {
                     const parsed = JSON.parse(text);
                     if (parsed && (parsed.h !== undefined || parsed.dark || parsed.themes || parsed.canvas_presets || parsed.css_presets)) {
-                        
-                        // Check for duplicates before showing the import modal
-                        const existingSnaps = getSnapshots();
-                        let allDuplicates = false;
-                        if (parsed.isLibraryBackup && Array.isArray(parsed.themes)) {
-                            allDuplicates = parsed.themes.length > 0 && parsed.themes.every(t => isThemeDuplicate(t, existingSnaps));
-                        } else if (parsed.dark && parsed.light && !parsed.canvas_presets && !parsed.css_presets) {
-                            allDuplicates = isThemeDuplicate(parsed, existingSnaps);
-                        } else if (parsed.h !== undefined) {
-                            const legacyTheme = { name: 'clipboard', dark: { h: parsed.h, c: parsed.c, l: parsed.l, overrides: parsed.overrides || {} }, light: { h: parsed.h, c: parsed.c, l: parsed.l, overrides: {} }, oled: { h: parsed.h, c: parsed.c, l: 0, overrides: parsed.overrides || {} }, her: { h: parsed.h, c: parsed.c, l: parsed.l, overrides: {} } };
-                            allDuplicates = isThemeDuplicate(legacyTheme, existingSnaps);
-                        }
-                        if (allDuplicates) {
-                            showToast('Theme already exists in your library.');
-                            return;
-                        }
-
-                        pendingClipboardData = text;
-                        
-                        // Detect Canvas FX for Security Warning
-                        let hasCanvas = false;
-                        if (parsed.themes) {
-                            hasCanvas = parsed.themes.some(t => 
-                                (t.dark?.canvasScript && t.dark?.canvasEnabled) || 
-                                (t.light?.canvasScript && t.light?.canvasEnabled) ||
-                                (t.oled?.canvasScript && t.oled?.canvasEnabled) ||
-                                (t.her?.canvasScript && t.her?.canvasEnabled)
-                            );
-                        } else if (parsed.dark || parsed.light || parsed.oled || parsed.her) {
-                            hasCanvas = (parsed.dark?.canvasScript && parsed.dark?.canvasEnabled) || 
-                                        (parsed.light?.canvasScript && parsed.light?.canvasEnabled) ||
-                                        (parsed.oled?.canvasScript && parsed.oled?.canvasEnabled) ||
-                                        (parsed.her?.canvasScript && parsed.her?.canvasEnabled);
-                        } else if (parsed.canvas_presets) {
-                            hasCanvas = true;
-                        } else if (parsed.h !== undefined) {
-                             hasCanvas = parsed.canvasEnabled && parsed.canvasScript;
-                        }
-
-                        document.getElementById('canvas-warning').style.display = hasCanvas ? 'block' : 'none';
-                        showModal('import-clipboard-modal');
+                        offerJsonImport(text, parsed);
                     }
                 } catch(err) { console.warn('Theme Pro:', err); }
             }
@@ -12753,6 +12761,63 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         }
         hideModal('import-clipboard-modal');
     };
+
+    // An install link from the Theme Designer Pro website: #tdp-import=<kind>:<value>.
+    // A preset opens its Import dialog with its address filled in, and a theme
+    // made in the Studio is offered the way a pasted one is. Nothing imports
+    // until the user confirms, and the URL import valves apply as they do to
+    // an address typed in by hand.
+    const INSTALL_DIALOGS = {
+        theme: ['import-theme-modal', 'import-url-input', 'import-url-status', 'import-url-load-btn', null],
+        bundle: ['import-theme-modal', 'import-url-input', 'import-url-status', 'import-url-load-btn', null],
+        canvas: ['import-canvas-modal', 'import-canvas-url-input', 'import-canvas-url-status', 'import-canvas-url-load-btn', 'enableCanvasFx'],
+        css: ['import-css-modal', 'import-css-url-input', 'import-css-url-status', 'import-css-url-load-btn', 'enableCustomCss'],
+        gradient: ['import-gradient-modal', 'import-gradient-url-input', 'import-gradient-url-status', 'import-gradient-url-load-btn', 'enableGradientBuilder'],
+    };
+    function installFromLink() {
+        const m = /^#tdp-import=(theme|bundle|canvas|css|gradient|json):(.+)$/.exec(location.hash);
+        if (!m) return;
+        // A reload must not offer it again
+        history.replaceState(null, '', location.pathname + location.search);
+        const kind = m[1];
+        let value = null;
+        try { value = decodeURIComponent(m[2]); } catch (e) {}
+        if (kind === 'json') {
+            try {
+                if (value === null) throw new Error('unreadable');
+                const b64 = value.replace(/-/g, '+').replace(/_/g, '/');
+                const text = new TextDecoder().decode(Uint8Array.from(atob(b64), (ch) => ch.charCodeAt(0)));
+                const parsed = JSON.parse(text);
+                if (!parsed || !parsed.dark || !parsed.light) throw new Error('not a theme');
+                offerJsonImport(text, parsed);
+            } catch (e) {
+                showToast('That install link has no theme in it that Theme Designer Pro can read.');
+            }
+            return;
+        }
+        if (value === null) return;
+        let url;
+        try { url = new URL(value); } catch (e) { return; }
+        if (url.protocol !== 'https:') return;
+        const [modalId, inputId, statusId, loadId, valve] = INSTALL_DIALOGS[kind];
+        const cfg = window.__THEME_PRO_CONFIG__ || {};
+        if (valve && cfg[valve] === false) {
+            showToast('This preset type is turned off on this instance, so it can\'t be installed here.');
+            return;
+        }
+        if (!$(modalId) || !$(inputId)) return;
+        $(inputId).value = url.href;
+        showModal(modalId);
+        const statusEl = $(statusId);
+        if (cfg.enableUrlImport === false) {
+            if (statusEl) showStatus(statusEl, 'Imports from an address are turned off on this instance. Download the preset and drop the file here instead.', 'error');
+            return;
+        }
+        if (statusEl) showStatus(statusEl, 'From an install link. Choose Load URL to import it.', 'loading');
+        if ($(loadId)) $(loadId).focus();
+    }
+    // After the rest of the page has wired its dialogs
+    setTimeout(installFromLink, 0);
 
 
     // --- Mass Import/Export Portability ---
