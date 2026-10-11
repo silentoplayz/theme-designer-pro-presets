@@ -41,12 +41,16 @@ jobs:
         run: node scripts/process-submission.js
 
       # ── On failure: comment with errors ──
+      # Step outputs carry the submitter's text, so the scripts read them
+      # from the environment; pasted into the script they would run as code
       - name: Comment on failure
         if: steps.process.outputs.result == 'failure'
         uses: actions/github-script@v7
+        env:
+          ERRORS: ${{ steps.process.outputs.errors }}
         with:
           script: |
-            const errors = `${{ steps.process.outputs.errors }}`;
+            const errors = process.env.ERRORS || '';
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -219,15 +223,22 @@ jobs:
         uses: actions/github-script@v7
         env:
           PREVIEWS: ${{ steps.shots.outputs.table }}
+          PR_URL: ${{ steps.pr.outputs.pr_url }}
+          PREVIEW_URL: ${{ steps.pr.outputs.preview_url }}
+          FILENAME: ${{ steps.process.outputs.filename }}
+          THEME_NAME: ${{ steps.process.outputs.theme_name }}
+          MODES: ${{ steps.process.outputs.modes }}
+          SIZE: ${{ steps.process.outputs.size }}
+          WARNINGS: ${{ steps.process.outputs.warnings }}
         with:
           script: |
-            const prUrl = `${{ steps.pr.outputs.pr_url }}`;
-            const previewUrl = `${{ steps.pr.outputs.preview_url }}`;
-            const filename = `${{ steps.process.outputs.filename }}`;
-            const themeName = `${{ steps.process.outputs.theme_name }}`;
-            const modes = `${{ steps.process.outputs.modes }}`;
-            const size = `${{ steps.process.outputs.size }}`;
-            const warnings = `${{ steps.process.outputs.warnings }}`;
+            const prUrl = process.env.PR_URL || '';
+            const previewUrl = process.env.PREVIEW_URL || '';
+            const filename = process.env.FILENAME || '';
+            const themeName = process.env.THEME_NAME || '';
+            const modes = process.env.MODES || '';
+            const size = process.env.SIZE || '';
+            const warnings = process.env.WARNINGS || '';
 
             let body = [
               `## ✅ Theme Validated Successfully!`,

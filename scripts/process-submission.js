@@ -23,6 +23,7 @@
  *   warnings     — newline-separated warning messages (on success)
  */
 
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
@@ -154,8 +155,9 @@ function main() {
 
   function setOutput(key, value) {
     if (outputFile) {
-      // Handle multiline values with delimiter
-      const delimiter = `EOF_${Date.now()}`;
+      // Handle multiline values with delimiter. It's random, so a value
+      // can't end itself early and write outputs of its own
+      const delimiter = `EOF_${crypto.randomBytes(16).toString('hex')}`;
       fs.appendFileSync(outputFile, `${key}<<${delimiter}\n${value}\n${delimiter}\n`);
     }
   }
