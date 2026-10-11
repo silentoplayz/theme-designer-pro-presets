@@ -427,10 +427,6 @@ class Event:
             default=True,
             description="Add a Themes tab to the Admin section of Open WebUI's Settings, after Interface, that opens this designer inside Settings. The designer stays available at its own URL either way.",
         )
-        show_in_admin_panel: bool = Field(
-            default=False,
-            description="Add a Themes page to the Admin Panel's top bar, between Functions and Settings, that opens the instance designer there. The designer stays available at its own URL, and in Settings, either way.",
-        )
         allow_personal_themes: bool = Field(
             default=False,
             description="Let every user design a personal theme from a Themes tab in their own Settings. A personal theme replaces the instance theme for that user only and follows them to every browser, within the limits the other valves set. Off: everyone sees the instance theme.",
@@ -2157,175 +2153,6 @@ class Event:
 })();
 """
 
-    ADMIN_PAGE_SCRIPT = r"""
-(function () {
-    'use strict';
-    if (window.__owuiTdpAdminPage) return;
-    window.__owuiTdpAdminPage = true;
-
-    // The instance designer as a page of the Admin Panel, in its top bar
-    // between Functions and Settings. The bar only renders for admins.
-    var SRC = '__THEME_ROUTE__?embed=admin';
-    var LABEL = 'Themes';
-    // The bar's links carry these while they aren't the open page.
-    var DIM = ['text-gray-300', 'dark:text-gray-600', 'hover:text-gray-700', 'dark:hover:text-white'];
-    var STYLE = [
-        '[data-tdp-admin-open]>:not(.tdp-admin-page){display:none!important}',
-        '.tdp-admin-page{display:none;position:relative;height:100%;min-height:0;flex-direction:column;padding:0 .625rem .5rem}',
-        '[data-tdp-admin-open]>.tdp-admin-page{display:flex}',
-        '.tdp-admin-page iframe{flex:1 1 auto;width:100%;min-height:0;border:0;border-radius:.75rem;background:transparent}',
-        '.tdp-admin-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--color-gray-500,#9b9b9b);pointer-events:none}'
-    ].join('');
-    var openPath = null;
-    var scheduled = false;
-
-    function ensureStyle() {
-        if (document.getElementById('owui-tdp-admin-page-style')) return;
-        var style = document.createElement('style');
-        style.id = 'owui-tdp-admin-page-style';
-        style.textContent = STYLE;
-        document.head.appendChild(style);
-    }
-
-    function bar() {
-        var settings = document.querySelector('nav a[href="/admin/settings"]');
-        if (!settings || !settings.parentElement.querySelector('a[href="/admin/evaluations"]')) return null;
-        return { row: settings.parentElement, settings: settings, host: settings.closest('nav').nextElementSibling };
-    }
-
-    function setDim(el, dim) {
-        DIM.forEach(function (c) { el.classList.toggle(c, dim); });
-    }
-
-    function makeLink(b) {
-        var link = document.createElement('a');
-        link.className = b.settings.className;
-        link.classList.add('tdp-admin-page-link');
-        link.href = '#theme-designer';
-        link.draggable = false;
-        link.textContent = LABEL;
-        link.addEventListener('click', function (evt) {
-            evt.preventDefault();
-            open(bar());
-        });
-        return link;
-    }
-
-    function makePage() {
-        var page = document.createElement('div');
-        page.className = 'tdp-admin-page';
-        var loading = document.createElement('div');
-        loading.className = 'tdp-admin-loading';
-        loading.textContent = 'Loading Theme Designer Pro…';
-        var frame = document.createElement('iframe');
-        frame.src = SRC;
-        frame.title = 'Theme Designer Pro';
-        frame.setAttribute('allow', 'clipboard-read; clipboard-write');
-        frame.addEventListener('load', function () { loading.remove(); }, { once: true });
-        page.appendChild(loading);
-        page.appendChild(frame);
-        return page;
-    }
-
-    function open(b) {
-        if (!b || !b.host) return;
-        if (!b.host.querySelector(':scope > .tdp-admin-page')) b.host.appendChild(makePage());
-        b.host.setAttribute('data-tdp-admin-open', '');
-        openPath = location.pathname;
-        render();
-    }
-
-    function close(b) {
-        openPath = null;
-        if (b && b.host) b.host.removeAttribute('data-tdp-admin-open');
-    }
-
-    // Give the bar's own links back the look they had.
-    function undim(b) {
-        [].forEach.call(b.row.querySelectorAll('a[data-tdp-dimmed]'), function (a) {
-            a.removeAttribute('data-tdp-dimmed');
-            setDim(a, false);
-        });
-    }
-
-    // Turned off while this page was open: take the link and the page away.
-    function withdraw(b) {
-        close(b);
-        undim(b);
-        var link = b.row.querySelector('.tdp-admin-page-link');
-        if (link) link.remove();
-        var page = b.host && b.host.querySelector(':scope > .tdp-admin-page');
-        if (page) page.remove();
-    }
-
-    function watch(b) {
-        if (b.row.__tdpWatched) return;
-        b.row.__tdpWatched = true;
-        // Another page of the bar closes ours; Settings opens a dialog over it.
-        b.row.addEventListener('click', function (evt) {
-            var a = evt.target.closest && evt.target.closest('a');
-            if (a && !a.classList.contains('tdp-admin-page-link') && a.getAttribute('href') !== '/admin/settings') {
-                close(bar());
-                render();
-            }
-        }, true);
-    }
-
-    function render() {
-        scheduled = false;
-        var b = bar();
-        if (!b) return;
-        if (window.__owuiThemeFunctionOff) {
-            withdraw(b);
-            return;
-        }
-        // Navigating elsewhere in the Admin Panel closes the page.
-        if (openPath && location.pathname !== openPath) {
-            openPath = null;
-            if (b.host) b.host.removeAttribute('data-tdp-admin-open');
-        }
-        ensureStyle();
-        watch(b);
-        var link = b.row.querySelector('.tdp-admin-page-link');
-        if (!link) link = makeLink(b);
-        if (link.nextElementSibling !== b.settings) b.row.insertBefore(link, b.settings);
-        var isOpen = !!openPath;
-        setDim(link, !isOpen);
-        link.setAttribute('aria-current', isOpen ? 'page' : 'false');
-        // While ours is open, the route's own link stops looking selected.
-        if (!isOpen) {
-            undim(b);
-            return;
-        }
-        [].forEach.call(b.row.querySelectorAll('a:not(.tdp-admin-page-link)'), function (a) {
-            if (!DIM.every(function (c) { return a.classList.contains(c); })) {
-                a.setAttribute('data-tdp-dimmed', '');
-                setDim(a, true);
-            }
-        });
-    }
-
-    function schedule() {
-        if (scheduled) return;
-        scheduled = true;
-        requestAnimationFrame(render);
-    }
-
-    function start() {
-        new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true });
-        window.addEventListener('owui-theme-function-state', schedule);
-        window.addEventListener('popstate', schedule);
-        schedule();
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', start, { once: true });
-    } else {
-        start();
-    }
-})();
-"""
-
     def _loader_fragment(self, active: bool) -> str:
         """Producer for the /static/loader.js fragment.
 
@@ -2347,7 +2174,6 @@ class Event:
             delivery[1] if delivery else None,  # state delivery ETag
             self.valves.show_in_admin_settings,
             self.valves.allow_personal_themes,
-            self.valves.show_in_admin_panel,
         )
         cached = Event._loader_fragment_cache
         if cached and cached[0] == cache_key:
@@ -2383,9 +2209,6 @@ class Event:
                 .replace("__TAB_ADMIN__", "true" if self.valves.show_in_admin_settings else "false")
                 .replace("__TAB_PERSONAL__", "true" if self.valves.allow_personal_themes else "false")
             )
-
-        if active and self.valves.show_in_admin_panel:
-            js += "\n" + self.ADMIN_PAGE_SCRIPT.strip().replace("__THEME_ROUTE__", cache_key[1])
 
         fragment = f"{self.LOADER_BLOCK_START}\n{js}\n{self.LOADER_BLOCK_END}"
         Event._loader_fragment_cache = (cache_key, fragment)
@@ -4031,13 +3854,11 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
     <script>
         // Opened from the Theme Designer Pro tab in Open WebUI's Settings.
         (function () {
-            // Or from the Themes page of the Admin Panel (embed=admin).
-            var embed = (location.search.slice(1).match(/(?:^|&)embed=(settings|admin)(?:&|$)/) || [])[1];
-            if (!embed) return;
+            if (!/(?:^|&)embed=settings(?:&|$)/.test(location.search.slice(1))) return;
             var root = document.documentElement;
             root.classList.add('owui-skin');
             // Overlay Transparency: a clear page lets the dialog's glass show through.
-            if (embed !== 'settings' || '{OVERLAY_TRANSPARENCY}' === 'opaque') return;
+            if ('{OVERLAY_TRANSPARENCY}' === 'opaque') return;
             root.classList.add('owui-skin-glass');
             // A frame whose color scheme differs from the page around it gets an
             // opaque backdrop, so take the dialog's, and whether it is dark.
@@ -5311,7 +5132,6 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                                     <tr><td><b>Enable Auth Page Theming</b></td><td>On</td><td>Off: hides every <b>Show on Auth Pages</b> checkbox and turns them off, so login pages keep Open WebUI&rsquo;s own look.</td></tr>
                                     <tr><td><b>Draft Mode Default</b></td><td>Off</td><td>On: the instance designer opens in Draft mode on every fresh page load (see Section 9).</td></tr>
                                     <tr><td><b>Show In Admin Settings</b></td><td>On</td><td>Adds a <b>Themes</b> tab to the Admin section of Settings (see Section 3).</td></tr>
-                                    <tr><td><b>Show In Admin Panel</b></td><td>Off</td><td>Adds a <b>Themes</b> page to the Admin Panel&rsquo;s top bar, between <b>Functions</b> and <b>Settings</b> (see Section 3).</td></tr>
                                     <tr><td><b>Allow Personal Themes</b></td><td>Off</td><td>On: every user gets a <b>Themes</b> tab in their own Settings for a personal theme (see Section 4). Off again: everyone is back on the instance theme, and personal themes are kept.</td></tr>
                                     <tr><td><b>Auto Sync</b></td><td>Off</td><td>On: skips the Selective Sync dialog and adds a <b>Sync All</b> switch to the footer.</td></tr>
                                     <tr><td><b>Sidebar Transparency</b></td><td><code>opaque</code></td><td>The chat sidebar&rsquo;s background: <code>opaque</code>, <code>translucent</code> (frosted glass) or <code>transparent</code> (turned into <code>translucent</code> on phones).</td></tr>
@@ -5328,7 +5148,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                 </details>
 
                 <details class="doc-accordion">
-                    <summary>3. The Themes Tab in Settings and the Admin Panel <i data-icon="chevron"></i></summary>
+                    <summary>3. The Themes Tab in Settings <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
                         <p>Admins can open the designer without leaving Open WebUI: Settings has a <b>Themes</b> tab in its Admin section, right after <b>Interface</b>. It shows the same designer in a frame that fills the panel, and the <b>Show In Admin Settings</b> valve turns it off. The designer stays available at <code>{ROUTE_BASE}</code> either way.</p>
                         <ul>
@@ -5337,8 +5157,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                             <li><b>Searchable:</b> The Settings search box finds the tab by words such as &ldquo;theme&rdquo;, &ldquo;designer&rdquo;, &ldquo;palette&rdquo; or &ldquo;canvas&rdquo;. While the search holds words that don&rsquo;t match, the tab is hidden like any other.</li>
                             <li><b>Frosted Glass:</b> With <b>Overlay Transparency</b> set to <code>translucent</code>, the designer&rsquo;s page turns clear, so Settings&rsquo; frosted glass shows behind it. It stays solid while you edit a mode whose light or dark look differs from Open WebUI&rsquo;s, so its text stays readable.</li>
                             <li><b>Personal Tab:</b> With <b>Allow Personal Themes</b> on, every user, admins included, also gets a <b>Themes</b> tab in the <i>Personal</i> section, after <b>Interface</b>, for their own theme (see Section 4). Users see it after their next page load.</li>
-                            <li><b>A Page in the Admin Panel:</b> With the <b>Show In Admin Panel</b> valve on, the Admin Panel&rsquo;s top bar gets a <b>Themes</b> page between <b>Functions</b> and <b>Settings</b>, with the same designer filling the page. <b>Settings</b> opens its dialog over it, and any other page of the bar, or navigating elsewhere, closes it. A reload shows the page you were on before you opened <b>Themes</b>.</li>
-                            <li><b>Turning the Function Off</b> removes the Settings tabs and the Admin Panel page from open pages.</li>
+                            <li><b>Turning the Function Off</b> removes both tabs from open Settings dialogs.</li>
                         </ul>
                     </div>
                 </details>
