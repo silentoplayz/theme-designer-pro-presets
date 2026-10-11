@@ -83,35 +83,3 @@ if (updated) {
 } else {
   console.log('ℹ️  Badges already up to date');
 }
-
-// ── Update tool/README.md ──
-
-const TOOL_README = path.join(ROOT, 'tool', 'README.md');
-if (fs.existsSync(TOOL_README)) {
-  let toolContent = fs.readFileSync(TOOL_README, 'utf8');
-  let toolUpdated = false;
-
-  const toolBadges = [
-    {
-      pattern: /(\| \*\*Canvas FX\*\* \| )\d+( interactive background animations)/,
-      replacement: `$1${counts.canvasFx}$2`,
-    },
-    {
-      pattern: /(\| \*\*CSS Presets\*\* \| )\d+( styling presets)/,
-      replacement: `$1${counts.css}$2`,
-    },
-  ];
-
-  for (const { pattern, replacement } of toolBadges) {
-    const before = toolContent;
-    toolContent = toolContent.replace(pattern, replacement);
-    if (toolContent !== before) toolUpdated = true;
-  }
-
-  if (toolUpdated) {
-    fs.writeFileSync(TOOL_README, toolContent);
-    console.log('✅ tool/README.md counts updated');
-  } else {
-    console.log('ℹ️  tool/README.md counts already up to date');
-  }
-}

@@ -1,5 +1,5 @@
 /* ========================================
-   Theme Designer Pro — Preset Gallery
+   Theme Designer Pro website
    Live preview engine: gradients, Canvas FX,
    themes, and CSS presets
    ======================================== */

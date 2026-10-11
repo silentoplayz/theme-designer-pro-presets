@@ -1,6 +1,6 @@
 # Scripts
 
-Build, validation, and manifest tooling for the Theme Designer Pro Preset Gallery.
+Build, validation, and manifest tooling for the Theme Designer Pro presets.
 
 | Script | Purpose |
 |---|---|
@@ -10,7 +10,7 @@ Build, validation, and manifest tooling for the Theme Designer Pro Preset Galler
 | `extract-curated.js` | Generate theme JSON files from the 8 built-in curated presets |
 | `extract-presets.js` | Split bulk export files into individual preset files |
 | `process-submission.js` | Process GitHub Issue theme submissions (used by CI) |
-| `update-badges.js` | Update shields.io badge counts in `README.md` and `tool/README.md` |
+| `update-badges.js` | Update shields.io badge counts in `README.md` |
 | `validate.js` | Validate all preset files against JSON schemas (via Ajv) and quality rules |
 
 ---
@@ -259,13 +259,13 @@ npm run build:badges
 # or: node scripts/update-badges.js
 ```
 
-No output if badges are already correct. Prints `✅ README badges updated` and/or `✅ tool/README.md counts updated` when changes are made.
+No output if badges are already correct. Prints `✅ README badges updated` when changes are made.
 
 ---
 
 ## `build-catalog.js`
 
-Scans all preset directories and generates a comprehensive `docs/catalog.json` used by the [GitHub Pages preset gallery](https://silentoplayz.github.io/theme-designer-pro-presets/).
+Scans all preset directories and generates a comprehensive `docs/catalog.json` used by the [Theme Designer Pro website](https://silentoplayz.github.io/theme-designer-pro-presets/): the gallery, the home page and the Studio.
 
 ### Usage
 
@@ -283,7 +283,7 @@ A single `docs/catalog.json` containing metadata for every preset in the reposit
 | `themes` | Name, description, author, version, per-mode OKLCH colors, feature flags (CSS, FX, gradient, overrides), import URL |
 | `canvasFx` | Name (from JSDoc `Title:` or filename), description, import URL |
 | `cssPresets` | Name (title-cased filename), import URL |
-| `gradients` | Name, type (linear/radial/mesh), animated flag, color stops, import URL |
+| `gradients` | Name, type (linear/radial/mesh), animated flag, color stops, and the angle, intensity, speed, radial and mesh settings the site needs to draw it exactly, import URL |
 | `bundles` | Name, description, import URL |
 
-The catalog is rebuilt automatically by CI on every push to `main`. The static site in `docs/` fetches this file at runtime to render the browsable gallery.
+The catalog is rebuilt automatically by CI on every push to `main`. The static site in `docs/` fetches this file at runtime to draw the gallery, the home page's preset strips and the Studio's pickers.

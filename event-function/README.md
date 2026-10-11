@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.10.0-blue)
+![Version](https://img.shields.io/badge/version-1.11.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -82,9 +82,7 @@ Unlike the [Tool variant](../tools/) which runs inside an AI chat iframe, this v
 
 ## 🎭 Preset Gallery
 
-A curated community collection of ready-to-import presets is available at:
-
-**🔗 [github.com/silentoplayz/theme-designer-pro-presets](https://github.com/silentoplayz/theme-designer-pro-presets)**
+Browse and live-preview every community preset in the **[preset gallery](https://silentoplayz.github.io/theme-designer-pro-presets/gallery/)**, or design a theme in your browser in the **[Studio](https://silentoplayz.github.io/theme-designer-pro-presets/studio/)** and drop the file it downloads on the designer. The presets themselves live in **[this repository](https://github.com/silentoplayz/theme-designer-pro-presets)**.
 
 ### Quick Import
 
