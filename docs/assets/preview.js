@@ -336,6 +336,41 @@
     photoPill: icon(['M21 7.6V20.4C21 20.7314 20.7314 21 20.4 21H7.6C7.26863 21 7 20.7314 7 20.4V7.6C7 7.26863 7.26863 7 7.6 7H20.4C20.7314 7 21 7.26863 21 7.6Z', 'M18 4H4.6C4.26863 4 4 4.26863 4 4.6V18', 'M7 16.8L12.4444 15L21 18', 'M16.5 13C15.6716 13 15 12.3284 15 11.5C15 10.6716 15.6716 10 16.5 10C17.3284 10 18 10.6716 18 11.5C18 12.3284 17.3284 13 16.5 13Z'], { strokeWidth: '1.75' }),
     terminalPill: icon(['M13 16H18', 'M6 8L10 12L6 16', 'M2 18V6C2 4.89543 2.89543 4 4 4H20C21.1046 4 22 4.89543 22 6V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18Z'], { strokeWidth: '2' }),
     wrenchPill: icon(['M21.75 6.75a4.5 4.5 0 0 1-4.884 4.484c-1.076-.091-2.264.071-2.95.904l-7.152 8.684a2.548 2.548 0 1 1-3.586-3.586l8.684-7.152c.833-.686.995-1.874.904-2.95a4.5 4.5 0 0 1 6.336-4.486l-3.276 3.276a3.004 3.004 0 0 0 2.25 2.25l3.276-3.276c.256.565.398 1.192.398 1.852Z', 'M4.867 19.125h.008v.008h-.008v-.008Z'], { strokeWidth: '1.75' }),
+    // Navbar: Temporary Chat on (ChatBubbleDottedChecked), the placeholder's
+    // EyeSlash, and Chat Controls' collapsible chevrons and close button
+    chatBubbleDottedChecked: icon(['M8 12L11 15L16 10', '<path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.8214 2.48697 15.5291 3.33782 17L2.5 21.5L7 20.6622C8.47087 21.513 10.1786 22 12 22Z" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2.5 3.5"></path>']),
+    eyeSlash: icon(['M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88'], { strokeWidth: '2' }),
+    chevronUpSm: icon(['m4.5 15.75 7.5-7.5 7.5 7.5'], { strokeWidth: '2' }),
+    chevronDownSm: icon(['m19.5 8.25-7.5 7.5-7.5-7.5'], { strokeWidth: '2' }),
+    chevronRightSm: icon(['m8.25 4.5 7.5 7.5-7.5 7.5'], { strokeWidth: '2' }),
+    chevronRightBold: icon(['m8.25 4.5 7.5 7.5-7.5 7.5'], { strokeWidth: '3' }),
+    close: icon(['M6 18 18 6M6 6l12 12']),
+    // Sidebar/icons for the chat menu and the user menu
+    share: icon(['M18 22C19.6569 22 21 20.6569 21 19C21 17.3431 19.6569 16 18 16C16.3431 16 15 17.3431 15 19C15 20.6569 16.3431 22 18 22Z', 'M18 8C19.6569 8 21 6.65685 21 5C21 3.34315 19.6569 2 18 2C16.3431 2 15 3.34315 15 5C15 6.65685 16.3431 8 18 8Z', 'M6 15C7.65685 15 9 13.6569 9 12C9 10.3431 7.65685 9 6 9C4.34315 9 3 10.3431 3 12C3 13.6569 4.34315 15 6 15Z', '<path d="M15.5 6.5L8.5 10.5" stroke-linecap="butt" stroke-linejoin="miter"/>', '<path d="M8.5 13.5L15.5 17.5" stroke-linecap="butt" stroke-linejoin="miter"/>']),
+    download: icon(['M6 20L18 20', 'M12 4V16M12 16L15.5 12.5M12 16L8.5 12.5']),
+    chatCheck: icon(['M8 12L11 15L16 10', 'M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.8214 2.48697 15.5291 3.33782 17L2.5 21.5L7 20.6622C8.47087 21.513 10.1786 22 12 22Z']),
+    pin: icon(['M9.5 14.5L3 21', 'M5.00007 9.48528L14.1925 18.6777L15.8895 16.9806L15.4974 13.1944L21.0065 8.5211L15.1568 2.67141L10.4834 8.18034L6.69713 7.78823L5.00007 9.48528Z']),
+    pinSlash: icon(['M9.5 14.5L3 21', 'M7.67602 7.8896L6.69713 7.78823L5.00007 9.48528L14.1925 18.6777L15.8895 16.9806L15.7879 16M11.4847 7L15.1568 2.67141L21.0065 8.5211L16.6991 12.175', 'M3 3L21 21']),
+    copy: icon(['M19.4 20H9.6C9.26863 20 9 19.7314 9 19.4V9.6C9 9.26863 9.26863 9 9.6 9H19.4C19.7314 9 20 9.26863 20 9.6V19.4C20 19.7314 19.7314 20 19.4 20Z', 'M15 9V4.6C15 4.26863 14.7314 4 14.4 4H4.6C4.26863 4 4 4.26863 4 4.6V14.4C4 14.7314 4.26863 15 4.6 15H9']),
+    folder: icon(['M2 11V4.6C2 4.26863 2.26863 4 2.6 4H8.77805C8.92127 4 9.05977 4.05124 9.16852 4.14445L12.3315 6.85555C12.4402 6.94876 12.5787 7 12.722 7H21.4C21.7314 7 22 7.26863 22 7.6V11M2 11V19.4C2 19.7314 2.26863 20 2.6 20H21.4C21.7314 20 22 19.7314 22 19.4V11M2 11H22']),
+    archiveBox: icon(['m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z'], { strokeWidth: '1.7' }),
+    trash: icon(['M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9', 'M21 6L15.375 6M3 6L8.625 6M8.625 6V4C8.625 2.89543 9.52043 2 10.625 2H13.375C14.4796 2 15.375 2.89543 15.375 4V6M8.625 6L15.375 6']),
+    cog: icon(['M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z', 'M15 12a3 3 0 11-6 0 3 3 0 016 0z']),
+    logOut: icon(['M12 12H19M19 12L16 15M19 12L16 9', 'M19 6V5C19 3.89543 18.1046 3 17 3H7C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V18']),
+    emojiFace: icon(['M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22Z', 'M16.5 14.5C16.5 14.5 15 16.5 12 16.5C9 16.5 7.5 14.5 7.5 14.5', '<path fill="currentColor" d="M15.5 9C15.2239 9 15 8.77614 15 8.5C15 8.22386 15.2239 8 15.5 8C15.7761 8 16 8.22386 16 8.5C16 8.77614 15.7761 9 15.5 9Z"/>', '<path fill="currentColor" d="M8.5 9C8.22386 9 8 8.77614 8 8.5C8 8.22386 8.22386 8 8.5 8C8.77614 8 9 8.22386 9 8.5C9 8.77614 8.77614 9 8.5 9Z"/>']),
+    user: icon(['M5 20V19C5 15.134 8.13401 12 12 12V12C15.866 12 19 15.134 19 19V20', 'M12 12C14.2091 12 16 10.2091 16 8C16 5.79086 14.2091 4 12 4C9.79086 4 8 5.79086 8 8C8 10.2091 9.79086 12 12 12Z']),
+    // Channels: Hashtag, Lock, and the message toolbar's icons
+    hashtag: icon(['M10 3L6 21', 'M20.5 16H2.5', 'M22 7H4', 'M18 3L14 21']),
+    lock: icon(['M16 12H17.4C17.7314 12 18 12.2686 18 12.6V19.4C18 19.7314 17.7314 20 17.4 20H6.6C6.26863 20 6 19.7314 6 19.4V12.6C6 12.2686 6.26863 12 6.6 12H8M16 12V8C16 6.66667 15.2 4 12 4C8.8 4 8 6.66667 8 8V12M16 12H8'], { strokeWidth: '1.7' }),
+    faceSmile: icon(['M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z']),
+    arrowUpLeftAlt: icon(['M10.25 4.75L6.75 8.25L10.25 11.75', 'M6.75 8.25L12.75 8.25C14.9591 8.25 16.75 10.0409 16.75 12.25V19.25']),
+    chatBubbleEllipsis: icon(['M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z']),
+    pencil: icon(['M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125']),
+    garbageBin: icon(['M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0']),
+    // channel/MessageInput.svelte's inline 20- and 16-unit filled glyphs
+    plusSolid: '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z"/></svg>',
+    micSolid: '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M7 4a3 3 0 016 0v6a3 3 0 11-6 0V4z"/><path d="M5.5 9.643a.75.75 0 00-1.5 0V10c0 3.06 2.29 5.585 5.25 5.954V17.5h-1.5a.75.75 0 000 1.5h4.5a.75.75 0 000-1.5h-1.5v-1.546A6.001 6.001 0 0016 10v-.357a.75.75 0 00-1.5 0V10a4.5 4.5 0 01-9 0v-.357z"/></svg>',
+    arrowUpSolid: '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M8 14a.75.75 0 0 1-.75-.75V4.56L4.03 7.78a.75.75 0 0 1-1.06-1.06l4.5-4.5a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1-1.06 1.06L8.75 4.56v8.69A.75.75 0 0 1 8 14Z" clip-rule="evenodd"/></svg>',
     // icons/XMark.svelte: a 20-unit filled glyph, unlike the stroked set
     xMark: '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/></svg>',
   };
@@ -906,6 +941,255 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
 .model-foot span { font-size: 0.65rem; color: var(--color-gray-500); cursor: pointer; text-underline-offset: 2px; }
 .model-foot span:hover { color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-300)'}; text-decoration: underline; }
 .model-menu .pb { height: 4px; flex-shrink: 0; }
+
+/* ---- Sidebar sections (Sidebar/Section.svelte) fold, with a chevron that
+   shows on hover and turns 90deg while open ---- */
+.side-section[data-section] > .side-label { cursor: pointer; transition: color 0.1s; }
+.side-section > .side-label:hover { color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; }
+.sec-chev { display: flex; margin-left: 4px; opacity: 0; transition: opacity 0.1s, transform 0.1s; }
+.sec-chev svg { width: 0.6875rem; height: 0.6875rem; }
+.side-label:hover .sec-chev { opacity: 1; }
+.side-section.open > .side-label .sec-chev { transform: rotate(90deg); }
+.side-section > .side-section-body { display: none; }
+.side-section.open > .side-section-body { display: block; }
+.side-label .sec-more svg { width: 0.875rem; height: 0.875rem; }
+.side-label .add + .add { margin-left: 2px; }
+.side-label.time-label { cursor: default; }
+.side-note { cursor: default; }
+/* ChannelItem.svelte: p-1 rounded-xl, a size-3 Hashtag (size-3.5 Lock), the
+   unread count badge and a Settings gear that shows on hover */
+.channel-item { display: flex; align-items: center; gap: 4px; margin: 0 4px; padding: 4px; border-radius: 12px; font-size: 0.8125rem; line-height: 1.25rem; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-400)'}; cursor: pointer; user-select: none; transition: background 0.15s; }
+.channel-item:hover { background: ${itemHover}; }
+.channel-item.active { background: ${isLight ? 'var(--color-gray-100)' : 'var(--color-gray-900)'}; }
+.channel-item.unread { color: ${isLight ? '#000' : '#fff'}; }
+.channel-item .ch-ico { width: 1rem; height: 1rem; margin-left: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.channel-item .ch-ico svg { width: 0.75rem; height: 0.75rem; }
+.channel-item .ch-ico.lock svg { width: 0.875rem; height: 0.875rem; }
+.channel-item .label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.unread-badge { display: inline-flex; align-items: center; justify-content: center; height: 1rem; min-width: 1rem; padding: 0 4px; border-radius: 6px; flex-shrink: 0; font-size: 0.625rem; font-weight: 600; line-height: 1rem; ${isLight ? 'background: oklch(68.5% 0.169 237.323 / 0.1); color: oklch(58.8% 0.158 241.966);' : 'background: oklch(74.6% 0.16 232.661 / 0.1); color: oklch(82.8% 0.111 230.318);'} }
+.channel-item .ch-settings { display: flex; padding: 2px; margin: 0 4px 0 2px; border-radius: 8px; opacity: 0; color: ${isLight ? 'inherit' : 'var(--color-gray-300)'}; transition: opacity 0.15s; }
+.channel-item:hover .ch-settings { opacity: 1; }
+.channel-item .ch-settings svg { width: 0.875rem; height: 0.875rem; }
+/* RecursiveFolder.svelte: py-1 px-1.5 rounded-xl, the Folder icon turning
+   into a chevron on hover, children behind the same left rule as Pinned */
+.folder-row { display: flex; align-items: center; gap: 6px; margin: 0 4px; padding: 4px 6px; border-radius: 12px; font-size: 0.8125rem; line-height: 1.25rem; color: ${textSoft}; cursor: pointer; transition: background 0.15s; }
+.folder-row:hover { background: ${itemHover}; }
+.folder-row svg { width: 0.875rem; height: 0.875rem; flex-shrink: 0; }
+.folder-row .folder-chev { display: none; }
+.folder-row .folder-chev svg { width: 0.75rem; height: 0.75rem; transition: transform 0.15s; }
+.folder-row:hover .folder-ico { display: none; }
+.folder-row:hover .folder-chev { display: flex; width: 0.875rem; justify-content: center; }
+.side-folder.open .folder-chev svg { transform: rotate(90deg); }
+.folder-children, .pinned-list { margin-left: 16px; padding-left: 4px; margin-top: 1px; border-left: 1px solid ${isLight ? 'var(--color-gray-100)' : 'var(--color-gray-900)'}; display: none; flex-direction: column; }
+.side-folder.open .folder-children, .side-pinned-wrap.open .pinned-list { display: flex; }
+.folder-children .side-item, .pinned-list .side-item { margin: 0; }
+/* common/Folder.svelte header: py-1.5 pl-2 gap-1.5 text-xs text-gray-500,
+   a size-3 ChevronDown/ChevronRight swapped, not rotated */
+.side-pinned { gap: 6px; padding: 6px 8px; font-size: 0.75rem; color: var(--color-gray-500); cursor: pointer; }
+.side-pinned .pin-chev { display: flex; padding: 1px; }
+.side-pinned .pin-chev svg { width: 0.75rem; height: 0.75rem; }
+.side-pinned-wrap { margin-bottom: 4px; }
+/* ChatItem.svelte: a size-1.5 sky dot for unread chats */
+.unread-dot { width: 6px; height: 6px; border-radius: 9999px; background: oklch(68.5% 0.169 237.323); flex-shrink: 0; margin-right: 2px; }
+.side-item.unread .label { color: ${isLight ? 'var(--color-gray-800)' : 'var(--color-gray-200)'}; }
+.side-item.menu-open { background: ${activeItem}; }
+.side-item.menu-open .chat-actions { visibility: visible; }
+.side-item.menu-open .age { display: none; }
+.ap-add { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin: 4px 0 20px; cursor: pointer; }
+.ap-add svg { width: 0.75rem; height: 0.75rem; }
+.ap-switch { justify-content: space-between; margin-top: 4px; }
+.side-item .rename { flex: 1; min-width: 0; margin-right: 40px; border: 0; outline: none; background: transparent; color: inherit; font: inherit; }
+/* Avatars carry the green status dot (enable_user_status) */
+.avatar-wrap { position: relative; display: flex; flex-shrink: 0; }
+.status-dot { position: absolute; right: -2px; bottom: -2px; width: 10px; height: 10px; border-radius: 9999px; background: oklch(72.3% 0.219 149.579); border: 2px solid ${isLight ? '#fff' : 'var(--color-gray-900)'}; }
+.side-user .avatar { width: 1.375rem; height: 1.375rem; }
+.side-user { gap: 12px; }
+
+/* ---- More dropdowns (common/DropdownMenu.svelte): ChatMenu, UserMenu, the
+   Chats header's More, submenus and the reaction picker ---- */
+.tdp-menu.chat-menu { min-width: 12.5rem; }
+.tdp-menu.user-menu { font-size: 0.75rem; }
+.tdp-menu.chats-more { min-width: 10.625rem; }
+.tdp-menu.submenu { min-width: 10rem; max-width: 200px; z-index: 10000; }
+.tdp-menu .mi { display: flex; align-items: center; gap: 8px; width: 100%; height: 1.6875rem; padding: 0 8px; border: 0; border-radius: 12px; background: transparent; color: inherit; font: inherit; font-size: 0.8125rem; text-align: left; cursor: pointer; user-select: none; flex-shrink: 0; transition: background 0.15s; }
+.tdp-menu .mi svg { width: 0.875rem; height: 0.875rem; flex-shrink: 0; }
+.tdp-menu .mi .label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-menu .mi:hover, .submenu .mi:hover, .chats-more .mi:hover { background: ${isLight ? 'var(--color-gray-100)' : 'var(--color-gray-900)'}; }
+.user-menu .mi:hover, .user-menu .mi.hl { background: color-mix(in srgb, var(--color-gray-${isLight ? '50' : '800'}) 60%, transparent); }
+.chat-menu .mi.sub.hl { background: ${isLight ? 'var(--color-gray-100)' : 'var(--color-gray-900)'}; }
+.tdp-menu hr { border: 0; border-top: 1px solid color-mix(in srgb, var(--color-gray-${isLight ? '50' : '800'}) 30%, transparent); margin: 2px 4px; }
+.user-menu .mi.who, .user-menu .mi.status { font-size: 0.75rem; }
+.user-menu .who img, .user-menu .who .avatar { width: 1.125rem; height: 1.125rem; }
+.user-menu .who .ico, .user-menu .status .ico { width: 1.125rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.user-menu .active-users { margin-left: auto; display: flex; align-items: center; gap: 4px; padding: 2px 6px; font-size: 0.6875rem; line-height: 1; color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; }
+.user-menu .active-users i { width: 6px; height: 6px; border-radius: 9999px; background: oklch(72.3% 0.219 149.579); }
+.user-menu .status .clear { display: flex; align-items: center; justify-content: center; width: 1.25rem; height: 1.25rem; opacity: 0.5; }
+.user-menu .status .clear:hover { opacity: 1; }
+.tdp-menu.emoji-menu { flex-direction: row; gap: 2px; padding: 4px; }
+.emoji-menu .em { width: 1.75rem; height: 1.75rem; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 1.05rem; cursor: pointer; }
+.emoji-menu .em:hover { background: ${navHover}; }
+
+/* ---- Temporary Chat: the checked icon, the placeholder's label, and a
+   dashed message bar (MessageInput.svelte) ---- */
+nav .temp-chat .on, nav .temp-chat.active .off { display: none; }
+nav .temp-chat.active .on { display: flex; }
+nav .temp-chat > span { display: flex; }
+.ph-temp { display: none; align-items: center; gap: 6px; margin-top: 4px; margin-bottom: 2px; width: fit-content; font-size: 0.75rem; color: var(--color-gray-500); }
+.ph-temp svg { width: 0.875rem; height: 0.875rem; }
+body.temp-chat .ph-temp { display: flex; }
+body.temp-chat #chat-input-container { border-style: dashed; border-color: ${isLight ? 'var(--color-gray-100)' : 'var(--color-gray-800)'}; }
+body.temp-chat #chat-input-container:hover { border-color: ${isLight ? 'var(--color-gray-200)' : 'var(--color-gray-700)'}; }
+
+/* ---- Side panes: ChatControls and Thread sit after a resizer's border ---- */
+.side-pane { flex: none; height: 100%; display: flex; flex-direction: column; min-height: 0; background: ${isLight ? '#fff' : 'var(--color-gray-900)'}; border-left: 1px solid ${isLight ? 'var(--color-gray-50)' : 'color-mix(in srgb, var(--color-gray-850) 30%, transparent)'}; position: relative; z-index: 10; }
+.side-pane[hidden] { display: none; }
+.controls-pane { width: 350px; }
+.thread-pane { width: 420px; }
+@media (max-width: 1023px) {
+  .side-pane { position: absolute; top: 0; right: 0; bottom: 0; z-index: 40; box-shadow: -10px 0 30px rgb(0 0 0 / 0.15); }
+}
+.cc-tabs { display: flex; align-items: center; justify-content: space-between; padding: 8px; flex-shrink: 0; }
+.cc-tab { padding: 4px 10px; font-size: 0.875rem; border-radius: 8px; white-space: nowrap; background: color-mix(in srgb, var(--color-gray-${isLight ? '100' : '800'}) ${isLight ? '40' : '25'}%, transparent); color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-200)'}; }
+.pane-close { display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 8px; color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; cursor: pointer; }
+.pane-close svg { width: 1rem; height: 1rem; }
+.cc-body { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 12px 16px; scrollbar-width: thin; font-size: 0.875rem; color: ${isLight ? 'inherit' : 'var(--color-gray-200)'}; }
+/* Collapsible.svelte headers: py-1 text-xs text-gray-500, a size-2.5 chevron
+   (up while open) at the right */
+.cc-sec + .cc-sec { margin-top: 4px; }
+.cc-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; padding: 4px 0; border: 0; background: none; font: inherit; font-size: 0.75rem; color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; cursor: pointer; user-select: none; transition: color 0.15s; }
+.cc-head:hover { color: ${isLight ? 'var(--color-gray-900)' : 'var(--color-gray-100)'}; }
+.cc-head svg { width: 0.625rem; height: 0.625rem; transform: translateY(1px); }
+.cc-head .up, .cc-sec.open .cc-head .down { display: none; }
+.cc-sec.open .cc-head .up { display: flex; }
+.cc-head .down { display: flex; }
+.cc-content { display: none; padding: 4px 0; font-size: 0.75rem; }
+.cc-sec.open .cc-content { display: block; }
+.cc-content textarea { width: 100%; resize: vertical; border: 0; outline: none; background: transparent; color: inherit; font: inherit; font-size: 0.75rem; padding: 4px 0; }
+.cc-content textarea::placeholder, .cc-content input::placeholder { color: ${isLight ? 'var(--color-gray-400)' : 'var(--color-gray-500)'}; }
+.cc-content select { flex: 1; min-width: 0; padding: 4px; border: 0; border-radius: 4px; outline: none; background: transparent; color: inherit; font: inherit; font-size: 0.75rem; }
+.cc-valves { display: flex; gap: 8px; }
+/* AdvancedParams.svelte: a label and a "Default" button per row, then a
+   slider and number box once set */
+.ap { color: ${isLight ? 'var(--color-gray-900)' : 'var(--color-gray-100)'}; }
+.ap-row { padding: 2px 0; }
+.ap-line { display: flex; justify-content: space-between; align-items: center; }
+.ap-label { font-size: 0.75rem; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-400)'}; }
+.ap-btn { padding: 4px 12px; font-size: 0.75rem; border-radius: 4px; flex-shrink: 0; cursor: pointer; }
+.ap-custom { display: flex; gap: 8px; margin-top: 2px; align-items: center; }
+.ap-custom input[type=range] { flex: 1; height: 8px; border-radius: 8px; appearance: none; -webkit-appearance: none; background: ${isLight ? 'var(--color-gray-200)' : 'var(--color-gray-700)'}; cursor: pointer; }
+.ap-custom input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 9999px; background: ${isLight ? 'var(--color-gray-900)' : '#fff'}; }
+.ap-custom input[type=number], .ap-custom input[type=text] { background: transparent; border: 0; outline: none; color: inherit; font: inherit; font-size: 0.75rem; }
+.ap-custom input[type=number] { width: 3.5rem; text-align: center; }
+.ap-custom input[type=text] { width: 100%; font-size: 0.875rem; }
+
+/* ---- Channel (channel/Channel.svelte, Navbar, Messages, Message) ---- */
+main.channel-mode > nav, main.channel-mode > #messages-container, main.channel-mode > .input-wrap { display: none; }
+.channel-view { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.channel-view[hidden] { display: none; }
+.ch-nav { display: flex; align-items: center; padding: 4px 12px; flex-shrink: 0; position: relative; z-index: 2; }
+.ch-title { display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1; margin-left: 4px; font-size: 0.875rem; font-weight: 500; line-height: 1.25rem; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-300)'}; }
+.ch-title svg { width: 1rem; height: 1rem; flex-shrink: 0; }
+.ch-nav-btns { display: flex; align-items: center; gap: 4px; color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; }
+.ch-nav-btn { display: flex; align-items: center; gap: 4px; height: 1.75rem; min-width: 1.75rem; justify-content: center; padding: 0 6px; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
+.ch-nav-btn:hover { background: color-mix(in srgb, var(--color-gray-${isLight ? '50' : '800'}) 60%, transparent); }
+.ch-nav-btn svg { width: 1rem; height: 1rem; }
+.ch-nav-btn .n { font-size: 0.75rem; font-variant-numeric: tabular-nums; }
+.ch-scroll { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 10px; scrollbar-width: none; }
+.ch-intro { padding: 32px 16px 16px; display: flex; flex-direction: column; gap: 6px; }
+.ch-intro .t { font-size: 1.125rem; font-weight: 500; line-height: 1.5rem; color: ${textMain}; }
+.ch-intro .d { font-size: 0.75rem; line-height: 1.25rem; color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; }
+.ch-intro-rule { margin: 0 16px 8px; border: 0; border-top: 1px solid color-mix(in srgb, var(--color-gray-${isLight ? '100' : '800'}) ${isLight ? '60' : '40'}%, transparent); }
+.cm { position: relative; padding: 0 16px; transition: background 0.1s; }
+.cm.head { padding-top: 10px; padding-bottom: 2px; }
+.cm:hover { background: color-mix(in srgb, var(--color-gray-${isLight ? '300' : '700'}) 5%, transparent); }
+.cm.pinned { background: ${isLight ? 'oklch(97.3% 0.071 103.193 / 0.2)' : 'oklch(97.3% 0.071 103.193 / 0.05)'}; }
+.cm.replying { border-left: 4px solid oklch(62.3% 0.214 259.815); padding-left: 12px; background: ${isLight ? 'oklch(93.2% 0.032 255.585 / 0.1)' : 'oklch(93.2% 0.032 255.585 / 0.05)'}; }
+.cm-pin-label { display: flex; align-items: center; gap: 4px; margin-left: 36px; margin-bottom: 2px; font-size: 0.6875rem; line-height: 1rem; }
+.cm-pin-label svg { width: 0.75rem; height: 0.75rem; color: ${isLight ? 'oklch(79.5% 0.184 86.047)' : 'oklch(90.5% 0.182 98.111)'}; }
+.cm-pin-label span { color: var(--color-gray-500); }
+.cm-row { display: flex; width: 100%; }
+.cm-av { width: 1.5rem; flex-shrink: 0; }
+.cm-av .av { width: 1.5rem; height: 1.5rem; margin-top: 2px; border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-size: 0.6875rem; font-weight: 600; color: #fff; overflow: hidden; }
+.cm-av .av img { width: 100%; height: 100%; object-fit: cover; }
+.cm-av .t2 { margin: 4px -4px 0; transform: translateY(1px); text-align: center; font-size: 0.6875rem; line-height: 1rem; font-variant-numeric: tabular-nums; color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; opacity: 0; transition: opacity 0.1s; }
+.cm:hover .cm-av .t2 { opacity: 1; }
+.cm-body { flex: 1; min-width: 0; padding-left: 12px; }
+.cm-meta { display: flex; align-items: baseline; gap: 6px; line-height: 1.25rem; }
+.cm-name { font-size: 0.8125rem; font-weight: 500; color: ${isLight ? 'var(--color-gray-900)' : 'var(--color-gray-100)'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cm-time { font-size: 0.6875rem; line-height: 1rem; color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; transform: translateY(1px); flex-shrink: 0; }
+.cm-text { font-size: 0.875rem; line-height: 1.375rem; color: ${proseText}; overflow-wrap: anywhere; }
+.cm-text b { color: ${isLight ? 'var(--color-gray-900)' : '#fff'}; font-weight: 600; }
+.cm-text code { font-size: 0.8125rem; padding: 1px 4px; border-radius: 6px; background: ${codeBg}; }
+.cm-text .mention { color: ${isLight ? 'oklch(58.8% 0.158 241.966)' : 'oklch(82.8% 0.111 230.318)'}; }
+.cm-text .edited { font-size: 0.625rem; color: var(--color-gray-500); padding-left: 4px; }
+.cm-edit textarea { width: 100%; resize: none; border: 0; outline: none; background: transparent; color: inherit; font: inherit; font-size: 0.875rem; line-height: 1.375rem; }
+.cm-edit .btns { display: flex; justify-content: flex-end; gap: 6px; margin: 8px 0 4px; font-size: 0.875rem; }
+.cm-edit .btns span { padding: 6px 14px; border-radius: 24px; cursor: pointer; }
+.cm-edit .cancel { background: ${isLight ? '#fff' : 'var(--color-gray-900)'}; color: ${isLight ? 'var(--color-gray-800)' : 'var(--color-gray-100)'}; }
+.cm-edit .save { background: ${isLight ? 'var(--color-gray-900)' : '#fff'}; color: ${isLight ? 'var(--color-gray-100)' : 'var(--color-gray-800)'}; }
+/* Reply-to quote above a reply */
+.cm-quote { position: relative; font-size: 0.75rem; margin-bottom: 4px; }
+.cm-quote::before { content: ''; position: absolute; left: 12px; top: 8px; width: 24px; height: 12px; border-top: 1.5px solid; border-left: 1.5px solid; border-top-left-radius: 8px; border-color: ${isLight ? 'var(--color-gray-200)' : 'var(--color-gray-700)'}; }
+.cm-quote .q { margin-left: 36px; display: flex; align-items: center; gap: 6px; min-width: 0; }
+.cm-quote .q .av { width: 1rem; height: 1rem; margin-left: 2px; border-radius: 9999px; font-size: 0.5rem; display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; }
+.cm-quote .q .who { flex-shrink: 0; color: ${textMain}; }
+.cm-quote .q .what { color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The hover toolbar: rounded-lg bg-white dark:bg-gray-850 shadow-md p-0.5 */
+.cm-tools { position: absolute; right: 4px; top: -12px; z-index: 30; display: flex; gap: 4px; padding: 2px; border-radius: 8px; background: ${isLight ? '#fff' : 'var(--color-gray-850)'}; border: 1px solid color-mix(in srgb, var(--color-gray-${isLight ? '100' : '850'}) 30%, transparent); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); opacity: 0; pointer-events: none; transition: opacity 0.1s; color: ${textMain}; }
+.cm:hover .cm-tools, .cm.tools-open .cm-tools { opacity: 1; pointer-events: auto; }
+.cm-tools span { display: flex; padding: 4px; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
+.cm-tools span:hover { background: ${isLight ? 'var(--color-gray-100)' : 'var(--color-gray-800)'}; }
+.cm-tools svg { width: 1rem; height: 1rem; }
+/* Reactions: min-h-6 rounded-lg px-1.5, blue when you reacted */
+.cm-reacts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 4px 0; }
+.cm-react { display: flex; align-items: center; gap: 6px; min-height: 1.5rem; padding: 2px 6px; border-radius: 8px; font-size: 0.875rem; line-height: 1rem; cursor: pointer; background: color-mix(in srgb, var(--color-gray-${isLight ? '300' : '500'}) 10%, transparent); outline: 1px solid transparent; transition: outline-color 0.15s; }
+.cm-react:hover { outline-color: ${isLight ? 'color-mix(in srgb, var(--color-gray-700) 30%, transparent)' : 'color-mix(in srgb, var(--color-gray-300) 30%, transparent)'}; }
+.cm-react.mine { background: oklch(80.9% 0.105 251.813 / 0.1); outline-color: oklch(62.3% 0.214 259.815 / 0.5); }
+.cm-react .n { font-size: 0.6875rem; color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; }
+.cm-react-add { display: flex; padding: 4px; border-radius: 8px; cursor: pointer; background: color-mix(in srgb, var(--color-gray-500) 10%, transparent); color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; outline: 1px solid transparent; }
+.cm-react-add:hover { outline-color: ${isLight ? 'color-mix(in srgb, var(--color-gray-700) 30%, transparent)' : 'color-mix(in srgb, var(--color-gray-300) 30%, transparent)'}; }
+.cm-react-add svg { width: 1rem; height: 1rem; }
+/* "N Replies - Last reply ..." opens the thread */
+.cm-replies { display: flex; margin: -2px 0 6px; }
+.cm-replies span.btn { display: flex; align-items: center; min-width: 0; padding: 4px 0; font-size: 0.6875rem; color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; cursor: pointer; transition: color 0.15s; }
+.cm-replies span.btn:hover { color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-300)'}; }
+.cm-replies b { font-weight: 500; margin-right: 4px; }
+.cm-replies svg { width: 0.625rem; height: 0.625rem; margin-left: 4px; }
+/* channel/MessageInput.svelte: one compact rounded-2xl card */
+.ch-input-wrap { padding: 0 12px 12px; flex-shrink: 0; position: relative; }
+.ch-typing { position: absolute; left: 12px; right: 12px; top: -26px; padding: 0 4px; font-size: 0.75rem; color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; display: none; align-items: center; gap: 6px; }
+.ch-typing.show { display: flex; }
+.ch-typing b { font-weight: 400; color: ${isLight ? '#000' : '#fff'}; }
+.ch-typing .dots { display: inline-flex; gap: 2px; }
+.ch-typing .dots i { width: 4px; height: 4px; border-radius: 9999px; background: currentColor; animation: tdp-typing 1.2s infinite ease-in-out; }
+.ch-typing .dots i:nth-child(2) { animation-delay: 0.15s; }
+.ch-typing .dots i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes tdp-typing { 0%, 60%, 100% { opacity: 0.25; } 30% { opacity: 1; } }
+.ch-input { display: flex; flex-direction: column; border-radius: 16px; border: 1px solid color-mix(in srgb, var(--color-gray-${isLight ? '100' : '800'}) ${isLight ? '60' : '50'}%, transparent); background: ${isLight ? '#fff' : 'color-mix(in srgb, var(--color-gray-400) 5%, transparent)'}; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); color: ${isLight ? 'inherit' : 'var(--color-gray-100)'}; transition: border-color 0.15s; }
+.ch-input:hover, .ch-input:focus-within { border-color: ${isLight ? 'var(--color-gray-100)' : 'var(--color-gray-800)'}; }
+.ch-reply-bar { display: none; align-items: center; justify-content: space-between; padding: 8px 12px 0; font-size: 0.75rem; color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; }
+.ch-input.replying .ch-reply-bar { display: flex; }
+.ch-reply-bar .x { display: flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; border-radius: 6px; cursor: pointer; }
+.ch-reply-bar .x:hover { background: ${isLight ? 'var(--color-gray-50)' : 'var(--color-gray-800)'}; }
+.ch-reply-bar .x svg { width: 0.875rem; height: 0.875rem; }
+.ch-edit { margin: 0 8px; padding: 8px 4px 2px; min-height: 1.375rem; max-height: 8rem; overflow: auto; outline: none; font-size: 0.875rem; line-height: 1.375rem; position: relative; }
+.ch-edit:empty::before { content: attr(data-placeholder); position: absolute; color: #676767; pointer-events: none; }
+.ch-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 2px 6px 6px; }
+.ch-plus, .ch-mic { width: 1.75rem; height: 1.75rem; display: flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; flex-shrink: 0; transition: background 0.15s, color 0.15s; }
+.ch-plus { color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; }
+.ch-plus:hover { background: ${isLight ? 'var(--color-gray-100)' : 'var(--color-gray-800)'}; }
+.ch-mic { color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-300)'}; }
+.ch-plus svg, .ch-mic svg, .ch-send svg { width: 1rem; height: 1rem; }
+.ch-right { display: flex; align-items: center; gap: 4px; }
+.ch-send { width: 1.75rem; height: 1.75rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; background: ${isLight ? 'var(--color-gray-200)' : 'var(--color-gray-700)'}; color: ${isLight ? '#fff' : 'var(--color-gray-900)'}; transition: background 0.15s; }
+.ch-input.has-text .ch-send { background: ${isLight ? '#000' : '#fff'}; color: ${isLight ? '#fff' : '#000'}; cursor: pointer; }
+.ch-input.has-text .ch-mic { display: none; }
+/* Thread (channel/Thread.svelte) */
+.th-head { display: flex; align-items: center; justify-content: space-between; min-height: 2.5rem; padding: 6px 16px; border-bottom: 1px solid color-mix(in srgb, var(--color-gray-${isLight ? '100' : '800'}) ${isLight ? '60' : '40'}%, transparent); flex-shrink: 0; }
+.th-head .t { font-size: 0.875rem; font-weight: 500; color: ${textMain}; }
+.th-head .pane-close { width: 1.75rem; height: 1.75rem; }
+.th-head .pane-close:hover { background: color-mix(in srgb, var(--color-gray-${isLight ? '50' : '800'}) 60%, transparent); }
+.thread-pane .ch-scroll { padding-top: 12px; }
 .footer-note { text-align: center; font-size: 0.65625rem; color: ${textFaint}; padding: 4px 0 6px; }
 
 /* Tooltip.svelte -> tippy theme 'dark' (app.css:379): rounded-lg bg-gray-950
@@ -967,7 +1251,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
       <span class="rail-btn rail-action" data-tip="Workspace" data-tip-placement="right"><span>${SVG.workspace}</span></span>
       <span class="rail-btn rail-action" data-tip="Playground" data-tip-placement="right"><span>${SVG.code}</span></span>
     </div>
-    <span class="rail-btn lg rail-action"><span><span class="rail-avatar"></span></span></span>
+    <span class="rail-btn lg rail-action" id="rail-user" role="button" aria-label="User menu"><span><span class="avatar-wrap"><span class="rail-avatar"></span><span class="status-dot"></span></span></span></span>
   </div>
   <div id="backdrop"></div>
   <div class="sidebar-panel" id="sidebar">
@@ -978,26 +1262,59 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
     <div class="side-item">${SVG.workspace} <span class="label">Workspace</span></div>
     <div class="side-item">${SVG.code} <span class="label">Playground</span></div>
     <div class="side-scroll">
-      <div class="side-label">Models</div>
-      <div class="side-item"><span class="avatar sm"></span> <span class="label">Preview Model</span></div>
-      <div class="side-label">Notes <span class="add" data-tip="New Note">${SVG.plus}</span></div>
-      <div class="side-label">Channels <span class="add" data-tip="Create Channel">${SVG.plus}</span></div>
-      <div class="side-label">Folders <span class="add" data-tip="New Folder">${SVG.plus}</span></div>
-      <div class="side-label">Chats</div>
-      <div class="side-pinned">${SVG.chevron} <span class="label">Pinned</span></div>
-      <div class="side-label">Today</div>
-      <div class="side-item active" data-chat="default"><span class="label">Theme preview chat</span>${CHAT_MENU}</div>
-      <div class="side-label">Previous 7 days</div>
-      <div class="side-item" data-chat="oklch"><span class="label">OKLCH color ramps</span><span class="age">1d</span>${CHAT_MENU}</div>
-      <div class="side-item" data-chat="fx"><span class="label">Canvas FX ideas</span><span class="age">2d</span>${CHAT_MENU}</div>
-      <div class="side-item" data-chat="gradient"><span class="label">Gradient inspiration</span><span class="age">3d</span>${CHAT_MENU}</div>
-      <div class="side-item" data-chat="transparency"><span class="label">Structural transparency</span><span class="age">4d</span>${CHAT_MENU}</div>
-      <div class="side-item" data-chat="notes"><span class="label">Preset gallery notes</span><span class="age">6d</span>${CHAT_MENU}</div>
+      <!-- Sidebar/Section.svelte: each header folds its section, with a
+           chevron that shows on hover; Channels and Folders start closed
+           upstream, Channels opens here to show one off -->
+      <div class="side-section open" data-section="models">
+        <div class="side-label" data-section-toggle role="button" aria-expanded="true">Models <span class="sec-chev">${SVG.chevron}</span></div>
+        <div class="side-section-body"><div class="side-item" data-chat="new"><span class="avatar sm"></span> <span class="label">Preview Model</span></div></div>
+      </div>
+      <div class="side-section" data-section="notes">
+        <div class="side-label" data-section-toggle role="button" aria-expanded="false">Notes <span class="sec-chev">${SVG.chevron}</span><span class="add" data-tip="New Note">${SVG.plus}</span></div>
+        <div class="side-section-body"><div class="side-item side-note">${SVG.notes} <span class="label">Theme ideas</span></div></div>
+      </div>
+      <div class="side-section open" data-section="channels">
+        <div class="side-label" data-section-toggle role="button" aria-expanded="true">Channels <span class="sec-chev">${SVG.chevron}</span><span class="add" data-tip="Create Channel">${SVG.plus}</span></div>
+        <div class="side-section-body">
+          <div class="channel-item unread" data-chat="channel:general"><span class="ch-ico">${SVG.hashtag}</span><span class="label">general</span><span class="unread-badge" title="Unread">3</span><span class="ch-settings" data-tip="Edit">${SVG.cog}</span></div>
+          <div class="channel-item" data-chat="channel:design"><span class="ch-ico">${SVG.hashtag}</span><span class="label">design</span><span class="ch-settings" data-tip="Edit">${SVG.cog}</span></div>
+          <div class="channel-item" data-chat="channel:theme-lab"><span class="ch-ico lock">${SVG.lock}</span><span class="label">theme-lab</span><span class="ch-settings" data-tip="Edit">${SVG.cog}</span></div>
+        </div>
+      </div>
+      <div class="side-section" data-section="folders">
+        <div class="side-label" data-section-toggle role="button" aria-expanded="false">Folders <span class="sec-chev">${SVG.chevron}</span><span class="add" data-tip="New Folder">${SVG.plus}</span></div>
+        <div class="side-section-body">
+          <div class="side-folder" data-folder="Theme work"><div class="folder-row" role="button" aria-expanded="false"><span class="folder-ico">${SVG.folder}</span><span class="folder-chev">${SVG.chevron}</span><span class="label">Theme work</span></div>
+            <div class="folder-children"><div class="side-item" data-chat="launch"><span class="label">Launch checklist</span><span class="age">5d</span>${CHAT_MENU}</div></div></div>
+        </div>
+      </div>
+      <div class="side-section open" data-section="chats">
+        <div class="side-label" data-section-toggle role="button" aria-expanded="true">Chats <span class="sec-chev">${SVG.chevron}</span><span class="add sec-more" data-tip="More" aria-label="More">${SVG.moreHorizontal}</span></div>
+        <div class="side-section-body">
+          <!-- common/Folder.svelte: Pinned is open by default, its chats
+               indented behind a left rule -->
+          <div class="side-pinned-wrap open">
+            <div class="side-pinned" role="button" aria-expanded="true"><span class="pin-chev">${SVG.chevronDownSm}</span><span class="label">Pinned</span></div>
+            <div class="pinned-list">
+              <div class="side-item" data-chat="brand"><span class="label">Brand palette v2</span><span class="age">2w</span>${CHAT_MENU}</div>
+              <div class="side-item" data-chat="digest"><span class="label">Weekly theme digest</span><span class="age">3w</span>${CHAT_MENU}</div>
+            </div>
+          </div>
+          <div class="side-label time-label">Today</div>
+          <div class="side-item active" data-chat="default"><span class="label">Theme preview chat</span>${CHAT_MENU}</div>
+          <div class="side-label time-label">Previous 7 days</div>
+          <div class="side-item" data-chat="oklch"><span class="label">OKLCH color ramps</span><span class="age">1d</span>${CHAT_MENU}</div>
+          <div class="side-item" data-chat="fx"><span class="label">Canvas FX ideas</span><span class="age">2d</span>${CHAT_MENU}</div>
+          <div class="side-item" data-chat="gradient"><span class="label">Gradient inspiration</span><span class="age">3d</span>${CHAT_MENU}</div>
+          <div class="side-item" data-chat="transparency"><span class="label">Structural transparency</span><span class="age">4d</span>${CHAT_MENU}</div>
+          <div class="side-item" data-chat="notes"><span class="label">Preset gallery notes</span><span class="age">6d</span>${CHAT_MENU}</div>
+        </div>
+      </div>
     </div>
-    <div class="side-user"><div class="avatar"></div> You</div>
+    <div class="side-user" id="side-user" role="button" aria-label="User menu"><span class="avatar-wrap"><span class="avatar"></span><span class="status-dot"></span></span> You</div>
   </div>
   <main>
-    <nav><span class="nav-btn nav-toggle" data-tip="Open Sidebar">${SVG.panel}</span><span id="nav-title">Theme preview chat</span><span class="nav-btn nav-chat-menu">${SVG.dots}</span><span class="right" id="nav-right"><span class="nav-btn nav-newchat" data-tip="New Chat">${SVG.chatPlus}</span><span class="nav-btn temp-chat" data-tip="Temporary Chat">${SVG.chatBubbleDotted}</span><span class="nav-btn controls" data-tip="Controls">${SVG.knobs}</span></span></nav>
+    <nav><span class="nav-btn nav-toggle" data-tip="Open Sidebar">${SVG.panel}</span><span id="nav-title">Theme preview chat</span><span class="nav-btn nav-chat-menu">${SVG.dots}</span><span class="right" id="nav-right"><span class="nav-btn nav-newchat" data-tip="New Chat">${SVG.chatPlus}</span><span class="nav-btn temp-chat" id="temporary-chat-button" role="button" aria-label="Temporary Chat" aria-pressed="false" data-tip="Temporary Chat"><span class="off">${SVG.chatBubbleDotted}</span><span class="on">${SVG.chatBubbleDottedChecked}</span></span><span class="nav-btn controls" id="chat-controls-button" role="button" aria-label="Controls" data-tip="Controls">${SVG.knobs}</span></span></nav>
     <div id="messages-container">
       ${userRow('Show me what this preset looks like on a real conversation.', false)}
       ${aiRow('Response Speed: 104.3 t/s | Total Duration: 2.418s | Prompt Evals: 147 | Eval Count: 236 | Session: 1854 tokens',
@@ -1034,7 +1351,13 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
       </div>
       <div class="footer-note">Preview Model can make mistakes. Verify important information.</div>
     </div>
+    <!-- channel/Channel.svelte: its own navbar, list and input (built by script) -->
+    <div class="channel-view" id="channel-view" hidden></div>
   </main>
+  <!-- ChatControls.svelte on desktop: a 350px pane after a resizer border -->
+  <aside class="side-pane controls-pane" id="controls-pane" hidden aria-label="Controls"></aside>
+  <!-- channel/Thread.svelte: a 420px pane beside the channel -->
+  <aside class="side-pane thread-pane" id="thread-pane" hidden aria-label="Thread"></aside>
 </div>
 ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.stringify(opts.canvasScript).replace(/</g, '\\u003c')}</script>
 <script>
@@ -1158,6 +1481,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   var navTitle = document.getElementById('nav-title');
   if (!msgs || !navTitle) return;
   var BOLT_SVG = ${JSON.stringify(SVG.bolt)};
+  var EYE_SVG = ${JSON.stringify(SVG.eyeSlash)};
 
   var MSG_ACTIONS_TPL = ${JSON.stringify(MSG_ACTIONS_TPL)};
   function msgActions(stats, pagerHtml) {
@@ -1308,10 +1632,39 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
            'Can I preview a preset before importing it?',
            'What makes a good Canvas FX submission?'])
     },
+    brand: {
+      title: 'Brand palette v2',
+      html: user('Can you turn our brand teal into a full gray ramp?') +
+        ai('Response Speed: 97.4 t/s | Total Duration: 1.9s | Eval Count: 171 | Session: 1402 tokens',
+          '<p>Sure. Keep the hue and drop the chroma low, and the twelve steps stay readable in every mode:</p>' +
+          '<ul><li><b>Hue</b>: 192, your teal</li><li><b>Chroma</b>: 0.022 for surfaces, the accent keeps its full color</li><li><b>Lightness</b>: 18% for Dark, 0% for OLED</li></ul>',
+          ['Show it on Light mode', 'Pick an accent that pairs with it'])
+    },
+    digest: {
+      title: 'Weekly theme digest',
+      html: user('Summarize what changed in the gallery this week.') +
+        ai('Response Speed: 102.6 t/s | Total Duration: 2.1s | Eval Count: 204 | Session: 1688 tokens',
+          '<p>A busy week:</p>' +
+          '<ul><li><b>Koi Pond</b> and <b>Midsummer</b> joined the themes</li>' +
+          '<li>Twelve Canvas FX now <b>follow your theme</b></li>' +
+          '<li>The Studio can tune an animation\\'s own settings</li></ul>',
+          null)
+    },
+    launch: {
+      title: 'Launch checklist',
+      html: user('What should I check before I submit a theme?') +
+        ai('Response Speed: 95.8 t/s | Total Duration: 1.7s | Eval Count: 158 | Session: 1290 tokens',
+          '<ol><li>Each mode reads well: Dark, OLED, Light and Her</li>' +
+          '<li>Text keeps its contrast over the background</li>' +
+          '<li>The Canvas FX runs smoothly on a laptop</li>' +
+          '<li>The preview link from the submission bot looks right</li></ol>',
+          null)
+    },
     'new': {
       title: 'New Chat',
       html: '<div class="placeholder">' +
         '<div class="ph-head">' +
+        '<div class="ph-temp" data-tip="This chat won\\'t appear in history and your messages will not be saved.">' + EYE_SVG + 'Temporary Chat</div>' +
         '<div class="ph-logo"><img src="${LOGO}" alt=""></div>' +
         '<div class="ph-model">Preview Model</div>' +
         '<div class="ph-sub">How can I help you today?</div>' +
@@ -1329,14 +1682,31 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     }
   };
 
+  var mainEl = document.querySelector('main');
   function openChat(key) {
+    var channel = key.indexOf('channel:') === 0;
     var chat = CHATS[key];
-    if (!chat) return;
-    document.querySelectorAll('.side-item.active').forEach(function (a) { a.classList.remove('active'); });
+    if (!chat && !channel) return;
+    document.querySelectorAll('.side-item.active, .channel-item.active').forEach(function (a) { a.classList.remove('active'); });
     if (key !== 'new') {
-      var item = document.querySelector('.side-scroll [data-chat="' + key + '"]');
-      if (item) item.classList.add('active');
+      document.querySelectorAll('.side-scroll [data-chat="' + key + '"]').forEach(function (item) {
+        item.classList.add('active');
+        item.classList.remove('unread');
+        var dot = item.querySelector('.unread-dot, .unread-badge');
+        if (dot) dot.remove();
+      });
     }
+    // A saved chat is never temporary; the Thread and Controls panes belong
+    // to the view they were opened from
+    if (key !== 'new' && window.__tdpTemp) window.__tdpTemp(false);
+    if (window.__tdpPanes) window.__tdpPanes.closeAll(channel);
+    mainEl.classList.toggle('channel-mode', channel);
+    if (channel) {
+      if (window.__tdpChannel) window.__tdpChannel.open(key.slice(8));
+      try { parent.postMessage({ __tdpPreview: true, kind: 'chatchange', chat: key }, '*'); } catch (e) {}
+      return;
+    }
+    if (window.__tdpChannel) window.__tdpChannel.close();
     navTitle.textContent = chat.title;
     // Navbar.svelte gates Temporary Chat on !chat?.id, so it shows only here
     var navRight = document.getElementById('nav-right');
@@ -1350,9 +1720,13 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     try { parent.postMessage({ __tdpPreview: true, kind: 'chatchange', chat: key }, '*'); } catch (e) {}
   }
 
-  document.querySelectorAll('[data-chat]').forEach(function (el) {
-    el.addEventListener('click', function () { openChat(el.getAttribute('data-chat')); });
+  // Delegated, so rows the chat menu renames, clones or moves keep working
+  document.addEventListener('click', function (e) {
+    var el = e.target && e.target.closest ? e.target.closest('[data-chat]') : null;
+    if (!el || e.target.closest('.chat-actions, .ch-settings, input')) return;
+    openChat(el.getAttribute('data-chat'));
   });
+  window.__tdpOpenChat = openChat;
 
   // Branch pager: show the previous/next regenerated variant. Bounds are
   // guarded like showPreviousMessage/showNextMessage upstream.
@@ -1383,7 +1757,8 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   });
 
   var initial = document.body.getAttribute('data-initial-chat');
-  if (initial && initial !== 'default' && CHATS[initial]) openChat(initial);
+  // Channels are set up by a later script, so they open once it has run
+  if (initial && initial !== 'default' && (CHATS[initial] || initial.indexOf('channel:') === 0)) setTimeout(function () { openChat(initial); }, 0);
 })();
 
 // Sidebar collapse/expand. Open WebUI drives this from the showSidebar store:
@@ -1504,7 +1879,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   var modelBtn = document.getElementById('model-selector-model-button');
   var pills = document.getElementById('input-pills');
   if (!moreBtn || !intBtn || !modelBtn || !pills) return;
-  var I = ${JSON.stringify({ clip: SVG.clip, camera: SVG.camera, globeAlt: SVG.globeAlt, documentArrowUp: SVG.documentArrowUp, pageEdit: SVG.pageEdit, database: SVG.database, clockRotateRight: SVG.clockRotateRight, chevronRightAlt: SVG.chevronRightAlt, chevronLeft: SVG.chevronLeft, chevronDown: SVG.chevronDown, wrench: SVG.wrench, searchAlt: SVG.searchAlt, photo: SVG.photo, terminal: SVG.terminal, check: SVG.check, keyframes: SVG.keyframes, documentPage: SVG.documentPage, dots: SVG.dots, globePill: SVG.globePill, photoPill: SVG.photoPill, terminalPill: SVG.terminalPill, wrenchPill: SVG.wrenchPill, xMark: SVG.xMark })};
+  var I = ${JSON.stringify({ share: SVG.share, download: SVG.download, editPencil: SVG.editPencil, chatCheck: SVG.chatCheck, pin: SVG.pin, pinSlash: SVG.pinSlash, copy: SVG.copy, folder: SVG.folder, archiveBox: SVG.archiveBox, trash: SVG.trash, cog: SVG.cog, logOut: SVG.logOut, emojiFace: SVG.emojiFace, user: SVG.user, workspace: SVG.workspace, notes: SVG.notes, code: SVG.code, checkAlt: SVG.check, clip: SVG.clip, camera: SVG.camera, globeAlt: SVG.globeAlt, documentArrowUp: SVG.documentArrowUp, pageEdit: SVG.pageEdit, database: SVG.database, clockRotateRight: SVG.clockRotateRight, chevronRightAlt: SVG.chevronRightAlt, chevronLeft: SVG.chevronLeft, chevronDown: SVG.chevronDown, wrench: SVG.wrench, searchAlt: SVG.searchAlt, photo: SVG.photo, terminal: SVG.terminal, check: SVG.check, keyframes: SVG.keyframes, documentPage: SVG.documentPage, dots: SVG.dots, globePill: SVG.globePill, photoPill: SVG.photoPill, terminalPill: SVG.terminalPill, wrenchPill: SVG.wrenchPill, xMark: SVG.xMark })};
   var LOGO_SRC = ${JSON.stringify(LOGO)};
 
   var TOOLS = ['Web Scraper', 'Calculator', 'Weather'];
@@ -1546,47 +1921,91 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
 
   function close() {
     if (!open) return;
+    closeSub();
     open.el.remove();
     open.trigger.setAttribute('aria-expanded', 'false');
+    if (open.ctx && open.ctx.onClose) open.ctx.onClose();
     open = null;
   }
 
-  function show(kind, trigger, view) {
-    var was = open && open.kind;
+  // Where each menu sits: Dropdown.svelte puts a menu's left edge (start) or
+  // right edge (end) on its trigger, 4px off it and 16px from the window's
+  // edges; Selector.svelte uses end, 2px and 8px
+  var SPECS = {
+    more: { align: 'start', gap: 4, pad: 16 }, integrations: { align: 'start', gap: 4, pad: 16 },
+    model: { align: 'end', gap: 2, pad: 8 }, chat: { align: 'start', gap: 4, pad: 16 },
+    user: { align: 'end', gap: 4, pad: 16 }, chatsMore: { align: 'end', gap: 4, pad: 16 },
+    emoji: { align: 'start', gap: 4, pad: 16 }
+  };
+
+  function show(kind, trigger, view, ctx) {
+    var was = open && open.kind, wasTrigger = open && open.trigger;
     close();
-    if (was === kind && !view) return;
+    if (was === kind && wasTrigger === trigger && !view) return;
     hideTip();
     var el = document.createElement('div');
-    open = { kind: kind, el: el, trigger: trigger };
+    open = { kind: kind, el: el, trigger: trigger, ctx: ctx || {} };
     trigger.setAttribute('aria-expanded', 'true');
     document.body.appendChild(el);
     if (kind === 'more') renderMore(view || 'root', 'from-left');
     else if (kind === 'integrations') renderIntegrations(view || 'root', 'from-left');
-    else renderModels();
+    else if (kind === 'model') renderModels();
+    else RENDER[kind](el, open.ctx);
+    place();
     el.addEventListener('click', onMenuClick);
     el.addEventListener('mouseover', onMenuHover);
     requestAnimationFrame(function () { if (open && open.el === el) el.classList.add('in'); });
   }
 
-  // Dropdown.svelte: left edge on the button, 4px off it, 16px from the
-  // window's edges. Selector.svelte: right edge on the trigger, 2px off, 8px.
-  // Both open downward unless there is more room above.
+  // Both open downward unless there is more room above (the input bar's and
+  // the user menu flip up; a chat's opens down)
   function place() {
     if (!open) return;
     var el = open.el, r = open.trigger.getBoundingClientRect();
-    var model = open.kind === 'model';
-    var gap = model ? 2 : 4, pad = model ? 8 : 16;
+    var spec = SPECS[open.kind];
     var w = el.offsetWidth, h = el.offsetHeight;
-    var left = model ? r.right - w : r.left;
-    left = Math.max(pad, Math.min(left, window.innerWidth - w - pad));
+    // An end-aligned menu is placed by its right edge, so only that side
+    // keeps the gap from the window
+    var left = spec.align === 'end' ? r.right - w : r.left;
+    left = Math.min(left, window.innerWidth - w - spec.pad);
+    if (spec.align !== 'end') left = Math.max(spec.pad, left);
+    left = Math.max(4, left);
     var below = window.innerHeight - r.bottom;
-    var top = below >= r.top ? r.bottom + gap : r.top - gap - h;
+    var top = below >= r.top ? r.bottom + spec.gap : r.top - spec.gap - h;
     el.style.left = left + 'px';
     el.style.top = Math.max(8, top) + 'px';
   }
 
+  // DropdownSub.svelte: opens on hover to the right of its row, 8px off,
+  // flipping left when there is no room
+  function openSub(row, html) {
+    if (open.sub && open.sub.row === row) return;
+    closeSub();
+    var sub = document.createElement('div');
+    sub.className = 'tdp-menu submenu app-dropdown-menu in';
+    sub.setAttribute('role', 'menu');
+    sub.innerHTML = html;
+    document.body.appendChild(sub);
+    var mr = open.el.getBoundingClientRect(), rr = row.getBoundingClientRect();
+    sub.style.minWidth = mr.width + 'px';
+    var left = mr.right + 8;
+    if (left + sub.offsetWidth > window.innerWidth - 8) left = mr.left - 8 - sub.offsetWidth;
+    sub.style.left = Math.max(8, left) + 'px';
+    sub.style.top = Math.max(8, Math.min(rr.top - 3, window.innerHeight - sub.offsetHeight - 8)) + 'px';
+    sub.addEventListener('click', onMenuClick);
+    open.sub = { el: sub, row: row };
+    row.classList.add('hl');
+  }
+  function closeSub() {
+    if (!open || !open.sub) return;
+    open.sub.row.classList.remove('hl');
+    open.sub.el.remove();
+    open.sub = null;
+  }
+
   document.addEventListener('mousedown', function (e) {
     if (!open || open.el.contains(e.target) || open.trigger.contains(e.target)) return;
+    if (open.sub && open.sub.el.contains(e.target)) return;
     close();
   }, true);
   // Escape closes the menu, and goes no further: the page around the
@@ -1769,9 +2188,66 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     close();
   }
 
+  // ---- Sidebar menus, the Chats header's More and the reaction picker ----
+
+  function mi(act, ico, label, more) {
+    return '<button type="button" class="mi" data-act="do:' + act + '">' + (ico || '') + '<span class="label">' + label + '</span>' + (more || '') + '</button>';
+  }
+  var RENDER = {
+    // Sidebar/ChatMenu.svelte, for an admin with one folder
+    chat: function (el, ctx) {
+      el.className = 'tdp-menu chat-menu app-dropdown-menu select-none rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-850 dark:text-white shadow-lg';
+      el.setAttribute('role', 'menu');
+      var pinned = ctx.pinned();
+      el.innerHTML =
+        mi('none', I.share, 'Share') +
+        '<button type="button" class="mi sub" data-act="do:download" data-sub="download">' + I.download + '<span class="label">Download</span></button>' +
+        mi('rename', I.editPencil, 'Rename') +
+        mi('unread', I.chatCheck, 'Mark as unread') +
+        '<hr>' +
+        mi('pin', pinned ? I.pinSlash : I.pin, pinned ? 'Unpin' : 'Pin') +
+        mi('clone', I.copy, 'Clone') +
+        '<button type="button" class="mi sub" data-act="do:move" data-sub="move">' + I.folder + '<span class="label">Move</span></button>' +
+        mi('archive', I.archiveBox, 'Archive') +
+        mi('delete', I.trash, 'Delete');
+    },
+    // Sidebar/UserMenu.svelte, an admin with user status on
+    user: function (el, ctx) {
+      el.className = 'tdp-menu user-menu app-dropdown-menu font-sans text-xs rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-850 dark:text-white shadow-lg';
+      el.setAttribute('role', 'menu');
+      el.style.width = ctx.width + 'px';
+      var st = ctx.status();
+      el.innerHTML =
+        '<button type="button" class="mi who" data-act="close"><span class="ico"><span class="avatar"></span></span><span class="label">You</span><span class="active-users" data-tip="Active Users"><i></i>1</span></button>' +
+        (st
+          ? '<button type="button" class="mi status" data-act="close"><span class="ico">' + st.emoji + '</span><span class="label">' + st.text + '</span><span class="clear" data-act="do:clear-status" data-tip="Clear status">' + I.xMark + '</span></button>'
+          : '<button type="button" class="mi status" data-act="do:status"><span class="ico">' + I.emojiFace + '</span><span class="label">Update your status</span></button>') +
+        '<hr>' +
+        mi('none', I.workspace, 'Workspace') + mi('none', I.notes, 'Notes') + mi('none', I.code, 'Playground') +
+        '<hr>' +
+        mi('none', I.user, 'Admin Panel') + mi('none', I.cog, 'Settings') + mi('none', I.logOut, 'Sign Out');
+    },
+    chatsMore: function (el) {
+      el.className = 'tdp-menu chats-more app-dropdown-menu rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-850 dark:text-white shadow-lg';
+      el.innerHTML = mi('read-all', I.checkAlt, 'Mark all as read');
+    },
+    emoji: function (el) {
+      el.className = 'tdp-menu emoji-menu rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-850 shadow-lg';
+      el.innerHTML = ['\ud83d\udc4d', '\u2764\ufe0f', '\ud83d\ude02', '\ud83c\udf89', '\ud83d\udc40', '\ud83c\udfa8'].map(function (em) {
+        return '<span class="em" data-act="do:emoji" data-emoji="' + em + '">' + em + '</span>';
+      }).join('');
+    }
+  };
+  window.__tdpMenus = { show: show, close: close, item: mi };
+
   // ---- Clicks inside a menu ----
 
   function onMenuHover(e) {
+    var item = e.target.closest('.mi');
+    if (item && open.ctx.subs) {
+      if (item.dataset.sub) openSub(item, open.ctx.subs[item.dataset.sub]());
+      else closeSub();
+    }
     var r = e.target.closest('.tdp-list .tdp-row.item, .model-item');
     if (!r) return;
     open.el.querySelectorAll('.hl').forEach(function (x) { if (x !== r) x.classList.remove('hl'); });
@@ -1785,6 +2261,13 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     if (!a) return;
     var act = a.dataset.act;
     if (act === 'close') { close(); return; }
+    if (act.indexOf('do:') === 0) {
+      var ctx = open.ctx;
+      if (a.dataset.sub) { openSub(a, ctx.subs[a.dataset.sub]()); return; }
+      var keep = ctx.onAct && ctx.onAct(act.slice(3), a);
+      if (!keep) close();
+      return;
+    }
     if (act === 'expand') {
       e.stopPropagation();
       var files = a.closest('.tdp-row').nextElementSibling;
@@ -1821,6 +2304,631 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       renderPills();
     }
   }
+})();
+
+// The sidebar's moving parts: sections, Pinned and folders fold
+// (Sidebar/Section.svelte, common/Folder.svelte, RecursiveFolder.svelte);
+// each chat's More menu (Sidebar/ChatMenu.svelte) renames, pins, clones,
+// moves, archives and deletes rows in the mock; the user menu
+// (Sidebar/UserMenu.svelte); Temporary Chat (Navbar.svelte) and the Chat
+// Controls pane (ChatControls.svelte, Controls/Controls.svelte).
+(function () {
+  var M = window.__tdpMenus;
+  var side = document.querySelector('.sidebar-panel .side-scroll');
+  if (!M || !side) return;
+  var I = ${JSON.stringify({ chevronDownSm: SVG.chevronDownSm, chevronRightSm: SVG.chevronRightSm, chevronUpSm: SVG.chevronUpSm, folder: SVG.folder, close: SVG.close, plusAlt: SVG.plusAlt })};
+
+  function closest(e, sel) { return e.target && e.target.closest ? e.target.closest(sel) : null; }
+  function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+
+  // ---- Folding ----
+
+  function fold(box, head, on) {
+    box.classList.toggle('open', on);
+    head.setAttribute('aria-expanded', on);
+  }
+
+  side.addEventListener('click', function (e) {
+    var btn = closest(e, '.chat-menu-btn');
+    if (btn) { chatMenu(btn); return; }
+    var add = closest(e, '.side-label .add');
+    if (add) {
+      if (add.classList.contains('sec-more')) {
+        M.show('chatsMore', add, null, { onAct: function (act) { if (act === 'read-all') markAllRead(); } });
+      }
+      return;
+    }
+    var head = closest(e, '[data-section-toggle]');
+    if (head) { fold(head.parentElement, head, !head.parentElement.classList.contains('open')); return; }
+    var pin = closest(e, '.side-pinned');
+    if (pin) {
+      var on = !pin.parentElement.classList.contains('open');
+      fold(pin.parentElement, pin, on);
+      pin.querySelector('.pin-chev').innerHTML = on ? I.chevronDownSm : I.chevronRightSm;
+      return;
+    }
+    var folder = closest(e, '.folder-row');
+    if (folder) fold(folder.parentElement, folder, !folder.parentElement.classList.contains('open'));
+  });
+
+  // ---- A chat's More menu ----
+
+  var FOLDERS = function () { return [].map.call(side.querySelectorAll('.side-folder'), function (f) { return f.dataset.folder; }); };
+  var pinnedWrap = side.querySelector('.side-pinned-wrap');
+  var pinnedList = side.querySelector('.pinned-list');
+
+  function chatMenu(btn) {
+    var row = btn.closest('.side-item');
+    row.classList.add('menu-open');
+    M.show('chat', btn, null, {
+      pinned: function () { return !!row.closest('.pinned-list'); },
+      subs: {
+        download: function () { return M.item('close-only', '', 'Export chat (.json)') + M.item('close-only', '', 'Plain text (.txt)') + M.item('close-only', '', 'PDF document (.pdf)'); },
+        move: function () {
+          return FOLDERS().map(function (n) {
+            return '<button type="button" class="mi" data-act="do:move-to" data-folder="' + esc(n) + '">' + I.folder + '<span class="label">' + esc(n) + '</span></button>';
+          }).join('');
+        }
+      },
+      onAct: function (act, el) { chatAct(row, act, el); },
+      onClose: function () { row.classList.remove('menu-open'); }
+    });
+  }
+
+  function todayAnchor() {
+    var labels = side.querySelectorAll('.time-label');
+    for (var i = 0; i < labels.length; i++) if (labels[i].textContent === 'Today') return labels[i];
+    return labels[0];
+  }
+  function syncPinned() { pinnedWrap.hidden = !pinnedList.children.length; }
+
+  function chatAct(row, act, el) {
+    if (act === 'rename') rename(row);
+    else if (act === 'unread') {
+      if (!row.querySelector('.unread-dot')) row.insertAdjacentHTML('afterbegin', '<span class="unread-dot"></span>');
+      row.classList.add('unread');
+    } else if (act === 'pin') {
+      if (row.closest('.pinned-list')) todayAnchor().after(row);
+      else { pinnedList.prepend(row); fold(pinnedWrap, pinnedWrap.querySelector('.side-pinned'), true); pinnedWrap.querySelector('.pin-chev').innerHTML = I.chevronDownSm; }
+      syncPinned();
+    } else if (act === 'clone') {
+      var copy = row.cloneNode(true);
+      copy.classList.remove('active', 'unread', 'menu-open');
+      ['.age', '.unread-dot'].forEach(function (s) { var x = copy.querySelector(s); if (x) x.remove(); });
+      copy.querySelector('.label').textContent = 'Clone of ' + row.querySelector('.label').textContent;
+      todayAnchor().after(copy);
+    } else if (act === 'move-to') {
+      var f = side.querySelector('.side-folder[data-folder="' + el.dataset.folder + '"]');
+      if (!f) return;
+      f.querySelector('.folder-children').appendChild(row);
+      fold(f, f.querySelector('.folder-row'), true);
+      var sec = f.closest('.side-section');
+      fold(sec, sec.querySelector('[data-section-toggle]'), true);
+      syncPinned();
+    } else if (act === 'archive' || act === 'delete') {
+      if (row.classList.contains('active') && window.__tdpOpenChat) window.__tdpOpenChat('new');
+      row.remove();
+      syncPinned();
+    }
+  }
+
+  // ChatItem.svelte: the title becomes an input in place; Enter or leaving
+  // it saves, Escape cancels
+  function rename(row) {
+    var label = row.querySelector('.label');
+    var old = label.textContent;
+    var input = document.createElement('input');
+    input.className = 'rename';
+    input.value = old;
+    label.hidden = true;
+    label.after(input);
+    row.classList.add('menu-open');
+    input.focus();
+    input.select();
+    var done = false;
+    function finish(save) {
+      if (done) return;
+      done = true;
+      var v = input.value.trim();
+      if (save && v) {
+        label.textContent = v;
+        if (row.classList.contains('active')) document.getElementById('nav-title').textContent = v;
+      }
+      input.remove();
+      label.hidden = false;
+      row.classList.remove('menu-open');
+    }
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); finish(false); }
+    });
+    input.addEventListener('blur', function () { finish(true); });
+  }
+
+  function markAllRead() {
+    side.querySelectorAll('.side-item.unread').forEach(function (r) {
+      r.classList.remove('unread');
+      var d = r.querySelector('.unread-dot');
+      if (d) d.remove();
+    });
+  }
+
+  // ---- The user menu: w-[calc(var(--sidebar-width)-1rem)] from the panel,
+  // w-[15rem] from the rail ----
+
+  var status = null;
+  function userMenu(trigger, width) {
+    M.show('user', trigger, null, {
+      width: width,
+      status: function () { return status; },
+      onAct: function (act) {
+        if (act === 'status') status = { emoji: '🎨', text: 'Designing a theme' };
+        if (act === 'clear-status') status = null;
+      }
+    });
+  }
+  var sideUser = document.getElementById('side-user');
+  var railUser = document.getElementById('rail-user');
+  if (sideUser) sideUser.addEventListener('click', function () { userMenu(sideUser, sideUser.parentElement.offsetWidth - 16); });
+  if (railUser) railUser.addEventListener('click', function (e) { e.stopPropagation(); userMenu(railUser, 240); });
+
+  // ---- Temporary Chat: only the icon changes on the button; the
+  // placeholder gains its label and the message bar a dashed border ----
+
+  var tempBtn = document.getElementById('temporary-chat-button');
+  function setTemp(on) {
+    document.body.classList.toggle('temp-chat', on);
+    if (!tempBtn) return;
+    tempBtn.classList.toggle('active', on);
+    tempBtn.setAttribute('aria-pressed', on);
+  }
+  window.__tdpTemp = setTemp;
+  if (tempBtn) tempBtn.addEventListener('click', function () { setTemp(!document.body.classList.contains('temp-chat')); });
+
+  // ---- Chat Controls ----
+
+  var pane = document.getElementById('controls-pane');
+  var thread = document.getElementById('thread-pane');
+  var ctrlBtn = document.getElementById('chat-controls-button');
+  window.__tdpPanes = {
+    closeAll: function (all) {
+      if (thread) thread.hidden = true;
+      if (all && pane) pane.hidden = true;
+    }
+  };
+
+  // AdvancedParams.svelte for an admin, in order: cycling rows step through
+  // their values, the rest turn from Default to a slider, a box or a switch
+  var PARAMS = [
+    ['Stream Chat Response', 'cycle', ['On', 'Off']],
+    ['Stream Delta Chunk Size', 'range', [1, 128, 1, 1]],
+    ['Context Compaction Threshold', 'text', ['Enter token threshold', '80000']],
+    ['Function Calling', 'cycle', ['Native', 'Legacy']],
+    ['Reasoning Tags', 'cycle', ['Custom', 'Enabled', 'Disabled']],
+    ['Seed', 'text', ['Enter Seed', '0']],
+    ['Stop Sequence', 'text', ['Enter stop sequence', '']],
+    ['Temperature', 'range', [0, 2, 0.05, 0.8]],
+    ['Reasoning Effort', 'text', ['Enter reasoning effort', 'medium']],
+    ['logit_bias', 'text', ['Enter comma-separated "token:bias_value" pairs (example: 5432:100, 413:-100)', '']],
+    ['max_tokens', 'range', [-2, 131072, 1, 128]],
+    ['top_k', 'range', [0, 1000, 1, 40]],
+    ['top_p', 'range', [0, 1, 0.05, 0.9]],
+    ['min_p', 'range', [0, 1, 0.05, 0]],
+    ['frequency_penalty', 'range', [-2, 2, 0.05, 1.1]],
+    ['presence_penalty', 'range', [-2, 2, 0.05, 0]],
+    ['mirostat', 'range', [0, 2, 1, 0]],
+    ['mirostat_eta', 'range', [0, 1, 0.05, 0.1]],
+    ['mirostat_tau', 'range', [0, 10, 0.5, 5]],
+    ['repeat_last_n', 'range', [-1, 128, 1, 64]],
+    ['tfs_z', 'range', [0, 2, 0.05, 1]],
+    ['repeat_penalty', 'range', [-2, 2, 0.05, 1.1]],
+    ['use_mmap', 'switch', []],
+    ['use_mlock', 'switch', []],
+    ['think (Ollama)', 'cycle', ['On', 'Custom', 'Off']],
+    ['format (Ollama)', 'cycle', ['JSON']],
+    ['num_keep (Ollama)', 'range', [-1, 10240000, 1, 24]],
+    ['num_ctx (Ollama)', 'range', [-1, 10240000, 1, 2048]],
+    ['num_batch (Ollama)', 'range', [256, 8192, 256, 512]],
+    ['num_thread (Ollama)', 'range', [1, 256, 1, 2]],
+    ['num_gpu (Ollama)', 'range', [0, 256, 1, 0]],
+    ['keep_alive (Ollama)', 'text', ["e.g. '30s','10m'. Valid time units are 's', 'm', 'h'.", '5m']]
+  ];
+
+  function section(key, title, open, body) {
+    return '<div class="cc-sec' + (open ? ' open' : '') + '" data-sec="' + key + '"><button type="button" class="cc-head" aria-expanded="' + open + '"><span>' + title + '</span><span class="down">' + I.chevronDownSm + '</span><span class="up">' + I.chevronUpSm + '</span></button><div class="cc-content">' + body + '</div></div>';
+  }
+
+  function buildControls() {
+    var rows = PARAMS.map(function (p, i) {
+      return '<div class="ap-row" data-p="' + i + '"><div class="ap-line"><div class="ap-label">' + esc(p[0]) + '</div><span class="ap-btn" role="button">Default</span></div><div class="ap-extra"></div></div>';
+    }).join('');
+    pane.innerHTML =
+      '<div class="cc-tabs"><div class="cc-tab">Controls</div><span class="pane-close" role="button" aria-label="Close">' + I.close + '</span></div>' +
+      '<div class="cc-body">' +
+      section('valves', 'Valves', false, '<div class="cc-valves"><select><option>Tools</option><option>Functions</option></select><select><option disabled selected>Select a tool</option><option>Web Scraper</option><option>Calculator</option><option>Weather</option></select></div>') +
+      section('system', 'System Prompt', true, '<textarea rows="3" placeholder="Enter system prompt"></textarea>') +
+      section('params', 'Advanced Params', true, '<div class="ap">' + rows + '<div class="ap-add" role="button">' + I.plusAlt + '<span>Add Custom Parameter</span></div></div>') +
+      '</div>';
+  }
+
+  function paramClick(row) {
+    var p = PARAMS[Number(row.dataset.p)];
+    var btn = row.querySelector('.ap-btn');
+    var extra = row.querySelector('.ap-extra');
+    if (p[1] === 'cycle') {
+      var steps = ['Default'].concat(p[2]);
+      btn.textContent = steps[(steps.indexOf(btn.textContent) + 1) % steps.length];
+      return;
+    }
+    var on = btn.textContent === 'Default';
+    btn.textContent = on ? 'Custom' : 'Default';
+    if (!on) { extra.innerHTML = ''; return; }
+    var a = p[2];
+    if (p[1] === 'range') {
+      extra.innerHTML = '<div class="ap-custom"><input type="range" min="' + a[0] + '" max="' + a[1] + '" step="' + a[2] + '" value="' + a[3] + '"><input type="number" min="' + a[0] + '" max="' + a[1] + '" step="any" value="' + a[3] + '"></div>';
+      var r = extra.querySelector('[type=range]'), n = extra.querySelector('[type=number]');
+      r.addEventListener('input', function () { n.value = r.value; });
+      n.addEventListener('input', function () { r.value = n.value; });
+    } else if (p[1] === 'text') {
+      extra.innerHTML = '<div class="ap-custom"><input type="text" value="' + esc(a[1]) + '" placeholder="' + esc(a[0]) + '"></div>';
+    } else {
+      extra.innerHTML = '<div class="ap-custom ap-switch"><div class="ap-label">Enabled</div><span class="tdp-switch on" role="switch" aria-checked="true"></span></div>';
+    }
+  }
+
+  if (pane && ctrlBtn) {
+    buildControls();
+    ctrlBtn.addEventListener('click', function () {
+      pane.hidden = !pane.hidden;
+      if (thread) thread.hidden = true;
+    });
+    pane.addEventListener('click', function (e) {
+      if (closest(e, '.pane-close')) { pane.hidden = true; return; }
+      var head = closest(e, '.cc-head');
+      if (head) { var sec = head.parentElement; var on = !sec.classList.contains('open'); sec.classList.toggle('open', on); head.setAttribute('aria-expanded', on); return; }
+      var b = closest(e, '.ap-btn');
+      if (b) { paramClick(b.closest('.ap-row')); return; }
+      var sw = closest(e, '.ap-switch .tdp-switch');
+      if (sw) {
+        var on2 = !sw.classList.contains('on');
+        sw.classList.toggle('on', on2);
+        sw.setAttribute('aria-checked', on2);
+        sw.previousElementSibling.textContent = on2 ? 'Enabled' : 'Disabled';
+      }
+    });
+  }
+})();
+
+// Channels (channel/Channel.svelte, Navbar.svelte, Messages.svelte,
+// Messages/Message.svelte, MessageInput.svelte) and threads (Thread.svelte)
+// as a mock that works: messages group by author, the hover toolbar reacts,
+// replies, pins, opens a thread, edits and deletes, and you can type into
+// the channel and the thread. Times read like dayjs in English: "2:14 PM"
+// for today, "14:14" on a grouped row.
+(function () {
+  var view = document.getElementById('channel-view');
+  var threadPane = document.getElementById('thread-pane');
+  var M = window.__tdpMenus;
+  if (!view || !threadPane || !M) return;
+  var I = ${JSON.stringify({ faceSmile: SVG.faceSmile, arrowUpLeftAlt: SVG.arrowUpLeftAlt, pin: SVG.pin, pinSlash: SVG.pinSlash, chatBubbleEllipsis: SVG.chatBubbleEllipsis, pencil: SVG.pencil, garbageBin: SVG.garbageBin, chevronRightBold: SVG.chevronRightBold, xMark: SVG.xMark, plusSolid: SVG.plusSolid, micSolid: SVG.micSolid, arrowUpSolid: SVG.arrowUpSolid, lock: SVG.lock, hashtag: SVG.hashtag, user: SVG.user })};
+  var LOGO_SRC = ${JSON.stringify(LOGO)};
+
+  var USERS = {
+    maya: { name: 'Maya', bg: 'linear-gradient(135deg, #f59e0b, #ef4444)' },
+    jonas: { name: 'Jonas', bg: 'linear-gradient(135deg, #10b981, #3b82f6)' },
+    you: { name: 'You', bg: 'linear-gradient(135deg, #6366f1, #ec4899)' },
+    model: { name: 'Preview Model', model: true }
+  };
+  var DAY = 'Sunday, October 11, 2026 ';
+  var nextId = 100;
+  function m(u, t, hm, text, more) {
+    var o = { id: nextId++, u: u, t: t, hm: hm, text: text, reacts: [], thread: [] };
+    for (var k in more) o[k] = more[k];
+    return o;
+  }
+  var CHANNELS = {
+    general: {
+      members: 4, created: 'October 1, 2026',
+      msgs: [
+        m('maya', '2:14 PM', '14:14', 'Morning! The new <b>Koi Pond</b> theme just landed in the gallery 🎏', { reacts: [{ e: '👍', n: 3, mine: true }, { e: '🎨', n: 2 }] }),
+        m('maya', '2:15 PM', '14:15', 'Light mode keeps the pond-water gradient; Dark and OLED run the canvas.'),
+        m('jonas', '2:20 PM', '14:20', 'Looks great. Does the canvas follow the theme hue now?', {
+          thread: [
+            m('maya', '2:22 PM', '14:22', 'It does. Twelve of the gallery animations pick up the accent now.'),
+            m('you', '2:24 PM', '14:24', 'And they recolor live while you drag the hue slider.'),
+            m('maya', '2:40 PM', '14:40', 'Even OLED gets its own palette ✨')
+          ], last: '5 minutes ago'
+        }),
+        m('you', '2:31 PM', '14:31', '<span class="mention">@Preview Model</span> suggest an accent for a teal palette?'),
+        m('model', '2:31 PM', '14:31', 'Try a warm coral around <code>oklch(0.72 0.14 30)</code>: it sits across the wheel from teal and stays readable in every mode.'),
+        m('jonas', '2:38 PM', '14:38', 'Pinning the release checklist: palette, OLED pass, light-mode contrast, submit.', { pinned: true })
+      ],
+      typing: { u: 'maya', t: '2:45 PM', hm: '14:45', text: 'Shipping it after lunch 🚀' }
+    },
+    design: {
+      members: 6, created: 'September 12, 2026',
+      msgs: [
+        m('jonas', '11:02 AM', '11:02', 'Sidebar transparency or opaque for the new dashboard theme?'),
+        m('maya', '11:05 AM', '11:05', 'Translucent. The frosted glass reads well over the gradient.', { reacts: [{ e: '💯', n: 2 }] })
+      ]
+    },
+    'theme-lab': {
+      members: 2, private: true, created: 'October 8, 2026',
+      msgs: [
+        m('you', '9:12 AM', '09:12', 'Private sandbox for experiments before they hit the gallery.'),
+        m('maya', '9:20 AM', '09:20', 'Testing a context-aware sunflower that grows with the chat 🌻')
+      ]
+    }
+  };
+
+  var current = null, threadOf = null, replyTo = null, typingTimers = [], typedOnce = {};
+
+  function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function now() {
+    var d = new Date(), h = d.getHours(), mm = String(d.getMinutes()).padStart(2, '0');
+    return { t: ((h % 12) || 12) + ':' + mm + (h < 12 ? ' AM' : ' PM'), hm: String(h).padStart(2, '0') + ':' + mm };
+  }
+  function avatar(u) {
+    var user = USERS[u];
+    if (user.model) return '<div class="av"><img src="' + LOGO_SRC + '" alt=""></div>';
+    return '<div class="av" style="background:' + user.bg + '">' + user.name.charAt(0) + '</div>';
+  }
+  function find(list, id) {
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+    return null;
+  }
+  function msgById(id) {
+    var ch = CHANNELS[current];
+    var hit = find(ch.msgs, id);
+    if (hit) return { msg: hit, list: ch.msgs };
+    for (var i = 0; i < ch.msgs.length; i++) {
+      var t = find(ch.msgs[i].thread, id);
+      if (t) return { msg: t, list: ch.msgs[i].thread, parent: ch.msgs[i] };
+    }
+    return null;
+  }
+
+  // ---- Rendering ----
+
+  function messageHtml(msg, prev, inThread) {
+    var head = !prev || prev.u !== msg.u || msg.replyTo;
+    var user = USERS[msg.u];
+    var tools = '<div class="cm-tools">' +
+      '<span data-do="react" data-tip="Add Reaction">' + I.faceSmile + '</span>' +
+      '<span data-do="reply" data-tip="Reply" aria-label="Reply">' + I.arrowUpLeftAlt + '</span>' +
+      '<span data-do="pin" data-tip="' + (msg.pinned ? 'Unpin' : 'Pin') + '">' + (msg.pinned ? I.pinSlash : I.pin) + '</span>' +
+      (inThread ? '' : '<span data-do="thread" data-tip="Reply in Thread" aria-label="Reply in Thread">' + I.chatBubbleEllipsis + '</span>') +
+      '<span data-do="edit" data-tip="Edit">' + I.pencil + '</span>' +
+      '<span data-do="delete" data-tip="Delete">' + I.garbageBin + '</span></div>';
+    var pin = msg.pinned ? '<div class="cm-pin-label">' + I.pin + '<span>Pinned</span></div>' : '';
+    var quote = '';
+    if (msg.replyTo) {
+      var q = msgById(msg.replyTo);
+      if (q) quote = '<div class="cm-quote"><div class="q">' + avatar(q.msg.u) + '<span class="who">' + USERS[q.msg.u].name + '</span><span class="what">' + q.msg.text.replace(/<[^>]+>/g, '') + '</span></div></div>';
+    }
+    var reacts = '';
+    if (msg.reacts.length) {
+      reacts = '<div class="cm-reacts">' + msg.reacts.map(function (r, i) {
+        return '<span class="cm-react' + (r.mine ? ' mine' : '') + '" data-react="' + i + '" data-tip="' + (r.mine ? (r.n > 1 ? 'You and ' + (r.n - 1) + ' others' : 'You') : r.n + ' people') + ' reacted with ' + r.e + '"><span>' + r.e + '</span><span class="n">' + r.n + '</span></span>';
+      }).join('') + '<span class="cm-react-add" data-do="react" data-tip="Add Reaction">' + I.faceSmile + '</span></div>';
+    }
+    var replies = '';
+    if (!inThread && msg.thread.length) {
+      replies = '<div class="cm-replies"><span class="btn" data-do="thread"><b>' + msg.thread.length + ' Replies</b><span> - Last reply ' + (msg.last || 'a few seconds ago') + '</span>' + I.chevronRightBold + '</span></div>';
+    }
+    var body = msg.editing
+      ? '<div class="cm-edit"><textarea rows="2">' + esc(msg.text.replace(/<[^>]+>/g, '')) + '</textarea><div class="btns"><span class="cancel" data-do="edit-cancel">Cancel</span><span class="save" data-do="edit-save">Save</span></div></div>'
+      : '<div class="cm-text">' + msg.text + (msg.edited ? '<span class="edited">(edited)</span>' : '') + '</div>';
+    return '<div class="cm' + (head ? ' head' : '') + (msg.pinned ? ' pinned' : '') + (replyTo === msg.id ? ' replying' : '') + '" data-id="' + msg.id + '">' + tools + pin + quote +
+      '<div class="cm-row"><div class="cm-av">' + (head ? avatar(msg.u) : '<div class="t2" data-tip="' + DAY + msg.t + '">' + msg.hm + '</div>') + '</div>' +
+      '<div class="cm-body">' + (head ? '<div class="cm-meta"><span class="cm-name">' + user.name + '</span><span class="cm-time" data-tip="' + DAY + msg.t + '">' + msg.t + '</span></div>' : '') +
+      body + reacts + replies + '</div></div></div>';
+  }
+
+  function listHtml(list, inThread) {
+    return list.map(function (msg, i) { return messageHtml(msg, list[i - 1], inThread); }).join('');
+  }
+
+  function inputHtml(placeholder) {
+    return '<div class="ch-input-wrap"><div class="ch-typing"></div><div class="ch-input" id="message-input-container">' +
+      '<div class="ch-reply-bar"><span class="who"></span><span class="x" data-do="reply-cancel" role="button" aria-label="Cancel">' + I.xMark + '</span></div>' +
+      '<div class="ch-edit" contenteditable="true" data-placeholder="' + placeholder + '"></div>' +
+      '<div class="ch-bar"><span class="ch-plus" id="input-menu-button" role="button" aria-label="More">' + I.plusSolid + '</span>' +
+      '<div class="ch-right"><span class="ch-mic" id="voice-input-button" role="button" aria-label="Voice Input" data-tip="Record voice">' + I.micSolid + '</span>' +
+      '<span class="ch-send" id="send-message-button" role="button" aria-label="Send message" data-tip="Send message">' + I.arrowUpSolid + '</span></div></div></div></div>';
+  }
+
+  function renderChannel(scroll) {
+    var ch = CHANNELS[current];
+    var box = view.querySelector('.ch-scroll');
+    var keep = box && !scroll ? box.scrollTop : null;
+    box.innerHTML = '<div class="ch-intro"><div class="t">' + current + '</div><div class="d">This channel was created on ' + ch.created + '. This is the very beginning of the ' + current + ' channel.</div></div>' +
+      (ch.msgs.length ? '<hr class="ch-intro-rule">' : '') + listHtml(ch.msgs, false);
+    box.scrollTop = keep === null ? box.scrollHeight : keep;
+  }
+
+  function renderThread(scroll) {
+    if (!threadOf) return;
+    var box = threadPane.querySelector('.ch-scroll');
+    var keep = !scroll ? box.scrollTop : null;
+    box.innerHTML = listHtml([threadOf].concat(threadOf.thread), true);
+    box.scrollTop = keep === null ? box.scrollHeight : keep;
+  }
+
+  function rerender() { renderChannel(false); renderThread(false); }
+
+  // ---- Opening ----
+
+  function open(name) {
+    if (!CHANNELS[name]) return;
+    close();
+    current = name;
+    var ch = CHANNELS[name];
+    view.hidden = false;
+    view.innerHTML = '<div class="ch-nav"><div class="ch-title">' + (ch.private ? I.lock : I.hashtag) + '<span>' + name + '</span></div>' +
+      '<div class="ch-nav-btns"><span class="ch-nav-btn" role="button" aria-label="Pinned Messages" data-tip="Pinned Messages">' + I.pin + '</span>' +
+      '<span class="ch-nav-btn" role="button" aria-label="User Count" data-tip="Users">' + I.user + '<span class="n">' + ch.members + '</span></span></div></div>' +
+      '<div class="ch-scroll"></div>' + inputHtml('Type here...');
+    renderChannel(true);
+    document.getElementById('nav-title').textContent = name;
+    if (ch.typing && !typedOnce[name]) simulateTyping(name);
+  }
+
+  function close() {
+    typingTimers.forEach(clearTimeout);
+    typingTimers = [];
+    closeThread();
+    replyTo = null;
+    current = null;
+    view.hidden = true;
+    view.innerHTML = '';
+  }
+
+  // Someone else in the channel: the typing line, then their message
+  function simulateTyping(name) {
+    typedOnce[name] = true;
+    var ch = CHANNELS[name], ty = ch.typing;
+    var line = view.querySelector('.ch-typing');
+    typingTimers.push(setTimeout(function () {
+      if (current !== name) return;
+      line.innerHTML = '<span class="dots"><i></i><i></i><i></i></span><span><b>' + USERS[ty.u].name + '</b> is typing...</span>';
+      line.classList.add('show');
+    }, 1400));
+    typingTimers.push(setTimeout(function () {
+      if (current !== name) return;
+      line.classList.remove('show');
+      ch.msgs.push(m(ty.u, ty.t, ty.hm, ty.text));
+      renderChannel(true);
+    }, 4200));
+  }
+
+  function openThread(msg) {
+    threadOf = msg;
+    var pane = document.getElementById('controls-pane');
+    if (pane) pane.hidden = true;
+    threadPane.hidden = false;
+    threadPane.innerHTML = '<div class="th-head"><div class="t">Thread</div><span class="pane-close" role="button" aria-label="Close">' + I.xMark + '</span></div>' +
+      '<div class="ch-scroll"></div>' + inputHtml('Reply to thread...');
+    renderThread(true);
+  }
+  function closeThread() {
+    threadOf = null;
+    threadPane.hidden = true;
+    threadPane.innerHTML = '';
+  }
+
+  // ---- Acting on messages ----
+
+  function setReply(id) {
+    replyTo = id;
+    var bar = view.querySelector('.ch-input');
+    var hit = id && msgById(id);
+    bar.classList.toggle('replying', !!hit);
+    if (hit) bar.querySelector('.who').textContent = 'Replying to ' + USERS[hit.msg.u].name;
+    renderChannel(false);
+    if (hit) bar.querySelector('.ch-edit').focus();
+  }
+
+  function addReaction(msg, e) {
+    for (var i = 0; i < msg.reacts.length; i++) {
+      if (msg.reacts[i].e === e) {
+        if (!msg.reacts[i].mine) { msg.reacts[i].mine = true; msg.reacts[i].n++; }
+        rerender();
+        return;
+      }
+    }
+    msg.reacts.push({ e: e, n: 1, mine: true });
+    rerender();
+  }
+
+  function onClick(e) {
+    var host = e.currentTarget;
+    var el = e.target.closest('[data-do], [data-react], .pane-close, .ch-plus, .ch-send');
+    if (!el) return;
+    if (el.classList.contains('pane-close')) { closeThread(); return; }
+    if (el.classList.contains('ch-plus')) { M.show('more', el); return; }
+    if (el.classList.contains('ch-send')) { send(host); return; }
+    var row = el.closest('.cm');
+    var hit = row && msgById(Number(row.dataset.id));
+    var act = el.dataset.do;
+    if (act === 'reply-cancel') { setReply(null); return; }
+    if (!hit) return;
+    var msg = hit.msg;
+    if (el.dataset.react) {
+      var r = msg.reacts[Number(el.dataset.react)];
+      r.mine = !r.mine;
+      r.n += r.mine ? 1 : -1;
+      if (!r.n) msg.reacts.splice(Number(el.dataset.react), 1);
+      rerender();
+      return;
+    }
+    if (act === 'react') {
+      row.classList.add('tools-open');
+      M.show('emoji', el, null, {
+        onAct: function (a, item) { if (a === 'emoji') addReaction(msg, item.dataset.emoji); },
+        onClose: function () { row.classList.remove('tools-open'); }
+      });
+    } else if (act === 'reply') {
+      if (host === threadPane) { threadPane.querySelector('.ch-edit').focus(); return; }
+      setReply(msg.id);
+    } else if (act === 'pin') { msg.pinned = !msg.pinned; rerender(); }
+    else if (act === 'thread') openThread(hit.parent || msg);
+    else if (act === 'edit') { msg.editing = true; rerender(); var ta = host.querySelector('.cm[data-id="' + msg.id + '"] textarea'); if (ta) ta.focus(); }
+    else if (act === 'edit-cancel') { msg.editing = false; rerender(); }
+    else if (act === 'edit-save') {
+      var v = row.querySelector('textarea').value.trim();
+      msg.editing = false;
+      if (v) { msg.text = esc(v); msg.edited = true; }
+      rerender();
+    } else if (act === 'delete') {
+      hit.list.splice(hit.list.indexOf(msg), 1);
+      if (threadOf === msg) closeThread();
+      if (replyTo === msg.id) setReply(null);
+      rerender();
+    }
+  }
+
+  function send(host) {
+    var edit = host.querySelector('.ch-edit');
+    var text = edit.innerText.trim();
+    if (!text) return;
+    var t = now();
+    var msg = m('you', t.t, t.hm, esc(text));
+    if (host === threadPane) {
+      threadOf.thread.push(msg);
+      threadOf.last = 'a few seconds ago';
+    } else {
+      if (replyTo) msg.replyTo = replyTo;
+      CHANNELS[current].msgs.push(msg);
+      replyTo = null;
+      host.querySelector('.ch-input').classList.remove('replying');
+    }
+    edit.innerHTML = '';
+    host.querySelector('.ch-input').classList.remove('has-text');
+    renderChannel(host === view);
+    renderThread(true);
+  }
+
+  function onKey(e) {
+    var edit = e.target.closest && e.target.closest('.ch-edit');
+    if (!edit) return;
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(e.currentTarget); }
+    if (e.key === 'Escape' && replyTo) { e.preventDefault(); e.stopPropagation(); setReply(null); }
+  }
+  function onInput(e) {
+    var edit = e.target.closest && e.target.closest('.ch-edit');
+    if (!edit) return;
+    if (!edit.innerText.trim()) edit.innerHTML = '';
+    edit.closest('.ch-input').classList.toggle('has-text', !!edit.innerText.trim());
+  }
+
+  [view, threadPane].forEach(function (host) {
+    host.addEventListener('click', onClick);
+    host.addEventListener('keydown', onKey);
+    host.addEventListener('input', onInput);
+  });
+
+  window.__tdpChannel = { open: open, close: close };
 })();
 
 // The floating preview toolbar lives in the parent and can change height when
