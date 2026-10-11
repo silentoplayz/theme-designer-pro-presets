@@ -54,9 +54,21 @@ for (const file of themeFiles) {
   if (!themes[stem].description) delete themes[stem].description;
 }
 
+// Keep the previous timestamp when no theme changed, so a build with
+// nothing new doesn't commit a manifest that differs only in its date
+let generated = new Date().toISOString();
+try {
+  const previous = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf8'));
+  if (previous.generated && JSON.stringify(previous.themes) === JSON.stringify(themes)) {
+    generated = previous.generated;
+  }
+} catch (e) {
+  // No manifest yet, or an unreadable one: write a fresh timestamp
+}
+
 const manifest = {
   manifestVersion: '1.0',
-  generated: new Date().toISOString(),
+  generated,
   manifestUrl: MANIFEST_URL,
   themes
 };
