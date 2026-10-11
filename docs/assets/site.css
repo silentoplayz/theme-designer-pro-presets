@@ -2070,3 +2070,66 @@ iframe { color-scheme: normal; }
 @media (max-width: 560px) {
   .grad-pick { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* ==========================================================
+   One-click install
+   ========================================================== */
+
+.install-dialog {
+  width: min(460px, calc(100vw - 32px));
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-lg);
+  background: var(--bg-2);
+  color: var(--text);
+  box-shadow: 0 40px 100px -20px oklch(0 0 0 / 0.7);
+}
+.install-dialog::backdrop {
+  background: oklch(0.1 0.02 var(--h) / 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .install-dialog[open] { animation: fade-in 0.25s ease; }
+}
+.install-form { display: grid; gap: 16px; padding: 24px; }
+.install-form .muted { font-size: 0.92rem; }
+.install-scope { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; }
+.install-scope legend { margin-bottom: 8px; }
+.radio {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+.radio:has(input:checked) { border-color: var(--accent-line); background: var(--accent-soft); }
+.radio input { margin-top: 3px; accent-color: var(--accent-strong); }
+.radio span { display: grid; gap: 2px; font-size: 0.92rem; }
+.radio small { color: var(--muted); font-size: 0.8rem; }
+.install-error { color: oklch(0.75 0.15 25); font-size: 0.85rem; }
+
+.install-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.install-note b { color: var(--text-2); font-weight: 500; }
+.linklike {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--accent);
+  font-size: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.btn-wide { width: 100%; height: 48px; }

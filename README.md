@@ -22,7 +22,7 @@ Theme Designer Pro themes your whole [Open WebUI](https://github.com/open-webui/
 | Design a theme without installing anything yet | The [Studio](https://silentoplayz.github.io/theme-designer-pro-presets/studio/), which designs in your browser and downloads a theme file the designer imports |
 | Find a ready-made look | The [preset gallery](https://silentoplayz.github.io/theme-designer-pro-presets/gallery/), with a live preview of every theme, animation, gradient and CSS preset |
 | Change my theme from a chat | The [Launcher Tool](launcher/README.md) |
-| Share a preset I made | [Contributing](CONTRIBUTING.md), or the [theme submission form](https://github.com/silentoplayz/theme-designer-pro-presets/issues/new?template=theme-submission.yml) |
+| Share a preset I made | **Submit to the gallery** in the Studio, the [theme submission form](https://github.com/silentoplayz/theme-designer-pro-presets/issues/new?template=theme-submission.yml), or [Contributing](CONTRIBUTING.md) |
 | Ask a question or suggest an idea | [Discussions](https://github.com/silentoplayz/theme-designer-pro-presets/discussions): [Q&A](https://github.com/silentoplayz/theme-designer-pro-presets/discussions/categories/q-a), [Show and tell](https://github.com/silentoplayz/theme-designer-pro-presets/discussions/6) or [Ideas](https://github.com/silentoplayz/theme-designer-pro-presets/discussions/7). Bugs go to [Issues](https://github.com/silentoplayz/theme-designer-pro-presets/issues). |
 
 ---
@@ -46,7 +46,9 @@ The [event function's README](event-function/README.md) covers every feature, va
 
 ## 📥 Importing presets
 
-Every preset in the gallery has an import link. In Theme Designer Pro, open any **Import** dialog, paste the link and choose **Load URL**. A regular GitHub page link works too: the designer turns it into the raw file link.
+The quickest way: choose **Install on my Open WebUI** on any preset in the [gallery](https://silentoplayz.github.io/theme-designer-pro-presets/gallery/) or any theme in the [Studio](https://silentoplayz.github.io/theme-designer-pro-presets/studio/). The first time, tell the site your Open WebUI address. It then opens your designer with the import ready, and you confirm it there. This needs Theme Designer Pro v1.11.0 or later.
+
+By hand: every preset in the gallery has an import link. In Theme Designer Pro, open any **Import** dialog, paste the link and choose **Load URL**. A regular GitHub page link works too: the designer turns it into the raw file link.
 
 You can also drop any `.js`, `.css` or `.json` file from this repository anywhere on the designer, and it goes to the right gallery.
 

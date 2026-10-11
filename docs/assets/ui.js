@@ -17,6 +17,7 @@
     check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
     expand: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>',
     close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+    install: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>',
     link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
     github: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a10.9 10.9 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.09 0 4.42-2.7 5.4-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>',
     arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
@@ -428,6 +429,154 @@
     }
   }
 
+  // ---- One-click install ----
+  // The visitor's Open WebUI address stays in this browser. An install opens
+  // their designer with #tdp-import=<kind>:<value>, which the event function
+  // turns into its own Import prompt; nothing installs without their click.
+
+  const INSTALL_KEY = 'tdp-install';
+  const KIND_BY_CATEGORY = { themes: 'theme', canvasFx: 'canvas', cssPresets: 'css', gradients: 'gradient', bundles: 'bundle' };
+
+  function installTarget() {
+    try {
+      const t = JSON.parse(localStorage.getItem(INSTALL_KEY) || 'null');
+      if (t && typeof t.base === 'string' && t.base) return { base: t.base, scope: t.scope === 'instance' ? 'instance' : 'me' };
+    } catch (e) {}
+    return null;
+  }
+
+  // A bare host gets https; a path with /api/ in it is taken as the designer's
+  // own address, for an admin who moved it with the Designer Url valve.
+  function normalizeBase(raw) {
+    let v = String(raw || '').trim();
+    if (!v) return null;
+    if (!/^https?:\/\//i.test(v)) v = 'https://' + v;
+    try {
+      const u = new URL(v);
+      const path = u.pathname.replace(/\/+$/, '');
+      return u.origin + (path.includes('/api/') ? path : '');
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function designerUrl(t) {
+    const path = t.base.includes('/api/') ? t.base : t.base + '/api/v1/theme-designer';
+    return path + (t.scope === 'me' ? '?scope=me' : '');
+  }
+
+  function hostOf(t) {
+    try { return new URL(t.base).host; } catch (e) { return t.base; }
+  }
+
+  let setupDialog = null;
+  function openInstallSetup(onSave) {
+    if (!setupDialog) {
+      setupDialog = document.createElement('dialog');
+      setupDialog.className = 'install-dialog';
+      setupDialog.setAttribute('aria-labelledby', 'install-title');
+      setupDialog.setAttribute('closedby', 'any');
+      setupDialog.innerHTML = `
+        <form method="dialog" class="install-form">
+          <h2 class="h3" id="install-title">Install on your Open WebUI</h2>
+          <p class="muted">Tell this site where your Open WebUI is, once. Installing then opens your designer with the import ready, and you confirm it there.</p>
+          <label class="field">
+            <span class="field-label">Your Open WebUI address</span>
+            <input class="input" name="base" type="text" inputmode="url" autocomplete="url" spellcheck="false" placeholder="chat.example.com" required>
+          </label>
+          <fieldset class="install-scope">
+            <legend class="field-label">Install to</legend>
+            <label class="radio"><input type="radio" name="scope" value="me" checked><span><b>My theme</b><small>Your personal theme. Needs the Allow Personal Themes valve on.</small></span></label>
+            <label class="radio"><input type="radio" name="scope" value="instance"><span><b>The instance theme</b><small>The theme everyone sees. Admins only.</small></span></label>
+          </fieldset>
+          <p class="studio-hint">Needs Theme Designer Pro v1.11.0 or later on your Open WebUI. Sign in there in this browser first. The address stays in this browser and is never sent anywhere else. If your admin moved the designer, paste its full address.</p>
+          <p class="install-error hidden" role="alert"></p>
+          <div class="cta-row">
+            <button class="btn btn-primary" value="save">Save and install</button>
+            <button class="btn btn-ghost" value="cancel" formnovalidate>Cancel</button>
+          </div>
+        </form>`;
+      document.body.appendChild(setupDialog);
+      if (!('closedBy' in HTMLDialogElement.prototype)) {
+        setupDialog.addEventListener('click', (e) => {
+          if (e.target !== setupDialog) return;
+          const r = setupDialog.getBoundingClientRect();
+          if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) setupDialog.close();
+        });
+      }
+      setupDialog.querySelector('form').addEventListener('submit', (e) => {
+        if (e.submitter && e.submitter.value === 'cancel') return;
+        const form = e.target;
+        const base = normalizeBase(form.base.value);
+        const err = setupDialog.querySelector('.install-error');
+        if (!base) {
+          e.preventDefault();
+          err.textContent = 'That doesn\'t look like a web address. Try something like chat.example.com.';
+          err.classList.remove('hidden');
+          return;
+        }
+        const t = { base, scope: form.scope.value === 'instance' ? 'instance' : 'me' };
+        try { localStorage.setItem(INSTALL_KEY, JSON.stringify(t)); } catch (x) {}
+        err.classList.add('hidden');
+        document.dispatchEvent(new CustomEvent('tdp-install-target', { detail: t }));
+        const done = setupDialog._onSave;
+        setupDialog._onSave = null;
+        if (done) setTimeout(() => done(t), 0);
+      });
+    }
+    const t = installTarget();
+    const form = setupDialog.querySelector('form');
+    form.base.value = t ? t.base.replace(/^https:\/\//, '') : '';
+    form.scope.value = t ? t.scope : 'me';
+    setupDialog.querySelector('.install-error').classList.add('hidden');
+    setupDialog._onSave = onSave || null;
+    if (!setupDialog.open) setupDialog.showModal();
+    form.base.focus();
+  }
+
+  // Browsers cap address length; past this a Studio theme goes by file
+  const MAX_INSTALL_URL = 400000;
+
+  function installLink(t, kind, value) {
+    return designerUrl(t) + '#tdp-import=' + kind + ':' + encodeURIComponent(value);
+  }
+
+  function install(kind, value) {
+    const go = (t) => {
+      const url = installLink(t, kind, value);
+      if (url.length > MAX_INSTALL_URL) {
+        showToast('This theme is too big to send by link. Download it and drop the file on the designer.');
+        return;
+      }
+      // A link click, so it opens in a new tab like any link the visitor
+      // clicks. window.open with noopener returns null even when it worked.
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast('Opened your designer on ' + hostOf(t) + '. Confirm the import there.');
+    };
+    const t = installTarget();
+    if (t) go(t);
+    else openInstallSetup(go);
+  }
+
+  function installPreset(item, category) {
+    const kind = KIND_BY_CATEGORY[category];
+    if (kind && item && item.importUrl) install(kind, item.importUrl);
+  }
+
+  // A Studio theme travels inside the link, as base64url UTF-8 JSON
+  function installTheme(theme) {
+    const bytes = new TextEncoder().encode(JSON.stringify(theme));
+    let bin = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    install('json', btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''));
+  }
+
   initChrome();
 
   window.TDPUI = {
@@ -435,5 +584,6 @@
     esc, titleCase, displayName, sourceUrl, loadCatalog, copyText, showToast,
     presentModes, modeSwatch, miniHTML, setMiniMode, themeFeatures,
     gradientStyle, fxThumbHTML, fxBlocked, hasWebGL, fxTags, fetchCached, mockStage, wireFxThumbs, live, hashNum,
+    installTarget, openInstallSetup, installPreset, installTheme, hostOf, installLink, normalizeBase,
   };
 })();

@@ -424,6 +424,53 @@
     UI.copyText(JSON.stringify(buildTheme(), null, 2), e.currentTarget, 'Theme JSON copied. Paste it into the designer.');
   });
 
+  $('install').addEventListener('click', () => UI.installTheme(buildTheme()));
+
+  function renderInstallNote() {
+    const note = $('install-note');
+    const t = UI.installTarget();
+    note.innerHTML = t
+      ? `Installs to <b>${UI.esc(UI.hostOf(t))}</b>, ${t.scope === 'instance' ? 'the instance theme' : 'your own theme'}. <button type="button" class="linklike" data-install-setup>Change</button>`
+      : 'The first time, you tell this site where your Open WebUI is. <button type="button" class="linklike" data-install-setup>Set it now</button>';
+    note.querySelector('[data-install-setup]').addEventListener('click', () => UI.openInstallSetup());
+  }
+  document.addEventListener('tdp-install-target', renderInstallNote);
+  renderInstallNote();
+
+  // GitHub fills an issue form's fields from matching query parameters.
+  // A theme with a script makes the address too long, so then the JSON is
+  // copied for the visitor to paste and everything else is still filled in.
+  const SUBMIT_FORM = 'https://github.com/silentoplayz/theme-designer-pro-presets/issues/new';
+  const MAX_FORM_URL = 7500;
+  $('submit').addEventListener('click', (e) => {
+    const theme = buildTheme();
+    const json = JSON.stringify(theme, null, 2);
+    const params = new URLSearchParams({ template: 'theme-submission.yml', name: theme.name });
+    if (theme.author) params.set('author', theme.author);
+    let url = SUBMIT_FORM + '?' + params.toString() + '&json=' + encodeURIComponent(json);
+    let copied = false;
+    if (url.length > MAX_FORM_URL) {
+      url = SUBMIT_FORM + '?' + params.toString();
+      copied = true;
+    }
+    const open = () => {
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    };
+    if (copied) {
+      UI.copyText(json, e.currentTarget, 'Theme JSON copied. Paste it into the form\'s Theme JSON field.');
+      open();
+    } else {
+      open();
+      UI.showToast('Opened the submission form with your theme filled in.');
+    }
+  });
+
   $('share').addEventListener('click', (e) => {
     UI.copyText(location.href.split('#')[0] + '#' + encodeState(), e.currentTarget, 'Link to this design copied');
   });

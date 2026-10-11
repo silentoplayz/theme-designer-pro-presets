@@ -64,6 +64,18 @@ npm run build:catalog
 | `catalog.json` | Generated list of every preset (see above) |
 | `og-preview.png` | The image shown when someone shares a link to the site |
 
+### Install links
+
+**Install on my Open WebUI**, on gallery presets and in the Studio, opens the visitor's designer with an address ending in `#tdp-import=<kind>:<value>`. The visitor's Open WebUI address and whether to install to their own theme (`?scope=me`) or the instance theme are kept in this browser's `localStorage` under `tdp-install`, and nowhere else.
+
+| Kind | Value | What the designer does (event function v1.11.0 or later) |
+|---|---|---|
+| `theme`, `bundle` | The preset's raw GitHub address | Opens the theme Import dialog with the address filled in |
+| `canvas`, `css`, `gradient` | The preset's raw GitHub address | Opens that type's Import dialog with the address filled in |
+| `json` | A Studio theme, as base64url UTF-8 JSON | Offers it like a pasted theme, with the Canvas FX warning when it has a script |
+
+The visitor still chooses **Load URL** or confirms the import, so the designer's URL import valves apply. The Studio's **Submit to the gallery** opens the theme submission form with the name, author and JSON filled in from the address. When the JSON makes that address too long, it copies the JSON instead.
+
 ### Studio links
 
 The Studio opens with whatever a link hands it, so other pages can send a preset straight there:

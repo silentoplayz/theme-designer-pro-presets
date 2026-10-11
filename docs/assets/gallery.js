@@ -175,6 +175,7 @@
       <button type="button" class="card-open" aria-label="Details for ${UI.esc(name)}"></button>
       ${visual(item, category)}
       <div class="card-actions">
+        <button type="button" class="icon-btn" data-act="install" aria-label="Install ${UI.esc(name)} on your Open WebUI" title="Install on my Open WebUI">${ICONS.install}</button>
         <button type="button" class="icon-btn" data-act="copy" aria-label="Copy the import link for ${UI.esc(name)}" title="Copy import link">${ICONS.copy}</button>
         ${PREVIEWABLE.includes(category) ? `<button type="button" class="icon-btn" data-act="preview" aria-label="Full-screen preview of ${UI.esc(name)}" title="Full-screen preview">${ICONS.expand}</button>` : ''}
       </div>
@@ -240,6 +241,7 @@
     if (act) {
       if (act.dataset.act === 'copy') UI.copyText(item.importUrl, act, 'Import link copied. Paste it in the designer\'s Import dialog.');
       if (act.dataset.act === 'preview') openPreview(item);
+      if (act.dataset.act === 'install') UI.installPreset(item, state.category);
       return;
     }
     if (e.target.closest('.thumb-play')) return;
@@ -323,17 +325,19 @@
           `<button type="button" data-mode="${m}" aria-pressed="${i === 0}">${m === 'oled' ? 'OLED' : m[0].toUpperCase() + m.slice(1)}</button>`).join('')}</div>` : ''}
         ${item.description ? `<p class="drawer-desc">${UI.esc(item.description)}</p>` : ''}
         <div class="drawer-actions">
-          ${PREVIEWABLE.includes(cat) ? `<button type="button" class="btn btn-primary" data-act="preview">${ICONS.expand}Full-screen preview</button>` : ''}
+          <button type="button" class="btn btn-primary" data-act="install">${ICONS.install}Install on my Open WebUI</button>
+          ${PREVIEWABLE.includes(cat) ? `<button type="button" class="btn btn-ghost" data-act="preview">${ICONS.expand}Full-screen preview</button>` : ''}
           <button type="button" class="btn btn-ghost" data-act="copy">${ICONS.copy}Copy import link</button>
           ${STUDIO_PARAM[cat] ? `<a class="btn btn-ghost" href="../studio/#${STUDIO_PARAM[cat]}=${encodeURIComponent(item.file)}">Open in Studio</a>` : ''}
         </div>
+        <p class="install-note" id="drawer-install-note"></p>
         <div class="drawer-section">
           <span class="drawer-label">Import link</span>
           <div class="url-field"><code>${UI.esc(item.importUrl)}</code><button type="button" class="icon-btn" data-act="copy" aria-label="Copy the import link">${ICONS.copy}</button></div>
         </div>
         ${cat === 'themes' ? `<div class="drawer-section"><span class="drawer-label">Modes</span>${modeTable(item)}</div>` : ''}
         <div class="drawer-section">
-          <span class="drawer-label">How to import</span>
+          <span class="drawer-label">Or import it by hand</span>
           <ol class="howto">
             <li>Copy the import link above.</li>
             <li>In Theme Designer Pro, open <b>Import</b> and paste the link.</li>
@@ -347,8 +351,10 @@
 
     drawerContent.querySelectorAll('[data-act]').forEach((b) => b.addEventListener('click', () => {
       if (b.dataset.act === 'copy') UI.copyText(item.importUrl, b, 'Import link copied. Paste it in the designer\'s Import dialog.');
+      else if (b.dataset.act === 'install') UI.installPreset(item, cat);
       else openPreview(item);
     }));
+    renderInstallNote();
 
     const seg = $('drawer-modes');
     if (seg) {
@@ -369,6 +375,17 @@
     const fx = drawerContent.querySelector('.thumb-fx[data-fx]');
     if (fx && !UI.reducedMotion.matches) UI.live.play(fx, fx.getAttribute('data-fx'));
   }
+
+  function renderInstallNote() {
+    const note = $('drawer-install-note');
+    if (!note) return;
+    const t = UI.installTarget();
+    note.innerHTML = t
+      ? `Installs to <b>${UI.esc(UI.hostOf(t))}</b>, ${t.scope === 'instance' ? 'the instance theme' : 'your own theme'}. <button type="button" class="linklike" data-install-setup>Change</button>`
+      : 'The first time, you tell this site where your Open WebUI is. <button type="button" class="linklike" data-install-setup>Set it now</button>';
+    note.querySelector('[data-install-setup]').addEventListener('click', () => UI.openInstallSetup());
+  }
+  document.addEventListener('tdp-install-target', renderInstallNote);
 
   // ---- Controls ----
 
