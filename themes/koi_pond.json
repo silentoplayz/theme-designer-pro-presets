@@ -1,0 +1,245 @@
+{
+  "name": "Koi Pond",
+  "version": "1.0.0",
+  "targetVersion": "0.11.0",
+  "author": "silentoplayz (G30)",
+  "description": "Companion palette for the Koi Pond canvas. Cool pond-water teal on every surface, with text that reads like sunlight on the water; the gradient is the pond floor when the canvas is off. Dark and OLED carry the Koi Pond (WebGL) canvas itself; Light and Her keep the light pond-water gradient.",
+  "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/koi_pond.json",
+  "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
+  "dark": {
+    "h": 200,
+    "c": 45,
+    "l": 17,
+    "overrides": {
+      "--color-gray-50": "#e5f1f2",
+      "--color-gray-100": "#d8e4e5",
+      "--color-gray-200": "#d1dede",
+      "--color-gray-300": "#bbc7c7",
+      "--color-gray-400": "#91b2b4",
+      "--color-gray-500": "#79999b",
+      "--color-gray-600": "#456466",
+      "--color-gray-700": "#254c4e",
+      "--color-gray-800": "#073234",
+      "--color-gray-850": "#122323",
+      "--color-gray-900": "#031213",
+      "--color-gray-950": "#000a0b"
+    },
+    "customCSS": "",
+    "customCssEnabled": false,
+    "autoScope": true,
+    "locks": {},
+    "canvasEnabled": true,
+    "canvasScript": "/**\n * Title: Koi Pond (WebGL)\n * Description: A serene pond viewed from above. Shader-rendered koi with\n *   orange-and-cream patch patterns glide on smooth wander paths, tails\n *   wiggling with their speed, casting soft shadows on the pond bed.\n *   Caustic light webs dance across the water and refraction gently warps\n *   everything below the surface. Move your mouse near a koi and it will\n *   curiously follow; click the water to cast an expanding ripple ring that\n *   startles nearby fish into a quick dart. Occasionally a koi kisses the\n *   surface, leaving a small ambient dimple.\n *\n *   Showcases: WebGL SDF creatures, uniform-driven simulation, click ripples\n */\n\n/* ────────── CONFIGURABLE VARIABLES ────────── */\nconst FISH_COUNT       = 3;      // number of koi (shader is rebuilt from this)\nconst FISH_SIZE        = 0.055;  // koi half-length in scene units\nconst FISH_SPEED       = 0.07;   // cruise speed (scene units per second)\nconst MAX_RIPPLES      = 8;      // simultaneous ripple rings\nconst RIPPLE_SPEED     = 0.22;   // ripple expansion rate\nconst CAUSTIC_STRENGTH = 0.45;   // brightness of caustic light webs\nconst MOUSE_LURE_RANGE = 0.55;   // how close the cursor must be to attract a koi\nconst SCARE_FORCE      = 0.38;   // dart impulse when clicking near fish\n/* ──────────────────────────────────────────── */\n\nvar canvas, gl, program;\nvar uTime, uRes, uFish, uRipples;\nvar w = 0, h = 0, aspect = 1.6;\nvar t0 = 0, lastT = 0;\nvar mouse = { x: -9, y: -9, last: -999 };\nvar fish = [];\nvar ripples = [];\nvar fishData = new Float32Array(FISH_COUNT * 4);\nvar rippleData = new Float32Array(MAX_RIPPLES * 3);\nvar nextDimple = 0;\n\nsetInterval(function () { self.postMessage({ type: 'heartbeat' }); }, 1000);\n\nvar VERT = 'attribute vec2 a_pos;void main(){gl_Position=vec4(a_pos,0.0,1.0);}';\n\nvar FRAG = [\n\t'precision highp float;',\n\t'uniform float u_time;',\n\t'uniform vec2 u_res;',\n\t'uniform vec4 u_fish[' + FISH_COUNT + '];',\n\t'uniform vec3 u_ripples[' + MAX_RIPPLES + '];',\n\t'',\n\t'const float FL = ' + FISH_SIZE.toFixed(4) + ';',\n\t'',\n\t'float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}',\n\t'float noise(vec2 p){',\n\t'  vec2 i=floor(p),f=fract(p);',\n\t'  f=f*f*(3.0-2.0*f);',\n\t'  return mix(mix(hash(i),hash(i+vec2(1.0,0.0)),f.x),',\n\t'             mix(hash(i+vec2(0.0,1.0)),hash(i+vec2(1.0,1.0)),f.x),f.y);',\n\t'}',\n\t'float fbm(vec2 p){',\n\t'  float v=0.0,a=0.5;',\n\t'  for(int i=0;i<5;i++){v+=a*noise(p);p=mat2(1.6,1.2,-1.2,1.6)*p;a*=0.5;}',\n\t'  return v;',\n\t'}',\n\t'',\n\t'float caustic(vec2 p, float t){',\n\t'  float n1 = fbm(p*4.0 + vec2(t*0.10, t*0.06));',\n\t'  float n2 = fbm(p*4.0 + vec2(-t*0.07, t*0.09) + 4.7);',\n\t'  float c1 = pow(0.5 + 0.5*sin(n1*14.0 + t*0.6), 5.0);',\n\t'  float c2 = pow(0.5 + 0.5*sin(n2*14.0 - t*0.5), 5.0);',\n\t'  return min(c1*c2*3.0, 1.0);',\n\t'}',\n\t'',\n\t'vec2 rippleWarp(vec2 p, out float glow){',\n\t'  vec2 off = vec2(0.0);',\n\t'  glow = 0.0;',\n\t'  for (int i = 0; i < ' + MAX_RIPPLES + '; i++){',\n\t'    vec3 rp = u_ripples[i];',\n\t'    float act = step(0.0, rp.z);',\n\t'    vec2 d = p - rp.xy;',\n\t'    float dist = length(d) + 0.0001;',\n\t'    float rad = rp.z * ' + RIPPLE_SPEED.toFixed(3) + ';',\n\t'    float band = exp(-pow((dist - rad)*26.0, 2.0));',\n\t'    float dec = exp(-rp.z*1.4) * act;',\n\t'    off += (d/dist) * band * dec * 0.012;',\n\t'    glow += band * dec;',\n\t'  }',\n\t'  return p + off;',\n\t'}',\n\t'',\n\t'float fishBody(vec2 p, vec4 f, out vec2 lc){',\n\t'  vec2 d = p - f.xy;',\n\t'  float ca = cos(f.z), sa = sin(f.z);',\n\t'  vec2 l = vec2(ca*d.x + sa*d.y, -sa*d.x + ca*d.y);',\n\t'  float s = l.x / FL;',\n\t'  lc = vec2(s, l.y / FL);',\n\t'  if (s > 1.15 || s < -1.7 || abs(l.y) > FL*0.8) return 0.0;',\n\t'  float wig = sin(s*3.2 - f.w) * FL * 0.20 * (0.55 - 0.4*clamp(s, -1.0, 1.0));',\n\t'  float ly = abs(l.y - wig);',\n\t'  float e = 2.5 / u_res.y;',\n\t'  float bw = FL*0.36*sqrt(max(0.0, 1.0 - s*s)) * (0.62 + 0.38*smoothstep(-1.0, 0.4, s));',\n\t'  float body = smoothstep(bw + e, bw - e, ly) * smoothstep(1.02, 0.96, abs(s));',\n\t'  float ft = clamp((-s - 0.85)/0.7, 0.0, 1.0);',\n\t'  float tw = FL*0.30*ft;',\n\t'  float fin = smoothstep(tw + e, tw - e, ly) * step(0.02, ft) * smoothstep(1.6, 1.5, -s);',\n\t'  return max(body, fin*0.85);',\n\t'}',\n\t'',\n\t'void main(){',\n\t'  float t = u_time;',\n\t'  vec2 p = gl_FragCoord.xy / u_res.y;',\n\t'  float glow;',\n\t'  vec2 q = rippleWarp(p, glow);',\n\t'  vec2 wob = (vec2(noise(q*6.0 + t*0.25), noise(q*6.0 + 13.7 + t*0.22)) - 0.5) * 0.012;',\n\t'  vec2 wq = q + wob;',\n\t'',\n\t'  float depth = fbm(wq*2.2 + 3.1);',\n\t'  vec3 col = mix(vec3(0.012,0.075,0.085), vec3(0.035,0.16,0.15), depth);',\n\t'  col += vec3(0.02,0.05,0.05) * fbm(wq*5.0 - t*0.02);',\n\t'',\n\t'  vec2 lc;',\n\t'  for (int i = 0; i < ' + FISH_COUNT + '; i++){',\n\t'    vec4 f = u_fish[i];',\n\t'    float seed = float(i)*7.31;',\n\t'    float shA = fishBody(wq + vec2(0.013, -0.013), f, lc);',\n\t'    col = mix(col, col*0.45, shA*0.55);',\n\t'    float a = fishBody(wq, f, lc);',\n\t'    if (a > 0.003){',\n\t'      float patch = noise(lc*vec2(2.2, 5.5) + seed);',\n\t'      vec3 fc = mix(vec3(0.93,0.90,0.84), vec3(0.98,0.45,0.10), smoothstep(0.46,0.56,patch));',\n\t'      fc *= 0.82 + 0.28*noise(lc*vec2(6.0,9.0) + seed*1.7);',\n\t'      fc *= 0.85 + 0.15*smoothstep(-1.0, 1.0, lc.x);',\n\t'      col = mix(col, fc, a*0.92);',\n\t'    }',\n\t'  }',\n\t'',\n\t'  float ca = caustic(wq, t);',\n\t'  col += vec3(0.30,0.50,0.45) * ca * ' + CAUSTIC_STRENGTH.toFixed(3) + ';',\n\t'  col += vec3(0.50,0.75,0.70) * glow * 0.25;',\n\t'',\n\t'  vec2 vp = p - vec2(u_res.x/u_res.y*0.5, 0.5);',\n\t'  col *= 1.0 - dot(vp, vp)*0.5;',\n\t'  gl_FragColor = vec4(col, 1.0);',\n\t'}'\n].join('\\n');\n\nfunction compile(type, src) {\n\tvar s = gl.createShader(type);\n\tgl.shaderSource(s, src);\n\tgl.compileShader(s);\n\tif (!gl.getShaderParameter(s, gl.COMPILE_STATUS))\n\t\tthrow new Error(gl.getShaderInfoLog(s));\n\treturn s;\n}\n\nfunction initGL() {\n\tvar vs = compile(gl.VERTEX_SHADER, VERT);\n\tvar fs = compile(gl.FRAGMENT_SHADER, FRAG);\n\tprogram = gl.createProgram();\n\tgl.attachShader(program, vs);\n\tgl.attachShader(program, fs);\n\tgl.linkProgram(program);\n\tif (!gl.getProgramParameter(program, gl.LINK_STATUS))\n\t\tthrow new Error(gl.getProgramInfoLog(program));\n\tgl.useProgram(program);\n\tvar buf = gl.createBuffer();\n\tgl.bindBuffer(gl.ARRAY_BUFFER, buf);\n\tgl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);\n\tvar a = gl.getAttribLocation(program, 'a_pos');\n\tgl.enableVertexAttribArray(a);\n\tgl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);\n\tuTime = gl.getUniformLocation(program, 'u_time');\n\tuRes = gl.getUniformLocation(program, 'u_res');\n\tuFish = gl.getUniformLocation(program, 'u_fish[0]');\n\tuRipples = gl.getUniformLocation(program, 'u_ripples[0]');\n\tt0 = performance.now() / 1000;\n}\n\nfunction clamp(v, lo, hi) { return v < lo ? lo : (v > hi ? hi : v); }\n\nfunction pickWaypoint(f) {\n\tf.wx = 0.12 + Math.random() * (aspect - 0.24);\n\tf.wy = 0.12 + Math.random() * 0.76;\n}\n\nfunction initFish() {\n\tfish = [];\n\tfor (var i = 0; i < FISH_COUNT; i++) {\n\t\tvar f = {\n\t\t\tx: 0.2 + Math.random() * (aspect - 0.4),\n\t\t\ty: 0.15 + Math.random() * 0.7,\n\t\t\tvx: 0.02, vy: 0.0,\n\t\t\tphase: Math.random() * 6.28,\n\t\t\twx: 0, wy: 0\n\t\t};\n\t\tpickWaypoint(f);\n\t\tfish.push(f);\n\t}\n}\n\nfunction initRipples() {\n\tripples = [];\n\tfor (var i = 0; i < MAX_RIPPLES; i++) ripples.push({ x: 0, y: 0, age: -1 });\n\tfor (var j = 0; j < MAX_RIPPLES * 3; j++) rippleData[j] = -1;\n}\n\nfunction addRipple(x, y) {\n\tvar oldest = 0, oldestAge = -2;\n\tfor (var i = 0; i < MAX_RIPPLES; i++) {\n\t\tif (ripples[i].age < 0) { oldest = i; break; }\n\t\tif (ripples[i].age > oldestAge) { oldestAge = ripples[i].age; oldest = i; }\n\t}\n\tripples[oldest].x = x;\n\tripples[oldest].y = y;\n\tripples[oldest].age = 0;\n}\n\nfunction scare(x, y) {\n\tfor (var i = 0; i < FISH_COUNT; i++) {\n\t\tvar f = fish[i];\n\t\tvar dx = f.x - x, dy = f.y - y;\n\t\tvar d = Math.sqrt(dx * dx + dy * dy) || 0.0001;\n\t\tvar imp = SCARE_FORCE * Math.exp(-d * 4.0);\n\t\tf.vx += dx / d * imp;\n\t\tf.vy += dy / d * imp;\n\t}\n}\n\nfunction updateFish(dt, now) {\n\tfor (var i = 0; i < FISH_COUNT; i++) {\n\t\tvar f = fish[i];\n\t\tvar tx = f.wx, ty = f.wy;\n\t\tif (now - mouse.last < 3.0) {\n\t\t\tvar mdx = mouse.x - f.x, mdy = mouse.y - f.y;\n\t\t\tvar md = Math.sqrt(mdx * mdx + mdy * mdy);\n\t\t\tif (md < MOUSE_LURE_RANGE && md > 0.13) { tx = mouse.x; ty = mouse.y; }\n\t\t}\n\t\tvar dx = tx - f.x, dy = ty - f.y;\n\t\tvar d = Math.sqrt(dx * dx + dy * dy) || 0.0001;\n\t\tif (d < 0.06) pickWaypoint(f);\n\t\tvar sp = FISH_SPEED * (0.8 + 0.4 * Math.sin(f.phase * 0.13 + i * 2.1));\n\t\tvar k = Math.min(1, dt * 1.2);\n\t\tf.vx += (dx / d * sp - f.vx) * k;\n\t\tf.vy += (dy / d * sp - f.vy) * k;\n\t\tf.x = clamp(f.x + f.vx * dt, 0.05, aspect - 0.05);\n\t\tf.y = clamp(f.y + f.vy * dt, 0.06, 0.94);\n\t\tvar spd = Math.sqrt(f.vx * f.vx + f.vy * f.vy);\n\t\tf.phase += dt * (3.0 + spd * 45.0);\n\t\tfishData[i * 4] = f.x;\n\t\tfishData[i * 4 + 1] = f.y;\n\t\tfishData[i * 4 + 2] = Math.atan2(f.vy, f.vx);\n\t\tfishData[i * 4 + 3] = f.phase;\n\t}\n}\n\nfunction updateRipples(dt) {\n\tfor (var i = 0; i < MAX_RIPPLES; i++) {\n\t\tvar r = ripples[i];\n\t\tif (r.age >= 0) {\n\t\t\tr.age += dt;\n\t\t\tif (r.age > 3.2) r.age = -1;\n\t\t}\n\t\trippleData[i * 3] = r.x;\n\t\trippleData[i * 3 + 1] = r.y;\n\t\trippleData[i * 3 + 2] = r.age;\n\t}\n}\n\nfunction render() {\n\tvar now = performance.now() / 1000;\n\tvar dt = lastT ? Math.min(now - lastT, 0.1) : 0.016;\n\tlastT = now;\n\tupdateFish(dt, now);\n\tupdateRipples(dt);\n\tif (now > nextDimple) {\n\t\tvar f = fish[Math.floor(Math.random() * FISH_COUNT)];\n\t\taddRipple(f.x, f.y);\n\t\tnextDimple = now + 5 + Math.random() * 9;\n\t}\n\tgl.viewport(0, 0, w, h);\n\tgl.uniform1f(uTime, now - t0);\n\tgl.uniform2f(uRes, w, h);\n\tgl.uniform4fv(uFish, fishData);\n\tgl.uniform3fv(uRipples, rippleData);\n\tgl.drawArrays(gl.TRIANGLES, 0, 3);\n\trequestAnimationFrame(render);\n}\n\nfunction sceneX(px) { return px / h; }\nfunction sceneY(py) { return 1.0 - py / h; }\n\nself.onmessage = function (e) {\n\tswitch (e.data.type) {\n\t\tcase 'init':\n\t\t\tcanvas = e.data.canvas;\n\t\t\tw = e.data.width; h = e.data.height;\n\t\t\tcanvas.width = w; canvas.height = h;\n\t\t\taspect = w / h;\n\t\t\tgl = canvas.getContext('webgl2') || canvas.getContext('webgl');\n\t\t\tif (!gl) {\n\t\t\t\tvar c2 = canvas.getContext('2d');\n\t\t\t\tif (c2) {\n\t\t\t\t\tc2.fillStyle = '#04141a';\n\t\t\t\t\tc2.fillRect(0, 0, w, h);\n\t\t\t\t\tc2.fillStyle = '#ff4466';\n\t\t\t\t\tc2.font = '16px monospace';\n\t\t\t\t\tc2.textAlign = 'center';\n\t\t\t\t\tc2.fillText('WebGL not available', w / 2, h / 2);\n\t\t\t\t}\n\t\t\t\treturn;\n\t\t\t}\n\t\t\ttry {\n\t\t\t\tinitGL();\n\t\t\t\tinitFish();\n\t\t\t\tinitRipples();\n\t\t\t\tnextDimple = performance.now() / 1000 + 4;\n\t\t\t\trender();\n\t\t\t} catch (err) {\n\t\t\t\tself.postMessage({ type: 'error', message: 'Koi Pond shader: ' + err.message });\n\t\t\t}\n\t\t\tbreak;\n\n\t\tcase 'resize':\n\t\t\tw = e.data.width; h = e.data.height;\n\t\t\tcanvas.width = w; canvas.height = h;\n\t\t\taspect = w / h;\n\t\t\tbreak;\n\n\t\tcase 'mousemove':\n\t\t\tmouse.x = sceneX(e.data.x);\n\t\t\tmouse.y = sceneY(e.data.y);\n\t\t\tmouse.last = performance.now() / 1000;\n\t\t\tbreak;\n\n\t\tcase 'click':\n\t\t\tvar cx = sceneX(e.data.x), cy = sceneY(e.data.y);\n\t\t\taddRipple(cx, cy);\n\t\t\tscare(cx, cy);\n\t\t\tbreak;\n\t}\n};\n",
+    "canvasShowAuth": false,
+    "themeShowAuth": false,
+    "customCssShowAuth": false,
+    "gradientEnabled": true,
+    "gradientType": "linear",
+    "gradientAngle": 160,
+    "gradientStops": [
+      {
+        "color": "#041b1f",
+        "position": 0
+      },
+      {
+        "color": "#0a383d",
+        "position": 33
+      },
+      {
+        "color": "#062a2e",
+        "position": 66
+      },
+      {
+        "color": "#041b1f",
+        "position": 100
+      }
+    ],
+    "gradientIntensity": 100,
+    "gradientAnimation": null,
+    "gradientAnimationSpeed": 5,
+    "gradientShowAuth": true,
+    "gradientRadialPosX": 50,
+    "gradientRadialPosY": 50,
+    "gradientRadialShape": "ellipse",
+    "gradientRadialSize": "farthest-corner",
+    "gradientMeshPoints": [],
+    "gradientMeshBgColor": "#000000"
+  },
+  "light": {
+    "h": 200,
+    "c": 22,
+    "l": 97,
+    "overrides": {
+      "--color-gray-50": "#f8fdfd",
+      "--color-gray-100": "#eff5f5",
+      "--color-gray-200": "#e4e9e9",
+      "--color-gray-300": "#c4d5d5",
+      "--color-gray-400": "#99a8a9",
+      "--color-gray-500": "#6f7e7e",
+      "--color-gray-600": "#4d5b5c",
+      "--color-gray-700": "#3b4545",
+      "--color-gray-800": "#263030",
+      "--color-gray-850": "#1d2626",
+      "--color-gray-900": "#111a1b",
+      "--color-gray-950": "#070f0f"
+    },
+    "customCSS": "",
+    "customCssEnabled": false,
+    "autoScope": true,
+    "locks": {},
+    "canvasEnabled": false,
+    "canvasScript": "",
+    "canvasShowAuth": false,
+    "themeShowAuth": false,
+    "customCssShowAuth": false,
+    "gradientEnabled": true,
+    "gradientType": "linear",
+    "gradientAngle": 160,
+    "gradientStops": [
+      {
+        "color": "#eaf7f6",
+        "position": 0
+      },
+      {
+        "color": "#d3eeec",
+        "position": 33
+      },
+      {
+        "color": "#f2fbfa",
+        "position": 66
+      },
+      {
+        "color": "#eaf7f6",
+        "position": 100
+      }
+    ],
+    "gradientIntensity": 100,
+    "gradientAnimation": null,
+    "gradientAnimationSpeed": 5,
+    "gradientShowAuth": true,
+    "gradientRadialPosX": 50,
+    "gradientRadialPosY": 50,
+    "gradientRadialShape": "ellipse",
+    "gradientRadialSize": "farthest-corner",
+    "gradientMeshPoints": [],
+    "gradientMeshBgColor": "#000000"
+  },
+  "oled": {
+    "h": 200,
+    "c": 45,
+    "l": 0,
+    "overrides": {
+      "--color-gray-50": "#aebabb",
+      "--color-gray-100": "#a2aeae",
+      "--color-gray-200": "#9ba7a8",
+      "--color-gray-300": "#869292",
+      "--color-gray-400": "#5f7e80",
+      "--color-gray-500": "#486768",
+      "--color-gray-600": "#183637",
+      "--color-gray-700": "#0d1e1f",
+      "--color-gray-800": "#020707",
+      "--color-gray-850": "#000102",
+      "--color-gray-900": "#000000",
+      "--color-gray-950": "#000000"
+    },
+    "customCSS": "",
+    "customCssEnabled": false,
+    "autoScope": true,
+    "locks": {},
+    "canvasEnabled": true,
+    "canvasScript": "/**\n * Title: Koi Pond (WebGL)\n * Description: A serene pond viewed from above. Shader-rendered koi with\n *   orange-and-cream patch patterns glide on smooth wander paths, tails\n *   wiggling with their speed, casting soft shadows on the pond bed.\n *   Caustic light webs dance across the water and refraction gently warps\n *   everything below the surface. Move your mouse near a koi and it will\n *   curiously follow; click the water to cast an expanding ripple ring that\n *   startles nearby fish into a quick dart. Occasionally a koi kisses the\n *   surface, leaving a small ambient dimple.\n *\n *   Showcases: WebGL SDF creatures, uniform-driven simulation, click ripples\n */\n\n/* ────────── CONFIGURABLE VARIABLES ────────── */\nconst FISH_COUNT       = 3;      // number of koi (shader is rebuilt from this)\nconst FISH_SIZE        = 0.055;  // koi half-length in scene units\nconst FISH_SPEED       = 0.07;   // cruise speed (scene units per second)\nconst MAX_RIPPLES      = 8;      // simultaneous ripple rings\nconst RIPPLE_SPEED     = 0.22;   // ripple expansion rate\nconst CAUSTIC_STRENGTH = 0.45;   // brightness of caustic light webs\nconst MOUSE_LURE_RANGE = 0.55;   // how close the cursor must be to attract a koi\nconst SCARE_FORCE      = 0.38;   // dart impulse when clicking near fish\n/* ──────────────────────────────────────────── */\n\nvar canvas, gl, program;\nvar uTime, uRes, uFish, uRipples;\nvar w = 0, h = 0, aspect = 1.6;\nvar t0 = 0, lastT = 0;\nvar mouse = { x: -9, y: -9, last: -999 };\nvar fish = [];\nvar ripples = [];\nvar fishData = new Float32Array(FISH_COUNT * 4);\nvar rippleData = new Float32Array(MAX_RIPPLES * 3);\nvar nextDimple = 0;\n\nsetInterval(function () { self.postMessage({ type: 'heartbeat' }); }, 1000);\n\nvar VERT = 'attribute vec2 a_pos;void main(){gl_Position=vec4(a_pos,0.0,1.0);}';\n\nvar FRAG = [\n\t'precision highp float;',\n\t'uniform float u_time;',\n\t'uniform vec2 u_res;',\n\t'uniform vec4 u_fish[' + FISH_COUNT + '];',\n\t'uniform vec3 u_ripples[' + MAX_RIPPLES + '];',\n\t'',\n\t'const float FL = ' + FISH_SIZE.toFixed(4) + ';',\n\t'',\n\t'float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}',\n\t'float noise(vec2 p){',\n\t'  vec2 i=floor(p),f=fract(p);',\n\t'  f=f*f*(3.0-2.0*f);',\n\t'  return mix(mix(hash(i),hash(i+vec2(1.0,0.0)),f.x),',\n\t'             mix(hash(i+vec2(0.0,1.0)),hash(i+vec2(1.0,1.0)),f.x),f.y);',\n\t'}',\n\t'float fbm(vec2 p){',\n\t'  float v=0.0,a=0.5;',\n\t'  for(int i=0;i<5;i++){v+=a*noise(p);p=mat2(1.6,1.2,-1.2,1.6)*p;a*=0.5;}',\n\t'  return v;',\n\t'}',\n\t'',\n\t'float caustic(vec2 p, float t){',\n\t'  float n1 = fbm(p*4.0 + vec2(t*0.10, t*0.06));',\n\t'  float n2 = fbm(p*4.0 + vec2(-t*0.07, t*0.09) + 4.7);',\n\t'  float c1 = pow(0.5 + 0.5*sin(n1*14.0 + t*0.6), 5.0);',\n\t'  float c2 = pow(0.5 + 0.5*sin(n2*14.0 - t*0.5), 5.0);',\n\t'  return min(c1*c2*3.0, 1.0);',\n\t'}',\n\t'',\n\t'vec2 rippleWarp(vec2 p, out float glow){',\n\t'  vec2 off = vec2(0.0);',\n\t'  glow = 0.0;',\n\t'  for (int i = 0; i < ' + MAX_RIPPLES + '; i++){',\n\t'    vec3 rp = u_ripples[i];',\n\t'    float act = step(0.0, rp.z);',\n\t'    vec2 d = p - rp.xy;',\n\t'    float dist = length(d) + 0.0001;',\n\t'    float rad = rp.z * ' + RIPPLE_SPEED.toFixed(3) + ';',\n\t'    float band = exp(-pow((dist - rad)*26.0, 2.0));',\n\t'    float dec = exp(-rp.z*1.4) * act;',\n\t'    off += (d/dist) * band * dec * 0.012;',\n\t'    glow += band * dec;',\n\t'  }',\n\t'  return p + off;',\n\t'}',\n\t'',\n\t'float fishBody(vec2 p, vec4 f, out vec2 lc){',\n\t'  vec2 d = p - f.xy;',\n\t'  float ca = cos(f.z), sa = sin(f.z);',\n\t'  vec2 l = vec2(ca*d.x + sa*d.y, -sa*d.x + ca*d.y);',\n\t'  float s = l.x / FL;',\n\t'  lc = vec2(s, l.y / FL);',\n\t'  if (s > 1.15 || s < -1.7 || abs(l.y) > FL*0.8) return 0.0;',\n\t'  float wig = sin(s*3.2 - f.w) * FL * 0.20 * (0.55 - 0.4*clamp(s, -1.0, 1.0));',\n\t'  float ly = abs(l.y - wig);',\n\t'  float e = 2.5 / u_res.y;',\n\t'  float bw = FL*0.36*sqrt(max(0.0, 1.0 - s*s)) * (0.62 + 0.38*smoothstep(-1.0, 0.4, s));',\n\t'  float body = smoothstep(bw + e, bw - e, ly) * smoothstep(1.02, 0.96, abs(s));',\n\t'  float ft = clamp((-s - 0.85)/0.7, 0.0, 1.0);',\n\t'  float tw = FL*0.30*ft;',\n\t'  float fin = smoothstep(tw + e, tw - e, ly) * step(0.02, ft) * smoothstep(1.6, 1.5, -s);',\n\t'  return max(body, fin*0.85);',\n\t'}',\n\t'',\n\t'void main(){',\n\t'  float t = u_time;',\n\t'  vec2 p = gl_FragCoord.xy / u_res.y;',\n\t'  float glow;',\n\t'  vec2 q = rippleWarp(p, glow);',\n\t'  vec2 wob = (vec2(noise(q*6.0 + t*0.25), noise(q*6.0 + 13.7 + t*0.22)) - 0.5) * 0.012;',\n\t'  vec2 wq = q + wob;',\n\t'',\n\t'  float depth = fbm(wq*2.2 + 3.1);',\n\t'  vec3 col = mix(vec3(0.012,0.075,0.085), vec3(0.035,0.16,0.15), depth);',\n\t'  col += vec3(0.02,0.05,0.05) * fbm(wq*5.0 - t*0.02);',\n\t'',\n\t'  vec2 lc;',\n\t'  for (int i = 0; i < ' + FISH_COUNT + '; i++){',\n\t'    vec4 f = u_fish[i];',\n\t'    float seed = float(i)*7.31;',\n\t'    float shA = fishBody(wq + vec2(0.013, -0.013), f, lc);',\n\t'    col = mix(col, col*0.45, shA*0.55);',\n\t'    float a = fishBody(wq, f, lc);',\n\t'    if (a > 0.003){',\n\t'      float patch = noise(lc*vec2(2.2, 5.5) + seed);',\n\t'      vec3 fc = mix(vec3(0.93,0.90,0.84), vec3(0.98,0.45,0.10), smoothstep(0.46,0.56,patch));',\n\t'      fc *= 0.82 + 0.28*noise(lc*vec2(6.0,9.0) + seed*1.7);',\n\t'      fc *= 0.85 + 0.15*smoothstep(-1.0, 1.0, lc.x);',\n\t'      col = mix(col, fc, a*0.92);',\n\t'    }',\n\t'  }',\n\t'',\n\t'  float ca = caustic(wq, t);',\n\t'  col += vec3(0.30,0.50,0.45) * ca * ' + CAUSTIC_STRENGTH.toFixed(3) + ';',\n\t'  col += vec3(0.50,0.75,0.70) * glow * 0.25;',\n\t'',\n\t'  vec2 vp = p - vec2(u_res.x/u_res.y*0.5, 0.5);',\n\t'  col *= 1.0 - dot(vp, vp)*0.5;',\n\t'  gl_FragColor = vec4(col, 1.0);',\n\t'}'\n].join('\\n');\n\nfunction compile(type, src) {\n\tvar s = gl.createShader(type);\n\tgl.shaderSource(s, src);\n\tgl.compileShader(s);\n\tif (!gl.getShaderParameter(s, gl.COMPILE_STATUS))\n\t\tthrow new Error(gl.getShaderInfoLog(s));\n\treturn s;\n}\n\nfunction initGL() {\n\tvar vs = compile(gl.VERTEX_SHADER, VERT);\n\tvar fs = compile(gl.FRAGMENT_SHADER, FRAG);\n\tprogram = gl.createProgram();\n\tgl.attachShader(program, vs);\n\tgl.attachShader(program, fs);\n\tgl.linkProgram(program);\n\tif (!gl.getProgramParameter(program, gl.LINK_STATUS))\n\t\tthrow new Error(gl.getProgramInfoLog(program));\n\tgl.useProgram(program);\n\tvar buf = gl.createBuffer();\n\tgl.bindBuffer(gl.ARRAY_BUFFER, buf);\n\tgl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);\n\tvar a = gl.getAttribLocation(program, 'a_pos');\n\tgl.enableVertexAttribArray(a);\n\tgl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);\n\tuTime = gl.getUniformLocation(program, 'u_time');\n\tuRes = gl.getUniformLocation(program, 'u_res');\n\tuFish = gl.getUniformLocation(program, 'u_fish[0]');\n\tuRipples = gl.getUniformLocation(program, 'u_ripples[0]');\n\tt0 = performance.now() / 1000;\n}\n\nfunction clamp(v, lo, hi) { return v < lo ? lo : (v > hi ? hi : v); }\n\nfunction pickWaypoint(f) {\n\tf.wx = 0.12 + Math.random() * (aspect - 0.24);\n\tf.wy = 0.12 + Math.random() * 0.76;\n}\n\nfunction initFish() {\n\tfish = [];\n\tfor (var i = 0; i < FISH_COUNT; i++) {\n\t\tvar f = {\n\t\t\tx: 0.2 + Math.random() * (aspect - 0.4),\n\t\t\ty: 0.15 + Math.random() * 0.7,\n\t\t\tvx: 0.02, vy: 0.0,\n\t\t\tphase: Math.random() * 6.28,\n\t\t\twx: 0, wy: 0\n\t\t};\n\t\tpickWaypoint(f);\n\t\tfish.push(f);\n\t}\n}\n\nfunction initRipples() {\n\tripples = [];\n\tfor (var i = 0; i < MAX_RIPPLES; i++) ripples.push({ x: 0, y: 0, age: -1 });\n\tfor (var j = 0; j < MAX_RIPPLES * 3; j++) rippleData[j] = -1;\n}\n\nfunction addRipple(x, y) {\n\tvar oldest = 0, oldestAge = -2;\n\tfor (var i = 0; i < MAX_RIPPLES; i++) {\n\t\tif (ripples[i].age < 0) { oldest = i; break; }\n\t\tif (ripples[i].age > oldestAge) { oldestAge = ripples[i].age; oldest = i; }\n\t}\n\tripples[oldest].x = x;\n\tripples[oldest].y = y;\n\tripples[oldest].age = 0;\n}\n\nfunction scare(x, y) {\n\tfor (var i = 0; i < FISH_COUNT; i++) {\n\t\tvar f = fish[i];\n\t\tvar dx = f.x - x, dy = f.y - y;\n\t\tvar d = Math.sqrt(dx * dx + dy * dy) || 0.0001;\n\t\tvar imp = SCARE_FORCE * Math.exp(-d * 4.0);\n\t\tf.vx += dx / d * imp;\n\t\tf.vy += dy / d * imp;\n\t}\n}\n\nfunction updateFish(dt, now) {\n\tfor (var i = 0; i < FISH_COUNT; i++) {\n\t\tvar f = fish[i];\n\t\tvar tx = f.wx, ty = f.wy;\n\t\tif (now - mouse.last < 3.0) {\n\t\t\tvar mdx = mouse.x - f.x, mdy = mouse.y - f.y;\n\t\t\tvar md = Math.sqrt(mdx * mdx + mdy * mdy);\n\t\t\tif (md < MOUSE_LURE_RANGE && md > 0.13) { tx = mouse.x; ty = mouse.y; }\n\t\t}\n\t\tvar dx = tx - f.x, dy = ty - f.y;\n\t\tvar d = Math.sqrt(dx * dx + dy * dy) || 0.0001;\n\t\tif (d < 0.06) pickWaypoint(f);\n\t\tvar sp = FISH_SPEED * (0.8 + 0.4 * Math.sin(f.phase * 0.13 + i * 2.1));\n\t\tvar k = Math.min(1, dt * 1.2);\n\t\tf.vx += (dx / d * sp - f.vx) * k;\n\t\tf.vy += (dy / d * sp - f.vy) * k;\n\t\tf.x = clamp(f.x + f.vx * dt, 0.05, aspect - 0.05);\n\t\tf.y = clamp(f.y + f.vy * dt, 0.06, 0.94);\n\t\tvar spd = Math.sqrt(f.vx * f.vx + f.vy * f.vy);\n\t\tf.phase += dt * (3.0 + spd * 45.0);\n\t\tfishData[i * 4] = f.x;\n\t\tfishData[i * 4 + 1] = f.y;\n\t\tfishData[i * 4 + 2] = Math.atan2(f.vy, f.vx);\n\t\tfishData[i * 4 + 3] = f.phase;\n\t}\n}\n\nfunction updateRipples(dt) {\n\tfor (var i = 0; i < MAX_RIPPLES; i++) {\n\t\tvar r = ripples[i];\n\t\tif (r.age >= 0) {\n\t\t\tr.age += dt;\n\t\t\tif (r.age > 3.2) r.age = -1;\n\t\t}\n\t\trippleData[i * 3] = r.x;\n\t\trippleData[i * 3 + 1] = r.y;\n\t\trippleData[i * 3 + 2] = r.age;\n\t}\n}\n\nfunction render() {\n\tvar now = performance.now() / 1000;\n\tvar dt = lastT ? Math.min(now - lastT, 0.1) : 0.016;\n\tlastT = now;\n\tupdateFish(dt, now);\n\tupdateRipples(dt);\n\tif (now > nextDimple) {\n\t\tvar f = fish[Math.floor(Math.random() * FISH_COUNT)];\n\t\taddRipple(f.x, f.y);\n\t\tnextDimple = now + 5 + Math.random() * 9;\n\t}\n\tgl.viewport(0, 0, w, h);\n\tgl.uniform1f(uTime, now - t0);\n\tgl.uniform2f(uRes, w, h);\n\tgl.uniform4fv(uFish, fishData);\n\tgl.uniform3fv(uRipples, rippleData);\n\tgl.drawArrays(gl.TRIANGLES, 0, 3);\n\trequestAnimationFrame(render);\n}\n\nfunction sceneX(px) { return px / h; }\nfunction sceneY(py) { return 1.0 - py / h; }\n\nself.onmessage = function (e) {\n\tswitch (e.data.type) {\n\t\tcase 'init':\n\t\t\tcanvas = e.data.canvas;\n\t\t\tw = e.data.width; h = e.data.height;\n\t\t\tcanvas.width = w; canvas.height = h;\n\t\t\taspect = w / h;\n\t\t\tgl = canvas.getContext('webgl2') || canvas.getContext('webgl');\n\t\t\tif (!gl) {\n\t\t\t\tvar c2 = canvas.getContext('2d');\n\t\t\t\tif (c2) {\n\t\t\t\t\tc2.fillStyle = '#04141a';\n\t\t\t\t\tc2.fillRect(0, 0, w, h);\n\t\t\t\t\tc2.fillStyle = '#ff4466';\n\t\t\t\t\tc2.font = '16px monospace';\n\t\t\t\t\tc2.textAlign = 'center';\n\t\t\t\t\tc2.fillText('WebGL not available', w / 2, h / 2);\n\t\t\t\t}\n\t\t\t\treturn;\n\t\t\t}\n\t\t\ttry {\n\t\t\t\tinitGL();\n\t\t\t\tinitFish();\n\t\t\t\tinitRipples();\n\t\t\t\tnextDimple = performance.now() / 1000 + 4;\n\t\t\t\trender();\n\t\t\t} catch (err) {\n\t\t\t\tself.postMessage({ type: 'error', message: 'Koi Pond shader: ' + err.message });\n\t\t\t}\n\t\t\tbreak;\n\n\t\tcase 'resize':\n\t\t\tw = e.data.width; h = e.data.height;\n\t\t\tcanvas.width = w; canvas.height = h;\n\t\t\taspect = w / h;\n\t\t\tbreak;\n\n\t\tcase 'mousemove':\n\t\t\tmouse.x = sceneX(e.data.x);\n\t\t\tmouse.y = sceneY(e.data.y);\n\t\t\tmouse.last = performance.now() / 1000;\n\t\t\tbreak;\n\n\t\tcase 'click':\n\t\t\tvar cx = sceneX(e.data.x), cy = sceneY(e.data.y);\n\t\t\taddRipple(cx, cy);\n\t\t\tscare(cx, cy);\n\t\t\tbreak;\n\t}\n};\n",
+    "canvasShowAuth": false,
+    "themeShowAuth": false,
+    "customCssShowAuth": false,
+    "gradientEnabled": true,
+    "gradientType": "linear",
+    "gradientAngle": 160,
+    "gradientStops": [
+      {
+        "color": "#000000",
+        "position": 0
+      },
+      {
+        "color": "#000000",
+        "position": 33
+      },
+      {
+        "color": "#000000",
+        "position": 66
+      },
+      {
+        "color": "#000000",
+        "position": 100
+      }
+    ],
+    "gradientIntensity": 100,
+    "gradientAnimation": null,
+    "gradientAnimationSpeed": 5,
+    "gradientShowAuth": true,
+    "gradientRadialPosX": 50,
+    "gradientRadialPosY": 50,
+    "gradientRadialShape": "ellipse",
+    "gradientRadialSize": "farthest-corner",
+    "gradientMeshPoints": [],
+    "gradientMeshBgColor": "#000000"
+  },
+  "her": {
+    "h": 200,
+    "c": 22,
+    "l": 95,
+    "overrides": {
+      "--color-gray-50": "#f8fdfd",
+      "--color-gray-100": "#eff5f5",
+      "--color-gray-200": "#e4e9e9",
+      "--color-gray-300": "#c4d5d5",
+      "--color-gray-400": "#99a8a9",
+      "--color-gray-500": "#6f7e7e",
+      "--color-gray-600": "#4d5b5c",
+      "--color-gray-700": "#3b4545",
+      "--color-gray-800": "#263030",
+      "--color-gray-850": "#1d2626",
+      "--color-gray-900": "#111a1b",
+      "--color-gray-950": "#070f0f"
+    },
+    "customCSS": "",
+    "customCssEnabled": false,
+    "autoScope": true,
+    "locks": {},
+    "canvasEnabled": false,
+    "canvasScript": "",
+    "canvasShowAuth": false,
+    "themeShowAuth": false,
+    "customCssShowAuth": false,
+    "gradientEnabled": true,
+    "gradientType": "linear",
+    "gradientAngle": 160,
+    "gradientStops": [
+      {
+        "color": "#eaf7f6",
+        "position": 0
+      },
+      {
+        "color": "#d3eeec",
+        "position": 33
+      },
+      {
+        "color": "#f2fbfa",
+        "position": 66
+      },
+      {
+        "color": "#eaf7f6",
+        "position": 100
+      }
+    ],
+    "gradientIntensity": 100,
+    "gradientAnimation": null,
+    "gradientAnimationSpeed": 5,
+    "gradientShowAuth": true,
+    "gradientRadialPosX": 50,
+    "gradientRadialPosY": 50,
+    "gradientRadialShape": "ellipse",
+    "gradientRadialSize": "farthest-corner",
+    "gradientMeshPoints": [],
+    "gradientMeshBgColor": "#000000"
+  }
+}
