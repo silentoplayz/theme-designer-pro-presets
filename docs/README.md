@@ -1,18 +1,14 @@
-# Preset Gallery (GitHub Pages site)
+# Theme Designer Pro website
 
-The browsable **[Theme Designer Pro Preset Gallery](https://silentoplayz.github.io/theme-designer-pro-presets/)** — a dependency-free static site that lets you search, filter, and **live-preview** every theme, Canvas FX animation, CSS preset, and gradient in this repository before importing it.
+The **[Theme Designer Pro website](https://silentoplayz.github.io/theme-designer-pro-presets/)**: a home page with a live demo and install steps, and the **[preset gallery](https://silentoplayz.github.io/theme-designer-pro-presets/gallery/)**, where you can search, filter and **live-preview** every theme, Canvas FX animation, CSS preset and gradient in this repository before importing it. It's plain HTML, CSS and JavaScript, with no build step and no dependencies.
 
-This directory is published to GitHub Pages by the [`deploy-pages.yml`](../.github/workflows/deploy-pages.yml) workflow on every push that touches `docs/**`.
+The [`deploy-pages.yml`](../.github/workflows/deploy-pages.yml) workflow publishes this directory to GitHub Pages on every push that touches `docs/**`.
 
 ---
 
-## 🌐 Running the gallery locally
+## 🌐 Running the site locally
 
-The site is plain HTML/CSS/JS with **no build step**, but it **cannot be opened directly from the filesystem**. `app.js` does `fetch('catalog.json')`, and browsers block `fetch()` over the `file://` protocol — opening `index.html` with a double-click gives you a permanently blank "Loading presets…" screen. You must serve `docs/` over HTTP.
-
-Pick whichever server you have. Run it **from inside this `docs/` directory**, then open the URL it prints.
-
-**Python 3** (installed almost everywhere):
+`fetch()` doesn't work over `file://`, so opening `index.html` by double-clicking it leaves the pages empty. Serve this `docs/` directory over HTTP instead, with whichever server you have, and open the URL it prints:
 
 ```bash
 cd docs
@@ -20,47 +16,34 @@ python3 -m http.server 8000
 # → http://localhost:8000
 ```
 
-**Node.js:**
-
-```bash
-cd docs
-npx serve .
-# or: npx http-server .
-```
-
-**PHP:**
-
-```bash
-cd docs
-php -S localhost:8000
-```
+`npx serve .` and `php -S localhost:8000` work too.
 
 > [!TIP]
-> `catalog.json` is committed to the repo, so a fresh clone runs immediately — you do **not** need to build anything first.
+> `catalog.json` is committed to the repo, so a fresh clone runs right away. You don't need to build anything first.
 
 > [!NOTE]
-> **Live previews require an internet connection.** When you click **Preview** on a card, the gallery fetches that preset's raw file from `raw.githubusercontent.com` (which sends `Access-Control-Allow-Origin: *`, so it works cross-origin). The gallery listing itself works offline; individual previews will not.
+> **Previews need an internet connection.** Canvas FX scripts, themes and gradients load from `raw.githubusercontent.com` when you preview them. On `localhost`, the Open WebUI logo inside the mock chat shows as a broken image: the browser won't let the sandboxed preview frame load anything from your own machine. It shows on the published site.
 
 ### Hard-refresh after editing
 
-`preview.js` and `style.css` are aggressively cached by the browser. If a change to those files doesn't show up, hard-refresh (`Ctrl+Shift+R` / `Cmd+Shift+R`) or disable cache in DevTools.
+Browsers cache the scripts and the stylesheet hard. If a change doesn't show, hard-refresh with `Ctrl+Shift+R` (`Cmd+Shift+R` on a Mac).
 
 ---
 
 ## 🔄 Regenerating `catalog.json`
 
-The gallery renders from `catalog.json`, a manifest of every preset built by [`scripts/build-catalog.js`](../scripts/build-catalog.js). **CI rebuilds it automatically** on every push to `main`, so you normally never touch it by hand.
+Both pages draw from `catalog.json`, a list of every preset that [`scripts/build-catalog.js`](../scripts/build-catalog.js) builds. **CI rebuilds it** on every push to `main` that touches presets or scripts, so you don't normally edit it by hand.
 
-If you want to preview presets you've just added locally *before* pushing:
+To preview presets you just added, before you push:
 
 ```bash
 # from the repo root
-npm install          # first time only (installs the build deps)
+npm install          # first time only
 npm run build:catalog
 ```
 
 > [!WARNING]
-> Do **not** commit a locally regenerated `catalog.json` (or bundles/manifest/badges). CI regenerates all of them on push, and committing your local copy causes merge conflicts on the next build. Rebuild it to test, then discard the change (`git checkout docs/catalog.json`) before committing.
+> Don't commit a catalog you regenerated locally. CI regenerates it (and the bundles, manifest and badges) on push, and a local copy causes merge conflicts on the next build. Rebuild to test, then discard it with `git checkout docs/catalog.json` before you commit.
 
 ---
 
@@ -68,23 +51,38 @@ npm run build:catalog
 
 | File | Purpose |
 |---|---|
-| `index.html` | Page structure — header, category tabs, toolbar, card grid, detail modal, and the live-preview overlay |
-| `app.js` | Gallery logic — fetches `catalog.json`, renders cards, search/filter/sort, shareable URL hash state, detail modals |
-| `preview.js` | The live-preview engine — renders themes/CSS on a mock Open WebUI chat, runs Canvas FX in a Web Worker, and composites gradients, all in a sandboxed iframe |
-| `style.css` | All styling for the gallery and preview overlay |
-| `catalog.json` | Generated manifest of every preset (see above) — the site's data source |
-| `favicon.svg` | Site icon |
-| `og-preview.png` | Open Graph / social share preview image |
+| `index.html` | The home page: live demo, features, install steps. Also forwards old gallery links (`/#canvasFx?q=…`) to the gallery. |
+| `gallery/index.html` | The preset gallery: type tabs, search, sort, filters, the detail drawer and the full-screen preview |
+| `assets/site.css` | All styling for both pages |
+| `assets/palette.js` | The site's own palette. Every color in `site.css` comes from one hue and one chroma, which the home page's sliders change and the browser remembers |
+| `assets/preview.js` | The preview engine: the designer's palette and gradient math, the mock Open WebUI chat, and the full-screen preview |
+| `assets/ui.js` | Pieces both pages share: theme thumbnails, gradient swatches, Canvas FX thumbnails that play on hover, copying, the header |
+| `assets/home.js` | The home page's demo, palette ramp and preset strips |
+| `assets/gallery.js` | The gallery's filtering, cards, drawer and shareable links |
+| `catalog.json` | Generated list of every preset (see above) |
+| `og-preview.png` | The image shown when someone shares a link to the site |
+
+### Gallery links
+
+The gallery keeps its state in the address, so any view can be shared:
+
+```
+gallery/#canvasFx?q=aurora&sort=newest
+gallery/#themes?filter=canvas-fx
+gallery/#gradients?p=electric_aurora.json     ← opens that preset's details
+```
 
 ---
 
-## ✨ Live preview — how it works
+## ✨ Live preview: how it works
 
-The preview overlay reproduces how a preset looks **inside Open WebUI** without embedding the real app:
+The previews show how a preset looks **inside Open WebUI** without running the real app:
 
-- **Themes / CSS** render on a mock chat whose layout and metrics are ported from the Open WebUI source (sidebar, message bubbles, code blocks, input bar). Sidebar chats are clickable, and dark/OLED/light/her mode pills let you compare modes. CSS previews are labelled *Approximate* — a preset targeting a selector the mock doesn't contain has nothing to paint.
-- **Canvas FX** run in a real `OffscreenCanvas` **Web Worker** — the same execution model the designer uses — with mouse/touch input bridged in. There is intentionally **no main-thread fallback**, so unsupported browsers see a notice instead of gallery scripts running in page scope.
-- **Gradients** are generated with the designer's exact `buildGradientCss` math (intensity, linear/radial/mesh, animation).
-- Everything runs inside a sandboxed, opaque-origin `<iframe>`, and preset CSS is sanitized against `</style>` breakout.
+- **Themes and CSS presets** render on a mock chat whose layout and sizes are copied from the Open WebUI source: sidebar, message bubbles, code blocks and the input bar. Sidebar chats are clickable, and mode pills switch between Dark, OLED, Light and Her. A preset that styles something the mock doesn't have has nothing to paint, so previews are labelled *Approximate*.
+- **Canvas FX** run in a real Web Worker on an `OffscreenCanvas`, the same way the designer runs them, with mouse and touch input passed in. There's deliberately **no fallback that runs them on the page itself**, so browsers without `OffscreenCanvas` see a notice instead. In the gallery, a script plays when you hover its card (or tap its play button), one at a time.
+- **Gradients** use the designer's own `buildGradientCss` math: intensity, linear, radial, mesh and animation.
+- Every preview runs in a sandboxed `<iframe>` with no origin of its own, and preset CSS can't break out of its `<style>` tag.
 
-See [`../CONTRIBUTING.md`](../CONTRIBUTING.md) for how to submit presets that show up here.
+The home page's demo uses the same mock. Its sliders send the new palette into the running mock instead of rebuilding it, and it stops its animation while it's scrolled out of view.
+
+See [`../CONTRIBUTING.md`](../CONTRIBUTING.md) to submit presets that show up here.

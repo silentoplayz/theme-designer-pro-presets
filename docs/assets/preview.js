@@ -7,6 +7,9 @@
 (function () {
   'use strict';
 
+  // The mock's logo resolves against this script, so it loads from any page
+  const LOGO = new URL('owui-logo.png', (document.currentScript && document.currentScript.src) || location.href).href;
+
   // ---- OKLCH palette math (mirrors the designer's generator) ----
 
   const STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 850, 900, 950];
@@ -393,7 +396,7 @@
   function aiRowMulti(variants) {
     var n = variants.length;
     return '<div class="message-listitem group"><div class="msg">' +
-      '<div class="ai-avatar"><img src="owui-logo.png" alt=""></div>' +
+      '<div class="ai-avatar"><img src="' + LOGO + '" alt=""></div>' +
       '<div class="ai-col flex-auto w-0 pl-1 relative">' +
       '<div class="ai-model">Preview Model</div>' +
       '<div class="branches">' +
@@ -838,7 +841,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
 <div class="app">
   <div class="sidebar-rail">
     <div class="rail-group">
-      <span class="rail-btn lg rail-logo" data-tip="Open Sidebar" data-tip-placement="right"><span><img src="owui-logo.png" alt="">${SVG.panel}</span></span>
+      <span class="rail-btn lg rail-logo" data-tip="Open Sidebar" data-tip-placement="right"><span><img src="${LOGO}" alt="">${SVG.panel}</span></span>
       <span class="rail-btn rail-action" data-chat="new" data-tip="New Chat" data-tip-placement="right" style="margin-top:4px"><span>${SVG.editPencil}</span></span>
       <span class="rail-btn rail-action" data-tip="Search" data-tip-placement="right"><span>${SVG.search}</span></span>
       <span class="rail-btn rail-action" data-tip="Notes" data-tip-placement="right"><span>${SVG.notes}</span></span>
@@ -849,7 +852,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
   </div>
   <div id="backdrop"></div>
   <div class="sidebar-panel" id="sidebar">
-    <div class="brand"><div class="brand-dot"><img src="owui-logo.png" alt=""></div><span class="brand-name">Open WebUI</span><span class="panel-icon" data-tip="Close Sidebar">${SVG.panel}</span></div>
+    <div class="brand"><div class="brand-dot"><img src="${LOGO}" alt=""></div><span class="brand-name">Open WebUI</span><span class="panel-icon" data-tip="Close Sidebar">${SVG.panel}</span></div>
     <div class="side-item" data-chat="new">${SVG.editPencil} <span class="label">New Chat</span></div>
     <div class="side-item">${SVG.search} <span class="label">Search</span></div>
     <div class="side-item">${SVG.notes} <span class="label">Notes</span></div>
@@ -879,16 +882,16 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
     <div id="messages-container">
       ${userRow('Show me what this preset looks like on a real conversation.', false)}
       ${aiRow('Response Speed: 104.3 t/s | Total Duration: 2.418s | Prompt Evals: 147 | Eval Count: 236 | Session: 1854 tokens',
-        '<p>Here you go — this mock chat mirrors Open WebUI\'s layout: <b>sidebar</b>, <b>message bubbles</b>, <code>inline code</code>, and the input bar below.</p>' +
+        '<p>Here you go: this mock chat mirrors Open WebUI\'s layout: <b>sidebar</b>, <b>message bubbles</b>, <code>inline code</code>, and the input bar below.</p>' +
         '<div class="code-block"><div class="code-block-header"><span>javascript</span><span class="cb-action">Copy</span></div><pre>const theme = \'applied\';</pre></div>' +
-        '<p>Every surface is painted by the preset\'s <code>--color-gray-*</code> ramp — the same variables the designer generates.</p>',
+        '<p>Every surface is painted by the preset\'s <code>--color-gray-*</code> ramp, the same variables the designer generates.</p>',
         null,
-        { seconds: 6, body: 'The user wants to see the preset on realistic chat content. I should show the layout pieces the theme actually paints — the sidebar, a user bubble, inline code, a fenced code block, and the input shell — so every themed surface is visible at once.' })}
+        { seconds: 6, body: 'The user wants to see the preset on realistic chat content. I should show the layout pieces the theme actually paints: the sidebar, a user bubble, inline code, a fenced code block, and the input shell, so every themed surface is visible at once.' })}
       ${userRow('Nice. The palette applies to every surface?', true)}
       ${aiRowMulti([
         {
           stats: 'Response Speed: 98.7 t/s | Total Duration: 1.9s | Eval Count: 164 | Session: 2018 tokens',
-          body: '<p><b>Exactly</b> — backgrounds, borders, and text all come from the preset, and Canvas FX or gradients render behind the whole interface.</p>',
+          body: '<p><b>Exactly.</b> Backgrounds, borders, and text all come from the preset, and Canvas FX or gradients render behind the whole interface.</p>',
           fups: [
             'How do I import one of these presets into my instance?',
             'Which presets look best with structural transparency enabled?',
@@ -898,7 +901,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
         },
         {
           stats: 'Response Speed: 101.2 t/s | Total Duration: 2.3s | Eval Count: 189 | Session: 2043 tokens',
-          body: '<p>It does — the designer emits one <code>--color-gray-*</code> ramp per mode, and every surface here reads from it: backgrounds, borders, bubbles, even this pager. Regenerate a response and the palette holds.</p>',
+          body: '<p>It does. The designer emits one <code>--color-gray-*</code> ramp per mode, and every surface here reads from it: backgrounds, borders, bubbles, even this pager. Regenerate a response and the palette holds.</p>',
           fups: [
             'Do regenerated responses keep the same theme variables?',
             'Which mode should I preview first for a new preset?',
@@ -1025,7 +1028,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   function aiMulti(variants) {
     var n = variants.length;
     return '<div class="message-listitem group"><div class="msg">' +
-      '<div class="ai-avatar"><img src="owui-logo.png" alt=""></div>' +
+      '<div class="ai-avatar"><img src="${LOGO}" alt=""></div>' +
       '<div class="ai-col flex-auto w-0 pl-1 relative">' +
       '<div class="ai-model">Preview Model</div>' +
       '<div class="branches">' +
@@ -1074,10 +1077,10 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       html: user('Give me some Canvas FX concepts that react to the conversation.') +
         ai('Response Speed: 96.2 t/s | Total Duration: 4.7s | Eval Count: 412 | Session: 3188 tokens',
           '<p>A few <b>context-aware</b> favorites:</p>' +
-          '<ul><li><b>Sunflower</b> — seed to full bloom as tokens accumulate</li>' +
-          '<li><b>Mushroom farm</b> — mycelium spreads with every reply</li>' +
-          '<li><b>Hourglass</b> — sand drains as the window fills</li></ul>' +
-          '<blockquote>Any metaphor with a clear empty-to-full progression works — the engine streams live token counts to your script.</blockquote>' +
+          '<ul><li><b>Sunflower</b>: seed to full bloom as tokens accumulate</li>' +
+          '<li><b>Mushroom farm</b>: mycelium spreads with every reply</li>' +
+          '<li><b>Hourglass</b>: sand drains as the window fills</li></ul>' +
+          '<blockquote>Any metaphor with a clear empty-to-full progression works. The engine streams live token counts to your script.</blockquote>' +
           '<p>All of them fall back to <code>estimatedTokens</code> when exact usage data is unavailable.</p>',
           ['What data does the engine stream to my script?',
            'How expensive are these effects on a laptop GPU?',
@@ -1090,17 +1093,17 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
           {
             stats: 'Response Speed: 101.4 t/s | Total Duration: 2.2s | Eval Count: 198 | Session: 1544 tokens',
             body: '<p>Three directions worth trying:</p>' +
-              '<ol><li><b>Deep linear</b> — near-black corners into a saturated core</li>' +
-              '<li><b>Radial glow</b> — a soft light source behind the input bar</li>' +
-              '<li><b>Mesh</b> — several drifting color points for an aurora feel</li></ol>' +
-              '<p>Browse the <a>preset gallery</a> for ready-made packs — every one imports with a single URL.</p>',
+              '<ol><li><b>Deep linear</b>: near-black corners into a saturated core</li>' +
+              '<li><b>Radial glow</b>: a soft light source behind the input bar</li>' +
+              '<li><b>Mesh</b>: several drifting color points for an aurora feel</li></ol>' +
+              '<p>Browse the <a>preset gallery</a> for ready-made packs. Every one imports with a single URL.</p>',
             fups: ['How do I animate a gradient without it feeling busy?',
               'Which gradients hold up in light mode?',
               'Can I export a gradient I built back out as a preset?'],
           },
           {
             stats: 'Response Speed: 97.8 t/s | Total Duration: 2.6s | Eval Count: 214 | Session: 1602 tokens',
-            body: '<p>Regenerated take: anchor a <b>radial glow</b> behind the input bar first, then layer a slow mesh drift over it — depth without motion sickness.</p>' +
+            body: '<p>Regenerated take: anchor a <b>radial glow</b> behind the input bar first, then layer a slow mesh drift over it for depth without motion sickness.</p>' +
               '<p>Keep the darkest stop near the sidebar so text stays readable, and preview both <code>dark</code> and <code>light</code> before committing.</p>',
             fups: ['What intensity works best for mesh gradients?',
               'Can the gradient animate only when the chat is idle?'],
@@ -1113,7 +1116,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
         ai('Response Speed: 108.9 t/s | Total Duration: 2.8s | Eval Count: 264 | Session: 2035 tokens',
           '<h4>The structural layer</h4>' +
           '<p>When Canvas FX or a gradient is active, layout containers turn <code>transparent</code> so the effect shines through, while the sidebar keeps a frosted-glass backdrop for readability.</p>' +
-          '<p>Portaled menus and dialogs live <b>outside</b> the app container, so they stay opaque — no unreadable dropdowns.</p>',
+          '<p>Portaled menus and dialogs live <b>outside</b> the app container, so they stay opaque and every dropdown stays readable.</p>',
           ['Which containers get transparency applied?',
            'How do I keep code blocks readable over an effect?',
            'Does the frosted sidebar cost much performance?'],
@@ -1124,10 +1127,10 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       html: user('Remind me what this gallery can preview.') +
         ai('Response Speed: 99.1 t/s | Total Duration: 1.6s | Eval Count: 142 | Session: 1210 tokens',
           '<p>Everything, live:</p>' +
-          '<ul><li><b>Themes</b> — full palette on this mock UI, per mode</li>' +
-          '<li><b>Canvas FX</b> — real Web Worker execution behind the chat</li>' +
-          '<li><b>CSS presets</b> — applied to genuine Open WebUI markup</li>' +
-          '<li><b>Gradients</b> — exact designer math, animation included</li></ul>',
+          '<ul><li><b>Themes</b>: full palette on this mock UI, per mode</li>' +
+          '<li><b>Canvas FX</b>: real Web Worker execution behind the chat</li>' +
+          '<li><b>CSS presets</b>: applied to genuine Open WebUI markup</li>' +
+          '<li><b>Gradients</b>: exact designer math, animation included</li></ul>',
           ['How do I submit a preset to this gallery?',
            'Can I preview a preset before importing it?',
            'What makes a good Canvas FX submission?'])
@@ -1136,7 +1139,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       title: 'New Chat',
       html: '<div class="placeholder">' +
         '<div class="ph-head">' +
-        '<div class="ph-logo"><img src="owui-logo.png" alt=""></div>' +
+        '<div class="ph-logo"><img src="${LOGO}" alt=""></div>' +
         '<div class="ph-model">Preview Model</div>' +
         '<div class="ph-sub">How can I help you today?</div>' +
         '</div>' +
@@ -1351,6 +1354,12 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       if (!isFinite(sc) || sc < 1 || sc > 1.5) return;
       root.style.setProperty('--app-text-scale', String(sc));
       apply(); // content height changed, so the first-row offset must too
+    } else if (d.kind === 'vars' && d.vars && typeof d.vars === 'object') {
+      // The home page's hue slider recolors the mock without rebuilding it
+      Object.keys(d.vars).forEach(function (k) {
+        var v = d.vars[k];
+        if (/^--color-gray-\\d+$/.test(k) && typeof v === 'string' && !/[;{}<]/.test(v)) root.style.setProperty(k, v);
+      });
     }
   });
 
@@ -1372,6 +1381,29 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     stage.appendChild(frame);
     return frame;
   }
+
+  // ---- Shared with the home page and the gallery cards ----
+
+  window.TDPEngine = {
+    themeVars,
+    gradientLayers,
+    applyGradientToEl,
+    buildMockSrcdoc,
+    mountMockFrame,
+    modeVars(mode, modeKey) {
+      const vars = themeVars(mode);
+      if (modeKey === 'oled') {
+        vars['--color-gray-800'] = '#101010';
+        vars['--color-gray-850'] = '#050505';
+        vars['--color-gray-900'] = '#000000';
+        vars['--color-gray-950'] = '#000000';
+      }
+      return vars;
+    },
+  };
+
+  // The home page has no full-screen preview
+  if (!document.getElementById('preview-overlay')) return;
 
   // ---- Overlay shell ----
 
@@ -1501,7 +1533,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
 
     const note = document.createElement('span');
     note.className = 'preview-hint';
-    note.textContent = 'Approximate — rendered on a mock chat layout';
+    note.textContent = 'Approximate: rendered on a mock chat layout';
     controlsEl.appendChild(note);
     return note;
   }
@@ -1512,7 +1544,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     labels.forEach((label) => {
       const b = document.createElement('button');
       b.className = 'preview-pill' + (label === activeLabel ? ' active' : '');
-      b.textContent = label;
+      b.textContent = label === 'oled' ? 'OLED' : label.charAt(0).toUpperCase() + label.slice(1);
       b.addEventListener('click', () => {
         wrap.querySelectorAll('.preview-pill').forEach((p) => p.classList.remove('active'));
         b.classList.add('active');

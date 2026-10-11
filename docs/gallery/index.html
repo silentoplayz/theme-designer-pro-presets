@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preset gallery · Theme Designer Pro</title>
+  <meta name="description" content="Browse and live-preview every Theme Designer Pro theme, Canvas FX animation, gradient and CSS preset, then import it into Open WebUI with one link.">
+  <meta name="theme-color" content="#121218">
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="canonical" href="https://silentoplayz.github.io/theme-designer-pro-presets/gallery/">
+  <meta property="og:title" content="Theme Designer Pro preset gallery">
+  <meta property="og:description" content="Themes, Canvas FX animations, gradients and CSS presets for Open WebUI, each with a live preview.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://silentoplayz.github.io/theme-designer-pro-presets/gallery/">
+  <meta property="og:image" content="https://silentoplayz.github.io/theme-designer-pro-presets/og-preview.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <script src="../assets/palette.js"></script>
+  <link rel="stylesheet" href="../assets/site.css">
+</head>
+<body data-root="../" data-page="gallery">
+  <a class="skip-link" href="#grid">Skip to presets</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="../" class="brand" aria-label="Theme Designer Pro home">
+        <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 7.5l9 4.5 9-4.5L12 3z"/><path d="m3 16.5 9 4.5 9-4.5"/><path d="m3 12 9 4.5 9-4.5"/></svg></span>
+        <span>Theme Designer Pro</span>
+      </a>
+      <nav class="nav" aria-label="Main">
+        <a href="../">Home</a>
+        <a href="./" aria-current="page">Gallery</a>
+        <a href="https://github.com/silentoplayz/theme-designer-pro-presets/tree/main/event-function#readme">Docs</a>
+        <a href="https://github.com/silentoplayz/theme-designer-pro-presets/discussions">Community</a>
+      </nav>
+      <div class="header-actions">
+        <a class="gh-link" href="https://github.com/silentoplayz/theme-designer-pro-presets/issues/new?template=theme-submission.yml">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          <span>Submit a preset</span>
+        </a>
+        <a class="btn btn-primary btn-sm btn-get" href="../#install">Get it</a>
+        <button class="icon-btn menu-btn" type="button" aria-label="Menu" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container g-head">
+      <div style="display:grid;gap:14px">
+        <span class="eyebrow">Preset gallery</span>
+        <h1 class="display">Pick a look, <span class="ital">preview it live.</span></h1>
+        <p>Every theme, animation, gradient and CSS preset here runs on a mock Open WebUI right in your browser. When one fits, import it with a single link.</p>
+      </div>
+      <div class="how" aria-label="How to import">
+        <span><b>1</b>Copy the import link</span>
+        <span><b>2</b>Paste it in the designer's Import dialog</span>
+        <span><b>3</b>Choose Load URL</span>
+      </div>
+    </div>
+
+    <div class="g-bar">
+      <div class="container g-bar-inner">
+        <div class="cats" role="tablist" aria-label="Preset types" id="cats">
+          <button class="cat" role="tab" data-category="themes" aria-selected="true">Themes <span class="cat-count" data-count="themes"></span></button>
+          <button class="cat" role="tab" data-category="canvasFx" aria-selected="false">Canvas FX <span class="cat-count" data-count="canvasFx"></span></button>
+          <button class="cat" role="tab" data-category="gradients" aria-selected="false">Gradients <span class="cat-count" data-count="gradients"></span></button>
+          <button class="cat" role="tab" data-category="cssPresets" aria-selected="false">CSS <span class="cat-count" data-count="cssPresets"></span></button>
+          <button class="cat" role="tab" data-category="bundles" aria-selected="false">Bundles <span class="cat-count" data-count="bundles"></span></button>
+        </div>
+        <label class="search">
+          <span class="sr-only">Search presets</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input type="search" id="search" placeholder="Search" autocomplete="off" spellcheck="false">
+          <kbd>/</kbd>
+        </label>
+        <label>
+          <span class="sr-only">Sort</span>
+          <select class="select" id="sort">
+            <option value="name-asc">Name, A to Z</option>
+            <option value="name-desc">Name, Z to A</option>
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="g-sub">
+        <div class="filters" id="filters" role="group" aria-label="Show themes with">
+          <button type="button" class="chip" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" class="chip" data-filter="canvas-fx" aria-pressed="false">Canvas FX</button>
+          <button type="button" class="chip" data-filter="gradient" aria-pressed="false">Gradient</button>
+          <button type="button" class="chip" data-filter="custom-css" aria-pressed="false">Custom CSS</button>
+          <button type="button" class="chip" data-filter="overrides" aria-pressed="false">Overrides</button>
+        </div>
+        <div class="result-count" id="result-count" aria-live="polite"></div>
+      </div>
+
+      <div class="grid" id="grid"></div>
+      <div class="empty hidden" id="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <p>Nothing matches that search.</p>
+        <button type="button" class="btn btn-ghost btn-sm" id="clear-search">Clear the search</button>
+      </div>
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Loading presets…</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-base" style="margin-top:0;padding-top:0;border-top:0">
+      <span>© 2026 silentoplayz. MIT License. Made by G30 for the <a href="https://openwebui.com" style="color:var(--text-2)">Open WebUI</a> community.</span>
+      <span style="display:flex;gap:18px;flex-wrap:wrap">
+        <a href="../">Home</a>
+        <a href="https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/CONTRIBUTING.md">Make a preset</a>
+        <a href="https://github.com/silentoplayz/theme-designer-pro-presets">GitHub</a>
+      </span>
+    </div>
+  </footer>
+
+  <!-- Detail drawer -->
+  <dialog class="drawer" id="drawer" closedby="any" aria-labelledby="drawer-title">
+    <div class="drawer-top">
+      <span class="drawer-kind" id="drawer-kind"></span>
+      <div class="drawer-tools">
+        <button type="button" class="icon-btn" id="drawer-share" aria-label="Copy a link to this preset" title="Copy a link to this preset"></button>
+        <button type="button" class="icon-btn" id="drawer-close" aria-label="Close"></button>
+      </div>
+    </div>
+    <div class="drawer-scroll" id="drawer-content"></div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Full-screen live preview (preview.js) -->
+  <div id="preview-overlay" class="preview-overlay" aria-hidden="true">
+    <div id="preview-stage" class="preview-stage" aria-live="off"></div>
+    <div class="preview-topbar">
+      <div class="preview-titlebox">
+        <span class="preview-label">Live preview</span>
+        <span id="preview-title" class="preview-title"></span>
+      </div>
+      <div id="preview-controls" class="preview-controls-box"></div>
+      <button class="preview-close" id="preview-close-btn" aria-label="Close preview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div id="preview-status" class="preview-status" aria-live="polite"></div>
+  </div>
+
+  <script src="../assets/preview.js"></script>
+  <script src="../assets/ui.js"></script>
+  <script src="../assets/gallery.js"></script>
+</body>
+</html>

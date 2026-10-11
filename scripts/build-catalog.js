@@ -212,6 +212,17 @@ function buildGradients() {
       type: data.type || 'linear',
       animated: !!data.animation,
       stops: data.stops || [],
+      // The rest of the fields the gallery needs to draw the gradient exactly
+      // as the designer does (docs/assets/preview.js gradientLayers)
+      angle: data.angle,
+      intensity: data.intensity,
+      speed: data.speed,
+      radialShape: data.radialShape,
+      radialSize: data.radialSize,
+      radialPosX: data.radialPosX,
+      radialPosY: data.radialPosY,
+      meshPoints: data.type === 'mesh' ? data.meshPoints : undefined,
+      meshBgColor: data.type === 'mesh' ? data.meshBgColor : undefined,
       dateAdded: getDateAdded(`gradients/${relPath}`),
       importUrl: `${RAW_BASE}/gradients/${relPath}`,
     });

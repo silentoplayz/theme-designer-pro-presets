@@ -3,165 +3,404 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Theme Designer Pro — Preset Gallery</title>
-  <meta name="description" content="Browse, preview, and install curated theme presets, canvas effects, CSS presets, gradients, and bundles for Theme Designer Pro.">
-  <meta name="theme-color" content="#09090b">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <meta property="og:title" content="Theme Designer Pro — Preset Gallery">
-  <meta property="og:description" content="A curated collection of premium themes, effects, and presets for Open WebUI.">
+  <script>
+    // Gallery links from before v2 pointed here with the category in the hash
+    (function () {
+      function go() {
+        if (/^#(themes|canvasFx|cssPresets|gradients|bundles)(\?.*)?$/.test(location.hash)) location.replace('gallery/' + location.hash);
+      }
+      go();
+      window.addEventListener('hashchange', go);
+    })();
+  </script>
+  <title>Theme Designer Pro for Open WebUI</title>
+  <meta name="description" content="A full theme designer for Open WebUI: palettes from one hue, animated Canvas FX backgrounds, gradients, custom CSS, and personal themes for every user. Free and open source.">
+  <meta name="theme-color" content="#121218">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="canonical" href="https://silentoplayz.github.io/theme-designer-pro-presets/">
+  <meta property="og:title" content="Theme Designer Pro for Open WebUI">
+  <meta property="og:description" content="Palettes from one hue, animated backgrounds, gradients and custom CSS for Open WebUI, with 149 ready-made presets.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://silentoplayz.github.io/theme-designer-pro-presets/">
-  <meta property="og:image" content="https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/docs/og-preview.png">
+  <meta property="og:image" content="https://silentoplayz.github.io/theme-designer-pro-presets/og-preview.png">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <script src="assets/palette.js"></script>
+  <link rel="stylesheet" href="assets/site.css">
 </head>
-<body>
-  <!-- Ambient background effects -->
-  <div class="ambient-glow" aria-hidden="true"></div>
-  <div class="grain-overlay" aria-hidden="true"></div>
+<body data-root="./" data-page="home">
+  <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site-header">
-    <div class="header-inner">
-      <a href="#" class="logo" aria-label="Theme Designer Pro">
-        <svg class="logo-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+    <div class="container header-inner">
+      <a href="./" class="brand" aria-label="Theme Designer Pro home">
+        <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 7.5l9 4.5 9-4.5L12 3z"/><path d="m3 16.5 9 4.5 9-4.5"/><path d="m3 12 9 4.5 9-4.5"/></svg></span>
         <span>Theme Designer Pro</span>
       </a>
-      <nav class="header-links">
-        <a href="https://github.com/silentoplayz/theme-designer-pro-presets/issues/new?template=theme-submission.yml" target="_blank" rel="noopener noreferrer" class="header-link submit-cta">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          <span>Submit</span>
-        </a>
-        <a href="https://github.com/silentoplayz/theme-designer-pro-presets" target="_blank" rel="noopener noreferrer" class="header-link">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      <nav class="nav" aria-label="Main">
+        <a href="./" aria-current="page">Home</a>
+        <a href="gallery/">Gallery</a>
+        <a href="https://github.com/silentoplayz/theme-designer-pro-presets/tree/main/event-function#readme">Docs</a>
+        <a href="https://github.com/silentoplayz/theme-designer-pro-presets/discussions">Community</a>
+      </nav>
+      <div class="header-actions">
+        <a class="gh-link" href="https://github.com/silentoplayz/theme-designer-pro-presets" aria-label="Source on GitHub">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a10.9 10.9 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.09 0 4.42-2.7 5.4-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>
           <span>GitHub</span>
         </a>
-        <a href="https://github.com/silentoplayz/theme-designer-pro-presets/discussions" target="_blank" rel="noopener noreferrer" class="header-link">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span>Community</span>
-        </a>
-      </nav>
+        <a class="btn btn-primary btn-sm btn-get" href="#install">Get it</a>
+        <button class="icon-btn menu-btn" type="button" aria-label="Menu" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
     </div>
   </header>
 
-  <main>
+  <main id="main">
     <!-- Hero -->
     <section class="hero">
-      <div class="hero-badge">Open WebUI Presets</div>
-      <h1 class="hero-title">
-        <span class="hero-title-line">Theme Designer</span>
-        <span class="hero-title-accent">Pro</span>
-      </h1>
-      <p class="hero-subtitle">Preset Gallery</p>
-      <p class="hero-desc">Browse, preview, and install curated themes, effects, and presets for Open WebUI.</p>
-    </section>
-
-    <!-- Controls -->
-    <section class="controls">
-      <div class="search-wrapper">
-        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input type="search" id="search-input" class="search-input" placeholder="Search presets…" autocomplete="off">
-      </div>
-      <nav class="category-tabs" role="tablist" aria-label="Preset categories">
-        <button class="tab active" role="tab" data-category="themes" aria-selected="true">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-          Themes
-          <span class="tab-count" id="count-themes">0</span>
-        </button>
-        <button class="tab" role="tab" data-category="canvasFx" aria-selected="false">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275z"/></svg>
-          Canvas FX
-          <span class="tab-count" id="count-canvasFx">0</span>
-        </button>
-        <button class="tab" role="tab" data-category="cssPresets" aria-selected="false">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          CSS
-          <span class="tab-count" id="count-cssPresets">0</span>
-        </button>
-        <button class="tab" role="tab" data-category="gradients" aria-selected="false">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M2 12h20"/><path d="M12 2v20"/></svg>
-          Gradients
-          <span class="tab-count" id="count-gradients">0</span>
-        </button>
-        <button class="tab" role="tab" data-category="bundles" aria-selected="false">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-          Bundles
-          <span class="tab-count" id="count-bundles">0</span>
-        </button>
-      </nav>
-    </section>
-
-    <!-- Toolbar: sort (all categories) + filters (themes only) -->
-    <section id="toolbar" class="toolbar">
-      <div class="toolbar-inner">
-        <div class="sort-group">
-          <label for="sort-select" class="sort-label">Sort by</label>
-          <select id="sort-select" class="sort-select">
-            <option value="name-asc">Name A–Z</option>
-            <option value="name-desc">Name Z–A</option>
-            <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
-          </select>
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="container">
+        <div class="hero-copy">
+          <span class="eyebrow">An event function for Open WebUI</span>
+          <h1 class="display">Make Open WebUI<br>look like <span class="ital">yours.</span></h1>
+          <div class="hero-row">
+            <p class="lede">Theme Designer Pro is a full theme designer for Open WebUI. Build a palette from one hue, put an animated background behind the chat, and add gradients and custom CSS. Every open page updates when you save.</p>
+            <div class="cta-row">
+              <a class="btn btn-primary" href="#install">Install it
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </a>
+              <a class="btn btn-ghost" href="gallery/"><span>Browse <span data-count="total">all</span> presets</span></a>
+            </div>
+          </div>
+          <div class="fine">
+            <span>Free and open source, MIT</span>
+            <span>Open WebUI v0.11.0 or later</span>
+            <span>No changes to Open WebUI's code</span>
+          </div>
         </div>
-        <div class="filter-chips" id="filter-chips">
-          <button class="chip active" data-filter="all">All</button>
-          <button class="chip" data-filter="gradient">Gradient</button>
-          <button class="chip" data-filter="canvas-fx">Canvas FX</button>
-          <button class="chip" data-filter="custom-css">Custom CSS</button>
-          <button class="chip" data-filter="overrides">Overrides</button>
+
+        <!-- Live demo -->
+        <div class="demo">
+          <div class="demo-glow" aria-hidden="true"></div>
+          <div class="window">
+            <div class="window-bar">
+              <div class="window-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+              <div class="window-url" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                your-open-webui.example
+              </div>
+              <span class="window-badge">Live</span>
+            </div>
+            <div class="viewport" id="demo-viewport">
+              <div class="viewport-msg" id="demo-msg">Loading the preview…</div>
+            </div>
+            <div class="dock" role="group" aria-label="Try the designer">
+              <label class="field">
+                <span class="field-label">Hue <output id="hue-out">265°</output></span>
+                <input class="range range-hue" id="hue" type="range" min="0" max="360" step="1" value="265">
+              </label>
+              <label class="field">
+                <span class="field-label">Chroma <output id="chroma-out">0.024</output></span>
+                <input class="range range-chroma" id="chroma" type="range" min="0" max="80" step="1" value="24">
+              </label>
+              <div class="field">
+                <span class="field-label">Mode</span>
+                <div class="seg" id="mode-seg">
+                  <button type="button" data-mode="dark" aria-pressed="true">Dark</button>
+                  <button type="button" data-mode="oled" aria-pressed="false">OLED</button>
+                  <button type="button" data-mode="light" aria-pressed="false">Light</button>
+                  <button type="button" data-mode="her" aria-pressed="false">Her</button>
+                </div>
+              </div>
+              <div class="dock-row-2">
+                <span class="field-label" style="margin-right:4px">Background</span>
+                <div class="chips" id="bg-chips"></div>
+                <span class="dock-note">The whole page follows your hue too. <button type="button" class="chip" id="reset-hue" style="height:26px;margin-left:6px">Reset</button></span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Card grid -->
-    <section class="grid-section">
-      <div id="card-grid" class="card-grid"></div>
-      <div id="empty-state" class="empty-state hidden">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="empty-icon"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <p>No presets found matching your search.</p>
+    <!-- Numbers -->
+    <section class="container" aria-label="What's in the gallery">
+      <div class="stats" id="stats">
+        <a class="stat" href="gallery/#canvasFx"><span class="stat-num" data-count="canvasFx">84</span><span class="stat-label">Canvas FX animations</span></a>
+        <a class="stat" href="gallery/#themes"><span class="stat-num" data-count="themes">33</span><span class="stat-label">Complete themes</span></a>
+        <a class="stat" href="gallery/#gradients"><span class="stat-num" data-count="gradients">13</span><span class="stat-label">Gradients</span></a>
+        <a class="stat" href="gallery/#cssPresets"><span class="stat-num" data-count="cssPresets">12</span><span class="stat-label">CSS presets</span></a>
+        <div class="stat"><span class="stat-num">4</span><span class="stat-label">Modes: Dark, OLED, Light, Her</span></div>
       </div>
-      <div id="loading-state" class="loading-state">
-        <div class="spinner"></div>
-        <p>Loading presets…</p>
+    </section>
+
+    <!-- Features -->
+    <section class="section" id="features">
+      <div class="container">
+        <div class="feature reveal">
+          <div class="feature-copy">
+            <span class="eyebrow">Palette</span>
+            <h2 class="h2">One hue. <span class="ital">Twelve</span> shades.</h2>
+            <p class="lede">Open WebUI paints its whole interface from twelve shades of gray. Pick a hue, a chroma and a lightness, and Theme Designer Pro builds all twelve in OKLCH, so every shade keeps the same feel from the darkest to the lightest.</p>
+            <ul class="ticks">
+              <li>Lock any color, and sliders, Randomize and image extraction leave it alone.</li>
+              <li>Take a palette from an image you upload or paste.</li>
+              <li>A separate design for each mode, synced between modes when you want.</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="ramp" id="ramp" aria-label="The twelve shades for the current hue"></div>
+            <div class="ramp-foot"><span>--color-gray-50 … 950</span><span id="ramp-values"></span></div>
+          </div>
+        </div>
+
+        <div class="feature flip reveal">
+          <div class="feature-copy">
+            <span class="eyebrow">Canvas FX</span>
+            <h2 class="h2">Backgrounds that <span class="ital">move.</span></h2>
+            <p class="lede">Run an animation behind the whole interface, and the panels turn see-through so it shows. Scripts run in a Web Worker on an OffscreenCanvas, so the chat stays responsive.</p>
+            <ul class="ticks">
+              <li>Scripts can follow the mouse and react to clicks and touches.</li>
+              <li>Some react to the conversation itself, from its token count.</li>
+              <li>Drop a <code>.js</code> file on the designer to import one.</li>
+            </ul>
+            <a class="text-link" href="gallery/#canvasFx">See all <span data-count="canvasFx">84</span> animations
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+          </div>
+          <div class="fx-grid" id="fx-grid"></div>
+        </div>
+
+        <div class="feature reveal">
+          <div class="feature-copy">
+            <span class="eyebrow">Gradients</span>
+            <h2 class="h2">Gradients, <span class="ital">still</span> or animated.</h2>
+            <p class="lede">Linear, radial and mesh gradients, with color stops you place by hand, an intensity control and an optional slow drift. They sit behind the interface the same way Canvas FX does.</p>
+            <a class="text-link" href="gallery/#gradients">Browse gradients
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+          </div>
+          <div class="panel"><div class="grad-strip" id="grad-strip"></div></div>
+        </div>
+
+        <div class="feature flip reveal">
+          <div class="feature-copy">
+            <span class="eyebrow">Instance and personal</span>
+            <h2 class="h2">One theme for everyone, or <span class="ital">one each.</span></h2>
+            <p class="lede">Admins design the instance theme that every user sees. Turn on <b>Allow Personal Themes</b>, and each user also gets a Themes tab in Settings for a theme of their own.</p>
+            <ul class="ticks">
+              <li>A personal theme is saved with the account, so it follows the user to every device.</li>
+              <li>It shows before Open WebUI draws the page, so nothing flashes first.</li>
+              <li>Your valves still apply: Canvas FX or Custom CSS off for the instance is off for everyone.</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="layers" id="layers"></div>
+          </div>
+        </div>
+
+        <div class="feature reveal">
+          <div class="feature-copy">
+            <span class="eyebrow">Launcher Tool and AI</span>
+            <h2 class="h2">Describe it. <span class="ital">Get it.</span></h2>
+            <p class="lede">Ask a chat for a theme in plain words. The Theme Designer Pro Launcher Tool has the chat model pick the colors and opens the designer in the chat with them applied, ready to fine-tune. In the designer, the AI button does the same.</p>
+            <a class="text-link" href="https://github.com/silentoplayz/theme-designer-pro-presets/tree/main/launcher#readme">About the Launcher Tool
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+          </div>
+          <div class="panel">
+            <div class="chat">
+              <div class="chat-user">A forest green theme, like moss after rain</div>
+              <div class="chat-ai">
+                <img src="assets/owui-logo.png" alt="">
+                <div>
+                  <div class="tool-call">apply_theme</div>
+                  <p>Here's a mossy green, soft and a little damp. I've opened it in the designer, ready to fine-tune.</p>
+                  <div class="chat-result">
+                    <div class="chat-swatches" id="moss"></div>
+                    <div class="chat-result-foot"><span>Hue 142° · Chroma 0.045</span><span>Applied to your theme</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Everything else -->
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">Also inside</span>
+          <h2 class="h2">And the rest of the <span class="ital">toolbox.</span></h2>
+        </div>
+        <div class="bento reveal">
+          <div class="bento-item">
+            <div class="bento-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1a10 10 0 0 1 0-14.2M19.1 4.9a10 10 0 0 1 0 14.2M7.8 16.2a6 6 0 0 1 0-8.4M16.2 7.8a6 6 0 0 1 0 8.4"/><circle cx="12" cy="12" r="2"/></svg></div>
+            <h3 class="h3">Live on every open page</h3>
+            <p>Save, and every open Open WebUI page updates without a reload. Setups with several workers relay it through Redis.</p>
+          </div>
+          <div class="bento-item">
+            <div class="bento-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div>
+            <h3 class="h3">Draft mode</h3>
+            <p>Try changes in your own browser first. Nobody else sees them until you publish.</p>
+          </div>
+          <div class="bento-item">
+            <div class="bento-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></div>
+            <h3 class="h3">Every mode, and System</h3>
+            <p>Separate designs for Dark, OLED, Light and Her, plus a System mode that follows the operating system.</p>
+          </div>
+          <div class="bento-item">
+            <div class="bento-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+            <h3 class="h3">Sign-in page too</h3>
+            <p>Choose which parts of the theme show on the sign-in and sign-up pages.</p>
+          </div>
+          <div class="bento-item">
+            <div class="bento-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg></div>
+            <h3 class="h3">A real CSS editor</h3>
+            <p>Auto-indent, closing pairs and line numbers, and auto-scoping so a rule only applies to the mode it's for.</p>
+          </div>
+          <div class="bento-item">
+            <div class="bento-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v13h13"/><path d="M7 3h14v14H7z"/></svg></div>
+            <h3 class="h3">Library and history</h3>
+            <p>Save snapshots of a theme, search and export them, and undo or redo any change.</p>
+          </div>
+          <div class="bento-item">
+            <div class="bento-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
+            <h3 class="h3">Import from a link</h3>
+            <p>Paste a link to any theme, script or bundle, including a regular GitHub page link.</p>
+          </div>
+          <div class="bento-item">
+            <div class="bento-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.2-8.56"/><path d="M21 4v5h-5"/></svg></div>
+            <h3 class="h3">Theme updates</h3>
+            <p>Themes can carry an update link, and the designer checks it for newer versions.</p>
+          </div>
+          <div class="bento-item">
+            <div class="bento-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg></div>
+            <h3 class="h3">Admins stay in control</h3>
+            <p>Valves turn Canvas FX, Custom CSS and link imports on or off, and set how see-through the sidebar and menus are.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Presets -->
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">Gallery</span>
+          <h2 class="h2">Start from a <span class="ital">preset.</span></h2>
+          <p class="lede">Every preset has a live preview on a mock Open WebUI. Copy its import link, paste it into the designer's Import dialog, and it's yours to change.</p>
+        </div>
+        <div class="grid reveal" id="theme-picks"></div>
+        <div style="margin-top:28px">
+          <a class="btn btn-ghost" href="gallery/">Open the gallery
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Install -->
+    <section class="section" id="install" style="padding-top:0">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">Install</span>
+          <h2 class="h2">Up and running in <span class="ital">three</span> steps.</h2>
+        </div>
+        <div class="steps reveal">
+          <div class="step">
+            <h3 class="h3">Add the event function</h3>
+            <p>Get it from <a class="text-link" href="https://openwebui.com/posts/b44c56ec-1fbd-4b42-9787-2a4facd5f047">its community page</a>. Or paste <code>theme_designer_pro_event.py</code> into <b>Admin Panel &gt; Functions &gt; Create New Function</b>.</p>
+          </div>
+          <div class="step">
+            <h3 class="h3">Turn it on</h3>
+            <p>Switch it on in the Functions list. It needs Open WebUI v0.11.0 or later.</p>
+          </div>
+          <div class="step">
+            <h3 class="h3">Open the designer</h3>
+            <p>In <b>Settings</b>, choose <b>Themes</b> in the Admin section. Or go to <code>/api/v1/theme-designer</code> for the full-screen designer.</p>
+          </div>
+        </div>
+        <div class="callout reveal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <p>Behind nginx or another reverse proxy? Add <code>proxy_buffering off;</code> to its location block. Without it, other pages see a theme change only after a reload.</p>
+        </div>
+        <div class="companion reveal">
+          <div>
+            <h3 class="h3">Add the Launcher Tool for chats</h3>
+            <p>The optional companion Tool opens the designer inside a chat, and turns a description like "a warm copper theme" into a theme.</p>
+          </div>
+          <div class="cta-row">
+            <a class="btn btn-ghost btn-sm" href="https://github.com/silentoplayz/theme-designer-pro-presets/tree/main/launcher#readme">Read the setup</a>
+            <a class="btn btn-ghost btn-sm" href="https://openwebui.com/posts/467b9ac8-731b-4d60-bafe-9fb4e2dfda35">Get the Launcher Tool</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Finale -->
+    <section class="container">
+      <div class="finale reveal">
+        <h2 class="display" style="font-size:clamp(2.4rem,6vw,4.8rem)">Your instance,<br><span class="ital">your colors.</span></h2>
+        <div class="cta-row" style="justify-content:center">
+          <a class="btn btn-primary" href="https://openwebui.com/posts/b44c56ec-1fbd-4b42-9787-2a4facd5f047">Get Theme Designer Pro</a>
+          <a class="btn btn-ghost" href="gallery/">Browse the gallery</a>
+        </div>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
-    <p>Made with care for the <a href="https://openwebui.com" target="_blank" rel="noopener noreferrer">Open WebUI</a> community</p>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <a href="./" class="brand">
+            <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 7.5l9 4.5 9-4.5L12 3z"/><path d="m3 16.5 9 4.5 9-4.5"/><path d="m3 12 9 4.5 9-4.5"/></svg></span>
+            <span>Theme Designer Pro</span>
+          </a>
+          <p>Made by G30 for the <a href="https://openwebui.com" style="color:var(--text-2)">Open WebUI</a> community. Free and open source.</p>
+        </div>
+        <div>
+          <h3>Get it</h3>
+          <ul>
+            <li><a href="https://openwebui.com/posts/b44c56ec-1fbd-4b42-9787-2a4facd5f047">Event function</a></li>
+            <li><a href="https://openwebui.com/posts/467b9ac8-731b-4d60-bafe-9fb4e2dfda35">Launcher Tool</a></li>
+            <li><a href="gallery/">Preset gallery</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Learn</h3>
+          <ul>
+            <li><a href="https://github.com/silentoplayz/theme-designer-pro-presets/tree/main/event-function#readme">Documentation</a></li>
+            <li><a href="https://github.com/silentoplayz/theme-designer-pro-presets/tree/main/launcher#readme">Launcher Tool setup</a></li>
+            <li><a href="https://github.com/silentoplayz/theme-designer-pro-presets/blob/main/CONTRIBUTING.md">Make a preset</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Community</h3>
+          <ul>
+            <li><a href="https://github.com/silentoplayz/theme-designer-pro-presets/discussions">Discussions</a></li>
+            <li><a href="https://github.com/silentoplayz/theme-designer-pro-presets/issues">Report a bug</a></li>
+            <li><a href="https://github.com/silentoplayz/theme-designer-pro-presets/issues/new?template=theme-submission.yml">Submit a preset</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-base">
+        <span>© 2026 silentoplayz. MIT License.</span>
+        <a href="https://github.com/silentoplayz/theme-designer-pro-presets">github.com/silentoplayz/theme-designer-pro-presets</a>
+      </div>
+    </div>
   </footer>
 
-  <!-- Detail modal -->
-  <div id="detail-modal" class="detail-overlay" aria-hidden="true">
-    <div class="detail-panel" role="dialog" aria-modal="true">
-      <button class="detail-close" id="detail-close-btn" aria-label="Close">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-      </button>
-      <div id="detail-content"></div>
-    </div>
-  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <!-- Toast -->
-  <div id="toast" class="toast" aria-live="polite"></div>
-
-  <!-- Live preview overlay -->
-  <div id="preview-overlay" class="preview-overlay" aria-hidden="true">
-    <div id="preview-stage" class="preview-stage" aria-live="off"></div>
-    <div class="preview-topbar">
-      <div class="preview-titlebox">
-        <span class="preview-label">Live Preview</span>
-        <span id="preview-title" class="preview-title"></span>
-      </div>
-      <div id="preview-controls" class="preview-controls-box"></div>
-      <button class="preview-close" id="preview-close-btn" aria-label="Close preview">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-      </button>
-    </div>
-    <div id="preview-status" class="preview-status" aria-live="polite"></div>
-  </div>
-
-  <script src="app.js"></script>
-  <script src="preview.js"></script>
+  <script src="assets/preview.js"></script>
+  <script src="assets/ui.js"></script>
+  <script src="assets/home.js"></script>
 </body>
 </html>

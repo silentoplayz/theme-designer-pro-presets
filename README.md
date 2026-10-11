@@ -8,7 +8,7 @@
 
 A curated collection of themes, Canvas FX animations, CSS presets, and gradient packs for [Theme Designer Pro](https://openwebui.com/posts/49fac49a-7cc3-4b9f-8f75-b3916abbfa5f) — the native theming tool for [Open WebUI](https://github.com/open-webui/open-webui).
 
-> **[Browse the Preset Gallery →](https://silentoplayz.github.io/theme-designer-pro-presets/)** — preview every theme, effect, and gradient before importing.
+> **[Browse the Preset Gallery →](https://silentoplayz.github.io/theme-designer-pro-presets/gallery/)** to preview every theme, effect, and gradient before importing. The [Theme Designer Pro website](https://silentoplayz.github.io/theme-designer-pro-presets/) has a live demo and install steps.
 
 > **Import any preset** directly into Theme Designer Pro using the built-in Import button, URL import, or drag-and-drop.
 

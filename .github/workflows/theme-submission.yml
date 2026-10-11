@@ -163,7 +163,7 @@ jobs:
             }
 
             body.push(
-              `Your theme will be reviewed and merged by a maintainer. Once merged, it will automatically appear in the [Preset Gallery](https://silentoplayz.github.io/theme-designer-pro-presets/) and be included in the next bundle update.`,
+              `Your theme will be reviewed and merged by a maintainer. Once merged, it will automatically appear in the [Preset Gallery](https://silentoplayz.github.io/theme-designer-pro-presets/gallery/) and be included in the next bundle update.`,
               ``,
               `---`,
               `*🤖 Automated validation by Theme Submission Bot*`
