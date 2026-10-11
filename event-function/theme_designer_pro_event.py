@@ -3486,6 +3486,9 @@ class Event:
             origin = body.get("origin")
             if not (isinstance(origin, str) and _re.fullmatch(r"[A-Za-z0-9_-]{1,64}", origin)):
                 origin = None
+            # A save a designer makes on its own as it opens: other designers
+            # don't reload for it. Open WebUI pages still refetch as usual.
+            settle = body.get("settle") is True
 
             # Size caps — admin-only endpoint, but a runaway payload would be
             # written to disk and trigger a refetch on every connected client.
@@ -3547,7 +3550,7 @@ class Event:
                         return JSONResponse({"status": "ok", "noop": True})
                     self._save_library(library, user_id)
                     # Open designers hold the library in memory; tell them.
-                    Event._broadcast_library(user_id, origin)
+                    Event._broadcast_library(user_id, origin, settle)
                     return JSONResponse({"status": "ok", "library_only": True})
                 return JSONResponse({"status": "ok", "noop": True})
 
@@ -3600,12 +3603,12 @@ class Event:
             if user_id:
                 # Only the owner's open pages show a personal theme.
                 if not body.get("suppress_broadcast", False):
-                    Event._broadcast_personal(user_id, origin=origin)
+                    Event._broadcast_personal(user_id, origin=origin, settle=settle)
             elif not body.get("suppress_broadcast", False):
                 # Prime delivery caches off-loop so the broadcast carries the
                 # new ETags and post-save fetches hit a warm cache.
                 _etags = await asyncio.to_thread(self._prime_delivery_caches)
-                Event._broadcast_update(_etags, origin=origin)
+                Event._broadcast_update(_etags, origin=origin, settle=settle)
 
             resp = {"status": "ok", "bytes": len(css)}
             # Return the valve-postprocessed CSS when it differs from what was
@@ -5299,7 +5302,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                             <li><b>How the Theme Reaches Pages:</b> Theme Designer Pro never writes to Open WebUI&rsquo;s files. It publishes a script into <code>/static/loader.js</code> and a safe subset of the theme CSS into <code>/static/custom.css</code> through a shared registry, composed fresh on every request (see Section 23). That subset holds the palette and your custom CSS, so they paint before Open WebUI draws its interface, with no flash. The state JSON, without Canvas FX scripts, is inlined into the loader too. On each load, the bootloader fetches <code>{ROUTE_BASE}/theme.css</code> and <code>{ROUTE_BASE}/state.json</code> for the full theme. The background animation starts when <code>state.json</code> arrives. <code>localStorage</code> keeps the last theme seen, applied before that fetch completes and kept as an offline fallback. A personal theme keeps its own copy, tagged with the account it belongs to.</li>
                             <li><b>Theme Files:</b> The instance theme is saved in <code>DATA_DIR/theme/</code> as <code>open_theme_designer.css</code>, <code>open_theme_designer.json</code>, <code>open_theme_designer_sections.json</code> (structured CSS sections) and <code>open_theme_designer_library.json</code>. Personal themes use the same names in <code>DATA_DIR/theme/users/&lt;user id&gt;/</code>.</li>
                             <li><b>Live Push via SSE:</b> Theme changes are broadcast to <b>all connected users in real time</b> using Server-Sent Events. Each save pushes a short version token to every open tab, and each page refetches the CSS and state after a random delay of up to 2 seconds, or skips it when its ETags show it already has that version. The channel at <code>{ROUTE_BASE}/events</code> reconnects 3 seconds after a drop and survives function hot-reloads. A personal theme save reaches only that user&rsquo;s own pages. With several workers, Redis carries the updates between them (see Section 22). Each worker accepts up to 8,192 connections; a page over that limit retries a minute later and still gets the theme on every load.</li>
-                            <li><b>Several Designers at Once:</b> Each open designer holds the theme and the gallery in memory. When one saves a change, every other designer showing the same theme reloads, in another tab or window, in Settings, in the Admin Panel or at <code>{ROUTE_BASE}</code>, so none of them can later save an older copy over it. A designer doesn&rsquo;t reload while it&rsquo;s saving or has a dialog open, and waits for that first. In Draft mode, it shows a message instead and keeps your draft. Saving the same theme that&rsquo;s already stored, as a designer does when it opens, changes nothing and reloads nobody.</li>
+                            <li><b>Several Designers at Once:</b> Each open designer holds the theme and the gallery in memory. When one saves a change, every other designer showing the same theme reloads, in another tab or window, in Settings, in the Admin Panel or at <code>{ROUTE_BASE}</code>, so none of them can later save an older copy over it. A designer doesn&rsquo;t reload while it&rsquo;s saving or has a dialog open, and waits for that first. It reloads at most once every 5 seconds, so a change made in several saves, as a Global Reset can be, ends in one more reload once that time is up. In Draft mode, it shows a message instead and keeps your draft. The save a designer makes on its own as it opens changes nothing for the others: an identical one is skipped, and any other is marked so they don&rsquo;t reload for it.</li>
                             <li><b>SSE Heartbeat:</b> The server sends a keep-alive heartbeat every 15 seconds to detect stale connections. If a client disconnects (closes the tab, loses network), the server-side queue is automatically cleaned up.</li>
                             <li><b>SSE Hot-Reload Persistence:</b> SSE connections survive function re-saves (hot-reloads). The client list is stored on the ASGI app's state object, which persists across module reloads, so re-saving the function code in the admin panel does <b>not</b> break live push to existing tabs.</li>
                             <li><b>Turning the Function Off and On:</b> Turning the function off fires <code>function.disable_started</code>. Theme Designer Pro then broadcasts a <code>theme-disable</code> event that strips the theme from every open page. It also withdraws its CSS from <code>/static/custom.css</code> and removes the <b>Themes</b> tabs from open Settings dialogs. The loader stays published but inactive, so its live connection survives. Turning it back on fires <code>function.enable_started</code>, which republishes the CSS, reactivates the loader, and broadcasts the theme to every page. Requires Open WebUI v0.11.0 or newer.</li>
@@ -6748,6 +6751,10 @@ location.reload();</code></pre>
     // other open designer but doesn't make this one reload.
     const TAB_ORIGIN = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
     let _lastLocalSave = 0;
+    // Saves this page makes on its own as it opens, before anyone touches it,
+    // only settle what it loaded; other designers ignore them (settle: true).
+    let _userActed = false;
+    ['pointerdown', 'keydown', 'drop', 'paste'].forEach(t => document.addEventListener(t, () => { _userActed = true; }, { capture: true, once: true }));
     const $ = (id) => document.getElementById(id);
 
     // --- SVG Icon Constants ---
@@ -7193,6 +7200,7 @@ location.reload();</code></pre>
         // Draft mode: skip server sync (changes stay local only)
         if (_draftMode) return;
         _lastLocalSave = Date.now();
+        const settle = !_userActed;
         // Personal mode holds saves until the theme actually changes, so
         // opening the designer, or switching it between modes, never turns
         // the instance theme into the user's own.
@@ -7251,7 +7259,7 @@ location.reload();</code></pre>
             _syncQueue = _syncQueue.then(() => fetch('{ROUTE_BASE}', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ css, state, sections, origin: TAB_ORIGIN })
+                body: JSON.stringify({ css, state, sections, origin: TAB_ORIGIN, settle })
             }).then(r => {
                 if (r.ok) {
                     console.log('[Theme Pro] CSS + state synced to server');
@@ -7316,7 +7324,7 @@ location.reload();</code></pre>
             fetch('{ROUTE_BASE}', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ css: '', state: '', library, suppress_broadcast: true, origin: TAB_ORIGIN })
+                body: JSON.stringify({ css: '', state: '', library, suppress_broadcast: true, origin: TAB_ORIGIN, settle: !_userActed })
             }).then(r => {
                 if (r.ok) console.log('[Theme Pro] Library synced to server');
                 else if (r.status === 503) {
@@ -15258,7 +15266,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         function fromOtherTab(e) {
             try {
                 const d = JSON.parse(e.data || '{}') || {};
-                return !!d.origin && d.origin !== TAB_ORIGIN;
+                return !!d.origin && d.origin !== TAB_ORIGIN && !d.settle;
             } catch (x) { return false; }
         }
         let _reloadPending = false;
@@ -15268,18 +15276,17 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 showToast('The theme changed in another tab. Your draft stays here, and publishing it replaces that change.', 6000);
                 return;
             }
-            // Reloaded for this a moment ago: say so rather than reload again.
-            let last = 0;
-            try { last = Number(sessionStorage.getItem('owui_tdp_auto_reload') || 0); } catch (x) {}
-            if (Date.now() - last < 5000) {
-                showToast('The theme changed in another tab. Reload this page to see it.', 6000);
-                return;
-            }
             _reloadPending = true;
-            // Not while this page is saving, or has a dialog open.
+            // Not while this page is saving, or has a dialog open, and at most
+            // once every 5 seconds: a change that arrives in several saves, as
+            // a Global Reset can, ends in one more reload once that time is up.
             (function attempt() {
                 const dialogOpen = [].some.call(document.querySelectorAll('[id$="-modal"]'), m => m.style.display === 'flex');
                 if (Date.now() - _lastLocalSave < 1500 || dialogOpen) { setTimeout(attempt, 1000); return; }
+                let last = 0;
+                try { last = Number(sessionStorage.getItem('owui_tdp_auto_reload') || 0); } catch (x) {}
+                const wait = 5000 - (Date.now() - last);
+                if (wait > 0) { setTimeout(attempt, wait); return; }
                 try { sessionStorage.setItem('owui_tdp_auto_reload', String(Date.now())); } catch (x) {}
                 location.reload();
             })();
@@ -15994,6 +16001,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     // applied once the designer has loaded the theme it starts from.
     const _applyOnLoad = (window.__THEME_PRO_CONFIG__ || {}).applyOnLoad;
     if (_applyOnLoad) {
+        // A theme from a chat is a real change: the other designers should follow it.
+        _userActed = true;
         AiConsultant.apply(_applyOnLoad, _applyOnLoad.mode && _applyOnLoad.mode !== 'all' ? [_applyOnLoad.mode] : MODES.slice());
     }
 
@@ -16574,7 +16583,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             pass  # Redis unavailable — local broadcast still runs below
 
     @classmethod
-    def _broadcast_update(cls, etags: dict | None = None, local_only: bool = False, origin: str | None = None):
+    def _broadcast_update(cls, etags: dict | None = None, local_only: bool = False, origin: str | None = None, settle: bool = False):
         """Push a theme-update notification to all connected SSE clients.
 
         The payload carries a version token — clients refetch /theme.css and
@@ -16599,6 +16608,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 data["stateTag"] = etags["stateTag"]
         if origin:
             data["origin"] = origin
+        if settle:
+            data["settle"] = True
         payload = _json.dumps(data, separators=(",", ":"))
         msg = f"event: theme-update\ndata: {payload}\n\n"
         if not local_only:
@@ -16613,20 +16624,23 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     _PERSONAL_PREFIX = "personal:"
 
     @classmethod
-    def _broadcast_personal(cls, user_id: str, local_only: bool = False, origin: str | None = None):
+    def _broadcast_personal(cls, user_id: str, local_only: bool = False, origin: str | None = None, settle: bool = False):
         """Tell one user's open pages that their personal theme changed.
 
         Nobody else's page is told, on this worker or, through Redis, on any
         other. The pages refetch their own theme, as they do on theme-update.
         """
-        data = _json.dumps({"origin": origin} if origin else {}, separators=(",", ":"))
+        payload = {"origin": origin} if origin else {}
+        if settle:
+            payload["settle"] = True
+        data = _json.dumps(payload, separators=(",", ":"))
         msg = f"event: personal-theme-update\ndata: {data}\n\n"
         if not local_only:
             cls._redis_publish(f"{cls._PERSONAL_PREFIX}{user_id}\n{msg}")
         cls._deliver_personal(user_id, msg)
 
     @classmethod
-    def _broadcast_library(cls, user_id: str | None, origin: str | None):
+    def _broadcast_library(cls, user_id: str | None, origin: str | None, settle: bool = False):
         """Tell open designers the saved themes and presets changed, so one
         holding an older copy reloads instead of saving it over the new one.
         Only designers listen for this event; a personal library's goes to its
@@ -16634,6 +16648,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         payload = {"scope": "me" if user_id else "instance"}
         if origin:
             payload["origin"] = origin
+        if settle:
+            payload["settle"] = True
         data = _json.dumps(payload, separators=(",", ":"))
         msg = f"event: library-update\ndata: {data}\n\n"
         if user_id:
