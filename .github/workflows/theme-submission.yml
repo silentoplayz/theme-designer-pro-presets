@@ -104,6 +104,11 @@ jobs:
 
           git push origin "${BRANCH}"
 
+          # The Studio opens the theme from this commit, which outlives the branch
+          SHA=$(git rev-parse HEAD)
+          PREVIEW_URL="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/studio/#theme=https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SHA}/themes/${FILENAME}"
+          echo "preview_url=${PREVIEW_URL}" >> $GITHUB_OUTPUT
+
           PR_URL=$(gh pr create \
             --base main \
             --head "${BRANCH}" \
@@ -114,6 +119,7 @@ jobs:
           **Source issue:** #${ISSUE_NUM}
           **File:** \`themes/${FILENAME}\` (${SIZE} KB)
           **Modes:** ${MODES}
+          **Preview:** [Open it in the Studio](${PREVIEW_URL})
 
           ---
 
@@ -136,6 +142,7 @@ jobs:
         with:
           script: |
             const prUrl = `${{ steps.pr.outputs.pr_url }}`;
+            const previewUrl = `${{ steps.pr.outputs.preview_url }}`;
             const filename = `${{ steps.process.outputs.filename }}`;
             const themeName = `${{ steps.process.outputs.theme_name }}`;
             const modes = `${{ steps.process.outputs.modes }}`;
@@ -153,6 +160,9 @@ jobs:
               `| **Size** | ${size} KB |`,
               `| **Modes** | ${modes} |`,
               `| **Pull Request** | ${prUrl} |`,
+              `| **Preview** | [Open it in the Studio](${previewUrl}) |`,
+              ``,
+              `The preview shows your theme on a mock Open WebUI in every mode, without installing anything.`,
               ``
             ];
 

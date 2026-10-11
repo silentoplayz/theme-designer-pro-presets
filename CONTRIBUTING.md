@@ -128,7 +128,7 @@ The easiest way to submit a theme — **no git required**:
 4. Submit — a bot automatically validates and opens a PR for you
 
 The bot will comment on your issue with the result:
-- **✅ Valid** — a PR is created and linked, ready for maintainer review
+- **✅ Valid** — a PR is created and linked, ready for maintainer review, with a link that previews your theme in the [Studio](https://silentoplayz.github.io/theme-designer-pro-presets/studio/)
 - **❌ Invalid** — specific errors are listed so you can fix and re-submit
 
 ---

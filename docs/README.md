@@ -86,9 +86,11 @@ studio/#gradient=electric_aurora.json  ← use a gradient
 studio/#fx=firefly_meadow.js           ← use a Canvas FX script
 studio/#h=200&c=40                     ← a hue and chroma, as the home page demo sends
 studio/#s=…                            ← a whole design, from its share button
+studio/#theme=https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/<commit>/themes/<file>.json
+                                       ← a theme file in this repository, even one not in the gallery yet
 ```
 
-A shared design carries palette numbers and preset file names, never script text, so a link can only load scripts from this repository. Without a link, the Studio reopens the last design from this browser.
+A shared design carries palette numbers and preset file names, never script text, so a link can only load scripts from this repository. A `#theme=` link only opens raw files from this repository, too. The Theme Submission Bot puts one in its reply and in the pull request, pointing at the submission's commit, so the submitter and the reviewer can see the theme in every mode before it's merged. The link keeps working after the merge. Without a link, the Studio reopens the last design from this browser.
 
 ### Gallery links
 

@@ -328,6 +328,14 @@
 
   $('preset').addEventListener('change', (e) => loadPreset(e.target.value));
 
+  // A theme file in this repository that isn't in the catalog yet, such as
+  // a submission on its pull request's commit
+  const REPO_RAW = UI.RAW.replace(/main\/$/, '');
+  function isRepoTheme(url) {
+    return typeof url === 'string' && url.startsWith(REPO_RAW) && !url.includes('..') &&
+      /^[\w-]+\/[\w./-]+\.json$/.test(url.slice(REPO_RAW.length));
+  }
+
   async function loadPreset(file, overrides) {
     const note = $('preset-note');
     if (!file) {
@@ -340,7 +348,8 @@
       queueSave();
       return;
     }
-    const item = (catalog.themes || []).find((t) => t.file === file);
+    const submitted = isRepoTheme(file);
+    const item = submitted ? { name: 'the theme', importUrl: file } : (catalog.themes || []).find((t) => t.file === file);
     if (!item) return;
     note.textContent = 'Loading ' + item.name + '…';
     note.classList.remove('hidden');
@@ -357,7 +366,7 @@
     });
     const same = MODES.every((k) => modes[k].h === modes.dark.h && modes[k].c === modes.dark.c);
     state = {
-      name: theme.name ? theme.name + ' (remix)' : '',
+      name: theme.name ? theme.name + (submitted ? '' : ' (remix)') : '',
       author: state.author,
       preset: file,
       linked: same,
@@ -366,12 +375,19 @@
       refs: {},
     };
     if (overrides) applyShared(overrides);
+    // Old submission links still work once the theme is merged
+    const merged = submitted && (catalog.themes || []).some((t) => t.file === file.split('/').pop());
+    // The picker lists it, so the theme still shows as the starting point
+    if (submitted && ![...$('preset').options].some((o) => o.value === file)) {
+      $('preset').add(new Option((theme.name || 'Untitled theme') + (merged ? ' (as submitted)' : ' (not in the gallery yet)'), file));
+    }
     const extras = [];
     if (MODES.some((k) => modes[k].customCssEnabled && modes[k].customCSS)) extras.push('custom CSS');
     if (MODES.some((k) => Object.keys(modes[k].overrides || {}).length || (modes[k].manualOverridesEnabled && modes[k].manualOverrides))) extras.push('color overrides');
-    note.textContent = extras.length
-      ? `Started from ${theme.name}. Its ${extras.join(' and ')} come along in the download.`
-      : `Started from ${theme.name}.`;
+    const lead = !submitted ? `Started from ${theme.name}.`
+      : merged ? `Previewing ${theme.name || 'this theme'} as it was submitted.`
+        : `Previewing ${theme.name || 'this theme'}, which isn't in the gallery yet.`;
+    note.textContent = extras.length ? `${lead} Its ${extras.join(' and ')} come along in the download.` : lead;
     bgTab = null;
     syncAll();
     render();
@@ -605,6 +621,8 @@
 
     if (hash.get('preset')) {
       await loadPreset(hash.get('preset'));
+    } else if (hash.get('theme')) {
+      await loadPreset(hash.get('theme'));
     } else if (shared && shared.p) {
       await loadPreset(shared.p, null);
       await loadScripts(applyShared(shared));
