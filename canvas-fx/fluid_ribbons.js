@@ -4,10 +4,13 @@
  *   sine/bezier curves. Ribbons taper from thick centers to thin edges, carry color gradients
  *   along their length, attract toward the mouse cursor, and glow at intersection points.
  *   Uses ring-buffer position history, Float32Array bulk storage, and delta-time animation.
+ *   Follows your theme's colors when the designer sends them.
  */
 
 // ─── CONFIG ────────────────────────────────────────────────────────────────────
 const CONFIG = {
+	// -- Theme --
+	followTheme: true, // Draw in the theme's colors when the designer sends them (true/false)
 	ribbonCount: 10, // Number of independent ribbons
 	ribbonLength: 120, // History points per ribbon (ring buffer depth)
 	ribbonWidth: 18, // Maximum width at the ribbon's center
@@ -31,6 +34,30 @@ let canvas, ctx, width, height;
 let mouse = { x: -5000, y: -5000 };
 let lastTime = 0;
 let ribbons = [];
+
+// Theme palette (null = original rainbow hues)
+let themeColors = null; // [accent, accent2, accent3] as { r, g, b }
+let glowRgb = ''; // "r, g, b" for intersection glows
+let fadeStyle = 'rgba(0, 0, 0, 0.08)';
+let themeAlpha = 1;
+
+function hexToRgb(hex) {
+	const n = parseInt(hex.slice(1), 16);
+	return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+
+function applyTheme(t) {
+	if (!CONFIG.followTheme || !t || !t.colors) return;
+	const c = t.colors;
+	const accent = c.accent || '#808080';
+	themeColors = [hexToRgb(accent), hexToRgb(c.accent2 || accent), hexToRgb(c.accent3 || accent)];
+	const light = t.dark === false;
+	const glow = hexToRgb(light ? accent : c.text || accent);
+	glowRgb = `${glow.r}, ${glow.g}, ${glow.b}`;
+	const bg = hexToRgb(c.background || (light ? '#ffffff' : '#000000'));
+	fadeStyle = `rgba(${bg.r}, ${bg.g}, ${bg.b}, 0.08)`;
+	themeAlpha = light ? 0.3 : 1; // fainter ribbons keep dark text readable
+}
 
 // ─── HEARTBEAT ─────────────────────────────────────────────────────────────────
 setInterval(() => {
@@ -146,6 +173,8 @@ class Ribbon {
 		const isGlow = pass > 0;
 		const extraWidth = isGlow ? pass * CONFIG.glowWidthStep : 0;
 		const alphaScale = isGlow ? Math.pow(CONFIG.glowAlphaDecay, pass) : 1;
+		const c0 = themeColors && themeColors[this.index % themeColors.length];
+		const c1 = themeColors && themeColors[(this.index + 1) % themeColors.length];
 
 		// Draw as a sequence of quadratic bezier segments
 		for (let i = 1; i < count - 1; i++) {
@@ -171,7 +200,14 @@ class Ribbon {
 			ctx.moveTo(mx0, my0);
 			ctx.quadraticCurveTo(curr.x, curr.y, mx1, my1);
 			ctx.lineWidth = Math.max(0.5, w);
-			ctx.strokeStyle = `hsla(${hue}, ${CONFIG.colorSaturation}%, ${CONFIG.colorLightness}%, ${alpha * 0.4})`;
+			if (themeColors) {
+				const r = Math.round(c0.r + (c1.r - c0.r) * t);
+				const g = Math.round(c0.g + (c1.g - c0.g) * t);
+				const b = Math.round(c0.b + (c1.b - c0.b) * t);
+				ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${alpha * 0.4 * themeAlpha})`;
+			} else {
+				ctx.strokeStyle = `hsla(${hue}, ${CONFIG.colorSaturation}%, ${CONFIG.colorLightness}%, ${alpha * 0.4})`;
+			}
 			ctx.lineCap = 'round';
 			ctx.lineJoin = 'round';
 			ctx.stroke();
@@ -211,8 +247,13 @@ function drawIntersectionGlows(ctx) {
 						const hue = (ra.baseHue + rb.baseHue) * 0.5;
 
 						const grad = ctx.createRadialGradient(midX, midY, 0, midX, midY, checkRadius);
-						grad.addColorStop(0, `hsla(${hue}, 80%, 80%, ${intensity * 0.5})`);
-						grad.addColorStop(1, `hsla(${hue}, 80%, 80%, 0)`);
+						if (themeColors) {
+							grad.addColorStop(0, `rgba(${glowRgb}, ${intensity * 0.5 * themeAlpha})`);
+							grad.addColorStop(1, `rgba(${glowRgb}, 0)`);
+						} else {
+							grad.addColorStop(0, `hsla(${hue}, 80%, 80%, ${intensity * 0.5})`);
+							grad.addColorStop(1, `hsla(${hue}, 80%, 80%, 0)`);
+						}
 						ctx.fillStyle = grad;
 						ctx.fillRect(midX - checkRadius, midY - checkRadius, checkRadius * 2, checkRadius * 2);
 					}
@@ -245,6 +286,7 @@ self.onmessage = (e) => {
 			ctx.lineCap = 'round';
 			ctx.lineJoin = 'round';
 			initRibbons();
+			applyTheme(e.data.theme);
 			lastTime = performance.now();
 			startAnimation();
 			break;
@@ -259,6 +301,9 @@ self.onmessage = (e) => {
 			mouse.x = e.data.x;
 			mouse.y = e.data.y;
 			break;
+		case 'theme':
+			applyTheme(e.data);
+			break;
 	}
 };
 
@@ -272,7 +317,7 @@ function startAnimation() {
 		lastTime = now;
 
 		// Semi-transparent clear for motion trail effect
-		ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+		ctx.fillStyle = fadeStyle;
 		ctx.fillRect(0, 0, width, height);
 
 		// Update all ribbons

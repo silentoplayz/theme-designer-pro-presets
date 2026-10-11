@@ -3,6 +3,7 @@
  * Description: Flowing, undulating aurora-like ribbons of light with green, teal, and purple hues.
  *              Ribbons sway gently using sine waves and respond subtly to mouse position
  *              by shifting their flow direction.
+ *              Follows your theme's colors when the designer sends them.
  */
 
 let canvas, ctx, width, height;
@@ -15,6 +16,7 @@ setInterval(() => {
 	self.postMessage({ type: 'heartbeat' });
 }, 1000);
 
+const FOLLOW_THEME = true; // Draw in the theme's colors when the designer sends them (true/false)
 const RIBBON_COUNT = 5;
 
 // Aurora color palette: greens, teals, purples
@@ -25,6 +27,38 @@ const PALETTE = [
 	{ r: 130, g: 80, b: 220 }, // purple
 	{ r: 60, g: 240, b: 160 } // bright green
 ];
+
+// Theme colors in PALETTE order (null keeps the original palette)
+let themePalette = null;
+
+function hexRgb(hex) {
+	const n = parseInt(String(hex).slice(1, 7), 16) || 0;
+	return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+
+function mixRgb(a, b, t) {
+	return {
+		r: Math.round(a.r + (b.r - a.r) * t),
+		g: Math.round(a.g + (b.g - a.g) * t),
+		b: Math.round(a.b + (b.b - a.b) * t)
+	};
+}
+
+function applyTheme(t) {
+	if (!FOLLOW_THEME || !t || !t.colors) return;
+	const c = t.colors;
+	const accent = hexRgb(c.accent);
+	const accent2 = hexRgb(c.accent2);
+	const accent3 = hexRgb(c.accent3);
+	// The theme hue spread across the ribbons, the last one pushed toward the text color
+	themePalette = [
+		accent,
+		accent3,
+		mixRgb(accent, accent2, 0.5),
+		accent2,
+		mixRgb(accent, hexRgb(c.text), 0.25)
+	];
+}
 
 class Ribbon {
 	constructor(index) {
@@ -51,7 +85,7 @@ class Ribbon {
 	}
 
 	draw(t) {
-		const { r, g, b } = this.color;
+		const { r, g, b } = themePalette ? themePalette[this.index % themePalette.length] : this.color;
 		const segments = 80;
 		const segWidth = (width + 40) / segments;
 
@@ -141,8 +175,12 @@ self.onmessage = (e) => {
 			height = e.data.height;
 			canvas.width = width;
 			canvas.height = height;
+			applyTheme(e.data.theme);
 			initRibbons();
 			startAnimation();
+			break;
+		case 'theme':
+			applyTheme(e.data);
 			break;
 		case 'resize':
 			width = e.data.width;

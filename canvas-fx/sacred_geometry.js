@@ -3,6 +3,7 @@
  * Description: Slowly rotating, nested geometric shapes — circles inscribed in
  * squares, inscribed in circles, etc. Uses the golden ratio for sizing. Thin lines
  * with low opacity in white/gold tones. Mouse position shifts the rotation center.
+ * Follows your theme's colors when the designer sends them.
  */
 
 let canvas, ctx, width, height;
@@ -11,9 +12,17 @@ let time = 0;
 let lastTime = 0;
 let centerX, centerY, baseRadius;
 
+const FOLLOW_THEME = true; // Draw in the theme's colors when the designer sends them (true/false)
 const PHI = (1 + Math.sqrt(5)) / 2; // Golden ratio ≈ 1.618
 const LAYERS = 8;
 const ROTATION_SPEED = 0.06; // radians per second base
+
+// Line colors as 'r, g, b' (the defaults until a theme arrives)
+let goldRGB = '220, 190, 120';
+let whiteRGB = '220, 225, 235';
+let innerRGB = '200, 200, 220';
+let guideRGB = '255, 255, 255';
+let dotRGB = '220, 200, 150';
 
 // Keep worker alive
 setInterval(() => {
@@ -29,6 +38,7 @@ self.onmessage = (e) => {
 			height = e.data.height;
 			canvas.width = width;
 			canvas.height = height;
+			applyTheme(e.data.theme);
 			recalcCenter();
 			startAnimation();
 			break;
@@ -43,8 +53,27 @@ self.onmessage = (e) => {
 			mouse.x = e.data.x;
 			mouse.y = e.data.y;
 			break;
+		case 'theme':
+			applyTheme(e.data);
+			break;
 	}
 };
+
+function toRGB(t, key) {
+	if (t.rgb && t.rgb[key]) return t.rgb[key].map((v) => Math.round(v * 255)).join(', ');
+	const n = parseInt((t.colors[key] || '#000000').slice(1), 16);
+	return [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(', ');
+}
+
+/** Gold becomes the theme accent, white the text color, inner lines the muted color */
+function applyTheme(t) {
+	if (!FOLLOW_THEME || !t || !t.colors) return;
+	goldRGB = toRGB(t, 'accent');
+	whiteRGB = toRGB(t, 'text');
+	innerRGB = toRGB(t, 'muted');
+	guideRGB = whiteRGB;
+	dotRGB = goldRGB;
+}
 
 function recalcCenter() {
 	centerX = width / 2;
@@ -135,9 +164,9 @@ function startAnimation() {
 			// Alternate between white and gold tones
 			const isGold = i % 3 === 1;
 			if (isGold) {
-				ctx.strokeStyle = `rgba(220, 190, 120, ${alpha})`;
+				ctx.strokeStyle = `rgba(${goldRGB}, ${alpha})`;
 			} else {
-				ctx.strokeStyle = `rgba(220, 225, 235, ${alpha})`;
+				ctx.strokeStyle = `rgba(${whiteRGB}, ${alpha})`;
 			}
 			ctx.lineWidth = 0.8;
 
@@ -164,7 +193,7 @@ function startAnimation() {
 			// Draw inscribed connecting lines for some layers
 			if (i < LAYERS - 1 && i % 2 === 0) {
 				const sides = [3, 4, 6][i % 3];
-				ctx.strokeStyle = `rgba(200, 200, 220, ${alpha * 0.4})`;
+				ctx.strokeStyle = `rgba(${innerRGB}, ${alpha * 0.4})`;
 				ctx.lineWidth = 0.4;
 				drawPolygon(drawCX, drawCY, r * 0.85, sides, rotation + Math.PI / sides);
 			}
@@ -172,17 +201,17 @@ function startAnimation() {
 
 		// Flower of Life in the center
 		const flowerRadius = baseRadius * Math.pow(1 / PHI, 4);
-		ctx.strokeStyle = 'rgba(220, 190, 120, 0.05)';
+		ctx.strokeStyle = `rgba(${goldRGB}, 0.05)`;
 		ctx.lineWidth = 0.5;
 		drawFlowerOfLife(drawCX, drawCY, flowerRadius, time * 0.03);
 
 		// Outer Vesica Piscis
-		ctx.strokeStyle = 'rgba(220, 225, 235, 0.04)';
+		ctx.strokeStyle = `rgba(${whiteRGB}, 0.04)`;
 		ctx.lineWidth = 0.6;
 		drawVesicaPiscis(drawCX, drawCY, baseRadius * 0.6, time * 0.02);
 
 		// Radial guide lines (very subtle)
-		ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
+		ctx.strokeStyle = `rgba(${guideRGB}, 0.02)`;
 		ctx.lineWidth = 0.3;
 		for (let i = 0; i < 12; i++) {
 			const angle = (Math.PI / 6) * i + time * 0.01;
@@ -196,7 +225,7 @@ function startAnimation() {
 		}
 
 		// Center dot
-		ctx.fillStyle = 'rgba(220, 200, 150, 0.12)';
+		ctx.fillStyle = `rgba(${dotRGB}, 0.12)`;
 		ctx.beginPath();
 		ctx.arc(drawCX, drawCY, 2.5, 0, Math.PI * 2);
 		ctx.fill();

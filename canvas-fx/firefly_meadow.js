@@ -9,10 +9,12 @@
  *   breath-like rhythm. Occasionally a firefly traces a long J-shaped mating
  *   flight arc. Mouse position shifts the wind direction, bending the grass.
  *
- *   Fully autonomous — no interaction required.
+ *   Fully autonomous — no interaction required. Follows your theme's
+ *   colors when the designer sends them.
  */
 
 /* ────────── CONFIGURABLE VARIABLES ────────── */
+const FOLLOW_THEME        = true;     // Draw in the theme's colors when the designer sends them (true/false)
 const FIREFLY_COUNT       = 35;       // drifting fireflies
 const STAR_COUNT          = 140;      // sky stars
 const GRASS_BLADES_NEAR   = 80;       // foreground grass density
@@ -33,6 +35,7 @@ let stars = [];
 let fireflies = [];
 let grassLayers = [];
 let time = 0;
+let palette = null;
 
 const TAU = Math.PI * 2;
 
@@ -57,8 +60,8 @@ function drawStars() {
 	for (let i = 0; i < stars.length; i++) {
 		const s = stars[i];
 		const brightness = 0.3 + 0.7 * Math.sin(time * s.twinkleSpeed + s.phase);
-		ctx.globalAlpha = brightness * 0.7;
-		ctx.fillStyle = '#e8e4d8';
+		ctx.globalAlpha = palette ? brightness * 0.7 * palette.starAlpha : brightness * 0.7;
+		ctx.fillStyle = palette ? palette.star : '#e8e4d8';
 		ctx.beginPath();
 		ctx.arc(s.x, s.y, s.size, 0, TAU);
 		ctx.fill();
@@ -75,8 +78,9 @@ function drawMoon() {
 	// Moonlight glow
 	ctx.globalAlpha = 0.06;
 	const glow = ctx.createRadialGradient(mx, my, 0, mx, my, r * 8);
-	glow.addColorStop(0, 'rgba(200, 210, 230, 0.5)');
-	glow.addColorStop(1, 'rgba(200, 210, 230, 0)');
+	const glowRgb = palette ? palette.moonGlow : '200, 210, 230';
+	glow.addColorStop(0, `rgba(${glowRgb}, 0.5)`);
+	glow.addColorStop(1, `rgba(${glowRgb}, 0)`);
 	ctx.fillStyle = glow;
 	ctx.beginPath();
 	ctx.arc(mx, my, r * 8, 0, TAU);
@@ -84,14 +88,14 @@ function drawMoon() {
 
 	// Moon disc
 	ctx.globalAlpha = 0.85;
-	ctx.fillStyle = '#d8dce8';
+	ctx.fillStyle = palette ? palette.moonDisc : '#d8dce8';
 	ctx.beginPath();
 	ctx.arc(mx, my, r, 0, TAU);
 	ctx.fill();
 
 	// Crescent shadow
 	const shadowOffset = r * (1 - MOON_PHASE * 2);
-	ctx.fillStyle = '#0a0e18';
+	ctx.fillStyle = palette ? palette.moonShadow : '#0a0e18';
 	ctx.beginPath();
 	ctx.arc(mx + shadowOffset, my - 1, r * 0.88, 0, TAU);
 	ctx.fill();
@@ -137,8 +141,8 @@ function drawGrassLayer(blades, layer, windOffset) {
 		const windSway = Math.sin(time * b.swaySpeed + b.swayPhase) * b.swayAmount;
 		const totalSway = windSway + windOffset * b.swayAmount * 0.5;
 
-		ctx.globalAlpha = layerAlpha;
-		ctx.strokeStyle = `hsl(${b.hue}, 40%, ${b.lightness}%)`;
+		ctx.globalAlpha = palette ? layerAlpha * palette.grassAlpha : layerAlpha;
+		ctx.strokeStyle = palette ? palette.grass[layer][shadeIndex(b.hue, 90, 30)] : `hsl(${b.hue}, 40%, ${b.lightness}%)`;
 		ctx.lineWidth = b.width;
 		ctx.lineCap = 'round';
 		ctx.beginPath();
@@ -213,12 +217,14 @@ function updateAndDrawFireflies(dt) {
 			brightness = Math.max(0, brightness);
 		}
 
+		const fly = palette ? palette.fly[shadeIndex(f.hue, 50, 20)] : null;
+
 		// Flash glow halo
 		if (brightness > 0.05) {
 			ctx.globalAlpha = brightness * 0.15;
 			const glow = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.size * 12);
-			glow.addColorStop(0, `hsla(${f.hue}, 100%, 75%, 0.6)`);
-			glow.addColorStop(1, `hsla(${f.hue}, 100%, 75%, 0)`);
+			glow.addColorStop(0, fly ? `rgba(${fly.join(', ')}, 0.6)` : `hsla(${f.hue}, 100%, 75%, 0.6)`);
+			glow.addColorStop(1, fly ? `rgba(${fly.join(', ')}, 0)` : `hsla(${f.hue}, 100%, 75%, 0)`);
 			ctx.fillStyle = glow;
 			ctx.beginPath();
 			ctx.arc(f.x, f.y, f.size * 12, 0, TAU);
@@ -227,7 +233,7 @@ function updateAndDrawFireflies(dt) {
 
 		// Core dot (always faintly visible + bright on flash)
 		ctx.globalAlpha = 0.03 + brightness * 0.85;
-		ctx.fillStyle = `hsl(${f.hue}, 100%, ${50 + brightness * 30}%)`;
+		ctx.fillStyle = fly ? rgbStr(mixRgb(fly, palette.flyTip, brightness * 0.5)) : `hsl(${f.hue}, 100%, ${50 + brightness * 30}%)`;
 		ctx.beginPath();
 		ctx.arc(f.x, f.y, f.size * (0.5 + brightness * 0.5), 0, TAU);
 		ctx.fill();
@@ -247,9 +253,10 @@ function drawMist() {
 
 		ctx.globalAlpha = alpha * (1 - layer * 0.3);
 		const grad = ctx.createLinearGradient(0, ly - 30, 0, ly + 40);
-		grad.addColorStop(0, 'rgba(180, 190, 210, 0)');
-		grad.addColorStop(0.4, `rgba(180, 190, 210, ${0.5 * breathe})`);
-		grad.addColorStop(1, 'rgba(180, 190, 210, 0)');
+		const mistRgb = palette ? palette.mist : '180, 190, 210';
+		grad.addColorStop(0, `rgba(${mistRgb}, 0)`);
+		grad.addColorStop(0.4, `rgba(${mistRgb}, ${0.5 * breathe})`);
+		grad.addColorStop(1, `rgba(${mistRgb}, 0)`);
 		ctx.fillStyle = grad;
 
 		for (let x = -50; x < w + 50; x += 40) {
@@ -266,12 +273,82 @@ function drawMist() {
 function drawGround() {
 	const groundY = h * 0.88;
 	const grad = ctx.createLinearGradient(0, groundY - 15, 0, h);
-	grad.addColorStop(0, 'rgba(8, 12, 6, 0)');
-	grad.addColorStop(0.2, 'rgb(8, 12, 6)');
-	grad.addColorStop(1, 'rgb(4, 6, 3)');
+	grad.addColorStop(0, palette ? palette.ground[0] : 'rgba(8, 12, 6, 0)');
+	grad.addColorStop(0.2, palette ? palette.ground[1] : 'rgb(8, 12, 6)');
+	grad.addColorStop(1, palette ? palette.ground[2] : 'rgb(4, 6, 3)');
 	ctx.globalAlpha = 1;
 	ctx.fillStyle = grad;
 	ctx.fillRect(0, groundY - 15, w, h - groundY + 15);
+}
+
+// ── Theme ──
+
+function hexRgb(hex) {
+	const n = parseInt(String(hex).slice(1, 7), 16) || 0;
+	return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function mixRgb(a, b, t) {
+	return [
+		Math.round(a[0] + (b[0] - a[0]) * t),
+		Math.round(a[1] + (b[1] - a[1]) * t),
+		Math.round(a[2] + (b[2] - a[2]) * t)
+	];
+}
+
+function rgbStr(c) {
+	return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
+}
+
+// Maps a blade or firefly hue onto one of 8 palette shades
+function shadeIndex(hue, min, range) {
+	return Math.max(0, Math.min(7, Math.floor((hue - min) / range * 8)));
+}
+
+function applyTheme(t) {
+	if (!FOLLOW_THEME || !t || !t.colors) return;
+	const c = t.colors;
+	const ramp = t.ramp || {};
+	const dark = t.dark !== false;
+	const bg = hexRgb(c.background);
+	const surface = hexRgb(c.surface);
+	const text = hexRgb(c.text);
+	const muted = hexRgb(c.muted);
+	const accent = hexRgb(c.accent);
+	const accent2 = hexRgb(c.accent2);
+	const accent3 = hexRgb(c.accent3);
+	const moon = dark ? text : muted;
+
+	// Grass blends from the surface toward the accents, nearer layers stronger
+	const grassMix = dark ? [0.12, 0.2, 0.3] : [0.25, 0.4, 0.55];
+	const grass = [];
+	for (let layer = 0; layer < 3; layer++) {
+		const shades = [];
+		for (let k = 0; k < 8; k++) shades.push(rgbStr(mixRgb(surface, mixRgb(accent3, accent, k / 7), grassMix[layer])));
+		grass.push(shades);
+	}
+
+	const fly = [];
+	for (let k = 0; k < 8; k++) fly.push(mixRgb(accent, accent2, k / 7));
+
+	const groundTop = dark ? bg : surface;
+	const groundBottom = hexRgb(dark ? (ramp['950'] || c.background) : (ramp['200'] || c.surface));
+
+	palette = {
+		sky: [rgbStr(bg), rgbStr(mixRgb(bg, surface, 0.5)), rgbStr(surface)],
+		wash: muted.join(', '),
+		star: rgbStr(dark ? text : muted),
+		starAlpha: dark ? 1 : 0.6,
+		moonGlow: moon.join(', '),
+		moonDisc: rgbStr(moon),
+		moonShadow: rgbStr(mixRgb(bg, surface, 0.2)),
+		grass,
+		grassAlpha: dark ? 1 : 0.6,
+		fly,
+		flyTip: text,
+		mist: (dark ? muted : bg).join(', '),
+		ground: [`rgba(${groundTop.join(', ')}, 0)`, rgbStr(groundTop), rgbStr(groundBottom)]
+	};
 }
 
 // ── Init ──
@@ -297,9 +374,9 @@ function animate(timestamp) {
 
 	// Night sky
 	const skyGrad = ctx.createLinearGradient(0, 0, 0, h * 0.75);
-	skyGrad.addColorStop(0, '#060810');
-	skyGrad.addColorStop(0.5, '#0a0e1a');
-	skyGrad.addColorStop(1, '#0e1520');
+	skyGrad.addColorStop(0, palette ? palette.sky[0] : '#060810');
+	skyGrad.addColorStop(0.5, palette ? palette.sky[1] : '#0a0e1a');
+	skyGrad.addColorStop(1, palette ? palette.sky[2] : '#0e1520');
 	ctx.globalAlpha = 1;
 	ctx.fillStyle = skyGrad;
 	ctx.fillRect(0, 0, w, h);
@@ -307,8 +384,9 @@ function animate(timestamp) {
 	// Ambient moonlight wash
 	ctx.globalAlpha = 0.02;
 	const moonGlow = ctx.createRadialGradient(w * 0.78, h * 0.15, 0, w * 0.78, h * 0.15, h * 0.9);
-	moonGlow.addColorStop(0, 'rgba(140, 160, 200, 0.3)');
-	moonGlow.addColorStop(1, 'rgba(140, 160, 200, 0)');
+	const washRgb = palette ? palette.wash : '140, 160, 200';
+	moonGlow.addColorStop(0, `rgba(${washRgb}, 0.3)`);
+	moonGlow.addColorStop(1, `rgba(${washRgb}, 0)`);
 	ctx.fillStyle = moonGlow;
 	ctx.fillRect(0, 0, w, h);
 
@@ -338,8 +416,13 @@ self.onmessage = (e) => {
 			h = e.data.height;
 			canvas.width = w;
 			canvas.height = h;
+			applyTheme(e.data.theme);
 			initAll();
 			requestAnimationFrame(animate);
+			break;
+
+		case 'theme':
+			applyTheme(e.data);
 			break;
 
 		case 'resize':

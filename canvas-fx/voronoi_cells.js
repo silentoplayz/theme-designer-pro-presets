@@ -3,6 +3,7 @@
  * Description: Animated Voronoi diagram where seed points drift slowly. Cell edges
  * are drawn with subtle glowing lines. Mouse acts as an additional seed point.
  * Colors use very subtle edge highlights against a transparent background.
+ * Follows your theme's colors when the designer sends them.
  */
 
 let canvas, ctx, width, height;
@@ -10,8 +11,13 @@ let mouse = { x: -5000, y: -5000 };
 let seeds = [];
 let lastTime = 0;
 
+const FOLLOW_THEME = true; // Draw in the theme's colors when the designer sends them (true/false)
 const NUM_SEEDS = 30;
 const EDGE_RESOLUTION = 4; // pixel step for edge detection (higher = faster, coarser)
+
+// Edge and seed colors as 'r, g, b' (the defaults until a theme arrives)
+let edgeRGB = '160, 200, 255';
+let seedRGB = '180, 210, 255';
 
 // Keep worker alive
 setInterval(() => {
@@ -27,6 +33,7 @@ self.onmessage = (e) => {
 			height = e.data.height;
 			canvas.width = width;
 			canvas.height = height;
+			applyTheme(e.data.theme);
 			initSeeds();
 			startAnimation();
 			break;
@@ -40,8 +47,24 @@ self.onmessage = (e) => {
 			mouse.x = e.data.x;
 			mouse.y = e.data.y;
 			break;
+		case 'theme':
+			applyTheme(e.data);
+			break;
 	}
 };
+
+function toRGB(t, key) {
+	if (t.rgb && t.rgb[key]) return t.rgb[key].map((v) => Math.round(v * 255)).join(', ');
+	const n = parseInt((t.colors[key] || '#000000').slice(1), 16);
+	return [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(', ');
+}
+
+/** Edges take the theme accent, seed points the second accent */
+function applyTheme(t) {
+	if (!FOLLOW_THEME || !t || !t.colors) return;
+	edgeRGB = toRGB(t, 'accent');
+	seedRGB = toRGB(t, 'accent2');
+}
 
 function initSeeds() {
 	seeds = [];
@@ -177,7 +200,7 @@ function startAnimation() {
 			const alpha = 0.06 * brightness + mouseGlow;
 			const size = EDGE_RESOLUTION * 0.9;
 
-			ctx.fillStyle = `rgba(160, 200, 255, ${alpha})`;
+			ctx.fillStyle = `rgba(${edgeRGB}, ${alpha})`;
 			ctx.fillRect(edge.x - size / 2, edge.y - size / 2, size, size);
 		}
 
@@ -190,7 +213,7 @@ function startAnimation() {
 
 			ctx.beginPath();
 			ctx.arc(seed.x, seed.y, radius, 0, Math.PI * 2);
-			ctx.fillStyle = `rgba(180, 210, 255, ${alpha})`;
+			ctx.fillStyle = `rgba(${seedRGB}, ${alpha})`;
 			ctx.fill();
 		}
 

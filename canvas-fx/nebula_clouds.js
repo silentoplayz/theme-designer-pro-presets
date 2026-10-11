@@ -3,6 +3,7 @@
  * Description: Soft, slowly drifting colored cloud formations using layered circles with very low
  *              opacity and large radii. Colors are deep purples, blues, and pinks.
  *              Mouse proximity causes nearby clouds to gently disperse.
+ *              Follows your theme's colors when the designer sends them.
  */
 
 let canvas, ctx, width, height;
@@ -10,6 +11,7 @@ let mouse = { x: -5000, y: -5000 };
 let clouds = [];
 let time = 0;
 
+const FOLLOW_THEME = true; // Draw in the theme's colors when the designer sends them (true/false)
 const CLOUD_COUNT = 45;
 const MOUSE_RADIUS = 200;
 const MOUSE_FORCE = 0.8;
@@ -31,6 +33,22 @@ const NEBULA_COLORS = [
 	{ r: 50, g: 50, b: 120 } // dark indigo
 ];
 
+// Theme role for each nebula color above, in the same order
+const NEBULA_ROLES = ['accent', 'accent3', 'accent2', 'accent', 'accent', 'accent3', 'accent2', 'muted'];
+let palette = NEBULA_COLORS;
+
+function hexToRgb(hex) {
+	const n = parseInt(hex.slice(1), 16);
+	return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+
+// Swap the palette and recolor existing clouds in place
+function applyTheme(t) {
+	if (!FOLLOW_THEME || !t || !t.colors) return;
+	palette = NEBULA_ROLES.map((role) => hexToRgb(t.colors[role] || t.colors.accent || '#808080'));
+	for (const cloud of clouds) cloud.color = palette[cloud.colorIndex];
+}
+
 class Cloud {
 	constructor() {
 		this.reset(true);
@@ -43,7 +61,8 @@ class Cloud {
 		this.baseRadius = this.radius;
 		this.vx = (Math.random() - 0.5) * 0.15;
 		this.vy = (Math.random() - 0.5) * 0.1;
-		this.color = NEBULA_COLORS[Math.floor(Math.random() * NEBULA_COLORS.length)];
+		this.colorIndex = Math.floor(Math.random() * NEBULA_COLORS.length);
+		this.color = palette[this.colorIndex];
 		this.opacity = 0.015 + Math.random() * 0.03;
 		this.phase = Math.random() * Math.PI * 2;
 		this.pulseSpeed = 0.005 + Math.random() * 0.01;
@@ -144,6 +163,7 @@ self.onmessage = (e) => {
 			canvas.width = width;
 			canvas.height = height;
 			initClouds();
+			applyTheme(e.data.theme);
 			startAnimation();
 			break;
 		case 'resize':
@@ -156,6 +176,9 @@ self.onmessage = (e) => {
 		case 'mousemove':
 			mouse.x = e.data.x;
 			mouse.y = e.data.y;
+			break;
+		case 'theme':
+			applyTheme(e.data);
 			break;
 	}
 };

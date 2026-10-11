@@ -3,6 +3,7 @@
  * Description: Ink-drop-like blooms that slowly expand and diffuse at random
  *   locations, fading out as they grow. Deep, rich colors (indigo, crimson,
  *   emerald) with low opacity. Mouse position influences where new blooms appear.
+ *   Follows your theme's colors when the designer sends them.
  */
 
 let canvas, ctx, width, height;
@@ -11,6 +12,7 @@ let blooms = [];
 let time = 0;
 let lastBloomTime = 0;
 
+const FOLLOW_THEME = true; // Draw in the theme's colors when the designer sends them (true/false)
 const MAX_BLOOMS = 25;
 const BLOOM_INTERVAL = 80; // frames between new blooms
 const MOUSE_BLOOM_CHANCE = 0.4; // chance a bloom spawns near mouse
@@ -31,6 +33,33 @@ const COLORS = [
 	{ r: 10, g: 80, b: 90 } // teal
 ];
 
+// Active palette and trail fade (the defaults above until a theme arrives)
+let palette = COLORS;
+let fadeStyle = 'rgba(0, 0, 0, 0.015)';
+
+function toRGB(t, key) {
+	if (t.rgb && t.rgb[key]) return t.rgb[key].map((v) => Math.round(v * 255));
+	const n = parseInt((t.colors[key] || '#000000').slice(1), 16);
+	return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function applyTheme(t) {
+	if (!FOLLOW_THEME || !t || !t.colors) return;
+	const bg = toRGB(t, 'background');
+	// Ink is the accent mixed into the page color: deep on dark, and on light
+	// a pale tint, since the ink builds up faster than the trail fade clears it
+	const mix = t.dark === false ? 0.2 : 0.55;
+	palette = ['accent', 'accent2', 'accent3'].map((key) => {
+		const c = toRGB(t, key);
+		return {
+			r: Math.round(bg[0] + (c[0] - bg[0]) * mix),
+			g: Math.round(bg[1] + (c[1] - bg[1]) * mix),
+			b: Math.round(bg[2] + (c[2] - bg[2]) * mix)
+		};
+	});
+	fadeStyle = `rgba(${bg[0]}, ${bg[1]}, ${bg[2]}, 0.015)`;
+}
+
 class Bloom {
 	constructor(x, y) {
 		this.x = x;
@@ -38,7 +67,7 @@ class Bloom {
 		this.radius = 2;
 		this.maxRadius = 80 + Math.random() * 160;
 		this.growthRate = 0.3 + Math.random() * 0.5;
-		this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+		this.colorIndex = Math.floor(Math.random() * COLORS.length);
 		this.alpha = 0.08 + Math.random() * 0.05;
 		this.maxAlpha = this.alpha;
 		this.alive = true;
@@ -77,7 +106,7 @@ class Bloom {
 	}
 
 	draw() {
-		const { r, g, b } = this.color;
+		const { r, g, b } = palette[this.colorIndex % palette.length];
 
 		ctx.save();
 		ctx.translate(this.x, this.y);
@@ -157,6 +186,7 @@ self.onmessage = (e) => {
 			height = e.data.height;
 			canvas.width = width;
 			canvas.height = height;
+			applyTheme(e.data.theme);
 			blooms = [];
 			// Seed initial blooms
 			for (let i = 0; i < 5; i++) {
@@ -174,6 +204,9 @@ self.onmessage = (e) => {
 			mouse.x = e.data.x;
 			mouse.y = e.data.y;
 			break;
+		case 'theme':
+			applyTheme(e.data);
+			break;
 	}
 };
 
@@ -182,7 +215,7 @@ function startAnimation() {
 		if (!ctx) return;
 
 		// Slow fade for trailing ink effect
-		ctx.fillStyle = 'rgba(0, 0, 0, 0.015)';
+		ctx.fillStyle = fadeStyle;
 		ctx.fillRect(0, 0, width, height);
 
 		time++;

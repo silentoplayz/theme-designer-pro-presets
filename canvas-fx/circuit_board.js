@@ -3,11 +3,13 @@
  * Description: Animated circuit board traces drawn in real-time. Lines travel horizontally
  *   and vertically with 90-degree turns. Glowing nodes at junctions/endpoints.
  *   Mouse creates signal pulses that race along nearby traces. Subtle cyan/green palette.
+ *   Follows your theme's colors when the designer sends them.
  */
 
 let canvas, ctx, width, height;
 let mouse = { x: -5000, y: -5000 };
 
+const FOLLOW_THEME = true; // Draw in the theme's colors when the designer sends them (true/false)
 const GRID = 20; // grid spacing
 const MAX_TRACES = 60;
 const MAX_PULSES = 40;
@@ -19,6 +21,12 @@ let traces = [];
 let pulses = [];
 let activeTraces = []; // traces currently being drawn
 let lastPulseTime = 0;
+
+// Palette (r, g, b); the theme replaces these when it arrives
+let traceRgb = '0, 180, 160';
+let nodeRgb = '0, 220, 180';
+let tipRgb = '0, 255, 220';
+let pulseRgb = '0, 255, 200';
 
 setInterval(() => {
 	self.postMessage({ type: 'heartbeat' });
@@ -34,6 +42,7 @@ self.onmessage = (e) => {
 			canvas.width = width;
 			canvas.height = height;
 			init();
+			applyTheme(e.data.theme);
 			startAnimation();
 			break;
 		case 'resize':
@@ -49,8 +58,27 @@ self.onmessage = (e) => {
 			mouse.x = e.data.x;
 			mouse.y = e.data.y;
 			break;
+		case 'theme':
+			applyTheme(e.data);
+			break;
 	}
 };
+
+function themeRgb(t, key) {
+	const c = t.rgb && t.rgb[key];
+	if (c) return c.map((v) => Math.round(Math.max(0, Math.min(1, v || 0)) * 255)).join(', ');
+	const hex = t.colors[key] || '#808080';
+	return [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) || 0).join(', ');
+}
+
+// Finished traces take the muted text color, nodes and signals the accents
+function applyTheme(t) {
+	if (!FOLLOW_THEME || !t || !t.colors) return;
+	traceRgb = themeRgb(t, 'muted');
+	nodeRgb = themeRgb(t, 'accent');
+	tipRgb = themeRgb(t, 'accent2');
+	pulseRgb = themeRgb(t, 'accent3');
+}
 
 function snapToGrid(v) {
 	return Math.round(v / GRID) * GRID;
@@ -207,8 +235,8 @@ function startAnimation() {
 
 			ctx.beginPath();
 			ctx.arc(px, py, 3, 0, Math.PI * 2);
-			ctx.fillStyle = `rgba(0, 255, 200, ${p.life * 0.8})`;
-			ctx.shadowColor = 'rgba(0, 255, 200, 0.6)';
+			ctx.fillStyle = `rgba(${pulseRgb}, ${p.life * 0.8})`;
+			ctx.shadowColor = `rgba(${pulseRgb}, 0.6)`;
 			ctx.shadowBlur = 10;
 			ctx.fill();
 			ctx.shadowBlur = 0;
@@ -228,7 +256,7 @@ function drawTrace(t) {
 	for (let i = 1; i < t.targetPoints.length; i++) {
 		ctx.lineTo(t.targetPoints[i].x, t.targetPoints[i].y);
 	}
-	ctx.strokeStyle = `rgba(0, 180, 160, ${t.opacity})`;
+	ctx.strokeStyle = `rgba(${traceRgb}, ${t.opacity})`;
 	ctx.lineWidth = 1.5;
 	ctx.stroke();
 
@@ -243,7 +271,7 @@ function drawTrace(t) {
 
 		ctx.beginPath();
 		ctx.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2);
-		ctx.fillStyle = `rgba(0, 220, 180, ${glow * t.opacity * 2})`;
+		ctx.fillStyle = `rgba(${nodeRgb}, ${glow * t.opacity * 2})`;
 		ctx.fill();
 	}
 }
@@ -265,15 +293,15 @@ function drawActiveTrace(t) {
 	const cy = a.y + (b.y - a.y) * t.progress;
 	ctx.lineTo(cx, cy);
 
-	ctx.strokeStyle = `rgba(0, 220, 180, ${t.opacity * 1.5})`;
+	ctx.strokeStyle = `rgba(${nodeRgb}, ${t.opacity * 1.5})`;
 	ctx.lineWidth = 1.5;
 	ctx.stroke();
 
 	// Glowing tip
 	ctx.beginPath();
 	ctx.arc(cx, cy, 3, 0, Math.PI * 2);
-	ctx.fillStyle = 'rgba(0, 255, 220, 0.8)';
-	ctx.shadowColor = 'rgba(0, 255, 220, 0.6)';
+	ctx.fillStyle = `rgba(${tipRgb}, 0.8)`;
+	ctx.shadowColor = `rgba(${tipRgb}, 0.6)`;
 	ctx.shadowBlur = 8;
 	ctx.fill();
 	ctx.shadowBlur = 0;
@@ -282,7 +310,7 @@ function drawActiveTrace(t) {
 	for (const pt of t.points) {
 		ctx.beginPath();
 		ctx.arc(pt.x, pt.y, 2, 0, Math.PI * 2);
-		ctx.fillStyle = `rgba(0, 220, 180, ${t.opacity * 2})`;
+		ctx.fillStyle = `rgba(${nodeRgb}, ${t.opacity * 2})`;
 		ctx.fill();
 	}
 }

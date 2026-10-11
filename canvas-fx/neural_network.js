@@ -3,6 +3,7 @@
  * Description: Visualization of connected nodes in layers with pulses of light traveling
  *   along connections. Nodes glow when activated. The network slowly reorganizes.
  *   Mouse adds energy to the nearest node, triggering cascading activations.
+ *   Follows your theme's colors when the designer sends them.
  */
 
 let canvas, ctx, width, height;
@@ -12,10 +13,20 @@ let layers = [];
 let connections = [];
 let pulses = [];
 
+const FOLLOW_THEME = true; // Draw in the theme's colors when the designer sends them (true/false)
 const LAYER_COUNT = 5;
 const NODE_RADIUS = 4;
 const MAX_PULSES = 80;
 const REORGANIZE_SPEED = 0.002;
+
+// Palette (r, g, b); the theme replaces these when it arrives
+let connRgb = '100, 160, 255';
+let pulseRgb = '140, 200, 255';
+let pulseShadowRgb = '100, 180, 255';
+let glowRgb = '100, 180, 255';
+let nodeRgb = '120, 180, 255';
+let coreRgb = '200, 230, 255';
+let coreShadowRgb = '120, 200, 255';
 
 setInterval(() => {
 	self.postMessage({ type: 'heartbeat' });
@@ -31,6 +42,7 @@ self.onmessage = (e) => {
 			canvas.width = width;
 			canvas.height = height;
 			initNetwork();
+			applyTheme(e.data.theme);
 			startAnimation();
 			break;
 		case 'resize':
@@ -44,8 +56,30 @@ self.onmessage = (e) => {
 			mouse.x = e.data.x;
 			mouse.y = e.data.y;
 			break;
+		case 'theme':
+			applyTheme(e.data);
+			break;
 	}
 };
+
+function themeRgb(t, key) {
+	const c = t.rgb && t.rgb[key];
+	if (c) return c.map((v) => Math.round(Math.max(0, Math.min(1, v || 0)) * 255)).join(', ');
+	const hex = t.colors[key] || '#808080';
+	return [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) || 0).join(', ');
+}
+
+// Connections take the muted text color, nodes and pulses the accents
+function applyTheme(t) {
+	if (!FOLLOW_THEME || !t || !t.colors) return;
+	connRgb = themeRgb(t, 'muted');
+	pulseRgb = themeRgb(t, 'accent');
+	pulseShadowRgb = pulseRgb;
+	glowRgb = themeRgb(t, 'accent2');
+	nodeRgb = themeRgb(t, 'accent');
+	coreRgb = themeRgb(t, t.dark === false ? 'accent3' : 'text');
+	coreShadowRgb = nodeRgb;
+}
 
 function initNetwork() {
 	layers = [];
@@ -204,7 +238,7 @@ function startAnimation() {
 
 			// Brighter if either node is energized
 			const energyBoost = Math.max(conn.from.energy, conn.to.energy) * 0.2;
-			ctx.strokeStyle = `rgba(100, 160, 255, ${conn.opacity + energyBoost})`;
+			ctx.strokeStyle = `rgba(${connRgb}, ${conn.opacity + energyBoost})`;
 			ctx.lineWidth = 0.8 + conn.weight * 0.5;
 			ctx.stroke();
 		}
@@ -244,8 +278,8 @@ function startAnimation() {
 
 			ctx.beginPath();
 			ctx.arc(px, py, 2.5, 0, Math.PI * 2);
-			ctx.fillStyle = `rgba(140, 200, 255, ${p.brightness * 0.7})`;
-			ctx.shadowColor = `rgba(100, 180, 255, ${p.brightness * 0.5})`;
+			ctx.fillStyle = `rgba(${pulseRgb}, ${p.brightness * 0.7})`;
+			ctx.shadowColor = `rgba(${pulseShadowRgb}, ${p.brightness * 0.5})`;
 			ctx.shadowBlur = 8;
 			ctx.fill();
 			ctx.shadowBlur = 0;
@@ -260,7 +294,7 @@ function startAnimation() {
 				if (glow > 0.05) {
 					ctx.beginPath();
 					ctx.arc(node.x, node.y, NODE_RADIUS + 6, 0, Math.PI * 2);
-					ctx.fillStyle = `rgba(100, 180, 255, ${glow * 0.15})`;
+					ctx.fillStyle = `rgba(${glowRgb}, ${glow * 0.15})`;
 					ctx.fill();
 				}
 
@@ -268,15 +302,15 @@ function startAnimation() {
 				ctx.beginPath();
 				ctx.arc(node.x, node.y, NODE_RADIUS, 0, Math.PI * 2);
 				const baseAlpha = 0.15 + glow * 0.6;
-				ctx.fillStyle = `rgba(120, 180, 255, ${baseAlpha})`;
+				ctx.fillStyle = `rgba(${nodeRgb}, ${baseAlpha})`;
 				ctx.fill();
 
 				// Bright center when energized
 				if (glow > 0.1) {
 					ctx.beginPath();
 					ctx.arc(node.x, node.y, NODE_RADIUS * 0.5, 0, Math.PI * 2);
-					ctx.fillStyle = `rgba(200, 230, 255, ${glow * 0.5})`;
-					ctx.shadowColor = `rgba(120, 200, 255, ${glow * 0.4})`;
+					ctx.fillStyle = `rgba(${coreRgb}, ${glow * 0.5})`;
+					ctx.shadowColor = `rgba(${coreShadowRgb}, ${glow * 0.4})`;
 					ctx.shadowBlur = 10;
 					ctx.fill();
 					ctx.shadowBlur = 0;

@@ -3,6 +3,7 @@
  * Description: Large, soft, amorphous blobs that slowly rise, merge, split,
  *   and sink like a lava lamp. Warm colors (deep reds, oranges, magentas)
  *   with very low opacity and heavy blur. Mouse attracts nearby blobs.
+ *   Follows your theme's colors when the designer sends them.
  */
 
 let canvas, ctx, width, height;
@@ -10,6 +11,7 @@ let mouse = { x: -5000, y: -5000 };
 let blobs = [];
 let time = 0;
 
+const FOLLOW_THEME = true; // Draw in the theme's colors when the designer sends them (true/false)
 const BLOB_COUNT = 12;
 const MOUSE_ATTRACT_RADIUS = 250;
 const MOUSE_ATTRACT_STRENGTH = 0.4;
@@ -29,6 +31,27 @@ const COLORS = [
 	{ r: 190, g: 40, b: 60 } // rose red
 ];
 
+// Theme role for each color above, in the same order
+const COLOR_ROLES = ['accent', 'accent2', 'accent3', 'accent2', 'accent3', 'accent'];
+let palette = COLORS;
+let fadeStyle = 'rgba(0, 0, 0, 0.08)';
+let alphaScale = 1;
+
+function hexToRgb(hex) {
+	const n = parseInt(hex.slice(1), 16);
+	return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+
+// Swap the palette and recolor existing blobs in place
+function applyTheme(t) {
+	if (!FOLLOW_THEME || !t || !t.colors) return;
+	palette = COLOR_ROLES.map((role) => hexToRgb(t.colors[role] || t.colors.accent || '#808080'));
+	const bg = hexToRgb(t.colors.background || (t.dark === false ? '#ffffff' : '#000000'));
+	fadeStyle = `rgba(${bg.r}, ${bg.g}, ${bg.b}, 0.08)`;
+	alphaScale = t.dark === false ? 0.4 : 1; // lighter blobs keep dark text readable
+	for (const blob of blobs) blob.color = palette[blob.colorIndex];
+}
+
 class Blob {
 	constructor() {
 		this.reset();
@@ -41,7 +64,8 @@ class Blob {
 		this.baseRadius = this.radius;
 		this.vx = (Math.random() - 0.5) * 0.3;
 		this.vy = -0.2 - Math.random() * 0.5; // drift upward
-		this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+		this.colorIndex = Math.floor(Math.random() * COLORS.length);
+		this.color = palette[this.colorIndex];
 		this.phase = Math.random() * Math.PI * 2;
 		this.pulseSpeed = 0.005 + Math.random() * 0.01;
 		this.wobbleAmpX = 0.3 + Math.random() * 0.5;
@@ -91,7 +115,7 @@ class Blob {
 		// Draw multiple layered radial gradients for a soft, blurred look
 		for (let layer = 0; layer < 3; layer++) {
 			const layerScale = 1 + layer * 0.4;
-			const layerAlpha = this.alpha / (layer + 1);
+			const layerAlpha = (this.alpha * alphaScale) / (layer + 1);
 			const rad = this.radius * layerScale;
 
 			const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, rad);
@@ -125,6 +149,7 @@ self.onmessage = (e) => {
 			canvas.width = width;
 			canvas.height = height;
 			initBlobs();
+			applyTheme(e.data.theme);
 			startAnimation();
 			break;
 		case 'resize':
@@ -138,6 +163,9 @@ self.onmessage = (e) => {
 			mouse.x = e.data.x;
 			mouse.y = e.data.y;
 			break;
+		case 'theme':
+			applyTheme(e.data);
+			break;
 	}
 };
 
@@ -146,7 +174,7 @@ function startAnimation() {
 		if (!ctx) return;
 
 		// Soft fade instead of full clear for trailing effect
-		ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+		ctx.fillStyle = fadeStyle;
 		ctx.fillRect(0, 0, width, height);
 
 		time++;

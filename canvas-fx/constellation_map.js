@@ -4,12 +4,20 @@
  *              to nearby stars within a threshold distance. Stars slowly drift across the canvas.
  *              Mouse creates a gravitational pull that attracts nearby stars.
  *              Connection line opacity is based on inter-star distance.
+ *              Follows your theme's colors when the designer sends them.
  */
 
 let canvas, ctx, width, height;
 let mouse = { x: -5000, y: -5000 };
 let stars = [];
 
+// Theme colors (null keeps the original star and line colors)
+let starTones = null;
+let lineRgb = null;
+let mouseLineRgb = null;
+let starAlpha = 1;
+
+const FOLLOW_THEME = true; // Draw in the theme's colors when the designer sends them (true/false)
 const STAR_COUNT = 120;
 const CONNECTION_DIST = 150;
 const MOUSE_RADIUS = 250;
@@ -40,10 +48,13 @@ class Star {
 		const hueRoll = Math.random();
 		if (hueRoll < 0.6) {
 			this.color = { r: 220, g: 230, b: 255 }; // pale blue-white
+			this.tone = 0;
 		} else if (hueRoll < 0.8) {
 			this.color = { r: 255, g: 240, b: 200 }; // warm white
+			this.tone = 1;
 		} else {
 			this.color = { r: 200, g: 220, b: 255 }; // blue
+			this.tone = 2;
 		}
 	}
 
@@ -78,8 +89,8 @@ class Star {
 	}
 
 	draw() {
-		const { r, g, b } = this.color;
-		const alpha = this.currentBrightness * 0.8;
+		const { r, g, b } = starTones ? starTones[this.tone] : this.color;
+		const alpha = this.currentBrightness * 0.8 * starAlpha;
 
 		// Star glow
 		ctx.beginPath();
@@ -118,7 +129,9 @@ function drawConnections() {
 				ctx.beginPath();
 				ctx.moveTo(stars[i].x, stars[i].y);
 				ctx.lineTo(stars[j].x, stars[j].y);
-				ctx.strokeStyle = `rgba(180, 200, 255, ${opacity})`;
+				ctx.strokeStyle = lineRgb
+					? `rgba(${lineRgb}, ${opacity})`
+					: `rgba(180, 200, 255, ${opacity})`;
 				ctx.lineWidth = 0.5;
 				ctx.stroke();
 				connections++;
@@ -140,11 +153,31 @@ function drawMouseConnections() {
 			ctx.beginPath();
 			ctx.moveTo(mouse.x, mouse.y);
 			ctx.lineTo(star.x, star.y);
-			ctx.strokeStyle = `rgba(160, 200, 255, ${opacity})`;
+			ctx.strokeStyle = mouseLineRgb
+				? `rgba(${mouseLineRgb}, ${opacity})`
+				: `rgba(160, 200, 255, ${opacity})`;
 			ctx.lineWidth = 0.3;
 			ctx.stroke();
 		}
 	}
+}
+
+function hexRgb(hex) {
+	const n = parseInt(String(hex).slice(1, 7), 16) || 0;
+	return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+
+function applyTheme(t) {
+	if (!FOLLOW_THEME || !t || !t.colors) return;
+	const c = t.colors;
+	// Most stars in the text color, the rest in the two accents
+	starTones = [hexRgb(c.text), hexRgb(c.accent2), hexRgb(c.accent)];
+	const line = hexRgb(c.text);
+	const accent = hexRgb(c.accent);
+	lineRgb = `${line.r}, ${line.g}, ${line.b}`;
+	mouseLineRgb = `${accent.r}, ${accent.g}, ${accent.b}`;
+	// Dark stars on a light page stay softer so text reads over them
+	starAlpha = t.dark === false ? 0.6 : 1;
 }
 
 let time = 0;
@@ -184,8 +217,12 @@ self.onmessage = (e) => {
 			height = e.data.height;
 			canvas.width = width;
 			canvas.height = height;
+			applyTheme(e.data.theme);
 			initStars();
 			startAnimation();
+			break;
+		case 'theme':
+			applyTheme(e.data);
 			break;
 		case 'resize':
 			width = e.data.width;

@@ -3,12 +3,16 @@
  * Description: Smooth, flowing topographic contour lines over a continuously
  *   evolving terrain. Bilinear-interpolated gradient fills and organic multi-axis
  *   time drift create a fluid, living map feel. Mouse creates a soft hill.
+ *   Follows your theme's colors when the designer sends them.
  */
 
 // ═══════════════════════════════════════════════════════════
 // ██  CONFIGURATION — Tweak these values to customize!   ██
 // ═══════════════════════════════════════════════════════════
 const CONFIG = {
+  // -- Theme --
+  followTheme: true,               // Draw in the theme's colors when the designer sends them (true/false)
+
   // -- Contour Appearance --
   contourCount: 14,                // Number of contour elevation bands (4-30)
   contourOpacity: 0.55,            // Contour line opacity (0-1)
@@ -46,6 +50,9 @@ let time = 0;
 let cols, rows, grid;
 let imageData, pixels;
 let paletteRgb;
+let themePalette = null;           // Theme colors for elevation bands, null until a theme arrives
+let alphaScale = 1;                // Softens fill and contours on light themes
+let lutDirty = false;              // Set when the palette changes mid-animation
 
 setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);
 
@@ -96,11 +103,24 @@ function fbm(x, y, octaves) {
 }
 
 function buildPalette() {
-  paletteRgb = CONFIG.colorPalette.map(hex => ({
+  paletteRgb = (themePalette || CONFIG.colorPalette).map(hex => ({
     r: parseInt(hex.slice(1, 3), 16),
     g: parseInt(hex.slice(3, 5), 16),
     b: parseInt(hex.slice(5, 7), 16),
   }));
+}
+
+// Low to high: a quiet base, the three accents, then the text color at the peaks
+function applyTheme(t) {
+  if (!CONFIG.followTheme || !t || !t.colors) return;
+  const c = t.colors;
+  const light = t.dark === false;
+  themePalette = [
+    light ? c.muted : c.surface, c.accent3, c.accent, c.accent2, c.text
+  ].map(hex => (typeof hex === 'string' && /^#[0-9a-f]{6}$/i.test(hex)) ? hex : '#808080');
+  alphaScale = light ? 0.7 : 1;
+  buildPalette();
+  lutDirty = true;
 }
 
 function initGrid() {
@@ -179,6 +199,7 @@ self.onmessage = (e) => {
       canvas.width = width;
       canvas.height = height;
       initGrid();
+      applyTheme(e.data.theme);
       startAnimation();
       break;
     case 'resize':
@@ -191,6 +212,9 @@ self.onmessage = (e) => {
     case 'mousemove':
       mouse.x = e.data.x;
       mouse.y = e.data.y;
+      break;
+    case 'theme':
+      applyTheme(e.data);
       break;
   }
 };
@@ -222,6 +246,7 @@ function startAnimation() {
   function render() {
     if (!ctx) return;
     time += CONFIG.animationSpeed;
+    if (lutDirty) { lutDirty = false; rebuildLUT(); }
 
     sampleGrid();
 
@@ -240,7 +265,7 @@ function startAnimation() {
 
     // ── Smooth gradient fill via bilinear interpolation + color LUT ──
     if (CONFIG.fillEnabled) {
-      const fillAlpha = Math.round(CONFIG.fillOpacity * 255);
+      const fillAlpha = Math.round(CONFIG.fillOpacity * alphaScale * 255);
       const w = width, h = height;
 
       // Sample every FILL_STEP pixel, write FILL_STEP×FILL_STEP blocks
@@ -276,7 +301,7 @@ function startAnimation() {
       const threshold = minE + (l + 1) * range / (levels + 1);
       const ci = Math.max(0, Math.min(255, (((l + 1) / (levels + 1)) * 255) | 0));
 
-      ctx.strokeStyle = `rgba(${LUT_R[ci]},${LUT_G[ci]},${LUT_B[ci]},${CONFIG.contourOpacity})`;
+      ctx.strokeStyle = `rgba(${LUT_R[ci]},${LUT_G[ci]},${LUT_B[ci]},${CONFIG.contourOpacity * alphaScale})`;
       ctx.lineWidth = CONFIG.contourWidth;
       ctx.beginPath();
 
