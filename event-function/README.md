@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.12.1-blue)
+![Version](https://img.shields.io/badge/version-1.13.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -49,7 +49,7 @@ Unlike the [Tool variant](../tools/) which runs inside an AI chat iframe, this v
 - 🌓 **True OS Integration & System Mode:** The System mode acts as a proxy, automatically swapping between your Light and Dark designs based on Operating System preference. The engine generates CSS utilizing native `@media (prefers-color-scheme)` blocks, guaranteeing custom styles, variables, and Canvas FX seamlessly adapt even if browser class management is delayed.
 - 🔄 **Selective Cross-Mode Synchronization:** Instantly duplicate your setup from one mode to another using the "Sync" button. A powerful selective sync modal allows you to copy exactly what you need — OKLCH Palette, Variable Overrides, Custom CSS, Canvas FX, Gradient Background, or Auth Visibility — to any combination of target modes simultaneously. Colored delta badges show which settings differ between modes.
 - 🔄 **Live Cross-UI Detection:** If you change the Open WebUI theme natively (via OS settings or keyboard shortcuts) while the designer is open, the designer instantly switches its internal tab to match your live environment.
-- 🔑 **Auth Page Theming:** Selectively opt-in your custom theme components (Foundation Colors, Custom CSS, Canvas FX, and Gradient Background) to display on the Open WebUI Login and Signup screens. Each component has an independent "Show on Auth Pages" toggle.
+- 🔑 **Auth Page Theming:** Selectively opt-in your custom theme components (Foundation Colors, Custom CSS, Canvas FX, and Gradient Background) to display on the Open WebUI Login and Signup screens. Each component has an independent "Show on Auth Pages" toggle, and an "Only on Auth Pages" toggle beside it keeps that component off the rest of Open WebUI.
 - 🎇 **Canvas FX Animations (Web Worker Powered):** Inject interactive JavaScript animations directly into the background of Open WebUI. Animations run on a Background Web Worker via `OffscreenCanvas` for zero-lag performance, with an automatic main-thread fallback for browsers that don't support `OffscreenCanvas`. The structural transparency layer makes native UI panels see-through so animations show behind the interface. Drag & drop `.js` files anywhere on the UI to import animations instantly.
 - 🎨 **Theme-Aware Animations:** Canvas FX scripts can draw in the theme's own colors. The engine sends the active mode's palette (background, surface, text and three accents in the theme's hue, as hex and as 0 to 1 floats for WebGL) with `init` and again whenever it changes, so a script that uses it recolors live as you edit the palette or switch modes. It's opt-in: scripts that ignore it keep their own colors.
 - 🔊 **Context-Aware Animations:** Canvas FX scripts can react to conversation data in real-time. A DOM observer scans chat messages for DOM-based token estimation (at most every 2 seconds, during streaming too), while a Socket.IO WebSocket interceptor extracts exact token counts from `chat:completion` responses — both feed a `context` message to the animation for data-driven visual effects. External scripts can also dispatch custom context data via the `owui-canvas-context` CustomEvent API.
@@ -224,7 +224,7 @@ Valves are configured in the Admin Panel under **Functions → Theme Designer Pr
 
 | Valve | Type | Default | Description |
 |---|---|---|---|
-| **Enable Auth Page Theming** | `bool` | `true` | Allow theming the login/signup pages. When disabled, all "Show on Auth Pages" toggles are hidden and forced off. |
+| **Enable Auth Page Theming** | `bool` | `true` | Allow theming the login/signup pages. When disabled, all "Show on Auth Pages" and "Only on Auth Pages" toggles are hidden and forced off, on the server too. |
 | **Draft Mode Default** | `bool` | `false` | Open the designer in Draft mode by default. When enabled, the designer starts in Draft mode on every fresh page load, preventing accidental live changes. |
 | **Allow Personal Themes** | `bool` | `false` | Let every user design a personal theme from a **Themes** tab in their own Settings. A personal theme replaces the instance theme for that user only and follows them to every browser. The other valves still apply to it: Canvas FX, Custom CSS, the gradient builder, community themes, URL import and the transparency styles. Off: everyone sees the instance theme. |
 | **Show In Admin Settings** | `bool` | `true` | Add a **Themes** tab to the Admin section of Open WebUI's Settings, after **Interface**, that opens the designer inside Settings. The designer stays available at its own URL either way. |
@@ -508,6 +508,30 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
 
 ---
+
+## 📝 What's New in 1.13.0
+
+**Only on Auth Pages.** Beside each **Show on Auth Pages** switch (Colors, Custom CSS, Canvas FX and Gradient) there's now **Only on Auth Pages**, which keeps that part off the rest of Open WebUI so it shows on the sign-in pages alone: an animation or a gradient for the sign-in page that stays out of your chats, for example. It needs **Show on Auth Pages**, signing in switches over without a reload, and personal themes ignore it, since they never reach the sign-in pages.
+
+**The instance theme stays where it belongs.** Open WebUI loads `/static/custom.css` on every page, and Theme Designer Pro puts the instance theme's colors and custom CSS there for a first paint without a flash. So a user with a personal theme still got the instance theme's custom CSS after a reload, and a sign-in page set not to show the colors or the custom CSS showed them anyway. The instance theme in that file is now marked, and each page switches it off where it doesn't belong. Themes you already have get this without being saved again.
+
+**The Enable Auth Page Theming valve works on its own.** Turned off, it now turns every auth page switch off when the theme is delivered. Before, nothing changed on the sign-in pages until an admin opened the designer.
+
+**Fixes from a review of the whole function:**
+- Undo right after opening the designer could restore this browser's older copy of the theme, or the defaults, and publish it to everyone.
+- A Manual Override line with an unclosed `(` or `[` broke the whole stylesheet, and one already marked `!important` was dropped.
+- Typing in an editor and switching modes within half a second saved that mode's text into the other one.
+- Refreshing the designer in Draft mode lost the draft.
+- Auto-Scope now treats `html` selectors like `:root`. Nested inside the mode's scope, they could never match, which silently broke rules in Windows Hotdog Stand, Pink Hues and Matrix Colors.
+- Color pickers in the variable grid and on mesh points no longer close after the first moment of a drag.
+- A pasted or linked theme can no longer skip the Canvas FX warning. The Community Themes **Update** button now asks first, like every other update.
+- Installing or importing a theme no longer leaves the gallery highlighting, syncing and updating the wrong one.
+- A Global Reset no longer strips users' personal themes from their open pages.
+- An animation stops when the theme it belongs to is gone, and a server error while Open WebUI restarts no longer reads as "no theme".
+- Chat-aware animations follow you to a new chat.
+- With the sidebar transparency valve on, a long line of custom CSS could freeze a server worker for seconds to minutes. Saves now do their file work off the main thread.
+- Live updates no longer stop on a worker after enough tabs close mid-connection, or after a Redis restart.
+- Enter on a focused **Cancel** button no longer confirms the dialog, and a theme applied from a chat is applied once per link.
 
 ## 📝 What's New in 1.12.1
 
