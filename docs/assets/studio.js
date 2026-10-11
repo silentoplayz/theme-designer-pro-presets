@@ -55,7 +55,7 @@
   // ---- Preview ----
 
   const viewport = $('studio-viewport');
-  const stage = UI.mockStage(viewport, $('studio-msg'), 'Open WebUI with your theme', { wide: true });
+  const stage = UI.mockStage(viewport, $('studio-msg'), 'Open WebUI with your theme', { wide: true, fill: true });
 
   function previewOpts(key) {
     const m = state.modes[key];

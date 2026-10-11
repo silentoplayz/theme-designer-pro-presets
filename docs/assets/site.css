@@ -1872,10 +1872,10 @@ iframe { color-scheme: normal; }
 
 .studio {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 400px;
+  grid-template-columns: minmax(0, 1fr) 420px;
   gap: 28px;
   width: 100%;
-  max-width: 1560px;
+  max-width: 2400px;
   margin-inline: auto;
   padding: 24px var(--gutter) 48px;
   align-items: start;
@@ -2045,6 +2045,15 @@ iframe { color-scheme: normal; }
 }
 .fx-row-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fx-row-tag { font-size: 0.72rem; color: var(--faint); white-space: nowrap; }
+
+/* Wide screens: the preview fills the window's height, and the mock lays
+   itself out to that shape (mockStage's fill option) */
+@media (min-width: 1081px) {
+  .studio .viewport {
+    aspect-ratio: auto;
+    height: max(460px, calc(100dvh - var(--header-h) - 150px));
+  }
+}
 
 @media (max-width: 1080px) {
   /* Block flow, so the sticky preview can stick across the whole panel */

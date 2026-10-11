@@ -349,8 +349,14 @@
       const w = viewport.clientWidth;
       // `wide` keeps the desktop layout even on a phone, for a short preview
       const small = w < 640 && !o.wide;
-      const vw = small ? 720 : 1280;
-      const vh = small ? 900 : 760;
+      let vw = small ? 720 : 1280;
+      let vh = small ? 900 : 760;
+      // `fill`: when the stylesheet gives the box its own height, the mock
+      // takes that shape instead of a fixed one, at close to real size
+      if (o.fill && getComputedStyle(viewport).aspectRatio === 'auto' && viewport.clientHeight > 0) {
+        vw = Math.max(1100, Math.min(1440, w));
+        vh = Math.round(vw * viewport.clientHeight / w);
+      }
       viewport.style.setProperty('--vw', vw);
       viewport.style.setProperty('--vh', vh);
       viewport.style.setProperty('--s', String(w / vw));
