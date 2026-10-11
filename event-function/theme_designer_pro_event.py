@@ -569,6 +569,10 @@ class Event:
             // nothing changed, so repeat fetches are cheap.
             // True while this page shows the signed-in user's personal theme.
             var _personal = false;
+            // The account the theme on screen was picked for (null: signed
+            // out). Open WebUI signs in without a page load, so checkAccount()
+            // compares it with the account signed in now.
+            var _themeUid = null;
             // Set once the live stream is open: claims it for the signed-in
             // account (bindStream, by the SSE code below).
             var _claimStream = null;
@@ -627,6 +631,7 @@ class Event:
                 // personal themes off) both come back empty and the instance
                 // theme applies, as it always has.
                 var uid = personalUser();
+                _themeUid = uid;
                 var pick = !uid ? readInstance().then(function(r) { return { results: r, personal: false }; })
                     : Promise.all([
                         readAsset('__THEME_ROUTE__/me/theme.css', true),
@@ -664,7 +669,10 @@ class Event:
                         return;
                     }
                     // No personal theme for this account: drop any copy of one.
-                    try { PERSONAL_KEYS.forEach(function(k) { localStorage.removeItem(k); }); } catch(x) {}
+                    // Signed out, the copy stays for when its account signs back in.
+                    if (uid) {
+                        try { PERSONAL_KEYS.forEach(function(k) { localStorage.removeItem(k); }); } catch(x) {}
+                    }
 
                     var css = cssRes.body;
                     var state = stateRes.body;
@@ -745,9 +753,14 @@ class Event:
                 var lsState = localStorage.getItem('owui_dev_theme_v1');
                 if (lsState) _owuiThemeState = lsState;
                 // This account's personal theme, from this browser's copy, so it
-                // is in place before Open WebUI draws its interface.
+                // is in place before Open WebUI draws its interface. Signed out
+                // (the sign-in page included), the copy is kept but not shown,
+                // so signing back in paints it at once; another account signing
+                // in here drops it.
                 var me = personalUser();
-                if (localStorage.getItem('owui_tdp_personal_uid') !== me) {
+                if (!me) {
+                    // Nothing to show: the instance theme applies
+                } else if (localStorage.getItem('owui_tdp_personal_uid') !== me) {
                     PERSONAL_KEYS.forEach(function(k) { localStorage.removeItem(k); });
                 } else if (localStorage.getItem('owui_tdp_personal_css')) {
                     _owuiThemeCss = localStorage.getItem('owui_tdp_personal_css');
@@ -1549,11 +1562,49 @@ class Event:
                 if (_refreshPending) return;
                 _refreshPending = true;
                 requestAnimationFrame(function() {
-                    _refreshPending = false; enforceTheme(); initCanvas();
+                    _refreshPending = false;
+                    checkAccount();
+                    enforceTheme(); initCanvas();
                     // An account that signed in after the page loaded
                     if (_claimStream) _claimStream();
                 });
             }
+
+            // Signing in, or into another account, happens without a page
+            // load, so the theme picked at load can belong to nobody or to
+            // someone else. Swap to the signed-in account's personal theme
+            // (this browser's copy at once, then the server's), or back to
+            // the instance theme when it has none.
+            function checkAccount() {
+                if (!_personalEnabled || _disabled || window.__THEME_DESIGNER__) return;
+                var uid = personalUser();
+                if (uid === _themeUid) return;
+                try {
+                    if (uid && localStorage.getItem('owui_tdp_personal_uid') === uid &&
+                        localStorage.getItem('owui_tdp_personal_css')) {
+                        _owuiThemeCss = localStorage.getItem('owui_tdp_personal_css');
+                        _owuiThemeState = localStorage.getItem('owui_tdp_personal_state') || null;
+                        _parsedState = null;
+                        _personal = true;
+                        enforceTheme(); initCanvas();
+                    }
+                } catch(x) {}
+                ++_themeVersion;  // Supersede a fetch made for the previous account
+                fetchThemeFromServer();
+            }
+
+            // Open WebUI's sign-in ends in a client-side goto(), which changes
+            // the address with history.pushState and fires nothing we listen
+            // to, so each history change checks whose page this is now.
+            ['pushState', 'replaceState'].forEach(function(name) {
+                var original = history[name];
+                if (typeof original !== 'function') return;
+                history[name] = function() {
+                    var result = original.apply(this, arguments);
+                    setTimeout(checkAccount, 0);
+                    return result;
+                };
+            });
 
             refresh();
             
@@ -1634,9 +1685,9 @@ class Event:
             });
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', refresh);
 
-            // SPA navigation is handled by the popstate listener (L874) and
-            // MutationObserver (L847-862) which fire on every SvelteKit route
-            // change. No history.pushState/replaceState patches needed.
+            // Repaints after SPA navigation come from the popstate listener and
+            // the MutationObserver above; the history wrappers only check for
+            // a change of account.
 
             // Live theme push via Server-Sent Events (cross-tab/browser/device)
             if (!window.__THEME_DESIGNER__) {
