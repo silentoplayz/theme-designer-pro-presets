@@ -313,6 +313,31 @@
       'M12 12.5C12.2761 12.5 12.5 12.2761 12.5 12C12.5 11.7239 12.2761 11.5 12 11.5C11.7239 11.5 11.5 11.7239 11.5 12C11.5 12.2761 11.7239 12.5 12 12.5Z',
       'M4 12.5C4.27614 12.5 4.5 12.2761 4.5 12C4.5 11.7239 4.27614 11.5 4 11.5C3.72386 11.5 3.5 11.7239 3.5 12C3.5 12.2761 3.72386 12.5 4 12.5Z',
     ], { fill: 'currentColor', strokeWidth: '2' }),
+    // The input bar's menus (InputMenu.svelte, IntegrationsMenu.svelte,
+    // ModelSelector/Selector.svelte) and their icons/*.svelte glyphs
+    clip: icon(['M21.4383 11.6622L12.2483 20.8522C11.1225 21.9781 9.59552 22.6106 8.00334 22.6106C6.41115 22.6106 4.88418 21.9781 3.75834 20.8522C2.63249 19.7264 2 18.1994 2 16.6072C2 15.015 2.63249 13.4881 3.75834 12.3622L12.9483 3.17222C13.6989 2.42166 14.7169 2 15.7783 2C16.8398 2 17.8578 2.42166 18.6083 3.17222C19.3589 3.92279 19.7806 4.94077 19.7806 6.00222C19.7806 7.06368 19.3589 8.08166 18.6083 8.83222L9.40834 18.0222C9.03306 18.3975 8.52406 18.6083 7.99334 18.6083C7.46261 18.6083 6.95362 18.3975 6.57834 18.0222C6.20306 17.6469 5.99222 17.138 5.99222 16.6072C5.99222 16.0765 6.20306 15.5675 6.57834 15.1922L15.0683 6.71222']),
+    camera: icon(['M2 19V9C2 7.89543 2.89543 7 4 7H4.5C5.12951 7 5.72229 6.70361 6.1 6.2L8.32 3.24C8.43331 3.08892 8.61115 3 8.8 3H15.2C15.3889 3 15.5667 3.08892 15.68 3.24L17.9 6.2C18.2777 6.70361 18.8705 7 19.5 7H20C21.1046 7 22 7.89543 22 9V19C22 20.1046 21.1046 21 20 21H4C2.89543 21 2 20.1046 2 19Z', 'M12 17C14.2091 17 16 15.2091 16 13C16 10.7909 14.2091 9 12 9C9.79086 9 8 10.7909 8 13C8 15.2091 9.79086 17 12 17Z']),
+    globeAlt: icon(['M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418']),
+    documentArrowUp: icon(['M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m6.75 12-3-3m0 0-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z']),
+    pageEdit: icon(['M20 12V5.74853C20 5.5894 19.9368 5.43679 19.8243 5.32426L16.6757 2.17574C16.5632 2.06321 16.4106 2 16.2515 2H4.6C4.26863 2 4 2.26863 4 2.6V21.4C4 21.7314 4.26863 22 4.6 22H11', 'M8 10H16M8 6H12M8 14H11', 'M17.9541 16.9394L18.9541 15.9394C19.392 15.5015 20.102 15.5015 20.5399 15.9394V15.9394C20.9778 16.3773 20.9778 17.0873 20.5399 17.5252L19.5399 18.5252M17.9541 16.9394L14.963 19.9305C14.8131 20.0804 14.7147 20.2741 14.6821 20.4835L14.4394 22.0399L15.9957 21.7973C16.2052 21.7646 16.3988 21.6662 16.5487 21.5163L19.5399 18.5252M17.9541 16.9394L19.5399 18.5252', 'M16 2V5.4C16 5.73137 16.2686 6 16.6 6H20']),
+    database: icon(['M5 12V18C5 18 5 21 12 21C19 21 19 18 19 18V12', 'M5 6V12C5 12 5 15 12 15C19 15 19 12 19 12V6', 'M12 3C19 3 19 6 19 6C19 6 19 9 12 9C5 9 5 6 5 6C5 6 5 3 12 3Z']),
+    clockRotateRight: icon(['M12 6L12 12L18 12', 'M21.8883 10.5C21.1645 5.68874 17.013 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C16.1006 22 19.6248 19.5318 21.1679 16', 'M17 16H21.4C21.7314 16 22 16.2686 22 16.6V21']),
+    chevronRightAlt: icon(['m8.25 4.5 7.5 7.5-7.5 7.5']),
+    chevronLeft: icon(['M15.75 19.5 8.25 12l7.5-7.5']),
+    wrench: icon(['M21.75 6.75a4.5 4.5 0 0 1-4.884 4.484c-1.076-.091-2.264.071-2.95.904l-7.152 8.684a2.548 2.548 0 1 1-3.586-3.586l8.684-7.152c.833-.686.995-1.874.904-2.95a4.5 4.5 0 0 1 6.336-4.486l-3.276 3.276a3.004 3.004 0 0 0 2.25 2.25l3.276-3.276c.256.565.398 1.192.398 1.852Z', 'M4.867 19.125h.008v.008h-.008v-.008Z']),
+    searchAlt: icon(['m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z'], { strokeWidth: '2' }),
+    photo: icon(['M21 7.6V20.4C21 20.7314 20.7314 21 20.4 21H7.6C7.26863 21 7 20.7314 7 20.4V7.6C7 7.26863 7.26863 7 7.6 7H20.4C20.7314 7 21 7.26863 21 7.6Z', 'M18 4H4.6C4.26863 4 4 4.26863 4 4.6V18', 'M7 16.8L12.4444 15L21 18', 'M16.5 13C15.6716 13 15 12.3284 15 11.5C15 10.6716 15.6716 10 16.5 10C17.3284 10 18 10.6716 18 11.5C18 12.3284 17.3284 13 16.5 13Z']),
+    terminal: icon(['M13 16H18', 'M6 8L10 12L6 16', 'M2 18V6C2 4.89543 2.89543 4 4 4H20C21.1046 4 22 4.89543 22 6V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18Z'], { strokeWidth: '1.75' }),
+    check: icon(['m4.5 12.75 6 6 9-13.5']),
+    keyframes: icon(['M13.8476 13.317L9.50515 18.2798C8.70833 19.1905 7.29167 19.1905 6.49485 18.2798L2.15238 13.317C1.49259 12.563 1.49259 11.437 2.15238 10.683L6.49485 5.72018C7.29167 4.80952 8.70833 4.80952 9.50515 5.72017L13.8476 10.683C14.5074 11.437 14.5074 12.563 13.8476 13.317Z', 'M13 19L17.8844 13.3016C18.5263 12.5526 18.5263 11.4474 17.8844 10.6984L13 5', 'M17 19L21.8844 13.3016C22.5263 12.5526 22.5263 11.4474 21.8844 10.6984L17 5'], { strokeWidth: '2' }),
+    documentPage: icon(['M4 21.4V2.6C4 2.26863 4.26863 2 4.6 2H16.2515C16.4106 2 16.5632 2.06321 16.6757 2.17574L19.8243 5.32426C19.9368 5.43679 20 5.5894 20 5.74853V21.4C20 21.7314 19.7314 22 19.4 22H4.6C4.26863 22 4 21.7314 4 21.4Z', 'M8 10L16 10', 'M8 18L16 18', 'M8 14L12 14', 'M16 2V5.4C16 5.73137 16.2686 6 16.6 6H20']),
+    // The feature pills draw their icons a little heavier (MessageInput.svelte)
+    globePill: icon(['M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418'], { strokeWidth: '1.75' }),
+    photoPill: icon(['M21 7.6V20.4C21 20.7314 20.7314 21 20.4 21H7.6C7.26863 21 7 20.7314 7 20.4V7.6C7 7.26863 7.26863 7 7.6 7H20.4C20.7314 7 21 7.26863 21 7.6Z', 'M18 4H4.6C4.26863 4 4 4.26863 4 4.6V18', 'M7 16.8L12.4444 15L21 18', 'M16.5 13C15.6716 13 15 12.3284 15 11.5C15 10.6716 15.6716 10 16.5 10C17.3284 10 18 10.6716 18 11.5C18 12.3284 17.3284 13 16.5 13Z'], { strokeWidth: '1.75' }),
+    terminalPill: icon(['M13 16H18', 'M6 8L10 12L6 16', 'M2 18V6C2 4.89543 2.89543 4 4 4H20C21.1046 4 22 4.89543 22 6V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18Z'], { strokeWidth: '2' }),
+    wrenchPill: icon(['M21.75 6.75a4.5 4.5 0 0 1-4.884 4.484c-1.076-.091-2.264.071-2.95.904l-7.152 8.684a2.548 2.548 0 1 1-3.586-3.586l8.684-7.152c.833-.686.995-1.874.904-2.95a4.5 4.5 0 0 1 6.336-4.486l-3.276 3.276a3.004 3.004 0 0 0 2.25 2.25l3.276-3.276c.256.565.398 1.192.398 1.852Z', 'M4.867 19.125h.008v.008h-.008v-.008Z'], { strokeWidth: '1.75' }),
+    // icons/XMark.svelte: a 20-unit filled glyph, unlike the stroked set
+    xMark: '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/></svg>',
   };
 
   // ResponseMessage.svelte's action row — inline SVGs rather than components,
@@ -790,6 +815,97 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
 .call-button { padding: 5px; border-radius: 9999px; border: none; background: ${isLight ? '#000' : '#fff'}; color: ${isLight ? '#fff' : '#000'}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; transition: background 0.15s; }
 .call-button svg { width: 1.25rem; height: 1.25rem; }
 .call-button:hover { background: ${isLight ? 'var(--color-gray-900)' : 'var(--color-gray-100)'}; }
+/* The divider between More and Integrations (MessageInput.svelte):
+   w-[0.0625rem] h-4 mx-1 bg-gray-200/50 dark:bg-gray-800/50 */
+.input-divider { width: 1px; height: 1rem; margin: 0 4px; flex-shrink: 0; background: color-mix(in srgb, var(--color-gray-${isLight ? '200' : '800'}) 50%, transparent); }
+.input-pills { display: flex; align-items: center; gap: 6px; margin-left: 4px; min-width: 0; }
+.input-pills:empty { display: none; }
+/* Selected tools: Wrench size-4 + count, px-1 gap-1 text-gray-600 dark:text-gray-300 */
+.tools-pill { display: flex; align-items: center; gap: 4px; padding: 0 4px; border-radius: 8px; font-size: 0.875rem; color: ${isLight ? 'var(--color-gray-600)' : 'var(--color-gray-300)'}; cursor: pointer; transition: color 0.15s; }
+.tools-pill:hover { color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-200)'}; }
+.tools-pill svg { width: 1rem; height: 1rem; }
+/* Web Search / Image / Code Interpreter while on: group p-[0.375rem]
+   rounded-full border, text-sky-500 bg-sky-50 border-sky-200/40, dark
+   text-sky-300 bg-sky-400/10 border-sky-500/20, with an XMark on hover */
+.feature-pill { display: flex; align-items: center; gap: 6px; padding: 0.375rem; border-radius: 9999px; cursor: pointer; transition: background-color 0.3s, color 0.3s; ${isLight
+    ? 'color: oklch(68.5% 0.169 237.323); background: oklch(97.7% 0.013 236.62); border: 1px solid oklch(90.1% 0.058 230.902 / 0.4);'
+    : 'color: oklch(82.8% 0.111 230.318); background: oklch(74.6% 0.16 232.661 / 0.1); border: 1px solid oklch(68.5% 0.169 237.323 / 0.2);'} }
+.feature-pill:hover { background: ${isLight ? 'oklch(95.1% 0.026 236.824)' : 'oklch(50% 0.134 242.749 / 0.1)'}; }
+.feature-pill svg { width: 1rem; height: 1rem; }
+.feature-pill .terminal-icon svg { width: 0.875rem; height: 0.875rem; }
+.feature-pill .x { display: none; }
+.feature-pill:hover .x { display: flex; }
+
+/* DropdownMenu.svelte, portaled to <body> by Dropdown.svelte: rounded-xl p-0.5
+   border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-850
+   dark:text-white shadow-lg, fixed at z-9999, flyAndScale in over 200ms */
+.tdp-menu { position: fixed; z-index: 9999; display: flex; flex-direction: column; padding: 2px; border-radius: 12px; border: 1px solid ${border}; background: ${isLight ? '#fff' : 'var(--color-gray-850)'}; color: ${isLight ? textMain : '#fff'}; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); overflow: hidden; font-size: 0.8125rem; opacity: 0; transform: translateY(-8px) scale(0.95); transition: opacity 0.2s cubic-bezier(0.33, 1, 0.68, 1), transform 0.2s cubic-bezier(0.33, 1, 0.68, 1); }
+.tdp-menu.in { opacity: 1; transform: none; }
+/* InputMenu w-70 max-h-72; IntegrationsMenu min-w-70 max-w-70 max-h-72 */
+.tdp-menu.input-menu, .tdp-menu.integrations-menu { width: 17.5rem; max-height: 18rem; }
+.tdp-view { display: flex; flex-direction: column; min-height: 0; max-height: calc(18rem - 4px); overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; }
+.tdp-view.from-left { animation: tdp-fly-left 0.15s cubic-bezier(0.33, 1, 0.68, 1); }
+.tdp-view.from-right { animation: tdp-fly-right 0.15s cubic-bezier(0.33, 1, 0.68, 1); }
+@keyframes tdp-fly-left { from { opacity: 0; transform: translateX(-20px); } }
+@keyframes tdp-fly-right { from { opacity: 0; transform: translateX(20px); } }
+/* Rows: flex gap-2 w-full items-center h-[1.6875rem] px-2 text-[0.8125rem]
+   font-normal rounded-xl hover:bg-gray-50/40 dark:hover:bg-gray-800/40 */
+.tdp-row { display: flex; align-items: center; gap: 8px; width: 100%; height: 1.6875rem; padding: 0 8px; flex-shrink: 0; border: 0; border-radius: 12px; background: transparent; color: inherit; font: inherit; font-size: 0.8125rem; font-weight: 400; text-align: left; cursor: pointer; user-select: none; }
+.tdp-row:hover, .tdp-row.hl { background: ${navHover}; }
+.tdp-row > svg, .tdp-row .ico svg { width: 1rem; height: 1rem; flex-shrink: 0; }
+.tdp-row .ico { display: flex; flex-shrink: 0; }
+.tdp-row .ico.sm svg, .tdp-row > svg.sm { width: 0.875rem; height: 0.875rem; }
+.tdp-row .label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tdp-row .count { margin-left: 2px; color: var(--color-gray-500); }
+.tdp-row .chev { display: flex; color: var(--color-gray-500); }
+.tdp-row .chev svg { width: 1rem; height: 1rem; }
+.tdp-row.back { justify-content: flex-start; }
+.tdp-row .doc svg { width: 0.875rem; height: 0.875rem; }
+.tdp-row.item .label { color: ${isLight ? '#000' : 'var(--color-gray-100)'}; }
+/* SearchInput.svelte: my-0.5 ml-2 mr-0.5 h-[1.6875rem] gap-2, Search size-3.5 */
+.tdp-search { display: flex; align-items: center; gap: 8px; height: 1.6875rem; margin: 2px 2px 2px 8px; flex-shrink: 0; }
+.tdp-search svg { width: 0.875rem; height: 0.875rem; flex-shrink: 0; }
+.tdp-search input { width: 100%; min-width: 0; border: 0; outline: none; background: transparent; color: inherit; font: inherit; font-size: 0.8125rem; font-weight: 400; }
+.tdp-search input::placeholder { color: ${isLight ? 'var(--color-gray-400)' : 'var(--color-gray-500)'}; }
+.tdp-empty { text-align: center; font-size: 0.75rem; color: var(--color-gray-500); padding: 12px 0; }
+.tdp-kb-files { display: flex; flex-direction: column; gap: 2px; padding-left: 12px; margin-bottom: 4px; }
+.tdp-row .expand { display: flex; margin-left: 8px; opacity: 0.5; transition: opacity 0.15s; }
+.tdp-row .expand:hover { opacity: 1; }
+.tdp-row .expand svg { width: 0.75rem; height: 0.75rem; }
+/* Switch.svelte: a 28x16 track, bg-gray-900 dark:bg-white when on and
+   bg-gray-300 dark:bg-gray-700 when off, with a 12px thumb at 2px or 14px */
+.tdp-switch { position: relative; width: 28px; height: 16px; margin: 0 1px; flex-shrink: 0; border-radius: 9999px; background: ${isLight ? 'var(--color-gray-300)' : 'var(--color-gray-700)'}; transition: background-color 0.15s; }
+.tdp-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 9999px; background: ${isLight ? '#fff' : 'var(--color-gray-500)'}; transition: left 0.15s, background-color 0.15s; }
+.tdp-switch.on { background: ${isLight ? 'var(--color-gray-900)' : '#fff'}; }
+.tdp-switch.on::after { left: 14px; background: ${isLight ? '#fff' : '#000'}; }
+
+/* ModelSelector/Selector.svelte: w-[20rem] rounded-xl border p-0.5 shadow-lg,
+   opened above the trigger with its right edge on the trigger's (bottom-end,
+   flipped, offset 2) */
+.tdp-menu.model-menu { width: 20rem; max-width: calc(100vw - 1rem); }
+.model-menu .compare { display: flex; align-items: center; justify-content: center; width: 1.375rem; height: 1.375rem; flex-shrink: 0; border-radius: 8px; color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; cursor: pointer; transition: background-color 0.1s, color 0.1s; }
+.model-menu .compare:hover { background: ${navHover}; color: ${isLight ? 'var(--color-gray-900)' : 'var(--color-gray-100)'}; }
+.model-menu .compare.on { background: ${isLight ? 'var(--color-gray-50)' : 'color-mix(in srgb, var(--color-gray-800) 60%, transparent)'}; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-200)'}; }
+.model-menu .compare svg { width: 0.75rem; height: 0.75rem; }
+.model-list { min-height: 0; max-height: 18rem; overflow-y: auto; scrollbar-width: thin; }
+/* ModelItem.svelte: h-8 rounded-xl px-2 text-[0.8125rem] text-gray-700
+   dark:text-gray-100, selected bg-gray-50/70 dark:bg-gray-800/60, a size-4
+   round avatar, EllipsisHorizontal and a size-3 Check */
+.model-item { display: flex; align-items: center; width: 100%; height: 2rem; padding: 0 8px; border-radius: 12px; font-size: 0.8125rem; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-100)'}; cursor: pointer; user-select: none; transition: background-color 75ms; }
+.model-item:hover { background: ${navHover}; }
+.model-item.selected, .model-item.hl { background: color-mix(in srgb, var(--color-gray-${isLight ? '50' : '800'}) ${isLight ? '70' : '60'}%, transparent); }
+.model-item .main { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; overflow: hidden; }
+.model-item img { width: 1rem; height: 1rem; border-radius: 9999px; flex-shrink: 0; }
+.model-item .name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.model-item .size { flex-shrink: 0; font-size: 0.6875rem; color: ${isLight ? 'var(--color-gray-500)' : 'var(--color-gray-400)'}; }
+.model-item .end { display: flex; align-items: center; gap: 6px; margin-left: auto; padding-left: 8px; flex-shrink: 0; }
+.model-item .end svg { width: 1rem; height: 1rem; }
+.model-item .end .tick svg { width: 0.75rem; height: 0.75rem; }
+.model-empty { display: flex; align-items: center; min-height: 2rem; padding: 0 8px; border-radius: 12px; font-size: 0.8125rem; color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-100)'}; }
+.model-foot { display: flex; justify-content: flex-end; padding: 4px 8px; line-height: 1; flex-shrink: 0; }
+.model-foot span { font-size: 0.65rem; color: var(--color-gray-500); cursor: pointer; text-underline-offset: 2px; }
+.model-foot span:hover { color: ${isLight ? 'var(--color-gray-700)' : 'var(--color-gray-300)'}; text-decoration: underline; }
+.model-menu .pb { height: 4px; flex-shrink: 0; }
 .footer-note { text-align: center; font-size: 0.65625rem; color: ${textFaint}; padding: 4px 0 6px; }
 
 /* Tooltip.svelte -> tippy theme 'dark' (app.css:379): rounded-lg bg-gray-950
@@ -906,10 +1022,12 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
       <div id="chat-input-container">
         <div id="chat-input" class="ProseMirror input-prose" contenteditable="false"><p class="is-editor-empty" data-placeholder="Send a Message"><br></p></div>
         <div class="input-row">
-          <span class="icon-btn" data-tip="More">${SVG.plusAlt}</span>
-          <span class="icon-btn" data-tip="Integrations">${SVG.component}</span>
+          <span class="icon-btn" id="input-menu-button" role="button" aria-label="More" aria-haspopup="true" data-tip="More">${SVG.plusAlt}</span>
+          <span class="input-divider"></span>
+          <span class="icon-btn" id="integration-menu-button" role="button" aria-label="Integrations" aria-haspopup="true" data-tip="Integrations">${SVG.component}</span>
+          <span class="input-pills" id="input-pills"></span>
           <span class="spacer"></span>
-          <span class="model-select"><span class="name">Preview Model</span>${SVG.chevronDown}</span>
+          <span class="model-select" id="model-selector-model-button" role="button" aria-haspopup="listbox"><span class="name">Preview Model</span>${SVG.chevronDown}</span>
           <span class="mic-btn" data-tip="Dictate">${SVG.mic}</span>
           <button class="call-button bg-black text-white dark:bg-white dark:text-black rounded-full p-[5px] self-center" data-tip="Voice mode">${SVG.voice}</button>
         </div>
@@ -1371,6 +1489,338 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     tip.style.top = y + 'px';
   });
   document.addEventListener('mouseleave', function () { current = null; tip.classList.remove('show'); }, true);
+})();
+
+// The input bar's menus as mocks that work: More (InputMenu.svelte),
+// Integrations (IntegrationsMenu.svelte) and the model selector
+// (ModelSelector/Selector.svelte). Each is portaled to <body> and opens above
+// its button, as Dropdown.svelte flips up at the bottom of the screen, and
+// carries the upstream class names so a preset's CSS reaches it too. They
+// show what an admin sees with web search, image generation and three tools
+// set up; a row that would upload, capture or fetch just closes the menu.
+(function () {
+  var moreBtn = document.getElementById('input-menu-button');
+  var intBtn = document.getElementById('integration-menu-button');
+  var modelBtn = document.getElementById('model-selector-model-button');
+  var pills = document.getElementById('input-pills');
+  if (!moreBtn || !intBtn || !modelBtn || !pills) return;
+  var I = ${JSON.stringify({ clip: SVG.clip, camera: SVG.camera, globeAlt: SVG.globeAlt, documentArrowUp: SVG.documentArrowUp, pageEdit: SVG.pageEdit, database: SVG.database, clockRotateRight: SVG.clockRotateRight, chevronRightAlt: SVG.chevronRightAlt, chevronLeft: SVG.chevronLeft, chevronDown: SVG.chevronDown, wrench: SVG.wrench, searchAlt: SVG.searchAlt, photo: SVG.photo, terminal: SVG.terminal, check: SVG.check, keyframes: SVG.keyframes, documentPage: SVG.documentPage, dots: SVG.dots, globePill: SVG.globePill, photoPill: SVG.photoPill, terminalPill: SVG.terminalPill, wrenchPill: SVG.wrenchPill, xMark: SVG.xMark })};
+  var LOGO_SRC = ${JSON.stringify(LOGO)};
+
+  var TOOLS = ['Web Scraper', 'Calculator', 'Weather'];
+  var FILES = ['palette-notes.md', 'brand-guidelines.pdf', 'dark-mode-screenshot.png', 'theme-export.json'];
+  var NOTES = ['Theme ideas', 'Font pairings'];
+  var KNOWLEDGE = [
+    { name: 'Design System', files: ['tokens.json', 'components.md'] },
+    { name: 'Product Docs', files: ['getting-started.md', 'faq.md'] }
+  ];
+  var MODELS = [
+    { name: 'Preview Model' }, { name: 'Preview Model Mini' }, { name: 'Reasoning Model' },
+    { name: 'Vision Model' }, { name: 'Local Model', size: '8B' }
+  ];
+  var state = { webSearch: false, image: false, code: false, tools: [false, false, false], model: 0, compare: false };
+  var open = null;
+
+  function chats() {
+    var out = [];
+    document.querySelectorAll('.side-scroll [data-chat] .label').forEach(function (el) {
+      if (el.closest('[data-chat="new"]')) return;
+      if (out.indexOf(el.textContent) === -1) out.push(el.textContent);
+    });
+    return out;
+  }
+  function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+  function chev() { return '<span class="chev">' + I.chevronRightAlt + '</span>'; }
+  function sw(on) { return '<span class="tdp-switch' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '"></span>'; }
+  function row(act, ico, label, more) {
+    return '<button type="button" class="tdp-row" data-act="' + act + '">' + ico + '<span class="label">' + label + '</span>' + (more || '') + '</button>';
+  }
+  function toggleRow(key, ico, label) {
+    return '<button type="button" class="tdp-row" data-act="toggle:' + key + '" aria-pressed="' + state[key] + '"><span class="ico' + (key === 'webSearch' ? '' : ' sm') + '">' + ico + '</span><span class="label">' + label + '</span>' + sw(state[key]) + '</button>';
+  }
+  function isNewChat() { var n = document.querySelector('nav'); return !!(n && n.classList.contains('is-new')); }
+
+  // ---- Opening, placing and closing ----
+
+  function hideTip() { var t = document.getElementById('tdp-tooltip'); if (t) t.classList.remove('show'); }
+
+  function close() {
+    if (!open) return;
+    open.el.remove();
+    open.trigger.setAttribute('aria-expanded', 'false');
+    open = null;
+  }
+
+  function show(kind, trigger, view) {
+    var was = open && open.kind;
+    close();
+    if (was === kind && !view) return;
+    hideTip();
+    var el = document.createElement('div');
+    open = { kind: kind, el: el, trigger: trigger };
+    trigger.setAttribute('aria-expanded', 'true');
+    document.body.appendChild(el);
+    if (kind === 'more') renderMore(view || 'root', 'from-left');
+    else if (kind === 'integrations') renderIntegrations(view || 'root', 'from-left');
+    else renderModels();
+    el.addEventListener('click', onMenuClick);
+    el.addEventListener('mouseover', onMenuHover);
+    requestAnimationFrame(function () { if (open && open.el === el) el.classList.add('in'); });
+  }
+
+  // Dropdown.svelte: left edge on the button, 4px off it, 16px from the
+  // window's edges. Selector.svelte: right edge on the trigger, 2px off, 8px.
+  // Both open downward unless there is more room above.
+  function place() {
+    if (!open) return;
+    var el = open.el, r = open.trigger.getBoundingClientRect();
+    var model = open.kind === 'model';
+    var gap = model ? 2 : 4, pad = model ? 8 : 16;
+    var w = el.offsetWidth, h = el.offsetHeight;
+    var left = model ? r.right - w : r.left;
+    left = Math.max(pad, Math.min(left, window.innerWidth - w - pad));
+    var below = window.innerHeight - r.bottom;
+    var top = below >= r.top ? r.bottom + gap : r.top - gap - h;
+    el.style.left = left + 'px';
+    el.style.top = Math.max(8, top) + 'px';
+  }
+
+  document.addEventListener('mousedown', function (e) {
+    if (!open || open.el.contains(e.target) || open.trigger.contains(e.target)) return;
+    close();
+  }, true);
+  // Escape closes the menu, and goes no further: the page around the
+  // preview would take it as closing the whole preview
+  window.addEventListener('keydown', function (e) {
+    if (open && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); }
+  }, true);
+  window.addEventListener('resize', place);
+
+  moreBtn.addEventListener('click', function () { show('more', moreBtn); });
+  intBtn.addEventListener('click', function () { show('integrations', intBtn); });
+  modelBtn.addEventListener('click', function () { show('model', modelBtn); });
+
+  // ---- More ----
+
+  function renderMore(view, fly) {
+    var el = open.el;
+    el.className = 'tdp-menu input-menu app-dropdown-menu rounded-xl border border-gray-100 dark:border-gray-800 z-50 bg-white dark:bg-gray-850 dark:text-white shadow-lg' + (open.el.classList.contains('in') ? ' in' : '');
+    el.setAttribute('role', 'menu');
+    open.view = view;
+    if (view === 'root') {
+      el.innerHTML = '<div class="tdp-view ' + fly + '">' +
+        row('close', I.clip, 'Upload Files') +
+        row('close', I.camera, 'Capture') +
+        row('close', I.globeAlt, 'Attach Webpage') +
+        row('tab:files', I.documentArrowUp, 'Attach Files', chev()) +
+        row('tab:notes', I.pageEdit, 'Attach Notes', chev()) +
+        row('tab:knowledge', I.database, 'Attach Knowledge', chev()) +
+        row('tab:chats', I.clockRotateRight, 'Reference Chats', chev()) +
+        '</div>';
+    } else {
+      var t = SUBTABS[view];
+      el.innerHTML = '<div class="tdp-view ' + fly + '">' +
+        '<button type="button" class="tdp-row back" data-act="back">' + I.chevronLeft + '<span class="label">' + t.title + '</span></button>' +
+        '<div class="tdp-search">' + I.searchAlt + '<input placeholder="' + t.placeholder + '" autocomplete="off"></div>' +
+        '<div class="tdp-list"></div></div>';
+      var input = el.querySelector('input');
+      input.addEventListener('input', function () { fillList(view, input.value); });
+      fillList(view, '');
+    }
+    place();
+  }
+
+  var SUBTABS = {
+    files: { title: 'Files', placeholder: 'Search Files', empty: 'No files found', items: function () { return FILES; } },
+    notes: { title: 'Notes', placeholder: 'Search Notes', empty: 'No notes found', items: function () { return NOTES; } },
+    knowledge: { title: 'Knowledge', placeholder: 'Search Knowledge', empty: 'No knowledge bases found.', items: function () { return KNOWLEDGE.map(function (k) { return k.name; }); } },
+    chats: { title: 'Chats', placeholder: 'Search Chats', empty: 'No chats found', items: chats }
+  };
+
+  function fillList(view, q) {
+    var list = open.el.querySelector('.tdp-list');
+    var t = SUBTABS[view];
+    var items = t.items().filter(function (n) { return n.toLowerCase().indexOf(q.trim().toLowerCase()) !== -1; });
+    if (!items.length) { list.innerHTML = '<div class="tdp-empty">' + t.empty + '</div>'; place(); return; }
+    list.innerHTML = items.map(function (name, i) {
+      var hl = i === 0 ? ' hl' : '';
+      if (view === 'knowledge') {
+        var kb = KNOWLEDGE.filter(function (k) { return k.name === name; })[0];
+        return '<div class="tdp-row item' + hl + '" data-act="close"><span class="ico sm">' + I.database + '</span><span class="label">' + esc(name) + '</span>' +
+          '<span class="expand" data-act="expand" role="button" aria-label="Show files">' + I.chevronRightAlt + '</span></div>' +
+          '<div class="tdp-kb-files" hidden>' + kb.files.map(function (f) {
+            return '<div class="tdp-row item" data-act="close"><span class="doc">' + I.documentPage + '</span><span class="label">' + esc(f) + '</span></div>';
+          }).join('') + '</div>';
+      }
+      var ico = view === 'chats' ? '' : '<span class="doc">' + (view === 'notes' ? I.pageEdit : I.documentPage) + '</span>';
+      return '<button type="button" class="tdp-row item' + hl + '" data-act="close">' + ico + '<span class="label">' + esc(name) + '</span></button>';
+    }).join('');
+    place();
+  }
+
+  // ---- Integrations ----
+
+  function renderIntegrations(view, fly) {
+    var el = open.el;
+    el.className = 'tdp-menu integrations-menu app-dropdown-menu rounded-xl border border-gray-100 dark:border-gray-800 z-50 bg-white dark:bg-gray-850 dark:text-white shadow-lg' + (open.el.classList.contains('in') ? ' in' : '');
+    el.setAttribute('role', 'menu');
+    open.view = view;
+    if (view === 'root') {
+      el.innerHTML = '<div class="tdp-view ' + fly + '">' +
+        row('tab:tools', I.wrench, 'Tools <span class="count">' + TOOLS.length + '</span>', chev()) +
+        toggleRow('webSearch', I.globeAlt, 'Web Search') +
+        toggleRow('image', I.photo, 'Image') +
+        toggleRow('code', I.terminal, 'Code Interpreter') +
+        '</div>';
+    } else {
+      el.innerHTML = '<div class="tdp-view ' + fly + '">' +
+        '<button type="button" class="tdp-row back" data-act="back">' + I.chevronLeft + '<span class="label">Tools <span class="count">' + TOOLS.length + '</span></span></button>' +
+        '<div class="tdp-search">' + I.searchAlt + '<input placeholder="Search tools" autocomplete="off"></div>' +
+        '<div class="tdp-list"></div></div>';
+      var input = el.querySelector('input');
+      input.addEventListener('input', function () { fillTools(input.value); });
+      fillTools('');
+    }
+    place();
+  }
+
+  function fillTools(q) {
+    var list = open.el.querySelector('.tdp-list');
+    var rows = TOOLS.map(function (name, i) {
+      if (name.toLowerCase().indexOf(q.trim().toLowerCase()) === -1) return '';
+      return '<button type="button" class="tdp-row" data-act="tool:' + i + '" aria-pressed="' + state.tools[i] + '"><span class="ico">' + I.wrench + '</span><span class="label">' + esc(name) + '</span>' + sw(state.tools[i]) + '</button>';
+    }).join('');
+    list.innerHTML = rows || '<div class="tdp-empty">No tools found</div>';
+    place();
+  }
+
+  // The pills after Integrations: selected tools, then each feature that is on
+  function renderPills() {
+    var n = state.tools.filter(Boolean).length, h = '';
+    if (n) h += '<span class="tools-pill" data-pill="tools" role="button" aria-label="Available Tools" data-tip="' + n + ' Available Tools">' + I.wrenchPill + '<span>' + n + '</span></span>';
+    if (state.webSearch) h += pill('webSearch', 'Web Search', I.globePill);
+    if (state.image) h += pill('image', 'Image', I.photoPill);
+    if (state.code) h += pill('code', 'Code Interpreter', '<span class="terminal-icon">' + I.terminalPill + '</span>');
+    pills.innerHTML = h;
+  }
+  function pill(key, tip, ico) {
+    return '<span class="feature-pill group" data-pill="' + key + '" role="button" aria-pressed="true" data-tip="' + tip + '">' + ico + '<span class="x">' + I.xMark + '</span></span>';
+  }
+  pills.addEventListener('click', function (e) {
+    var p = e.target.closest('[data-pill]');
+    if (!p) return;
+    hideTip();
+    if (p.dataset.pill === 'tools') { show('integrations', intBtn, 'tools'); return; }
+    state[p.dataset.pill] = false;
+    renderPills();
+    if (open && open.kind === 'integrations' && open.view === 'root') renderIntegrations('root', '');
+  });
+
+  // ---- Model selector ----
+
+  function renderModels() {
+    var el = open.el;
+    el.className = 'tdp-menu model-menu z-40 w-[20rem] rounded-xl border border-gray-100 bg-white p-0.5 shadow-lg dark:border-gray-800 dark:bg-gray-850 dark:text-white';
+    el.innerHTML = '<div class="tdp-search">' + I.searchAlt +
+      '<input id="model-search-input" placeholder="Search a model" autocomplete="off" aria-label="Search In Models">' +
+      '<span class="compare' + (state.compare ? ' on' : '') + '" data-act="compare" role="button" aria-label="Compare">' + I.keyframes + '</span></div>' +
+      '<div class="model-list" role="listbox" aria-label="Available models"></div>' +
+      (isNewChat() ? '<div class="model-foot"><span data-act="close">Set as default</span></div>' : '<div class="pb"></div>');
+    var input = el.querySelector('input');
+    open.hl = state.model;
+    input.addEventListener('input', function () { open.hl = -1; fillModels(input.value); });
+    input.addEventListener('keydown', function (e) {
+      var rows = [].slice.call(open.el.querySelectorAll('.model-item'));
+      if (!rows.length) return;
+      var at = rows.findIndex(function (r) { return r.classList.contains('hl'); });
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        at = e.key === 'ArrowDown' ? Math.min(rows.length - 1, at + 1) : Math.max(0, at - 1);
+        rows.forEach(function (r, i) { r.classList.toggle('hl', i === at); });
+        rows[at].scrollIntoView({ block: 'nearest' });
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        pickModel(Number((rows[at] || rows[0]).dataset.model));
+      }
+    });
+    fillModels('');
+    input.focus();
+  }
+
+  function fillModels(q) {
+    var list = open.el.querySelector('.model-list');
+    var shown = MODELS.map(function (m, i) { return i; }).filter(function (i) { return MODELS[i].name.toLowerCase().indexOf(q.trim().toLowerCase()) !== -1; });
+    // A search highlights its first result, for the arrow keys and Enter
+    if (shown.indexOf(open.hl) === -1) open.hl = shown.length ? shown[0] : -1;
+    var rows = MODELS.map(function (m, i) {
+      if (shown.indexOf(i) === -1) return '';
+      var sel = i === state.model;
+      return '<div class="model-item' + (sel ? ' selected' : '') + (i === open.hl ? ' hl' : '') + '" role="option" aria-selected="' + sel + '" data-model="' + i + '">' +
+        '<div class="main"><img src="' + LOGO_SRC + '" alt=""><span class="name">' + esc(m.name) + '</span>' + (m.size ? '<span class="size">' + m.size + '</span>' : '') + '</div>' +
+        '<div class="end"><span aria-label="More Options">' + I.dots + '</span>' + (sel ? '<span class="tick">' + I.check + '</span>' : '') + '</div></div>';
+    }).join('');
+    list.innerHTML = rows || '<div class="model-empty">No results found</div>';
+    place();
+  }
+
+  function pickModel(i) {
+    state.model = i;
+    modelBtn.querySelector('.name').textContent = MODELS[i].name;
+    close();
+  }
+
+  // ---- Clicks inside a menu ----
+
+  function onMenuHover(e) {
+    var r = e.target.closest('.tdp-list .tdp-row.item, .model-item');
+    if (!r) return;
+    open.el.querySelectorAll('.hl').forEach(function (x) { if (x !== r) x.classList.remove('hl'); });
+    r.classList.add('hl');
+  }
+
+  function onMenuClick(e) {
+    var model = e.target.closest('.model-item');
+    if (model) { pickModel(Number(model.dataset.model)); return; }
+    var a = e.target.closest('[data-act]');
+    if (!a) return;
+    var act = a.dataset.act;
+    if (act === 'close') { close(); return; }
+    if (act === 'expand') {
+      e.stopPropagation();
+      var files = a.closest('.tdp-row').nextElementSibling;
+      files.hidden = !files.hidden;
+      a.innerHTML = files.hidden ? I.chevronRightAlt : I.chevronDown;
+      place();
+      return;
+    }
+    if (act === 'compare') { state.compare = !state.compare; a.classList.toggle('on', state.compare); return; }
+    if (act === 'back') {
+      if (open.kind === 'more') renderMore('root', 'from-left'); else renderIntegrations('root', 'from-left');
+      return;
+    }
+    if (act.indexOf('tab:') === 0) {
+      var view = act.slice(4);
+      if (open.kind === 'more') renderMore(view, 'from-right'); else renderIntegrations(view, 'from-right');
+      var input = open.el.querySelector('input');
+      if (input) input.focus();
+      return;
+    }
+    if (act.indexOf('toggle:') === 0) {
+      var key = act.slice(7);
+      state[key] = !state[key];
+      a.setAttribute('aria-pressed', state[key]);
+      a.querySelector('.tdp-switch').classList.toggle('on', state[key]);
+      renderPills();
+      return;
+    }
+    if (act.indexOf('tool:') === 0) {
+      var i = Number(act.slice(5));
+      state.tools[i] = !state.tools[i];
+      a.setAttribute('aria-pressed', state.tools[i]);
+      a.querySelector('.tdp-switch').classList.toggle('on', state.tools[i]);
+      renderPills();
+    }
+  }
 })();
 
 // The floating preview toolbar lives in the parent and can change height when
