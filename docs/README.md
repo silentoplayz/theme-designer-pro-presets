@@ -52,14 +52,14 @@ npm run build:catalog
 | File | Purpose |
 |---|---|
 | `index.html` | The home page: live demo, features, install steps. Also forwards old gallery links (`/#canvasFx?q=…`) to the gallery. |
-| `studio/index.html` | The Studio: a palette for each mode, a gradient or Canvas FX background, a live preview, and a theme file to download or copy |
+| `studio/index.html` | The Studio: a palette for each mode, a gradient or Canvas FX background with the animation's own settings, a live preview, and a theme file to download or copy |
 | `gallery/index.html` | The preset gallery: type tabs, search, sort, filters, the detail drawer and the full-screen preview |
 | `assets/site.css` | All styling for both pages |
 | `assets/palette.js` | The site's own palette. Every color in `site.css` comes from one hue and one chroma, which the home page's sliders change and the browser remembers |
 | `assets/preview.js` | The preview engine: the designer's palette and gradient math, the mock Open WebUI chat, and the full-screen preview |
 | `assets/ui.js` | Pieces both pages share: theme thumbnails, gradient swatches, Canvas FX thumbnails that play on hover, copying, the header |
 | `assets/home.js` | The home page's demo, palette ramp and preset strips |
-| `assets/studio.js` | The Studio's state, controls, share links and export. Its theme file has the same shape as the designer's own export, so it imports like any other |
+| `assets/studio.js` | The Studio's state, controls, animation settings, share links and export. Its theme file has the same shape as the designer's own export, so it imports like any other |
 | `assets/gallery.js` | The gallery's filtering, cards, drawer and shareable links |
 | `catalog.json` | Generated list of every preset (see above) |
 | `og-preview.png` | The image shown when someone shares a link to the site |
@@ -76,6 +76,10 @@ npm run build:catalog
 
 The visitor still chooses **Load URL** or confirms the import, so the designer's URL import valves apply. The Studio's **Submit to the gallery** opens the theme submission form with the name, author and JSON filled in from the address. When the JSON makes that address too long, it copies the JSON instead.
 
+### Animation settings
+
+The Studio reads the settings at the top of a Canvas FX script, either a `CONFIG` object (one line or many) or a block of constants, and shows each number as a slider, each `true`/`false` as a switch and each `'#rrggbb'` as a color. A range written in the setting's comment, such as `(0.5-3)`, sets the slider's range; without one it's sized from the default. A change rewrites only that value in the script, so the downloaded theme carries the tuned copy. Scripts that follow the theme's colors have a `followTheme` setting, and the preview passes them the palette the way the designer does, so they recolor as the sliders move.
+
 ### Studio links
 
 The Studio opens with whatever a link hands it, so other pages can send a preset straight there:
@@ -90,7 +94,7 @@ studio/#theme=https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-
                                        ← a theme file in this repository, even one not in the gallery yet
 ```
 
-A shared design carries palette numbers and preset file names, never script text, so a link can only load scripts from this repository. A `#theme=` link only opens raw files from this repository, too. The Theme Submission Bot puts one in its reply and in the pull request, pointing at the submission's commit, so the submitter and the reviewer can see the theme in every mode before it's merged. The link keeps working after the merge. Without a link, the Studio reopens the last design from this browser.
+A shared design carries palette numbers, preset file names and any changed animation settings, never script text, so a link can only load scripts from this repository. A `#theme=` link only opens raw files from this repository, too. The Theme Submission Bot puts one in its reply and in the pull request, pointing at the submission's commit, so the submitter and the reviewer can see the theme in every mode before it's merged. The link keeps working after the merge. Without a link, the Studio reopens the last design from this browser.
 
 ### Gallery links
 

@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.11.0-blue)
+![Version](https://img.shields.io/badge/version-1.12.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -51,6 +51,7 @@ Unlike the [Tool variant](../tools/) which runs inside an AI chat iframe, this v
 - 🔄 **Live Cross-UI Detection:** If you change the Open WebUI theme natively (via OS settings or keyboard shortcuts) while the designer is open, the designer instantly switches its internal tab to match your live environment.
 - 🔑 **Auth Page Theming:** Selectively opt-in your custom theme components (Foundation Colors, Custom CSS, Canvas FX, and Gradient Background) to display on the Open WebUI Login and Signup screens. Each component has an independent "Show on Auth Pages" toggle.
 - 🎇 **Canvas FX Animations (Web Worker Powered):** Inject interactive JavaScript animations directly into the background of Open WebUI. Animations run on a Background Web Worker via `OffscreenCanvas` for zero-lag performance, with an automatic main-thread fallback for browsers that don't support `OffscreenCanvas`. The structural transparency layer makes native UI panels see-through so animations show behind the interface. Drag & drop `.js` files anywhere on the UI to import animations instantly.
+- 🎨 **Theme-Aware Animations:** Canvas FX scripts can draw in the theme's own colors. The engine sends the active mode's palette (background, surface, text and three accents in the theme's hue, as hex and as 0 to 1 floats for WebGL) with `init` and again whenever it changes, so a script that uses it recolors live as you edit the palette or switch modes. It's opt-in: scripts that ignore it keep their own colors.
 - 🔊 **Context-Aware Animations:** Canvas FX scripts can react to conversation data in real-time. A DOM observer scans chat messages for DOM-based token estimation (at most every 2 seconds, during streaming too), while a Socket.IO WebSocket interceptor extracts exact token counts from `chat:completion` responses — both feed a `context` message to the animation for data-driven visual effects. External scripts can also dispatch custom context data via the `owui-canvas-context` CustomEvent API.
 - 🎭 **Community Themes Browser:** Browse and install curated community themes directly from the Themes tab. The community themes grid fetches from the [preset gallery manifest](https://github.com/silentoplayz/theme-designer-pro-presets) and supports one-click install, install-all, and search. Controlled by the `enable_community_themes` valve.
 - 🪟 **Sidebar & Overlay Transparency:** Admin-configurable transparency for the sidebar and overlay UI (settings modals, dropdowns). Choose between opaque (solid), translucent (frosted glass with backdrop-blur), or transparent modes via the `sidebar_transparency` and `overlay_transparency` valves.
@@ -396,7 +397,7 @@ All Canvas FX scripts must follow this Web Worker contract:
 // Receive messages from the host
 self.onmessage = (e) => {
   switch (e.data.type) {
-    case 'init':       // { canvas: OffscreenCanvas, width, height, env }
+    case 'init':       // { canvas: OffscreenCanvas, width, height, env, theme }
     case 'resize':     // { width, height }
     case 'mousemove':  // { x, y }
     case 'click':      // { x, y }
@@ -406,6 +407,7 @@ self.onmessage = (e) => {
     case 'touchmove':  // { touches: [{x, y}, ...] }
     case 'touchend':   // { touches: [{x, y}, ...] }
     case 'context':    // { messages, chars, estimatedTokens } or { exactTokens, promptTokens, completionTokens, source }
+    case 'theme':      // { mode, dark, hue, chroma, colors, rgb, ramp } (optional to handle)
   }
 };
 
@@ -414,6 +416,8 @@ self.onmessage = (e) => {
 ```
 
 > **Note:** The `init` message includes an `env` object with `{ authToken, baseUrl, locale, timezone }`. `authToken` is **the token of whichever user is viewing the page**, not the admin's, and is an empty string unless the `enable_canvas_api_access` valve is enabled. A script that receives it can call the Open WebUI API with that user's permissions, so treat any script you did not write as untrusted before turning the valve on.
+
+> **Theme palette:** `init` carries `theme`, the active mode's palette, and a `theme` message brings a new one whenever it changes while the script runs (a mode switch that keeps the same script, a theme update, or a palette edit in the designer). `colors` holds `background`, `surface`, `text`, `muted`, `accent`, `accent2` and `accent3` as `'#rrggbb'`, `rgb` holds the same as `[r, g, b]` from 0 to 1, `ramp` is the `--color-gray-*` ramp, and `dark` is false on Light and Her. A script that follows it should keep its own colors as defaults, offer a `followTheme` setting, recolor without restarting, and avoid additive blending when `dark` is false. The **📖 Docs** page's **Theme-Aware Animations** section has the full pattern.
 
 ### Dual Execution Modes
 
@@ -504,6 +508,10 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
 
 ---
+
+## 📝 What's New in 1.12.0
+
+**Animations can follow your theme.** Canvas FX scripts now receive the active mode's palette: with `init`, and again whenever it changes. A script that uses it draws in the theme's colors, recolors live while you drag the palette sliders, and switches with your mode, so one animation fits every theme and every mode instead of needing a copy per palette. Twelve animations in the [preset gallery](https://silentoplayz.github.io/theme-designer-pro-presets/gallery/) follow it now, tagged **Follows your theme**: Firefly Meadow, Constellation Map, Aurora Borealis, Nebula Clouds, Fluid Ribbons, Lava Lamp, Ink Bloom, Voronoi Cells, Sacred Geometry, Neural Network, Topographic Map and Circuit Board. Each has a `followTheme` setting to keep its own colors. Scripts that don't use the palette, and every theme you already have, look exactly as before. The **📖 Docs** page has a new **Theme-Aware Animations** section with the payload and the pattern for your own scripts.
 
 ## 📝 What's New in 1.11.0
 

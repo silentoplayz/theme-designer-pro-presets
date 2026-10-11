@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.11.0
+version: 1.12.0
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -22,7 +22,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.11.0"
+VERSION = "1.12.0"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -5740,7 +5740,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         <p>Inject interactive JavaScript animations directly into the background of Open WebUI. The designer automatically applies a <i>Structural Layer</i> that makes native UI components transparent so the animation shines through.</p>
                         <ul>
                             <li><b>Background Worker Execution:</b> By default, scripts run in a true background Web Worker utilizing <code>OffscreenCanvas</code> (if supported by your browser) to ensure high-performance rendering without blocking the UI thread. Both <b>Canvas 2D</b> and <b>WebGL/WebGL2</b> contexts are supported &mdash; call <code>canvas.getContext('2d')</code> for standard drawing or <code>canvas.getContext('webgl2')</code> for GPU-accelerated shader rendering (see <i>WebGL Rendering</i> below). A script whose source contains the text <code>document</code> anywhere, even in a comment or inside a longer word such as &ldquo;documentation&rdquo;, is sent straight to the main thread. The status badge in the designer shows the <i>predicted</i> execution mode, from the browser&rsquo;s capabilities and that text check: <b style="color:#10b981">Background Worker</b> (OffscreenCanvas), <b style="color:#60a5fa">Main Thread (DOM Access)</b> (the script contains <code>document</code>), or <b style="color:#f59e0b">Main Thread (Fallback)</b> (the browser lacks <code>OffscreenCanvas</code>). If the Worker reports an uncaught error, the engine also moves the script to the main thread; the badge doesn&rsquo;t change in that case, because it shows the prediction, not the live path. Next to it, a <b>WebGL</b> badge appears when the script asks for a WebGL context, and a <b>Context</b> badge when it handles <code>context</code> messages.</li>
-                            <li><b>Event Handling:</b> Ten message types are sent to your script via <code>self.onmessage</code>: <code>init</code>, <code>resize</code>, <code>mousemove</code>, <code>click</code>, <code>mousedown</code>, <code>mouseup</code>, <code>touchstart</code>, <code>touchmove</code>, <code>touchend</code>, and <code>context</code>. Touch events also generate synthetic mouse equivalents for cross-device compatibility.</li>
+                            <li><b>Event Handling:</b> Eleven message types are sent to your script via <code>self.onmessage</code>: <code>init</code>, <code>resize</code>, <code>mousemove</code>, <code>click</code>, <code>mousedown</code>, <code>mouseup</code>, <code>touchstart</code>, <code>touchmove</code>, <code>touchend</code>, <code>context</code>, and <code>theme</code>. Touch events also generate synthetic mouse equivalents for cross-device compatibility.</li>
                             <li><b>Show on Auth Pages:</b> Toggle whether canvas animations appear on Login/Signup screens. Enabled by default. When the <b>Enable Auth Page Theming</b> valve is off, this checkbox is hidden and off in every mode.</li>
                             <li><b>Preset Gallery:</b> Save, rename, overwrite with the editor&rsquo;s script, delete, and export individual animations, and import native <code>.js</code> animation files by dragging them into the designer. The gallery has search, a sort, and a type filter (All, WebGL, Context, DOM Access).</li>
                             <li><b>The Enable Canvas FX valve:</b> turning it off hides this tab, stops animations that are running, and serves every theme with its Canvas FX left out. The scripts stay saved, so turning the valve back on restores them.</li>
@@ -5753,7 +5753,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         <p>Your Canvas FX script runs inside a <b>Web Worker</b> with an <code>OffscreenCanvas</code>. The runtime communicates with your script using a structured message protocol via <code>self.onmessage</code>. Understanding this contract is essential for writing reliable animations.</p>
 
                         <p class="doc-subheading">Inbound Messages (Runtime &rarr; Your Script)</p>
-                        <p>Ten message types are dispatched to your script's <code>self.onmessage</code> handler:</p>
+                        <p>Eleven message types are dispatched to your script's <code>self.onmessage</code> handler:</p>
                         <table class="doc-table-compact">
                             <thead>
                                 <tr style="border-bottom: 1px solid var(--border);">
@@ -5765,8 +5765,8 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                             <tbody>
                                 <tr style="border-bottom: 1px solid var(--border);">
                                     <td><code>init</code></td>
-                                    <td><code>{ canvas, width, height, env }</code></td>
-                                    <td>Fired once on startup. <code>canvas</code> is an <code>OffscreenCanvas</code> transferred via <code>postMessage</code>. Call <code>canvas.getContext('2d')</code> for 2D drawing, or <code>canvas.getContext('webgl2')</code> (with <code>'webgl'</code> fallback) for GPU-accelerated shader rendering. <code>width</code> and <code>height</code> are the initial viewport dimensions. <code>env</code> provides runtime context: <code>{ authToken, baseUrl, locale, timezone }</code>. <b>authToken is the token of whichever user is viewing the page</b>, and is an empty string unless an admin has enabled the Canvas API Access valve &mdash; a script given it can call the Open WebUI API as that user.</td>
+                                    <td><code>{ canvas, width, height, env, theme }</code></td>
+                                    <td>Fired once on startup. <code>theme</code> is the active mode's palette, the same object a <code>theme</code> message carries (see <b>Theme-Aware Animations</b>). <code>canvas</code> is an <code>OffscreenCanvas</code> transferred via <code>postMessage</code>. Call <code>canvas.getContext('2d')</code> for 2D drawing, or <code>canvas.getContext('webgl2')</code> (with <code>'webgl'</code> fallback) for GPU-accelerated shader rendering. <code>width</code> and <code>height</code> are the initial viewport dimensions. <code>env</code> provides runtime context: <code>{ authToken, baseUrl, locale, timezone }</code>. <b>authToken is the token of whichever user is viewing the page</b>, and is an empty string unless an admin has enabled the Canvas API Access valve &mdash; a script given it can call the Open WebUI API as that user.</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid var(--border);">
                                     <td><code>resize</code></td>
@@ -5813,6 +5813,11 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                                     <td><code>{ messages, chars, estimatedTokens }</code></td>
                                     <td>Fired at most every 2 seconds while the chat changes, during a streaming reply too. <code>messages</code> counts the elements in the chat whose id starts with <code>message-</code> (an open edit or feedback box counts too), <code>chars</code> is the total character count of the user and assistant messages, and <code>estimatedTokens</code> is <code>chars / 4</code>, rounded up. Enables context-aware animations that grow or change as the conversation progresses. External scripts can also dispatch custom data via <code>window.dispatchEvent(new CustomEvent('owui-canvas-context', { detail: { ... } }))</code>.</td>
                                 </tr>
+                                <tr style="border-top: 1px solid var(--border);">
+                                    <td><code>theme</code></td>
+                                    <td><code>{ mode, dark, hue, chroma, colors, rgb, ramp }</code></td>
+                                    <td>Fired when the palette changes while your script runs: a switch to a mode that uses the same script, a theme update, or a palette edit in this designer. The same object also arrives with <code>init</code> as <code>e.data.theme</code>. Handling it is optional; a script that ignores it keeps its own colors. See <b>Theme-Aware Animations</b>.</td>
+                                </tr>
                             </tbody>
                         </table>
 
@@ -5849,6 +5854,7 @@ self.onmessage = (e) =&gt; {
       height = e.data.height;
       canvas.width = width;
       canvas.height = height;
+      // e.data.theme: the theme's palette, when you want it
       animate();
       break;
     case 'resize':
@@ -5877,6 +5883,9 @@ self.onmessage = (e) =&gt; {
       break;
     case 'context':
       // e.data.messages, e.data.chars, e.data.estimatedTokens
+      break;
+    case 'theme':
+      // The palette changed: e.data.colors.accent, e.data.dark
       break;
   }
 };
@@ -6019,6 +6028,76 @@ window.dispatchEvent(new CustomEvent('owui-canvas-context', {
                             <button class="owui-code-btn" style="position: absolute; top: 6px; right: 6px; font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('doc-custom-event-api-code').textContent).then(()=>showToast('Copied to clipboard'))">Copy</button>
                         </div>
                         <p>The engine forwards the entire <code>detail</code> object to your Canvas FX script as a <code>context</code> message. Your script can read any custom fields you include. Don&rsquo;t put a <code>type</code> field in <code>detail</code>: it replaces <code>context</code>.</p>
+                            </div>
+                        </details>
+
+                        <details class="doc-sub-accordion">
+                            <summary>Theme-Aware Animations <i data-icon="chevron"></i></summary>
+                            <div class="doc-sub-inner">
+                        <p>The engine hands your script the active mode&rsquo;s palette, so an animation can draw in the theme&rsquo;s colors instead of its own. Change the hue in the Design Studio and a theme-aware animation recolors as you drag; switch from Dark to Light and it follows. It is opt-in: a script that never reads the palette keeps drawing exactly as it always has.</p>
+
+                        <p class="doc-subheading">When It Arrives</p>
+                        <ul>
+                            <li><b>With <code>init</code></b>, as <code>e.data.theme</code>, so the first frame can already use it.</li>
+                            <li><b>As a <code>theme</code> message</b> whenever it changes while your script runs: a mode switch that keeps the same script, a theme update from the server, or a palette edit here. It is only sent when something in it changed.</li>
+                        </ul>
+
+                        <p class="doc-subheading">Payload</p>
+                        <div style="position: relative;">
+                        <pre class="doc-pre" id="doc-theme-payload"><code>{
+  type: 'theme',
+  mode: 'dark',          // 'dark', 'oled', 'light' or 'her'
+  dark: true,            // false on Light and Her: dark text on a light page
+  hue: 265,              // the palette's hue, 0-360
+  chroma: 0.025,         // the palette's chroma, 0 for a neutral theme
+  colors: {              // '#rrggbb', for 2D canvas styles
+    background, surface, text, muted,
+    accent, accent2, accent3
+  },
+  rgb: { ... },          // the same colors as [r, g, b] from 0 to 1, for WebGL
+  ramp: { '50': '#...', ..., '950': '#...' }   // the --color-gray-* ramp
+}</code></pre>
+                            <button class="owui-code-btn" style="position: absolute; top: 6px; right: 6px; font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('doc-theme-payload').textContent).then(()=>showToast('Copied to clipboard'))">Copy</button>
+                        </div>
+                        <ul>
+                            <li><code>background</code>: the page color for this mode. <code>surface</code>: one step raised, like the input bar. <code>text</code> and <code>muted</code>: the main and secondary text colors.</li>
+                            <li><code>accent</code>: the palette&rsquo;s hue at a color made for the mode, lighter on dark modes and deeper on light ones, and as colorful as the theme itself. <code>accent2</code> and <code>accent3</code> sit 40&deg; to either side of it. A neutral theme gets gray accents.</li>
+                            <li>The colors are read from the page, so per-step overrides and the OLED blacks are already in them.</li>
+                        </ul>
+
+                        <p class="doc-subheading">The Pattern</p>
+                        <div style="position: relative;">
+                        <pre class="doc-pre" id="doc-theme-pattern"><code>const CONFIG = {
+  followTheme: true,   // Draw in the theme's colors when the designer sends them (true/false)
+};
+
+let colors = { bg: '#000000', glow: '#66ccff' };   // your own defaults
+let light = false;
+
+function applyTheme(t) {
+  if (!CONFIG.followTheme || !t || !t.colors) return;
+  colors = { bg: t.colors.background, glow: t.colors.accent };
+  light = t.dark === false;
+  // Rebuild anything cached in the old colors here
+}
+
+// In your message handler:
+case 'init':
+  // ...set up the canvas...
+  applyTheme(e.data.theme);
+  break;
+case 'theme':
+  applyTheme(e.data);
+  break;</code></pre>
+                            <button class="owui-code-btn" style="position: absolute; top: 6px; right: 6px; font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('doc-theme-pattern').textContent).then(()=>showToast('Copied to clipboard'))">Copy</button>
+                        </div>
+                        <ul>
+                            <li><b>Keep your defaults.</b> Older engines send no palette, and <code>followTheme: false</code> turns it off, so the script must still draw well in its own colors.</li>
+                            <li><b>Recolor, don&rsquo;t restart.</b> A <code>theme</code> message can arrive mid-animation. Swap the colors and rebuild cached gradients or sprites, but keep particles and positions where they are.</li>
+                            <li><b>Mind light modes.</b> When <code>dark</code> is false the animation sits behind dark text on a light page. Additive blending such as <code>'lighter'</code> disappears there, so draw with <code>'source-over'</code> and keep alphas modest.</li>
+                            <li><b>WebGL:</b> pass <code>rgb</code> entries straight to <code>uniform3fv</code>.</li>
+                        </ul>
+                        <p>The preset gallery tags these scripts <b>Follows your theme</b>, and the website&rsquo;s Studio shows <code>followTheme</code> as a switch with the rest of a script&rsquo;s settings.</p>
                             </div>
                         </details>
 

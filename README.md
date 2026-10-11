@@ -19,7 +19,7 @@ Theme Designer Pro themes your whole [Open WebUI](https://github.com/open-webui/
 | I want to… | Go to |
 |---|---|
 | Theme my Open WebUI | [Install the event function](#-install) |
-| Design a theme without installing anything yet | The [Studio](https://silentoplayz.github.io/theme-designer-pro-presets/studio/), which designs in your browser and downloads a theme file the designer imports |
+| Design a theme without installing anything yet | The [Studio](https://silentoplayz.github.io/theme-designer-pro-presets/studio/), which designs in your browser, tunes an animation's own settings, and downloads a theme file the designer imports |
 | Find a ready-made look | The [preset gallery](https://silentoplayz.github.io/theme-designer-pro-presets/gallery/), with a live preview of every theme, animation, gradient and CSS preset |
 | Change my theme from a chat | The [Launcher Tool](launcher/README.md) |
 | Share a preset I made | **Submit to the gallery** in the Studio, the [theme submission form](https://github.com/silentoplayz/theme-designer-pro-presets/issues/new?template=theme-submission.yml), or [Contributing](CONTRIBUTING.md) |
@@ -96,7 +96,7 @@ https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/b
 | Folder | What's in it |
 |---|---|
 | [`themes/`](themes/) | Complete themes as `.json`: a palette and settings for each mode (Dark, OLED, Light and Her), with any Canvas FX, gradient and custom CSS they use. Each has an `updateUrl`, so the designer can check it for updates. |
-| [`canvas-fx/`](canvas-fx/) | Animations as standalone `.js` files. They run behind the interface in a Web Worker on an OffscreenCanvas, and many have a `CONFIG` block of settings you can tune. |
+| [`canvas-fx/`](canvas-fx/) | Animations as standalone `.js` files. They run behind the interface in a Web Worker on an OffscreenCanvas, and many have a `CONFIG` block of settings you can tune, in the Studio too. Those tagged **Follows your theme** draw in the theme's colors (Theme Designer Pro v1.12.0 or later). |
 | [`gradients/`](gradients/) | Gradient presets, sorted by motion (`still/`, `animated/`) and then by type (`linear/`, `radial/`, `mesh/`). |
 | [`css-presets/`](css-presets/) | Styling as plain `.css` files: fonts, colors, spacing, components and effects. |
 | [`bundles/`](bundles/) | The presets combined into single files for one import each. Built by CI; see [`bundles/README.md`](bundles/README.md). |

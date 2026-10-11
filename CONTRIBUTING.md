@@ -17,9 +17,10 @@ Before submitting a PR, ensure your preset meets these requirements:
 - [ ] **Includes heartbeat** — `setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);`
 - [ ] **Uses `requestAnimationFrame`** for the render loop
 - [ ] **Has a JSDoc header** with `Title` and `Description`
+- [ ] **Follows the theme** (recommended): reads the palette from `init` (`e.data.theme`) and from `theme` messages, keeps its own colors as defaults, has a `followTheme` setting, recolors without restarting, and avoids additive blending when `theme.dark` is false. The designer's **📖 Docs** page, under **Theme-Aware Animations**, has the payload and the pattern
 - [ ] **Has a CONFIG block** (strongly recommended) with:
   - Box-decorated borders for visibility
-  - Inline comments with valid ranges for each property
+  - Inline comments with valid ranges for each property, written as `(min-max)`: the [Studio](https://silentoplayz.github.io/theme-designer-pro-presets/studio/) shows each number as a slider and uses that range
   - At least 10 tunable properties
   - Descriptive section grouping
 - [ ] **Performs well** — no visible lag on mid-range hardware
@@ -184,6 +185,9 @@ Use this template for new Canvas FX scripts:
 // ██  CONFIGURATION — Tweak these values to customize!   ██
 // ═══════════════════════════════════════════════════════════
 const CONFIG = {
+  // -- Theme --
+  followTheme: true,                      // Draw in the theme's colors when the designer sends them (true/false)
+
   // -- Section Name --
   propertyName: defaultValue,             // Description and valid range (min-max)
 };
