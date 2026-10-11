@@ -809,10 +809,57 @@ class Event:
                     for (var i = 0; i < links.length; i++) {
                         var href = links[i].getAttribute('href') || '';
                         if (href.indexOf('/static/custom.css') !== 0) continue;
+                        // The new copy arrives with the instance block back in
+                        links[i].addEventListener('load', syncInstanceSharedCss, { once: true });
                         links[i].setAttribute('href', '/static/custom.css?_t=' + Date.now());
                         return;
                     }
                 } catch(x) {}
+            }
+
+            // /static/custom.css gives every page the instance theme's colors
+            // and custom CSS for a first paint without a flash, inside an
+            // @supports block the server marks with --tdp-instance. Where the
+            // instance theme doesn't belong, this page's copy of that block is
+            // removed (the file itself is untouched) and put back when it does:
+            // a signed-in user's personal theme replaces it, and a sign-in page
+            // whose mode hides the colors or the custom CSS gets only what's
+            // allowed there, from the CSS enforceTheme() assembles.
+            function instanceSharedCssWanted() {
+                if (_personal) return false;
+                if (window.location.pathname.startsWith('/auth')) {
+                    var st = getParsedState();
+                    var c = st && st[themeToMode(localStorage.getItem('theme') || 'dark')];
+                    if (c && (c.themeShowAuth === false || c.customCssShowAuth === false)) return false;
+                }
+                return true;
+            }
+            function syncInstanceSharedCss() {
+                var want = instanceSharedCssWanted();
+                var links = document.querySelectorAll('link[rel="stylesheet"]');
+                for (var i = 0; i < links.length; i++) {
+                    var link = links[i];
+                    if ((link.getAttribute('href') || '').indexOf('/static/custom.css') !== 0) continue;
+                    var sheet = link.sheet, rules = null;
+                    try { rules = sheet && sheet.cssRules; } catch(x) {}
+                    if (!rules) {
+                        // Not loaded yet: check again once it is
+                        link.addEventListener('load', syncInstanceSharedCss, { once: true });
+                        continue;
+                    }
+                    if (!want && !sheet.__tdpInstanceOff) {
+                        for (var r = 0; r < rules.length; r++) {
+                            if ((rules[r].conditionText || '').indexOf('--tdp-instance') === -1) continue;
+                            sheet.__tdpInstanceOff = { index: r, text: rules[r].cssText };
+                            try { sheet.deleteRule(r); } catch(x) { sheet.__tdpInstanceOff = null; }
+                            break;
+                        }
+                    } else if (want && sheet.__tdpInstanceOff) {
+                        var off = sheet.__tdpInstanceOff;
+                        sheet.__tdpInstanceOff = null;
+                        try { sheet.insertRule(off.text, Math.min(off.index, rules.length)); } catch(x) {}
+                    }
+                }
             }
 
             var _refreshPending = false;
@@ -905,6 +952,7 @@ class Event:
                 }
                 // Some paths start the canvas before this applies the CSS
                 pushCanvasTheme();
+                syncInstanceSharedCss();
             }
             
             // Token usage interceptor — listens for Socket.IO 'events' messages
@@ -2635,14 +2683,26 @@ class Event:
                 flags=_re.DOTALL,
             )
 
+        # custom.css reaches every page and every user, but the instance theme
+        # doesn't belong on all of them: a user with a personal theme sees
+        # theirs instead, and a sign-in page can hide the colors or the custom
+        # CSS. The condition is always true; it marks the block so the
+        # bootloader can switch it off in that page's copy of the stylesheet.
+        safe_css = f"@supports ({self.INSTANCE_CSS_MARK}) {{\n{safe_css}\n}}\n"
+
         # The overlay valve APPENDS glass rules for portaled overlays, so unlike
         # the sidebar valve it has to be baked in here or overlays pop from
         # opaque to glass the moment the bootloader's /theme.css fetch lands.
+        # They're the admin's for every page, so they stay outside the block.
         if self.valves.overlay_transparency != "opaque":
             safe_css = self._apply_overlay_transparency(safe_css)
 
         Event._safe_css_cache = (cache_key, safe_css)
         return safe_css
+
+    # The @supports condition around the instance theme in custom.css. The
+    # bootloader looks for it by the property name.
+    INSTANCE_CSS_MARK = "--tdp-instance: 1"
 
     def _custom_css_fragment(self) -> str:
         """Producer for the /static/custom.css fragment.
