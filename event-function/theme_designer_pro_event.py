@@ -2272,6 +2272,8 @@ class Event:
         '.tdp-settings-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--color-gray-500,#9b9b9b);pointer-events:none}',
         // The tab whose theme this page shows
         '.tdp-theme-dot{width:6px;height:6px;margin-left:auto;flex-shrink:0;border-radius:9999px;background:#22c55e}',
+        // A ring for the instance theme, where the Admin tab isn't there to show it
+        '.tdp-theme-dot.tdp-theme-dot-instance{background:transparent;box-shadow:inset 0 0 0 1.5px #22c55e}',
         // The dialog's own tab keeps its selected look while ours is open; drop it.
         '#settings-tabs-container[data-tdp-active] [data-tdp-was]{font-weight:400;color:var(--color-gray-600,#676767);background:transparent}',
         'html.dark #settings-tabs-container[data-tdp-active] [data-tdp-was]{color:var(--color-gray-400,#b4b4b4)}'
@@ -2451,7 +2453,6 @@ class Event:
         var className = (isOpen ? activeClass : inactiveClass) + ' tdp-settings-tab';
         if (tab.className !== className) tab.className = className;
         tab.setAttribute('aria-selected', isOpen ? 'true' : 'false');
-        markInUse(tab, spec);
         if (anchor.classList.contains('tabs')) {
             // Already at the end among our own tabs: with two of ours anchored
             // here, each moved itself after the other on every render, and
@@ -2466,23 +2467,33 @@ class Event:
         }
     }
 
-    // With both tabs, which theme is on screen isn't obvious from the list:
-    // a dot marks the tab whose theme this page shows, from the loader's
-    // window.__owuiThemeSource, and the tooltips say what's in use.
-    function markInUse(tab, spec) {
+    // Which theme is on screen isn't obvious from the list: a dot marks the
+    // tab whose theme this page shows, from the loader's
+    // window.__owuiThemeSource, and the tooltips say what's in use. A user
+    // without the Admin tab gets a ring on their own tab for the instance
+    // theme, so they can tell it from a theme of their own.
+    function markInUse(nav, tab, spec) {
         var source = window.__owuiThemeSource || '';
         var own = spec.key === 'personal' ? 'personal' : 'instance';
+        var adminTab = !!nav.querySelector('.tdp-settings-tab[data-tdp-key="admin"]');
+        var mark = source === own ? 'own'
+            : (own === 'personal' && source === 'instance' && !adminTab ? 'instance' : '');
         var dot = tab.querySelector('.tdp-theme-dot');
-        if (source === own && !dot) {
+        if (mark && !dot) {
             dot = document.createElement('span');
-            dot.className = 'tdp-theme-dot';
             dot.setAttribute('aria-hidden', 'true');
             tab.appendChild(dot);
-        } else if (source !== own && dot) {
+        } else if (!mark && dot) {
             dot.remove();
+            dot = null;
+        }
+        if (dot) {
+            var dotClass = 'tdp-theme-dot' + (mark === 'instance' ? ' tdp-theme-dot-instance' : '');
+            if (dot.className !== dotClass) dot.className = dotClass;
         }
         var hint = '';
-        if (source === own) hint = own === 'personal' ? 'In use: your own theme' : 'In use: the instance theme';
+        if (mark === 'own') hint = own === 'personal' ? 'In use: your own theme' : 'In use: the instance theme';
+        else if (mark === 'instance') hint = 'In use: the instance theme, set by an admin. Saving your own theme here replaces it for you';
         else if (own === 'instance' && source === 'personal') hint = 'Your own theme, under Basics, replaces this one for you';
         if ((tab.getAttribute('title') || '') !== hint) {
             if (hint) tab.setAttribute('title', hint);
@@ -2509,6 +2520,11 @@ class Event:
         watch(nav);
         readClasses(nav);
         SPECS.forEach(function (spec) { place(nav, spec); });
+        // After placing both, since a tab's mark depends on the other being there
+        SPECS.forEach(function (spec) {
+            var tab = nav.querySelector('.tdp-settings-tab[data-tdp-key="' + spec.key + '"]');
+            if (tab) markInUse(nav, tab, spec);
+        });
     }
 
     function schedule() {
@@ -5865,7 +5881,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                             <li><b>Searchable:</b> The Settings search box finds the tab by words such as &ldquo;theme&rdquo;, &ldquo;designer&rdquo;, &ldquo;palette&rdquo; or &ldquo;canvas&rdquo;. While the search holds words that don&rsquo;t match, the tab is hidden like any other.</li>
                             <li><b>Frosted Glass:</b> With <b>Overlay Transparency</b> set to <code>translucent</code>, the designer&rsquo;s page turns clear, so Settings&rsquo; frosted glass shows behind it. It stays solid while you edit a mode whose light or dark look differs from Open WebUI&rsquo;s, so its text stays readable.</li>
                             <li><b>Personal Tab:</b> With <b>Allow Personal Themes</b> on, every user, admins included, also gets a <b>Themes</b> tab in the <i>Personal</i> section, after <b>Interface</b>, for their own theme (see Section 4). Users see it after their next page load.</li>
-                            <li><b>Which One Is In Use:</b> A green dot marks the <b>Themes</b> tab whose theme the page is showing: the Admin one for the instance theme, the Personal one for your own. While your own theme is showing, hovering the Admin tab says it replaces the instance theme for you.</li>
+                            <li><b>Which One Is In Use:</b> A green dot marks the <b>Themes</b> tab whose theme the page is showing: the Admin one for the instance theme, the Personal one for your own. While your own theme is showing, hovering the Admin tab says it replaces the instance theme for you. A user without the Admin tab sees a green ring on their own tab while the instance theme is showing, and a dot once they save a theme of their own.</li>
                             <li><b>A Page in the Admin Panel:</b> With the <b>Show In Admin Panel</b> valve on, the Admin Panel&rsquo;s top bar gets a <b>Themes</b> page between <b>Functions</b> and <b>Settings</b>, with the same designer filling the page. <b>Settings</b> opens its dialog over it, and any other page of the bar, or navigating elsewhere, closes it. A reload shows the page you were on before you opened <b>Themes</b>.</li>
                             <li><b>Turning the Function Off</b> removes the Settings tabs and the Admin Panel page from open pages.</li>
                         </ul>
