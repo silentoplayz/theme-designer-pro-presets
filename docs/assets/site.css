@@ -504,7 +504,7 @@ p { text-wrap: pretty; }
 
 .viewport {
   position: relative;
-  aspect-ratio: var(--vw, 1280) / var(--vh, 760);
+  aspect-ratio: var(--vw, 1280) / var(--vh, 800);
   overflow: hidden;
   background: #0b0b0e;
 }
@@ -513,7 +513,7 @@ p { text-wrap: pretty; }
   top: 0;
   left: 0;
   width: calc(var(--vw, 1280) * 1px);
-  height: calc(var(--vh, 760) * 1px);
+  height: calc(var(--vh, 800) * 1px);
   max-width: none;
   border: 0;
   transform: scale(var(--s, 1));

@@ -892,20 +892,10 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
         {
           stats: 'Response Speed: 98.7 t/s | Total Duration: 1.9s | Eval Count: 164 | Session: 2018 tokens',
           body: '<p><b>Exactly.</b> Backgrounds, borders, and text all come from the preset, and Canvas FX or gradients render behind the whole interface.</p>',
-          fups: [
-            'How do I import one of these presets into my instance?',
-            'Which presets look best with structural transparency enabled?',
-            'Can I combine a Canvas FX script with a gradient background?',
-            'What happens to the palette in OLED mode?',
-          ],
         },
         {
           stats: 'Response Speed: 101.2 t/s | Total Duration: 2.3s | Eval Count: 189 | Session: 2043 tokens',
           body: '<p>It does. The designer emits one <code>--color-gray-*</code> ramp per mode, and every surface here reads from it: backgrounds, borders, bubbles, even this pager. Regenerate a response and the palette holds.</p>',
-          fups: [
-            'Do regenerated responses keep the same theme variables?',
-            'Which mode should I preview first for a new preset?',
-          ],
         },
       ])}
     </div>

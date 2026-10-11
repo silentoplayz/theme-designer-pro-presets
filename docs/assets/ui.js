@@ -349,13 +349,18 @@
       const w = viewport.clientWidth;
       // `wide` keeps the desktop layout even on a phone, for a short preview
       const small = w < 640 && !o.wide;
+      // 800 tall keeps the longest mock chat above the input bar
       let vw = small ? 720 : 1280;
-      let vh = small ? 900 : 760;
+      let vh = small ? 900 : 800;
       // `fill`: when the stylesheet gives the box its own height, the mock
       // takes that shape instead of a fixed one, at close to real size
       if (o.fill && getComputedStyle(viewport).aspectRatio === 'auto' && viewport.clientHeight > 0) {
-        vw = Math.max(1100, Math.min(1440, w));
-        vh = Math.round(vw * viewport.clientHeight / w);
+        // At least 820 tall, so every mock chat ends above the input bar
+        // (the longest ends at 657 and the bar starts 110 from the bottom)
+        // instead of running under it
+        const h = viewport.clientHeight;
+        vw = Math.max(1100, Math.min(1440, w), Math.ceil(820 * w / h));
+        vh = Math.round(vw * h / w);
       }
       viewport.style.setProperty('--vw', vw);
       viewport.style.setProperty('--vh', vh);
