@@ -437,38 +437,41 @@
   document.addEventListener('tdp-install-target', renderInstallNote);
   renderInstallNote();
 
-  // GitHub fills an issue form's fields from matching query parameters.
-  // A theme with a script makes the address too long, so then the JSON is
-  // copied for the visitor to paste and everything else is still filled in.
+  // GitHub fills an issue form's fields from matching query parameters, and
+  // answers 414 past its address limit. The JSON goes in compact; a theme
+  // with a Canvas FX script is usually still too long, so then its JSON is
+  // copied and a note on the page says to paste it.
   const SUBMIT_FORM = 'https://github.com/silentoplayz/theme-designer-pro-presets/issues/new';
   const MAX_FORM_URL = 7500;
+  function openTab(url) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
   $('submit').addEventListener('click', (e) => {
     const theme = buildTheme();
-    const json = JSON.stringify(theme, null, 2);
-    const params = new URLSearchParams({ template: 'theme-submission.yml', name: theme.name });
+    const params = new URLSearchParams({ template: 'theme-submission.yml', title: 'Theme submission: ' + theme.name, name: theme.name });
     if (theme.author) params.set('author', theme.author);
-    let url = SUBMIT_FORM + '?' + params.toString() + '&json=' + encodeURIComponent(json);
-    let copied = false;
-    if (url.length > MAX_FORM_URL) {
-      url = SUBMIT_FORM + '?' + params.toString();
-      copied = true;
-    }
-    const open = () => {
-      const a = document.createElement('a');
-      a.href = url;
-      a.target = '_blank';
-      a.rel = 'noopener';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    };
-    if (copied) {
-      UI.copyText(json, e.currentTarget, 'Theme JSON copied. Paste it into the form\'s Theme JSON field.');
-      open();
-    } else {
-      open();
+    const base = SUBMIT_FORM + '?' + params.toString();
+    const full = base + '&json=' + encodeURIComponent(JSON.stringify(theme));
+    const note = $('submit-note');
+    if (full.length <= MAX_FORM_URL) {
+      note.classList.add('hidden');
+      openTab(full);
       UI.showToast('Opened the submission form with your theme filled in.');
+      return;
     }
+    const json = JSON.stringify(theme, null, 2);
+    UI.copyText(json, e.currentTarget, 'Theme JSON copied. Paste it into the form\'s Theme JSON field.');
+    note.innerHTML = 'This theme is too long to fill in through a link' + (MODES.some((k) => state.modes[k].canvasEnabled) ? ', because of its Canvas FX script' : '') +
+      ', so its JSON is on your clipboard. Paste it into the form\'s <b>Theme JSON</b> field. <button type="button" class="linklike" id="submit-copy-again">Copy it again</button>';
+    note.classList.remove('hidden');
+    $('submit-copy-again').addEventListener('click', (ev) => UI.copyText(json, ev.currentTarget, 'Theme JSON copied again.'));
+    openTab(base);
   });
 
   $('share').addEventListener('click', (e) => {
