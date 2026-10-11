@@ -2246,6 +2246,13 @@
           "position": 100
         }
       ],
+      "angle": 135,
+      "intensity": 75,
+      "speed": 6,
+      "radialShape": "ellipse",
+      "radialSize": "farthest-corner",
+      "radialPosX": 50,
+      "radialPosY": 50,
       "dateAdded": "2026-07-18T00:31:39-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/animated/linear/neon_drift.json"
     },
@@ -2276,6 +2283,13 @@
           "position": 100
         }
       ],
+      "angle": 180,
+      "intensity": 80,
+      "speed": 4,
+      "radialShape": "ellipse",
+      "radialSize": "farthest-corner",
+      "radialPosX": 50,
+      "radialPosY": 50,
       "dateAdded": "2026-07-18T00:31:39-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/animated/linear/sunset_tide.json"
     },
@@ -2298,6 +2312,40 @@
           "position": 100
         }
       ],
+      "angle": 252,
+      "intensity": 85,
+      "speed": 8,
+      "radialShape": "circle",
+      "radialSize": "farthest-side",
+      "radialPosX": 26,
+      "radialPosY": 23,
+      "meshPoints": [
+        {
+          "color": "#cbe82c",
+          "x": 15,
+          "y": 15,
+          "spread": 53
+        },
+        {
+          "color": "#40f2a5",
+          "x": 85,
+          "y": 15,
+          "spread": 56
+        },
+        {
+          "color": "#c5b80d",
+          "x": 15,
+          "y": 85,
+          "spread": 40
+        },
+        {
+          "color": "#81f33f",
+          "x": 85,
+          "y": 85,
+          "spread": 57
+        }
+      ],
+      "meshBgColor": "#006ee0",
       "dateAdded": "2026-07-18T00:31:39-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/animated/mesh/electric_aurora.json"
     },
@@ -2320,6 +2368,40 @@
           "position": 100
         }
       ],
+      "angle": 0,
+      "intensity": 80,
+      "speed": 5,
+      "radialShape": "circle",
+      "radialSize": "farthest-side",
+      "radialPosX": 50,
+      "radialPosY": 50,
+      "meshPoints": [
+        {
+          "color": "#f43f5e",
+          "x": 10,
+          "y": 20,
+          "spread": 55
+        },
+        {
+          "color": "#8b5cf6",
+          "x": 90,
+          "y": 10,
+          "spread": 50
+        },
+        {
+          "color": "#06b6d4",
+          "x": 20,
+          "y": 85,
+          "spread": 48
+        },
+        {
+          "color": "#f97316",
+          "x": 80,
+          "y": 80,
+          "spread": 52
+        }
+      ],
+      "meshBgColor": "#0f0720",
       "dateAdded": "2026-07-18T00:31:39-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/animated/mesh/plasma_field.json"
     },
@@ -2350,6 +2432,13 @@
           "position": 100
         }
       ],
+      "angle": 0,
+      "intensity": 75,
+      "speed": 4,
+      "radialShape": "ellipse",
+      "radialSize": "farthest-corner",
+      "radialPosX": 50,
+      "radialPosY": 50,
       "dateAdded": "2026-07-18T00:31:39-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/animated/radial/aurora_shimmer.json"
     },
@@ -2376,6 +2465,13 @@
           "position": 100
         }
       ],
+      "angle": 0,
+      "intensity": 90,
+      "speed": 3,
+      "radialShape": "circle",
+      "radialSize": "farthest-side",
+      "radialPosX": 50,
+      "radialPosY": 50,
       "dateAdded": "2026-07-18T00:31:39-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/animated/radial/breathing_nebula.json"
     },
@@ -2402,6 +2498,13 @@
           "position": 100
         }
       ],
+      "angle": 0,
+      "intensity": 85,
+      "speed": 5,
+      "radialShape": "ellipse",
+      "radialSize": "farthest-corner",
+      "radialPosX": 65,
+      "radialPosY": 35,
       "dateAdded": "2026-07-18T00:31:39-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/animated/radial/cosmic_ripple.json"
     },
@@ -2428,6 +2531,13 @@
           "position": 100
         }
       ],
+      "angle": 200,
+      "intensity": 85,
+      "speed": 8,
+      "radialShape": "ellipse",
+      "radialSize": "farthest-corner",
+      "radialPosX": 50,
+      "radialPosY": 50,
       "dateAdded": "2026-07-18T00:31:39-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/still/linear/arctic_frost.json"
     },
@@ -2454,6 +2564,13 @@
           "position": 100
         }
       ],
+      "angle": 160,
+      "intensity": 90,
+      "speed": 8,
+      "radialShape": "ellipse",
+      "radialSize": "farthest-corner",
+      "radialPosX": 50,
+      "radialPosY": 50,
       "dateAdded": "2026-07-18T00:31:39-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/still/linear/ember_glow.json"
     },
@@ -2480,6 +2597,13 @@
           "position": 100
         }
       ],
+      "angle": 135,
+      "intensity": 100,
+      "speed": 8,
+      "radialShape": "ellipse",
+      "radialSize": "farthest-corner",
+      "radialPosX": 50,
+      "radialPosY": 50,
       "dateAdded": "2026-07-18T00:31:39-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/still/linear/midnight_indigo.json"
     },
@@ -2502,6 +2626,40 @@
           "position": 100
         }
       ],
+      "angle": 0,
+      "intensity": 80,
+      "speed": 8,
+      "radialShape": "ellipse",
+      "radialSize": "farthest-corner",
+      "radialPosX": 50,
+      "radialPosY": 50,
+      "meshPoints": [
+        {
+          "color": "#6b3fa0",
+          "x": 20,
+          "y": 20,
+          "spread": 45
+        },
+        {
+          "color": "#2d8a7a",
+          "x": 80,
+          "y": 25,
+          "spread": 50
+        },
+        {
+          "color": "#4a2080",
+          "x": 25,
+          "y": 80,
+          "spread": 42
+        },
+        {
+          "color": "#1a6b5a",
+          "x": 75,
+          "y": 75,
+          "spread": 48
+        }
+      ],
+      "meshBgColor": "#0f0f1e",
       "dateAdded": "2026-07-18T00:31:39-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/still/mesh/twilight_garden.json"
     },
@@ -2528,6 +2686,13 @@
           "position": 100
         }
       ],
+      "angle": 0,
+      "intensity": 100,
+      "speed": 8,
+      "radialShape": "ellipse",
+      "radialSize": "farthest-corner",
+      "radialPosX": 35,
+      "radialPosY": 30,
       "dateAdded": "2026-07-18T00:31:39-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/still/radial/deep_ocean.json"
     },
@@ -2554,6 +2719,13 @@
           "position": 100
         }
       ],
+      "angle": 0,
+      "intensity": 95,
+      "speed": 8,
+      "radialShape": "ellipse",
+      "radialSize": "farthest-corner",
+      "radialPosX": 50,
+      "radialPosY": 40,
       "dateAdded": "2026-07-18T00:31:39-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/gradients/still/radial/solar_flare.json"
     }
