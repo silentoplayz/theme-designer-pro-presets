@@ -1,6 +1,6 @@
 # Theme Designer Pro website
 
-The **[Theme Designer Pro website](https://silentoplayz.github.io/theme-designer-pro-presets/)**: a home page with a live demo and install steps, and the **[preset gallery](https://silentoplayz.github.io/theme-designer-pro-presets/gallery/)**, where you can search, filter and **live-preview** every theme, Canvas FX animation, CSS preset and gradient in this repository before importing it. It's plain HTML, CSS and JavaScript, with no build step and no dependencies.
+The **[Theme Designer Pro website](https://silentoplayz.github.io/theme-designer-pro-presets/)**: a home page with a live demo and install steps, the **[Studio](https://silentoplayz.github.io/theme-designer-pro-presets/studio/)**, where you design a theme in the browser and download it for the designer, and the **[preset gallery](https://silentoplayz.github.io/theme-designer-pro-presets/gallery/)**, where you can search, filter and **live-preview** every theme, Canvas FX animation, CSS preset and gradient in this repository before importing it. It's plain HTML, CSS and JavaScript, with no build step and no dependencies.
 
 The [`deploy-pages.yml`](../.github/workflows/deploy-pages.yml) workflow publishes this directory to GitHub Pages on every push that touches `docs/**`.
 
@@ -52,15 +52,31 @@ npm run build:catalog
 | File | Purpose |
 |---|---|
 | `index.html` | The home page: live demo, features, install steps. Also forwards old gallery links (`/#canvasFx?q=…`) to the gallery. |
+| `studio/index.html` | The Studio: a palette for each mode, a gradient or Canvas FX background, a live preview, and a theme file to download or copy |
 | `gallery/index.html` | The preset gallery: type tabs, search, sort, filters, the detail drawer and the full-screen preview |
 | `assets/site.css` | All styling for both pages |
 | `assets/palette.js` | The site's own palette. Every color in `site.css` comes from one hue and one chroma, which the home page's sliders change and the browser remembers |
 | `assets/preview.js` | The preview engine: the designer's palette and gradient math, the mock Open WebUI chat, and the full-screen preview |
 | `assets/ui.js` | Pieces both pages share: theme thumbnails, gradient swatches, Canvas FX thumbnails that play on hover, copying, the header |
 | `assets/home.js` | The home page's demo, palette ramp and preset strips |
+| `assets/studio.js` | The Studio's state, controls, share links and export. Its theme file has the same shape as the designer's own export, so it imports like any other |
 | `assets/gallery.js` | The gallery's filtering, cards, drawer and shareable links |
 | `catalog.json` | Generated list of every preset (see above) |
 | `og-preview.png` | The image shown when someone shares a link to the site |
+
+### Studio links
+
+The Studio opens with whatever a link hands it, so other pages can send a preset straight there:
+
+```
+studio/#preset=synthwave_1984.json     ← start from a theme
+studio/#gradient=electric_aurora.json  ← use a gradient
+studio/#fx=firefly_meadow.js           ← use a Canvas FX script
+studio/#h=200&c=40                     ← a hue and chroma, as the home page demo sends
+studio/#s=…                            ← a whole design, from its share button
+```
+
+A shared design carries palette numbers and preset file names, never script text, so a link can only load scripts from this repository. Without a link, the Studio reopens the last design from this browser.
 
 ### Gallery links
 

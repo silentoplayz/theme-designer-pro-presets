@@ -325,6 +325,72 @@
     });
   }
 
+  // ---- A live mock Open WebUI inside a viewport (home demo and Studio) ----
+
+  const sourceCache = new Map();
+  function fetchCached(url, json) {
+    const key = url + (json ? '#json' : '');
+    if (!sourceCache.has(key)) {
+      sourceCache.set(key, fetch(url).then((r) => {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return json ? r.json() : r.text();
+      }).catch((e) => { sourceCache.delete(key); throw e; }));
+    }
+    return sourceCache.get(key);
+  }
+
+  // The mock is laid out at a desktop size and scaled to fit, so it reads
+  // like a screenshot of Open WebUI instead of a squeezed copy of it.
+  function mockStage(viewport, msg, title, opts) {
+    const o = opts || {};
+    let frame = null;
+    function fit() {
+      const w = viewport.clientWidth;
+      // `wide` keeps the desktop layout even on a phone, for a short preview
+      const small = w < 640 && !o.wide;
+      const vw = small ? 720 : 1280;
+      const vh = small ? 900 : 760;
+      viewport.style.setProperty('--vw', vw);
+      viewport.style.setProperty('--vh', vh);
+      viewport.style.setProperty('--s', String(w / vw));
+    }
+    new ResizeObserver(fit).observe(viewport);
+    fit();
+
+    return {
+      // The new frame loads on top of the old one, which goes once it's
+      // drawn, so a rebuild never flashes an empty box
+      show(opts) {
+        const old = frame;
+        const fresh = window.TDPEngine.mountMockFrame(viewport, window.TDPEngine.buildMockSrcdoc(opts));
+        fresh.setAttribute('title', title || 'Open WebUI preview');
+        frame = fresh;
+        let timer = null;
+        const done = () => {
+          window.removeEventListener('message', onReady);
+          clearTimeout(timer);
+          if (old && old !== frame) old.remove();
+          if (msg) msg.hidden = true;
+        };
+        const onReady = (e) => {
+          if (e.source === fresh.contentWindow && e.data && e.data.kind === 'ready') done();
+        };
+        window.addEventListener('message', onReady);
+        timer = setTimeout(done, 5000);
+      },
+      clear() {
+        if (frame) frame.remove();
+        frame = null;
+        if (msg) msg.hidden = false;
+      },
+      // Recolor the running mock without rebuilding it
+      pushVars(vars) {
+        if (!frame || !frame.contentWindow) return;
+        try { frame.contentWindow.postMessage({ __tdpPreview: true, kind: 'vars', vars }, '*'); } catch (e) {}
+      },
+    };
+  }
+
   // ---- Page chrome ----
 
   function initChrome() {
@@ -368,6 +434,6 @@
     ROOT, REPO, RAW, MODE_ORDER, ICONS, reducedMotion, canHover, supportsFx,
     esc, titleCase, displayName, sourceUrl, loadCatalog, copyText, showToast,
     presentModes, modeSwatch, miniHTML, setMiniMode, themeFeatures,
-    gradientStyle, fxThumbHTML, fxBlocked, hasWebGL, fxTags, wireFxThumbs, live, hashNum,
+    gradientStyle, fxThumbHTML, fxBlocked, hasWebGL, fxTags, fetchCached, mockStage, wireFxThumbs, live, hashNum,
   };
 })();

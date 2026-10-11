@@ -25,12 +25,10 @@
   };
 
   let catalog = null;
-  let frame = null;
   let mountToken = 0;
   let onScreen = true;
   const viewport = $('demo-viewport');
-  const msg = $('demo-msg');
-  const sourceCache = new Map();
+  const stage = UI.mockStage(viewport, $('demo-msg'), 'Open WebUI with the theme you are building');
 
   function mode() {
     return { h: state.h, c: state.c, l: 20 };
@@ -40,31 +38,6 @@
     return (catalog && catalog[list] || []).find((x) => x.file === file);
   }
 
-  function fetchSource(url, json) {
-    const key = url + (json ? '#json' : '');
-    if (!sourceCache.has(key)) {
-      sourceCache.set(key, fetch(url).then((r) => {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return json ? r.json() : r.text();
-      }).catch((e) => { sourceCache.delete(key); throw e; }));
-    }
-    return sourceCache.get(key);
-  }
-
-  // The mock is laid out at a desktop size and scaled to fit, so it reads
-  // like a screenshot of Open WebUI instead of a squeezed copy of it.
-  function fit() {
-    const w = viewport.clientWidth;
-    const small = w < 640;
-    const vw = small ? 720 : 1280;
-    const vh = small ? 900 : 760;
-    viewport.style.setProperty('--vw', vw);
-    viewport.style.setProperty('--vh', vh);
-    viewport.style.setProperty('--s', String(w / vw));
-  }
-  new ResizeObserver(fit).observe(viewport);
-  fit();
-
   async function mount() {
     const token = ++mountToken;
     const bg = BACKGROUNDS.find((b) => b.id === state.bg) || BACKGROUNDS[0];
@@ -73,16 +46,16 @@
     try {
       if (bg.fx) {
         const item = findItem('canvasFx', bg.fx);
-        if (item) canvasScript = await fetchSource(item.importUrl, false);
+        if (item) canvasScript = await UI.fetchCached(item.importUrl, false);
       } else if (bg.gradient) {
         const item = findItem('gradients', bg.gradient);
-        if (item) gradient = E.gradientLayers(await fetchSource(item.importUrl, true));
+        if (item) gradient = E.gradientLayers(await UI.fetchCached(item.importUrl, true));
       }
     } catch (e) {
       // Offline or rate-limited: show the theme without the background
     }
     if (token !== mountToken) return;
-    const srcdoc = E.buildMockSrcdoc({
+    stage.show({
       modeKey: state.mode,
       vars: E.modeVars(mode(), state.mode),
       customCSS: '',
@@ -90,37 +63,14 @@
       gradient,
       transparent: false,
     });
-    // The new frame loads on top of the old one, which goes once it's drawn,
-    // so switching modes or backgrounds never flashes an empty box
-    const old = frame;
-    const fresh = E.mountMockFrame(viewport, srcdoc);
-    fresh.setAttribute('title', 'Open WebUI with the theme you are building');
-    frame = fresh;
-    let timer = null;
-    const done = () => {
-      window.removeEventListener('message', onReady);
-      clearTimeout(timer);
-      if (old && old !== frame) old.remove();
-      msg.hidden = true;
-    };
-    const onReady = (e) => {
-      if (e.source === fresh.contentWindow && e.data && e.data.kind === 'ready') done();
-    };
-    window.addEventListener('message', onReady);
-    timer = setTimeout(done, 5000);
   }
 
   function unmount() {
-    if (frame) frame.remove();
-    frame = null;
-    msg.hidden = false;
+    stage.clear();
   }
 
   function pushVars() {
-    if (!frame || !frame.contentWindow) return;
-    try {
-      frame.contentWindow.postMessage({ __tdpPreview: true, kind: 'vars', vars: E.modeVars(mode(), state.mode) }, '*');
-    } catch (e) {}
+    stage.pushVars(E.modeVars(mode(), state.mode));
   }
 
   // Stop the animation while the demo is off screen
@@ -148,8 +98,18 @@
     chromaOut.textContent = (state.c / 1000).toFixed(3);
   }
 
+  // The Studio picks up where the demo leaves off
+  function updateStudioLink() {
+    const bg = BACKGROUNDS.find((b) => b.id === state.bg) || {};
+    const p = new URLSearchParams({ h: Math.round(state.h), c: Math.round(state.c) });
+    if (bg.fx) p.set('fx', bg.fx);
+    if (bg.gradient) p.set('gradient', bg.gradient);
+    $('to-studio').href = 'studio/#' + p.toString();
+  }
+
   function onPalette(persist) {
     syncControls();
+    updateStudioLink();
     window.TDPSite.set({ h: state.h, c: state.c }, persist);
     pushVars();
   }
@@ -185,6 +145,7 @@
     if (!b || b.dataset.bg === state.bg) return;
     state.bg = b.dataset.bg;
     chips.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+    updateStudioLink();
     mount();
   });
 
@@ -201,6 +162,7 @@
   });
 
   syncControls();
+  updateStudioLink();
 
   // ---- Palette ramp ----
 

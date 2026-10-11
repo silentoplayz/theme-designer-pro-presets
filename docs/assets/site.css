@@ -1865,3 +1865,208 @@ iframe { color-scheme: normal; }
 
 .thumb-play.thumb-note,
 .card:hover .thumb-play.thumb-note { width: auto; padding: 0 10px; color: oklch(1 0 0 / 0.75); cursor: default; }
+
+/* ==========================================================
+   Studio
+   ========================================================== */
+
+.studio {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 400px;
+  gap: 28px;
+  width: 100%;
+  max-width: 1560px;
+  margin-inline: auto;
+  padding: 24px var(--gutter) 48px;
+  align-items: start;
+}
+.studio-stage {
+  position: sticky;
+  top: calc(var(--header-h) + 20px);
+  display: grid;
+  gap: 12px;
+}
+.studio-note { font-size: 0.82rem; color: var(--faint); }
+.studio-panel {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--bg-2);
+  overflow: hidden;
+}
+.studio-head { display: grid; gap: 10px; padding: 24px 22px 18px; }
+.studio-head .h2 { font-size: 1.9rem; }
+.studio-head p { font-size: 0.92rem; }
+.studio-sec {
+  display: grid;
+  gap: 14px;
+  padding: 18px 22px 20px;
+  border-top: 1px solid var(--line);
+}
+.studio-sec-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.studio-label {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.studio-hint { font-size: 0.84rem; color: var(--muted); }
+.studio-select { width: 100%; border-radius: var(--r-md); }
+.studio-export { background: var(--bg); }
+.studio-export .howto { margin-top: 4px; }
+
+.seg-wide { display: flex; }
+.seg-wide button { flex: 1; }
+
+.range-light {
+  --track: linear-gradient(90deg, oklch(0.16 0.03 var(--studio-h, 265)), oklch(0.98 0.03 var(--studio-h, 265)));
+}
+
+.mini-ramp {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  height: 34px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px oklch(1 0 0 / 0.08) inset;
+}
+
+.input {
+  width: 100%;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+  background: var(--bg);
+  font-size: 0.92rem;
+}
+.input::placeholder { color: var(--faint); }
+.input:focus { outline: none; border-color: var(--accent-line); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.84rem;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.switch input { position: absolute; opacity: 0; pointer-events: none; }
+.switch-ui {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+}
+.switch-ui::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: translate 0.2s var(--ease);
+}
+.switch input:checked + .switch-ui { background: var(--accent-strong); }
+.switch input:checked + .switch-ui::after { translate: 16px 0; }
+.switch input:focus-visible + .switch-ui { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.grad-pick {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+.grad-pick button {
+  display: grid;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+.grad-pick .grad {
+  aspect-ratio: 4 / 3;
+  border-radius: 9px;
+  box-shadow: 0 0 0 1px oklch(1 0 0 / 0.1) inset;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color 0.15s;
+}
+.grad-pick button[aria-pressed='true'] .grad { outline-color: var(--accent); }
+.grad-pick .grad-name {
+  font-size: 0.7rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fx-pick {
+  margin-top: 10px;
+  max-height: 280px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--bg);
+}
+.fx-pick button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 14px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  text-align: left;
+  font-size: 0.86rem;
+  color: var(--text-2);
+}
+.fx-pick button:last-child { border-bottom: 0; }
+.fx-pick button:hover { background: oklch(1 0 0 / 0.04); color: var(--text); }
+.fx-pick button[aria-selected='true'] { background: var(--accent-soft); color: var(--text); }
+.fx-pick button:disabled { opacity: 0.45; cursor: not-allowed; }
+.fx-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, oklch(0.85 0.15 var(--h1)), oklch(0.5 0.18 calc(var(--h1) + 60)));
+}
+.fx-row-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fx-row-tag { font-size: 0.72rem; color: var(--faint); white-space: nowrap; }
+
+@media (max-width: 1080px) {
+  /* Block flow, so the sticky preview can stick across the whole panel */
+  .studio { display: block; padding-top: 0; }
+  .studio-panel { margin-top: 16px; }
+  /* The preview stays in view above the controls while you change them */
+  .studio-stage {
+    top: var(--header-h);
+    z-index: 30;
+    margin-inline: calc(var(--gutter) * -1);
+    padding: 12px var(--gutter);
+    background: color-mix(in oklch, var(--bg) 92%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .studio-stage .window-bar { display: none; }
+  .studio-note { display: none; }
+}
+@media (max-width: 1080px) and (max-height: 600px) {
+  .studio-stage { position: static; }
+}
+@media (max-width: 560px) {
+  .grad-pick { grid-template-columns: repeat(3, 1fr); }
+}

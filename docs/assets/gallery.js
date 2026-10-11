@@ -24,6 +24,8 @@
     cssPresets: ['CSS preset', 'CSS presets'],
     bundles: ['bundle', 'bundles'],
   };
+  // Which presets the Studio can start from, and how it's told
+  const STUDIO_PARAM = { themes: 'preset', gradients: 'gradient', canvasFx: 'fx' };
   const FILTERS = {
     'canvas-fx': 'hasFX',
     gradient: 'hasGradient',
@@ -323,6 +325,7 @@
         <div class="drawer-actions">
           ${PREVIEWABLE.includes(cat) ? `<button type="button" class="btn btn-primary" data-act="preview">${ICONS.expand}Full-screen preview</button>` : ''}
           <button type="button" class="btn btn-ghost" data-act="copy">${ICONS.copy}Copy import link</button>
+          ${STUDIO_PARAM[cat] ? `<a class="btn btn-ghost" href="../studio/#${STUDIO_PARAM[cat]}=${encodeURIComponent(item.file)}">Open in Studio</a>` : ''}
         </div>
         <div class="drawer-section">
           <span class="drawer-label">Import link</span>
