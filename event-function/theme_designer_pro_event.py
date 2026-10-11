@@ -1934,7 +1934,12 @@ class Event:
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                             body: JSON.stringify({ cid: _streamId })
-                        }).then(function(r) { if (!r.ok) failed(); }).catch(failed);
+                        }).then(function(r) {
+                            if (!r.ok) { failed(); return; }
+                            // A personal save that landed between this page's
+                            // fetch and the claim was sent to nobody: check once
+                            if (_claimed === key) fetchThemeFromServer();
+                        }).catch(failed);
                     }
                     _claimStream = bindStream;
 
