@@ -406,6 +406,10 @@ class Event:
             default=True,
             description="Show the AI Consultant in the designer: describe a theme in words, and a model on this instance picks its colors and gradient. Admins can always use it; users can when personal themes are on. Each request is one call to the model set in AI Consultant Model, or the task model.",
         )
+        enable_theme_update_checks: bool = Field(
+            default=True,
+            description="Let the designer check installed themes for newer versions: the Updates button, each theme's own update check, and the Update badges in Community Themes. When disabled, the designer makes none of these requests to GitHub or to a theme's update URL.",
+        )
         enable_community_themes: bool = Field(
             default=True,
             description="Show the Community Themes browser in the Themes tab. When disabled, the community themes grid is hidden and no manifest is fetched.\n\n---\n\n#### 🖌️ UX Policy",
@@ -4415,8 +4419,8 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         body.light-mode .header-json-btn { border-color: var(--border); color: var(--text-muted); }
         body.light-mode .header-json-btn:hover { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); }
 
-        #tab-docs { position: fixed !important; inset: 0; z-index: 9999; background: oklch(0.20 0 0 / 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); overflow-y: auto; padding: 32px 48px; display: none; }
-        body.light-mode #tab-docs { background: oklch(0.96 0 0 / 0.75); }
+        /* Opaque, so the documentation reads cleanly over any theme or Canvas FX. */
+        #tab-docs { position: fixed !important; inset: 0; z-index: 9999; background: var(--bg-deep); overflow-y: auto; padding: 32px 48px; display: none; }
         #tab-docs .docs-container { max-width: 1200px; margin: 0 auto; position: relative; }
         .docs-modal-close-btn { position: sticky; top: 0; float: right; z-index: 10000; background: var(--bg-deep); border: 1px solid var(--border); color: var(--text-main); font-size: 1.4rem; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; line-height: 1; }
         .docs-modal-close-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
@@ -13391,6 +13395,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
     // --- Theme Update System ---
     const MANIFEST_URL = 'https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/manifest.json';
+    // The Enable Theme Update Checks valve: off, no update request is made.
+    const UPDATE_CHECKS = (window.__THEME_PRO_CONFIG__ || {}).enableThemeUpdateChecks !== false;
 
     // The one URL rewriter. loadFromUrl used to carry its own copy with an extra
     // gist rule, and the allowlist checked this one — so a gist URL was approved
@@ -13460,6 +13466,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     }
 
     async function checkThemeUpdate(index) {
+        if (!UPDATE_CHECKS) return null;
         const snapshots = getSnapshots();
         const snap = snapshots[index];
         if (!snap || !snap.updateUrl) return null;
@@ -13484,6 +13491,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     }
 
     async function checkUpdatesViaManifest(snapshots) {
+        if (!UPDATE_CHECKS) return null;
         const manifest = await fetchManifest();
         if (!manifest) return null; // manifest unavailable, caller should fall back
 
@@ -13630,7 +13638,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             if (!data.themes || !Array.isArray(data.themes)) throw new Error('Invalid catalog');
             _communityCatalog = data;
             // Also load manifest for update version checking
-            _communityManifest = await fetchManifest();
+            if (UPDATE_CHECKS) _communityManifest = await fetchManifest();
             renderCommunityGrid(data);
         } catch(e) {
             // Fall back to manifest-only (fewer features)
@@ -13711,7 +13719,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             const importUrl = t.importUrl || '';
             const rawUrl = toRawGitHub(importUrl);
             const isInstalled = installedUrls.has(rawUrl) || installedUrls.has(importUrl);
-            const hasUpdate = isInstalled && _communityManifest && semverCompare(t.version || '0.0.0', installedVersions[rawUrl] || '0.0.0') > 0;
+            const hasUpdate = UPDATE_CHECKS && isInstalled && _communityManifest && semverCompare(t.version || '0.0.0', installedVersions[rawUrl] || '0.0.0') > 0;
 
             // Status badge (update only, no installed badge)
             let statusBadge = '';
@@ -14891,6 +14899,12 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             if (tabEl) tabEl.style.display = 'none';
         });
 
+        // ── Update checks turned off: no Updates button ──
+        if (cfg.enableThemeUpdateChecks === false) {
+            const updatesBtn = $('check-updates-btn');
+            if (updatesBtn) updatesBtn.style.display = 'none';
+        }
+
         // ── Community Themes section visibility ──
         if (!cfg.enableCommunityThemes) {
             const communitySection = $('community-themes-grid');
@@ -15191,7 +15205,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                     <div class="snapshot-action update-snapshot" onclick="event.stopPropagation(); updateSnapshot(${i})" data-tooltip="Overwrite with current values">💾</div>
                     <div class="snapshot-action delete-snapshot" onclick="event.stopPropagation(); requestDelete(${i})" data-tooltip="Delete theme">×</div>
                     <div class="snapshot-action export-snapshot" onclick="event.stopPropagation(); exportSnapshot(${i})" data-tooltip="Export theme">↓</div>
-                    ${s.updateUrl ? '<div class="snapshot-action check-update-snapshot" onclick="event.stopPropagation(); checkSingleUpdate(' + i + ')" data-tooltip="Check for update">⟳</div>' : ''}
+                    ${s.updateUrl && UPDATE_CHECKS ? '<div class="snapshot-action check-update-snapshot" onclick="event.stopPropagation(); checkSingleUpdate(' + i + ')" data-tooltip="Check for update">⟳</div>' : ''}
                     <div class="preset-dots">${renderTonalRampHTML(s[dm], dm)}</div>
                     <span style="font-size: 10px; width: 100%; overflow: hidden; text-overflow: ellipsis; text-align: center; white-space: nowrap; display: block;">${_esc(s.name)}${s.version ? ' <span style="opacity:0.5;">v' + _esc(s.version) + '</span>' : ''}</span>
                     <div class="selected-check">✓</div>
@@ -15576,6 +15590,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             "enableAuthPageTheming": self.valves.enable_auth_page_theming,
             "enableGradientBuilder": self.valves.enable_gradient_builder,
             "enableCommunityThemes": self.valves.enable_community_themes,
+            "enableThemeUpdateChecks": self.valves.enable_theme_update_checks,
             "draftModeDefault": self.valves.draft_mode_default,
             "autoSync": self.valves.auto_sync,
             "sidebarTransparency": self.valves.sidebar_transparency,

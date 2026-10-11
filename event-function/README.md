@@ -218,6 +218,7 @@ Valves are configured in the Admin Panel under **Functions → Theme Designer Pr
 | **Enable Custom CSS** | `bool` | `true` | Allow the Style Overrides (custom CSS) editor. When disabled, the Style Overrides tab is hidden in the designer UI. |
 | **Enable Gradient Builder** | `bool` | `true` | Allow the Gradient Background builder. When disabled, the Gradient tab is hidden in the designer UI. |
 | **Enable AI Consultant** | `bool` | `true` | Show the **AI** button in the designer, which turns a description into a theme's colors and gradient. Admins can always use it; users can when personal themes are on. Each request is one call to the model in **AI Consultant Model**, or the task model. |
+| **Enable Theme Update Checks** | `bool` | `true` | Let the designer check installed themes for newer versions: the **Updates** button, each theme's own update check, and the **Update** badges in Community Themes. When disabled, the designer makes none of these requests to GitHub or to a theme's update URL. The Community Themes browser is a separate valve. |
 | **Enable Community Themes** | `bool` | `true` | Show the Community Themes browser in the Themes tab. When disabled, the community themes grid is hidden and no manifest is fetched. |
 
 #### 🖌️ UX Policy
