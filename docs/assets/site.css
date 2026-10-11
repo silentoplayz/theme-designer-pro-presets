@@ -507,6 +507,9 @@ p { text-wrap: pretty; }
   aspect-ratio: var(--vw, 1280) / var(--vh, 800);
   overflow: hidden;
   background: #0b0b0e;
+  /* The window's overflow doesn't clip the scaled frame at its rounded
+     corners in every browser, so the viewport clips its own */
+  clip-path: inset(0 round 0 0 calc(var(--r-lg) - 1px) calc(var(--r-lg) - 1px));
 }
 .viewport iframe {
   position: absolute;
@@ -2129,6 +2132,7 @@ iframe { color-scheme: normal; }
     border-bottom: 1px solid var(--line);
   }
   .studio-stage .window-bar { display: none; }
+  .studio-stage .viewport { clip-path: inset(0 round calc(var(--r-lg) - 1px)); }
   .studio-note { display: none; }
 }
 @media (max-width: 1080px) and (max-height: 600px) {
