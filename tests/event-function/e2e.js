@@ -287,6 +287,16 @@ test('a Canvas FX animation runs on app pages and not where it\'s hidden', async
   if (await auth.$('#owui-theme-canvas-bg')) throw new Error('the canvas runs on the sign-in page');
 });
 
+// Open WebUI's own shortcut for Settings, once the app listens for it
+async function openSettings(page) {
+  await waitFor('Settings to open', async () => {
+    if (await page.$('#settings-tabs-container')) return true;
+    await page.keyboard.press('Control+Period');
+    await new Promise((r) => setTimeout(r, 750));
+    return !!(await page.$('#settings-tabs-container')) || 'closed';
+  });
+}
+
 test('Settings marks the Themes tab whose theme is in use', async ({ admin }) => {
   await saveTheme(admin, markerTheme('instance'));
   await removePersonalTheme(admin);
@@ -294,13 +304,7 @@ test('Settings marks the Themes tab whose theme is in use', async ({ admin }) =>
   await page.goto(BASE + '/');
   await loaderReady(page);
   await expectParts(page, { vars: 'instance' }, 'instance theme');
-  // Open WebUI's own shortcut for Settings, once the app listens for it
-  await waitFor('Settings to open', async () => {
-    if (await page.$('#settings-tabs-container')) return true;
-    await page.keyboard.press('Control+Period');
-    await new Promise((r) => setTimeout(r, 750));
-    return !!(await page.$('#settings-tabs-container')) || 'closed';
-  });
+  await openSettings(page);
   await page.waitForSelector('#settings-tabs-container .tdp-settings-tab[data-tdp-key="admin"]', { timeout: WAIT_MS });
   const marks = () => page.evaluate(() => {
     const out = {};
@@ -321,6 +325,33 @@ test('Settings marks the Themes tab whose theme is in use', async ({ admin }) =>
     return m.personal.dot && !m.admin.dot && /replaces this one/.test(m.admin.title) ? true : m;
   });
   await removePersonalTheme(admin);
+});
+
+test('a user without the Admin tab sees a ring for the instance theme', async ({ admin, user }) => {
+  await saveTheme(admin, markerTheme('instance'));
+  await removePersonalTheme(user);
+  const page = await openPage({ token: user });
+  await page.goto(BASE + '/');
+  await loaderReady(page);
+  await expectParts(page, { vars: 'instance' }, 'instance theme');
+  await openSettings(page);
+  const mark = () => page.evaluate(() => {
+    const tabs = document.querySelectorAll('#settings-tabs-container .tdp-settings-tab');
+    const tab = document.querySelector('#settings-tabs-container .tdp-settings-tab[data-tdp-key="personal"]');
+    const dot = tab && tab.querySelector('.tdp-theme-dot');
+    return { tabs: tabs.length, dot: !!dot, ring: !!dot && dot.classList.contains('tdp-theme-dot-instance') };
+  });
+  await waitFor('a ring on the user\'s Themes tab', async () => {
+    const m = await mark();
+    return m.tabs === 1 && m.dot && m.ring ? true : m;
+  });
+  await saveTheme(user, markerTheme('personal', {}, ['custom']), true);
+  await expectParts(page, { vars: 'personal' }, 'personal theme');
+  await waitFor('a dot once the user has a theme of their own', async () => {
+    const m = await mark();
+    return m.dot && !m.ring ? true : m;
+  });
+  await removePersonalTheme(user);
 });
 
 // The instance designer, opened the way the admin's browser opens it
