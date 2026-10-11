@@ -614,6 +614,53 @@
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/kinetic_thermal_plasma_core.json"
     },
     {
+      "name": "Koi Pond",
+      "file": "koi_pond.json",
+      "description": "Companion palette for the Koi Pond canvas. Cool pond-water teal on every surface, with text that reads like sunlight on the water; the gradient is the pond floor when the canvas is off. Dark and OLED carry the Koi Pond (WebGL) canvas itself; Light and Her keep the light pond-water gradient.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "dateAdded": "2026-10-11T14:43:47Z",
+      "modes": {
+        "dark": {
+          "h": 200,
+          "c": 45,
+          "l": 17,
+          "hasCSS": false,
+          "hasFX": true,
+          "hasGradient": true,
+          "hasOverrides": true
+        },
+        "light": {
+          "h": 200,
+          "c": 22,
+          "l": 97,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": true
+        },
+        "oled": {
+          "h": 200,
+          "c": 45,
+          "l": 0,
+          "hasCSS": false,
+          "hasFX": true,
+          "hasGradient": true,
+          "hasOverrides": true
+        },
+        "her": {
+          "h": 200,
+          "c": 22,
+          "l": 95,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": true,
+          "hasOverrides": true
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/koi_pond.json"
+    },
+    {
       "name": "LUMINA // AURORA",
       "file": "lumina_aurora.json",
       "description": "Premium glassmorphism with layered frosted panels, Fluid Aurora Borealis Canvas FX, and deep indigo-violet tones.",

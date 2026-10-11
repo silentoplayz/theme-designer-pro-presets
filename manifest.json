@@ -1,6 +1,6 @@
 {
   "manifestVersion": "1.0",
-  "generated": "2026-10-11T08:06:32.871Z",
+  "generated": "2026-10-11T17:33:22.964Z",
   "manifestUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/manifest.json",
   "themes": {
     "aether_nebula_flow": {
@@ -106,6 +106,14 @@
       "description": "Fusion reactor control interface with industrial plating, Plasma Arc Discharge Canvas FX, and cool blue containment tones.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/kinetic_thermal_plasma_core.json",
       "file": "themes/kinetic_thermal_plasma_core.json"
+    },
+    "koi_pond": {
+      "name": "Koi Pond",
+      "version": "1.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "Companion palette for the Koi Pond canvas. Cool pond-water teal on every surface, with text that reads like sunlight on the water; the gradient is the pond floor when the canvas is off. Dark and OLED carry the Koi Pond (WebGL) canvas itself; Light and Her keep the light pond-water gradient.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/koi_pond.json",
+      "file": "themes/koi_pond.json"
     },
     "lumina_aurora": {
       "name": "LUMINA // AURORA",
