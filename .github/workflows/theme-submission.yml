@@ -2,7 +2,8 @@ name: Theme Submission Bot
 
 on:
   issues:
-    types: [opened]
+    # Re-opening an issue after editing it runs the bot again
+    types: [opened, reopened]
 
 # Only one submission processed at a time to avoid branch conflicts
 concurrency:
@@ -63,6 +64,14 @@ jobs:
                 `*🤖 Automated validation by Theme Submission Bot*`
               ].join('\n')
             });
+
+            // A re-run drops the label an earlier run left
+            await github.rest.issues.removeLabel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              name: 'validated'
+            }).catch(() => {});
 
             await github.rest.issues.addLabels({
               owner: context.repo.owner,
@@ -135,7 +144,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git checkout -b "${BRANCH}"
+          # A re-opened issue rebuilds its branch from main
+          git checkout -B "${BRANCH}"
           git add "themes/${FILENAME}"
           git commit -m "feat: add community theme '${THEME_NAME}'
 
@@ -144,7 +154,7 @@ jobs:
           Modes: ${MODES}
           File: themes/${FILENAME} (${SIZE} KB)"
 
-          git push origin "${BRANCH}"
+          git push --force origin "${BRANCH}"
 
           # The Studio opens the theme from this commit, which outlives the branch
           SHA=$(git rev-parse HEAD)
@@ -160,11 +170,8 @@ jobs:
           "
           fi
 
-          PR_URL=$(gh pr create \
-            --base main \
-            --head "${BRANCH}" \
-            --title "feat: add community theme '${THEME_NAME}'" \
-            --body "## 🎨 New Theme: ${THEME_NAME}
+          TITLE="feat: add community theme '${THEME_NAME}'"
+          BODY="## 🎨 New Theme: ${THEME_NAME}
 
           **Submitted by:** @${SUBMITTER}
           **Source issue:** #${ISSUE_NUM}
@@ -182,8 +189,28 @@ jobs:
           - [ ] No broken or overlapping UI elements
 
           ---
-          *🤖 Automated PR by Theme Submission Bot*" \
-            --label "theme-submission")
+          *🤖 Automated PR by Theme Submission Bot*"
+
+          # A re-opened issue updates its open PR. If the theme was renamed,
+          # its branch name changed too, so it gets a new PR and the old one
+          # is closed.
+          OPEN=$(gh pr list --state open --label theme-submission --json number,headRefName \
+            -q ".[] | select(.headRefName | startswith(\"theme-submission/${ISSUE_NUM}-\")) | \"\(.number) \(.headRefName)\"")
+          PR_URL=""
+          while read -r NUM HEAD; do
+            if [ -n "${NUM}" ] && [ "${HEAD}" = "${BRANCH}" ]; then
+              gh api -X PATCH "repos/${GITHUB_REPOSITORY}/pulls/${NUM}" -f title="${TITLE}" -f body="${BODY}" > /dev/null
+              PR_URL="https://github.com/${GITHUB_REPOSITORY}/pull/${NUM}"
+            fi
+          done <<< "${OPEN}"
+          if [ -z "${PR_URL}" ]; then
+            PR_URL=$(gh pr create --base main --head "${BRANCH}" --title "${TITLE}" --body "${BODY}" --label "theme-submission")
+          fi
+          while read -r NUM HEAD; do
+            if [ -n "${NUM}" ] && [ "${HEAD}" != "${BRANCH}" ]; then
+              gh pr close "${NUM}" --comment "Replaced by ${PR_URL}, from the re-opened #${ISSUE_NUM}." --delete-branch
+            fi
+          done <<< "${OPEN}"
 
           echo "pr_url=${PR_URL}" >> $GITHUB_OUTPUT
 
@@ -242,6 +269,13 @@ jobs:
               issue_number: context.issue.number,
               body: body.join('\n')
             });
+
+            await github.rest.issues.removeLabel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              name: 'invalid'
+            }).catch(() => {});
 
             await github.rest.issues.addLabels({
               owner: context.repo.owner,
