@@ -154,6 +154,16 @@ async def reload_ensure_listener(app: Any) -> None:
                     )
         except Exception as e:
             reload_log.warning("[%s] listener stopped: %s", ASSET_KEY, type(e).__name__)
+        # A Redis restart or failover ends listen(). The finished task stayed
+        # in state["listener"], so nothing ever subscribed again and this
+        # worker missed every later enable or disable until it restarted.
+        state["listener"] = None
+        try:
+            await pubsub.close()
+        except Exception:
+            pass
+        await asyncio.sleep(5)
+        await reload_ensure_listener(app)
 
     state["listener"] = asyncio.create_task(listen())
 
@@ -553,7 +563,9 @@ class Event:
             function getParsedState() {
                 if (_parsedState) return _parsedState;
                 try {
-                    var raw = _owuiThemeState || localStorage.getItem('owui_dev_theme_v1') || '{}';
+                    // The localStorage copy is the instance theme's; a personal
+                    // theme without state of its own must not borrow it
+                    var raw = _owuiThemeState || (_personal ? null : localStorage.getItem('owui_dev_theme_v1')) || '{}';
                     if (typeof raw === 'string' && raw.charAt(0) === '{') {
                         _parsedState = JSON.parse(raw);
                     }
@@ -605,6 +617,10 @@ class Event:
                     }
                     return fetch(url, init)
                         .then(function(r) {
+                            // A proxy error while Open WebUI restarts (502, 503),
+                            // rate limiting or a timeout says nothing about the
+                            // theme: keep what's on screen
+                            if (r.status >= 500 || r.status === 429 || r.status === 408) return null;
                             if (r.ok && r.status !== 204) {
                                 var tag = r.headers.get('ETag');
                                 return r.text().then(function(t) { return { body: t, tag: tag }; });
@@ -688,6 +704,7 @@ class Event:
                         try { localStorage.setItem('owui_dev_theme_v1_css', css); } catch(x) {}
                     } else {
                         // Server returned empty — theme is inactive, clear stale cache
+                        var _hadTheme = !!_owuiThemeCss || !!document.getElementById('owui-dev-live-theme');
                         _owuiThemeCss = null;
                         try { localStorage.removeItem('owui_dev_theme_v1_css'); } catch(x) {}
                         var _staleStyle = document.getElementById('owui-dev-live-theme');
@@ -698,7 +715,9 @@ class Event:
                         // this empty response on resume. Drop the shared
                         // stylesheet's copy of the palette here too, or the
                         // colours linger with nothing left to override them.
-                        refreshSharedCustomCss();
+                        // Only when there was one: with no theme at all, every
+                        // load and focus re-downloaded it for nothing.
+                        if (_hadTheme) refreshSharedCustomCss();
                     }
 
                     if (state && state.trim() && state !== '{}') {
@@ -1061,6 +1080,7 @@ class Event:
                 var _lastChars = -1;
                 var _lastMsgCount = -1;
                 var _polling = false;
+                var _watched = null;  // the #messages-container being observed
 
                 // Custom event API — any Open WebUI plugin/extension can dispatch
                 // window.dispatchEvent(new CustomEvent('owui-canvas-context', { detail: { ratio: 0.65, ... } }))
@@ -1114,6 +1134,7 @@ class Event:
                         _scanTimer = setTimeout(function() { _scanTimer = null; scan(); }, 2000);
                     });
                     _observer.observe(container, { childList: true, subtree: true, characterData: true });
+                    _watched = container;
 
                     // Also re-attach if SPA navigates away and back (container gets replaced)
                     if (!_navObserver) {
@@ -1138,10 +1159,34 @@ class Event:
                     scan();
                 }
 
+                // Open WebUI renders inside a display:contents wrapper, so a
+                // route change (New Chat, another chat) never touches body's
+                // own children and the observer above doesn't see it. After
+                // each client-side navigation, check the container is still
+                // the one being watched.
+                function recheck() {
+                    var current = document.getElementById('messages-container');
+                    if (current && current === _watched) return;
+                    if (_observer) { _observer.disconnect(); _observer = null; }
+                    _watched = null;
+                    if (!current && (_lastChars !== 0 || _lastMsgCount !== 0)) {
+                        _lastChars = 0;
+                        _lastMsgCount = 0;
+                        sendFn({ type: 'context', messages: 0, chars: 0, estimatedTokens: 0 });
+                    }
+                    clearTimeout(_pollTimer);
+                    setup();
+                }
+                var _onRoute = function() { setTimeout(recheck, 400); };
+                window.addEventListener('owui-tdp-route', _onRoute);
+                window.addEventListener('popstate', _onRoute);
+
                 setup();
 
                 return function() {
                     window.removeEventListener('owui-canvas-context', _onCustom);
+                    window.removeEventListener('owui-tdp-route', _onRoute);
+                    window.removeEventListener('popstate', _onRoute);
                     if (_observer) _observer.disconnect();
                     if (_navObserver) _navObserver.disconnect();
                     clearTimeout(_scanTimer);
@@ -1219,7 +1264,10 @@ class Event:
             }
 
             function initCanvas(forceFallback) {
-                var myGen = ++_canvasGeneration;
+                // Bumped only where a canvas is torn down or started below: a
+                // call that changes nothing must not make a starting canvas's
+                // Worker-error fallback think it's stale
+                var myGen = _canvasGeneration;
                 try {
                     if (!document.body) {
                         setTimeout(function() { initCanvas(forceFallback); }, 50);
@@ -1227,6 +1275,7 @@ class Event:
                     }
                     // Valve gate: admin disabled Canvas FX
                     if (localStorage.getItem('owui_theme_valve_no_canvas') === 'true') {
+                        myGen = ++_canvasGeneration;
                         if (window.owuiCanvasCleanups) {
                             window.owuiCanvasCleanups.forEach(fn => fn());
                             window.owuiCanvasCleanups = [];
@@ -1240,7 +1289,24 @@ class Event:
                         return;
                     }
                     var savedData = getParsedState();
-                    if (!savedData || Object.keys(savedData).length === 0) return;
+                    if (!savedData || Object.keys(savedData).length === 0) {
+                        // No theme left (turned off while this page slept, or
+                        // removed): a canvas still running belongs to the old one
+                        if (lastCanvasWasEnabled || document.getElementById('owui-theme-canvas-bg')) {
+                            myGen = ++_canvasGeneration;
+                            if (window.owuiCanvasCleanups) {
+                                window.owuiCanvasCleanups.forEach(function(fn) { try { fn(); } catch(x) {} });
+                                window.owuiCanvasCleanups = [];
+                            }
+                            ['owui-theme-canvas-bg','owui-canvas-script-runner','owui-theme-bg-color'].forEach(function(id) {
+                                var el = document.getElementById(id);
+                                if (el) el.remove();
+                            });
+                            lastCanvasScript = null;
+                            lastCanvasWasEnabled = false;
+                        }
+                        return;
+                    }
                     const mode = themeToMode(document.documentElement.getAttribute('data-theme') || 'dark');
                     const config = savedData[mode];
                     
@@ -1248,6 +1314,7 @@ class Event:
                     const canvasHidden = !!config && (isAuthPage ? config.canvasShowAuth === false
                         : (config.canvasAuthOnly === true && !_personal));
                     if (canvasHidden) {
+                        myGen = ++_canvasGeneration;
                         if (window.owuiCanvasCleanups) {
                             window.owuiCanvasCleanups.forEach(fn => fn());
                             window.owuiCanvasCleanups =[];
@@ -1271,6 +1338,7 @@ class Event:
                         if (!isCanvasExpected || existingCanvas) { pushCanvasTheme(); return; }
                     }
 
+                    myGen = ++_canvasGeneration;
                     if (window.owuiCanvasCleanups) {
                         window.owuiCanvasCleanups.forEach(fn => fn());
                         window.owuiCanvasCleanups =[];
@@ -1666,7 +1734,10 @@ class Event:
                 if (typeof original !== 'function') return;
                 history[name] = function() {
                     var result = original.apply(this, arguments);
-                    setTimeout(refresh, 0);
+                    setTimeout(function() {
+                        refresh();
+                        try { window.dispatchEvent(new Event('owui-tdp-route')); } catch(x) {}
+                    }, 0);
                     return result;
                 };
             });
@@ -1792,8 +1863,19 @@ class Event:
                         // function stays on, so only a real disable hides the tab.
                         var reason = 'disabled';
                         try { reason = (JSON.parse((e && e.data) || '') || {}).reason || 'disabled'; } catch(x) {}
-                        if (reason !== 'reset') announceFunctionOff(true);
-                        // Admin disabled or reset — set disable flag, clear state, strip DOM
+                        if (reason === 'reset') {
+                            // The instance theme was emptied; the function is still
+                            // on and personal themes are untouched. Fetch what's
+                            // left (a personal theme, or none) instead of stripping
+                            // everything and ignoring updates until the next save.
+                            ++_themeVersion;
+                            _lastCssTag = null;
+                            _lastStateTag = null;
+                            fetchThemeFromServer();
+                            return;
+                        }
+                        announceFunctionOff(true);
+                        // Admin disabled — set disable flag, clear state, strip DOM
                         _disabled = true;
                         _themeVersion++;  // Invalidate any in-flight fetch callbacks
                         _owuiThemeState = null;
@@ -2353,7 +2435,14 @@ class Event:
         if (tab.className !== className) tab.className = className;
         tab.setAttribute('aria-selected', isOpen ? 'true' : 'false');
         if (anchor.classList.contains('tabs')) {
-            if (anchor.lastElementChild !== tab) anchor.appendChild(tab);
+            // Already at the end among our own tabs: with two of ours anchored
+            // here, each moved itself after the other on every render, and
+            // each move was a mutation that scheduled the next render
+            var atEnd = tab.parentElement === anchor;
+            for (var next = tab.nextElementSibling; atEnd && next; next = next.nextElementSibling) {
+                if (!next.classList.contains('tdp-settings-tab')) atEnd = false;
+            }
+            if (!atEnd) anchor.appendChild(tab);
         } else if (anchor.nextElementSibling !== tab) {
             anchor.after(tab);
         }
@@ -2512,13 +2601,16 @@ class Event:
     function render() {
         scheduled = false;
         var b = bar();
-        if (!b) return;
+        // Leaving the Admin Panel closes the page too, or coming back to
+        // the same address showed our link as current over the real page
+        if (!b) { openPath = null; return; }
         if (window.__owuiThemeFunctionOff) {
             withdraw(b);
             return;
         }
-        // Navigating elsewhere in the Admin Panel closes the page.
-        if (openPath && location.pathname !== openPath) {
+        // Navigating elsewhere in the Admin Panel closes the page, and so
+        // does a rebuilt layout that no longer holds it open.
+        if (openPath && (location.pathname !== openPath || (b.host && !b.host.hasAttribute('data-tdp-admin-open')))) {
             openPath = null;
             if (b.host) b.host.removeAttribute('data-tdp-admin-open');
         }
@@ -2644,11 +2736,11 @@ class Event:
         JSON parse, or two DOTALL passes over the whole blob on the legacy path.
         """
         try:
-            css_mtime = self._get_css_path().stat().st_mtime_ns
+            css_mtime = Event._file_sig(self._get_css_path())
         except OSError:
             return ""
         try:
-            sections_mtime = self._get_sections_path().stat().st_mtime_ns
+            sections_mtime = Event._file_sig(self._get_sections_path())
         except OSError:
             sections_mtime = None
         # sidebar_transparency cannot reach this subset today (it rewrites
@@ -2720,6 +2812,16 @@ class Event:
     # The @supports condition around the instance theme in custom.css. The
     # bootloader looks for it by the property name.
     INSTANCE_CSS_MARK = "--tdp-instance: 1"
+
+    @staticmethod
+    def _file_sig(path):
+        """A saved file's identity for the delivery cache keys. The mtime
+        alone repeats within a tick on filesystems with coarse timestamps
+        (1 s on some NFS and SMB mounts), so two quick saves served the first
+        one's body and ETag. Saves replace the file, which gives it a new
+        inode, and the size usually changes too."""
+        st = path.stat()
+        return (st.st_mtime_ns, st.st_ino, st.st_size)
 
     def _custom_css_fragment(self) -> str:
         """Producer for the /static/custom.css fragment.
@@ -2909,7 +3011,7 @@ class Event:
         None — callers serve the graceful empty response, never a 500.
         """
         try:
-            css_mtime = self._get_css_path().stat().st_mtime_ns
+            css_mtime = Event._file_sig(self._get_css_path())
         except OSError:
             return None
         cache_key = (
@@ -2941,17 +3043,18 @@ class Event:
         valve settings), OSError-safe against reset races.
         """
         try:
-            state_mtime = self._get_state_path().stat().st_mtime_ns
+            state_mtime = Event._file_sig(self._get_state_path())
         except OSError:
             return None
         try:
-            sections_mtime = self._get_sections_path().stat().st_mtime_ns
+            sections_mtime = Event._file_sig(self._get_sections_path())
         except OSError:
             sections_mtime = None
         cache_key = (
             state_mtime,
             sections_mtime,
             self.valves.enable_canvas_fx,
+            self.valves.enable_auth_page_theming,
             self.valves.sidebar_transparency,
             self.valves.overlay_transparency,
         )
@@ -2974,6 +3077,10 @@ class Event:
         return state, etag
 
     _personal_delivery_cache = {}  # (user_id, kind) -> (cache_key, body, etag)
+    # Saves run their file work in a thread, one at a time, so two of them
+    # can't interleave one's CSS with the other's state
+    import threading as _threading
+    _save_lock = _threading.Lock()
     _PERSONAL_CACHE_MAX = 512
 
     def _get_personal_delivery(self, user_id: str, kind: str):
@@ -2986,17 +3093,18 @@ class Event:
         css_path = self._get_css_path(user_id)
         path = css_path if kind == "css" else self._get_state_path(user_id)
         try:
-            mtime = path.stat().st_mtime_ns
+            mtime = Event._file_sig(path)
         except OSError:
             return None
         try:
-            sections_mtime = self._get_sections_path(user_id).stat().st_mtime_ns
+            sections_mtime = Event._file_sig(self._get_sections_path(user_id))
         except OSError:
             sections_mtime = None
         cache_key = (
             mtime,
             sections_mtime,
             self.valves.enable_canvas_fx,
+            self.valves.enable_auth_page_theming,
             self.valves.sidebar_transparency,
             self.valves.overlay_transparency,
         )
@@ -3663,9 +3771,13 @@ class Event:
 
                 queue._tdp_cid = secrets.token_urlsafe(18)
                 hello = f'event: hello\ndata: {{"cid":"{queue._tdp_cid}"}}\n\n'
-            Event._sse_clients.add(queue)
 
             async def event_stream():
+                # Registered here, not before the response starts: a client
+                # that disconnects first never starts this generator, so its
+                # finally never ran and the queue stayed in the set for good,
+                # filling it toward the cap
+                Event._sse_clients.add(queue)
                 try:
                     # Flush padding: Cloudflare's free-tier proxy may buffer small SSE
                     # chunks until an internal threshold (~4KB) is reached. Sending a
@@ -3834,9 +3946,14 @@ class Event:
             if not css:
                 library = body.get("library", "")
                 if library and isinstance(library, str):
-                    if library == self._load_library(user_id):
+                    def write_library():
+                        with Event._save_lock:
+                            if library == self._load_library(user_id):
+                                return False
+                            self._save_library(library, user_id)
+                            return True
+                    if not await asyncio.to_thread(write_library):
                         return JSONResponse({"status": "ok", "noop": True})
-                    self._save_library(library, user_id)
                     # Open designers hold the library in memory; tell them.
                     Event._broadcast_library(user_id, origin, settle)
                     return JSONResponse({"status": "ok", "library_only": True})
@@ -3845,41 +3962,53 @@ class Event:
             if not isinstance(css, str):
                 return JSONResponse({"error": "css must be a string"}, status_code=400)
 
-            # The same theme again, as a designer sends when it opens: nothing to
-            # write, and no broadcast to make the other open designers reload.
-            if self._is_unchanged_save(css, state, sections, body.get("library", ""), user_id):
-                return JSONResponse({"status": "ok", "noop": True, "bytes": len(css)})
-
-            self._save_css(css, user_id)
-
-            # Persist the structured sections alongside the flat CSS. When the
-            # payload has no valid sections (older designer build still cached
-            # in a browser tab), drop any stale sections file so consumers fall
-            # back to regex-slicing the fresh flat CSS instead of assembling
-            # sections from a previous save.
-            if isinstance(sections, dict) and all(
-                isinstance(sections.get(k), str) for k in self.SECTION_KEYS
-            ):
-                self._save_sections({k: sections[k] for k in self.SECTION_KEYS}, user_id)
-            else:
-                self._delete_sections(user_id)
-
-            if state and isinstance(state, str):
-                # '_cssSections' is a delivery-time key (merged into state.json
-                # when served) — strip it if a client echoed it back, so it
-                # never round-trips into the persisted state.
-                if '"_cssSections"' in state:
-                    try:
-                        _parsed = _json.loads(state)
-                        if isinstance(_parsed, dict) and _parsed.pop("_cssSections", None) is not None:
-                            state = _json.dumps(_parsed, separators=(",", ":"))
-                    except Exception:
-                        pass
-                self._save_state(state, user_id)
-
+            # The comparison, the writes and the post-processing are file I/O
+            # and regex work over up to tens of MB, and ran on the event loop,
+            # so every request on the worker waited on each save. They run in a
+            # thread now.
             library = body.get("library", "")
-            if library and isinstance(library, str):
-                self._save_library(library, user_id)
+
+            def write() -> bool:
+                nonlocal state
+                with Event._save_lock:
+                    # The same theme again, as a designer sends when it opens:
+                    # nothing to write, and no broadcast to make the other open
+                    # designers reload.
+                    if self._is_unchanged_save(css, state, sections, library, user_id):
+                        return False
+                    self._save_css(css, user_id)
+
+                    # Persist the structured sections alongside the flat CSS. When the
+                    # payload has no valid sections (older designer build still cached
+                    # in a browser tab), drop any stale sections file so consumers fall
+                    # back to regex-slicing the fresh flat CSS instead of assembling
+                    # sections from a previous save.
+                    if isinstance(sections, dict) and all(
+                        isinstance(sections.get(k), str) for k in self.SECTION_KEYS
+                    ):
+                        self._save_sections({k: sections[k] for k in self.SECTION_KEYS}, user_id)
+                    else:
+                        self._delete_sections(user_id)
+
+                    if state and isinstance(state, str):
+                        # '_cssSections' is a delivery-time key (merged into state.json
+                        # when served) — strip it if a client echoed it back, so it
+                        # never round-trips into the persisted state.
+                        if '"_cssSections"' in state:
+                            try:
+                                _parsed = _json.loads(state)
+                                if isinstance(_parsed, dict) and _parsed.pop("_cssSections", None) is not None:
+                                    state = _json.dumps(_parsed, separators=(",", ":"))
+                            except Exception:
+                                pass
+                        self._save_state(state, user_id)
+
+                    if library and isinstance(library, str):
+                        self._save_library(library, user_id)
+                    return True
+
+            if not await asyncio.to_thread(write):
+                return JSONResponse({"status": "ok", "noop": True, "bytes": len(css)})
 
             # Broadcast the update via SSE unless the client explicitly suppressed it
             # (e.g. library-only sync from syncLibrary()).
@@ -3905,7 +4034,7 @@ class Event:
             # the source of truth on disk). State is deliberately NOT returned:
             # the designer's localStorage state key doubles as its editing
             # store, and writing back a canvas-stripped copy would lose data.
-            processed_css = self._postprocess_css(css)
+            processed_css = await asyncio.to_thread(self._postprocess_css, css)
             if processed_css != css:
                 resp["css"] = processed_css
             return JSONResponse(resp)
@@ -3955,6 +4084,10 @@ class Event:
 
         key = cls._apply_token_key()
         if not token or not key or not str(token).startswith(cls.APPLY_TOKEN_PREFIX):
+            return None
+        # A real token is ASCII; anything else in the link raised and turned
+        # the designer page into a server error
+        if not str(token).isascii():
             return None
         body, _, sig = str(token)[len(cls.APPLY_TOKEN_PREFIX):].partition(".")
         expected = base64.urlsafe_b64encode(
@@ -7909,6 +8042,16 @@ location.reload();</code></pre>
     }
 
     function getSnapshots() { return Storage.get('snapshots', []); }
+
+    // Themes added at the front of the gallery move the rest down; the
+    // modes' "applied from gallery theme N" refs have to move with them, or
+    // they point at the new theme (highlighted, synced and updated as if
+    // it were the one in use)
+    function shiftThemeRefs(by) {
+        MODES.forEach(m => {
+            if (activeThemeRef[m] && activeThemeRef[m].type === 'snapshot') activeThemeRef[m].id += by;
+        });
+    }
     function saveSnapshots(s) { Storage.set('snapshots', s); syncLibrary(); }
 
     function parseHex(hex) {
@@ -8542,6 +8685,15 @@ function startAnimation() {
             historyIndex++;
         }
         
+        updateHistoryButtons();
+    }
+
+    // The page's starting point. The history's first entry is taken before
+    // the server's theme loads, from this browser's older copy or defaults,
+    // and Undo back to it published that over the live theme.
+    function resetHistoryBaseline() {
+        historyStack = [structuredClone({ themeData, activeThemeRef, activeCanvasRef, activeCssRef, activeGradientRef })];
+        historyIndex = 0;
         updateHistoryButtons();
     }
 
@@ -9800,6 +9952,11 @@ function startAnimation() {
 
         // Update module-level ref so delegated lock handler sees current values
         _lastActiveVars = activeVars;
+        // Not under a color picker in use: rebuilding replaced it mid-drag,
+        // which closed it and lost its change event (and the undo point).
+        // The grid catches up on the next change once focus moves on.
+        const activeEl = document.activeElement;
+        if (activeEl && activeEl.classList && activeEl.classList.contains('var-picker') && grid.contains(activeEl)) return;
 
         grid.innerHTML = Object.entries(activeVars).map(([name, val]) => {
             const isLocked = (config.locks || {})[name] === true;
@@ -9933,9 +10090,13 @@ function startAnimation() {
 
     // === Gradient CSS Helpers ===
     function hexToRgba(hex, alpha) {
-        hex = hex.replace('#', '');
-        if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
-        const [r, g, b] = parseHex(hex);
+        const tok = _cssTok(hex, '#000000');
+        let h = tok.replace('#', '');
+        if (h.length === 3) h = h.split('').map(c => c + c).join('');
+        // rgb(), oklch() and named colors have no hex channels to read (they
+        // gave rgba(NaN, ...), which the browser drops); let it mix them
+        if (!/^[0-9a-fA-F]{6}$/.test(h)) return `color-mix(in srgb, ${tok} ${Math.round(alpha * 100)}%, transparent)`;
+        const [r, g, b] = parseHex(h);
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
@@ -10106,7 +10267,10 @@ function startAnimation() {
                 let cssText = modeData.customCSS.replace(/\/\*\[OWUI_/g, '/* [OWUI_');
                 if (modeData.autoScope) {
                     const { keyframes, cleanedCss } = extractKeyframes(cssText);
-                    let scoped = cleanedCss.replace(/:root/gi, '&');
+                    // :root and html both mean the page root, which the scope
+                    // selector already is; nested as descendants they'd never match
+                    let scoped = cleanedCss.replace(/:root/gi, '&')
+                        .replace(/(^|[\s,{};(])html(?=[\s.,:\[#{>+~)]|$)/gim, '$1&');
                     return `\n/*[OWUI_CUSTOM_START]*/\n/* Custom CSS (Auto-Scoped) */\n${selector} {\n${scoped}\n}\n${keyframes}\n/*[OWUI_CUSTOM_END]*/\n`;
                 } else {
                     let scoped = cssText.replace(/:root/gi, `:is(${selector})`);
@@ -10173,11 +10337,18 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             const trimmed = line.trim();
             if (!trimmed || trimmed.startsWith('/*') || trimmed.startsWith('//') || trimmed.startsWith('*')) return '';
             if (trimmed.startsWith('--')) {
-                // Block CSS scope breakout: reject lines containing braces
+                // Block CSS scope breakout: reject lines containing braces, and
+                // lines with an unclosed ( or [, which swallow every rule after
+                // them (a value split over two lines leaves one on the first)
                 if (/[{}]/.test(trimmed)) return '';
+                if (!_parensBalanced(trimmed) ||
+                    !_parensBalanced(trimmed.replace(/[()]/g, '').replace(/\[/g, '(').replace(/\]/g, ')'))) return '';
                 // Neutralize marker comment sequences in override values
                 const sanitized = trimmed.replace(/\/\*\[OWUI_/g, '/* [OWUI_');
-                const withImportant = sanitized.endsWith(';') ? sanitized.slice(0, -1) + ' !important;' : sanitized + ' !important;';
+                // A value already marked !important would get it twice, which
+                // makes the declaration invalid
+                const value = sanitized.replace(/;\s*$/, '').replace(/\s*!\s*important\s*$/i, '');
+                const withImportant = value + ' !important;';
                 return `${indent}${withImportant}\n`;
             }
             return '';
@@ -10272,8 +10443,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     }
     
     // Minify Toggle Listeners
-    document.getElementById('toggle-minify-css')?.addEventListener('change', updateCodeView);
-    document.getElementById('toggle-minify-tailwind')?.addEventListener('change', updateCodeView);
+    document.getElementById('toggle-minify-css')?.addEventListener('change', () => updateCodeView());
+    document.getElementById('toggle-minify-tailwind')?.addEventListener('change', () => updateCodeView());
     
     function forceLocalIframeTheme(sections) {
         const dm = getActiveDataMode();
@@ -10496,6 +10667,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     function resetActiveMode(silent = false, saveBackup = false) {
         if (!silent && saveBackup) {
             const snapshots = getSnapshots();
+            shiftThemeRefs(1);
             snapshots.unshift({
                 name: `Backup: Pre-Reset`,
                 dark: cleanMode(themeData.dark),
@@ -10782,19 +10954,29 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
         setupGutter(editor);
 
+        // The mode AND the text are captured when typed: switching modes
+        // refills this editor with the other mode's text, which a timer
+        // reading the editor when it fired then saved into the first mode
+        const applyEdit = ({ dm, value }) => {
+            themeData[dm][propKey] = value;
+            activeThemeRef[dm] = null;
+            if (propKey === 'canvasScript') activeCanvasRef[dm] = null;
+            if (propKey === 'customCSS') activeCssRef[dm] = null;
+            commitChange({ clearRef: false, push: false });
+            // Debounced pushState for editor changes
+            clearTimeout(editor._historyTimer);
+            editor._historyTimer = setTimeout(() => pushState(), 800);
+        };
         editor.addEventListener('input', (e) => {
             updateLineNumbers(editor);
             clearTimeout(editor._timer);
-            const capturedDm = getActiveDataMode(); // Capture mode at input time, not fire time
+            const edit = { dm: getActiveDataMode(), value: e.target.value };
+            // Typing in another mode before the last mode's edit was saved
+            if (editor._pendingEdit && editor._pendingEdit.dm !== edit.dm) applyEdit(editor._pendingEdit);
+            editor._pendingEdit = edit;
             editor._timer = setTimeout(() => {
-                themeData[capturedDm][propKey] = e.target.value;
-                activeThemeRef[capturedDm] = null;
-                if (propKey === 'canvasScript') activeCanvasRef[capturedDm] = null;
-                if (propKey === 'customCSS') activeCssRef[capturedDm] = null;
-                commitChange({ clearRef: false, push: false });
-                // Debounced pushState for editor changes
-                clearTimeout(editor._historyTimer);
-                editor._historyTimer = setTimeout(() => pushState(), 800);
+                editor._pendingEdit = null;
+                applyEdit(edit);
             }, 500); 
         });
 
@@ -11074,9 +11256,9 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                                 ${ICONS.dragHandle}
                             </div>
                             <div class="gradient-stop-swatch" style="background: ${_cssTok(p.color)};">
-                                <input type="color" value="${_escAttr(_cssTok(p.color))}" aria-label="Mesh point ${i + 1} color" onchange="window.updateMeshStop(${i}, {color: this.value})" oninput="this.parentElement.style.background = this.value; window.updateMeshStop(${i}, {color: this.value})">
+                                <input type="color" value="${_escAttr(_cssTok(p.color))}" aria-label="Mesh point ${i + 1} color" onchange="window.updateMeshStop(${i}, {color: this.value})" oninput="this.parentElement.style.background = this.value">
                             </div>
-                            <input type="range" class="gradient-stop-slider" min="10" max="80" value="${_cssNum(p.spread, 50)}" aria-label="Mesh point ${i + 1} spread" onpointerdown="window._meshSpreadSliderActive = true" oninput="window.updateMeshStop(${i}, {spread: parseInt(this.value)}); this.nextElementSibling.innerText = this.value + '%'" onchange="window._meshSpreadSliderActive = false; window.updateMeshStop(${i}, {spread: parseInt(this.value)})">
+                            <input type="range" class="gradient-stop-slider" min="10" max="80" value="${_cssNum(p.spread, 50)}" aria-label="Mesh point ${i + 1} spread" onpointerdown="window._meshSpreadSliderActive = true" onpointerup="window._meshSpreadSliderActive = false" onpointercancel="window._meshSpreadSliderActive = false" oninput="window.updateMeshStop(${i}, {spread: parseInt(this.value)}); this.nextElementSibling.innerText = this.value + '%'" onchange="window._meshSpreadSliderActive = false; window.updateMeshStop(${i}, {spread: parseInt(this.value)})">
                             <span class="gradient-stop-pos">${_cssNum(p.spread, 50)}%</span>
                             <button class="gradient-stop-delete" onclick="event.stopPropagation(); window.removeMeshStop(${i})" ${points.length <= 2 ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''} data-tooltip="Remove stop" aria-label="Remove mesh point ${i + 1}">×</button>
                         </div>
@@ -11116,7 +11298,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                     <div class="gradient-stop-swatch" style="background: ${_cssTok(stop.color)};">
                         <input type="color" value="${_escAttr(_cssTok(stop.color))}" aria-label="Stop ${i + 1} color" onchange="window.updateGradientStop(${i}, {color: this.value})" oninput="this.parentElement.style.background = this.value">
                     </div>
-                    <input type="range" class="gradient-stop-slider" min="0" max="100" value="${_cssNum(stop.position, 0)}" aria-label="Stop ${i + 1} position" onpointerdown="window._gradientSliderActive = true" oninput="window.updateGradientStop(${i}, {position: parseInt(this.value)}); this.nextElementSibling.innerText = this.value + '%'" onchange="window._gradientSliderActive = false; window.updateGradientStop(${i}, {position: parseInt(this.value)})">
+                    <input type="range" class="gradient-stop-slider" min="0" max="100" value="${_cssNum(stop.position, 0)}" aria-label="Stop ${i + 1} position" onpointerdown="window._gradientSliderActive = true" onpointerup="window._gradientSliderActive = false" onpointercancel="window._gradientSliderActive = false" oninput="window.updateGradientStop(${i}, {position: parseInt(this.value)}); this.nextElementSibling.innerText = this.value + '%'" onchange="window._gradientSliderActive = false; window.updateGradientStop(${i}, {position: parseInt(this.value)})">
                     <span class="gradient-stop-pos">${_cssNum(stop.position, 0)}%</span>
                     <button class="gradient-stop-dup" onclick="window.duplicateGradientStop(${i})" ${stops.length >= 16 ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''} data-tooltip="Duplicate stop" aria-label="Duplicate color stop ${i + 1}">⧉</button>
                     <button class="gradient-stop-delete" onclick="window.removeGradientStop(${i})" ${stops.length <= 2 && config.gradientEnabled ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''} data-tooltip="Remove stop" aria-label="Remove color stop ${i + 1}">×</button>
@@ -12604,7 +12786,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 const layers = data.meshPoints.map(p => `radial-gradient(at ${_cssNum(p.x, 50)}% ${_cssNum(p.y, 50)}%, ${_cssTok(p.color)} 0%, transparent ${_cssNum(p.spread, 50)}%)`).join(', ');
                 return `${_cssTok(data.meshBgColor, '#0a0a12')}; background-image: ${layers}`;
             }
-            if (!data.stops || data.stops.length === 0) return 'transparent';
+            if (!Array.isArray(data.stops) || data.stops.length === 0) return 'transparent';
             const stopStr = data.stops.map(st => `${_cssTok(st.color)} ${_cssNum(st.position, 0)}%`).join(', ');
             if (data.type === 'radial') {
                 const rShape = _cssTok(data.radialShape, 'ellipse');
@@ -12982,7 +13164,10 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         ];
 
         const activeEl = document.activeElement;
-        const isEditingInModal = activeEl && (activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'INPUT');
+        const isEditingInModal = activeEl && (activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'INPUT' ||
+            // A focused button (Cancel) answers Enter itself; confirming here
+            // ran the destructive action instead
+            activeEl.tagName === 'BUTTON');
 
         for (const [modalId, confirmBtnId, allowBackspace] of modalConfigs) {
             const modal = $(modalId);
@@ -13274,18 +13459,14 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
         // Detect Canvas FX for Security Warning
         let hasCanvas = false;
-        if (parsed.themes) {
-            hasCanvas = parsed.themes.some(t => 
-                (t.dark?.canvasScript && t.dark?.canvasEnabled) || 
-                (t.light?.canvasScript && t.light?.canvasEnabled) ||
-                (t.oled?.canvasScript && t.oled?.canvasEnabled) ||
-                (t.her?.canvasScript && t.her?.canvasEnabled)
-            );
-        } else if (parsed.dark || parsed.light || parsed.oled || parsed.her) {
-            hasCanvas = (parsed.dark?.canvasScript && parsed.dark?.canvasEnabled) || 
-                        (parsed.light?.canvasScript && parsed.light?.canvasEnabled) ||
-                        (parsed.oled?.canvasScript && parsed.oled?.canvasEnabled) ||
-                        (parsed.her?.canvasScript && parsed.her?.canvasEnabled);
+        // Both shapes are checked: a theme with a 'themes' list that isn't a
+        // library backup imports its top-level modes, and checking only the
+        // list let such a script skip this warning
+        const modesHaveCanvas = (t) => !!t && ['dark', 'light', 'oled', 'her'].some(m => t[m]?.canvasScript && t[m]?.canvasEnabled);
+        if ((Array.isArray(parsed.themes) && parsed.themes.some(modesHaveCanvas)) || modesHaveCanvas(parsed)) {
+            hasCanvas = true;
+        } else if (parsed.themes || parsed.dark || parsed.light || parsed.oled || parsed.her) {
+            hasCanvas = false;
         } else if (parsed.canvas_presets) {
             hasCanvas = true;
         } else if (parsed.h !== undefined) {
@@ -14094,10 +14275,13 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
                 if (data.isGradientBackup && Array.isArray(data.gradient_presets)) {
                     let gCount = 0, gSkipped = 0;
-                    data.gradient_presets.forEach(p => {
-                        if (!p.name || (!p.stops && !p.meshPoints)) return;
+                    data.gradient_presets.forEach(raw => {
+                        // Through the same sanitizer as every other gradient
+                        // import: a malformed one threw on every render after
+                        const p = sanitizeGradientPreset(raw);
+                        if (!p) return;
                         if (isGradientDuplicate(p)) { gSkipped++; return; }
-                        CUSTOM_GRADIENT_PRESETS.push(structuredClone(p));
+                        CUSTOM_GRADIENT_PRESETS.push(p);
                         gCount++;
                     });
                     if (gCount > 0) {
@@ -14163,6 +14347,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         
         if (importedCount > 0) {
             saveSnapshots(snapshots);
+            shiftThemeRefs(importedCount);
             // A Canvas FX script is JavaScript that runs for everyone who sees
             // the theme, so applying one from a file or URL asks first. The
             // clipboard import already warned in its own dialog.
@@ -14188,8 +14373,9 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 });
                 commitChange({ clearRef: false, snapshots: true });
             } else {
-                // Import into the gallery without activating the theme.
-                renderSnapshots();
+                // Import into the gallery without activating the theme. The
+                // shifted refs are saved with the theme's state.
+                commitChange({ clearRef: false, push: false, snapshots: true });
             }
 
             const skMsg = skippedCount > 0 ? ` (${skippedCount} dup.)` : '';
@@ -14953,16 +15139,14 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             const existingIdx = snapshots.findIndex(s => s.updateUrl && (toRawGitHub(s.updateUrl) === rawUrl || s.updateUrl === updateUrl));
 
             if (existingIdx >= 0) {
-                MODES.forEach(m => { if (newTheme[m]) snapshots[existingIdx][m] = newTheme[m]; });
-                snapshots[existingIdx].version = newTheme.version;
-                snapshots[existingIdx].description = newTheme.description;
-                snapshots[existingIdx].author = newTheme.author;
-                if (newTheme.targetVersion) snapshots[existingIdx].targetVersion = newTheme.targetVersion;
-                saveSnapshots(snapshots);
-                showToast(`✓ Updated "${newTheme.name}" to v${newTheme.version}`);
+                // Through the same gate as every other update, so a new Canvas
+                // FX script or custom CSS asks first
+                if (applyThemeUpdate(existingIdx, remote)) showToast(`✓ Updated "${newTheme.name}" to v${newTheme.version}`);
             } else {
                 snapshots.unshift(newTheme);
                 saveSnapshots(snapshots);
+                shiftThemeRefs(1);
+                commitChange({ clearRef: false, push: false, snapshots: true });
                 showToast(`✓ Installed "${newTheme.name}"`);
             }
 
@@ -15446,13 +15630,14 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             }
 
             // Custom CSS
-            const lCss = (lm.customCSS || '').trim(), rCss = (rm.customCSS || '').trim();
+            // Remote values are unchecked JSON: a number or object here threw
+            const lCss = _remoteText(lm.customCSS), rCss = _remoteText(rm.customCSS);
             if (lCss !== rCss) {
                 changes.push({ name: 'Custom CSS', html: _renderCodeDiffClickable(lCss, rCss, mode, `${prefix}-css`, '', '') });
             }
 
             // Canvas FX
-            const lCanvas = (lm.canvasScript || '').trim(), rCanvas = (rm.canvasScript || '').trim();
+            const lCanvas = _remoteText(lm.canvasScript), rCanvas = _remoteText(rm.canvasScript);
             if (lCanvas !== rCanvas) {
                 changes.push({ name: 'Canvas FX', html: _renderCodeDiffClickable(lCanvas, rCanvas, mode, `${prefix}-canvas`, '', '') });
             }
@@ -15814,7 +15999,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                     }
                 } catch(e) { console.warn('Theme Pro:', e); }
                 
-                pushState();
+                // Her mode's defaults above may have changed the theme
+                if (historyIndex === 0) resetHistoryBaseline(); else pushState();
                 
                 const herBtn = document.getElementById('mode-btn-her');
                 if (showHer) {
@@ -15857,7 +16043,12 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                     } else if (serverState === null) {
                         Storage.remove('theme');
                     }
-                    const saved = Storage.getRaw('theme');
+                    // A draft resumed after a refresh is what this page edits
+                    // (_draftMode isn't on yet, so Storage reads the published
+                    // copy); the server's theme stays the published one
+                    let draftRaw = null;
+                    if (_resumingDraft) { try { draftRaw = sessionStorage.getItem(Storage._resolve('theme')); } catch (x) {} }
+                    const saved = draftRaw || Storage.getRaw('theme');
                     if (saved) {
                         const s = JSON.parse(saved);
                         if (s.dark && s.light) {
@@ -15907,6 +16098,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                             if (themeData[m]) themeData[m] = validateModeData(themeData[m]);
                         });
                     }
+                    resetHistoryBaseline();
                     
                     const pTheme = localStorage.getItem('theme');
                     const pDoc = document.documentElement;
@@ -16589,7 +16781,9 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     function setupPresetCRUD({
         presets,             // in-memory array (CANVAS_PRESETS or CSS_PRESETS)
         storageKey,          // localStorage key
-        refMap,              // activeCanvasRef or activeCssRef
+        getRefMap,           // () => activeCanvasRef or activeCssRef. A getter:
+                             // Undo, Global Reset and Delete All replace those
+                             // objects, and a captured one went stale
         enabledKey,          // 'canvasEnabled' or 'customCssEnabled'
         contentKey,          // 'canvasScript' or 'customCSS'
         editorId,            // 'canvas-fx-editor' or 'custom-css-editor'
@@ -16632,7 +16826,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 const dm = getActiveDataMode();
                 themeData[dm][enabledKey] = true;
                 themeData[dm][contentKey] = content;
-                refMap[dm] = presets.length - 1;
+                getRefMap()[dm] = presets.length - 1;
                 commitChange({ clearRef: false });
                 hideModal(saveModalId);
                 showToast(`${defaultName} Saved!`);
@@ -16655,13 +16849,13 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             let needsInject = false;
             // Adjust refs for ALL modes, not just the current one
             MODES.forEach(m => {
-                if (refMap[m] === itemToDelete) {
+                if (getRefMap()[m] === itemToDelete) {
                     themeData[m][enabledKey] = false;
                     themeData[m][contentKey] = "";
-                    refMap[m] = null;
+                    getRefMap()[m] = null;
                     needsInject = true;
-                } else if (refMap[m] !== null && refMap[m] > itemToDelete) {
-                    refMap[m]--;
+                } else if (getRefMap()[m] !== null && getRefMap()[m] > itemToDelete) {
+                    getRefMap()[m]--;
                 }
             });
             if (needsInject) {
@@ -16700,7 +16894,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             Storage.set(storageKey, presets);
             syncLibrary();
             const dm = getActiveDataMode();
-            refMap[dm] = index;
+            getRefMap()[dm] = index;
             themeData[dm][contentKey] = content;
             commitChange({ clearRef: false });
             showToast(`${defaultName} Overwritten!`);
@@ -16717,7 +16911,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
     // Canvas Presets
     const canvasCRUD = setupPresetCRUD({
-        presets: CANVAS_PRESETS, storageKey: 'owui_canvas_presets', refMap: activeCanvasRef,
+        presets: CANVAS_PRESETS, storageKey: 'owui_canvas_presets', getRefMap: () => activeCanvasRef,
         enabledKey: 'canvasEnabled', contentKey: 'canvasScript', editorId: 'canvas-fx-editor',
         saveModalId: 'save-canvas-modal', deleteModalId: 'delete-canvas-modal', renameModalId: 'rename-canvas-modal',
         nameInputId: 'canvas-name-input', deleteNameId: 'delete-canvas-name', renameInputId: 'rename-canvas-input',
@@ -16733,7 +16927,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
     // CSS Presets
     const cssCRUD = setupPresetCRUD({
-        presets: CSS_PRESETS, storageKey: 'owui_css_presets', refMap: activeCssRef,
+        presets: CSS_PRESETS, storageKey: 'owui_css_presets', getRefMap: () => activeCssRef,
         enabledKey: 'customCssEnabled', contentKey: 'customCSS', editorId: 'custom-css-editor',
         saveModalId: 'save-css-modal', deleteModalId: 'delete-css-modal', renameModalId: 'rename-css-modal',
         nameInputId: 'css-name-input', deleteNameId: 'delete-css-name', renameInputId: 'rename-css-input',
@@ -16754,9 +16948,23 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     // applied once the designer has loaded the theme it starts from.
     const _applyOnLoad = (window.__THEME_PRO_CONFIG__ || {}).applyOnLoad;
     if (_applyOnLoad) {
-        // A theme from a chat is a real change: the other designers should follow it.
-        _userActed = true;
-        AiConsultant.apply(_applyOnLoad, _applyOnLoad.mode && _applyOnLoad.mode !== 'all' ? [_applyOnLoad.mode] : MODES.slice());
+        // Once per link: the address keeps ?apply=, so a reload (another
+        // designer's save reloads this one) or a re-rendered chat frame
+        // applied it again over everything changed since
+        const applyKey = 'owui_tdp_applied_' + (new URLSearchParams(location.search).get('apply') || '');
+        let applied = false;
+        try { applied = sessionStorage.getItem(applyKey) === '1'; } catch (x) {}
+        if (!applied) {
+            try { sessionStorage.setItem(applyKey, '1'); } catch (x) {}
+            // A theme from a chat is a real change: the other designers should follow it.
+            _userActed = true;
+            AiConsultant.apply(_applyOnLoad, _applyOnLoad.mode && _applyOnLoad.mode !== 'all' ? [_applyOnLoad.mode] : MODES.slice());
+        }
+        try {
+            const url = new URL(location.href);
+            url.searchParams.delete('apply');
+            history.replaceState(history.state, '', url);
+        } catch (x) {}
     }
 
     // Forward mousemove events to parent window for Canvas FX mouse tracking.
@@ -16828,7 +17036,10 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             # Personal designs follow the admin's Draft choice no further:
             # saves only ever change the user's own theme.
             valve_config["draftModeDefault"] = False
-        safe_config = _json.dumps(valve_config).replace("</", "<\\/")
+        # Every '<' escaped, not only '</': a saved theme holding '<!--' and
+        # '<script' (in a Canvas FX script, say) put the HTML parser in its
+        # escaped state, and the tag never closed, so the designer didn't load
+        safe_config = _json.dumps(valve_config).replace("<", "\\u003c")
         # The designer starts from the theme the server is serving, as the
         # main app's bootloader does. Its own localStorage copy can predate a
         # save made from another browser, and Live mode saves whatever it
@@ -16856,7 +17067,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             saved_state = None  # Reset race / unreadable data dir
         if not saved_state or saved_state.strip() in ("", "{}"):
             saved_state = None
-        safe_saved_state = _json.dumps(saved_state).replace("</", "<\\/")
+        safe_saved_state = _json.dumps(saved_state).replace("<", "\\u003c")
         config_tag = (
             '<script id="owui-valve-config">'
             f"window.__THEME_PRO_CONFIG__={safe_config};"
@@ -17068,48 +17279,76 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         individual rules, so it can be applied to the flat CSS or to the
         structural/gradient sections independently.
         """
-        if mode == 'translucent':
-            blur_val = 'blur(20px) saturate(1.3)'
-        else:
-            blur_val = 'none'
+        def rewrite(css: str) -> str:
+            if mode == 'translucent':
+                blur_val = 'blur(20px) saturate(1.3)'
+            else:
+                blur_val = 'none'
 
-        # Replace structural opaque sidebar (marked with /*[FX]*/): var-based bg
-        # Pattern groups: (1: prefix) (2: var ref) (3: !important;) — closing } matched but not captured
-        if mode == 'translucent':
+            # Replace structural opaque sidebar (marked with /*[FX]*/): var-based bg
+            # Pattern groups: (1: prefix) (2: var ref) (3: !important;) — closing } matched but not captured
+            if mode == 'translucent':
+                css = _re.sub(
+                    r'(#sidebar\s*\{\s*/\*\[FX\]\*/\s*background-color:\s*)(var\(--[^)]+\))(\s*!important\s*;)\s*\}',
+                    rf'\1color-mix(in srgb, \2 20%, transparent)\3 backdrop-filter: {blur_val} !important; -webkit-backdrop-filter: {blur_val} !important; }}',
+                    css,
+                )
+            else:
+                css = _re.sub(
+                    r'(#sidebar\s*\{\s*/\*\[FX\]\*/\s*background-color:\s*)var\(--[^)]+\)(\s*!important\s*;)\s*\}',
+                    rf'\1transparent\2 backdrop-filter: {blur_val} !important; -webkit-backdrop-filter: {blur_val} !important; }}',
+                    css,
+                )
+
+            # Replace gradient sidebar (marked with /*[FX]*/): rgba-based bg + existing blur
+            if mode == 'translucent':
+                css = _re.sub(
+                    r'(#sidebar\s*\{\s*/\*\[FX\]\*/[^}]*background-color:\s*)rgba\(([^,]+,[^,]+,[^,]+),\s*[\d.]+\)(\s*!important\s*;[^}]*backdrop-filter:\s*)blur\([^)]+\)',
+                    rf'\1rgba(\2, 0.25)\3{blur_val}',
+                    css,
+                )
+            else:
+                css = _re.sub(
+                    r'(#sidebar\s*\{\s*/\*\[FX\]\*/[^}]*background-color:\s*)rgba\([^)]+\)(\s*!important\s*;[^}]*backdrop-filter:\s*)blur\([^)]+\)',
+                    rf'\1transparent\2{blur_val}',
+                    css,
+                )
+
+            # Remove the revert-layer rule (marked with /*[FX]*/)
             css = _re.sub(
-                r'(#sidebar\s*\{\s*/\*\[FX\]\*/\s*background-color:\s*)(var\(--[^)]+\))(\s*!important\s*;)\s*\}',
-                rf'\1color-mix(in srgb, \2 20%, transparent)\3 backdrop-filter: {blur_val} !important; -webkit-backdrop-filter: {blur_val} !important; }}',
+                r'[^\n]*#sidebar[^{]*\{\s*/\*\[FX\]\*/\s*background-color:\s*revert-layer\s*;?\s*\}',
+                '',
                 css,
             )
-        else:
-            css = _re.sub(
-                r'(#sidebar\s*\{\s*/\*\[FX\]\*/\s*background-color:\s*)var\(--[^)]+\)(\s*!important\s*;)\s*\}',
-                rf'\1transparent\2 backdrop-filter: {blur_val} !important; -webkit-backdrop-filter: {blur_val} !important; }}',
-                css,
-            )
+            return css
 
-        # Replace gradient sidebar (marked with /*[FX]*/): rgba-based bg + existing blur
-        if mode == 'translucent':
-            css = _re.sub(
-                r'(#sidebar\s*\{\s*/\*\[FX\]\*/[^}]*background-color:\s*)rgba\(([^,]+,[^,]+,[^,]+),\s*[\d.]+\)(\s*!important\s*;[^}]*backdrop-filter:\s*)blur\([^)]+\)',
-                rf'\1rgba(\2, 0.25)\3{blur_val}',
-                css,
-            )
-        else:
-            css = _re.sub(
-                r'(#sidebar\s*\{\s*/\*\[FX\]\*/[^}]*background-color:\s*)rgba\([^)]+\)(\s*!important\s*;[^}]*backdrop-filter:\s*)blur\([^)]+\)',
-                rf'\1transparent\2{blur_val}',
-                css,
-            )
-
-        # Remove the revert-layer rule (marked with /*[FX]*/)
-        css = _re.sub(
-            r'[^\n]*#sidebar[^{]*\{\s*/\*\[FX\]\*/\s*background-color:\s*revert-layer\s*;?\s*\}[^\n]*\n?',
-            '',
-            css,
-        )
-
-        return css
+        # Each marked rule on its own. Run over the whole CSS, these patterns
+        # backtracked in quadratic to cubic time on a long line (custom CSS
+        # with an inline font is one), freezing the worker for seconds to
+        # minutes. A rule starts on the marker's line and ends at its '}'.
+        out, pos = [], 0
+        while True:
+            i = css.find("/*[FX]*/", pos)
+            if i < 0:
+                break
+            nl = css.rfind("\n", max(pos, i - 2000), i)
+            start = nl + 1 if nl >= 0 else (pos if i - pos <= 2000 else i)
+            end = css.find("}", i, i + 2000)
+            if end < 0:
+                out.append(css[pos:i + 8])
+                pos = i + 8
+                continue
+            out.append(css[pos:start])
+            rewritten = rewrite(css[start:end + 1])
+            out.append(rewritten)
+            pos = end + 1
+            if not rewritten.strip():
+                # A removed rule takes its line with it
+                nl = css.find("\n", pos)
+                if nl >= 0 and not css[pos:nl].strip():
+                    pos = nl + 1
+        out.append(css[pos:])
+        return "".join(out)
 
     @staticmethod
     def _sidebar_mobile_css() -> str:
@@ -17254,10 +17493,31 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         return _json.dumps(data, separators=(",", ":"))
 
     def _postprocess_state(self, state):
-        """Apply valve-based state post-processing (strip canvas if disabled)."""
+        """Apply valve-based state post-processing (strip canvas if disabled,
+        auth page theming off when that valve is)."""
         if state and not self.valves.enable_canvas_fx:
             state = self._strip_canvas_from_state(state)
+        if state and not self.valves.enable_auth_page_theming:
+            state = self._strip_auth_from_state(state)
         return state
+
+    @staticmethod
+    def _strip_auth_from_state(state_str: str) -> str:
+        """Turn every Show on Auth Pages and Only on Auth Pages flag off, for
+        the Enable Auth Page Theming valve. Only the designer's page forced
+        them off before, so turning the valve off changed nothing on sign-in
+        pages until an admin happened to open the designer."""
+        try:
+            data = _json.loads(state_str)
+            for mode in ("dark", "oled", "light", "her"):
+                if isinstance(data.get(mode), dict):
+                    for key in ("themeShowAuth", "customCssShowAuth", "canvasShowAuth", "gradientShowAuth"):
+                        data[mode][key] = False
+                    for key in ("themeAuthOnly", "customCssAuthOnly", "canvasAuthOnly", "gradientAuthOnly"):
+                        data[mode][key] = False
+            return _json.dumps(data, separators=(",", ":"))
+        except Exception:
+            return state_str
 
     _redis_url_warned = None  # The unusable REDIS_URL already reported, so it is logged once
 
