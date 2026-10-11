@@ -5972,7 +5972,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         </ul>
                         <h4>Publishing</h4>
                         <ul>
-                            <li><b>Publish Button:</b> Click the <b>Publish</b> button that appears in Draft mode to push all pending changes to the server and broadcast them to all users via SSE. The toast confirms: &ldquo;Published! Theme pushed to all users.&rdquo; While the function is off, publishing fails with the server&rsquo;s error message; turn the function back on first.</li>
+                            <li><b>Publish Button:</b> Click the <b>Publish</b> button that appears in Draft mode to push all pending changes to the server and broadcast them via SSE to everyone the theme reaches: all users, or with <b>Allow Personal Themes</b> on, everyone who isn&rsquo;t using a theme of their own. The toast says who it reached. While the function is off, publishing fails with the server&rsquo;s error message; turn the function back on first.</li>
                             <li><b>Toggle Back:</b> Switching the toggle from Draft back to Live is equivalent to clicking Publish — it triggers the same sync and broadcast.</li>
                             <li><b>Discard:</b> If you close the tab without publishing, your draft changes are lost — they are stored in <code>sessionStorage</code>, which is tab-scoped and destroyed when the tab closes. Within the same tab session, draft changes survive page refreshes. The last-published server-side theme remains active for everyone else.</li>
                         </ul>
@@ -7002,7 +7002,7 @@ self.onmessage = function(e) {
                         <p>If Open WebUI is behind a reverse proxy (nginx, Caddy, Apache, Traefik, etc.), <b>response buffering must be disabled</b> for Theme Designer Pro to work correctly. Without this, SSE live push events are buffered and never delivered to clients, and theme data may not reach other users/devices.</p>
 
                         <div class="doc-subheading">⚠️ Why This Matters</div>
-                        <p>Theme Designer Pro uses three delivery layers to push themes to all users:</p>
+                        <p>Theme Designer Pro uses three delivery layers to push themes to every page (the instance theme to everyone without a personal theme, a personal theme to its owner&rsquo;s pages):</p>
                         <ul>
                             <li><b>Server-Sent Events (SSE)</b> — live push to connected browsers via <code>{ROUTE_BASE}/events</code></li>
                             <li><b>HTTP fetch</b> — bootloader fetches <code>{ROUTE_BASE}/theme.css</code> and <code>{ROUTE_BASE}/state.json</code> on every page load</li>
@@ -7227,7 +7227,7 @@ location.reload();</code></pre>
                     <div class="draft-switch" id="draft-switch" data-tooltip="Click to enter Draft mode — changes will stay local until you Publish"></div>
                     <span class="draft-toggle-label" id="draft-label-draft"><span class="draft-dot" style="display:none;" id="draft-dot"></span> Draft</span>
             </div>
-            <button class="draft-publish-btn" id="draft-publish-btn" data-tooltip="Push all changes live to all users">
+            <button class="draft-publish-btn" id="draft-publish-btn" data-tooltip="Push all changes live">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
                 Publish
             </button>
@@ -7729,6 +7729,15 @@ location.reload();</code></pre>
     }
     let _draftMode = false;  // When true, syncToServer is suppressed
 
+    // Who a live save reaches, for the badge, Draft and Publish: a personal
+    // theme only its owner's own pages, and the instance theme everyone, or,
+    // with personal themes on, everyone without a theme of their own
+    function liveAudience() {
+        const cfg = window.__THEME_PRO_CONFIG__ || {};
+        if (cfg.scope === 'me') return 'your own open pages';
+        return cfg.allowPersonalThemes ? 'everyone who isn\u2019t using a theme of their own' : 'all users';
+    }
+
     function setDraftMode(on) {
         if (on && !_draftMode) {
             // Entering draft: seed sessionStorage with current localStorage values
@@ -7769,7 +7778,8 @@ location.reload();</code></pre>
         if (labelDraft) labelDraft.classList.toggle('active', on);
         if (publishBtn) publishBtn.classList.toggle('visible', on);
         if (draftDot) draftDot.style.display = on ? 'inline-block' : 'none';
-        if (sw) sw.setAttribute('data-tooltip', on ? 'Click to exit Draft and push changes live to all users' : 'Click to enter Draft mode \u2014 changes will stay local until you Publish');
+        if (sw) sw.setAttribute('data-tooltip', on ? 'Click to exit Draft and push changes live to ' + liveAudience() : 'Click to enter Draft mode \u2014 changes will stay local until you Publish');
+        if (publishBtn) publishBtn.setAttribute('data-tooltip', 'Push all changes live to ' + liveAudience());
         sessionStorage.setItem('owui_theme_draft_mode', on ? '1' : '0');
         if (window._updateThemeBadge) window._updateThemeBadge();
     }
@@ -7788,7 +7798,7 @@ location.reload();</code></pre>
             body: JSON.stringify({ css, state, sections, origin: TAB_ORIGIN })
         }).then(r => {
             if (r.ok) {
-                showToast('Published! Theme pushed to all users.');
+                showToast('Published! Theme pushed to ' + liveAudience() + '.');
                 setDraftMode(false);
                 // Mirror syncToServer: persist the valve-postprocessed CSS into
                 // the localStorage fallback now that draft mode is off (Storage
@@ -16223,7 +16233,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             badge.classList.remove('active', 'draft');
             if (state === 'active') {
                 badge.classList.add('active');
-                badge.setAttribute('data-tooltip', 'Theme is active \u2014 changes are pushed to all users in real-time');
+                badge.setAttribute('data-tooltip', 'Theme is active \u2014 changes reach ' + liveAudience() + ' in real time');
                 badgeText.textContent = 'Theme Active';
             } else if (state === 'draft') {
                 badge.classList.add('draft');
@@ -17072,6 +17082,9 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             "overlayTransparency": self.valves.overlay_transparency,
             # "me": the signed-in user's personal theme; "instance": everyone's.
             "scope": "me" if user_id else "instance",
+            # Who an instance save reaches: with personal themes on, only
+            # people without a theme of their own
+            "allowPersonalThemes": self.valves.allow_personal_themes,
             "enableAiConsultant": self.valves.enable_ai_consultant,
             # A theme the chat asked for, checked by _read_apply_token.
             "applyOnLoad": apply,

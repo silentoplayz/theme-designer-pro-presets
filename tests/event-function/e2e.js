@@ -433,6 +433,9 @@ test('the designer opens without errors and with nothing to undo', async ({ admi
     await new Promise((r) => setTimeout(r, 400));
   }
   if (JSON.stringify(await theme()) !== before) throw new Error('Undo right after opening changed the theme');
+  // With personal themes on, an instance save reaches only people without one
+  const tip = await page.$eval('#inactive-badge', (b) => b.getAttribute('data-tooltip') || '');
+  if (!/using a theme of their own/.test(tip)) throw new Error('the badge says a save reaches: ' + tip);
   if (page.errors.length) throw new Error('page errors: ' + page.errors.join(' | '));
 });
 
