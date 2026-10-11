@@ -1022,9 +1022,12 @@ class Event:
                         return;
                     }
 
+                    // Scan at most every 2s, during a streaming reply too: a change
+                    // starts the timer only when none is running, so a steady
+                    // stream of changes can't keep pushing the scan back.
                     _observer = new MutationObserver(function() {
-                        clearTimeout(_scanTimer);
-                        _scanTimer = setTimeout(scan, 2000); // Debounce: scan at most every 2s
+                        if (_scanTimer) return;
+                        _scanTimer = setTimeout(function() { _scanTimer = null; scan(); }, 2000);
                     });
                     _observer.observe(container, { childList: true, subtree: true, characterData: true });
 
@@ -2605,6 +2608,14 @@ class Event:
             Event._personal_delivery_cache.pop((user_id, kind), None)
         log.info("[Theme Pro] Removed a personal theme; that user is back on the instance theme")
 
+    def _delete_personal_library(self, user_id: str) -> None:
+        """Remove a user's saved themes and presets, for a Factory Reset in
+        their personal designer."""
+        try:
+            self._get_library_path(user_id).unlink()
+        except FileNotFoundError:
+            pass
+
     def _delete_user_themes(self, user_id: str) -> bool:
         """Remove everything a deleted account kept here: its personal theme
         and its library. True when there was something to remove."""
@@ -3303,6 +3314,9 @@ class Event:
             if is_reset and user_id:
                 # A personal reset puts the user back on the instance theme.
                 await asyncio.to_thread(self._delete_personal_theme, user_id)
+                # Factory Reset also wipes their library; Use instance theme keeps it.
+                if body.get("wipe_library") is True:
+                    await asyncio.to_thread(self._delete_personal_library, user_id)
                 Event._broadcast_personal(user_id)
                 return JSONResponse({"status": "reset"})
 
@@ -3757,9 +3771,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                 var refs = {};
                 MODES.forEach(function (m) {
                     if (!parsed[m]) return;
-                    var mode = JSON.parse(JSON.stringify(parsed[m]));
-                    delete mode.manualOverridesEnabled;
-                    snap[m] = mode;
+                    snap[m] = JSON.parse(JSON.stringify(parsed[m]));
                     refs[m] = { type: 'snapshot', id: 0 };
                 });
                 // The Tool's preset references point into its own galleries.
@@ -5426,7 +5438,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                                 <tr>
                                     <td><code>context</code></td>
                                     <td><code>{ messages, chars, estimatedTokens }</code></td>
-                                    <td>Fired about 2 seconds after the chat stops changing, so during a streaming reply it usually arrives once the reply finishes. <code>messages</code> counts the elements in the chat whose id starts with <code>message-</code> (an open edit or feedback box counts too), <code>chars</code> is the total character count of the user and assistant messages, and <code>estimatedTokens</code> is <code>chars / 4</code>, rounded up. Enables context-aware animations that grow or change as the conversation progresses. External scripts can also dispatch custom data via <code>window.dispatchEvent(new CustomEvent('owui-canvas-context', { detail: { ... } }))</code>.</td>
+                                    <td>Fired at most every 2 seconds while the chat changes, during a streaming reply too. <code>messages</code> counts the elements in the chat whose id starts with <code>message-</code> (an open edit or feedback box counts too), <code>chars</code> is the total character count of the user and assistant messages, and <code>estimatedTokens</code> is <code>chars / 4</code>, rounded up. Enables context-aware animations that grow or change as the conversation progresses. External scripts can also dispatch custom data via <code>window.dispatchEvent(new CustomEvent('owui-canvas-context', { detail: { ... } }))</code>.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -5514,8 +5526,8 @@ function animate() {
                         <p class="doc-subheading">How It Works</p>
                         <p>The engine provides <b>two complementary data sources</b> for context tracking, both delivered as <code>context</code> messages to your script:</p>
 
-                        <p style="margin: 8px 0 4px; font-weight: 600; font-size: 0.72rem; color: var(--text-main);">1. DOM Observer (about 2 seconds after the chat settles)</p>
-                        <p>A <code>MutationObserver</code> on the <code>#messages-container</code> element watches for message changes. Each change restarts a 2-second timer, and once the chat has been still for 2 seconds it scans the <code>.chat-user</code> and <code>.chat-assistant</code> areas and sends:</p>
+                        <p style="margin: 8px 0 4px; font-weight: 600; font-size: 0.72rem; color: var(--text-main);">1. DOM Observer (every 2 seconds, during streaming)</p>
+                        <p>A <code>MutationObserver</code> on the <code>#messages-container</code> element watches for message changes. A change starts a 2-second timer if none is running; when it ends, the observer scans the <code>.chat-user</code> and <code>.chat-assistant</code> areas and sends:</p>
                         <div style="position: relative;">
                         <pre class="doc-pre" id="doc-dom-observer-payload"><code>{ type: 'context', messages: 8, chars: 12400, estimatedTokens: 3100 }</code></pre>
                             <button class="owui-code-btn" style="position: absolute; top: 6px; right: 6px; font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('doc-dom-observer-payload').textContent).then(()=>showToast('Copied to clipboard'))">Copy</button>
@@ -5537,7 +5549,7 @@ function animate() {
                             <li><code>promptTokens</code> / <code>completionTokens</code> &mdash; exact breakdown (supports OpenAI-style <code>prompt_tokens</code>/<code>completion_tokens</code> and Anthropic-style <code>input_tokens</code>/<code>output_tokens</code> field names)</li>
                             <li><code>source</code> &mdash; always <code>'socket'</code> to distinguish from DOM estimates</li>
                         </ul>
-                        <p>Your script receives both. The DOM observer sends an estimate once the chat settles, so during a streaming reply it usually arrives after the reply finishes; the socket interceptor sends an <b>exact snapshot</b> after each response completes. Prefer <code>exactTokens</code> when available.</p>
+                        <p>Your script receives both. The DOM observer sends an estimate at most every 2 seconds, so the character count grows during a streaming reply, while the socket interceptor sends an <b>exact snapshot</b> after each response completes. Prefer <code>exactTokens</code> when available.</p>
 
                         <p>When the chat container leaves the page, for example on a new empty chat, the DOM observer sends <code>{ messages: 0, chars: 0, estimatedTokens: 0 }</code>. Switching between two chats that both have messages simply delivers the new chat&rsquo;s counts. Socket token counts aren&rsquo;t reset when you change chats.</p>
 
@@ -5609,7 +5621,7 @@ else { /* warning — context nearly full! */ }</code></pre>
 
                         <p class="doc-subheading">Tips</p>
                         <ul>
-                            <li><b>Smooth interpolation is essential.</b> Context updates arrive in steps, about 2 seconds after the chat settles. Without easing (<code>ratio += (target - ratio) * 0.01</code>), the animation will jump abruptly between states.</li>
+                            <li><b>Smooth interpolation is essential.</b> Context updates arrive in steps, at most every 2 seconds. Without easing (<code>ratio += (target - ratio) * 0.01</code>), the animation will jump abruptly between states.</li>
                             <li><b>Use <code>GROWTH_SPEED</code> for testing.</b> At <code>MAX_TOKENS = 128000</code>, you&rsquo;d need a very long conversation to see full growth. Set <code>GROWTH_SPEED = 50</code> during development so a few messages take you through the entire lifecycle.</li>
                             <li><b>Stagger growth across elements.</b> If your scene has multiple objects (mushroom clusters, wheat stalks), give each a random <code>growStart</code> offset so they don&rsquo;t all appear simultaneously. This creates a much more natural, organic feel.</li>
                             <li><b>Add a warning state.</b> When <code>contextRatio &gt; 0.85</code>, add a visual cue (color shift, pulsing glow, drooping) so the user knows context is running low &mdash; this is the whole point of the feature.</li>
@@ -5796,10 +5808,10 @@ self.onmessage = function(e) {
                             <li><b>Undo / Redo:</b> Full history support via the <b>Undo</b> and <b>Redo</b> buttons in the footer, or <b>Ctrl+Z</b> / <b>Ctrl+Y</b> (<b>Cmd</b> on macOS). The shortcuts don&rsquo;t fire while you&rsquo;re typing in a field. The history keeps the last 50 steps of palette changes, overrides, locks, CSS, Canvas, Manual Variable Overrides, and Gradient Background.</li>
                             <li><b>Reset Mode:</b> Clears only the current active mode — OKLCH sliders, variable overrides, locks, Custom CSS, Canvas FX, Manual Variable Overrides, and Gradient Background are all wiped. A confirmation dialog gives you the option to create a backup snapshot first.</li>
                             <li><b>Global Reset:</b> Resets all 4 modes to factory defaults &mdash; OKLCH sliders, variable overrides, locks, Custom CSS, Canvas FX, Manual Variable Overrides, and Gradient Background. Saved snapshots and preset libraries are kept. A confirmation dialog gives you the option to create a backup snapshot first.</li>
-                            <li><b>Factory Reset:</b> Permanently removes <b>all</b> data: active theme state, saved snapshot library, CSS presets, Canvas presets, Gradient presets, and saved metadata. Its confirmation downloads a backup first unless you untick <b>Export a backup before wiping</b>. The built-in Tactical Liquid Grid Canvas FX preset and Tactical HUD CSS preset come back on the next load. In a personal <b>Themes</b> tab, it removes your personal theme, but your library comes back from the server on the next load.</li>
+                            <li><b>Factory Reset:</b> Permanently removes <b>all</b> data: active theme state, saved snapshot library, CSS presets, Canvas presets, Gradient presets, and saved metadata. Its confirmation downloads a backup first unless you untick <b>Export a backup before wiping</b>. The built-in Tactical Liquid Grid Canvas FX preset and Tactical HUD CSS preset come back on the next load. In a personal <b>Themes</b> tab, it removes your personal theme and your library.</li>
                             <li><b>JSON View:</b> Click the <b>{ } JSON</b> button in the header to view the current theme as formatted JSON in a modal. Includes a <b>Collapse/Expand</b> toggle for minified output and a <b>Copy to Clipboard</b> button. If a snapshot is active, the output includes its metadata (name, version, author, description, etc.).</li>
                             <li><b>Clipboard Import (JSON):</b> Pressing <b>Ctrl+V</b> with theme JSON on your clipboard, while you aren&rsquo;t typing in a field, opens an import dialog. The tool auto-detects the theme structure, checks for duplicates, and warns about embedded Canvas FX scripts for security review before importing. <b>Import Without Applying</b> adds the theme to your gallery without switching to it. Canvas FX and CSS preset backups can be pasted the same way.</li>
-                            <li><b>Modal Shortcuts:</b> <b>Escape</b> closes the designer&rsquo;s dialogs and <b>Enter</b> confirms the primary action. <b>Backspace</b> also cancels most confirmation dialogs when you aren&rsquo;t typing in a field. The Themes, Style Overrides and Canvas FX import dialogs close when you click outside them.</li>
+                            <li><b>Modal Shortcuts:</b> <b>Escape</b> closes the designer&rsquo;s dialogs and <b>Enter</b> confirms the primary action. <b>Backspace</b> also cancels most confirmation dialogs when you aren&rsquo;t typing in a field.</li>
                         </ul>
                     </div>
                 </details>
@@ -5810,7 +5822,7 @@ self.onmessage = function(e) {
                         <p>Theme Designer Pro features isolated libraries for Themes, Custom CSS, Canvas Scripts, and Gradient Presets. Themes save complete snapshots of all 4 modes, including locks, CSS, Canvas scripts, Manual Variable Overrides, and Gradient Background configuration.</p>
                         <h4>Theme Gallery</h4>
                         <ul>
-                            <li><b>Snapshot Coverage:</b> When saving a theme snapshot, all associated data is captured: OKLCH sliders, variable locks &amp; overrides, Manual Variable Overrides, Custom CSS, Canvas FX scripts, and Gradient Background configuration across all 4 modes. The Manual Variable Overrides text is saved but loads switched off, so tick <b>Enabled</b> to apply it, and loading a snapshot locks every variable it overrides.</li>
+                            <li><b>Snapshot Coverage:</b> When saving a theme snapshot, all associated data is captured: OKLCH sliders, variable locks &amp; overrides, Manual Variable Overrides, Custom CSS, Canvas FX scripts, and Gradient Background configuration across all 4 modes. The Manual Variable Overrides switch is saved with the text, and a theme saved before 1.11.0, which has no switch, loads its overrides switched on when it has any. Loading a snapshot locks every variable it overrides.</li>
                             <li><b>Theme Metadata:</b> When saving a snapshot, you can attach rich metadata &mdash; <b>Name</b>, <b>Description</b>, <b>Author</b>, <b>Theme Version</b>, <b>Target WebUI Version</b>, <b>Repository URL</b>, and a <b>Theme Update URL</b>. Metadata is embedded in exported <code>.json</code> files and preserved through imports, enabling a robust community theme sharing ecosystem.</li>
                             <li><b>Visual Indicators:</b> Hovering over a theme card displays a rich tooltip showing the name, version, author, description, and color-coded feature tags: <span style="color:#6ee7b7;">Custom CSS</span>, <span style="color:#fdba74;">Canvas FX</span>, <span style="color:#f9a8d4;">Gradient</span>, <span style="color:#c4b5fd;">Overrides</span>, and <span style="color:#67e8f9;">Linked</span> (URL-linked themes).</li>
                             <li><b>Search:</b> Click the 🔍 icon to search themes by name, author, or description. Press Escape to close the search bar.</li>
@@ -5818,8 +5830,8 @@ self.onmessage = function(e) {
                             <li><b>Sort:</b> Click the sort icon to cycle through <b>Default</b> (newest first), <b>A&rarr;Z</b>, or <b>Z&rarr;A</b> alphabetical sorting.</li>
                             <li><b>Card Actions:</b> Hovering a theme card shows ✎ edit details, 💾 overwrite with your current settings, × delete, ↓ export, and ⟳ check for an update when the theme has an Update URL and update checks are on.</li>
                             <li><b>Manual Editor:</b> The save and edit dialogs have a <b>{ } Manual Editor</b> that edits the theme as JSON, with live validation.</li>
-                            <li><b>Import from URL:</b> Click the Import button to open a modal where you can paste a direct URL to a theme JSON file (e.g., a GitHub raw link). The tool fetches it, adds it to your library, and applies it right away, which outside Draft mode means live for every user. URL imports skip the duplicate check and don&rsquo;t show the Canvas FX warning, so only import from sources you trust. You can also import local <code>.json</code> files from the same modal.</li>
-                            <li><b>Duplicate Detection:</b> When importing themes from a file or the clipboard, the tool automatically checks for duplicates and skips identical themes already in your gallery.</li>
+                            <li><b>Import from URL:</b> Click the Import button to open a modal where you can paste a direct URL to a theme JSON file (e.g., a GitHub raw link). The tool fetches it, adds it to your library, and applies it right away, which outside Draft mode means live for every user. If the theme runs a Canvas FX script, it asks first, and the theme stays in your gallery if you say no. You can also import local <code>.json</code> files from the same modal, or drop them onto the designer, with the same check.</li>
+                            <li><b>Duplicate Detection:</b> When importing themes from a file, a URL or the clipboard, the tool checks for duplicates and skips identical themes already in your gallery.</li>
                         </ul>
                         <h4>Preset Galleries</h4>
                         <ul>
@@ -5850,7 +5862,7 @@ self.onmessage = function(e) {
                         <ul>
                             <li><b>Theme Update URL:</b> When saving or editing a theme snapshot, provide a direct URL to the theme's JSON file (e.g., a GitHub raw link). This URL is where the designer will check for newer versions.</li>
                             <li><b>Exporting for Updates:</b> Use the <b>Export</b> button (↓) on any snapshot to download a <code>.json</code> file. This exported file includes all metadata (name, version, author, description, updateUrl) and can be hosted anywhere accessible via HTTP.</li>
-                            <li><b>Version Field:</b> Set a version made of plain dotted numbers, such as <code>1.2.0</code>, when saving. An update is only offered when the remote version is <i>higher</i> than the local one, compared number by number. A prefix like <code>v</code> or a tag like <code>-beta</code> stops update detection for that theme.</li>
+                            <li><b>Version Field:</b> Set a version such as <code>1.2.0</code> when saving. An update is only offered when the remote version is <i>higher</i> than the local one, compared number by number. A leading <code>v</code> is ignored, and a pre-release such as <code>1.2.0-beta.1</code> counts as older than <code>1.2.0</code>.</li>
                             <li><b>Valid Updates:</b> The remote file must contain at least a <code>dark</code> and a <code>light</code> mode, or the check reports &ldquo;Invalid theme format&rdquo;.</li>
                         </ul>
                         <h4>Per-Theme Updates</h4>
@@ -6372,7 +6384,7 @@ location.reload();</code></pre>
                 <details class="doc-accordion" open>
                     <summary style="color: #ef4444;">28. Danger Zone <i data-icon="chevron"></i></summary>
                     <div class="doc-inner" style="display:flex; flex-direction:column; align-items:center; gap:16px;">
-                        <p style="margin:0; text-align:center; color:var(--text-muted); font-size:0.75rem; line-height:1.6;">Permanently wipe <b>all</b> Theme Designer Pro data including your theme gallery, CSS snippets, canvas scripts, gradient presets, and active configuration. This action cannot be undone. In a personal <b>Themes</b> tab, it removes your personal theme, and your library comes back from the server on the next load.</p>
+                        <p style="margin:0; text-align:center; color:var(--text-muted); font-size:0.75rem; line-height:1.6;">Permanently wipe <b>all</b> Theme Designer Pro data including your theme gallery, CSS snippets, canvas scripts, gradient presets, and active configuration. This action cannot be undone. In a personal <b>Themes</b> tab, it removes your personal theme and your library.</p>
                         <button class="btn" id="factory-reset-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 10px 24px; font-weight: 600; border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s; width: 100%; max-width: 320px;">Factory Reset (Wipe All Data)</button>
                     </div>
                 </details>
@@ -7325,9 +7337,7 @@ location.reload();</code></pre>
     }
 
     function cleanMode(m) {
-        const c = structuredClone(m);
-        delete c.manualOverridesEnabled;
-        return c;
+        return structuredClone(m);
     }
 
     // Per-field validation applied on every import path. normalizeModeData()
@@ -7484,7 +7494,7 @@ location.reload();</code></pre>
         return list;
     }
 
-    function normalizeModeData(d, { forExport = false } = {}) {
+    function normalizeModeData(d) {
         if (!d) return d;
         // Format normalization (handles JSON Viewer and other non-standard formats)
         if (d.oklch && d.h === undefined) {
@@ -7499,9 +7509,12 @@ location.reload();</code></pre>
             d.locks = o;
         }
         delete d.variables;
-        const result = validateModeData({ ...createDefaultModeData(), ...d });
-        if (forExport) delete result.manualOverridesEnabled;
-        return result;
+        // Themes saved before the switch was kept have none: their overrides
+        // were meant to apply, so text means on.
+        if (d.manualOverridesEnabled === undefined && typeof d.manualOverrides === 'string' && d.manualOverrides.trim()) {
+            d.manualOverridesEnabled = true;
+        }
+        return validateModeData({ ...createDefaultModeData(), ...d });
     }
 
     async function loadFromUrl({ urlInputId, statusId, loadBtnId, modalId, fetchMsg, emptyMsg, defaultName, defaultExt, mimeType, importFn }) {
@@ -11238,7 +11251,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         fetch('{ROUTE_BASE}', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ css: '', reset: true })
+            // A personal designer's reset keeps the library unless asked to wipe it.
+            body: JSON.stringify({ css: '', reset: true, wipe_library: true })
         }).then(r => {
             if (r.ok) {
                 console.log('[Theme Pro] Factory reset complete — reloading');
@@ -11765,7 +11779,10 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             }
             // Also sync manual CSS variable overrides
             themeData[mode].manualOverrides = sourceData.manualOverrides || '';
-            themeData[mode].manualOverridesEnabled = !!sourceData.manualOverridesEnabled;
+            // A snapshot saved before the switch was kept has none: text means on.
+            themeData[mode].manualOverridesEnabled = sourceData.manualOverridesEnabled !== undefined
+                ? !!sourceData.manualOverridesEnabled
+                : !!(sourceData.manualOverrides && sourceData.manualOverrides.trim());
         }
         if (opts.syncCss) {
             themeData[mode].customCSS = sourceData.customCSS || '';
@@ -12064,7 +12081,10 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             ['delete-gradient-modal', 'confirm-delete-gradient-btn', true],
             ['rename-gradient-modal', 'confirm-rename-gradient-btn', false],
             ['delete-all-gradient-modal', 'confirm-delete-all-gradient-btn', true],
-            ['import-gradient-modal', null, true]
+            ['import-gradient-modal', null, true],
+            ['import-theme-modal', null, true],
+            ['import-css-modal', null, true],
+            ['import-canvas-modal', null, true]
         ];
 
         const activeEl = document.activeElement;
@@ -12409,7 +12429,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     $('confirm-clipboard-import-btn').onclick = async () => {
         if (pendingClipboardData) {
             const file = new File([pendingClipboardData], "clipboard-import.json", { type: "application/json" });
-            await handleFilesImport([file]);
+            await handleFilesImport([file], { canvasConfirmed: true });
             pendingClipboardData = null;
         }
         hideModal('import-clipboard-modal');
@@ -12429,11 +12449,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     document.getElementById('export-all-btn').onclick = () => {
         const snapshots = getSnapshots();
         if (snapshots.length === 0) return showToast("Error: Your library is empty!");
-        const cleanedSnapshots = snapshots.map(s => {
-            const clone = structuredClone(s);
-            MODES.forEach(m => { if (clone[m]) delete clone[m].manualOverridesEnabled; });
-            return clone;
-        });
+        const cleanedSnapshots = snapshots.map(s => structuredClone(s));
         const dateStr = new Date().toISOString().split('T')[0];
         downloadFile({ themes: cleanedSnapshots, isLibraryBackup: true, version: "{VERSION}" }, `owui-themes-backup-${dateStr}.json`);
     };
@@ -12530,7 +12546,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         };
         MODES.forEach(mode => {
             if (snap[mode]) {
-                normalized[mode] = normalizeModeData(structuredClone(snap[mode]), { forExport: true });
+                normalized[mode] = normalizeModeData(structuredClone(snap[mode]));
             }
         });
         return normalized;
@@ -12567,7 +12583,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         
         // Match export mode order: dark, light, oled, her
         MODES.forEach(mode => {
-            snapshot[mode] = normalizeModeData(structuredClone(themeData[mode]), { forExport: true });
+            snapshot[mode] = normalizeModeData(structuredClone(themeData[mode]));
         });
         
         return JSON.stringify(snapshot, null, collapsed ? 0 : 2);
@@ -12689,7 +12705,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         };
         const snapshot = { ...metadata };
         MODES.forEach(mode => {
-            snapshot[mode] = normalizeModeData(structuredClone(themeData[mode]), { forExport: true });
+            snapshot[mode] = normalizeModeData(structuredClone(themeData[mode]));
         });
         return JSON.stringify(snapshot, null, collapsed ? 0 : 2);
     }
@@ -13066,7 +13082,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         });
     }
 
-    async function handleFilesImport(files, { skipDuplicateCheck = false, applyAfter = true } = {}) {
+    async function handleFilesImport(files, { applyAfter = true, canvasConfirmed = false } = {}) {
         let snapshots = getSnapshots();
         let importedCount = 0;
         let skippedCount = 0;
@@ -13146,7 +13162,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                         if (t.her.l === 0) t.her.l = 20;
                         MODES.forEach(m => { t[m] = normalizeModeData(t[m]); if (!t[m].paletteEnabled) t[m].paletteEnabled = true; });
                         
-                        if (!skipDuplicateCheck && isThemeDuplicate(t, snapshots)) { skippedCount++; return; }
+                        if (isThemeDuplicate(t, snapshots)) { skippedCount++; return; }
                         snapshots.unshift(t); 
                         importedCount++; 
                     });
@@ -13176,7 +13192,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                         newTheme = migrateLegacyTheme({ ...data, name: file.name.replace('.json', '') });
                     }
                     if (newTheme) {
-                        if (!skipDuplicateCheck && isThemeDuplicate(newTheme, snapshots)) {
+                        if (isThemeDuplicate(newTheme, snapshots)) {
                             skippedCount++;
                         } else {
                             snapshots.unshift(newTheme); 
@@ -13191,6 +13207,16 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         
         if (importedCount > 0) {
             saveSnapshots(snapshots);
+            // A Canvas FX script is JavaScript that runs for everyone who sees
+            // the theme, so applying one from a file or URL asks first. The
+            // clipboard import already warned in its own dialog.
+            if (applyAfter && !canvasConfirmed) {
+                const first = snapshots[0];
+                const runsScript = MODES.some(m => first[m] && first[m].canvasEnabled && first[m].canvasScript);
+                if (runsScript && !window.confirm(`"${first.name || 'This theme'}" runs a Canvas FX script, which is JavaScript that runs in the browser of everyone who sees this theme. Apply it now? It stays in your gallery either way.`)) {
+                    applyAfter = false;
+                }
+            }
             if (applyAfter) {
                 const firstImport = snapshots[0];
                 shouldInject = true;
@@ -13483,7 +13509,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         loadBtnId: 'import-url-load-btn', modalId: 'import-theme-modal',
         fetchMsg: 'Fetching theme from URL...', emptyMsg: 'Please enter a URL to a theme JSON file.',
         defaultName: 'theme.json', defaultExt: '.json', mimeType: 'application/json',
-        importFn: (files) => handleFilesImport(files, { skipDuplicateCheck: true })
+        importFn: (files) => handleFilesImport(files)
     });
 
     // Allow Enter key to trigger URL load
@@ -13600,12 +13626,30 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         return JSON.parse(await readCappedText(res, cap));
     }
 
+    // Dotted numbers, with an optional leading "v" and a pre-release tag
+    // ("1.2.0-beta.1") that sorts before its release, as in semver. A part
+    // that isn't a number counts as 0 instead of making every comparison fail.
     const semverCompare = (a, b) => {
-        const pa = (a || '0.0.0').split('.').map(Number);
-        const pb = (b || '0.0.0').split('.').map(Number);
-        for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
-            const diff = (pa[i] || 0) - (pb[i] || 0);
+        const parse = (v) => {
+            const m = String(v || '0.0.0').trim().replace(/^v/i, '').split('+')[0].match(/^([^-]*)(?:-(.*))?$/);
+            return { nums: m[1].split('.').map(n => parseInt(n, 10) || 0), pre: m[2] || '' };
+        };
+        const pa = parse(a), pb = parse(b);
+        for (let i = 0; i < Math.max(pa.nums.length, pb.nums.length); i++) {
+            const diff = (pa.nums[i] || 0) - (pb.nums[i] || 0);
             if (diff !== 0) return diff;
+        }
+        if (pa.pre === pb.pre) return 0;
+        if (!pa.pre) return 1;
+        if (!pb.pre) return -1;
+        const xa = pa.pre.split('.'), xb = pb.pre.split('.');
+        for (let i = 0; i < Math.max(xa.length, xb.length); i++) {
+            if (xa[i] === undefined) return -1;
+            if (xb[i] === undefined) return 1;
+            const na = /^\d+$/.test(xa[i]), nb = /^\d+$/.test(xb[i]);
+            if (na && nb) { const d = Number(xa[i]) - Number(xb[i]); if (d) return d; }
+            else if (na !== nb) return na ? -1 : 1;
+            else if (xa[i] !== xb[i]) return xa[i] < xb[i] ? -1 : 1;
         }
         return 0;
     };
@@ -15426,7 +15470,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             const snapshots = getSnapshots();
             if (snapshots[index]) {
                 const cleanData = structuredClone(themeData);
-                MODES.forEach(m => { if (cleanData[m]) delete cleanData[m].manualOverridesEnabled; });
                 snapshots[index] = {
                     ...snapshots[index],
                     ...cleanData
@@ -15495,7 +15538,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
               Storage.set('metadata', metadata);
               
               const cleanData = structuredClone(themeData);
-              MODES.forEach(m => { if (cleanData[m]) delete cleanData[m].manualOverridesEnabled; });
               const newTheme = {
                   name: name,
                   ...metadata,
