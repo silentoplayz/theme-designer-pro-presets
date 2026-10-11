@@ -1,4 +1,4 @@
-# Theme Designer Pro — Preset Gallery
+# Theme Designer Pro
 
 [![Build Bundles](https://github.com/silentoplayz/theme-designer-pro-presets/actions/workflows/build-bundles.yml/badge.svg)](https://github.com/silentoplayz/theme-designer-pro-presets/actions/workflows/build-bundles.yml)
 ![Canvas FX](https://img.shields.io/badge/Canvas_FX-84_animations-blue)
@@ -6,210 +6,153 @@
 ![Themes](https://img.shields.io/badge/Themes-33_themes-green)
 ![Gradients](https://img.shields.io/badge/Gradients-13_presets-orange)
 
-A curated collection of themes, Canvas FX animations, CSS presets, and gradient packs for [Theme Designer Pro](https://openwebui.com/posts/49fac49a-7cc3-4b9f-8f75-b3916abbfa5f) — the native theming tool for [Open WebUI](https://github.com/open-webui/open-webui).
+Theme Designer Pro themes your whole [Open WebUI](https://github.com/open-webui/open-webui): a palette built from one hue, animated Canvas FX backgrounds, gradients and custom CSS. Admins set the theme every user sees, and each user can have a theme of their own. This repository holds Theme Designer Pro itself and its community presets.
 
-> **[Browse the Preset Gallery →](https://silentoplayz.github.io/theme-designer-pro-presets/gallery/)** to preview every theme, effect, and gradient before importing. The [Theme Designer Pro website](https://silentoplayz.github.io/theme-designer-pro-presets/) has a live demo and install steps.
+**[Website](https://silentoplayz.github.io/theme-designer-pro-presets/)** · **[Studio](https://silentoplayz.github.io/theme-designer-pro-presets/studio/)** · **[Preset gallery](https://silentoplayz.github.io/theme-designer-pro-presets/gallery/)** · **[Documentation](event-function/README.md)** · **[Discussions](https://github.com/silentoplayz/theme-designer-pro-presets/discussions)**
 
-> **Import any preset** directly into Theme Designer Pro using the built-in Import button, URL import, or drag-and-drop.
-
-> **💬 [Join the Discussions](https://github.com/silentoplayz/theme-designer-pro-presets/discussions)** — ask questions in [Q&A](https://github.com/silentoplayz/theme-designer-pro-presets/discussions/categories/q-a), show off your setup in [Show and tell](https://github.com/silentoplayz/theme-designer-pro-presets/discussions/6), or pitch presets in [Ideas](https://github.com/silentoplayz/theme-designer-pro-presets/discussions/7). Bugs still go to [Issues](https://github.com/silentoplayz/theme-designer-pro-presets/issues).
+[![Theme Designer Pro: make Open WebUI look like yours](docs/og-preview.png)](https://silentoplayz.github.io/theme-designer-pro-presets/)
 
 ---
 
-## 📦 Repository Structure
+## ✨ Start here
 
-```
-theme-designer-pro-presets/
-├── .github/
-│   ├── ISSUE_TEMPLATE/      # Bug report, preset, & theme submission forms
-│   ├── PULL_REQUEST_TEMPLATE.md
-│   └── workflows/
-│       ├── build-bundles.yml   # CI: validate → build → commit
-│       ├── deploy-pages.yml    # CD: deploy docs/ to GitHub Pages
-│       └── theme-submission.yml # Automated theme submission processing
-├── bundles/                 # Combined import-ready JSON files
-├── canvas-fx/               # Canvas FX animation scripts (.js)
-├── css-presets/             # CSS-only styling presets (.css)
-├── docs/                    # GitHub Pages gallery site (see docs/README.md to run locally)
-├── event-function/          # Theme Designer Pro event function + documentation
-├── gradients/               # Gradient preset packs (.json)
-│   ├── animated/            #   Animated/transitioning gradients
-│   │   ├── linear/
-│   │   ├── mesh/
-│   │   └── radial/
-│   └── still/               #   Non-animated gradients
-│       ├── linear/
-│       ├── mesh/
-│       └── radial/
-├── schemas/                 # JSON schemas for validation
-├── scripts/                 # Build, validation, and manifest tooling
-├── themes/                  # Complete theme presets (.json)
-├── launcher/                # Launcher companion tool for the event function + documentation
-│   ├── theme_designer_pro_launcher.py
-│   └── README.md
-├── tools/                   # Theme Designer Pro tool (legacy, no longer updated) + documentation
-│   ├── theme_designer_pro.py
-│   └── README.md
-├── .gitignore
-├── CONTRIBUTING.md
-├── LICENSE
-├── manifest.json            # Centralized theme update manifest
-└── README.md
-```
-
-> **Looking for the theming tools?** The Theme Designer Pro tool lives in [`tools/`](tools/), the event function lives in [`event-function/`](event-function/), and the companion launcher tool lives in [`launcher/`](launcher/).
-
----
-
-## 🚀 Quick Start
-
-### Import Everything at Once
-
-1. Open **Theme Designer Pro** in Open WebUI
-2. Go to any Import modal → paste this URL:
-   ```
-   https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/everything.json
-   ```
-3. Click **Load URL** — all animations, CSS, themes, and gradients are imported in one shot
-
-### Import a Category Bundle
-
-Download or URL-import any bundle from [`bundles/`](bundles/):
-
-| Bundle | Description |
+| I want to… | Go to |
 |---|---|
-| **`everything.json`** | **All presets in one import** |
+| Theme my Open WebUI | [Install the event function](#-install) |
+| Design a theme without installing anything yet | The [Studio](https://silentoplayz.github.io/theme-designer-pro-presets/studio/), which designs in your browser and downloads a theme file the designer imports |
+| Find a ready-made look | The [preset gallery](https://silentoplayz.github.io/theme-designer-pro-presets/gallery/), with a live preview of every theme, animation, gradient and CSS preset |
+| Change my theme from a chat | The [Launcher Tool](launcher/README.md) |
+| Share a preset I made | [Contributing](CONTRIBUTING.md), or the [theme submission form](https://github.com/silentoplayz/theme-designer-pro-presets/issues/new?template=theme-submission.yml) |
+| Ask a question or suggest an idea | [Discussions](https://github.com/silentoplayz/theme-designer-pro-presets/discussions): [Q&A](https://github.com/silentoplayz/theme-designer-pro-presets/discussions/categories/q-a), [Show and tell](https://github.com/silentoplayz/theme-designer-pro-presets/discussions/6) or [Ideas](https://github.com/silentoplayz/theme-designer-pro-presets/discussions/7). Bugs go to [Issues](https://github.com/silentoplayz/theme-designer-pro-presets/issues). |
+
+---
+
+## 🚀 Install
+
+Theme Designer Pro is an event function for **Open WebUI v0.11.0 or later**.
+
+1. **Add the event function.** Get it from [its community page](https://openwebui.com/posts/b44c56ec-1fbd-4b42-9787-2a4facd5f047), or paste [`event-function/theme_designer_pro_event.py`](event-function/theme_designer_pro_event.py) into **Admin Panel > Functions > Create New Function**.
+2. **Turn it on** in the Functions list.
+3. **Open the designer.** In **Settings**, choose **Themes** in the Admin section, or go to `/api/v1/theme-designer` for the full-screen designer.
+
+To give every user a theme of their own, turn on the event function's **Allow Personal Themes** valve. Each user then gets a **Themes** tab in their own Settings.
+
+> [!WARNING]
+> **Behind nginx or another reverse proxy?** Add `proxy_buffering off;` to its location block. Without it, other pages see a theme change only after a reload.
+
+The [event function's README](event-function/README.md) covers every feature, valve and setting.
+
+---
+
+## 📥 Importing presets
+
+Every preset in the gallery has an import link. In Theme Designer Pro, open any **Import** dialog, paste the link and choose **Load URL**. A regular GitHub page link works too: the designer turns it into the raw file link.
+
+You can also drop any `.js`, `.css` or `.json` file from this repository anywhere on the designer, and it goes to the right gallery.
+
+### Everything at once
+
+Paste this link into an Import dialog to get every animation, CSS preset, theme and gradient in one go:
+
+```
+https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/everything.json
+```
+
+### One kind at a time
+
+| Bundle in [`bundles/`](bundles/) | Contains |
+|---|---|
+| **`everything.json`** | **Every preset** |
 | `canvas-fx-all.json` | All Canvas FX scripts |
 | `css-presets-all.json` | All CSS presets |
 | `themes-all.json` | All themes |
-| `gradients-all.json` | All gradient presets |
-| `gradients-still.json` | Static (non-animated) gradients only |
-| `gradients-animated.json` | Animated gradients only |
+| `gradients-all.json` | All gradients |
+| `gradients-still.json` | Gradients that don't move |
+| `gradients-animated.json` | Gradients that drift |
 
-### Import Individual Presets
+### One preset at a time
 
-- **Canvas FX**: Canvas FX tab → Import → select a `.js` file from [`canvas-fx/`](canvas-fx/)
-- **CSS**: Style Overrides tab → Import → select a `.css` file from [`css-presets/`](css-presets/)
-- **Themes**: Theme Library → Import → select a `.json` from [`themes/`](themes/)
-- **Gradients**: Gradient tab → Import → select a `.json` from [`gradients/`](gradients/)
-
-### Drag & Drop
-
-Drag any `.js`, `.css`, or `.json` file directly onto the Theme Designer Pro interface.
-
-### URL Import
-
-Paste any GitHub file URL into an import modal's URL field — Theme Designer Pro automatically converts `github.com` blob URLs to raw content URLs.
+- **Canvas FX:** Canvas FX tab > Import, with a `.js` file from [`canvas-fx/`](canvas-fx/)
+- **CSS:** Style Overrides tab > Import, with a `.css` file from [`css-presets/`](css-presets/)
+- **Themes:** Theme Library > Import, with a `.json` file from [`themes/`](themes/)
+- **Gradients:** Gradient tab > Import, with a `.json` file from [`gradients/`](gradients/)
 
 ---
 
-## 📁 Preset Types
+## 📁 What's in this repository
 
-### 🎨 Canvas FX ([`canvas-fx/`](canvas-fx/))
+### The plugins
 
-JavaScript animation scripts that run behind the Open WebUI interface via OffscreenCanvas in a Web Worker. Each script is a standalone `.js` file. Many include a `CONFIG` block with tunable properties.
+| Folder | What it is |
+|---|---|
+| [`event-function/`](event-function/) | **Theme Designer Pro**, the event function. The maintained version: the instance theme, personal themes, the designer in Settings, and live updates to every open page. Themes are served through Open WebUI's shared `/static/loader.js` and `/static/custom.css`, so it works alongside other plugins and never writes to the frontend build. |
+| [`launcher/`](launcher/) | **Theme Designer Pro Launcher**, a companion Tool. It opens the designer inside a chat, or turns a description such as _"a warm copper theme"_ into a theme. It needs the event function, and **iframe Sandbox Allow Same Origin** turned on in each user's **Settings > Interface**. |
+| [`tools/`](tools/) | **Theme Designer Pro Tool**, the original chat-based version, which kept themes in one browser. **Legacy:** it gets no more updates, and the event function covers what it did. |
 
-### 🎭 Themes ([`themes/`](themes/))
+### The presets
 
-Complete theme configurations including OKLCH color tokens, CSS overrides, Canvas FX selection, and per-mode settings (dark, light, OLED, her). Exported as `.json` files. Every theme includes an `updateUrl` for automatic update checking.
+| Folder | What's in it |
+|---|---|
+| [`themes/`](themes/) | Complete themes as `.json`: a palette and settings for each mode (Dark, OLED, Light and Her), with any Canvas FX, gradient and custom CSS they use. Each has an `updateUrl`, so the designer can check it for updates. |
+| [`canvas-fx/`](canvas-fx/) | Animations as standalone `.js` files. They run behind the interface in a Web Worker on an OffscreenCanvas, and many have a `CONFIG` block of settings you can tune. |
+| [`gradients/`](gradients/) | Gradient presets, sorted by motion (`still/`, `animated/`) and then by type (`linear/`, `radial/`, `mesh/`). |
+| [`css-presets/`](css-presets/) | Styling as plain `.css` files: fonts, colors, spacing, components and effects. |
+| [`bundles/`](bundles/) | The presets combined into single files for one import each. Built by CI; see [`bundles/README.md`](bundles/README.md). |
 
-### 🖌️ CSS Presets ([`css-presets/`](css-presets/))
+### Everything else
 
-CSS-only styling overrides — fonts, colors, spacing, component styles, and visual effects. Stored as raw `.css` files.
-
-### 🌈 Gradients ([`gradients/`](gradients/))
-
-Gradient presets for backgrounds, panels, and UI elements. Organized by motion (`still`/`animated`) and type (`linear`/`radial`/`mesh`).
-
-### 📦 Bundles ([`bundles/`](bundles/))
-
-Combined JSON files for one-click bulk import. See [`bundles/README.md`](bundles/README.md).
-
-### 📐 Schemas ([`schemas/`](schemas/))
-
-JSON Schema definitions documenting the data formats for themes, Canvas FX, CSS, gradient presets, and the update manifest.
-
-### 📋 Manifest ([`manifest.json`](manifest.json))
-
-Centralized theme update manifest listing every theme with its current version and raw GitHub `updateUrl`. Theme Designer Pro fetches this in a single request to check all themes for updates at once.
-
-### 🛠️ Tool ([`tools/`](tools/))
-
-The Theme Designer Pro Open WebUI **tool** — invoked via AI chat, renders inside an iframe artifact, and persists themes in browser localStorage. See [`tools/README.md`](tools/README.md).
-
-> **Legacy:** the Tool gets no more updates. Use the Event Function, which since 1.10.0 also gives every user a personal theme, saved with their account rather than in one browser.
-
-### ⚡ Event Function ([`event-function/`](event-function/))
-
-The Theme Designer Pro **event function** — the maintained version, with server-side persistence and real-time SSE push to all connected users. Admins design the instance theme from a **Themes** tab in Settings, and with **Allow Personal Themes** on, every user designs their own personal theme from a **Themes** tab of their own. Themes are served through Open WebUI's shared `/static/loader.js` and `/static/custom.css`, composed per request, so it coexists with other plugins and never writes to the frontend build. See [`event-function/README.md`](event-function/README.md) for installation and how it differs from the tool.
-
-### 🚀 Launcher Tool ([`launcher/`](launcher/))
-
-A lightweight **companion tool** for the Event Function that brings the designer into an Open WebUI chat. Ask it to open the designer, or describe a theme (_"a warm copper theme"_) and the chat model applies it, as the legacy Tool did. Users get their own personal theme; admins can also change the instance theme. Requires the Event Function to be installed and running, and **iframe Sandbox Allow Same Origin** turned on in each user's **Settings > Interface**. See [`launcher/README.md`](launcher/README.md).
+| Path | What it is |
+|---|---|
+| [`docs/`](docs/) | The [website](https://silentoplayz.github.io/theme-designer-pro-presets/): the home page, the Studio and the preset gallery. [`docs/README.md`](docs/README.md) says how to run it locally. |
+| [`manifest.json`](manifest.json) | Every theme with its current version and update link, so the designer can check all themes for updates in one request. Built by CI. |
+| [`schemas/`](schemas/) | JSON schemas for themes, Canvas FX, CSS presets, gradients and the manifest. |
+| [`scripts/`](scripts/) | Validation and the build scripts CI runs. |
+| [`.github/`](.github/) | Issue forms (bug report, preset and theme submissions), the pull request template, and the workflows below. |
 
 ---
 
-## ⚙️ CI/CD
+## ⚙️ How the repository runs itself
 
-This repository uses three [GitHub Actions workflows](.github/workflows/) to automate validation, builds, deployments, and community submissions.
+Three [GitHub Actions workflows](.github/workflows/) validate presets, build the generated files, process submissions and publish the website.
 
 ### Validate & Build Bundles ([`build-bundles.yml`](.github/workflows/build-bundles.yml))
 
-#### What Happens on Push to `main`
+Runs on pushes to `main` that change a preset or a script: `.js` in `canvas-fx/`, `.css` in `css-presets/`, `.json` in `themes/`, `gradients/` or `schemas/`, or `.js` in `scripts/`. Edits to documentation don't start it.
 
-> The workflow only triggers when preset files are modified (`.js` in `canvas-fx/`, `.css` in `css-presets/`, `.json` in `themes/`, `gradients/`, `schemas/`, or `.js` in `scripts/`). README and documentation edits do not trigger a rebuild.
+1. **Validate.** [`scripts/validate.js`](scripts/validate.js) checks every preset:
+   - **Canvas FX:** an `onmessage` handler, no DOM access, and a heartbeat (a warning when it's missing)
+   - **CSS:** not empty, and valid syntax
+   - **Themes:** a `name`, an `updateUrl`, at least one mode, and valid OKLCH color fields
+   - **Gradients:** the type, the stops, and the right subfolder
+   - **Bundles:** flags that match what each bundle contains
+2. **Build** the bundles, `manifest.json`, the preset counts in this README's badges, and `docs/catalog.json`, the list the website draws from.
+3. **Commit** the generated files when anything changed.
 
-1. **Validate** — `scripts/validate.js` runs against all preset files:
-   - Canvas FX: checks for `onmessage` handler, forbidden DOM access, heartbeat (warning)
-   - CSS: verifies non-empty files with valid syntax
-   - Themes: validates required `name`, `updateUrl`, at least one mode, and OKLCH color fields
-   - Gradients: checks type, stops, correct subdirectory placement
-   - Bundles: verifies backup flags match their content arrays
-2. **Build bundles** — `scripts/build-bundles.js` regenerates all bundles
-3. **Build manifest** — `scripts/build-manifest.js` regenerates `manifest.json` with current theme versions
-4. **Update badges** — `scripts/update-badges.js` recalculates preset counts in README badge URLs
-5. **Build catalog** — `scripts/build-catalog.js` regenerates `docs/catalog.json` for the [GitHub Pages gallery](https://silentoplayz.github.io/theme-designer-pro-presets/)
-6. **Auto-commit** — if any generated files changed, the bot commits and pushes them
-
-#### What Happens on Pull Requests
-
-Only the **Validate** step runs — bundles, manifest, and badges are not rebuilt. This gives contributors immediate feedback on whether their presets are correctly formatted before merge.
+On pull requests, only the validation step runs, so contributors see right away whether their presets are formatted correctly.
 
 ### Theme Submission Bot ([`theme-submission.yml`](.github/workflows/theme-submission.yml))
 
-Triggered when a [Theme Submission](https://github.com/silentoplayz/theme-designer-pro-presets/issues/new?template=theme-submission.yml) issue is opened:
-
-1. **Parse** — extracts the theme JSON from the issue body
-2. **Validate** — checks required fields, OKLCH values, Canvas FX safety
-3. **On success** — creates a branch, writes the theme file, opens a PR, and comments with a summary
-4. **On failure** — comments with specific error messages so the submitter can fix and resubmit
-
-This allows anyone to submit a theme without knowing git — see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+Runs when someone opens a [theme submission](https://github.com/silentoplayz/theme-designer-pro-presets/issues/new?template=theme-submission.yml) issue. It takes the theme JSON from the issue, checks the required fields, the OKLCH values and any Canvas FX script, and then either opens a pull request with the theme or comments with what to fix. Anyone can submit a theme this way without using git; see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### Deploy to GitHub Pages ([`deploy-pages.yml`](.github/workflows/deploy-pages.yml))
 
-Deploys the [`docs/`](docs/) preset gallery to [GitHub Pages](https://silentoplayz.github.io/theme-designer-pro-presets/). To run the gallery locally, see [`docs/README.md`](docs/README.md).
+Publishes [`docs/`](docs/) as the [website](https://silentoplayz.github.io/theme-designer-pro-presets/). It runs after a successful build, so the site always has the latest catalog, and on any push that changes `docs/`, `event-function/`, `launcher/` or `tools/`. Only one deployment runs at a time, and a newer one cancels an older one.
 
-- **After builds**: Triggers automatically when `Validate & Build Bundles` completes successfully (via `workflow_run`), ensuring the catalog is deployed with the latest rebuilt `docs/catalog.json`.
-- **On direct changes**: Also triggers on pushes that modify `docs/` or `tools/` files, so documentation and gallery edits are deployed immediately without waiting for a bundle build.
-- **Concurrency**: Uses a `pages` concurrency group to cancel stale deployments and ensure only one deployment runs at a time.
-
-### Running Locally
+### Checking presets locally
 
 ```bash
-node scripts/validate.js       # Check all presets (run before pushing)
+node scripts/validate.js
 ```
 
-> **Note**: Do **not** run the build scripts locally before committing — CI handles bundles, manifest, and badges automatically. Rebuilding locally causes merge conflicts on the next push. If you need to test build output, run the scripts but discard the generated file changes before committing.
-
----
-
-## 📜 License
-
-[MIT](LICENSE) — free to use, modify, and redistribute.
+> [!NOTE]
+> Don't commit files you built locally. CI builds the bundles, manifest, badges and catalog on push, and a local copy causes merge conflicts on the next build. Run the build scripts to test if you need to, then discard what they changed before you commit.
 
 ---
 
 ## 🤝 Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on submitting presets, quality standards, and the curation process. All participants are expected to follow our [Code of Conduct](CODE_OF_CONDUCT.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to submit presets, the quality bar, and how presets are reviewed. Everyone taking part is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+## 📜 License
+
+[MIT](LICENSE). Free to use, change and share.
