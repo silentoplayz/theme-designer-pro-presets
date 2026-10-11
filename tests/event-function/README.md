@@ -9,6 +9,7 @@ They cover how a theme reaches each page:
 - signing in without a reload, and signing out
 - a personal theme replacing the instance theme, its custom CSS included, and **Use instance theme** reaching an open page live
 - a Canvas FX animation starting on app pages and staying off where it's hidden
+- deleting a gallery theme, **Wipe CSS Snippets** and **Wipe Canvas Presets** leaving the live theme alone
 - the designer opening without errors, with nothing to undo
 
 The themes they save are markers, not palettes: each CSS section sets one custom property on `<html>` (`--tdp-vars`, `--tdp-structural`, `--tdp-gradient`, `--tdp-custom`) to the theme's name, so a test reads exactly which parts of which theme reached a page.

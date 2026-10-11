@@ -287,16 +287,76 @@ test('a Canvas FX animation runs on app pages and not where it\'s hidden', async
   if (await auth.$('#owui-theme-canvas-bg')) throw new Error('the canvas runs on the sign-in page');
 });
 
-test('the designer opens without errors and with nothing to undo', async ({ admin }) => {
-  await saveTheme(admin, markerTheme('instance'));
+// The instance designer, opened the way the admin's browser opens it
+async function openDesigner(admin) {
   const page = await openPage({ token: admin });
   // The designer page itself takes the sign-in cookie Open WebUI sets
-  await page.goto(BASE + '/');
-  await loaderReady(page);
   await page.context().addCookies([{ name: 'token', value: admin, url: BASE }]);
   await page.goto(BASE + ROUTE);
   await page.waitForSelector('#theme-designer-container', { timeout: WAIT_MS });
+  // Let it settle: it saves the theme it opened with
   await new Promise((r) => setTimeout(r, 2500));
+  return page;
+}
+
+// The instance theme's saved state, as the server delivers it
+async function savedState(admin) {
+  const res = await fetch(BASE + ROUTE + '/state.json', { headers: { Authorization: 'Bearer ' + admin }, cache: 'no-store' });
+  return res.json();
+}
+
+// A theme whose modes run marker custom CSS and a marker Canvas FX script
+const LIVE_CSS = 'html { --tdp-live: 1; }';
+const LIVE_SCRIPT = 'self.onmessage = function () { /* tdp-live */ };';
+function liveTheme(extra = {}) {
+  const theme = markerTheme('instance', {
+    customCssEnabled: true, customCSS: LIVE_CSS, autoScope: false,
+    canvasEnabled: true, canvasScript: LIVE_SCRIPT,
+  });
+  const state = JSON.parse(theme.state);
+  Object.assign(state, extra);
+  return { ...theme, state: JSON.stringify(state) };
+}
+
+async function expectLiveThemeKept(admin, action) {
+  // Long enough for the designer's debounced save to have landed
+  await new Promise((r) => setTimeout(r, 3000));
+  const state = await savedState(admin);
+  const lost = MODES.filter((m) => !state[m] || state[m].customCSS !== LIVE_CSS || state[m].canvasScript !== LIVE_SCRIPT);
+  if (lost.length) throw new Error(`${action} changed the live theme in ${lost.join(', ')}`);
+}
+
+test('Wipe CSS Snippets and Wipe Canvas Presets leave the live theme alone', async ({ admin }) => {
+  await saveTheme(admin, liveTheme());
+  const page = await openDesigner(admin);
+  for (const kind of ['css', 'canvas']) {
+    await page.evaluate((k) => document.getElementById('delete-all-' + k + '-btn').click(), kind);
+    await page.waitForSelector('#confirm-delete-all-' + kind + '-btn', { state: 'visible', timeout: WAIT_MS });
+    await page.click('#confirm-delete-all-' + kind + '-btn');
+    await expectLiveThemeKept(admin, kind === 'css' ? 'Wipe CSS Snippets' : 'Wipe Canvas Presets');
+  }
+});
+
+test('deleting the gallery theme a mode came from leaves the live theme alone', async ({ admin }) => {
+  const fromFirst = { type: 'snapshot', id: 0 };
+  const theme = liveTheme({ _activeThemeRef: { dark: fromFirst, oled: fromFirst, light: fromFirst, her: fromFirst } });
+  await saveTheme(admin, theme);
+  // The gallery entry every mode came from, in the instance library
+  const modes = JSON.parse(theme.state);
+  const entry = { name: 'Gallery entry', dark: modes.dark, light: modes.light, oled: modes.oled, her: modes.her };
+  await api('POST', ROUTE, { css: '', state: '', library: JSON.stringify({ snapshots: [entry] }) }, admin);
+  const page = await openDesigner(admin);
+  const count = await page.evaluate(() => JSON.parse(localStorage.getItem('owui_theme_snapshots') || '[]').length);
+  if (!count) throw new Error('the gallery is empty, nothing to delete');
+  await page.evaluate(() => window.requestDelete(0));
+  await page.waitForSelector('#confirm-delete-btn', { state: 'visible', timeout: WAIT_MS });
+  await page.click('#confirm-delete-btn');
+  await expectLiveThemeKept(admin, 'Deleting the gallery theme');
+});
+
+test('the designer opens without errors and with nothing to undo', async ({ admin }) => {
+  await saveTheme(admin, markerTheme('instance'));
+  const page = await openDesigner(admin);
   // Undo as far as it goes: the history used to start from defaults or an
   // old copy of the theme, and undoing back to it published that
   const theme = () => page.evaluate(() => JSON.parse(localStorage.getItem('owui_dev_theme_v1') || '{}').dark || null);
