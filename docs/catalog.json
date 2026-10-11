@@ -755,6 +755,53 @@
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/midnight.json"
     },
     {
+      "name": "Midsummer",
+      "file": "midsummer.json",
+      "description": "A summer day in four modes. Dark is the meadow at night: fireflies blink over swaying grass under a crescent moon, and the palette matches that night sky, so the sidebar and the scene read as one. OLED looks up from the meadow to the midnight sky, true black with slow constellations. Light is a clear morning in sage and cream with nothing moving, for focused work. Her is golden hour, honey and parchment with warm pollen drifting up.",
+      "author": "Claude",
+      "version": "1.0.0",
+      "dateAdded": "2026-10-11T08:05:35Z",
+      "modes": {
+        "dark": {
+          "h": 265,
+          "c": 25,
+          "l": 17,
+          "hasCSS": false,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": false
+        },
+        "light": {
+          "h": 125,
+          "c": 18,
+          "l": 20,
+          "hasCSS": false,
+          "hasFX": false,
+          "hasGradient": false,
+          "hasOverrides": false
+        },
+        "oled": {
+          "h": 265,
+          "c": 25,
+          "l": 0,
+          "hasCSS": false,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": false
+        },
+        "her": {
+          "h": 78,
+          "c": 30,
+          "l": 18,
+          "hasCSS": false,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": false
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/midsummer.json"
+    },
+    {
       "name": "NEO-TACTICAL // ARCHIVE 01",
       "file": "neo_tactical_archive_01.json",
       "description": "Military console interface with Lidar Topographical Scan Canvas FX, monospace typography, and stealth blue-gray tones.",

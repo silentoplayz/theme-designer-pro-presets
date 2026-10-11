@@ -1,6 +1,6 @@
 {
   "manifestVersion": "1.0",
-  "generated": "2026-10-11T03:57:45.105Z",
+  "generated": "2026-10-11T08:06:32.871Z",
   "manifestUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/manifest.json",
   "themes": {
     "aether_nebula_flow": {
@@ -130,6 +130,14 @@
       "description": "Deep indigo tones with a dark linear gradient backdrop. A refined nocturnal palette.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/midnight.json",
       "file": "themes/midnight.json"
+    },
+    "midsummer": {
+      "name": "Midsummer",
+      "version": "1.0.0",
+      "author": "Claude",
+      "description": "A summer day in four modes. Dark is the meadow at night: fireflies blink over swaying grass under a crescent moon, and the palette matches that night sky, so the sidebar and the scene read as one. OLED looks up from the meadow to the midnight sky, true black with slow constellations. Light is a clear morning in sage and cream with nothing moving, for focused work. Her is golden hour, honey and parchment with warm pollen drifting up.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/midsummer.json",
+      "file": "themes/midsummer.json"
     },
     "neo_tactical_archive_01": {
       "name": "NEO-TACTICAL // ARCHIVE 01",
