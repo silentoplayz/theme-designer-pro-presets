@@ -5545,7 +5545,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                             <li><b>Hot Reload:</b> The function hot-reloads when updated in the admin panel; no server restart is needed.</li>
                             <li><b>Auto-Save:</b> Your active theme configuration is saved automatically after every change. Use the <b>Save (+)</b> button only to create named snapshots in your theme gallery.</li>
                             <li><b>Core Palette:</b> The OKLCH color palette is enabled by default for all modes. Use the <b>Enabled</b> toggle in the Core Palette section to disable palette generation for a specific mode if you prefer to manage colors entirely through manual overrides.</li>
-                            <li><b>Auth Pages:</b> You can selectively toggle theme components (Colors, Custom CSS, Canvas FX, and Gradient Background) for the Login/Signup screens using the individual <b>Show on Auth Pages</b> checkboxes. By default, all four components are visible on auth pages. The <b>Enable Auth Page Theming</b> valve hides every one of these checkboxes and turns them off.</li>
+                            <li><b>Auth Pages:</b> You can selectively toggle theme components (Colors, Custom CSS, Canvas FX, and Gradient Background) for the Login/Signup screens using the individual <b>Show on Auth Pages</b> checkboxes. By default, all four components are visible on auth pages. The <b>Enable Auth Page Theming</b> valve hides every one of these checkboxes and turns them off. A personal theme never reaches the auth pages, which always show the instance theme, so the designer in a user&rsquo;s own Settings hides these checkboxes.</li>
                             <li><b>Layer Order:</b> The generated CSS applies in this order: <i>OKLCH Palette &rarr; Manual Variable Overrides &rarr; Structural Rules &rarr; Gradient Background &rarr; Custom CSS &rarr; valve rules</i> (overlay glass and the mobile sidebar fix, when those valves are on). Each layer can override the one before it.</li>
                             <li><b>Session Persistence:</b> The designer uses <code>sessionStorage</code> to remember which tab you were working in, and restores it when you come back.</li>
                             <li><b>Legacy Data Migration:</b> Upgrading from an older version? The designer detects legacy data structures and migrates your saved snapshots and active themes to the latest format without data loss.</li>
@@ -16091,6 +16091,20 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             });
             // Persist to localStorage so the bootloader also respects this
             commitChange({ clearRef: false, push: false });
+        }
+
+        // ── 6. Personal themes — the auth pages always show the instance
+        // theme, so the 'Show on Auth Pages' toggles would change nothing.
+        // Hidden, not cleared: a personal theme exported and installed as the
+        // instance theme keeps its auth choices. ──
+        if (cfg.scope === 'me') {
+            ['toggle-theme-auth', 'toggle-custom-auth', 'toggle-canvas-auth', 'toggle-gradient-auth']
+                .forEach(id => {
+                    const label = document.getElementById(id)?.closest('label');
+                    if (label) label.style.display = 'none';
+                });
+            const syncAuth = document.getElementById('sync-opt-auth')?.closest('.sync-option');
+            if (syncAuth) syncAuth.style.display = 'none';
         }
     })();
 
