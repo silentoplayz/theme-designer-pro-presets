@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.12.0-blue)
+![Version](https://img.shields.io/badge/version-1.12.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -508,6 +508,12 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
 
 ---
+
+## 📝 What's New in 1.12.1
+
+**Your personal theme is back as soon as you sign in.** Signing out and back in showed the instance theme instead of your own until you reloaded the page. Signing out reloads onto the sign-in page, which always shows the instance theme, but signing in doesn't reload, and the theme was never fetched again for the account that just signed in. The page now notices when the signed-in account changes and switches to that account's personal theme, or to the instance theme for an account without one. This browser's copy of your theme also survives signing out, so it shows the moment you sign back in. Another account signing in on the same browser still removes it.
+
+**No auth page switches in a personal Themes tab.** The sign-in pages always show the instance theme, so the four **Show on Auth Pages** switches did nothing in the designer in a user's own Settings. They're hidden there now, along with **Auth Page Visibility** in the Sync dialog. The admin's designer keeps them, and a personal theme keeps its saved choices if it's later installed as the instance theme.
 
 ## 📝 What's New in 1.12.0
 
