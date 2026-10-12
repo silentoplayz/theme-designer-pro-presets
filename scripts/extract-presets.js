@@ -21,7 +21,7 @@
  *
  * Filename generation:
  *   "NEO-TACTICAL // ARCHIVE 01"  →  neo_tactical_archive_01.js
- *   "01: The Architect (Matrix)"  →  01_the_architect_matrix.js
+ *   "02: Aetheric Flow (Vector)"  →  02_aetheric_flow_vector.js
  *   "@h4nn1b4l Custom CSS"        →  h4nn1b4l_custom_css.css
  */
 

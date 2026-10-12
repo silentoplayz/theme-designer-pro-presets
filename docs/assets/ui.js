@@ -179,7 +179,7 @@
     else if (/webgl/.test(f) || /\(webgl\)/i.test(item.name || '')) tags.push('WebGL');
     if (/^context_/.test(f)) tags.push('Reacts to chat');
     if (item.followsTheme) tags.push('Follows your theme');
-    if (/^(tap_|touch_)|bubble_pop|ripple_pond/.test(f)) tags.push('Interactive');
+    if (/^(tap_|touch_)|bubble_pop/.test(f)) tags.push('Interactive');
     return tags;
   }
 

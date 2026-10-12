@@ -1650,13 +1650,6 @@
   ],
   "canvasFx": [
     {
-      "name": "The Architect (Transparency Optimized)",
-      "file": "01_the_architect_matrix.js",
-      "description": "Matrix-style digital rain.",
-      "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/01_the_architect_matrix.js"
-    },
-    {
       "name": "Aetheric Flow",
       "file": "02_aetheric_flow_vector.js",
       "description": "2,000+ energy filaments in a dynamic noise field.",
@@ -1764,13 +1757,6 @@
       "followsTheme": true
     },
     {
-      "name": "Comet Shower",
-      "file": "comet_shower.js",
-      "description": "Comets streak diagonally across the sky with glowing heads and sparkling fading tails. Mouse gravity pulls nearby comets toward the cursor.",
-      "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/comet_shower.js"
-    },
-    {
       "name": "Constellation Map",
       "file": "constellation_map.js",
       "description": "Randomly placed stars that form connection lines (like constellation patterns) to nearby stars within a threshold distance. Stars slowly drift across the canvas. Mouse creates a gravitational pull that attracts nearby stars. Connection line opacity is based on inter-star distance. Follows your theme's colors when the designer sends them.",
@@ -1840,13 +1826,6 @@
       "description": "A living aquarium with hungry fish that chase and eat food you drop from the surface. Move your cursor to the top of the tank to sprinkle food pellets — fish detect them, race to eat, and do a happy wiggle. Features bezier-curve fish with stripe patterns, leaf-shaped plants, aerator bubble streams, decorative rocks, caustic lighting, depth layering, fish shadows, and an animated water surface.",
       "dateAdded": "2026-07-18T00:31:39-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/digital_fishtank.js"
-    },
-    {
-      "name": "DNA Double Helix",
-      "file": "dna_helix.js",
-      "description": "A rotating double-helix DNA strand rendered in 3D perspective with base-pair rungs, phosphate backbone nodes, and ambient bio-glow particles. Mouse Y modulates rotation speed; mouse X shifts the helix horizontally.",
-      "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/dna_helix.js"
     },
     {
       "name": "Electric Tendrils",
@@ -1926,13 +1905,6 @@
       "description": "A slowly fading, hypnotic spiral made of concentric colored rings that rotate and drift outward. Full-spectrum hue cycling with configurable trail fade, ring spacing, and rotation speed.",
       "dateAdded": "2026-07-18T00:31:39-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/hypno_spiral.js"
-    },
-    {
-      "name": "Ice Crystals",
-      "file": "ice_crystals.js",
-      "description": "Hexagonal crystal growth with 6-fold symmetry, prismatic highlights, and mouse-warmth melting.",
-      "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/ice_crystals.js"
     },
     {
       "name": "Ink Bloom",
@@ -2028,13 +2000,6 @@
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/morphing_polygons.js"
     },
     {
-      "name": "Mycelium Network",
-      "file": "mycelium_network.js",
-      "description": "An organic fungal mycelium that grows outward from seed points, branching stochastically. Nutrient pulses race along established connections, mature nodes release spores, and the mouse acts as a nutrient source that accelerates nearby growth and attracts branching direction.",
-      "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/mycelium_network.js"
-    },
-    {
       "name": "Nebula Clouds",
       "file": "nebula_clouds.js",
       "description": "Soft, slowly drifting colored cloud formations using layered circles with very low opacity and large radii. Colors are deep purples, blues, and pinks. Mouse proximity causes nearby clouds to gently disperse. Follows your theme's colors when the designer sends them.",
@@ -2093,13 +2058,6 @@
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/quantum_particle_tunnel.js"
     },
     {
-      "name": "Rain on Glass",
-      "file": "rain_on_glass.js",
-      "description": "Raindrops falling with realistic physics — acceleration, subtle streaks, occasional pausing and merging. Larger drops fall slower. Mouse position creates a wind effect that angles the rain.",
-      "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/rain_on_glass.js"
-    },
-    {
       "name": "Rainbow Sparkle Trail",
       "file": "rainbow_sparkle_trail.js",
       "description": "A magical rainbow sparkle trail that follows your mouse! Every movement creates a burst of colorful, glittery star-shaped particles that twirl, shrink, and fade. The faster you move, the more sparkles appear. Perfect for little ones who love chasing magic around the screen.",
@@ -2112,21 +2070,6 @@
       "description": "Synthwave sunset with a glowing semi-circle sun, animated horizontal stripe cutouts, twinkling stars, and a rich gradient sky. Mouse proximity intensifies the sun's glow.",
       "dateAdded": "2026-07-18T00:31:39-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/retro_sun.js"
-    },
-    {
-      "name": "Ripple Pond",
-      "file": "ripple_pond.js",
-      "description": "Water ripple interference simulation using a 2D wave equation. Periodic drops create expanding circular ripples that interfere with each other. Mouse acts as a continuous drop source. Optional rain mode for ambient drops.",
-      "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/ripple_pond.js"
-    },
-    {
-      "name": "Sacred Geometry",
-      "file": "sacred_geometry.js",
-      "description": "Slowly rotating, nested geometric shapes — circles inscribed in",
-      "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/sacred_geometry.js",
-      "followsTheme": true
     },
     {
       "name": "Sandstorm",
@@ -2162,13 +2105,6 @@
       "description": "A classic starfield effect where stars fly toward the viewer from the center. Stars have trails and speed up when the mouse is near them. Deep space feel with white/blue stars of varying sizes.",
       "dateAdded": "2026-07-18T00:31:39-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/starfield_warp.js"
-    },
-    {
-      "name": "Stress Test — Particle Inferno",
-      "file": "stress_test_particle_inferno.js",
-      "description": "A brutal CPU stress test that pushes Canvas FX to its absolute limits. Renders 100,000 particles with real-time physics, per-particle velocity-to-heat color mapping, additive blending, and a multi-pass glow bloom. Particles are violently attracted to the cursor, creating a molten vortex that heats up on impact. A live FPS HUD shows how your system copes.",
-      "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/stress_test_particle_inferno.js"
     },
     {
       "name": "Tactical Liquid Grid",
@@ -2207,13 +2143,6 @@
       "followsTheme": true
     },
     {
-      "name": "Touch Garden",
-      "file": "touch_garden.js",
-      "description": "An interactive garden where you plant flowers by tapping! Each click/tap plants a flower that grows from a seed. Drag your finger or mouse to scatter seed particles. Multi-touch plants multiple flowers at once. Flowers sway gently in the breeze and butterflies occasionally flutter between them. Perfect for little ones who love to click!",
-      "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/touch_garden.js"
-    },
-    {
       "name": "VHS Static",
       "file": "vhs_static.js",
       "description": "Authentic VHS tracking effect with rolling tracking bars, random static noise, horizontal jitter, chromatic aberration, scanlines, and mouse-proximity distortion amplification.",
@@ -2241,13 +2170,6 @@
       "description": "Multiple circular wave sources creating beautiful constructive and destructive interference patterns. Waves emanate from fixed points and the mouse position. Subtle monochrome/blue tones.",
       "dateAdded": "2026-07-18T00:31:39-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/wave_interference.js"
-    },
-    {
-      "name": "Wireframe City",
-      "file": "wireframe_city.js",
-      "description": "A procedurally generated wireframe cityscape rendered in slight perspective view. Buildings pulse with flickering windows, flying light streaks arc between structures, and a radar-like scanning beam sweeps across the scene. Depth fog fades distant buildings. Mouse acts as a spotlight and scan-beam origin. Uses typed arrays, spatial bucketing, delta-time animation, off-screen culling, and batched draw calls.",
-      "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/wireframe_city.js"
     }
   ],
   "cssPresets": [
