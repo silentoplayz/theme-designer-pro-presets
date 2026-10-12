@@ -355,6 +355,24 @@ test('a user without the Admin tab sees a ring for the instance theme', async ({
   await removePersonalTheme(user);
 });
 
+test('an app page does no theme work while nothing changes', async ({ admin }) => {
+  await saveTheme(admin, markerTheme('instance'));
+  const page = await openPage({ token: admin });
+  await page.goto(BASE + '/');
+  await loaderReady(page);
+  await expectParts(page, { vars: 'instance' });
+  await new Promise((r) => setTimeout(r, 1500));
+  // Each repaint touched <html>'s classes, which the bootloader took for a
+  // mode switch and answered with another repaint, every frame
+  const changes = await page.evaluate(() => new Promise((resolve) => {
+    let n = 0;
+    const seen = new MutationObserver((ms) => { n += ms.length; });
+    seen.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme'] });
+    setTimeout(() => { seen.disconnect(); resolve(n); }, 2000);
+  }));
+  if (changes) throw new Error(`<html> changed ${changes} times in 2s with nothing happening`);
+});
+
 // The instance designer, opened the way the admin's browser opens it
 async function openDesigner(admin) {
   const page = await openPage({ token: admin });
@@ -393,6 +411,33 @@ async function expectLiveThemeKept(admin, action) {
   const lost = MODES.filter((m) => !state[m] || state[m].customCSS !== LIVE_CSS || state[m].canvasScript !== LIVE_SCRIPT);
   if (lost.length) throw new Error(`${action} changed the live theme in ${lost.join(', ')}`);
 }
+
+test('a change in the designer reaches an open page in well under two seconds', async ({ admin }) => {
+  await saveTheme(admin, liveTheme());
+  const app = await openPage({ token: admin });
+  await app.goto(BASE + '/');
+  await loaderReady(app);
+  await expectParts(app, { vars: 'instance' });
+  const designer = await openDesigner(admin);
+  await app.evaluate(() => {
+    window.__tdpChanged = null;
+    const style = document.getElementById('owui-dev-live-theme');
+    new MutationObserver(() => { window.__tdpChanged = window.__tdpChanged || Date.now(); })
+      .observe(style, { childList: true, characterData: true, subtree: true });
+  });
+  // Pages used to wait a random 0-2s before fetching, on top of a 250ms wait
+  // before the designer saved, however few were open
+  const tries = [];
+  for (let i = 0; i < 3; i++) {
+    await app.evaluate(() => { window.__tdpChanged = null; });
+    const clicked = Date.now();
+    await designer.evaluate(() => document.getElementById('toggle-custom-css').click());
+    await app.waitForFunction(() => window.__tdpChanged, null, { timeout: WAIT_MS });
+    tries.push(await app.evaluate(() => window.__tdpChanged) - clicked);
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  if (Math.max(...tries) > 1500) throw new Error('the change took ' + tries.join(', ') + 'ms to reach the page');
+});
 
 test('Wipe CSS Snippets and Wipe Canvas Presets leave the live theme alone', async ({ admin }) => {
   await saveTheme(admin, liveTheme());

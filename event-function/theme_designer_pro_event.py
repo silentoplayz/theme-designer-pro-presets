@@ -581,6 +581,9 @@ class Event:
             // nothing changed, so repeat fetches are cheap.
             // True while this page shows the signed-in user's personal theme.
             var _personal = false;
+            // The last CSS enforceTheme() cleaned, and the result
+            var _strippedFrom = null;
+            var _strippedCss = '';
             // The account the theme on screen was picked for (null: signed
             // out). Open WebUI signs in without a page load, so checkAccount()
             // compares it with the account signed in now.
@@ -915,9 +918,13 @@ class Event:
                         document.head.appendChild(style);
                     }
                     
-                    let finalCss = savedCss;
-                    // Sanitize: strip any stale body::before rules from cached CSS (legacy hue-rotate feature)
-                    finalCss = finalCss.replace(/[^{}]*body\\s*::before\\s*\\{[^}]*\\}/g, '');
+                    // Sanitize: strip any stale body::before rules from cached CSS (legacy hue-rotate feature).
+                    // Kept until the CSS changes: this runs on every refresh.
+                    if (savedCss !== _strippedFrom) {
+                        _strippedFrom = savedCss;
+                        _strippedCss = savedCss.replace(/[^{}]*body\\s*::before\\s*\\{[^}]*\\}/g, '');
+                    }
+                    let finalCss = _strippedCss;
                     const isAuthPage = window.location.pathname.startsWith('/auth');
 
                     // Palette vars for disabled modes are emitted as defaults
@@ -991,7 +998,10 @@ class Event:
                     const target = classMap[currentTheme];
                     if (target) {
                         if (!html.classList.contains(target)) html.classList.add(target);
-                        ['dark', 'light', 'her'].filter(c => c !== target).forEach(c => html.classList.remove(c));
+                        // Only classes it has: removing an absent one still
+                        // counts as a class change, which the observer below
+                        // answered with another refresh, every frame
+                        ['dark', 'light', 'her'].filter(c => c !== target && html.classList.contains(c)).forEach(c => html.classList.remove(c));
                     }
                 }
                 // Some paths start the canvas before this applies the CSS
@@ -1915,20 +1925,26 @@ class Event:
                         // This keeps SSE frames tiny (previously every save pushed
                         // the full CSS + state, including the entire canvas script,
                         // to every client).
+                        var d = {};
                         try {
-                            var d = JSON.parse(e.data || '{}');
+                            d = JSON.parse(e.data || '{}') || {};
                             if (d.cssTag && d.stateTag &&
                                 d.cssTag === _lastCssTag && d.stateTag === _lastStateTag) {
                                 return; // Already applied this exact version — skip refetch
                             }
                         } catch(x) {}
                         var myV = ++_themeVersion;  // Supersede any in-flight fetch
-                        // Jitter the refetch 0-2s so one broadcast doesn't stampede
-                        // the server with simultaneous fetches from every client.
+                        // A hidden page refetches when it's shown (visibilitychange
+                        // below), so it adds nothing to the rush now
+                        if (document.visibilityState === 'hidden') return;
+                        // Jitter the refetch over the spread the server sized to
+                        // the pages it has (0-2s; an older server sends none) so
+                        // one broadcast doesn't stampede it with every client.
+                        var spread = typeof d.spread === 'number' ? Math.max(0, Math.min(2000, d.spread)) : 2000;
                         setTimeout(function() {
                             if (myV !== _themeVersion || _disabled) return; // Superseded while waiting
                             fetchThemeFromServer();
-                        }, Math.random() * 2000);
+                        }, Math.random() * spread);
                     }
                     function handleThemeDisable(e) {
                         // A Global Reset strips the theme the same way, but the
@@ -5895,7 +5911,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                             <li><b>SSE Heartbeat:</b> The server sends a keep-alive heartbeat every 15 seconds to detect stale connections. If a client disconnects (closes the tab, loses network), the server-side queue is automatically cleaned up.</li>
                             <li><b>SSE Hot-Reload Persistence:</b> SSE connections survive function re-saves (hot-reloads). The client list is stored on the ASGI app's state object, which persists across module reloads, so re-saving the function code in the admin panel does <b>not</b> break live push to existing tabs.</li>
                             <li><b>Turning the Function Off and On:</b> Turning the function off fires <code>function.disable_started</code>. Theme Designer Pro then broadcasts a <code>theme-disable</code> event that strips the theme from every open page. It also withdraws its CSS from <code>/static/custom.css</code> and removes the <b>Themes</b> tabs from open Settings dialogs. The loader stays published but inactive, so its live connection survives. Turning it back on fires <code>function.enable_started</code>, which republishes the CSS, reactivates the loader, and broadcasts the theme to every page. Requires Open WebUI v0.11.0 or newer.</li>
-                            <li><b>Server Sync:</b> Changes save to the server automatically, 250 ms after you stop, by POST to <code>{ROUTE_BASE}</code> (or <code>{ROUTE_BASE}/me</code> for a personal theme). The server saves the CSS, sections and state files and broadcasts a version token; the next request for <code>/static/loader.js</code> or <code>/static/custom.css</code> already includes the save. While the function is off, edits and library changes wait in the browser, with a message saying so, and go through once it&rsquo;s back on.</li>
+                            <li><b>Server Sync:</b> Changes save to the server automatically by POST to <code>{ROUTE_BASE}</code> (or <code>{ROUTE_BASE}/me</code> for a personal theme): a single change at once, and while you drag a slider, 250 ms after you stop. The server saves the CSS, sections and state files and broadcasts a version token; the next request for <code>/static/loader.js</code> or <code>/static/custom.css</code> already includes the save. Open pages fetch the new theme within a moment of the broadcast, spread over up to two seconds when many are connected so they don&rsquo;t all ask at once. A page in a background tab fetches it when it&rsquo;s shown again. While the function is off, edits and library changes wait in the browser, with a message saying so, and go through once it&rsquo;s back on.</li>
                             <li><b>Draft Mode:</b> Switch between <b>Live</b> and <b>Draft</b> with the switch in the footer. In Draft mode, changes stay on the designer page; they aren&rsquo;t saved to the server or pushed to other users until you click <b>Publish</b> or switch back to Live. See Section 9.</li>
                             <li><b>Hot Reload:</b> The function hot-reloads when updated in the admin panel; no server restart is needed.</li>
                             <li><b>Auto-Save:</b> Your active theme configuration is saved automatically after every change. Use the <b>Save (+)</b> button only to create named snapshots in your theme gallery.</li>
@@ -7832,6 +7848,7 @@ location.reload();</code></pre>
     let _syncTimer = null;
     let _syncSeq = 0;  // Monotonic save counter — guards css_cache against stale responses
     let _syncQueue = Promise.resolve();  // Serializes POSTs so saves reach the server in order
+    let _lastSyncAt = 0;  // When the last save went out (see syncToServer's delay)
     // Mirrors the admin's function ON/OFF toggle, driven by the badge's SSE
     // connection further down. The save endpoint answers 503 while the function
     // is disabled, so posting into that window would lose the edit silently.
@@ -7982,7 +7999,13 @@ location.reload();</code></pre>
         // theme was ever real.
         const state = stateStr || localStorage.getItem('owui_dev_theme_v1') || '{}';
         clearTimeout(_syncTimer);
+        // A change after a quiet spell goes out at once, but not in the same
+        // tick: one action can commit several times in a row, and those still
+        // go as one save. Changes in quick succession (a slider being dragged)
+        // wait for a 250ms pause, as every change used to.
+        const delay = Date.now() - _lastSyncAt >= 250 ? 40 : 250;
         _syncTimer = setTimeout(() => {
+            _lastSyncAt = Date.now();
             // Sequence + queue: rapid consecutive saves (fast theme swaps) must
             // not race. The queue serializes POSTs so the server persists them
             // in order — an earlier request committing after a later one would
@@ -8033,7 +8056,7 @@ location.reload();</code></pre>
                 showToast('⚠️ Server unreachable — changes may not be saved');
                 if (mySeq === _syncSeq) { try { Storage.setRaw('css_cache', css); } catch(x) {} }
             }));
-        }, 250);
+        }, delay);
     }
 
     // --- Server-Side Library Sync (presets, snapshots) ---
@@ -9621,7 +9644,10 @@ function startAnimation() {
 
         // Sync Custom CSS Editor
         const syncCheck = (id, val) => { const el = $(id); if (el) el.checked = val; };
-        if ($('custom-css-editor')) { $('custom-css-editor').value = config.customCSS || ""; updateLineNumbers($('custom-css-editor')); }
+        // Each editor is refilled only when its text changed: this runs on every
+        // tick of a slider, and a Canvas FX script can be tens of KB
+        const syncEditor = (id, text) => { const el = $(id); if (el && el.value !== text) { el.value = text; updateLineNumbers(el); } };
+        syncEditor('custom-css-editor', config.customCSS || "");
 
         syncCheck('toggle-custom-css', config.customCssEnabled !== false);
         syncCheck('toggle-auto-scope', config.autoScope !== false);
@@ -9632,12 +9658,12 @@ function startAnimation() {
         { ['toggle-auto-scope','toggle-custom-auth'].forEach(id => { const el = $(id); if (el) { const l = el.closest('label'); if (l) l.style.opacity = (config.customCssEnabled !== false) ? '1' : '0.35'; } }); }
         
         // Sync Manual Overrides Editor
-        if ($('manual-overrides-editor')) { $('manual-overrides-editor').value = config.manualOverrides || ""; updateLineNumbers($('manual-overrides-editor')); }
+        syncEditor('manual-overrides-editor', config.manualOverrides || "");
 
         syncCheck('toggle-manual-overrides', !!config.manualOverridesEnabled);
         
         // Sync Canvas Editor
-        if ($('canvas-fx-editor')) { $('canvas-fx-editor').value = config.canvasScript || ""; updateLineNumbers($('canvas-fx-editor')); }
+        syncEditor('canvas-fx-editor', config.canvasScript || "");
 
         syncCheck('toggle-canvas-fx', config.canvasEnabled === true);
         syncCheck('toggle-canvas-auth', config.canvasShowAuth !== false);
@@ -9700,7 +9726,6 @@ function startAnimation() {
 
     function updateActiveHighlights() {
         const dm = getActiveDataMode();
-        const snapshots = getSnapshots();
         
         // Auto-resolution removed in favor of proper ref persistence to prevent "swapping" confusion.
         // Highlights now strictly follow explicit user selection or loaded state.
@@ -9754,7 +9779,7 @@ function startAnimation() {
         if (presets.length === 0) {
             scrollArea.style.display = 'block';
             gallery.style.display = 'block';
-            gallery.innerHTML = `<div class="empty-state">${emptyMsg}</div>`;
+            setGalleryHtml(gallery, `<div class="empty-state">${emptyMsg}</div>`);
             return;
         }
 
@@ -9764,14 +9789,14 @@ function startAnimation() {
             const noResultsMsg = searchQuery
                 ? `${noResultsPrefix} &ldquo;${_esc(searchQuery)}&rdquo;`
                 : `${noResultsPrefix} this filter`;
-            gallery.innerHTML = `<div class="empty-state">${noResultsMsg}</div>`;
+            setGalleryHtml(gallery, `<div class="empty-state">${noResultsMsg}</div>`);
             return;
         }
 
         scrollArea.style.display = 'block';
         gallery.style.display = 'grid';
 
-        gallery.innerHTML = filtered.map((p) => {
+        setGalleryHtml(gallery, filtered.map((p) => {
             const i = p._origIndex;
             const content = p[contentField];
             const isEnabledField = contentField === 'script' ? 'canvasEnabled' : 'customCssEnabled';
@@ -9791,7 +9816,16 @@ function startAnimation() {
                 <div class="selected-check">✓</div>
             </div>
             `;
-        }).join('');
+        }).join(''));
+    }
+
+    // A gallery's markup, written only when it changed: the galleries are
+    // redrawn on every edit, and most edits (a palette slider) change nothing
+    // in them. Every write to a gallery goes through here.
+    function setGalleryHtml(gallery, html) {
+        if (gallery._tdpHtml === html) return;
+        gallery.innerHTML = html;
+        gallery._tdpHtml = html;
     }
 
     // Detect capability "badges" from a Canvas FX script's source. Shared by the
@@ -11665,7 +11699,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             html = `<div style="grid-column:1/-1; text-align:center; padding:20px 0; color:var(--text-muted); font-size:0.7rem;">No presets match "${_esc(searchTerm)}"</div>`;
         }
 
-        gallery.innerHTML = html;
+        setGalleryHtml(gallery, html);
     }
 
     // --- Shared Stop Helpers ---
@@ -17953,6 +17987,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             data["origin"] = origin
         if settle:
             data["settle"] = True
+        data["spread"] = cls._refetch_spread()
         payload = _json.dumps(data, separators=(",", ":"))
         msg = f"event: theme-update\ndata: {payload}\n\n"
         if not local_only:
@@ -17962,6 +17997,17 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 q.put_nowait(msg)
             except asyncio.QueueFull:
                 pass  # Drop if client is backed up
+
+    @classmethod
+    def _refetch_spread(cls) -> int:
+        """How many ms the pages told of a theme-update spread their refetch
+        over, so one save doesn't send every open page to the server at once.
+        Scaled to the pages connected here: a few refetch at once, a few
+        hundred over the full two seconds. Through Redis other workers' pages
+        hear it too and aren't counted, so they get the full spread."""
+        if cls._redis_url():
+            return 2000
+        return min(2000, 8 * len(cls._sse_clients))
 
     # Redis relay prefix for a personal-theme update, followed by the user id.
     _PERSONAL_PREFIX = "personal:"

@@ -12,6 +12,7 @@ They cover how a theme reaches each page:
 - deleting a gallery theme, **Wipe CSS Snippets** and **Wipe Canvas Presets** leaving the live theme alone
 - the dot in Settings on the **Themes** tab whose theme is in use, and the ring a user without the Admin tab sees for the instance theme
 - the designer opening without errors, with nothing to undo
+- an app page doing no theme work while nothing changes, and a change in the designer reaching an open page in well under two seconds
 - a model's background image hidden by the instance theme, live and after a page load, and a folder's by a personal theme on that folder's page
 - a theme file keeping every setting through the Studio and the designer: every gallery theme and the [theme format](../../schemas/theme-format.md)'s fixtures go through the Studio's Download button and the designer's import and export, and must come out as the other side wrote them
 
