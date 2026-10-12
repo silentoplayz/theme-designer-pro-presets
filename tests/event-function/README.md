@@ -12,6 +12,7 @@ They cover how a theme reaches each page:
 - deleting a gallery theme, **Wipe CSS Snippets** and **Wipe Canvas Presets** leaving the live theme alone
 - the dot in Settings on the **Themes** tab whose theme is in use, and the ring a user without the Admin tab sees for the instance theme
 - the designer opening without errors, with nothing to undo
+- a model's background image hidden by the instance theme, live and after a page load, and a folder's by a personal theme on that folder's page
 - a theme file keeping every setting through the Studio and the designer: every gallery theme and the [theme format](../../schemas/theme-format.md)'s fixtures go through the Studio's Download button and the designer's import and export, and must come out as the other side wrote them
 
 The themes they save are markers, not palettes: each CSS section sets one custom property on `<html>` (`--tdp-vars`, `--tdp-structural`, `--tdp-gradient`, `--tdp-custom`) to the theme's name, so a test reads exactly which parts of which theme reached a page.

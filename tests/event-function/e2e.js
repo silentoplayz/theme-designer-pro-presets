@@ -440,6 +440,95 @@ test('the designer opens without errors and with nothing to undo', async ({ admi
   if (page.errors.length) throw new Error('page errors: ' + page.errors.join(' | '));
 });
 
+// ── Model and folder backgrounds ──
+
+// A model of its own: a pipe function, which Open WebUI lists as a model
+const BG_MODEL = 'tdp_bg_pipe';
+const PIPE = 'class Pipe:\n    def pipe(self, body: dict) -> str:\n        return "ok"\n';
+const PNG_1PX = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+
+// The model, with a background image uploaded the way its editor uploads one
+async function modelWithBackground(admin) {
+  if ((await api('GET', `/api/v1/functions/id/${BG_MODEL}`, undefined, admin)).status !== 200) {
+    const made = await api('POST', '/api/v1/functions/create',
+      { id: BG_MODEL, name: 'Background model', content: PIPE, meta: { description: 'End-to-end tests' } }, admin);
+    if (made.status !== 200) throw new Error('Could not add the model: ' + JSON.stringify(made.json));
+    await api('POST', `/api/v1/functions/id/${BG_MODEL}/toggle`, undefined, admin);
+  }
+  const existing = await api('GET', `/api/v1/models/model?id=${BG_MODEL}`, undefined, admin);
+  const had = existing.status === 200 && existing.json && existing.json.meta && existing.json.meta.background_image_url;
+  if (had) return had;
+  const form = new FormData();
+  form.append('file', new Blob([Buffer.from(PNG_1PX, 'base64')], { type: 'image/png' }), 'background.png');
+  const res = await fetch(BASE + '/api/v1/files/?process=false', { method: 'POST', headers: { Authorization: 'Bearer ' + admin }, body: form });
+  if (!res.ok) throw new Error('Could not upload the image: ' + res.status);
+  const url = `/api/v1/files/${(await res.json()).id}/content`;
+  const made = await api('POST', '/api/v1/models/create',
+    { id: BG_MODEL, base_model_id: null, name: 'Background model', meta: { background_image_url: url }, params: {} }, admin);
+  if (made.status !== 200) throw new Error('Could not give the model a background: ' + JSON.stringify(made.json));
+  return url;
+}
+
+// One of the user's folders, with a background image set the way Edit Folder sets one
+async function folderWithBackground(user) {
+  const made = await api('POST', '/api/v1/folders/', { name: 'Backgrounds ' + Date.now() }, user);
+  if (made.status !== 200) throw new Error('Could not add a folder: ' + JSON.stringify(made.json));
+  const meta = { background_image_url: 'data:image/png;base64,' + PNG_1PX };
+  const updated = await api('POST', `/api/v1/folders/${made.json.id}/update`, { name: made.json.name, meta }, user);
+  if (updated.status !== 200) throw new Error('Could not give the folder a background: ' + JSON.stringify(updated.json));
+  return made.json.id;
+}
+
+function hidingBackgrounds(theme, hidden) {
+  return { ...theme, state: JSON.stringify({ ...JSON.parse(theme.state), _hiddenBackgrounds: hidden }) };
+}
+
+// Whether Open WebUI's background image, and the dimming layer over it, show
+async function expectChatBackground(page, shown, label) {
+  await waitFor(label, () => page.evaluate((want) => {
+    const image = [...document.querySelectorAll('div.pointer-events-none.absolute.bg-cover')]
+      .find((el) => (el.getAttribute('style') || '').includes('background-image'));
+    if (!image) return 'no background image on the page';
+    const visible = (el) => !!el && getComputedStyle(el).display !== 'none';
+    const state = { image: visible(image), dimming: visible(image.nextElementSibling) };
+    return state.image === want && state.dimming === want ? true : state;
+  }, shown));
+}
+
+test('a theme hides the background image of a model it names', async ({ admin }) => {
+  await modelWithBackground(admin);
+  await removePersonalTheme(admin);
+  await saveTheme(admin, markerTheme('instance'));
+  const page = await openPage({ token: admin });
+  await page.goto(BASE + '/?models=' + BG_MODEL);
+  await loaderReady(page);
+  await expectChatBackground(page, true, 'the model\'s background before the theme names it');
+  // A page already open follows the save
+  await saveTheme(admin, hidingBackgrounds(markerTheme('instance'), { models: [BG_MODEL] }));
+  await expectChatBackground(page, false, 'the model\'s background on an open page');
+  const fresh = await openPage({ token: admin });
+  await fresh.goto(BASE + '/?models=' + BG_MODEL);
+  await loaderReady(fresh);
+  await expectChatBackground(fresh, false, 'the model\'s background after a page load');
+  if (fresh.errors.length) throw new Error('page errors: ' + fresh.errors.join(' | '));
+});
+
+test('a personal theme hides the background image of a folder it names', async ({ admin, user }) => {
+  await saveTheme(admin, markerTheme('instance'));
+  const folder = await folderWithBackground(user);
+  await saveTheme(user, markerTheme('mine'), true);
+  const page = await openPage({ token: user });
+  await page.goto(BASE + '/folders/' + folder);
+  await loaderReady(page);
+  await expectChatBackground(page, true, 'the folder\'s background before the theme names it');
+  await saveTheme(user, hidingBackgrounds(markerTheme('mine'), { folders: [folder] }), true);
+  const fresh = await openPage({ token: user });
+  await fresh.goto(BASE + '/folders/' + folder);
+  await loaderReady(fresh);
+  await expectChatBackground(fresh, false, 'the folder\'s background');
+  await removePersonalTheme(user);
+});
+
 // ── The theme format (schemas/theme-format.md) ──
 // A theme file goes through the Studio and the designer, and each must read
 // it the way the other wrote it.
