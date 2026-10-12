@@ -16,7 +16,7 @@ Each theme JSON contains:
 | Field | Description |
 |---|---|
 | `name` | Display name |
-| `dark`, `light` | Per-mode configurations — **at least one required** |
+| `dark`, `light` | Per-mode configurations, **both required** |
 | `oled`, `her` | Optional additional mode configurations |
 | `description`, `author`, `version` | Optional metadata |
 | `repositoryUrl`, `targetVersion` | Optional — source repository URL and target Open WebUI version |
@@ -24,4 +24,4 @@ Each theme JSON contains:
 
 Each mode object includes OKLCH color values (`h`, `c`, `l`), CSS custom property `overrides`, `customCSS`, `canvasScript`, and various toggle flags.
 
-See [`schemas/theme.schema.json`](../schemas/theme.schema.json) for the full specification.
+[`schemas/theme-format.md`](../schemas/theme-format.md) is the full specification: every field, its default, and how a reader fills in what a file leaves out. [`schemas/theme.schema.json`](../schemas/theme.schema.json) checks a file against it.

@@ -1,0 +1,28 @@
+{
+  "name": "Format fixture: minimal",
+  "dark": {
+    "h": 200,
+    "c": 30,
+    "l": 14,
+    "manualOverrides": "--color-gray-900: #0b1020;",
+    "gradientEnabled": true,
+    "gradientStops": [
+      {
+        "color": "#000000",
+        "position": 0
+      },
+      {
+        "color": "#334455",
+        "position": 100
+      }
+    ],
+    "gradientAnimation": null
+  },
+  "light": {
+    "h": 40,
+    "c": 12,
+    "l": 96,
+    "customCSS": "html { --fixture-light: 1; }",
+    "customCssEnabled": true
+  }
+}

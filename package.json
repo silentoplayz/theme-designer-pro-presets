@@ -20,7 +20,8 @@
     "presets"
   ],
   "scripts": {
-    "test": "node scripts/validate.js",
+    "test": "node scripts/validate.js && node tests/theme-format/check.js",
+    "test:format": "node tests/theme-format/check.js",
     "validate": "node scripts/validate.js",
     "build": "node scripts/build-bundles.js",
     "build:manifest": "node scripts/build-manifest.js",

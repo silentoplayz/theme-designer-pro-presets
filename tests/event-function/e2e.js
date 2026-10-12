@@ -14,6 +14,7 @@
  * which theme reached a page, whatever the designer's generator does.
  *
  * Usage:
+ *   npm ci
  *   npm install --no-save playwright-core@1.56.1
  *   BASE_URL=http://127.0.0.1:3000 node tests/event-function/e2e.js
  *
@@ -437,6 +438,204 @@ test('the designer opens without errors and with nothing to undo', async ({ admi
   const tip = await page.$eval('#inactive-badge', (b) => b.getAttribute('data-tooltip') || '');
   if (!/using a theme of their own/.test(tip)) throw new Error('the badge says a save reaches: ' + tip);
   if (page.errors.length) throw new Error('page errors: ' + page.errors.join(' | '));
+});
+
+// ── The theme format (schemas/theme-format.md) ──
+// A theme file goes through the Studio and the designer, and each must read
+// it the way the other wrote it.
+
+const REPO_ROOT = path.join(__dirname, '..', '..');
+const RAW = 'https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/';
+const FIXTURES = 'tests/theme-format/fixtures';
+
+// The site in docs/, on a free local port
+function serveSite() {
+  const http = require('http');
+  const docs = path.join(REPO_ROOT, 'docs');
+  const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png' };
+  const server = http.createServer((req, res) => {
+    let file = path.join(docs, path.normalize(decodeURIComponent(new URL(req.url, BASE).pathname)));
+    if (file.endsWith(path.sep)) file = path.join(file, 'index.html');
+    if (!file.startsWith(docs + path.sep) || !fs.existsSync(file)) { res.writeHead(404); res.end(); return; }
+    res.writeHead(200, { 'Content-Type': types[path.extname(file)] || 'application/octet-stream' });
+    res.end(fs.readFileSync(file));
+  });
+  return new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve(server)));
+}
+
+// The Studio reads presets from this repository on GitHub: it gets this
+// checkout's copies instead, fixtures included
+async function openStudio() {
+  const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  await context.route(RAW + '**', (route) => {
+    const file = path.join(REPO_ROOT, path.normalize(route.request().url().slice(RAW.length).split('?')[0]));
+    if (!file.startsWith(REPO_ROOT + path.sep) || !fs.existsSync(file)) return route.fulfill({ status: 404 });
+    return route.fulfill({ status: 200, body: fs.readFileSync(file), headers: { 'Access-Control-Allow-Origin': '*' } });
+  });
+  await context.route(/fonts\.(googleapis|gstatic)\.com/, (route) => route.abort());
+  const page = await context.newPage();
+  page.errors = [];
+  page.on('pageerror', (e) => page.errors.push(e.message));
+  return page;
+}
+
+async function download(page, start, what) {
+  const [file] = await Promise.all([
+    page.waitForEvent('download', { timeout: WAIT_MS }).catch(() => { throw new Error('no download of ' + what); }),
+    start(),
+  ]);
+  return JSON.parse(fs.readFileSync(await file.path(), 'utf8'));
+}
+
+// What the Studio's Download button gives for each address (#preset=,
+// #theme=, #gradient= or #fx=)
+async function studioDownloads(site, hashes) {
+  const page = await openStudio();
+  const out = [];
+  for (const [i, hash] of hashes.entries()) {
+    // A new query each time, so the page loads again rather than only its hash changing
+    await page.goto(`${site}/studio/?n=${i}#${hash}`);
+    await page.waitForFunction(() => {
+      const note = document.getElementById('preset-note');
+      return document.getElementById('preset').options.length > 1 &&
+        (note.classList.contains('hidden') || /^(Started from|Previewing)/.test(note.textContent));
+    }, null, { timeout: WAIT_MS });
+    // Gradients and scripts apply after the preset
+    await new Promise((r) => setTimeout(r, 300));
+    // A theme started from nothing is named after what built it
+    if (!/^(preset|theme)=/.test(hash)) await page.fill('#name', 'Built from ' + hash);
+    out.push(await download(page, () => page.evaluate(() => document.getElementById('download').click()), 'the Studio\'s #' + hash));
+  }
+  if (page.errors.length) throw new Error('Studio page errors: ' + page.errors.join(' | '));
+  return out;
+}
+
+// Drops the themes on the designer, the way a person drops downloaded files,
+// and exports each one from its gallery
+async function throughDesigner(admin, themes) {
+  // An empty gallery, so none is skipped as a duplicate
+  await api('POST', ROUTE, { css: '', state: '', library: JSON.stringify({ snapshots: [] }) }, admin);
+  const page = await openDesigner(admin);
+  // The Canvas FX question before a theme with a script is applied
+  page.on('dialog', (d) => d.accept());
+  await page.evaluate((files) => {
+    const dt = new DataTransfer();
+    files.forEach((f) => dt.items.add(new File([f.text], f.name, { type: 'application/json' })));
+    window.dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true }));
+  }, themes.map((t, i) => ({ name: `theme-${i}.json`, text: JSON.stringify(t) })));
+  const count = () => page.evaluate(() => JSON.parse(localStorage.getItem('owui_theme_snapshots') || '[]').length);
+  await waitFor('themes in the gallery', async () => (await count()) === themes.length || `${await count()} of ${themes.length}`);
+  // Each export as the file it would download: Chrome stops a page's
+  // downloads after the first ten in a row
+  await page.evaluate(() => {
+    const make = URL.createObjectURL;
+    URL.createObjectURL = (blob) => { window.__tdpBlob = blob; return make.call(URL, blob); };
+  });
+  const out = [];
+  for (let i = 0; i < themes.length; i++) {
+    const text = await page.evaluate(async (n) => {
+      window.__tdpBlob = null;
+      window.exportSnapshot(n);
+      return window.__tdpBlob ? window.__tdpBlob.text() : null;
+    }, i);
+    if (!text) throw new Error('no export of gallery theme ' + i);
+    out.push(JSON.parse(text));
+  }
+  if (page.errors.length) throw new Error('designer page errors: ' + page.errors.join(' | '));
+  // Closed, so it can't save its gallery over the next round's
+  await page.context().close();
+  return out;
+}
+
+// Paths where two values differ. null and false read the same for a switch
+// (older builds wrote null), and key order doesn't matter.
+function differences(a, b, at = '', out = []) {
+  if (out.length >= 8) return out;
+  if ((a === null || a === false) && (b === null || b === false)) return out;
+  if (a && b && typeof a === 'object' && typeof b === 'object' && Array.isArray(a) === Array.isArray(b)) {
+    new Set([...Object.keys(a), ...Object.keys(b)]).forEach((k) => differences(a[k], b[k], at + '.' + k, out));
+  } else if (a !== b) {
+    out.push(`${at || '(root)'}: ${JSON.stringify(a)?.slice(0, 60)} vs ${JSON.stringify(b)?.slice(0, 60)}`);
+  }
+  return out;
+}
+
+const META = ['name', 'description', 'author', 'version', 'targetVersion', 'repositoryUrl', 'updateUrl'];
+const metaOf = (t) => Object.fromEntries(META.map((k) => [k, t[k] || '']));
+const modesOf = (t) => Object.fromEntries(MODES.map((m) => [m, t[m]]));
+
+test('a theme file keeps every setting through the Studio and the designer', async ({ admin }) => {
+  const read = (rel) => JSON.parse(fs.readFileSync(path.join(REPO_ROOT, rel), 'utf8'));
+  const fixtures = fs.readdirSync(path.join(REPO_ROOT, FIXTURES)).filter((f) => f.endsWith('.json')).map((f) => `${FIXTURES}/${f}`);
+  const gallery = fs.readdirSync(path.join(REPO_ROOT, 'themes')).filter((f) => f.endsWith('.json'));
+  const originals = [...fixtures.map(read), ...gallery.map((f) => read('themes/' + f))];
+  const catalog = read('docs/catalog.json');
+  const built = [
+    ...['mesh', 'radial'].map((type) => ({ type, hash: 'gradient=' + catalog.gradients.find((g) => g.type === type).file })),
+    { hash: 'fx=' + catalog.canvasFx[0].file },
+  ];
+  const hashes = [
+    ...fixtures.map((f) => 'theme=' + encodeURIComponent(RAW + f)),
+    ...gallery.map((f) => 'preset=' + encodeURIComponent(f)),
+    ...built.map((b) => b.hash),
+  ];
+
+  const server = await serveSite();
+  let fromStudio;
+  try {
+    fromStudio = await studioDownloads(`http://127.0.0.1:${server.address().port}`, hashes);
+  } finally {
+    server.close();
+  }
+  const direct = await throughDesigner(admin, originals);
+  const viaStudio = await throughDesigner(admin, fromStudio);
+  const again = await throughDesigner(admin, direct);
+
+  const failures = [];
+  const check = (label, diffs) => { if (diffs.length) failures.push(`${label}\n          ${diffs.join('\n          ')}`); };
+  const byName = (list) => new Map(list.map((t) => [t.name, t]));
+  const directByName = byName(direct);
+  const viaStudioByName = byName(viaStudio);
+  const againByName = byName(again);
+
+  // The designer keeps every value a complete, valid file has
+  const every = originals[fixtures.findIndex((f) => f.endsWith('every-field.json'))];
+  check('the designer changed the every-field fixture', differences(every, directByName.get(every.name)));
+
+  originals.forEach((t, i) => {
+    const d = directByName.get(t.name);
+    if (!d) return failures.push(`the designer didn't export ${t.name}`);
+    // What the designer wrote, it reads back unchanged
+    const a = againByName.get(t.name);
+    check(`${t.name}: the designer changed its own export`, a ? differences(d, a) : ['not exported']);
+    // The Studio reads a file the way the designer does
+    const s = viaStudioByName.get(fromStudio[i].name);
+    check(`${t.name}: through the Studio, the designer got different modes`, s ? differences(modesOf(d), modesOf(s)) : ['not exported']);
+  });
+
+  // The themes built in the Studio carry what built them
+  fromStudio.slice(originals.length).forEach((s, i) => {
+    const kind = built[i].hash.split('=')[0];
+    const ok = MODES.every((m) => kind === 'fx' ? s[m].canvasEnabled && s[m].canvasScript : s[m].gradientEnabled && s[m].gradientType === built[i].type);
+    if (!ok) failures.push(`the Studio's download from #${built[i].hash} doesn't have its ${kind === 'fx' ? 'script' : 'gradient'} in every mode`);
+  });
+
+  // The designer keeps every value the Studio wrote, its metadata included
+  fromStudio.forEach((s) => {
+    const d = viaStudioByName.get(s.name);
+    check(`${s.name}: the designer changed the Studio's file`, d ? differences({ ...metaOf(s), ...modesOf(s) }, { ...metaOf(d), ...modesOf(d) }) : ['not exported']);
+  });
+
+  // Every file either side wrote is valid against the schema
+  const Ajv = require('ajv');
+  const ajv = new Ajv({ allErrors: true, strict: false });
+  require('ajv-formats')(ajv);
+  const valid = ajv.compile(read('schemas/theme.schema.json'));
+  [...fromStudio, ...direct].forEach((t) => {
+    if (!valid(t)) failures.push(`${t.name} doesn't match the schema: ${ajv.errorsText(valid.errors)}`);
+  });
+
+  if (failures.length) throw new Error(`${failures.length} problems:\n        ${failures.join('\n        ')}`);
 });
 
 // ── Run ──

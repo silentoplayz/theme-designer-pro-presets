@@ -1,5 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "$comment": "Theme format 1.0. The written spec, with the rules for reading and writing a file, is schemas/theme-format.md. tests/theme-format/check.js keeps this file, the designer and the Studio in step.",
   "title": "Theme Preset",
   "description": "A complete Theme Designer Pro theme with per-mode configurations (dark, light, OLED, her)",
   "type": "object",
@@ -26,14 +27,12 @@
       "description": "Theme Designer Pro version this was built for"
     },
     "repositoryUrl": {
-      "type": "string",
-      "format": "uri",
-      "description": "URL to the theme's source repository"
+      "description": "URL to the theme's source repository, or empty for none",
+      "anyOf": [{ "type": "string", "format": "uri" }, { "const": "" }]
     },
     "updateUrl": {
-      "type": "string",
-      "format": "uri",
-      "description": "URL to fetch theme updates from (raw JSON)"
+      "description": "URL to fetch theme updates from (raw JSON), or empty for none",
+      "anyOf": [{ "type": "string", "format": "uri" }, { "const": "" }]
     },
     "dark": { "$ref": "#/$defs/themeMode" },
     "light": { "$ref": "#/$defs/themeMode" },
@@ -41,84 +40,219 @@
     "her": { "$ref": "#/$defs/themeMode" }
   },
   "$defs": {
+    "color": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "description": "A CSS color, such as '#6366f1' or 'oklch(0.5 0.1 250)'"
+    },
+    "percent": { "type": "number", "minimum": 0, "maximum": 100 },
     "themeMode": {
       "type": "object",
-      "description": "Configuration for a single theme mode",
+      "description": "Configuration for a single theme mode. A reader fills in any field left out with its default.",
       "required": ["h", "c", "l"],
       "properties": {
         "h": {
           "type": "number",
           "minimum": 0,
           "maximum": 360,
+          "default": 250,
           "description": "OKLCH hue angle (0–360)"
         },
         "c": {
           "type": "number",
           "minimum": 0,
-          "description": "OKLCH chroma value"
+          "maximum": 150,
+          "default": 0,
+          "description": "OKLCH chroma in thousandths (0–150): 18 is a chroma of 0.018"
         },
         "l": {
           "type": "number",
           "minimum": 0,
           "maximum": 100,
-          "description": "OKLCH lightness percentage (0–100)"
+          "default": 20,
+          "description": "OKLCH lightness percentage (0–100); 20 matches Open WebUI's own grays"
+        },
+        "paletteEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether the palette from h, c and l applies. Off, the mode keeps Open WebUI's own grays."
         },
         "overrides": {
           "type": "object",
-          "description": "CSS custom property overrides (e.g. '--color-gray-50': '#f8f9ff')",
-          "additionalProperties": { "type": "string" }
+          "default": {},
+          "description": "Colors set by hand for single palette steps (e.g. '--color-gray-50': '#f8f9ff')",
+          "propertyNames": { "pattern": "^--[\\w-]{1,64}$" },
+          "additionalProperties": { "$ref": "#/$defs/color" }
         },
         "locks": {
           "type": "object",
-          "description": "Map of locked CSS custom properties (true = locked from auto-generation)",
+          "default": {},
+          "description": "Palette steps locked against regeneration (true = locked)",
           "additionalProperties": { "type": "boolean" }
+        },
+        "manualOverrides": {
+          "type": "string",
+          "default": "",
+          "description": "Palette steps set as text, one '--color-gray-N: value;' per line"
+        },
+        "manualOverridesEnabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether manualOverrides applies. Left out while manualOverrides has text, it reads as on."
         },
         "customCSS": {
           "type": "string",
+          "default": "",
           "description": "Custom CSS stylesheet for this mode"
         },
         "customCssEnabled": {
           "type": "boolean",
+          "default": false,
           "description": "Whether custom CSS is active"
         },
         "autoScope": {
           "type": "boolean",
+          "default": true,
           "description": "Whether to auto-scope custom CSS to the active theme mode"
         },
         "canvasEnabled": {
           "type": "boolean",
+          "default": false,
           "description": "Whether the Canvas FX animation is active"
         },
         "canvasScript": {
           "type": "string",
+          "default": "",
           "description": "Canvas FX animation script (Web Worker JS)"
         },
-        "canvasShowAuth": {
+        "gradientEnabled": {
           "type": "boolean",
-          "description": "Show Canvas FX on auth/login pages"
+          "default": false,
+          "description": "Whether the gradient background is active"
+        },
+        "gradientType": {
+          "enum": ["linear", "radial", "conic", "mesh"],
+          "default": "linear",
+          "description": "Kind of gradient"
+        },
+        "gradientAngle": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 360,
+          "default": 135,
+          "description": "Angle in degrees, for linear and conic gradients"
+        },
+        "gradientStops": {
+          "type": "array",
+          "default": [],
+          "maxItems": 32,
+          "description": "Color stops, for linear, radial and conic gradients",
+          "items": {
+            "type": "object",
+            "required": ["color", "position"],
+            "properties": {
+              "color": { "$ref": "#/$defs/color" },
+              "position": { "$ref": "#/$defs/percent" }
+            }
+          }
+        },
+        "gradientIntensity": {
+          "$ref": "#/$defs/percent",
+          "default": 85,
+          "description": "How strongly the gradient shows, in percent"
+        },
+        "gradientAnimation": {
+          "type": ["boolean", "null"],
+          "default": false,
+          "description": "Whether the gradient moves. Older builds wrote null, which reads as false."
+        },
+        "gradientAnimationSpeed": {
+          "type": "number",
+          "minimum": 2,
+          "maximum": 30,
+          "default": 8,
+          "description": "Seconds per animation cycle"
+        },
+        "gradientRadialPosX": {
+          "$ref": "#/$defs/percent",
+          "default": 50,
+          "description": "Horizontal center of a radial gradient, in percent"
+        },
+        "gradientRadialPosY": {
+          "$ref": "#/$defs/percent",
+          "default": 50,
+          "description": "Vertical center of a radial gradient, in percent"
+        },
+        "gradientRadialShape": {
+          "enum": ["circle", "ellipse"],
+          "default": "ellipse",
+          "description": "Shape of a radial gradient"
+        },
+        "gradientRadialSize": {
+          "enum": ["closest-side", "closest-corner", "farthest-side", "farthest-corner"],
+          "default": "farthest-corner",
+          "description": "Size of a radial gradient"
+        },
+        "gradientMeshPoints": {
+          "type": "array",
+          "default": [],
+          "maxItems": 32,
+          "description": "Color points, for mesh gradients",
+          "items": {
+            "type": "object",
+            "required": ["color", "x", "y", "spread"],
+            "properties": {
+              "color": { "$ref": "#/$defs/color" },
+              "x": { "$ref": "#/$defs/percent" },
+              "y": { "$ref": "#/$defs/percent" },
+              "spread": { "$ref": "#/$defs/percent" }
+            }
+          }
+        },
+        "gradientMeshBgColor": {
+          "$ref": "#/$defs/color",
+          "default": "#0a0a12",
+          "description": "Color behind a mesh gradient's points"
         },
         "themeShowAuth": {
           "type": "boolean",
+          "default": true,
           "description": "Show theme colors on auth/login pages"
         },
         "customCssShowAuth": {
           "type": "boolean",
+          "default": true,
           "description": "Show custom CSS on auth/login pages"
+        },
+        "canvasShowAuth": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show Canvas FX on auth/login pages"
+        },
+        "gradientShowAuth": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the gradient on auth/login pages"
         },
         "themeAuthOnly": {
           "type": "boolean",
+          "default": false,
           "description": "Show theme colors only on auth/login pages, not in the app"
         },
         "customCssAuthOnly": {
           "type": "boolean",
+          "default": false,
           "description": "Show custom CSS only on auth/login pages, not in the app"
         },
         "canvasAuthOnly": {
           "type": "boolean",
+          "default": false,
           "description": "Show Canvas FX only on auth/login pages, not in the app"
         },
         "gradientAuthOnly": {
           "type": "boolean",
+          "default": false,
           "description": "Show the gradient only on auth/login pages, not in the app"
         }
       }

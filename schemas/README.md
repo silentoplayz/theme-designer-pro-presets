@@ -2,6 +2,8 @@
 
 JSON Schema definitions (draft-07) describing the data formats used by Theme Designer Pro presets.
 
+The theme format also has a written spec, [`theme-format.md`](theme-format.md): every field, its default, how a reader fills in what a file leaves out, and how the format is versioned.
+
 ## Available Schemas
 
 | Schema | Describes |

@@ -12,12 +12,13 @@ They cover how a theme reaches each page:
 - deleting a gallery theme, **Wipe CSS Snippets** and **Wipe Canvas Presets** leaving the live theme alone
 - the dot in Settings on the **Themes** tab whose theme is in use, and the ring a user without the Admin tab sees for the instance theme
 - the designer opening without errors, with nothing to undo
+- a theme file keeping every setting through the Studio and the designer: every gallery theme and the [theme format](../../schemas/theme-format.md)'s fixtures go through the Studio's Download button and the designer's import and export, and must come out as the other side wrote them
 
 The themes they save are markers, not palettes: each CSS section sets one custom property on `<html>` (`--tdp-vars`, `--tdp-structural`, `--tdp-gradient`, `--tdp-custom`) to the theme's name, so a test reads exactly which parts of which theme reached a page.
 
 ## In CI
 
-[`event-function-tests.yml`](../../.github/workflows/event-function-tests.yml) runs them on every push and pull request that changes the function or the tests, and weekly. It runs them against Open WebUI's latest release and the oldest one the function supports (v0.11).
+[`event-function-tests.yml`](../../.github/workflows/event-function-tests.yml) runs them on every push and pull request that changes the function, the tests, the theme schema or the Studio, and weekly. It runs them against Open WebUI's latest release and the oldest one the function supports (v0.11).
 
 ## Locally
 
@@ -27,6 +28,7 @@ They need a fresh, throwaway Open WebUI. They sign up its first account as admin
 docker run -d --rm --name tdp-tests -p 127.0.0.1:3000:8080 \
   -e WEBUI_SECRET_KEY=tests -e ENABLE_OLLAMA_API=false -e ENABLE_OPENAI_API=false -e OFFLINE_MODE=true \
   ghcr.io/open-webui/open-webui:main
+npm ci
 npm install --no-save playwright-core@1.56.1
 BASE_URL=http://127.0.0.1:3000 node tests/event-function/e2e.js
 docker stop tdp-tests

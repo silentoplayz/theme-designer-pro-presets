@@ -1,0 +1,281 @@
+{
+  "name": "Format fixture: every field",
+  "description": "Every field set away from its default, differently in each mode.",
+  "author": "Theme Designer Pro tests",
+  "version": "2.3.4",
+  "targetVersion": "1.14.0",
+  "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
+  "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/tests/theme-format/fixtures/every-field.json",
+  "dark": {
+    "h": 12,
+    "c": 18,
+    "l": 11,
+    "overrides": {
+      "--color-gray-50": "#f8f9ff",
+      "--color-gray-950": "#05050a"
+    },
+    "locks": {
+      "--color-gray-50": true,
+      "--color-gray-950": false
+    },
+    "paletteEnabled": false,
+    "customCSS": "/* dark */\nhtml { --fixture-dark: 1; }",
+    "customCssEnabled": true,
+    "autoScope": false,
+    "canvasEnabled": true,
+    "canvasScript": "self.onmessage = function (e) { /* fixture dark */ };",
+    "manualOverrides": "--color-gray-900: #121218;",
+    "manualOverridesEnabled": true,
+    "gradientEnabled": true,
+    "gradientType": "conic",
+    "gradientAngle": 10,
+    "gradientStops": [
+      {
+        "color": "#ff0055",
+        "position": 0
+      },
+      {
+        "color": "#00ccff",
+        "position": 30
+      },
+      {
+        "color": "#112233",
+        "position": 100
+      }
+    ],
+    "gradientIntensity": 12,
+    "gradientAnimation": true,
+    "gradientAnimationSpeed": 2,
+    "gradientRadialPosX": 0,
+    "gradientRadialPosY": 100,
+    "gradientRadialShape": "circle",
+    "gradientRadialSize": "closest-side",
+    "gradientMeshPoints": [
+      {
+        "color": "#6366f1",
+        "x": 10,
+        "y": 20,
+        "spread": 30
+      },
+      {
+        "color": "#ec4899",
+        "x": 90,
+        "y": 80,
+        "spread": 0
+      }
+    ],
+    "gradientMeshBgColor": "#101010",
+    "gradientShowAuth": false,
+    "themeShowAuth": true,
+    "customCssShowAuth": false,
+    "canvasShowAuth": true,
+    "themeAuthOnly": true,
+    "customCssAuthOnly": false,
+    "canvasAuthOnly": false,
+    "gradientAuthOnly": true
+  },
+  "light": {
+    "h": 140,
+    "c": 40,
+    "l": 92,
+    "overrides": {
+      "--color-gray-50": "#fefefe",
+      "--color-gray-950": "#101018"
+    },
+    "locks": {
+      "--color-gray-50": true,
+      "--color-gray-950": true
+    },
+    "paletteEnabled": true,
+    "customCSS": "/* light */\nhtml { --fixture-light: 1; }",
+    "customCssEnabled": true,
+    "autoScope": true,
+    "canvasEnabled": false,
+    "canvasScript": "self.onmessage = function (e) { /* fixture light */ };",
+    "manualOverrides": "--color-gray-900: #202030;",
+    "manualOverridesEnabled": true,
+    "gradientEnabled": true,
+    "gradientType": "radial",
+    "gradientAngle": 200,
+    "gradientStops": [
+      {
+        "color": "#ff0055",
+        "position": 0
+      },
+      {
+        "color": "#00ccff",
+        "position": 55
+      },
+      {
+        "color": "#112233",
+        "position": 100
+      }
+    ],
+    "gradientIntensity": 64,
+    "gradientAnimation": true,
+    "gradientAnimationSpeed": 30,
+    "gradientRadialPosX": 25,
+    "gradientRadialPosY": 10,
+    "gradientRadialShape": "circle",
+    "gradientRadialSize": "closest-corner",
+    "gradientMeshPoints": [
+      {
+        "color": "#6366f1",
+        "x": 10,
+        "y": 20,
+        "spread": 30
+      },
+      {
+        "color": "#ec4899",
+        "x": 60,
+        "y": 80,
+        "spread": 100
+      }
+    ],
+    "gradientMeshBgColor": "#fafafa",
+    "gradientShowAuth": true,
+    "themeShowAuth": false,
+    "customCssShowAuth": true,
+    "canvasShowAuth": false,
+    "themeAuthOnly": false,
+    "customCssAuthOnly": true,
+    "canvasAuthOnly": true,
+    "gradientAuthOnly": false
+  },
+  "oled": {
+    "h": 305,
+    "c": 9,
+    "l": 0,
+    "overrides": {
+      "--color-gray-50": "#eeeeff",
+      "--color-gray-950": "#000000"
+    },
+    "locks": {
+      "--color-gray-50": true,
+      "--color-gray-950": false
+    },
+    "paletteEnabled": false,
+    "customCSS": "/* oled */\nhtml { --fixture-oled: 1; }",
+    "customCssEnabled": true,
+    "autoScope": false,
+    "canvasEnabled": true,
+    "canvasScript": "self.onmessage = function (e) { /* fixture oled */ };",
+    "manualOverrides": "--color-gray-900: #0a0a0a;",
+    "manualOverridesEnabled": true,
+    "gradientEnabled": true,
+    "gradientType": "mesh",
+    "gradientAngle": 359,
+    "gradientStops": [
+      {
+        "color": "#ff0055",
+        "position": 0
+      },
+      {
+        "color": "#00ccff",
+        "position": 70
+      },
+      {
+        "color": "#112233",
+        "position": 100
+      }
+    ],
+    "gradientIntensity": 100,
+    "gradientAnimation": true,
+    "gradientAnimationSpeed": 14,
+    "gradientRadialPosX": 100,
+    "gradientRadialPosY": 33,
+    "gradientRadialShape": "circle",
+    "gradientRadialSize": "farthest-side",
+    "gradientMeshPoints": [
+      {
+        "color": "#6366f1",
+        "x": 10,
+        "y": 20,
+        "spread": 30
+      },
+      {
+        "color": "#ec4899",
+        "x": 40,
+        "y": 80,
+        "spread": 65
+      }
+    ],
+    "gradientMeshBgColor": "#000000",
+    "gradientShowAuth": false,
+    "themeShowAuth": true,
+    "customCssShowAuth": false,
+    "canvasShowAuth": true,
+    "themeAuthOnly": true,
+    "customCssAuthOnly": false,
+    "canvasAuthOnly": false,
+    "gradientAuthOnly": true
+  },
+  "her": {
+    "h": 77,
+    "c": 120,
+    "l": 85,
+    "overrides": {
+      "--color-gray-50": "#fff0f5",
+      "--color-gray-950": "#1a0010"
+    },
+    "locks": {
+      "--color-gray-50": true,
+      "--color-gray-950": true
+    },
+    "paletteEnabled": true,
+    "customCSS": "/* her */\nhtml { --fixture-her: 1; }",
+    "customCssEnabled": true,
+    "autoScope": true,
+    "canvasEnabled": false,
+    "canvasScript": "self.onmessage = function (e) { /* fixture her */ };",
+    "manualOverrides": "--color-gray-900: #2a1020;",
+    "manualOverridesEnabled": true,
+    "gradientEnabled": true,
+    "gradientType": "linear",
+    "gradientAngle": 45,
+    "gradientStops": [
+      {
+        "color": "#ff0055",
+        "position": 0
+      },
+      {
+        "color": "#00ccff",
+        "position": 90
+      },
+      {
+        "color": "#112233",
+        "position": 100
+      }
+    ],
+    "gradientIntensity": 0,
+    "gradientAnimation": true,
+    "gradientAnimationSpeed": 21,
+    "gradientRadialPosX": 75,
+    "gradientRadialPosY": 66,
+    "gradientRadialShape": "circle",
+    "gradientRadialSize": "closest-side",
+    "gradientMeshPoints": [
+      {
+        "color": "#6366f1",
+        "x": 10,
+        "y": 20,
+        "spread": 30
+      },
+      {
+        "color": "#ec4899",
+        "x": 15,
+        "y": 80,
+        "spread": 12
+      }
+    ],
+    "gradientMeshBgColor": "#220011",
+    "gradientShowAuth": true,
+    "themeShowAuth": false,
+    "customCssShowAuth": true,
+    "canvasShowAuth": false,
+    "themeAuthOnly": false,
+    "customCssAuthOnly": true,
+    "canvasAuthOnly": true,
+    "gradientAuthOnly": false
+  }
+}
