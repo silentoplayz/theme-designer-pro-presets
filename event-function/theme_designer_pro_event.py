@@ -7755,6 +7755,35 @@ location.reload();</code></pre>
     // Keys that the bootloader's `storage` event listener watches — must use sessionStorage in draft mode
     const _BOOTLOADER_WATCHED_KEYS = new Set(['theme', 'css_cache']);
 
+    // The galleries (themes, Canvas FX scripts, CSS snippets, gradients) are
+    // kept on the server, which puts them in this page. Copied into the
+    // browser's storage as well, they filled it: a site gets about 5 MB,
+    // shared with Open WebUI, and a personal designer kept a second set. So
+    // they're kept in memory. An older build's copy in the browser is read
+    // while the server has no copy of that gallery, and removed once it has.
+    const _LIBRARY_FIELDS = {
+        snapshots: 'owui_theme_snapshots', canvas_presets: 'owui_canvas_presets',
+        css_presets: 'owui_css_presets', gradient_presets: 'owui_gradient_presets'
+    };
+    const _libraryKeys = new Set(Object.values(_LIBRARY_FIELDS));
+    const _libraryMemory = new Map();
+    const _libraryStore = {
+        getItem(k) { return _libraryMemory.has(k) ? _libraryMemory.get(k) : localStorage.getItem(k); },
+        setItem(k, v) { _libraryMemory.set(k, String(v)); },
+        removeItem(k) { _libraryMemory.delete(k); localStorage.removeItem(k); }
+    };
+    const _serverLibrary = (() => {
+        try {
+            const lib = JSON.parse(window.__THEME_PRO_LIBRARY__ || 'null');
+            return lib && typeof lib === 'object' ? lib : {};
+        } catch (e) { return {}; }
+    })();
+    Object.entries(_LIBRARY_FIELDS).forEach(([field, key]) => {
+        if (!Array.isArray(_serverLibrary[field]) || !_serverLibrary[field].length) return;
+        _libraryMemory.set(key, JSON.stringify(_serverLibrary[field]));
+        try { localStorage.removeItem(key); } catch (e) {}
+    });
+
     const Storage = {
         _keys: {
             theme: STORAGE_KEY,
@@ -7767,7 +7796,10 @@ location.reload();</code></pre>
         },
         _resolve(key) { return this._keys[key] || key; },
         // In draft mode, bootloader-watched keys go to sessionStorage (tab-scoped, no cross-tab leak)
-        _store(key) { return (_draftMode && _BOOTLOADER_WATCHED_KEYS.has(key)) ? sessionStorage : localStorage; },
+        _store(key) {
+            if (_libraryKeys.has(this._resolve(key))) return _libraryStore;
+            return (_draftMode && _BOOTLOADER_WATCHED_KEYS.has(key)) ? sessionStorage : localStorage;
+        },
         get(key, fallback = null) {
             try { return JSON.parse(this._store(key).getItem(this._resolve(key))) || fallback; }
             catch { return fallback; }
@@ -7788,7 +7820,7 @@ location.reload();</code></pre>
                 // silent failure would look like data loss.
                 console.warn('[Theme Pro] Storage write failed for', key, e);
                 if (typeof showToast === 'function') {
-                    showToast('⚠️ Browser storage full — export and remove old snapshots to free space');
+                    showToast('⚠️ This browser\'s storage is full, so its copy of the theme is out of date. Your changes still save to the server.');
                 }
                 return false;
             }
@@ -8713,45 +8745,45 @@ function startAnimation() {
     let CUSTOM_GRADIENT_PRESETS = Storage.get('gradients', []);
     if (!Array.isArray(CUSTOM_GRADIENT_PRESETS)) CUSTOM_GRADIENT_PRESETS = [];
 
-    // Load presets from server (source of truth) — auto-migrate from localStorage on first run
-    (function loadServerLibrary() {
-        fetch('{ROUTE_BASE}/library.json', { credentials: 'same-origin' })
-            .then(r => r.ok ? r.json() : null)
-            .then(lib => {
-                if (!lib) return;
-                const hasServerData = (lib.snapshots && lib.snapshots.length > 0)
-                    || (lib.canvas_presets && lib.canvas_presets.length > 0)
-                    || (lib.css_presets && lib.css_presets.length > 0)
-                    || (lib.gradient_presets && lib.gradient_presets.length > 0);
+    // The server's library (source of truth), which it put in this page and
+    // _libraryStore already reads. Once the page has loaded it's checked like
+    // an import and drawn. When the server has none yet, an older build's copy
+    // in the browser goes up to it.
+    function loadServerLibrary() {
+        const lib = _serverLibrary;
+        const hasServerData = (lib.snapshots && lib.snapshots.length > 0)
+            || (lib.canvas_presets && lib.canvas_presets.length > 0)
+            || (lib.css_presets && lib.css_presets.length > 0)
+            || (lib.gradient_presets && lib.gradient_presets.length > 0);
 
-                if (hasServerData) {
-                    // Validated at the door, like import. This path overwrites the
-                    // whole library on every page load, so skipping it left the
-                    // render-time sanitizers as the only defence for exactly the
-                    // themes written by an older build.
-                    if (lib.snapshots && lib.snapshots.length > 0) saveSnapshots(sanitizeSnapshotList(lib.snapshots));
-                    if (lib.canvas_presets && lib.canvas_presets.length > 0) { CANVAS_PRESETS.splice(0, CANVAS_PRESETS.length, ...lib.canvas_presets); Storage.set('canvas', CANVAS_PRESETS); }
-                    if (lib.css_presets && lib.css_presets.length > 0) { CSS_PRESETS.splice(0, CSS_PRESETS.length, ...lib.css_presets); Storage.set('css', CSS_PRESETS); }
-                    if (lib.gradient_presets && lib.gradient_presets.length > 0) { const g = sanitizeGradientPresets(lib.gradient_presets); CUSTOM_GRADIENT_PRESETS.splice(0, CUSTOM_GRADIENT_PRESETS.length, ...g); Storage.set('gradients', CUSTOM_GRADIENT_PRESETS); }
-                    if (typeof renderSnapshots === 'function') renderSnapshots();
-                    if (typeof renderCanvasPresets === 'function') renderCanvasPresets();
-                    if (typeof renderCssPresets === 'function') renderCssPresets();
-                    if (typeof renderGradientPresets === 'function') renderGradientPresets();
-                    console.log('[Theme Pro] Library loaded from server');
-                } else {
-                    // Server empty — auto-migrate localStorage data (one-time)
-                    const hasLocalData = getSnapshots().length > 0
-                        || CANVAS_PRESETS.length > 0
-                        || CSS_PRESETS.length > 0
-                        || CUSTOM_GRADIENT_PRESETS.length > 0;
-                    if (hasLocalData) {
-                        syncLibrary();
-                        console.log('[Theme Pro] Auto-migrated localStorage presets to server');
-                    }
-                }
-            })
-            .catch(e => console.warn('[Theme Pro] Library load failed:', e));
-    })();
+        if (hasServerData) {
+            // Validated at the door, like import. This path overwrites the
+            // whole library on every page load, so skipping it left the
+            // render-time sanitizers as the only defence for exactly the
+            // themes written by an older build.
+            if (lib.snapshots && lib.snapshots.length > 0) saveSnapshots(sanitizeSnapshotList(lib.snapshots));
+            if (lib.canvas_presets && lib.canvas_presets.length > 0) { CANVAS_PRESETS.splice(0, CANVAS_PRESETS.length, ...lib.canvas_presets); Storage.set('canvas', CANVAS_PRESETS); }
+            if (lib.css_presets && lib.css_presets.length > 0) { CSS_PRESETS.splice(0, CSS_PRESETS.length, ...lib.css_presets); Storage.set('css', CSS_PRESETS); }
+            if (lib.gradient_presets && lib.gradient_presets.length > 0) { const g = sanitizeGradientPresets(lib.gradient_presets); CUSTOM_GRADIENT_PRESETS.splice(0, CUSTOM_GRADIENT_PRESETS.length, ...g); Storage.set('gradients', CUSTOM_GRADIENT_PRESETS); }
+            if (typeof renderSnapshots === 'function') renderSnapshots();
+            if (typeof renderCanvasPresets === 'function') renderCanvasPresets();
+            if (typeof renderCssPresets === 'function') renderCssPresets();
+            if (typeof renderGradientPresets === 'function') renderGradientPresets();
+            console.log('[Theme Pro] Library loaded from server');
+        } else {
+            // Server empty — auto-migrate localStorage data (one-time)
+            const hasLocalData = getSnapshots().length > 0
+                || CANVAS_PRESETS.length > 0
+                || CSS_PRESETS.length > 0
+                || CUSTOM_GRADIENT_PRESETS.length > 0;
+            if (hasLocalData) {
+                syncLibrary();
+                console.log('[Theme Pro] Auto-migrated localStorage presets to server');
+            }
+        }
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadServerLibrary);
+    else setTimeout(loadServerLibrary, 0);
 
     // Mathematically match Open WebUI's native Tailwind v4 exact baseline
     const lightnessMap = { 50: 0.98, 100: 0.94, 200: 0.92, 300: 0.85, 400: 0.77, 500: 0.69, 600: 0.51, 700: 0.42, 800: 0.32, 850: 0.27, 900: 0.20, 950: 0.16 };
@@ -17339,10 +17371,21 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         if not saved_state or saved_state.strip() in ("", "{}"):
             saved_state = None
         safe_saved_state = _json.dumps(saved_state).replace("<", "\\u003c")
+        # The galleries too: the designer keeps them in memory, not in the
+        # browser's storage, so they have to be there from its first line
+        # (see _libraryStore). null means none saved yet.
+        try:
+            library = self._load_library(user_id)
+            if library is not None:
+                _json.loads(library)
+        except (OSError, ValueError):
+            library = None
+        safe_library = _json.dumps(library).replace("<", "\\u003c")
         config_tag = (
             '<script id="owui-valve-config">'
             f"window.__THEME_PRO_CONFIG__={safe_config};"
             f"window.__THEME_PRO_SAVED_STATE__={safe_saved_state};"
+            f"window.__THEME_PRO_LIBRARY__={safe_library};"
             "</script>"
         )
 

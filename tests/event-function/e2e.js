@@ -414,7 +414,7 @@ test('deleting the gallery theme a mode came from leaves the live theme alone', 
   const entry = { name: 'Gallery entry', dark: modes.dark, light: modes.light, oled: modes.oled, her: modes.her };
   await api('POST', ROUTE, { css: '', state: '', library: JSON.stringify({ snapshots: [entry] }) }, admin);
   const page = await openDesigner(admin);
-  const count = await page.evaluate(() => JSON.parse(localStorage.getItem('owui_theme_snapshots') || '[]').length);
+  const count = await page.evaluate(() => Number(document.getElementById('library-count').textContent) || 0);
   if (!count) throw new Error('the gallery is empty, nothing to delete');
   await page.evaluate(() => window.requestDelete(0));
   await page.waitForSelector('#confirm-delete-btn', { state: 'visible', timeout: WAIT_MS });
@@ -437,6 +437,35 @@ test('the designer opens without errors and with nothing to undo', async ({ admi
   // With personal themes on, an instance save reaches only people without one
   const tip = await page.$eval('#inactive-badge', (b) => b.getAttribute('data-tooltip') || '');
   if (!/using a theme of their own/.test(tip)) throw new Error('the badge says a save reaches: ' + tip);
+  if (page.errors.length) throw new Error('page errors: ' + page.errors.join(' | '));
+});
+
+test('the designer moves an older browser copy of its gallery to the server and keeps none', async ({ admin }) => {
+  const LIBRARY_KEYS = ['owui_theme_snapshots', 'owui_canvas_presets', 'owui_css_presets', 'owui_gradient_presets'];
+  await saveTheme(admin, markerTheme('instance'));
+  await api('POST', ROUTE, { css: '', state: '', library: JSON.stringify({ snapshots: [] }) }, admin);
+  // What an older build left in this browser
+  const page = await openPage({ token: admin });
+  await page.context().addCookies([{ name: 'token', value: admin, url: BASE }]);
+  await page.goto(BASE + '/auth');
+  const old = { name: 'Browser copy', ...JSON.parse(markerTheme('old').state) };
+  await page.evaluate((t) => localStorage.setItem('owui_theme_snapshots', JSON.stringify([t])), old);
+  const galleryCount = () => page.evaluate(() => Number(document.getElementById('library-count').textContent) || 0);
+  const kept = () => page.evaluate((keys) => keys.filter((k) => localStorage.getItem(k) !== null), LIBRARY_KEYS);
+
+  await page.goto(BASE + ROUTE);
+  await page.waitForSelector('#theme-designer-container', { timeout: WAIT_MS });
+  await waitFor('the browser copy in the gallery', async () => (await galleryCount()) === 1 || await galleryCount());
+  await waitFor('the browser copy on the server', async () => {
+    const lib = await (await fetch(BASE + ROUTE + '/library.json', { headers: { Authorization: 'Bearer ' + admin } })).json();
+    return (lib.snapshots || []).some((s) => s.name === 'Browser copy') || 'not there';
+  });
+
+  await page.reload();
+  await page.waitForSelector('#theme-designer-container', { timeout: WAIT_MS });
+  await waitFor('the gallery after a reload', async () => (await galleryCount()) === 1 || await galleryCount());
+  const left = await kept();
+  if (left.length) throw new Error('still in browser storage: ' + left.join(', '));
   if (page.errors.length) throw new Error('page errors: ' + page.errors.join(' | '));
 });
 
@@ -612,7 +641,7 @@ async function throughDesigner(admin, themes) {
     files.forEach((f) => dt.items.add(new File([f.text], f.name, { type: 'application/json' })));
     window.dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true }));
   }, themes.map((t, i) => ({ name: `theme-${i}.json`, text: JSON.stringify(t) })));
-  const count = () => page.evaluate(() => JSON.parse(localStorage.getItem('owui_theme_snapshots') || '[]').length);
+  const count = () => page.evaluate(() => Number(document.getElementById('library-count').textContent) || 0);
   await waitFor('themes in the gallery', async () => (await count()) === themes.length || `${await count()} of ${themes.length}`);
   // Each export as the file it would download: Chrome stops a page's
   // downloads after the first ten in a row
