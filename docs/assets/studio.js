@@ -1,6 +1,7 @@
 /* Theme Designer Pro site: Studio.
-   Builds a theme in the same shape the designer exports (buildThemeJson in
-   the event function), so the file it downloads imports like any other. */
+   Reads and writes themes in the theme format (schemas/theme-format.md),
+   the same as the designer, so the file it downloads imports like any
+   other. tests/theme-format/check.js keeps DEFAULT_MODE in step. */
 (function () {
   'use strict';
 
@@ -22,6 +23,7 @@
     gradientMeshPoints: [], gradientMeshBgColor: '#0a0a12',
     gradientAnimationSpeed: 8, gradientShowAuth: true, themeShowAuth: true,
     customCssShowAuth: true, canvasShowAuth: true,
+    themeAuthOnly: false, customCssAuthOnly: false, canvasAuthOnly: false, gradientAuthOnly: false,
   };
 
   const clone = (o) => JSON.parse(JSON.stringify(o));
@@ -582,9 +584,7 @@
       return;
     }
     const modes = {};
-    MODES.forEach((k) => {
-      modes[k] = Object.assign(clone(DEFAULT_MODE), theme[k] || theme.dark || {});
-    });
+    MODES.forEach((k) => { modes[k] = readMode(theme, k); });
     const same = MODES.every((k) => modes[k].h === modes.dark.h && modes[k].c === modes.dark.c);
     state = {
       name: theme.name ? theme.name + (submitted ? '' : ' (remix)') : '',
@@ -615,6 +615,18 @@
     queueSave();
   }
 
+  // A mode as the designer reads it from a file (schemas/theme-format.md):
+  // a missing OLED is Dark at lightness 0, a missing Her is Light, and
+  // override text from before the switch existed is on
+  function readMode(theme, k) {
+    const from = theme[k] || (k === 'oled' ? Object.assign(clone(theme.dark || {}), { l: 0 }) : k === 'her' ? theme.light || theme.dark : null) || {};
+    const m = Object.assign(clone(DEFAULT_MODE), clone(from));
+    if (from.manualOverridesEnabled === undefined && typeof from.manualOverrides === 'string' && from.manualOverrides.trim()) {
+      m.manualOverridesEnabled = true;
+    }
+    return m;
+  }
+
   $('reset-all').addEventListener('click', () => {
     $('preset').value = '';
     window.TDPSite.reset();
@@ -630,8 +642,8 @@
   // ---- Export ----
 
   function buildTheme() {
-    // Empty link fields are left out: the designer fills them in on
-    // import, and the repo's theme schema rejects them as invalid URIs
+    // Empty link fields are left out: a reader takes a missing one as
+    // empty, and the designer fills them in on import
     const theme = {
       name: state.name.trim() || 'Untitled theme',
       description: 'Made in the Theme Designer Pro Studio.',

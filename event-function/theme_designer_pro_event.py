@@ -14365,7 +14365,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                     data.themes.reverse().forEach(t => { 
                         ensureAllModes(t);
                         if (t.her.l === 0) t.her.l = 20;
-                        MODES.forEach(m => { t[m] = normalizeModeData(t[m]); if (!t[m].paletteEnabled) t[m].paletteEnabled = true; });
+                        MODES.forEach(m => { t[m] = normalizeModeData(t[m]); });
                         
                         if (isThemeDuplicate(t, snapshots)) { skippedCount++; return; }
                         snapshots.unshift(t); 
@@ -14391,7 +14391,9 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                             her: data.her || null
                         };
                         ensureAllModes(newTheme);
-                        MODES.forEach(m => { newTheme[m] = normalizeModeData(newTheme[m]); if (!newTheme[m].paletteEnabled) newTheme[m].paletteEnabled = true; });
+                        // A theme saved with its palette off stays off: normalizeModeData
+                        // fills it in only when the file has none
+                        MODES.forEach(m => { newTheme[m] = normalizeModeData(newTheme[m]); });
                         
                     } else if (data.h !== undefined) {
                         newTheme = migrateLegacyTheme({ ...data, name: file.name.replace('.json', '') });
@@ -16577,7 +16579,6 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                         if (!s[m].locks) { needsSave = true; s[m].locks = {}; Object.keys(s[m].overrides || {}).forEach(k => s[m].locks[k] = true); }
                         const keysBefore = Object.keys(s[m]).length;
                         s[m] = normalizeModeData(s[m]);
-                        if (!s[m].paletteEnabled) s[m].paletteEnabled = true;
                         if (Object.keys(s[m]).length !== keysBefore) needsSave = true;
                     }
                 });
