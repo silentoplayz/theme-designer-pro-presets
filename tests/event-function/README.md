@@ -7,6 +7,7 @@ They cover how a theme reaches each page:
 - the instance theme on app pages
 - what a sign-in page shows under **Show on Auth Pages**, **Only on Auth Pages** and the **Enable Auth Page Theming** valve
 - signing in without a reload, and signing out
+- a personal save made before a page claims its live stream still reaching it, with nothing fetched twice
 - a personal theme replacing the instance theme, its custom CSS included, and **Use instance theme** reaching an open page live
 - a Canvas FX animation starting on app pages and staying off where it's hidden
 - deleting a gallery theme, **Wipe CSS Snippets** and **Wipe Canvas Presets** leaving the live theme alone

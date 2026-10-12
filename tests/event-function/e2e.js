@@ -256,6 +256,34 @@ test('a personal theme survives a reload and Use instance theme removes it', asy
   await expectParts(page, { vars: 'instance', custom: 'instance' }, 'after Use instance theme');
 });
 
+test('a personal save before a page claims its stream still reaches it, and nothing is fetched twice', async ({ admin, user }) => {
+  await saveTheme(admin, markerTheme('instance'));
+  await removePersonalTheme(user);
+  // Held until the save below has landed, so the save reaches no stream
+  let release;
+  const held = new Promise((r) => { release = r; });
+  const page = await openPage({ token: user });
+  await page.route('**/events/bind', async (route) => { await held; await route.continue(); });
+  await page.goto(BASE + '/');
+  await loaderReady(page);
+  await expectParts(page, { vars: 'instance' });
+  await saveTheme(user, markerTheme('mine'), true);
+  release();
+  await expectParts(page, { vars: 'mine' }, 'the personal save made before the claim');
+
+  // With nothing saved in between, the claim fetches nothing again
+  const fresh = await openPage({ token: user });
+  let reads = 0;
+  fresh.on('request', (r) => { if (r.url().endsWith('/me/theme.css')) reads++; });
+  const bound = fresh.waitForResponse((r) => r.url().endsWith('/events/bind'), { timeout: WAIT_MS });
+  await fresh.goto(BASE + '/');
+  await bound;
+  await expectParts(fresh, { vars: 'mine' });
+  await new Promise((r) => setTimeout(r, 1500));
+  await removePersonalTheme(user);
+  if (reads !== 1) throw new Error(`the personal theme was fetched ${reads} times on one load`);
+});
+
 test('Enable Auth Page Theming off keeps the sign-in page on Open WebUI\'s look', async ({ admin }) => {
   await saveTheme(admin, markerTheme('instance'));
   await setValves(admin, { enable_auth_page_theming: false });

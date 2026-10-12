@@ -581,6 +581,8 @@ class Event:
             // nothing changed, so repeat fetches are cheap.
             // True while this page shows the signed-in user's personal theme.
             var _personal = false;
+            // What the latest fetch read of the personal theme (see bindStream)
+            var _personalRead = Promise.resolve(null);
             // The last CSS enforceTheme() cleaned, and the result
             var _strippedFrom = null;
             var _strippedCss = '';
@@ -651,11 +653,17 @@ class Event:
                 // theme applies, as it always has.
                 var uid = personalUser();
                 _themeUid = uid;
+                var mineRead = uid ? Promise.all([
+                    readAsset('__THEME_ROUTE__/me/theme.css', true),
+                    readAsset('__THEME_ROUTE__/me/state.json', true)
+                ]) : null;
+                // The tags of the personal theme this fetch read (both null for
+                // none), which a stream claim compares with what's saved now
+                _personalRead = !mineRead ? Promise.resolve(null) : mineRead.then(function(mine) {
+                    return mine[0] && mine[1] ? { uid: uid, tags: [mine[0].tag, mine[1].tag] } : null;
+                });
                 var pick = !uid ? readInstance().then(function(r) { return { results: r, personal: false }; })
-                    : Promise.all([
-                        readAsset('__THEME_ROUTE__/me/theme.css', true),
-                        readAsset('__THEME_ROUTE__/me/state.json', true)
-                    ]).then(function(mine) {
+                    : mineRead.then(function(mine) {
                         if (!mine[0] || !mine[1]) return null; // Network error: learned nothing
                         if (mine[0].body && mine[0].body.trim()) return { results: mine, personal: true, uid: uid };
                         return readInstance().then(function(r) { return { results: r, personal: false }; });
@@ -2026,8 +2034,16 @@ class Event:
                         }).then(function(r) {
                             if (!r.ok) { failed(); return; }
                             // A personal save that landed between this page's
-                            // fetch and the claim was sent to nobody: check once
-                            if (_claimed === key) fetchThemeFromServer();
+                            // fetch and the claim was sent to nobody. The answer
+                            // names the personal theme saved now: fetch only when
+                            // this page shows something else (or can't tell)
+                            return Promise.all([r.json().catch(function() { return null; }), _personalRead]).then(function(both) {
+                                if (_claimed !== key) return;
+                                var d = both[0], seen = both[1];
+                                var current = !!d && !!seen && seen.uid === uid && 'cssTag' in d &&
+                                    seen.tags[0] === (d.cssTag || null) && seen.tags[1] === (d.stateTag || null);
+                                if (!current) fetchThemeFromServer();
+                            });
                         }).catch(failed);
                     }
                     _claimStream = bindStream;
@@ -3842,7 +3858,16 @@ class Event:
             # The stream may be held by another worker; Redis tells it
             if not Event._bind_stream(cid, user.id):
                 Event._redis_publish(f"{Event._CTRL_PREFIX}bind {cid} {user.id}\n\n")
-            return JSONResponse({"status": "ok"})
+            # The personal theme saved now, by the tags its fetches carry, so
+            # the page fetches again only when it shows something else: a save
+            # that landed before this claim reached no stream
+            css = await asyncio.to_thread(event_instance._get_personal_delivery, user.id, "css")
+            state = await asyncio.to_thread(event_instance._get_personal_delivery, user.id, "state")
+            return JSONResponse({
+                "status": "ok",
+                "cssTag": css[1] if css else None,
+                "stateTag": state[1] if state else None,
+            })
 
         # -- GET /api/v1/theme-designer/events (SSE — live push to all clients) --
 
