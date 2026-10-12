@@ -314,8 +314,13 @@
     const note = $('bg-note');
     const r = ref();
     const fromPreset = state.preset && bgKind(m) !== 'none' && !r.gradient && !r.fx;
-    note.textContent = fromPreset ? 'This background comes from the preset you started from.' : '';
-    note.classList.toggle('hidden', !fromPreset);
+    // A script that handles the context message, as the gallery's preview tells
+    const reacts = bgKind(m) === 'fx' && /(case|===)\s*['"]context['"]/.test(m.canvasScript);
+    note.textContent = [
+      fromPreset ? 'This background comes from the preset you started from.' : '',
+      reacts ? 'This animation reacts to the chat: click a follow-up under the last reply in the preview, and it changes as the answer streams in.' : '',
+    ].filter(Boolean).join(' ');
+    note.classList.toggle('hidden', !note.textContent);
   }
 
   // ---- Animation settings ----

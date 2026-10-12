@@ -506,6 +506,90 @@
   // message's own stats when building rows on chat switch.
   const MSG_ACTIONS_TPL = msgActions('__TDP_STATS__');
 
+  // What Preview Model answers when a follow-up is clicked, in the order new
+  // follow-ups are offered. Every follow-up in the mock chats has an answer.
+  const CODE = (lang, code) => '<div class="code-block"><div class="code-block-header"><span>' + lang +
+    '</span><span class="cb-action">Copy</span></div><pre>' + code + '</pre></div>';
+  const MOCK_REPLIES = [
+    ['How do I import one of these presets into my instance?',
+      '<p>Three ways, all from the designer in Open WebUI:</p><ul>' +
+      '<li><b>Install on my Open WebUI</b> on any gallery preset opens your designer with the import ready. Nothing installs until you confirm it.</li>' +
+      '<li>Download the preset and drop the file anywhere on the designer.</li>' +
+      '<li>Paste a preset\'s address into its tab\'s <b>Import</b> dialog and choose <b>Load URL</b>.</li></ul>' +
+      '<p>A theme with a Canvas FX script asks before it runs, since the script runs for everyone who sees the theme.</p>'],
+    ['Which presets look best with structural transparency enabled?',
+      '<p>The ones with something behind the interface to show: a Canvas FX animation or a gradient. Turning either on brings in the structural layer, which makes the layout containers see-through so the background reaches the chat.</p>' +
+      '<p>Dark, low-chroma palettes carry it best, because text stays readable over a busy background. The <b>Sidebar Transparency</b> and <b>Overlay Transparency</b> valves set how much of it shows through the sidebar and the menus.</p>'],
+    ['Can I combine a Canvas FX script with a gradient background?',
+      '<p>Yes. Each mode has its own gradient and its own Canvas FX, and both can be on. The gradient paints the page, and the animation draws on a canvas above it.</p>' +
+      '<p>A script that clears its canvas each frame, rather than filling it, lets the gradient show through between its shapes. One that paints a full background covers it.</p>'],
+    ['What happens to the palette in OLED mode?',
+      '<p>OLED is a mode of its own, with its own palette. It starts at lightness <code>0</code>, so the darkest steps are pure black and the pixels behind them switch off.</p>' +
+      '<p>A theme file without an OLED mode gets Dark\'s palette at lightness <code>0</code>, so every theme has one.</p>'],
+    ['Do regenerated responses keep the same theme variables?',
+      '<p>They do. The theme lives on the page, not in a message: every response, regenerated or not, reads the same <code>--color-gray-*</code> variables. Switch branches with the pager and nothing changes but the text.</p>'],
+    ['Which mode should I preview first for a new preset?',
+      '<p>The one most of your users use. On most instances that\'s Dark, so start there, then check Light: a palette that looks right in the dark can wash out text once the surfaces turn pale.</p>' +
+      '<p>OLED and Her follow from Dark and Light if the preset leaves them out.</p>'],
+    ['Why OKLCH instead of HSL for the ramp?',
+      '<p>In OKLCH, equal steps of lightness look equal. In HSL a yellow and a blue at the same lightness look nothing alike, so a ramp built on it jumps in brightness as the hue moves.</p>' +
+      '<p>Open WebUI\'s own grays are OKLCH too, so a ramp at the default hue and chroma matches them exactly, and every hue you pick keeps the same contrast between steps.</p>'],
+    ['How do I keep contrast accessible across all twelve steps?',
+      '<p>Watch the text-on-surface pairs rather than the steps one by one. The designer\'s contrast report rates each pair the theme actually uses against WCAG: 4.5 for AA and 7 for AAA, at normal text size.</p>' +
+      '<p>Chroma is usually what breaks it. A strongly colored ramp can pass in Dark and fail in Light, so check both.</p>'],
+    ['Can I pin a single step and regenerate the rest?',
+      '<p>Yes: set the step\'s color in the variable grid and lock it with 🔒. Moving the hue, chroma or lightness sliders then regenerates every other step and leaves the locked one as you set it.</p>'],
+    ['What data does the engine stream to my script?',
+      '<p>Everything arrives through <code>self.onmessage</code>:</p><ul>' +
+      '<li><code>init</code> with the canvas, its size and the theme\'s palette</li>' +
+      '<li><code>resize</code>, and the mouse, click and touch events</li>' +
+      '<li><code>theme</code> whenever the palette or the mode changes</li>' +
+      '<li><code>context</code> as the chat grows: the message count, characters and estimated tokens, and the exact token count after each reply when the model reports usage</li></ul>' +
+      CODE('javascript', 'self.onmessage = (e) =&gt; {\n  if (e.data.type === \'context\') grow(e.data.estimatedTokens);\n};') +
+      '<p>This chat is sending it right now: each answer here adds to the count.</p>'],
+    ['How expensive are these effects on a laptop GPU?',
+      '<p>It depends on the script. They run in a Web Worker on an <code>OffscreenCanvas</code>, so drawing never blocks the chat itself, but the device still does the work.</p>' +
+      '<p>Particle fields and line drawings are light. Full-screen WebGL shaders are the heaviest. If a device struggles, turn Canvas FX off for that mode, or switch it off for everyone with the <b>Enable Canvas FX</b> valve.</p>'],
+    ['Can a script react to which model is selected?',
+      '<p>Not from the engine: it doesn\'t send the model. With the <b>Enable Canvas Api Access</b> valve on, a script gets the user\'s token and the instance address, and can ask Open WebUI\'s API for anything the user can see, the models included.</p>' +
+      '<p>Leave that valve off unless you trust every script you install.</p>'],
+    ['How do I animate a gradient without it feeling busy?',
+      '<p>Slow it down and narrow it. A longer animation speed (the slider is in seconds per cycle) and stops close together in hue read as a slow drift rather than motion.</p>' +
+      '<p>Lowering the intensity helps too: the gradient stays behind the chat instead of competing with it.</p>'],
+    ['Which gradients hold up in light mode?',
+      '<p>Pale ones with little chroma. In Light, the surfaces are near white, so a saturated gradient shows through as a tint on everything, text included.</p>' +
+      '<p>Keep a separate gradient for Light, or lower its intensity there. Each mode has its own.</p>'],
+    ['Can I export a gradient I built back out as a preset?',
+      '<p>Yes. Save it to the gradient gallery from the Gradient tab, and its export button downloads it as a preset file anyone can import. The whole gallery exports at once too.</p>'],
+    ['What intensity works best for mesh gradients?',
+      '<p>Lower than you\'d think. A mesh stacks several soft color points, so it reads stronger than a linear gradient at the same intensity.</p>' +
+      '<p>Start in the middle of the slider and raise it until the colors reach the corners, then stop.</p>'],
+    ['Can the gradient animate only when the chat is idle?',
+      '<p>Not the gradient itself: once it animates, it runs all the time. A Canvas FX script can, though, since it hears about the chat through <code>context</code> messages. It can pause while the count is changing and drift once it settles.</p>'],
+    ['Which containers get transparency applied?',
+      '<p>The layout containers: the app\'s wrapper, the main area, and the gray panels inside them. Menus, dialogs and dropdowns sit outside those, so they keep their backgrounds, and the sign-in card stays solid.</p>' +
+      '<p>Buttons, inputs and labels keep theirs too, so controls stay visible over any background.</p>'],
+    ['How do I keep code blocks readable over an effect?',
+      '<p>Give them a background of their own in the theme\'s custom CSS, a little lighter than the chat:</p>' +
+      CODE('css', '.prose pre {\n  background: color-mix(in srgb, var(--color-gray-900) 85%, transparent);\n}') +
+      '<p>The effect still shows around them, and the code reads on a calm surface.</p>'],
+    ['Does the frosted sidebar cost much performance?',
+      '<p>Some. A backdrop blur redraws whatever moves behind it, so it costs the most over an animation. On most devices it\'s fine.</p>' +
+      '<p>If scrolling or the animation stutters, the <b>Sidebar Transparency</b> valve can make the sidebar solid.</p>'],
+    ['How do I submit a preset to this gallery?',
+      '<p>For a theme, <b>Submit to the gallery</b> in the Studio opens the submission form with your theme filled in. A bot checks it, screenshots it in every mode and links a preview of it, and it opens the pull request for you.</p>' +
+      '<p>Canvas FX scripts, CSS snippets and gradients go in through a pull request on GitHub.</p>'],
+    ['Can I preview a preset before importing it?',
+      '<p>Yes. Every preset in the gallery opens a live preview like this one: themes on a mock Open WebUI in each mode, and animations you can move the mouse over. Start one in the Studio to change it before you take it home.</p>'],
+    ['What makes a good Canvas FX submission?',
+      '<p>One that runs well in a Web Worker and fits any theme:</p><ul>' +
+      '<li>no <code>document</code> or <code>window</code>: the canvas comes with <code>init</code></li>' +
+      '<li>a <code>requestAnimationFrame</code> loop, and a <code>heartbeat</code> message so the engine knows it\'s alive</li>' +
+      '<li>handles <code>resize</code></li>' +
+      '<li>its settings in a <code>CONFIG</code> object, so the designer can show them as sliders</li>' +
+      '<li>colors from the theme\'s palette, so it suits every theme</li></ul>'],
+  ].map(([q, body]) => ({ q, body }));
+
   function esc(str) {
     return String(str == null ? '' : str)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -699,7 +783,13 @@ nav .right.is-new .temp-chat { display: flex; }
 nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
 
 /* Messages.svelte: rows are max-w-[58rem] px-5 mb-3 inside a full-width scroller */
-#messages-container { flex: 1; overflow: hidden; padding: 8px 0 6px; display: flex; flex-direction: column; width: 100%; }
+#messages-container { flex: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; padding: 8px 0 6px; display: flex; flex-direction: column; width: 100%; scrollbar-width: thin; scrollbar-color: ${isLight ? 'var(--color-gray-300)' : 'var(--color-gray-700)'} transparent; }
+/* A reply still streaming has no stats line or actions yet */
+.message-listitem.streaming .ai-stats, .message-listitem.streaming .msg-actions { visibility: hidden; }
+.tdp-wait { display: inline-flex; gap: 4px; padding: 8px 0; }
+.tdp-wait i { width: 6px; height: 6px; border-radius: 9999px; background: currentColor; animation: tdp-typing 1.2s infinite ease-in-out; }
+.tdp-wait i:nth-child(2) { animation-delay: 0.15s; }
+.tdp-wait i:nth-child(3) { animation-delay: 0.3s; }
 #messages-container > .message-listitem { max-width: 58rem; width: 100%; margin: 0 auto 12px; padding: 0 20px; }
 /* The gallery's floating .preview-topbar overlays the stage, so the opening
    message has to start below it. The navbar deliberately stays put and sits
@@ -1328,10 +1418,20 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
         {
           stats: 'Response Speed: 98.7 t/s | Total Duration: 1.9s | Eval Count: 164 | Session: 2018 tokens',
           body: '<p><b>Exactly.</b> Backgrounds, borders, and text all come from the preset, and Canvas FX or gradients render behind the whole interface.</p>',
+          fups: [
+            'How do I import one of these presets into my instance?',
+            'Which presets look best with structural transparency enabled?',
+            'Can I combine a Canvas FX script with a gradient background?',
+            'What happens to the palette in OLED mode?',
+          ],
         },
         {
           stats: 'Response Speed: 101.2 t/s | Total Duration: 2.3s | Eval Count: 189 | Session: 2043 tokens',
           body: '<p>It does. The designer emits one <code>--color-gray-*</code> ramp per mode, and every surface here reads from it: backgrounds, borders, bubbles, even this pager. Regenerate a response and the palette holds.</p>',
+          fups: [
+            'Do regenerated responses keep the same theme variables?',
+            'Which mode should I preview first for a new preset?',
+          ],
         },
       ])}
     </div>
@@ -1442,6 +1542,14 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     });
     return { type: 'theme', mode: mode, dark: dark, hue: hue, chroma: chroma / 1000, colors: colors, rgb: rgb, ramp: ramp };
   }
+  // What the mock chat says about itself (see sendContext), kept until the
+  // worker starts
+  var toWorker = null, waiting = null;
+  window.addEventListener('tdp-context', function (e) {
+    var m = Object.assign({ type: 'context' }, e.detail);
+    if (toWorker) toWorker(m);
+    else if (!('exactTokens' in m)) waiting = m;
+  });
   var started = false;
   var start = function () {
     if (started || !window.innerWidth || !window.innerHeight) return;
@@ -1468,6 +1576,8 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       } catch (e) { return null; }
     };
     wpost({ type: 'init', canvas: off, width: window.innerWidth, height: window.innerHeight, env: { authToken: '', baseUrl: '', locale: navigator.language, timezone: '' }, theme: theme() }, [off]);
+    toWorker = wpost;
+    if (waiting) { wpost(waiting); waiting = null; }
     window.addEventListener('tdp-palette', function () {
       var before = lastTheme, t = theme();
       if (t && lastTheme !== before) wpost(t);
@@ -1723,6 +1833,8 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     var channel = key.indexOf('channel:') === 0;
     var chat = CHATS[key];
     if (!chat && !channel) return;
+    stopReply();
+    currentKey = key;
     document.querySelectorAll('.side-item.active, .channel-item.active').forEach(function (a) { a.classList.remove('active'); });
     if (key !== 'new') {
       document.querySelectorAll('.side-scroll [data-chat="' + key + '"]').forEach(function (item) {
@@ -1739,6 +1851,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     mainEl.classList.toggle('channel-mode', channel);
     if (channel) {
       if (window.__tdpChannel) window.__tdpChannel.open(key.slice(8));
+      sendContext(true);
       try { parent.postMessage({ __tdpPreview: true, kind: 'chatchange', chat: key }, '*'); } catch (e) {}
       return;
     }
@@ -1752,6 +1865,8 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     var navEl = document.querySelector('nav');
     if (navEl) navEl.classList.toggle('is-new', key === 'new');
     msgs.innerHTML = chat.html;
+    msgs.scrollTop = 0;
+    sendContext(true);
     // the offset is measured, so it has to be recomputed for the new content
     if (window.__tdpApplyInset) window.__tdpApplyInset();
     try { parent.postMessage({ __tdpPreview: true, kind: 'chatchange', chat: key }, '*'); } catch (e) {}
@@ -1793,9 +1908,153 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     t.classList.toggle('open', open);
   });
 
+  // Follow-ups get answered. Nothing typed is sent here (channels take
+  // typing), but a follow-up on the last reply is sent as your message and
+  // Preview Model streams an answer, with follow-ups of its own. The chat
+  // grows like a real one, so a Canvas FX script that reacts to the chat has
+  // something to react to.
+  var REPLIES = ${JSON.stringify(MOCK_REPLIES)};
+  var currentKey = 'default';
+  var reply = null;
+
+  function escText(t) { return String(t).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
+  function textLength(html) { var d = document.createElement('div'); d.innerHTML = html; return (d.textContent || '').length; }
+  function askedHere() {
+    var out = {};
+    msgs.querySelectorAll('.chat-user').forEach(function (el) { out[(el.textContent || '').trim()] = true; });
+    return out;
+  }
+  // The next questions not yet asked in this chat, after the one just asked
+  function nextFollowUps(from) {
+    var asked = askedHere(), out = [];
+    for (var n = 1; n <= REPLIES.length && out.length < 3; n++) {
+      var r = REPLIES[(from + n) % REPLIES.length];
+      if (!asked[r.q]) out.push(r.q);
+    }
+    return out;
+  }
+  // Tags whole, text a word at a time
+  function pieces(html) {
+    var out = [], i = 0;
+    while (i < html.length) {
+      var k;
+      if (html.charAt(i) === '<') {
+        k = html.indexOf('>', i);
+        k = k < 0 ? html.length : k + 1;
+      } else {
+        k = i;
+        while (k < html.length && html.charAt(k) !== '<' && html.charAt(k) !== ' ') k++;
+        while (k < html.length && html.charAt(k) === ' ') k++;
+      }
+      out.push(html.slice(i, k));
+      i = k;
+    }
+    return out;
+  }
+  function nearBottom() { return msgs.scrollHeight - msgs.scrollTop - msgs.clientHeight < 80; }
+
+  function stopReply() {
+    if (!reply) return;
+    clearTimeout(reply.timer);
+    reply = null;
+  }
+
+  function answer(q) {
+    var at = -1;
+    REPLIES.forEach(function (r, i) { if (r.q === q) at = i; });
+    var body = at >= 0 ? REPLIES[at].body : '<p>Good question. Try it in the designer: every change shows here as you make it.</p>';
+    msgs.querySelectorAll('.followups-wrap').forEach(function (w) { w.remove(); });
+    msgs.insertAdjacentHTML('beforeend', user(escText(q), true));
+    var fups = nextFollowUps(at);
+    var promptTokens = Math.ceil(contextNow().chars / 4);
+    var tokens = Math.ceil(textLength(body) / 4);
+    var speed = 92 + Math.random() * 24;
+    var stats = 'Response Speed: ' + speed.toFixed(1) + ' t/s | Total Duration: ' + (tokens / speed + 0.4).toFixed(2) +
+      's | Eval Count: ' + tokens + ' | Session: ' + (promptTokens + tokens) + ' tokens';
+    var done = ai(stats, body, fups.length ? fups : null);
+    // The finished exchange is the chat's from now on, so switching chats or
+    // modes mid-reply keeps it whole
+    CHATS[currentKey].html = msgs.innerHTML + done;
+    grown[currentKey] = true;
+    if (window.__tdpState) window.__tdpState.save();
+
+    msgs.insertAdjacentHTML('beforeend', ai('', '<span class="tdp-wait"><i></i><i></i><i></i></span>', null));
+    var row = msgs.lastElementChild;
+    row.classList.add('streaming');
+    var prose = row.querySelector('.markdown-prose');
+    msgs.scrollTop = msgs.scrollHeight;
+    var parts = pieces(body), shown = 0, html = '';
+    function finish() {
+      reply = null;
+      var stick = nearBottom();
+      row.outerHTML = done;
+      if (stick) msgs.scrollTop = msgs.scrollHeight;
+      // What the socket hook hands a script once the reply ends: the exact count
+      sendContext(true);
+      window.dispatchEvent(new CustomEvent('tdp-context', { detail: {
+        exactTokens: promptTokens + tokens, promptTokens: promptTokens, completionTokens: tokens, source: 'socket'
+      } }));
+    }
+    function tick() {
+      var stick = nearBottom();
+      for (var n = 0; n < 2 && shown < parts.length; n++) html += parts[shown++];
+      prose.innerHTML = html;
+      if (stick) msgs.scrollTop = msgs.scrollHeight;
+      if (shown < parts.length) reply.timer = setTimeout(tick, 32);
+      else finish();
+    }
+    reply = { timer: setTimeout(tick, 550) };
+  }
+
+  msgs.addEventListener('click', function (e) {
+    var f = e.target && e.target.closest ? e.target.closest('.followup') : null;
+    if (!f || !msgs.contains(f) || reply) return;
+    answer((f.getAttribute('data-tip') || f.textContent || '').trim());
+  });
+
+  // What the bootloader sends a Canvas FX script about the chat: the message
+  // count, characters and estimated tokens, at most every 2 seconds while the
+  // chat changes, and straight away for another chat. Nothing in a channel.
+  function contextNow() {
+    if (mainEl.classList.contains('channel-mode')) return { messages: 0, chars: 0, estimatedTokens: 0 };
+    var chars = 0;
+    msgs.querySelectorAll('.chat-user, .chat-assistant').forEach(function (el) { chars += (el.textContent || '').length; });
+    return { messages: msgs.querySelectorAll('.message-listitem').length, chars: chars, estimatedTokens: Math.ceil(chars / 4) };
+  }
+  var lastContext = '', contextTimer = 0;
+  function sendContext(now) {
+    if (!now) {
+      if (!contextTimer) contextTimer = setTimeout(function () { contextTimer = 0; sendContext(true); }, 2000);
+      return;
+    }
+    var c = contextNow(), sig = JSON.stringify(c);
+    if (sig === lastContext) return;
+    lastContext = sig;
+    window.dispatchEvent(new CustomEvent('tdp-context', { detail: c }));
+  }
+  new MutationObserver(function () { sendContext(false); }).observe(msgs, { childList: true, subtree: true, characterData: true });
+
+  // A chat grown here comes back after a rebuild for another mode or palette
+  var grown = {};
+  var savedChats = window.__tdpState && window.__tdpState.saved.chats;
+  if (savedChats && typeof savedChats === 'object') {
+    Object.keys(savedChats).forEach(function (k) {
+      if (!CHATS[k] || typeof savedChats[k] !== 'string') return;
+      CHATS[k].html = savedChats[k];
+      grown[k] = true;
+    });
+    if (grown['default']) msgs.innerHTML = CHATS['default'].html;
+  }
+  if (window.__tdpState) window.__tdpState.add('chats', function () {
+    var out = {};
+    Object.keys(grown).forEach(function (k) { out[k] = CHATS[k].html; });
+    return out;
+  });
+
   var initial = document.body.getAttribute('data-initial-chat');
   // Channels are set up by a later script, so they open once it has run
   if (initial && initial !== 'default' && (CHATS[initial] || initial.indexOf('channel:') === 0)) setTimeout(function () { openChat(initial); }, 0);
+  else sendContext(true);
 })();
 
 // Sidebar collapse/expand. Open WebUI drives this from the showSidebar store:
