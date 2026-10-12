@@ -7216,6 +7216,8 @@ ProxyPassReverse / http://127.0.0.1:8080/</code></pre>
  'owui_canvas_presets', 'owui_css_presets', 'owui_gradient_presets',
  'owui_canvas_last_mode', 'owui_canvas_last_script',
  'owui_theme_last_metadata', 'owui_theme_valve_no_canvas',
+ // the model background addresses the theme looked up
+ 'owui_tdp_model_bg',
  // personal themes, and the legacy Tool's theme kept aside
  'owui_tdp_personal_css', 'owui_tdp_personal_state', 'owui_tdp_personal_uid',
  'owui_tdp_seen', 'owui_tdp_tool_state', 'owui_tdp_tool_css', 'owui_tdp_tool_dismissed',
@@ -12490,7 +12492,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             'owui_canvas_last_mode',
             'owui_canvas_last_script',
             'owui_theme_last_metadata',
-            'owui_theme_valve_no_canvas'
+            'owui_theme_valve_no_canvas',
+            'owui_tdp_model_bg'
         ];
         keysToWipe.forEach(k => {
             Storage.remove(k);
