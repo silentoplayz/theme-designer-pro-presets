@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<!--
+  The site's link-preview image, docs/og-preview.png, drawn on a canvas with
+  the site's own palette code. scripts/render-og-image.js serves docs/ beside
+  this page, opens it in headless Chrome and saves what it draws. The chips
+  count the gallery from docs/catalog.json, so the image is redrawn whenever
+  the gallery grows or shrinks.
+-->
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>html,body{margin:0;background:#111}canvas{display:block;width:1200px;height:630px}</style>
+</head><body>
+<canvas id="c" width="1200" height="630"></canvas>
+<script src="/assets/preview.js"></script>
+<script>
+(async function () {
+  const catalog = await (await fetch('/catalog.json', { cache: 'no-store' })).json();
+  const count = (n, one, many) => n + ' ' + (n === 1 ? one : many);
+  const chips = [
+    count((catalog.canvasFx || []).length, 'Canvas FX', 'Canvas FX'),
+    count((catalog.themes || []).length, 'theme', 'themes'),
+    count((catalog.gradients || []).length, 'gradient', 'gradients'),
+    'Live previews',
+  ];
+  await Promise.all([
+    document.fonts.load('600 70px Geist'),
+    document.fonts.load('400 26px Geist'),
+    document.fonts.load('500 18px Geist'),
+    document.fonts.load('italic 400 80px "Instrument Serif"'),
+    document.fonts.load('400 18px "Geist Mono"'),
+  ]);
+
+  const W = 1200, H = 630, SITE_H = 265;
+  const cv = document.getElementById('c');
+  const x = cv.getContext('2d');
+  const ok = (l, c, h, a) => `oklch(${l} ${c} ${h}${a != null ? ' / ' + a : ''})`;
+
+  function rr(px, py, w, h, r) {
+    x.beginPath();
+    x.roundRect(px, py, w, h, r);
+  }
+  function glow(cx, cy, r, color) {
+    const g = x.createRadialGradient(cx, cy, 0, cx, cy, r);
+    g.addColorStop(0, color);
+    g.addColorStop(1, 'transparent');
+    x.fillStyle = g;
+    x.fillRect(0, 0, W, H);
+  }
+
+  // ---- Background ----
+  x.fillStyle = ok(0.15, 0.019, SITE_H);
+  x.fillRect(0, 0, W, H);
+  glow(180, 60, 620, ok(0.6, 0.2, SITE_H, 0.34));
+  glow(1120, 90, 520, ok(0.6, 0.2, 325, 0.24));
+  glow(980, 640, 420, ok(0.6, 0.18, 220, 0.16));
+
+  // Faint grid, faded out from the top left
+  const grid = document.createElement('canvas');
+  grid.width = W; grid.height = H;
+  const gx = grid.getContext('2d');
+  gx.strokeStyle = 'rgba(255,255,255,0.05)';
+  gx.lineWidth = 1;
+  for (let i = 0; i <= W; i += 48) { gx.beginPath(); gx.moveTo(i + 0.5, 0); gx.lineTo(i + 0.5, H); gx.stroke(); }
+  for (let j = 0; j <= H; j += 48) { gx.beginPath(); gx.moveTo(0, j + 0.5); gx.lineTo(W, j + 0.5); gx.stroke(); }
+  gx.globalCompositeOperation = 'destination-in';
+  const m = gx.createRadialGradient(300, 120, 0, 300, 120, 900);
+  m.addColorStop(0, 'rgba(0,0,0,1)');
+  m.addColorStop(1, 'rgba(0,0,0,0)');
+  gx.fillStyle = m;
+  gx.fillRect(0, 0, W, H);
+  x.drawImage(grid, 0, 0);
+
+  // ---- Right: Open WebUI window painted by a theme ----
+  const T = window.TDPEngine.themeVars({ h: 290, c: 38, l: 20 });
+  const g = (s) => T['--color-gray-' + s];
+  const WX = 690, WY = 96, WW = 478, WH = 410;
+
+  x.save();
+  x.shadowColor = 'rgba(0,0,0,0.6)';
+  x.shadowBlur = 70;
+  x.shadowOffsetY = 30;
+  rr(WX, WY, WW, WH, 18);
+  x.fillStyle = g('900');
+  x.fill();
+  x.restore();
+
+  x.save();
+  rr(WX, WY, WW, WH, 18);
+  x.clip();
+  x.fillStyle = g('900');
+  x.fillRect(WX, WY, WW, WH);
+  // the theme's moving background
+  const bx = WX + 140, by = WY + 36;
+  const fx = x.createRadialGradient(WX + 400, WY + 380, 0, WX + 400, WY + 380, 340);
+  fx.addColorStop(0, ok(0.62, 0.19, 300, 0.55));
+  fx.addColorStop(1, 'transparent');
+  x.fillStyle = fx; x.fillRect(bx, by, WW, WH);
+  const fx2 = x.createRadialGradient(WX + 250, WY + 90, 0, WX + 250, WY + 90, 240);
+  fx2.addColorStop(0, ok(0.7, 0.15, 230, 0.3));
+  fx2.addColorStop(1, 'transparent');
+  x.fillStyle = fx2; x.fillRect(bx, by, WW, WH);
+  // fireflies
+  let seed = 7;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 46; i++) {
+    const px = bx + rnd() * (WW - 140), py = by + rnd() * (WH - 36), r = 0.8 + rnd() * 2.2;
+    const f = x.createRadialGradient(px, py, 0, px, py, r * 5);
+    f.addColorStop(0, ok(0.95, 0.12, 95, 0.9));
+    f.addColorStop(1, 'transparent');
+    x.fillStyle = f;
+    x.fillRect(px - r * 5, py - r * 5, r * 10, r * 10);
+  }
+  // title bar
+  x.fillStyle = 'rgba(0,0,0,0.35)';
+  x.fillRect(WX, WY, WW, 36);
+  ['#ff5f57', '#febc2e', '#28c840'].forEach((c, i) => {
+    x.fillStyle = c; x.globalAlpha = 0.85;
+    x.beginPath(); x.arc(WX + 20 + i * 18, WY + 18, 5.5, 0, Math.PI * 2); x.fill();
+  });
+  x.globalAlpha = 1;
+  // sidebar (translucent, like structural transparency)
+  x.fillStyle = 'color-mix(in oklch, ' + g('950') + ' 78%, transparent)';
+  x.fillStyle = g('950');
+  x.globalAlpha = 0.82;
+  x.fillRect(WX, WY + 36, 140, WH - 36);
+  x.globalAlpha = 1;
+  x.fillStyle = 'rgba(255,255,255,0.06)';
+  x.fillRect(WX + 140, WY + 36, 1, WH - 36);
+  const line = (px, py, w, h, c) => { rr(px, py, w, h, h / 2); x.fillStyle = c; x.fill(); };
+  line(WX + 16, WY + 56, 92, 9, g('600'));
+  [0, 1, 2, 3, 4, 5, 6].forEach((i) => line(WX + 16, WY + 90 + i * 26, [96, 80, 104, 66, 90, 74, 92][i], 6, g('800')));
+  rr(WX + 10, WY + 84 + 2 * 26, 120, 20, 6); x.fillStyle = 'rgba(255,255,255,0.05)'; x.fill();
+  // chat
+  const cx0 = WX + 166;
+  rr(WX + WW - 196, WY + 62, 170, 30, 15); x.fillStyle = g('850'); x.globalAlpha = 0.9; x.fill(); x.globalAlpha = 1;
+  line(WX + WW - 180, WY + 74, 128, 6, g('600'));
+  x.beginPath(); x.arc(cx0 + 8, WY + 128, 9, 0, Math.PI * 2); x.fillStyle = '#fff'; x.fill();
+  [[250, 0], [270, 1], [190, 2]].forEach(([w, i]) => line(cx0 + 28, WY + 124 + i * 18, w, 7, g('500')));
+  rr(cx0 + 28, WY + 180, 270, 64, 10); x.fillStyle = 'rgba(0,0,0,0.65)'; x.fill();
+  line(cx0 + 44, WY + 198, 110, 6, ok(0.78, 0.13, 330));
+  line(cx0 + 44, WY + 216, 170, 6, ok(0.8, 0.11, 200));
+  [[240, 0], [170, 1]].forEach(([w, i]) => line(cx0 + 28, WY + 262 + i * 18, w, 7, g('500')));
+  // input bar
+  x.save();
+  rr(cx0, WY + WH - 72, 290, 48, 22);
+  x.fillStyle = g('850'); x.globalAlpha = 0.85; x.fill(); x.globalAlpha = 1;
+  x.strokeStyle = 'rgba(255,255,255,0.08)'; x.stroke();
+  x.restore();
+  line(cx0 + 22, WY + WH - 52, 110, 7, g('600'));
+  x.beginPath(); x.arc(cx0 + 264, WY + WH - 48, 13, 0, Math.PI * 2); x.fillStyle = '#fff'; x.fill();
+  x.restore();
+  rr(WX + 0.5, WY + 0.5, WW - 1, WH - 1, 18);
+  x.strokeStyle = 'rgba(255,255,255,0.14)'; x.lineWidth = 1; x.stroke();
+
+  // ---- Palette dock overlapping the window ----
+  const DX = 650, DY = 452, DW = 320, DH = 126;
+  x.save();
+  x.shadowColor = 'rgba(0,0,0,0.55)'; x.shadowBlur = 40; x.shadowOffsetY = 16;
+  rr(DX, DY, DW, DH, 16); x.fillStyle = ok(0.21, 0.025, SITE_H); x.fill();
+  x.restore();
+  rr(DX + 0.5, DY + 0.5, DW - 1, DH - 1, 16); x.strokeStyle = 'rgba(255,255,255,0.12)'; x.stroke();
+  x.font = '500 13px "Geist Mono"'; x.fillStyle = ok(0.7, 0.02, SITE_H);
+  x.fillText('HUE', DX + 20, DY + 30);
+  x.textAlign = 'right'; x.fillStyle = ok(0.9, 0.01, SITE_H); x.fillText('290°', DX + DW - 20, DY + 30); x.textAlign = 'left';
+  // rainbow track
+  const tx = DX + 20, ty = DY + 44, tw = DW - 40;
+  const tr = x.createLinearGradient(tx, 0, tx + tw, 0);
+  for (let i = 0; i <= 12; i++) tr.addColorStop(i / 12, ok(0.7, 0.16, i * 30));
+  rr(tx, ty, tw, 10, 5); x.fillStyle = tr; x.fill();
+  const thx = tx + tw * (290 / 360);
+  x.beginPath(); x.arc(thx, ty + 5, 10, 0, Math.PI * 2); x.fillStyle = ok(0.7, 0.16, 290); x.fill();
+  x.lineWidth = 3; x.strokeStyle = '#fff'; x.stroke(); x.lineWidth = 1;
+  // twelve shades
+  const steps = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '850', '900', '950'];
+  const sw = (tw - 11 * 4) / 12;
+  steps.forEach((s, i) => { rr(tx + i * (sw + 4), DY + 76, sw, 34, 5); x.fillStyle = g(s); x.fill(); });
+
+  // ---- Left: brand and headline ----
+  const L = 72;
+  const mark = x.createConicGradient(Math.PI * 1.1, L + 20, 84);
+  mark.addColorStop(0, ok(0.72, 0.17, SITE_H));
+  mark.addColorStop(0.5, ok(0.78, 0.15, SITE_H + 50));
+  mark.addColorStop(1, ok(0.72, 0.17, SITE_H));
+  rr(L, 64, 40, 40, 11); x.fillStyle = mark; x.fill();
+  x.save();
+  x.translate(L + 8, 72); x.scale(1, 1);
+  x.strokeStyle = ok(0.2, 0.05, SITE_H); x.lineWidth = 2.6; x.lineJoin = 'round'; x.lineCap = 'round';
+  x.stroke(new Path2D('M12 3 3 7.5l9 4.5 9-4.5L12 3z'));
+  x.stroke(new Path2D('m3 16.5 9 4.5 9-4.5'));
+  x.stroke(new Path2D('m3 12 9 4.5 9-4.5'));
+  x.restore();
+  x.font = '600 24px Geist'; x.fillStyle = ok(0.97, 0.005, SITE_H);
+  x.fillText('Theme Designer Pro', L + 56, 93);
+
+  x.font = '600 68px Geist';
+  x.letterSpacing = '-2.4px';
+  x.fillStyle = ok(0.97, 0.005, SITE_H);
+  x.fillText('Make Open WebUI', L - 3, 230);
+  x.fillText('look like', L - 3, 308);
+  const lw = x.measureText('look like ').width;
+  x.letterSpacing = '-0.5px';
+  x.font = 'italic 400 80px "Instrument Serif"';
+  x.fillStyle = ok(0.8, 0.14, SITE_H);
+  x.fillText('yours.', L - 3 + lw, 308);
+  x.letterSpacing = '0px';
+
+  x.font = '400 25px Geist';
+  x.fillStyle = ok(0.84, 0.012, SITE_H);
+  x.fillText('Palettes from one hue, animated Canvas FX,', L, 378);
+  x.fillText('gradients and custom CSS for Open WebUI.', L, 412);
+
+  // chips
+  let cx = L;
+  chips.forEach((t) => {
+    x.font = '500 17px Geist';
+    const w = x.measureText(t).width + 32;
+    rr(cx + 0.5, 456.5, w, 38, 19);
+    x.fillStyle = 'rgba(255,255,255,0.04)'; x.fill();
+    x.strokeStyle = ok(0.44, 0.02, SITE_H, 0.8); x.stroke();
+    x.fillStyle = ok(0.88, 0.01, SITE_H);
+    x.fillText(t, cx + 16, 481);
+    cx += w + 10;
+  });
+
+  x.font = '400 17px "Geist Mono"';
+  x.fillStyle = ok(0.66, 0.02, SITE_H);
+  x.fillText('silentoplayz.github.io/theme-designer-pro-presets', L, 574);
+
+  // ---- Done: the render script takes it from here ----
+  window.__og = { png: cv.toDataURL('image/png'), chips };
+})().catch((e) => { window.__og = { error: String(e && e.message || e) }; });
+</script>
+</body></html>

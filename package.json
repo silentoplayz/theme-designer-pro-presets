@@ -26,6 +26,7 @@
     "build": "node scripts/build-bundles.js",
     "build:manifest": "node scripts/build-manifest.js",
     "build:catalog": "node scripts/build-catalog.js",
+    "build:og": "node scripts/render-og-image.js",
     "build:badges": "node scripts/update-badges.js",
     "build:all": "npm run build && npm run build:manifest && npm run build:badges && npm run build:catalog"
   },

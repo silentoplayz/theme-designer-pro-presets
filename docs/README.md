@@ -62,7 +62,7 @@ npm run build:catalog
 | `assets/studio.js` | The Studio's state, controls, animation settings, share links and export. Its theme file has the same shape as the designer's own export, so it imports like any other |
 | `assets/gallery.js` | The gallery's filtering, cards, drawer and shareable links |
 | `catalog.json` | Generated list of every preset (see above) |
-| `og-preview.png` | The image shown when someone shares a link to the site |
+| `og-preview.png` | The image shown when someone shares a link to the site, drawn by [`scripts/render-og-image.js`](../scripts/render-og-image.js) from [`scripts/og-image.html`](../scripts/og-image.html). Its counts come from `catalog.json`, and the bundle build draws it again whenever they change. |
 
 ### Install links
 

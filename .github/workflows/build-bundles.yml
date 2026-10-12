@@ -10,6 +10,7 @@ on:
       - 'gradients/**/*.json'
       - 'schemas/*.json'
       - 'scripts/*.js'
+      - 'scripts/og-image.html'
   pull_request:
     paths:
       - 'canvas-fx/*.js'
@@ -66,10 +67,17 @@ jobs:
       - name: Build catalog
         run: node scripts/build-catalog.js
 
+      # Drawn again only when the gallery's counts or the template changed.
+      # Drives the runner's installed Chrome, so there's no browser download.
+      - name: Render the link-preview image
+        run: |
+          npm install --no-save --no-audit --no-fund playwright-core@1.56.1
+          node scripts/render-og-image.js
+
       - name: Check for changes
         id: diff
         run: |
-          git add bundles/ manifest.json README.md docs/catalog.json
+          git add bundles/ manifest.json README.md docs/catalog.json docs/og-preview.png
           git diff --cached --quiet && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
 
       - name: Commit and push updated artifacts
@@ -84,4 +92,4 @@ jobs:
 
       - name: Unstage if no changes
         if: steps.diff.outputs.changed == 'false'
-        run: git reset HEAD -- bundles/ manifest.json README.md docs/catalog.json
+        run: git reset HEAD -- bundles/ manifest.json README.md docs/catalog.json docs/og-preview.png

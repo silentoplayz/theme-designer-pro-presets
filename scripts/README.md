@@ -11,6 +11,7 @@ Build, validation, and manifest tooling for the Theme Designer Pro presets.
 | `extract-presets.js` | Split bulk export files into individual preset files |
 | `process-submission.js` | Process GitHub Issue theme submissions (used by CI) |
 | `render-previews.js` | Screenshot a theme on the site's mock Open WebUI, one image per mode (used by CI) |
+| `render-og-image.js` | Draw the site's link-preview image with the gallery's current counts (used by CI) |
 | `update-badges.js` | Update shields.io badge counts in `README.md` |
 | `validate.js` | Validate all preset files against JSON schemas (via Ajv) and quality rules |
 
@@ -306,3 +307,21 @@ A single `docs/catalog.json` containing metadata for every preset in the reposit
 | `bundles` | Name, description, import URL |
 
 The catalog is rebuilt automatically by CI on every push to `main`. The static site in `docs/` fetches this file at runtime to draw the gallery, the home page's preset strips and the Studio's pickers.
+
+---
+
+## `render-og-image.js`
+
+Draws `docs/og-preview.png`, the image shown when someone shares a link to the site, from [`og-image.html`](og-image.html) in headless Chrome. The template paints a canvas with the site's own palette code, and its chips count the gallery's Canvas FX, themes and gradients from `docs/catalog.json`, so run it after `build-catalog.js`.
+
+The image is stamped with what it shows, the chips and a hash of the template, in a PNG text chunk. It's drawn again only when either changes, so a run with nothing new writes nothing and starts no browser. The bundle build runs it on every push to `main` that changes the gallery.
+
+### Usage
+
+```bash
+npm install --no-save playwright-core@1.56.1
+npm run build:og
+# or: node scripts/render-og-image.js [--force]
+```
+
+`--force` draws it even when nothing changed, for an edit to the site's colors or fonts that the template picks up without changing. It needs Google Chrome installed, which GitHub's Ubuntu runners have, and loads its fonts from Google Fonts.
