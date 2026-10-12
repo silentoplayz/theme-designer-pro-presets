@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.13.0-blue)
+![Version](https://img.shields.io/badge/version-1.14.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -508,6 +508,16 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
 
 ---
+
+## 📝 What's New in 1.14.0
+
+**See which theme is in use from Settings.** With both **Themes** tabs in Settings, it was hard to tell whether you were looking at the instance theme or your own without opening the designer. Now a green dot marks the tab whose theme the page is showing: the Admin tab for the instance theme, the one under Basics for your own. While your own theme is showing, hovering the Admin tab says it replaces the instance theme for you. A user without the Admin tab sees a green ring on their **Themes** tab while the instance theme is in use, and a dot once they save a theme of their own. The marks move live when a theme changes, even with Settings open.
+
+**Deleting and wiping leave the live theme alone.** Deleting a gallery theme that a mode came from used to run a Global Reset of all four modes, live for everyone. **Wipe CSS Snippets** and **Wipe Canvas Presets** also cleared the live theme's custom CSS and scripts in every mode, and deleting a single saved preset blanked the modes using it. Now each of these removes only the saved copy, and the live theme stays exactly as it was.
+
+**Says who a save reaches.** The designer said changes are pushed "to all users". With personal themes on, an instance save only reaches people who aren't using a theme of their own, and in the personal designer a save only reaches your own open pages. The **Theme Active** badge, the Draft switch, the Publish button and its message now say which.
+
+**A personal save never misses a page.** A personal theme saved while one of its owner's pages was still connecting never reached that page, which also lost saves made on another device during a page load. The page now checks for its theme once its connection is set up.
 
 ## 📝 What's New in 1.13.0
 
