@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.14.0
+version: 1.14.1
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -22,7 +22,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.14.0"
+VERSION = "1.14.1"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -6574,7 +6574,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         <p>Your script runs on the main thread in three cases: (1) the browser doesn&rsquo;t support <code>OffscreenCanvas</code>, (2) the script&rsquo;s source contains the text <code>document</code> anywhere, or (3) the Worker reports an uncaught error. This is <b>not a sandbox</b>: the script runs inside a function on the page itself, with full access to <code>window</code>, <code>document</code>, cookies and <code>localStorage</code>. In this mode:</p>
                         <ul>
                             <li>The <code>canvas</code> in the <code>init</code> message is a standard <code>&lt;canvas&gt;</code> DOM element (not an <code>OffscreenCanvas</code>).</li>
-                            <li>A synthetic <code>self</code> object is provided with an <code>onmessage</code> setter and a no-op <code>postMessage</code>. A bare <code>onmessage = fn</code> assignment works too.</li>
+                            <li>A synthetic <code>self</code> object is provided with <code>onmessage</code>, <code>addEventListener('message', fn)</code> and a no-op <code>postMessage</code>. A bare <code>onmessage = fn</code> assignment works too.</li>
                             <li><code>requestAnimationFrame</code>, <code>setInterval</code> and <code>setTimeout</code> calls are tracked and cleared on teardown.</li>
                             <li>Your script code should work identically in both modes as long as you use the <code>self.onmessage</code> pattern and don&rsquo;t rely on Worker-specific APIs beyond what&rsquo;s listed here.</li>
                         </ul>

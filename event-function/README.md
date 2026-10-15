@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.14.0-blue)
+![Version](https://img.shields.io/badge/version-1.14.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -251,7 +251,7 @@ Valves are configured in the Admin Panel under **Functions → Theme Designer Pr
 | Valve | Type | Default | Description |
 |---|---|---|---|
 | **AI Consultant Model** | `str` | `""` | The model the AI Consultant asks, by its ID. Empty: the task model set under **Admin Settings > Interface**, local first, then external. Open WebUI asks it as the signed-in person, so for users to use the AI button, they need access to this model, as they do for a task model. |
-| **Designer URL** | `str` | `/api/v1/theme-designer` | URL path where the designer and all its sub-routes are served. Must start with `/api/v1/` — paths outside this prefix are auto-corrected to prevent the SPA catch-all from intercepting the route (a warning is logged). Changing this value triggers a route re-registration; the loader fragment picks up the new URL on its next compose. |
+| **Designer URL** | `str` | `/api/v1/theme-designer` | URL path where the designer and all its sub-routes are served. Must start with `/api/v1/` — paths outside this prefix are auto-corrected to prevent the SPA catch-all from intercepting the route (a warning is logged). Changing this value triggers a route re-registration; the loader fragment picks up the new URL on its next compose. Pages that were already open keep fetching the theme and hearing live updates at the old URL until the next restart; the designer, saves and the library move to the new one. |
 
 > **Note:** Most valves default to their most permissive values. **Allow Personal Themes**, **Show In Admin Panel** and **Enable Canvas API Access** start off, and **Draft Mode Default** and **Auto Sync** start off too. Admins only need to change a valve to restrict a feature or turn one of those on.
 
@@ -319,7 +319,7 @@ Theme Designer Pro persists themes on the server and pushes changes to every con
    **FOUC prevention:** `/static/custom.css` carries a safe subset of the theme (palette variables + custom CSS, with structural and gradient rules deferred so the page doesn't flash through to the background before the canvas starts). Open WebUI already loads that file as a render-blocking stylesheet, so the subset applies before first paint. The bootloader then fetches the full CSS and applies the deferred rules. Canvas FX scripts are deliberately **not** inlined — they are the bulk of the state, and the composed asset is rebuilt and hashed on every request, so they arrive with the `/state.json` fetch a moment later. As a **Watchtower recovery** fallback the bootloader writes theme data through to `localStorage`, so a client can re-apply the last known theme before the server files are refetched.
 
 4. **SSE Push Architecture:**
-   When the designer saves a theme, the POST handler writes CSS + state to disk and calls `_broadcast_update()`, which pushes a lightweight version token (with ETags) to all connected SSE clients (`_sse_clients`); each client then refetches `/theme.css` and `/state.json`, with ETag revalidation so unchanged files cost a cheap 304. SSE clients are stored on `app.state` to survive function hot-reloads. The `theme-disable` event type is broadcast when the admin toggles the function OFF. In multi-worker deployments, `_redis_publish()` broadcasts to the `<REDIS_KEY_PREFIX>:theme_pro_sse` Redis pub/sub channel (for example `open-webui:theme_pro_sse`), ensuring all workers relay updates to their local SSE clients.
+   When the designer saves a theme, the POST handler writes CSS + state to disk and calls `_broadcast_update()`, which pushes a lightweight version token (with ETags) to all connected SSE clients (`_sse_clients`); each client then refetches `/theme.css` and `/state.json`, with ETag revalidation so unchanged files cost a cheap 304. SSE clients are stored on `app.state` to survive function hot-reloads. The `theme-disable` event type is broadcast when the admin toggles the function OFF. In multi-worker deployments, `_redis_publish()` broadcasts to the `<REDIS_KEY_PREFIX>:theme_pro_sse` Redis pub/sub channel (for example `open-webui:theme_pro_sse`), ensuring all workers relay updates to their local SSE clients. With `REDIS_SENTINEL_HOSTS` set it connects through Sentinel, the way Open WebUI does, and the subscriber pings Redis when idle and reconnects if Redis goes quiet for 90 seconds.
 
    **Valve convergence (multi-worker):** Open WebUI reloads a function's valves only on the worker that served the change, so peers hold stale valves until their own next event. The changing worker detects that *any* valve differs from its last snapshot and publishes an internal `valvesync` control message on the same Redis channel. Peers intercept it before it reaches a browser, re-read their valves via `Functions.get_function_valves_by_id`, re-prime their delivery caches, and nudge their local clients — re-registering routes if `designer_url` moved. The control message is framed as an SSE comment, so a peer on an older build that forwards raw channel traffic delivers a harmless keep-alive. The whole path is fail-safe: a peer that cannot read or validate the stored valves keeps what it has and converges on its own next event, exactly as before this mechanism existed.
 
@@ -423,8 +423,8 @@ self.onmessage = (e) => {
 
 | Mode | Condition | Canvas Type |
 |---|---|---|
-| **Worker** | Browser supports `OffscreenCanvas` + script doesn't reference `document` | `OffscreenCanvas` transferred via `postMessage` |
-| **Fallback** | No `OffscreenCanvas` support, or script throws in Worker | Standard `<canvas>` DOM element; synthetic `self` object provided |
+| **Worker** | Browser supports `OffscreenCanvas` + script doesn't reference `document` (comments don't count) | `OffscreenCanvas` transferred via `postMessage` |
+| **Fallback** | No `OffscreenCanvas` support, or script throws in Worker | Standard `<canvas>` DOM element; synthetic `self` object with `onmessage` and `addEventListener('message', …)` |
 
 The fallback is automatic — Worker errors are caught, the Worker is terminated, and the script is re-run on the main thread.
 
@@ -508,6 +508,26 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
 
 ---
+
+## 📝 What's New in 1.14.1
+
+A fix release from an audit of the whole function. Nothing to change on your side: paste it in and save.
+
+**A draft stays a draft.** Reloading the designer while in Draft mode published the draft to everyone, because the page repainted and saved before Draft switched back on. Draft is now restored first. A Publish also saves edits you make while it's still sending, instead of switching to Live without them.
+
+**Restarts no longer hang.** Any open Open WebUI tab held a restart for about ten seconds until Docker killed the process, and Open WebUI's own shutdown cleanup never ran. Live update connections now close the moment Open WebUI is asked to stop.
+
+**Custom CSS and Manual Overrides can't break the theme.** Typing `@keyframes` in custom CSS and pausing before the `{` froze the designer tab. A comment on a **Manual Overrides** line made that override lose to the palette, and an unclosed one swallowed every rule after it in the CSS every user receives. Several declarations on one line now all apply, and all count in the contrast report. Unbalanced braces in custom CSS no longer leak out of, or swallow, the part of `/static/custom.css` other plugins share.
+
+**Turning Canvas FX off takes effect at once.** Each browser ran its saved copy of the animation one more time on its next page load after the **Enable Canvas FX** valve was switched off. Now a page sets that copy aside whenever the valve is off.
+
+**Live updates come back on their own.** A page whose live connection was closed by a proxy error, for example while Open WebUI restarted, stayed out of date until it was reloaded or hidden and shown again. It now reconnects and fetches anything it missed. A proxy's 401 or 403 no longer wipes the theme from open pages, and pages that were open when **Designer URL** changed keep their theme and live updates until the next restart.
+
+**Multi-worker and multi-container setups.** Two saves landing at once, or a save and a reset, could leave one save's CSS beside the other's state; saves and resets are now locked across every worker and container sharing the data folder. Live updates now reach other workers under Redis Sentinel, and a Redis connection dropped without notice is detected and reopened.
+
+**The gallery stays right.** Saving, deleting or importing gallery themes could leave a mode marked as coming from the wrong theme after an Undo or a reload, so Update and Sync acted on that theme. Search and sort highlighted the wrong card. One malformed entry, from the JSON editors or an imported file, could blank the whole gallery or stop imports, search and **Check for Updates**; it's now repaired in place, and the JSON editors only accept themes. Library saves made close together no longer overwrite newer presets.
+
+**Also fixed:** Canvas FX scripts on the main-thread fallback no longer keep every animation frame in memory, scripts using `self.addEventListener` start there, and a comment mentioning `document` no longer forces a script onto the main thread. The AI Consultant ignores an answer that arrives after **Cancel**. Applying a gallery theme keeps its palette switch. Three-digit hex gradient stops and percentage lightness read correctly. The update diff no longer fails on a malformed remote gradient, Factory Reset asks before wiping once its backup downloads have started, and a failed Publish says why. On the server, chunked uploads are held to the size limit, a body that isn't a JSON object gets a 400, the Canvas FX valve holds even for state the server can't read, and a trusted email header, when configured, is checked as Open WebUI checks it.
 
 ## 📝 What's New in 1.14.0
 
