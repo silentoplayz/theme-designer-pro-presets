@@ -560,6 +560,13 @@ class Event:
             var _lastCssTag = null;
             var _lastStateTag = null;
 
+            // The Enable Canvas FX valve as this page load's loader saw it.
+            // Until the first answer from the server, the state in use is this
+            // browser's cached copy, which still carries any script the admin
+            // has since switched off, and ran it once more on every page load.
+            // The server's own copy is stripped already when the valve is off.
+            var _cachedCanvasOk = __CANVAS_FX__;
+
             function getParsedState() {
                 if (_parsedState) return _parsedState;
                 try {
@@ -570,6 +577,12 @@ class Event:
                         _parsedState = JSON.parse(raw);
                     }
                 } catch(e) { _parsedState = {}; }
+                if (!_cachedCanvasOk && _parsedState) {
+                    ['dark', 'oled', 'light', 'her'].forEach(function(m) {
+                        var c = _parsedState[m];
+                        if (c && typeof c === 'object') { c.canvasEnabled = false; delete c.canvasScript; }
+                    });
+                }
                 return _parsedState || {};
             }
 
@@ -623,9 +636,11 @@ class Event:
                     return fetch(url, init)
                         .then(function(r) {
                             // A proxy error while Open WebUI restarts (502, 503),
-                            // rate limiting or a timeout says nothing about the
-                            // theme: keep what's on screen
-                            if (r.status >= 500 || r.status === 429 || r.status === 408) return null;
+                            // rate limiting, a timeout, or a proxy's 401/403 says
+                            // nothing about the theme: keep what's on screen. The
+                            // server says "no theme" with 204 or an empty 200;
+                            // only a missing route (404/410) also means it.
+                            if (!r.ok && r.status !== 404 && r.status !== 410) return null;
                             if (r.ok && r.status !== 204) {
                                 var tag = r.headers.get('ETag');
                                 return r.text().then(function(t) { return { body: t, tag: tag }; });
@@ -685,6 +700,7 @@ class Event:
                         var pState = stateRes.body && stateRes.body.trim() && stateRes.body !== '{}' ? stateRes.body : null;
                         _owuiThemeState = pState;
                         _parsedState = null;
+                        _cachedCanvasOk = true;
                         try {
                             localStorage.setItem('owui_tdp_personal_uid', picked.uid);
                             localStorage.setItem('owui_tdp_personal_css', cssRes.body);
@@ -731,6 +747,7 @@ class Event:
                         if (_hadTheme) refreshSharedCustomCss();
                     }
 
+                    _cachedCanvasOk = true;
                     if (state && state.trim() && state !== '{}') {
                         _owuiThemeState = state;
                         _parsedState = null;  // Invalidate — state source changed
@@ -1110,6 +1127,11 @@ class Event:
                 var _lastMsgCount = -1;
                 var _polling = false;
                 var _watched = null;  // the #messages-container being observed
+                // Set by the cleanup. A route timer or poll already queued when
+                // the canvas was torn down used to run setup() afterwards and
+                // leave a live observer and poll with nobody to stop them.
+                var _dead = false;
+                var _routeTimer = 0;
 
                 // Custom event API — any Open WebUI plugin/extension can dispatch
                 // window.dispatchEvent(new CustomEvent('owui-canvas-context', { detail: { ratio: 0.65, ... } }))
@@ -1146,6 +1168,7 @@ class Event:
                 }
 
                 function setup() {
+                    if (_dead) return;
                     _polling = false;
                     var container = document.getElementById('messages-container');
                     if (!container) {
@@ -1194,6 +1217,8 @@ class Event:
                 // each client-side navigation, check the container is still
                 // the one being watched.
                 function recheck() {
+                    _routeTimer = 0;
+                    if (_dead) return;
                     var current = document.getElementById('messages-container');
                     if (current && current === _watched) return;
                     if (_observer) { _observer.disconnect(); _observer = null; }
@@ -1206,13 +1231,15 @@ class Event:
                     clearTimeout(_pollTimer);
                     setup();
                 }
-                var _onRoute = function() { setTimeout(recheck, 400); };
+                var _onRoute = function() { clearTimeout(_routeTimer); _routeTimer = setTimeout(recheck, 400); };
                 window.addEventListener('owui-tdp-route', _onRoute);
                 window.addEventListener('popstate', _onRoute);
 
                 setup();
 
                 return function() {
+                    _dead = true;
+                    clearTimeout(_routeTimer);
                     window.removeEventListener('owui-canvas-context', _onCustom);
                     window.removeEventListener('owui-tdp-route', _onRoute);
                     window.removeEventListener('popstate', _onRoute);
@@ -1398,7 +1425,10 @@ class Event:
                         // Pre-detect scripts that reference `document` — they'll always
                         // throw ReferenceError in a Worker. Skip straight to fallback
                         // to avoid async onerror race with rapid initCanvas() calls.
-                        const _scriptNeedsDOM = config.canvasScript.indexOf('document') !== -1;
+                        // Comments don't count: the README's own skeleton ends with
+                        // "// NO DOM access (no document, ...)", which sent every
+                        // script that kept it to the main thread.
+                        const _scriptNeedsDOM = /\\bdocument\\b/.test(config.canvasScript.replace(/\\/\\*[\\s\\S]*?\\*\\//g, '').replace(/(^|\\s)\\/\\/.*$/gm, '$1'));
                         const useWorker = !forceFallback && !_scriptNeedsDOM && !!canvas.transferControlToOffscreen;
                         let _canvasSend = null;
                         let _initTheme = null;
@@ -1435,7 +1465,7 @@ class Event:
                             const offscreen = canvas.transferControlToOffscreen();
                             
                             const _env = {
-                                authToken: __CANVAS_API_ACCESS__ ? ((document.cookie.match(/token=([^;]+)/) || [])[1] || localStorage.getItem('token') || '') : '',
+                                authToken: __CANVAS_API_ACCESS__ ? ((document.cookie.match(/(?:^|;\\s*)token=([^;]+)/) || [])[1] || localStorage.getItem('token') || '') : '',
                                 baseUrl: window.location.origin,
                                 locale: navigator.language || 'en-US',
                                 timezone: (function() { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(e) { return ''; } })()
@@ -1647,15 +1677,31 @@ class Event:
                                     window.addEventListener('touchmove', _onTouchMove, { passive: true });
                                     window.addEventListener('touchend', _onTouchEnd, { passive: true });
     
-                                    const _rAFs =[];
-                                    const _intervals =[];
-                                    const _timeouts =[];
+                                    // Only PENDING ids: a callback drops its own id as it runs.
+                                    // Arrays that only grew held one id per frame forever
+                                    // (~5M a day at 60fps) and teardown walked all of them.
+                                    const _rAFs = new Set();
+                                    const _intervals = new Set();
+                                    const _timeouts = new Set();
                                     let _stopped = false;
-                                    const requestAnimationFrame = (fn) => { if (_stopped) return -1; const id = window.requestAnimationFrame(fn); _rAFs.push(id); return id; };
-                                    const setInterval = (fn, delay) => { if (_stopped) return -1; const id = window.setInterval(fn, delay); _intervals.push(id); return id; };
-                                    const setTimeout = (fn, delay) => { if (_stopped) return -1; const id = window.setTimeout(fn, delay); _timeouts.push(id); return id; };
+                                    const requestAnimationFrame = (fn) => { if (_stopped) return -1; const id = window.requestAnimationFrame(t => { _rAFs.delete(id); fn(t); }); _rAFs.add(id); return id; };
+                                    const cancelAnimationFrame = (id) => { _rAFs.delete(id); window.cancelAnimationFrame(id); };
+                                    const setInterval = (fn, delay, ...a) => { if (_stopped) return -1; const id = window.setInterval(fn, delay, ...a); _intervals.add(id); return id; };
+                                    const clearInterval = (id) => { _intervals.delete(id); window.clearInterval(id); };
+                                    const setTimeout = (fn, delay, ...a) => { if (_stopped) return -1; const id = typeof fn === 'function' ? window.setTimeout(() => { _timeouts.delete(id); fn(...a); }, delay) : window.setTimeout(fn, delay); _timeouts.add(id); return id; };
+                                    const clearTimeout = (id) => { _timeouts.delete(id); window.clearTimeout(id); };
                                     
-                                    const self = { postMessage: (msg) => {}, set onmessage(fn) { _fbHandler = fn; } };
+                                    // A Worker's self also has addEventListener('message'),
+                                    // which shipped presets use; without it the script threw
+                                    // before init and the canvas stayed blank.
+                                    const _fbListeners = [];
+                                    const self = {
+                                        postMessage: (msg) => {},
+                                        set onmessage(fn) { _fbHandler = fn; },
+                                        get onmessage() { return _fbHandler; },
+                                        addEventListener: (t, fn) => { if (t === 'message' && typeof fn === 'function' && _fbListeners.indexOf(fn) === -1) _fbListeners.push(fn); },
+                                        removeEventListener: (t, fn) => { const i = _fbListeners.indexOf(fn); if (i !== -1) _fbListeners.splice(i, 1); }
+                                    };
     
                                     window.owuiCanvasCleanups.push(() => {
                                         _stopped = true;
@@ -1673,16 +1719,21 @@ class Event:
                                         _rAFs.forEach(id => window.cancelAnimationFrame(id));
                                         _intervals.forEach(id => window.clearInterval(id));
                                         _timeouts.forEach(id => window.clearTimeout(id));
+                                        _rAFs.clear(); _intervals.clear(); _timeouts.clear();
                                     });
     
                                     (function() {
                                         let onmessage = null;
                                         ${config.canvasScript}
-                                        const finalHandler = onmessage || _fbHandler;
+                                        const _own = onmessage || _fbHandler;
+                                        const finalHandler = !_fbListeners.length ? _own : function (ev) {
+                                            if (_own) _own(ev);
+                                            _fbListeners.slice().forEach(function (l) { l(ev); });
+                                        };
                                         if (finalHandler) {
                                             _fbHandler = finalHandler;
                                             const _fbEnv = {
-                                                authToken: __CANVAS_API_ACCESS__ ? ((document.cookie.match(/token=([^;]+)/) || [])[1] || localStorage.getItem('token') || '') : '',
+                                                authToken: __CANVAS_API_ACCESS__ ? ((document.cookie.match(/(?:^|;\\\\s*)token=([^;]+)/) || [])[1] || localStorage.getItem('token') || '') : '',
                                                 baseUrl: window.location.origin,
                                                 locale: navigator.language || 'en-US',
                                                 timezone: (function() { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(e) { return ''; } })()
@@ -1694,7 +1745,9 @@ class Event:
                             } catch(e) { console.error('Canvas FX Fallback Error:', e); }`;
                             document.body.appendChild(scriptEl);
 
-                            _canvasSend = function(data) { if (window.__owuiFbHandler) window.__owuiFbHandler({ data: data }); };
+                            // try/catch like the Worker branch: a script that throws on a
+                            // message it doesn't know aborted enforceTheme()/refresh()
+                            _canvasSend = function(data) { try { if (window.__owuiFbHandler) window.__owuiFbHandler({ data: data }); } catch (x) { console.warn('Canvas FX:', x); } };
                         }
 
                         // Start context observer — sends { type: 'context' } updates
@@ -2048,9 +2101,24 @@ class Event:
                     }
                     _claimStream = bindStream;
 
+                    var _sseRetryTimer = 0, _sseRetryN = 0, _sseOpened = false, _sseResync = 0;
                     function connectSSE() {
+                        clearTimeout(_sseRetryTimer);
                         if (es) try { es.close(); } catch(x) {}
                         es = new EventSource('__THEME_ROUTE__/events?_=' + Date.now());
+                        var mine = es;
+                        // Reopened after a drop: an update broadcast while it was
+                        // down is never resent. With personal themes on, 'hello'
+                        // refetches; without them nothing did, so refetch here
+                        // unless a hello turns up first.
+                        es.onopen = function() {
+                            _sseRetryN = 0;
+                            if (_sseOpened) {
+                                clearTimeout(_sseResync);
+                                _sseResync = setTimeout(function() { _sseResync = 0; fetchThemeFromServer(); }, 1000);
+                            }
+                            _sseOpened = true;
+                        };
                         es.addEventListener('theme-update', handleThemeUpdate);
                         es.addEventListener('theme-disable', handleThemeDisable);
                         // Sent first on every connection while personal themes are on
@@ -2059,6 +2127,8 @@ class Event:
                             _claimed = null;
                             _claimRetryAt = 0;
                             bindStream();
+                            clearTimeout(_sseResync);
+                            _sseResync = 0;
                             // A reconnect: a personal save may have landed while
                             // the stream was down, and nothing would resend it
                             if (_hellos++ > 0) fetchThemeFromServer();
@@ -2069,7 +2139,15 @@ class Event:
                             ++_themeVersion;
                             fetchThemeFromServer();
                         });
-                        es.onerror = function() { /* EventSource auto-reconnects */ };
+                        // EventSource retries a dropped stream by itself, but an HTTP
+                        // error (a proxy's 502 while Open WebUI restarts) closes it
+                        // for good, and a visible tab never reopened it.
+                        es.onerror = function() {
+                            if (mine !== es || es.readyState !== EventSource.CLOSED) return;
+                            var delay = Math.min(60000, 3000 * Math.pow(2, _sseRetryN++)) * (0.5 + Math.random());
+                            clearTimeout(_sseRetryTimer);
+                            _sseRetryTimer = setTimeout(function() { if (mine === es) connectSSE(); }, delay);
+                        };
                     }
 
                     var es = null;
@@ -2080,7 +2158,13 @@ class Event:
                     // connection pool exhaustion (6 per-domain limit) during refresh.
                     // Uses `es` directly (mutable var) so beforeunload always closes the
                     // CURRENT EventSource, even after iOS PWA reconnect reassigns it.
-                    window.addEventListener('beforeunload', function() { if (es) es.close(); });
+                    // Open WebUI can still cancel the unload with its own leave
+                    // prompt; then the page stays and needs its stream back.
+                    window.addEventListener('beforeunload', function() {
+                        if (es) es.close();
+                        clearTimeout(_sseRetryTimer);
+                        _sseRetryTimer = setTimeout(function() { connectSSE(); }, 3000);
+                    });
 
                     // iOS PWA resilience: when the app returns to foreground, the EventSource
                     // connection may have been silently killed by WebKit. Force a reconnect
@@ -2837,6 +2921,7 @@ class Event:
             self.valves.show_in_admin_settings,
             self.valves.allow_personal_themes,
             self.valves.show_in_admin_panel,
+            self.valves.enable_canvas_fx,
         )
         cached = Event._loader_fragment_cache
         if cached and cached[0] == cache_key:
@@ -2853,6 +2938,9 @@ class Event:
         ).replace(
             "__PERSONAL_THEMES__",
             "true" if self.valves.allow_personal_themes else "false",
+        ).replace(
+            "__CANVAS_FX__",
+            "true" if self.valves.enable_canvas_fx else "false",
         )
 
         # State inlined as a JS string literal, minus the canvas scripts. Was a
@@ -2951,6 +3039,29 @@ class Event:
                 flags=_re.DOTALL,
             )
 
+        # The block below wraps this in @supports { }, inside a stylesheet
+        # shared with other plugins. Unbalanced braces in the admin's custom
+        # CSS either closed it early (the rest escaped the switch-off) or
+        # never closed it (it swallowed every later plugin's rules). Leave the
+        # custom part to the bootloader, which applies it from /theme.css.
+        if not self._css_balanced(safe_css):
+            if sections:
+                safe_css = (
+                    sections["vars"]
+                    + "/* structural rules deferred to bootloader */\n"
+                    + "/* gradient rules deferred to bootloader */\n"
+                    + "/* custom CSS deferred to bootloader */\n"
+                )
+            else:
+                safe_css = _re.sub(
+                    r"/\*\[OWUI_CUSTOM_START\]\*/.*?/\*\[OWUI_CUSTOM_END\]\*/",
+                    "/* custom CSS deferred to bootloader */",
+                    safe_css,
+                    flags=_re.DOTALL,
+                )
+            if not self._css_balanced(safe_css):
+                safe_css = ""
+
         # custom.css reaches every page and every user, but the instance theme
         # doesn't belong on all of them: a user with a personal theme sees
         # theirs instead, and a sign-in page can hide the colors or the custom
@@ -2967,6 +3078,41 @@ class Event:
 
         Event._safe_css_cache = (cache_key, safe_css)
         return safe_css
+
+    @staticmethod
+    def _css_balanced(css: str) -> bool:
+        """Whether every { has its }, no } comes first, and no comment or
+        string is left open, ignoring braces inside comments and strings."""
+        depth = 0
+        i, n = 0, len(css)
+        while i < n:
+            ch = css[i]
+            if ch == "/" and css.startswith("/*", i):
+                end = css.find("*/", i + 2)
+                if end == -1:
+                    return False
+                i = end + 2
+                continue
+            if ch in "\"'":
+                j = i + 1
+                while j < n and css[j] != ch:
+                    if css[j] == "\\":
+                        j += 1
+                    elif css[j] == "\n":
+                        return False
+                    j += 1
+                if j >= n:
+                    return False
+                i = j + 1
+                continue
+            if ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth < 0:
+                    return False
+            i += 1
+        return depth == 0
 
     # The @supports condition around the instance theme in custom.css. The
     # bootloader looks for it by the property name.
@@ -3240,6 +3386,41 @@ class Event:
     # can't interleave one's CSS with the other's state
     import threading as _threading
     _save_lock = _threading.Lock()
+
+    @classmethod
+    def _save_transaction(cls):
+        """Serialize a save or reset across threads AND processes.
+
+        _save_lock alone only covered one worker: with several workers or
+        containers on one DATA_DIR, two saves could still leave one's CSS
+        beside the other's state. The flock on a file under theme/ covers
+        every process; the thread lock keeps one process's threads from
+        sharing a single flock.
+        """
+        import fcntl
+        from contextlib import contextmanager
+
+        @contextmanager
+        def _txn():
+            with cls._save_lock:
+                try:
+                    from open_webui.env import DATA_DIR
+
+                    path = Path(DATA_DIR) / "theme" / ".save.lock"
+                except ImportError:
+                    path = Path("/app/backend/data/theme/.save.lock")
+                path.parent.mkdir(parents=True, exist_ok=True)
+                fd = open(path, "w")
+                try:
+                    fcntl.flock(fd, fcntl.LOCK_EX)
+                    yield
+                finally:
+                    try:
+                        fcntl.flock(fd, fcntl.LOCK_UN)
+                    finally:
+                        fd.close()
+
+        return _txn()
     _PERSONAL_CACHE_MAX = 512
 
     def _get_personal_delivery(self, user_id: str, kind: str):
@@ -3281,9 +3462,16 @@ class Event:
         else:
             body = self._state_with_sections(self._postprocess_state(raw), user_id)
         etag = '"' + hashlib.md5(body.encode("utf-8"), usedforsecurity=False).hexdigest() + '"'
-        if len(Event._personal_delivery_cache) >= Event._PERSONAL_CACHE_MAX:
-            Event._personal_delivery_cache.pop(next(iter(Event._personal_delivery_cache)))
-        Event._personal_delivery_cache[(user_id, kind)] = (cache_key, body, etag)
+        # This runs in to_thread workers, so two misses can evict at once:
+        # the same oldest key (KeyError) or mid-insert (RuntimeError from the
+        # iterator). Losing a cache entry is harmless; a 500 is not.
+        cache = Event._personal_delivery_cache
+        if len(cache) >= Event._PERSONAL_CACHE_MAX:
+            try:
+                cache.pop(next(iter(cache), None), None)
+            except RuntimeError:
+                pass
+        cache[(user_id, kind)] = (cache_key, body, etag)
         return body, etag
 
     def _delete_personal_theme(self, user_id: str) -> None:
@@ -3402,6 +3590,25 @@ class Event:
 
     # -- route registration --------------------------------------------------
 
+    class _BodyTooLarge(Exception):
+        pass
+
+    @staticmethod
+    async def _read_json_capped(request, cap: int):
+        """The request's JSON, reading at most cap bytes of body.
+
+        The routes' Content-Length checks don't see a chunked upload, which
+        has no length: request.json() buffered all of it, so one signed-in
+        user could stream a worker out of memory. Raises _BodyTooLarge past
+        the cap and ValueError for a body that isn't JSON.
+        """
+        buf = bytearray()
+        async for chunk in request.stream():
+            buf += chunk
+            if len(buf) > cap:
+                raise Event._BodyTooLarge()
+        return _json.loads(bytes(buf))
+
     @staticmethod
     async def _require_admin(request) -> bool:
         """Manual admin auth check — bypasses FastAPI DI which fails in APIRoute closures."""
@@ -3474,6 +3681,20 @@ class Event:
                 return JSONResponse({"error": "Invalid token"}, status_code=401)
 
         user = await Users.get_user_by_id(data["id"])
+        # Behind a trusted-header proxy, upstream's get_current_user rejects a
+        # token whose user isn't the one the proxy vouches for; a stale cookie
+        # from another account kept working on these routes.
+        if user:
+            try:
+                from open_webui.env import WEBUI_AUTH_TRUSTED_EMAIL_HEADER
+            except ImportError:
+                WEBUI_AUTH_TRUSTED_EMAIL_HEADER = None
+            if WEBUI_AUTH_TRUSTED_EMAIL_HEADER:
+                trusted_email = request.headers.get(WEBUI_AUTH_TRUSTED_EMAIL_HEADER, "").lower()
+                if trusted_email and user.email != trusted_email:
+                    return JSONResponse(
+                        {"error": "User mismatch. Please sign in again."}, status_code=401
+                    )
         if not user or user.role not in roles:
             return JSONResponse(
                 {"error": "Admin access required" if roles == ("admin",) else "Access denied"},
@@ -3532,6 +3753,20 @@ class Event:
 
                 _on_shutdown.append(_theme_shutdown)
 
+        # Pages loaded before a designer_url change keep the old route compiled
+        # into their bootloader: every refetch and SSE reconnect went to a
+        # removed path and got 404s. The read-only delivery endpoints stay
+        # reachable at every base this app has served (until a restart); the
+        # designer itself, saves and the library move to the new URL only.
+        alias_bases = getattr(app.state, "_theme_alias_bases", None)
+        if not isinstance(alias_bases, set):
+            alias_bases = set()
+            app.state._theme_alias_bases = alias_bases
+        prev = Event._routes_registered_url  # normalized, unlike the raw valve
+        if prev and prev.startswith("/api/") and prev != route_base and len(alias_bases) < 16:
+            alias_bases.add(prev)
+        alias_bases.discard(route_base)
+
         # Remove stale routes from previous function load so new handlers take effect
         # Clean up default, current, AND previous paths to ensure only one URL is active
         stale_paths = set()
@@ -3542,6 +3777,8 @@ class Event:
         # _last_designer_url can lag; the registered path never does.
         if Event._routes_registered_url:
             paths_to_clean.append(Event._routes_registered_url)
+        # Their aliases are re-added below, with this load's handlers
+        paths_to_clean.extend(alias_bases)
         for path in paths_to_clean:
             stale_paths.update(
                 {
@@ -3849,7 +4086,7 @@ class Event:
             if hasattr(user, "status_code"):
                 return user
             try:
-                body = await request.json()
+                body = await Event._read_json_capped(request, 4096)
             except Exception:
                 body = None
             cid = body.get("cid") if isinstance(body, dict) else None
@@ -4031,6 +4268,18 @@ class Event:
             start=6,
         ):
             app.routes.insert(spa_idx + offset, personal_route)
+        alias_routes = []
+        for base in sorted(alias_bases):
+            alias_routes += [
+                Route(base + "/theme.css", serve_theme_css, methods=["GET"]),
+                Route(base + "/state.json", serve_theme_state, methods=["GET"]),
+                Route(base + "/events", theme_sse, methods=["GET"]),
+                Route(base + "/events/bind", bind_sse, methods=["POST"]),
+                Route(base + "/me/theme.css", serve_personal_css, methods=["GET"]),
+                Route(base + "/me/state.json", serve_personal_state, methods=["GET"]),
+            ]
+        for offset, alias_route in enumerate(alias_routes, start=12):
+            app.routes.insert(spa_idx + offset, alias_route)
         log.info(
             "[Theme Pro] Registered routes at %s (position %d)", route_base, spa_idx
         )
@@ -4044,7 +4293,14 @@ class Event:
         from starlette.responses import JSONResponse
 
         try:
-            body = await request.json()
+            body = await Event._read_json_capped(request, 64 * 1024 * 1024)
+        except Event._BodyTooLarge:
+            return JSONResponse({"error": "Request body exceeds 64MB limit"}, status_code=413)
+        except Exception:
+            body = None
+        if not isinstance(body, dict):
+            return JSONResponse({"error": "Expected a JSON object"}, status_code=400)
+        try:
             css = body.get("css", "")
             state = body.get("state", "")
             sections = body.get("sections")
@@ -4079,27 +4335,35 @@ class Event:
 
             if is_reset and user_id:
                 # A personal reset puts the user back on the instance theme.
-                await asyncio.to_thread(self._delete_personal_theme, user_id)
-                # Factory Reset also wipes their library; Use instance theme keeps it.
-                if body.get("wipe_library") is True:
-                    await asyncio.to_thread(self._delete_personal_library, user_id)
+                # Under the save lock, like a save: a reset landing between a
+                # save's CSS and state writes left the state without its CSS.
+                wipe_library = body.get("wipe_library") is True
+
+                def reset_personal():
+                    with Event._save_transaction():
+                        self._delete_personal_theme(user_id)
+                        # Factory Reset also wipes their library; Use instance theme keeps it.
+                        if wipe_library:
+                            self._delete_personal_library(user_id)
+
+                await asyncio.to_thread(reset_personal)
                 Event._broadcast_personal(user_id, origin=origin)
                 return JSONResponse({"status": "reset"})
 
             if is_reset:
-                path = self._get_css_path()
-                if path.exists():
-                    path.unlink()
-                    log.info("[Theme Pro] Deleted theme CSS file")
-                state_path = self._get_state_path()
-                if state_path.exists():
-                    state_path.unlink()
-                    log.info("[Theme Pro] Deleted theme state file")
-                library_path = self._get_library_path()
-                if library_path.exists():
-                    library_path.unlink()
-                    log.info("[Theme Pro] Deleted theme gallery file")
-                self._delete_sections()
+                def reset_instance():
+                    with Event._save_transaction():
+                        for path, what in (
+                            (self._get_css_path(), "CSS"),
+                            (self._get_state_path(), "state"),
+                            (self._get_library_path(), "gallery"),
+                        ):
+                            if path.exists():
+                                path.unlink(missing_ok=True)
+                                log.info("[Theme Pro] Deleted theme %s file", what)
+                        self._delete_sections()
+
+                await asyncio.to_thread(reset_instance)
                 # No index.html work: the CSS fragment producer reads through
                 # _get_css_delivery(), which now finds no file and returns "",
                 # so the next request composes a custom.css without our block.
@@ -4115,7 +4379,7 @@ class Event:
                 library = body.get("library", "")
                 if library and isinstance(library, str):
                     def write_library():
-                        with Event._save_lock:
+                        with Event._save_transaction():
                             if library == self._load_library(user_id):
                                 return False
                             self._save_library(library, user_id)
@@ -4138,7 +4402,7 @@ class Event:
 
             def write() -> bool:
                 nonlocal state
-                with Event._save_lock:
+                with Event._save_transaction():
                     # The same theme again, as a designer sends when it opens:
                     # nothing to write, and no broadcast to make the other open
                     # designers reload.
@@ -4366,7 +4630,7 @@ class Event:
         def number(key, low, high):
             try:
                 return max(low, min(high, int(round(float(data.get(key))))))
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 return None
 
         hue, chroma, lightness = number("hue", 0, 360), number("chroma", 0, 40), number("lightness", 0, 50)
@@ -4388,10 +4652,14 @@ class Event:
         from starlette.responses import JSONResponse
 
         try:
-            body = await request.json()
+            body = await Event._read_json_capped(request, 64 * 1024)
+        except Event._BodyTooLarge:
+            return JSONResponse({"error": "Request too large"}, status_code=413)
         except Exception:
             body = None
-        description = " ".join(str((body or {}).get("description") or "").split())[:500]
+        if not isinstance(body, dict):
+            body = {}
+        description = " ".join(str(body.get("description") or "").split())[:500]
         if not description:
             return JSONResponse({"error": "Describe the theme you want"}, status_code=400)
 
@@ -7729,6 +7997,12 @@ location.reload();</code></pre>
     // the '}' that close the rule and everything after them. Measured: one
     // override of `rgb(` collapsed a three-rule stylesheet to a single parsed
     // rule, taking out the rest of the instance-wide theme.
+    // The objects in an array from theme data, for code that reads fields off
+    // each one: a remote theme's [null, null] or a string threw in the diff
+    function _objArr(a) {
+        return Array.isArray(a) ? a.filter(x => x && typeof x === 'object') : [];
+    }
+
     function _parensBalanced(s) {
         let depth = 0;
         for (let i = 0; i < s.length; i++) {
@@ -7948,6 +8222,15 @@ location.reload();</code></pre>
         if (window._updateThemeBadge) window._updateThemeBadge();
     }
 
+    let _draftRestored = false;
+    function restoreDraftMode() {
+        if (_draftRestored) return;
+        _draftRestored = true;
+        if (sessionStorage.getItem('owui_theme_draft_mode') === '1' || window.__THEME_PRO_CONFIG__?.draftModeDefault) {
+            setDraftMode(true);
+        }
+    }
+
     function publishTheme() {
         // Push the current theme state to the server (bypasses draft gate).
         // Regenerate CSS + sections from themeData rather than reusing the
@@ -7963,7 +8246,11 @@ location.reload();</code></pre>
         }).then(r => {
             if (r.ok) {
                 showToast('Published! Theme pushed to ' + liveAudience() + '.');
+                // Edits made while the request was in flight are not in it, and
+                // Live mode would otherwise only show them, never save them
+                const editedSince = Storage.getRaw('theme') !== state;
                 setDraftMode(false);
+                if (editedSince) { try { injectLive(); } catch (x) { console.warn('[Theme Pro] Publish follow-up failed:', x); } }
                 // Mirror syncToServer: persist the valve-postprocessed CSS into
                 // the localStorage fallback now that draft mode is off (Storage
                 // routes css_cache back to localStorage after setDraftMode).
@@ -7971,7 +8258,8 @@ location.reload();</code></pre>
                     try { Storage.setRaw('css_cache', (d && d.css) ? d.css : css); } catch(x) {}
                 }).catch(() => {});
             } else {
-                r.json().then(d => showToast('Publish failed: ' + (d.error || 'Unknown error')));
+                // A proxy's 502/504 page is not JSON
+                r.json().catch(() => null).then(d => showToast('Publish failed: ' + ((d && d.error) || ('HTTP ' + r.status))));
             }
         }).catch(e => showToast('Publish error: ' + e.message));
     }
@@ -8086,6 +8374,7 @@ location.reload();</code></pre>
 
     // --- Server-Side Library Sync (presets, snapshots) ---
     let _libTimer = null;
+    let _libQueue = Promise.resolve();
     function syncLibrary() {
         // Same hold as syncToServer: while the function is off the endpoint
         // answers 503, so an import or snapshot made now would be lost with a
@@ -8107,11 +8396,13 @@ location.reload();</code></pre>
             // Send ONLY the library data — CSS + state syncing is handled exclusively
             // by syncToServer() to prevent dual-writer race conditions where this
             // function's stale localStorage read could overwrite fresh CSS.
-            fetch('{ROUTE_BASE}', {
+            // Queued like syncToServer: each POST replaces the whole library, so
+            // a slow earlier one landing after a later one erased the newer presets.
+            _libQueue = _libQueue.then(() => fetch('{ROUTE_BASE}', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ css: '', state: '', library, suppress_broadcast: true, origin: TAB_ORIGIN, settle: !_userActed })
-            }).then(r => {
+            })).then(r => {
                 if (r.ok) console.log('[Theme Pro] Library synced to server');
                 else if (r.status === 503) {
                     // Function toggled off while this POST was in flight —
@@ -8138,7 +8429,9 @@ location.reload();</code></pre>
         a.href = url;
         a.download = filename;
         a.click();
-        URL.revokeObjectURL(url);
+        // Revoking in the same tick can cancel the download in Firefox and
+        // Safari before it has read the blob
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
     }
 
     function downloadAllBackups() {
@@ -8295,18 +8588,71 @@ location.reload();</code></pre>
         return out;
     }
 
-    function getSnapshots() { return Storage.get('snapshots', []); }
+    // Gallery entries come from storage, the server, imports, community themes
+    // and two raw JSON editors. A null entry, or a number where a name or
+    // updateUrl belongs, threw in search, sort, export, the duplicate check
+    // and Check for Updates. Repaired in place so every index still holds.
+    const _THEME_META = ['name', 'description', 'author', 'version', 'targetVersion', 'repositoryUrl', 'updateUrl'];
+    function _repairSnapshotEntry(s) {
+        if (!s || typeof s !== 'object' || Array.isArray(s)) s = { name: 'Unreadable theme' };
+        _THEME_META.forEach(k => {
+            const v = s[k];
+            if (v !== undefined && v !== null && typeof v !== 'string') s[k] = (typeof v === 'number' && isFinite(v)) ? String(v) : '';
+        });
+        return s;
+    }
+    // A theme entry the gallery can show: modes for dark and light, or the
+    // legacy single-palette format renderSnapshots migrates
+    function _isThemeEntry(t) {
+        return !!t && typeof t === 'object' && !Array.isArray(t) &&
+            ((!!t.dark && typeof t.dark === 'object' && !!t.light && typeof t.light === 'object') || typeof t.h === 'number');
+    }
+    function getSnapshots() {
+        const list = Storage.get('snapshots', []);
+        return Array.isArray(list) ? list.map(_repairSnapshotEntry) : [];
+    }
 
     // Themes added at the front of the gallery move the rest down; the
     // modes' "applied from gallery theme N" refs have to move with them, or
     // they point at the new theme (highlighted, synced and updated as if
     // it were the one in use)
-    function shiftThemeRefs(by) {
-        MODES.forEach(m => {
-            if (activeThemeRef[m] && activeThemeRef[m].type === 'snapshot') activeThemeRef[m].id += by;
+    // Gallery refs are array positions, so every insert or delete has to move
+    // them. Undo/redo entries carry their own copies; moving only the live map
+    // let an Undo restore a position that now names a different theme.
+    function _remapSnapshotRefs(fn) {
+        const apply = refs => {
+            if (!refs) return;
+            MODES.forEach(m => {
+                if (refs[m] && refs[m].type === 'snapshot') {
+                    const id = fn(refs[m].id);
+                    if (id === null) refs[m] = null; else refs[m].id = id;
+                }
+            });
+        };
+        apply(activeThemeRef);
+        historyStack.forEach(h => apply(h && h.activeThemeRef));
+        _persistRefsSoon();
+    }
+    // The saved state carries the refs too. Callers move them and set the new
+    // entry's ref without committing, so a reload restored positions that now
+    // named a neighbour, and Update/Sync then acted on the wrong theme. After
+    // the caller's own synchronous writes, save once. Not while a personal
+    // designer is still holding saves: a ref alone must not turn the instance
+    // theme into the user's own.
+    let _refsPersistQueued = false;
+    function _persistRefsSoon() {
+        if (_refsPersistQueued) return;
+        _refsPersistQueued = true;
+        queueMicrotask(() => {
+            _refsPersistQueued = false;
+            if (window.__TDP_HOLD_SAVES__ === true) return;
+            commitChange({ clearRef: false, push: false });
         });
     }
-    function saveSnapshots(s) { Storage.set('snapshots', s); syncLibrary(); }
+    function shiftThemeRefs(by) {
+        _remapSnapshotRefs(id => id + by);
+    }
+    function saveSnapshots(s) { Storage.set('snapshots', Array.isArray(s) ? s.map(_repairSnapshotEntry) : s); syncLibrary(); }
 
     function parseHex(hex) {
         const h = hex.startsWith('#') ? hex.slice(1) : hex;
@@ -9202,8 +9548,17 @@ function startAnimation() {
             showToast(`✨ ${name}${withGradient ? ' — palette and gradient' : ' — palette'}. Fine-tune it below.`);
         }
 
+        // Bumped by close(): an answer that lands after Cancel/Escape belongs to
+        // a request the admin walked away from and must not repaint the theme.
+        let requestSeq = 0;
+
         function close() {
-            if (modal) modal.style.display = 'none';
+            requestSeq++;
+            if (modal) {
+                modal.style.display = 'none';
+                const go = modal.querySelector('#ai-consult-go');
+                if (go) go.disabled = false;
+            }
         }
 
         function build() {
@@ -9237,18 +9592,21 @@ function startAnimation() {
             const input = modal.querySelector('#ai-consult-input');
             const status = modal.querySelector('#ai-consult-status');
             const go = modal.querySelector('#ai-consult-go');
+            if (go.disabled) return;
             const description = input.value.trim();
             if (!description) { status.textContent = 'Describe the theme you want first.'; input.focus(); return; }
             const modes = modal.querySelector('#ai-consult-one-mode').checked ? [getActiveDataMode()] : MODES.slice();
             go.disabled = true;
             status.style.color = 'var(--text-muted)';
             status.textContent = 'Asking the model…';
+            const seq = ++requestSeq;
             fetch('{ROUTE_BASE}/consult', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ description })
             }).then(r => r.json().catch(() => ({})).then(d => ({ ok: r.ok, d })))
                 .then(({ ok, d }) => {
+                    if (seq !== requestSeq) return;
                     go.disabled = false;
                     if (!ok) {
                         status.style.color = 'var(--color-danger)';
@@ -9260,6 +9618,7 @@ function startAnimation() {
                     apply(d, modes);
                 })
                 .catch(() => {
+                    if (seq !== requestSeq) return;
                     go.disabled = false;
                     status.style.color = 'var(--color-danger)';
                     status.textContent = 'The server could not be reached.';
@@ -9481,21 +9840,73 @@ function startAnimation() {
         };
     }
 
-    // One manual-override line -> { name, value }, or null if it is not one.
-    // Mirrors the guards in generateThemeSections' formatOverrideLine (skip
-    // blanks and comments, require a leading --, reject braces as a CSS scope
-    // breakout) and additionally requires a value, which the report needs and a
-    // malformed declaration would not supply.
-    function _parseOverrideLine(line) {
-        const trimmed = String(line == null ? '' : line).trim();
-        if (!trimmed || trimmed.startsWith('/*') || trimmed.startsWith('//') || trimmed.startsWith('*')) return null;
-        if (!trimmed.startsWith('--') || /[{}]/.test(trimmed)) return null;
-        const body = trimmed.endsWith(';') ? trimmed.slice(0, -1) : trimmed;
-        const i = body.indexOf(':');
-        if (i < 1) return null;
-        const name = body.slice(0, i).trim();
-        const value = body.slice(i + 1).trim();
-        return (name && value) ? { name, value } : null;
+    // Every --name: value declaration on one manual-override line, as
+    // [{ name, value }]; the single parser behind both the shipped CSS and the
+    // contrast report. Whole /* */ comments are dropped first and a line with
+    // an unclosed one is rejected: the old pass appended !important after a
+    // trailing comment (so the override lost to the palette) and an unclosed
+    // comment swallowed every rule after it, in the CSS every user receives.
+    // Declarations are split on top-level semicolons only, so a data: URL's
+    // ";base64," stays inside its url().
+    function _overrideDecls(line) {
+        let trimmed = String(line == null ? '' : line).trim();
+        if (!trimmed || trimmed.startsWith('/*') || trimmed.startsWith('//') || trimmed.startsWith('*')) return [];
+        if (!trimmed.startsWith('--')) return [];
+        // Comments out, strings left as written ("/*" inside quotes is text)
+        let clean = '', q = '';
+        for (let i = 0; i < trimmed.length; i++) {
+            const ch = trimmed[i];
+            if (q) {
+                clean += ch;
+                if (ch === '\\' && i + 1 < trimmed.length) clean += trimmed[++i];
+                else if (ch === q) q = '';
+                continue;
+            }
+            if (ch === '"' || ch === "'") { q = ch; clean += ch; continue; }
+            if (ch === '/' && trimmed[i + 1] === '*') {
+                const end = trimmed.indexOf('*/', i + 2);
+                if (end === -1) return [];
+                clean += ' ';
+                i = end + 1;
+                continue;
+            }
+            if (ch === '*' && trimmed[i + 1] === '/') return [];
+            clean += ch;
+        }
+        trimmed = clean.trim();
+        // Block CSS scope breakout: reject lines containing braces, and lines
+        // with an unclosed ( or [, which swallow every rule after them (a value
+        // split over two lines leaves one on the first)
+        if (/[{}]/.test(trimmed)) return [];
+        if (!_parensBalanced(trimmed) ||
+            !_parensBalanced(trimmed.replace(/[()]/g, '').replace(/\[/g, '(').replace(/\]/g, ')'))) return [];
+        const parts = [];
+        let depth = 0, quote = '', start = 0;
+        for (let i = 0; i < trimmed.length; i++) {
+            const ch = trimmed[i];
+            if (quote) { if (ch === '\\') i++; else if (ch === quote) quote = ''; continue; }
+            if (ch === '"' || ch === "'") quote = ch;
+            else if (ch === '(' || ch === '[') depth++;
+            else if (ch === ')' || ch === ']') depth--;
+            else if (ch === ';' && depth === 0) { parts.push(trimmed.slice(start, i)); start = i + 1; }
+        }
+        if (quote) return [];
+        parts.push(trimmed.slice(start));
+        const out = [];
+        parts.forEach(p => {
+            p = p.trim();
+            if (!p.startsWith('--')) return;
+            const c = p.indexOf(':');
+            if (c < 3) return;
+            const name = p.slice(0, c).trim();
+            // A value already marked !important would get it twice, which makes
+            // the declaration invalid
+            const value = p.slice(c + 1).trim().replace(/\s*!\s*important\s*$/i, '')
+                // Neutralize marker comment sequences inside quoted values
+                .replace(/\/\*\[OWUI_/g, '/* [OWUI_');
+            if (/^--\S+$/.test(name) && value) out.push({ name, value });
+        });
+        return out;
     }
 
     // The palette values that actually SHIP, which is what a contrast report has
@@ -9517,13 +9928,15 @@ function startAnimation() {
         let overridden = 0;
         if (config.manualOverridesEnabled && config.manualOverrides && config.manualOverrides.trim()) {
             config.manualOverrides.split('\n').forEach(line => {
-                const p = _parseOverrideLine(line);
-                // hasOwnProperty, not `in`: only real palette steps, never an
-                // inherited key like __proto__ smuggled in through an override.
-                if (p && Object.prototype.hasOwnProperty.call(vars, p.name)) {
-                    vars[p.name] = p.value;
-                    overridden++;
-                }
+                // Every declaration on the line, as the shipped CSS has them
+                _overrideDecls(line).forEach(p => {
+                    // hasOwnProperty, not `in`: only real palette steps, never an
+                    // inherited key like __proto__ smuggled in through an override.
+                    if (Object.prototype.hasOwnProperty.call(vars, p.name)) {
+                        vars[p.name] = p.value;
+                        overridden++;
+                    }
+                });
             });
         }
         return { vars, overridden, usingDefaults: config.paletteEnabled === false };
@@ -9653,7 +10066,7 @@ function startAnimation() {
                 const hex = oklchToHex(activeVars[`--color-gray-${s}`]);
                 const rawVal = activeVars[`--color-gray-${s}`];
                 let lVal = 0;
-                if (rawVal.startsWith('oklch(')) lVal = parseFloat(rawVal.split(' ')[0].replace('oklch(', ''));
+                if (rawVal.startsWith('oklch(')) lVal = _oklchL(rawVal);
                 else if (rawVal.startsWith('#')) {
                     const r = parseInt(rawVal.slice(1,3), 16), g = parseInt(rawVal.slice(3,5), 16), b = parseInt(rawVal.slice(5,7), 16);
                     lVal = (r*0.299 + g*0.587 + b*0.114) / 255;
@@ -9755,7 +10168,10 @@ function startAnimation() {
         // Auto-resolution removed in favor of proper ref persistence to prevent "swapping" confusion.
         // Highlights now strictly follow explicit user selection or loaded state.
         
-        document.querySelectorAll('#snapshot-list .preset-btn').forEach((btn, i) => {
+        // The card's gallery index, not its position on screen: with a search
+        // or sort applied the two differ
+        document.querySelectorAll('#snapshot-list .preset-btn').forEach(btn => {
+            const i = parseInt(btn.dataset.index, 10);
             const isRef = activeThemeRef[dm] && activeThemeRef[dm].type === 'snapshot' && activeThemeRef[dm].id === i;
             btn.classList.toggle('active-theme', !!isRef);
         });
@@ -9861,7 +10277,8 @@ function startAnimation() {
             webgl: /getContext\s*\(\s*['"]webgl/.test(s),
             context: /(?:case|===)\s*['"]context['"]/.test(s),
             theme: /(?:case|===)\s*['"]theme['"]/.test(s),
-            dom: s.indexOf('document') !== -1,
+            // Same test the bootloader uses to pick the main thread
+            dom: /\bdocument\b/.test(s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|\s)\/\/.*$/gm, '$1')),
         };
     }
 
@@ -10322,10 +10739,18 @@ function startAnimation() {
         });
     }
 
+    // Lightness of an oklch() value on the 0-1 scale; CSS also allows a
+    // percentage ("oklch(14.5% 0 0)"), which parseFloat alone read as 14.5.
+    function _oklchL(colorStr) {
+        const tok = colorStr.replace(/^oklch\(\s*/, '').split(/[\s/)]/)[0];
+        const v = parseFloat(tok);
+        return tok.endsWith('%') ? v / 100 : v;
+    }
+
     function getEffectiveLightness(colorStr) {
         if (!colorStr) return 0.20;
         if (colorStr.startsWith('oklch(')) {
-            return parseFloat(colorStr.split(' ')[0].replace('oklch(', ''));
+            return _oklchL(colorStr);
         } else if (colorStr.startsWith('#')) {
             return getLuminance(colorStr);
         }
@@ -10335,24 +10760,32 @@ function startAnimation() {
     function extractKeyframes(css) {
         let keyframes = '';
         let cleanedCss = css;
-        let startIndex = cleanedCss.indexOf('@keyframes');
-        
+        // Scan a copy with comments and strings blanked to spaces (same length,
+        // so indices line up): a "@keyframes" or brace inside a comment is not
+        // CSS. An unbalanced block (still being typed, or a bare mention) used
+        // to rescan the same index forever and freeze the tab; it now stays put.
+        let shadow = css.replace(/\/\*[\s\S]*?(?:\*\/|$)|"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'/g, m => ' '.repeat(m.length));
+        let from = 0;
+        let startIndex = shadow.indexOf('@keyframes', from);
+
         while (startIndex !== -1) {
             let openBraces = 0;
             let i = startIndex;
             let started = false;
-            while (i < cleanedCss.length) {
-                if (cleanedCss[i] === '{') { openBraces++; started = true; }
-                else if (cleanedCss[i] === '}') { openBraces--; }
-                
+            let end = -1;
+            while (i < shadow.length) {
+                if (shadow[i] === '{') { openBraces++; started = true; }
+                else if (shadow[i] === '}') { openBraces--; }
+
                 i++;
-                if (started && openBraces === 0) {
-                    keyframes += cleanedCss.substring(startIndex, i) + '\n';
-                    cleanedCss = cleanedCss.substring(0, startIndex) + cleanedCss.substring(i);
-                    break;
-                }
+                if (started && openBraces === 0) { end = i; break; }
             }
-            startIndex = cleanedCss.indexOf('@keyframes');
+            if (end === -1) break;
+            keyframes += cleanedCss.substring(startIndex, end) + '\n';
+            cleanedCss = cleanedCss.substring(0, startIndex) + cleanedCss.substring(end);
+            shadow = shadow.substring(0, startIndex) + shadow.substring(end);
+            from = startIndex;
+            startIndex = shadow.indexOf('@keyframes', from);
         }
         return { keyframes, cleanedCss };
     }
@@ -10374,7 +10807,11 @@ function startAnimation() {
         let darkest = stops[0].color;
         let minLum = Infinity;
         stops.forEach(s => {
-            const lum = getLuminance(s.color);
+            // getLuminance reads six hex digits, so #000 or rgb() gave NaN and
+            // could never win; resolve every stop to #rrggbb first
+            const hex = _resolveReportColor(s.color);
+            if (!hex) return;
+            const lum = getLuminance(hex);
             if (lum < minLum) { minLum = lum; darkest = s.color; }
         });
         return darkest;
@@ -10603,24 +11040,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
         // Helper: format manual override lines with !important
         const formatOverrideLine = (line, indent = '  ') => {
-            const trimmed = line.trim();
-            if (!trimmed || trimmed.startsWith('/*') || trimmed.startsWith('//') || trimmed.startsWith('*')) return '';
-            if (trimmed.startsWith('--')) {
-                // Block CSS scope breakout: reject lines containing braces, and
-                // lines with an unclosed ( or [, which swallow every rule after
-                // them (a value split over two lines leaves one on the first)
-                if (/[{}]/.test(trimmed)) return '';
-                if (!_parensBalanced(trimmed) ||
-                    !_parensBalanced(trimmed.replace(/[()]/g, '').replace(/\[/g, '(').replace(/\]/g, ')'))) return '';
-                // Neutralize marker comment sequences in override values
-                const sanitized = trimmed.replace(/\/\*\[OWUI_/g, '/* [OWUI_');
-                // A value already marked !important would get it twice, which
-                // makes the declaration invalid
-                const value = sanitized.replace(/;\s*$/, '').replace(/\s*!\s*important\s*$/i, '');
-                const withImportant = value + ' !important;';
-                return `${indent}${withImportant}\n`;
-            }
-            return '';
+            return _overrideDecls(line).map(d => `${indent}${d.name}: ${d.value} !important;\n`).join('');
         };
 
         let varsCss = `/*[OWUI_VARS_START]*/\n`;
@@ -10976,6 +11396,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 her: cleanMode(themeData.her)
             });
             saveSnapshots(snapshots);
+            // The live refs are cleared below, but undo entries still hold positions
+            shiftThemeRefs(1);
         }
         
         shouldInject = true; 
@@ -12571,7 +12993,9 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     $('confirm-factory-reset-btn').onclick = () => {
         const backupCb = $('factory-backup-cb');
         if (backupCb && backupCb.checked) {
-            downloadAllBackups();
+            // Up to four files, and the browser may ask before allowing more
+            // than one; wiping and reloading at once could lose the rest
+            if (downloadAllBackups() > 0 && !window.confirm('Your backup files are downloading. Wipe everything once they have saved?')) return;
         }
         const keysToWipe =[
             'owui_dev_theme_v1', 
@@ -12822,7 +13246,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             if (!cvMatch) canvasDiffs++;
 
             // === Gradient ===
-            const gradientSnapshot = (d) => ({ stops: d.gradientStops || [], type: d.gradientType || 'linear', angle: d.gradientAngle ?? 135, intensity: d.gradientIntensity ?? 85, anim: !!d.gradientAnimation, radialPosX: d.gradientRadialPosX ?? 50, radialPosY: d.gradientRadialPosY ?? 50, radialShape: d.gradientRadialShape || 'ellipse', radialSize: d.gradientRadialSize || 'farthest-corner', meshPoints: d.gradientMeshPoints || [], meshBgColor: d.gradientMeshBgColor || '#0a0a12' });
+            const gradientSnapshot = (d) => ({ stops: _objArr(d.gradientStops), type: d.gradientType || 'linear', angle: d.gradientAngle ?? 135, intensity: d.gradientIntensity ?? 85, anim: !!d.gradientAnimation, radialPosX: d.gradientRadialPosX ?? 50, radialPosY: d.gradientRadialPosY ?? 50, radialShape: d.gradientRadialShape || 'ellipse', radialSize: d.gradientRadialSize || 'farthest-corner', meshPoints: _objArr(d.gradientMeshPoints), meshBgColor: d.gradientMeshBgColor || '#0a0a12' });
             const gMatch = compareGradientProps(sourceData, targetData);
             syncDiffData.gradient.push({
                 mode, match: gMatch,
@@ -13115,6 +13539,9 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             themeData[mode].h = sourceData.h;
             themeData[mode].c = sourceData.c;
             themeData[mode].l = opts.adjustL ? opts.adjustL(mode, sourceData.l) : sourceData.l;
+            // Off means the default ramp ships, so the h/c/l above only count
+            // with it. Missing on themes saved before the switch: on.
+            themeData[mode].paletteEnabled = sourceData.paletteEnabled !== false;
         }
         if (opts.syncOverrides) {
             themeData[mode].overrides = structuredClone(sourceData.overrides || {});
@@ -14060,7 +14487,9 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         snapshotJsonSaveBtn.addEventListener('click', () => {
             if (!validateSnapshotJson() || renameIndex === null) return;
             const snapshots = getSnapshots();
-            const edited = JSON.parse(snapshotJsonTextarea.value);
+            const parsedEdit = JSON.parse(snapshotJsonTextarea.value);
+            if (!_isThemeEntry(parsedEdit)) { showToast('Not a theme: it needs "dark" and "light" modes'); return; }
+            const edited = _repairSnapshotEntry(parsedEdit);
             snapshots[renameIndex] = edited;
             saveSnapshots(snapshots);
             // Update the rename modal fields to reflect any changes
@@ -14146,7 +14575,9 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         saveJsonSaveBtn.addEventListener('click', () => {
             if (!validateSaveJson()) return;
             try {
-                const newTheme = JSON.parse(saveJsonTextarea.value);
+                const parsedNew = JSON.parse(saveJsonTextarea.value);
+                if (!_isThemeEntry(parsedNew)) { showToast('Not a theme: it needs "dark" and "light" modes'); return; }
+                const newTheme = _repairSnapshotEntry(parsedNew);
                 if (!newTheme.name || !newTheme.name.trim()) {
                     showToast('Theme name is required');
                     return;
@@ -14155,11 +14586,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 snapshots.unshift(newTheme);
                 saveSnapshots(snapshots);
                 // Shift existing snapshot refs
-                MODES.forEach(m => {
-                    if (activeThemeRef[m] && activeThemeRef[m].type === 'snapshot') {
-                        activeThemeRef[m].id++;
-                    }
-                });
+                shiftThemeRefs(1);
                 activeThemeRef[getActiveDataMode()] = { type: 'snapshot', id: 0 };
                 // Update save modal fields to reflect the saved JSON
                 const g = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
@@ -14465,14 +14892,14 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             });
         };
         const newSig = {
-            name: (newTheme.name || '').trim().toLowerCase(),
+            name: String(newTheme.name || '').trim().toLowerCase(),
             dark: normForCompare(newTheme.dark),
             light: normForCompare(newTheme.light),
             oled: normForCompare(newTheme.oled),
             her: normForCompare(newTheme.her)
         };
         return existingSnapshots.some(existing => {
-            return (existing.name || '').trim().toLowerCase() === newSig.name
+            return String((existing && existing.name) || '').trim().toLowerCase() === newSig.name
                 && normForCompare(existing.dark) === newSig.dark
                 && normForCompare(existing.light) === newSig.light
                 && normForCompare(existing.oled) === newSig.oled
@@ -15095,6 +15522,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     // the host this returns is the host the allowlist verdict is about.
     function toRawGitHub(url) {
         if (!url) return url;
+        if (typeof url !== 'string') return '';
         const ghBlob = url.match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/(.+)$/);
         if (ghBlob) return `https://raw.githubusercontent.com/${ghBlob[1]}/${ghBlob[2]}/${ghBlob[3]}`;
         const ghRaw = url.match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/raw\/(.+)$/);
@@ -15676,6 +16104,9 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         
         // Try manifest-based checking first (1 fetch instead of N)
         let results = [];
+        // A throw here used to leave the button disabled on "Checking…"
+        // until the page was reloaded
+        try {
         const manifestResult = await checkUpdatesViaManifest(snapshots);
         
         if (manifestResult) {
@@ -15693,6 +16124,13 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             // Manifest unavailable — fall back to per-theme checking for all
             const allResults = await Promise.all(updatable.map(x => checkThemeUpdate(x.index)));
             results = allResults.filter(r => r !== null);
+        }
+        } catch (e) {
+            btn.innerHTML = origHTML;
+            btn.disabled = false;
+            console.warn('[Theme Pro] Update check failed:', e);
+            showToast('⚠️ Update check failed: ' + (e && e.message ? e.message : e));
+            return;
         }
         
         btn.innerHTML = origHTML;
@@ -16012,7 +16450,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             }
 
             // Gradient
-            const gradientSnapshot = (d) => ({ stops: d.gradientStops || [], type: d.gradientType || 'linear', angle: d.gradientAngle ?? 135, intensity: d.gradientIntensity ?? 85, anim: !!d.gradientAnimation, radialPosX: d.gradientRadialPosX ?? 50, radialPosY: d.gradientRadialPosY ?? 50, radialShape: d.gradientRadialShape || 'ellipse', radialSize: d.gradientRadialSize || 'farthest-corner', meshPoints: d.gradientMeshPoints || [], meshBgColor: d.gradientMeshBgColor || '#0a0a12' });
+            const gradientSnapshot = (d) => ({ stops: _objArr(d.gradientStops), type: d.gradientType || 'linear', angle: d.gradientAngle ?? 135, intensity: d.gradientIntensity ?? 85, anim: !!d.gradientAnimation, radialPosX: d.gradientRadialPosX ?? 50, radialPosY: d.gradientRadialPosY ?? 50, radialShape: d.gradientRadialShape || 'ellipse', radialSize: d.gradientRadialSize || 'farthest-corner', meshPoints: _objArr(d.gradientMeshPoints), meshBgColor: d.gradientMeshBgColor || '#0a0a12' });
             const lSnap = gradientSnapshot(lm), rSnap = gradientSnapshot(rm);
             const hasGradientData = lSnap.stops.length > 0 || rSnap.stops.length > 0 || lSnap.meshPoints.length > 0 || rSnap.meshPoints.length > 0;
             if (hasGradientData && JSON.stringify(lSnap) !== JSON.stringify(rSnap)) {
@@ -16469,6 +16907,10 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                         });
                     }
                     resetHistoryBaseline();
+                    // Before the mode click below: it repaints and saves, and
+                    // with Draft not yet on that published a resumed draft to
+                    // every user on a plain refresh.
+                    restoreDraftMode();
                     
                     const pTheme = localStorage.getItem('theme');
                     const pDoc = document.documentElement;
@@ -16495,14 +16937,11 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 }
             } catch (e) { console.warn('Theme Pro:', e); }
 
-            // Draft Mode: restore from sessionStorage, or honor valve default
-            // Must run BEFORE updatePalette() so syncToServer() is gated in draft mode
-            const _hasSavedDraft = sessionStorage.getItem('owui_theme_draft_mode');
-            if (_hasSavedDraft === '1') {
-                setDraftMode(true);
-            } else if (window.__THEME_PRO_CONFIG__?.draftModeDefault) {
-                setDraftMode(true);
-            }
+            // Draft Mode: restore from sessionStorage, or honor valve default.
+            // Must run BEFORE anything calls updatePalette() so syncToServer()
+            // is gated in draft mode; normally done above, this catches a load
+            // that threw first.
+            restoreDraftMode();
 
             updatePalette();
             renderSnapshots();
@@ -16876,6 +17315,15 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                     needsSave = true;
                     return migrateLegacyTheme(s);
                 }
+                // No dark or light mode (an unreadable entry, or JSON saved
+                // without them) made ensureAllModes throw, and the catch below
+                // left the whole gallery undrawn. Give it modes so it shows
+                // and can be deleted.
+                if (!s.dark || typeof s.dark !== 'object') {
+                    needsSave = true;
+                    s.dark = (s.light && typeof s.light === 'object') ? structuredClone(s.light) : createDefaultModeData();
+                }
+                if (!s.light || typeof s.light !== 'object') { needsSave = true; s.light = createDefaultModeData(); }
                 if (!s.oled || !s.her) { needsSave = true; ensureAllModes(s); }
                 MODES.forEach(m => {
                     if (s[m]) {
@@ -16983,7 +17431,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 const ttKey = _ttRegister(`snap:${i}`, ttHtml);
 
                 return `
-                <div class="preset-btn ${active ? 'active-theme' : ''}" onclick="loadSnapshot(${i})" data-tooltip-key="${ttKey}">
+                <div class="preset-btn ${active ? 'active-theme' : ''}" data-index="${i}" onclick="loadSnapshot(${i})" data-tooltip-key="${ttKey}">
                     <div class="snapshot-action edit-snapshot" onclick="event.stopPropagation(); requestRename(${i})" data-tooltip="Edit theme">✎</div>
                     <div class="snapshot-action update-snapshot" onclick="event.stopPropagation(); updateSnapshot(${i})" data-tooltip="Overwrite with current values">💾</div>
                     <div class="snapshot-action delete-snapshot" onclick="event.stopPropagation(); requestDelete(${i})" data-tooltip="Delete theme">×</div>
@@ -17021,15 +17469,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
             // Only the gallery entry goes. The live theme stays as it is, even
             // in modes that came from this entry; a Global Reset is its own button.
-            MODES.forEach(m => {
-                if (activeThemeRef[m] && activeThemeRef[m].type === 'snapshot') {
-                    if (activeThemeRef[m].id === deletedIndex) {
-                        activeThemeRef[m] = null;
-                    } else if (activeThemeRef[m].id > deletedIndex) {
-                        activeThemeRef[m].id--;
-                    }
-                }
-            });
+            _remapSnapshotRefs(id => id === deletedIndex ? null : (id > deletedIndex ? id - 1 : id));
             renderSnapshots();
         });
     }
@@ -17128,11 +17568,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
               snapshots.unshift(newTheme);
               saveSnapshots(snapshots);
               // Since unshift adds at index 0, all existing snapshot refs shift by +1
-              MODES.forEach(m => {
-                  if (activeThemeRef[m] && activeThemeRef[m].type === 'snapshot') {
-                      activeThemeRef[m].id++;
-                  }
-              });
+              shiftThemeRefs(1);
               activeThemeRef[getActiveDataMode()] = { type: 'snapshot', id: 0 };
               renderSnapshots();
               hideModal('save-modal');
@@ -17364,6 +17800,9 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         ).replace(
             "__EMBEDDED_STATE__",
             "null",
+        ).replace(
+            "__CANVAS_FX__",
+            "true" if self.valves.enable_canvas_fx else "false",
         )
 
         valve_config = {
@@ -17625,7 +18064,10 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                     data[mode].pop("canvasAuthOnly", None)
             return _json.dumps(data, separators=(",", ":"))
         except Exception:
-            return state_str
+            # Fail closed: this enforces a valve. JSON Python can't parse
+            # (nesting past its recursion limit) still parses in the browser,
+            # which would then run the script the admin switched off.
+            return "{}"
 
     @classmethod
     def _apply_sidebar_transparency(cls, css: str, mode: str) -> str:
@@ -17938,6 +18380,52 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         return f"{REDIS_KEY_PREFIX}:theme_pro_sse" if REDIS_KEY_PREFIX else "theme_pro_sse"
 
     @classmethod
+    def _redis_connect(cls, async_mode: bool, **opts):
+        """A client of this plugin's own (never Open WebUI's shared, cached
+        one, since callers close it), connected the way Open WebUI connects.
+
+        With REDIS_SENTINEL_HOSTS set, REDIS_URL's host is the Sentinel
+        service name, not a reachable host: connecting to it directly failed
+        on every publish and reconnected forever, so updates never left the
+        worker that made them. Otherwise REDIS_URL as before.
+        """
+        url = cls._redis_url()
+        if not url:
+            return None
+        hosts = os.environ.get("REDIS_SENTINEL_HOSTS", "").strip()
+        if hosts and url.lower().startswith(("redis://", "rediss://")):
+            from urllib.parse import urlparse
+
+            if async_mode:
+                import redis.asyncio.sentinel as _sentinel_mod
+            else:
+                import redis.sentinel as _sentinel_mod
+            # Credentials as Open WebUI's own parse_redis_url reads them (not
+            # percent-decoded), so whatever works for its Sentinel client
+            # works here too
+            parts = urlparse(url)
+            try:
+                port = int(os.environ.get("REDIS_SENTINEL_PORT") or 26379)
+            except ValueError:
+                port = 26379
+            opts.pop("maint_notifications", None)  # a client option, not a connection one
+            sentinel = _sentinel_mod.Sentinel(
+                [(h.strip(), port) for h in hosts.split(",") if h.strip()],
+                db=int(parts.path.lstrip("/") or "0"),
+                username=parts.username or None,
+                password=parts.password or None,
+                **opts,
+            )
+            return sentinel.master_for(parts.hostname or "mymaster")
+        if async_mode:
+            import redis.asyncio as _redis_mod
+
+            return _redis_mod.from_url(url, **opts)
+        import redis as _redis_mod
+
+        return _redis_mod.Redis.from_url(url, **opts)
+
+    @classmethod
     def _redis_publish(cls, msg: str):
         """Publish a message to the Redis SSE relay channel (best-effort).
 
@@ -17973,8 +18461,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 pass
             # Bounded timeouts: even off-loop, a dead route shouldn't pin a
             # thread-pool worker for minutes waiting on TCP defaults.
-            r = _sync_redis.Redis.from_url(
-                redis_url,
+            r = cls._redis_connect(
+                False,
                 socket_connect_timeout=2,
                 socket_timeout=2,
                 **_extra,
@@ -18223,10 +18711,14 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 except BaseException:
                     pass  # CancelledError (expected) or teardown noise
                 setattr(app.state, attr, None)
-        # Wake every SSE stream with a None sentinel so the generators
-        # return. This lets uvicorn's graceful wait for in-flight responses
-        # finish instead of stalling on open EventSource connections until
-        # the container runtime SIGKILLs the process (~10s restart penalty).
+        cls._end_sse_streams()
+
+    @classmethod
+    def _end_sse_streams(cls):
+        """Wake every SSE stream with a None sentinel so the generators
+        return, letting uvicorn's graceful wait for in-flight responses
+        finish instead of stalling on open EventSource connections until the
+        container runtime SIGKILLs the process (~10s restart penalty)."""
         for q in list(cls._sse_clients):
             try:
                 q.put_nowait(None)
@@ -18236,6 +18728,58 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                     q.put_nowait(None)
                 except (asyncio.QueueEmpty, asyncio.QueueFull):
                     pass
+
+    @classmethod
+    def _install_exit_hook(cls, app):
+        """End SSE streams the moment uvicorn is asked to stop.
+
+        The system.shutdown.* events come from Open WebUI's lifespan exit,
+        and uvicorn runs that only AFTER every open response has finished
+        (Server.shutdown waits on its tasks first, with no timeout by
+        default). An EventSource never finishes on its own, so any open tab
+        held the shutdown until Docker's SIGKILL, and Open WebUI's own
+        lifespan cleanup never ran.
+
+        uvicorn bound its handler with signal.signal() at startup, so this
+        wraps whatever handler is installed now: wake the streams, then hand
+        over. Re-running (a hot reload) only swaps the hook it calls.
+        """
+        import signal as _signal
+        import threading as _thr
+
+        loop = asyncio.get_running_loop()
+
+        def _hook():
+            def _wake():
+                Event._end_sse_streams()
+
+            try:
+                loop.call_soon_threadsafe(_wake)
+            except RuntimeError:
+                pass  # loop already closed
+
+        app.state._theme_exit_hook = _hook
+        if _thr.current_thread() is not _thr.main_thread():
+            return  # signal handlers can only be set from the main thread
+        for sig in (_signal.SIGINT, _signal.SIGTERM):
+            try:
+                prev = _signal.getsignal(sig)
+                if not callable(prev) or getattr(prev, "_tdp_exit_wrapper", False):
+                    continue
+
+                def _wrapper(signum, frame, _prev=prev):
+                    try:
+                        hook = getattr(app.state, "_theme_exit_hook", None)
+                        if hook is not None:
+                            hook()
+                    except Exception:
+                        pass
+                    return _prev(signum, frame)
+
+                _wrapper._tdp_exit_wrapper = True
+                _signal.signal(sig, _wrapper)
+            except (ValueError, OSError, RuntimeError):
+                pass
 
     def _ensure_redis_subscriber(self, app):
         """Start the Redis pub/sub subscriber for multi-worker SSE broadcasting.
@@ -18286,17 +18830,35 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                         # stays silent instead of raising into the GC.
                         _teardown = False
                         try:
-                            r = aioredis.from_url(
-                                redis_url,
+                            r = Event._redis_connect(
+                                True,
                                 socket_timeout=None,
                                 socket_connect_timeout=10,
+                                socket_keepalive=True,
                                 **_redis_extra,
                             )
                             pubsub = r.pubsub()
                             channel = Event._sse_channel()
                             await pubsub.subscribe(channel)
                             log.info("[Theme Pro] Redis subscriber connected on channel '%s'", channel)
-                            async for message in pubsub.listen():
+                            # listen() blocked forever on a connection dropped
+                            # without a reset (an idle timeout in a NAT, load
+                            # balancer or Swarm's IPVS), and this worker stopped
+                            # hearing the others with nothing in the log. Ping
+                            # when idle and reconnect when Redis goes quiet.
+                            _loop = asyncio.get_running_loop()
+                            _last_rx = _last_ping = _loop.time()
+                            while True:
+                                message = await pubsub.get_message(timeout=15.0)
+                                _now = _loop.time()
+                                if message is None:
+                                    if _now - _last_rx > 90:
+                                        raise ConnectionError("no reply from Redis for 90s")
+                                    if _now - _last_ping >= 30:
+                                        _last_ping = _now
+                                        await pubsub.ping()
+                                    continue
+                                _last_rx = _now
                                 if message["type"] != "message":
                                     continue
                                 raw = message["data"]
@@ -18487,6 +19049,12 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 Event._published = False
 
         self._ensure_redis_subscriber(__app__)
+        if getattr(__app__.state, "_theme_exit_hook_exec", None) != RELOAD_EXEC_ID:
+            __app__.state._theme_exit_hook_exec = RELOAD_EXEC_ID
+            try:
+                Event._install_exit_hook(__app__)
+            except Exception:
+                pass
 
         canvas_valve_changed = (
             Event._last_enable_canvas_fx is not None
@@ -18589,6 +19157,10 @@ def register(app: Any) -> None:
     # does. Runs as a task: the valves are read from the database.
     async def load():
         inst._ensure_redis_subscriber(app)
+        try:
+            Event._install_exit_hook(app)
+        except Exception:
+            pass
         await Event._handle_peer_valve_sync(app)
 
     task = asyncio.get_running_loop().create_task(load())
