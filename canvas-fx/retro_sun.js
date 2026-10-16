@@ -90,6 +90,11 @@ function build() {
 	horizonY = Math.round(h * HORIZON);
 	// The sun sits just past the calm band on its preferred side, or the other side when that one has no room, inside the chat area
 	const L = column ? column.left : 0, R = column ? column.right : w, pref = L + (R - L) * SUN_X;
+	// Too big for either margin, it shrinks to fit the wider one rather than sitting on the column
+	if (column) {
+		const room = Math.max(colX() - colHalf() - L, R - colX() - colHalf());
+		sunR = Math.max(24, Math.min(sunR, room / 2.4));
+	}
 	const lo = L + sunR * 1.1, hi = R - sunR * 1.1, off = colHalf() + sunR * 0.2;
 	const right = Math.max(pref, colX() + off), left = Math.min(pref, colX() - off);
 	const first = SUN_X > 0.5 ? right : left, other = SUN_X > 0.5 ? left : right;
