@@ -12,41 +12,44 @@ Before submitting a PR, ensure your preset meets these requirements:
 
 ### Canvas FX Scripts
 
-- [ ] **Web Worker compatible** — no `document`, `window`, `alert`, or `localStorage` access
-- [ ] **Handles all message types** — `init`, `resize`, `mousemove`, `click`, `mousedown`, `mouseup`, `touchstart`, `touchmove`, `touchend`, `context`
-- [ ] **Includes heartbeat** — `setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);`
-- [ ] **Uses `requestAnimationFrame`** for the render loop
-- [ ] **Has a JSDoc header** with `Title` and `Description`
-- [ ] **Follows the theme** (recommended): reads the palette from `init` (`e.data.theme`) and from `theme` messages, keeps its own colors as defaults, has a `followTheme` setting, recolors without restarting, and avoids additive blending when `theme.dark` is false. The designer's **📖 Docs** page, under **Theme-Aware Animations**, has the payload and the pattern
-- [ ] **Has a CONFIG block** (strongly recommended) with:
-  - Box-decorated borders for visibility
-  - Inline comments with valid ranges for each property, written as `(min-max)`: the designer's Animation Settings and the [Studio](https://silentoplayz.github.io/theme-designer-pro-presets/studio/) show each number as a slider and use that range
-  - At least 10 tunable properties
-  - Descriptive section grouping
-- [ ] **Performs well** — no visible lag on mid-range hardware
-  - Avoid allocations in the render loop (no `new Array()`, no object literals in hot paths)
-  - Precompute values at init, not per-frame
-  - Use typed arrays (`Float32Array`) for large datasets
-- [ ] **Mouse interaction** is responsive and satisfying (if applicable)
-- [ ] **File is self-contained** — no external imports or dependencies
+Every script follows the house standard in [`canvas-fx/README.md`](canvas-fx/README.md). In short:
+
+- [ ] **Runs in the worker:** no `document`, `window`, `alert` or `localStorage` in the code
+- [ ] **Handles** `init`, `resize` (with `dpr`), `theme`, `motion`, and the pointer or `context` messages it uses
+- [ ] **No heartbeat:** the engine ignores anything a script posts back
+- [ ] **Follows the theme:** its own colors as defaults, the theme's when `FOLLOW_THEME` is on, recolored in place, no `'lighter'` on light themes
+- [ ] **Fits behind a chat:** a transparent canvas, a calm chat column (`CENTER_CALM`), focal points in the outer thirds or the bottom fifth, no flashes
+- [ ] **Answers taps through `mousedown` only,** gently, since every click on the page reaches it
+- [ ] **Cheap:** elapsed-time motion with `dt` clamped to 0.1 s, nothing allocated per frame, sprites instead of per-particle gradients
+- [ ] **Respects reduced motion** and the screen's pixel ratio
+- [ ] **WebGL:** premultiplied alpha, `webglcontextlost` handled, shader errors to `console.error`
+- [ ] **A header** with `Title:` and a one-line `Description:`, and **at least 10 settings** as top-level constants with `(min-max)` ranges
+- [ ] **4 to 14 KB,** never over 20 KB, with no external imports
 
 ### Themes
 
-- [ ] Exported as valid JSON from Theme Designer Pro
-- [ ] Includes a descriptive `name` field
+- [ ] Exported as valid JSON from Theme Designer Pro, with a `name`, `description`, `author` and `version`
 - [ ] Includes an `updateUrl` field set to the raw GitHub URL for the file:
   ```
   https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/your_theme.json
   ```
-- [ ] Contains at least `dark` and `light` mode configurations
+- [ ] **Every mode designed:** Dark, Light, OLED and Her each read well, none a copy of another's colors
+- [ ] **Palette from hue, chroma and lightness;** step overrides only where the generator can't get there
+- [ ] **Custom CSS follows the CSS rules below**
+- [ ] **A version bump on every change,** or nobody who installed the theme is offered the update. Updating replaces all four modes, so say what changed in the description or the release notes
 - [ ] Tested on both desktop and mobile viewports
-- [ ] No hardcoded pixel values that break on different screen sizes
 
 ### CSS Presets
 
-- [ ] Valid CSS stored as a raw `.css` file
-- [ ] Uses CSS custom properties where appropriate for easy customization
-- [ ] Doesn't break core Open WebUI layout or functionality
+These rules apply to theme custom CSS too. CI checks the first and warns on the others.
+
+- [ ] **Style the rounded input pill, `#message-input-container`,** never `#chat-input-container`, the square box inside it
+- [ ] **Recolor through the palette first.** Open WebUI's surfaces read `var(--color-gray-*)`, so most of a look comes from the palette, and CSS adds only what the palette can't
+- [ ] **Stable hooks only:** IDs such as `#sidebar`, `#message-input-container`, `#sidebar-chat-item`, classes such as `.chat-user`, `.chat-assistant`, `.markdown-prose`. No Tailwind utility classes as selectors, and none of the stale ones CI warns about
+- [ ] **Keep Open WebUI's shapes:** the input is a pill, bubbles and cards are rounded; don't square them off or box text in
+- [ ] **No blanket `input`, `textarea` or `*` rules,** which restyle every field in Settings and hide focus rings
+- [ ] **`!important` only where a background is otherwise cleared** (Canvas FX and gradients clear most surfaces first)
+- [ ] Works in light and dark, with readable contrast in both
 
 ### Gradient Presets
 
@@ -93,23 +96,22 @@ midnight_ocean.json
 
 ### Visual
 
-- **First impression matters** — the animation should look polished and intentional, not like a tech demo
-- **Subtle is often better** — these run behind a chat UI, so overwhelming animations can be distracting
-- **Color palette should be harmonious** — avoid clashing colors; prefer curated palettes
-- **Smooth motion** — no jitter, no stuttering, organic easing
+- **First impression matters:** polished and intentional, never a tech demo
+- **Quiet behind the chat:** people read over this for hours. The chat column stays calm; the motion lives at the edges
+- **The theme's colors:** a script that follows the palette matches every theme it is paired with
+- **Smooth motion:** elapsed-time movement, no jitter, organic easing
 
 ### Performance
 
-- **Target 60fps** on a mid-range laptop (2020-era i5, integrated GPU)
-- **Memory stable** — no growing arrays, no leaked particles, no unbounded buffers
-- **Efficient rendering** — use `ImageData` for per-pixel work instead of thousands of `fillRect` calls
-- **Lazy init** — precompute noise tables, color LUTs, etc. at init time
+- **Smooth on a mid-range laptop** (2020-era i5, integrated GPU), and nearly free while the page is hidden
+- **Memory stable:** pools with hard caps, nothing allocated per frame
+- **Efficient rendering:** sprites for glows, one reused `ImageData` for per-pixel work, a reduced render scale for soft shader effects
 
 ### Interactivity
 
-- **Mouse should feel responsive** — sub-frame latency, smooth tracking
-- **Interaction should be meaningful** — not just "particles follow mouse"
-- **Provide visual feedback** — the user should immediately see that their input did something
+- **Influence, not control:** the cursor nudges the scene and its effect fades when the cursor stops
+- **Taps stay gentle:** every click on the page reaches the script, the Send button's included
+- **Beautiful with no input at all:** most of its life is spent unattended
 
 ---
 
@@ -170,26 +172,21 @@ node scripts/validate.js
 
 ---
 
-## 📝 CONFIG Block Template
+## 📝 Settings Block Template
 
-Use this template for new Canvas FX scripts:
+The designer shows each top-level constant in the banner as a slider, switch or color picker, and a `(min-max)` range in its comment sets the slider's range. [`canvas-fx/nebula_webgl.js`](canvas-fx/nebula_webgl.js) is a complete example.
 
 ```javascript
 /**
  * Title: Your Animation Name
- * Description: A clear, compelling description of what this animation does
- *   and how the mouse interacts with it. Wrap at ~80 chars.
+ * Description: One line on what it draws and how it responds.
  */
 
-// ═══════════════════════════════════════════════════════════
-// ██  CONFIGURATION — Tweak these values to customize!   ██
-// ═══════════════════════════════════════════════════════════
-const CONFIG = {
-  // -- Theme --
-  followTheme: true,                      // Draw in the theme's colors when the designer sends them (true/false)
-
-  // -- Section Name --
-  propertyName: defaultValue,             // Description and valid range (min-max)
-};
-// ═══════════════════════════════════════════════════════════
+/* ────────── CONFIGURABLE VARIABLES ────────── */
+const INTENSITY    = 0.8;        // how strongly it shows (0-1)
+const SPEED        = 1;          // overall speed (0-3)
+const CENTER_CALM  = 0.7;        // how much it fades behind the chat column (0-1)
+const FOLLOW_THEME = true;       // take the colors from the theme's palette
+const COLOR_A      = '#7aa2ff';  // main color when not following the theme
+/* ──────────────────────────────────────────── */
 ```

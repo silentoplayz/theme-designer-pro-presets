@@ -657,7 +657,7 @@
   ${opts.transparent ? 'body { background: transparent !important; }' : ''}
   .app, main, nav { background: transparent !important; }
   #sidebar { background: color-mix(in srgb, ${sidebarBg} 72%, transparent) !important; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
-  #chat-input-container { background: color-mix(in srgb, ${isLight ? '#ffffff' : 'var(--color-gray-900)'} 72%, transparent) !important; }
+  #message-input-container { background: color-mix(in srgb, ${isLight ? '#ffffff' : 'var(--color-gray-900)'} 72%, transparent) !important; }
   .chat-user .bubble { background: transparent; }`
       : '';
     // In-iframe gradient: body background layers, exactly like the designer's
@@ -901,8 +901,8 @@ nav.is-new #nav-title, nav.is-new .nav-chat-menu { display: none; }
    rounded-3xl border-gray-100/30 dark:border-gray-850/30 bg-white/5
    dark:bg-gray-500/5 backdrop-blur-sm */
 .input-wrap { padding: 0 10px; max-width: 58rem; width: 100%; margin: 0 auto; }
-#chat-input-container { background: ${inputBg}; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid ${borderSubtle}; border-radius: 24px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); padding: 10px 10px 8px 18px; display: flex; flex-direction: column; gap: 8px; transition: border-color 0.15s; }
-#chat-input-container:hover { border-color: ${isLight ? 'var(--color-gray-200)' : 'var(--color-gray-800)'}; }
+.input-wrap > #message-input-container { background: ${inputBg}; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid ${borderSubtle}; border-radius: 24px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); padding: 10px 10px 8px 18px; display: flex; flex-direction: column; gap: 8px; transition: border-color 0.15s; }
+.input-wrap > #message-input-container:hover { border-color: ${isLight ? 'var(--color-gray-200)' : 'var(--color-gray-800)'}; }
 /* The real chat input is a ProseMirror contenteditable (RichTextInput,
    id="chat-input", .input-prose = !text-[0.9375rem]) — NOT a <textarea>.
    Preset CSS that skins textarea/input fields therefore never touches the
@@ -1127,8 +1127,8 @@ nav .temp-chat > span { display: flex; }
 .ph-temp { display: none; align-items: center; gap: 6px; margin-top: 4px; margin-bottom: 2px; width: fit-content; font-size: 0.75rem; color: var(--color-gray-500); }
 .ph-temp svg { width: 0.875rem; height: 0.875rem; }
 body.temp-chat .ph-temp { display: flex; }
-body.temp-chat #chat-input-container { border-style: dashed; border-color: ${isLight ? 'var(--color-gray-100)' : 'var(--color-gray-800)'}; }
-body.temp-chat #chat-input-container:hover { border-color: ${isLight ? 'var(--color-gray-200)' : 'var(--color-gray-700)'}; }
+body.temp-chat .input-wrap > #message-input-container { border-style: dashed; border-color: ${isLight ? 'var(--color-gray-100)' : 'var(--color-gray-800)'}; }
+body.temp-chat .input-wrap > #message-input-container:hover { border-color: ${isLight ? 'var(--color-gray-200)' : 'var(--color-gray-700)'}; }
 
 /* ---- Side panes: ChatControls and Thread sit after a resizer's border ---- */
 .side-pane { flex: none; height: 100%; display: flex; flex-direction: column; min-height: 0; background: ${isLight ? '#fff' : 'var(--color-gray-900)'}; border-left: 1px solid ${isLight ? 'var(--color-gray-50)' : 'color-mix(in srgb, var(--color-gray-850) 30%, transparent)'}; position: relative; z-index: 10; }
@@ -1436,8 +1436,10 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
       ])}
     </div>
     <div class="input-wrap">
-      <div id="chat-input-container">
-        <div id="chat-input" class="ProseMirror input-prose" contenteditable="false"><p class="is-editor-empty" data-placeholder="Send a Message"><br></p></div>
+      <div id="message-input-container">
+        <div id="chat-input-container">
+          <div id="chat-input" class="ProseMirror input-prose" contenteditable="false"><p class="is-editor-empty" data-placeholder="Send a Message"><br></p></div>
+        </div>
         <div class="input-row">
           <span class="icon-btn" id="input-menu-button" role="button" aria-label="More" aria-haspopup="true" data-tip="More">${SVG.plusAlt}</span>
           <span class="input-divider"></span>
