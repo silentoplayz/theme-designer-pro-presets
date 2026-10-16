@@ -519,11 +519,13 @@ Canvas FX and the preset gallery fit Open WebUI better. Nothing to change on you
 
 **Sharper, calmer scripts.** Scripts now learn the screen's pixel ratio, so lines can be sharp on high-resolution screens, and whether you've asked your system to reduce motion, so they can slow down or hold still. A script that changes when you toggle the setting hears about it right away.
 
+**Animations that make room for the chat.** Scripts now learn where the chat column is and where the sidebar ends, and hear about it again when you open the sidebar, resize the window or switch to a page without a chat. Every script in the gallery keeps the column calm wherever it sits and puts its suns, moons and other focal points in the visible margins beside it, never under the sidebar.
+
 **Accent colors of your own.** The Design Studio has an Accent Colors row under the palette sliders: three swatches that follow your hue until you pick a color for one, per mode, and ⟲ sets it back. Themes whose look is two colors the hue can't give, such as amber with teal, no longer have to switch off a Canvas FX script's theme colors to get theirs: scripts that follow your theme draw in the accents you set. Theme CSS gets the same three as `var(--tdp-accent)`, `var(--tdp-accent-2)` and `var(--tdp-accent-3)` in every mode, on every page the theme's colors reach, so it no longer needs hex values. Theme files carry them as `accent`, `accent2` and `accent3` (theme format 1.1); a theme without them looks exactly as before.
 
 **A fresh start that follows the rules.** A new designer starts with the rewritten Tactical Liquid Grid and Tactical HUD, which follow your theme's colors and keep the input's rounded shape.
 
-**The gallery, rebuilt.** Every Canvas FX script, theme and CSS preset in the [gallery](https://github.com/silentoplayz/theme-designer-pro-presets) was rewritten to one standard: scripts take your theme's colors, keep the canvas transparent, stay quiet behind the chat column and cost little, and theme CSS styles Open WebUI's rounded input instead of drawing a box inside it. Duplicates were retired: 36 scripts and 29 themes remain, each designed in every mode. Updating a theme you installed replaces all four of its modes, so changes you made to it are lost.
+**The gallery, rebuilt.** Every Canvas FX script, theme and CSS preset in the [gallery](https://github.com/silentoplayz/theme-designer-pro-presets) was rewritten to one standard: scripts take your theme's colors, keep the canvas transparent, stay quiet behind the chat column and cost little, and theme CSS styles Open WebUI's rounded input instead of drawing a box inside it. Duplicates were retired and new ones added: 47 scripts and 33 themes, each theme designed in every mode. Updating a theme you installed replaces all four of its modes, so changes you made to it are lost.
 
 ## 📝 What's New in 1.14.3
 
