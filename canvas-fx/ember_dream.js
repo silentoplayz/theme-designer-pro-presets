@@ -1,538 +1,276 @@
 /**
  * Title: Ember Dream
- * Description: A warm, hypnotic field of drifting embers and ghostly flame wisps
- *   rising through the screen like a campfire viewed in a trance. Features pooled
- *   glowing particles with pulsing halos, translucent bezier flame shapes that
- *   morph as they rise, ambient glow pools, and a subtle heat shimmer. Mouse
- *   creates a wind-dispersal effect; clicks burst new embers outward.
+ * Description: Campfire embers rise from the bottom of the screen in your theme's colors, cool as they climb, thin out behind the chat, scatter when the cursor sweeps past and burst from a tap.
  */
 
-// ─── CONFIG ────────────────────────────────────────────────────────────────────
-const CONFIG = {
-	// Embers
-	emberCount: 180,
-	emberMinCore: 1,
-	emberMaxCore: 3.5,
-	emberMinGlow: 8,
-	emberMaxGlow: 18,
-	emberRiseSpeed: 0.3,
-	emberRiseVariance: 0.2,
-	emberSwayAmount: 30,
-	emberSwaySpeed: 0.5,
-	emberPulseSpeed: 1.2,
-	emberPulseAmount: 0.4,
-	emberFadeInZone: 0.15,      // Bottom 15% of screen: embers fade in
-	emberFadeOutZone: 0.1,      // Top 10%: embers fade out
-	emberSpawnSpread: 1.2,      // Horizontal spawn spread (1 = screen width)
+/* ────────── CONFIGURABLE VARIABLES ────────── */
+const EMBER_COUNT   = 150;   // embers in the air at once (30-400)
+const RISE_SPEED    = 42;    // average climb, in px per second (10-120)
+const RISE_HEIGHT   = 0.55;  // how far up the screen embers climb before burning out (0.2-1)
+const SWAY          = 18;    // side-to-side drift, in px per second (0-60)
+const EMBER_SIZE    = 1;     // size of each ember and its glow (0.5-2)
+const WISPS         = 5;     // faint flame wisps along the bottom edge (0-12)
+const GLOW_POOLS    = 3;     // warm pools of firelight along the bottom (0-6)
+const WIND          = 1;     // how hard a moving cursor scatters embers (0-3)
+const BURST_SIZE    = 24;    // embers thrown by a tap; 0 turns taps off (0-60)
+const MOTION        = 1;     // overall speed (0.2-2)
+const REDUCED_SPEED = 0.25;  // speed kept when the viewer asks to reduce motion (0-1)
+const CENTER_CALM   = 0.8;   // how much the embers thin out behind the chat column (0-1)
+const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const FOLLOW_THEME  = true;  // take the colors from the theme's palette
+const COLOR_HOT     = '#ffd98a';  // fresh ember color when not following the theme
+const COLOR_WARM    = '#ff8c3a';  // ember color halfway up
+const COLOR_COOL    = '#d4442a';  // dying ember and wisp color
+const FIRE_WARMTH   = 0.3;   // how far theme colors lean toward firelight (0-1)
+/* ──────────────────────────────────────────── */
 
-	// Flame wisps
-	wispCount: 10,
-	wispMinAlpha: 0.025,
-	wispMaxAlpha: 0.065,
-	wispRiseSpeed: 0.15,
-	wispWidth: 60,
-	wispHeight: 200,
-	wispSwayAmount: 40,
-	wispControlPoints: 5,
-	wispFlickerSpeed: 0.8,
+const MAX_BURST = 150, ES = 32, GS = 128;
+let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, time = 0, reduced = false, dark = true;
+let calmLut = new Float32Array(1), hexes = [COLOR_HOT, COLOR_WARM, COLOR_COOL];
+const emberSprites = [], mouse = { x: -10000, y: -10000, energy: 0 };
+let glowSprite = null, wispSprite = null;
 
-	// Glow pools
-	glowPoolCount: 4,
-	glowPoolRadius: 200,
-	glowPoolAlpha: 0.035,
-	glowPoolDriftSpeed: 0.1,
+// Ember pool
+const ex = new Float32Array(EMBER_COUNT), ey = new Float32Array(EMBER_COUNT), evx = new Float32Array(EMBER_COUNT);
+const ey0 = new Float32Array(EMBER_COUNT), erise = new Float32Array(EMBER_COUNT), espd = new Float32Array(EMBER_COUNT);
+const esz = new Float32Array(EMBER_COUNT), eph = new Float32Array(EMBER_COUNT), eage = new Float32Array(EMBER_COUNT);
+// Burst pool
+const bx = new Float32Array(MAX_BURST), by = new Float32Array(MAX_BURST), bvx = new Float32Array(MAX_BURST), bvy = new Float32Array(MAX_BURST);
+const blife = new Float32Array(MAX_BURST), bsz = new Float32Array(MAX_BURST);
+let bcount = 0;
+// Wisps and pools
+const wx = new Float32Array(12), wy = new Float32Array(12), wage = new Float32Array(12), wspan = new Float32Array(12), wsc = new Float32Array(12), wph = new Float32Array(12);
+const px = new Float32Array(6), pph = new Float32Array(6);
 
-	// Heat shimmer
-	shimmerEnabled: true,
-	shimmerAlpha: 0.015,
-	shimmerWaveCount: 8,
-	shimmerSpeed: 0.6,
+function rgb(hex) {
+	const n = parseInt(hex.slice(1), 16);
+	return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+function rgba(c, a, lift) {
+	return 'rgba(' + Math.round(c[0] + (255 - c[0]) * lift) + ',' + Math.round(c[1] + (255 - c[1]) * lift) + ',' + Math.round(c[2] + (255 - c[2]) * lift) + ',' + a + ')';
+}
+// Leans a theme color toward its firelight default, so embers still read as embers
+function mix(a, b) {
+	const x = rgb(a), y = rgb(b), k = FIRE_WARMTH;
+	return '#' + ((1 << 24) | (Math.round(x[0] + (y[0] - x[0]) * k) << 16) | (Math.round(x[1] + (y[1] - x[1]) * k) << 8) | Math.round(x[2] + (y[2] - x[2]) * k)).toString(16).slice(1);
+}
+function radial(size, stops) {
+	const s = new OffscreenCanvas(size, size), g = s.getContext('2d'), r = size / 2;
+	const grad = g.createRadialGradient(r, r, 0, r, r, r);
+	for (let i = 0; i < stops.length; i += 2) grad.addColorStop(stops[i], stops[i + 1]);
+	g.fillStyle = grad;
+	g.fillRect(0, 0, size, size);
+	return s;
+}
 
-	// Interaction
-	windRadius: 160,
-	windStrength: 2.5,
-	burstCount: 25,
-	burstSpeed: 3,
-	burstDecay: 0.96,
-
-	// Colors (HSLA)
-	coreColor: [42, 100, 95],       // Near-white yellow
-	glowColorHot: [30, 100, 60],    // Orange
-	glowColorCool: [8, 90, 40],     // Deep red-orange
-	wispColorTop: [45, 100, 65],    // Bright yellow
-	wispColorMid: [25, 95, 50],     // Orange
-	wispColorBase: [5, 85, 30],     // Deep crimson
-	glowPoolColor: [20, 90, 45],    // Warm amber-orange
-};
-
-// ─── STATE ─────────────────────────────────────────────────────────────────────
-let canvas, ctx, W, H;
-let mouse = { x: -9999, y: -9999 };
-let time = 0, lastNow = 0;
-
-// Ember pool — flat arrays for performance
-let emberX, emberY, emberVx, emberVy;
-let emberCoreSize, emberGlowSize, emberPhase, emberSpeed, emberAlpha;
-let emberHue, emberLife, emberMaxLife;
-let emberActive;
-
-// Wisps
-let wisps = [];
-
-// Glow pools
-let glowPools = [];
-
-// Burst embers (separate short-lived pool)
-let bursts = [];
-
-// ─── HEARTBEAT ─────────────────────────────────────────────────────────────────
-setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);
-
-// ─── UTILITIES ─────────────────────────────────────────────────────────────────
-function rand(a, b) { return Math.random() * (b - a) + a; }
-function lerp(a, b, t) { return a + (b - a) * t; }
-
-// ─── EMBER POOL ────────────────────────────────────────────────────────────────
-function initEmberPool() {
-	const n = CONFIG.emberCount;
-	emberX = new Float32Array(n);
-	emberY = new Float32Array(n);
-	emberVx = new Float32Array(n);
-	emberVy = new Float32Array(n);
-	emberCoreSize = new Float32Array(n);
-	emberGlowSize = new Float32Array(n);
-	emberPhase = new Float32Array(n);
-	emberSpeed = new Float32Array(n);
-	emberAlpha = new Float32Array(n);
-	emberHue = new Float32Array(n);
-	emberLife = new Float32Array(n);
-	emberMaxLife = new Float32Array(n);
-	emberActive = new Uint8Array(n);
-
-	for (let i = 0; i < n; i++) {
-		resetEmber(i, true);
+// Sprites: one glowing ember per heat stage, a pool of firelight and a soft flame tongue
+function buildSprites() {
+	for (let i = 0; i < 3; i++) {
+		const c = rgb(hexes[i]);
+		emberSprites[i] = dark
+			? radial(ES, [0, rgba(c, 1, 0.75 - i * 0.25), 0.07, rgba(c, 1, 0.35 - i * 0.12), 0.18, rgba(c, 0.7, 0), 0.4, rgba(c, 0.22, 0), 0.7, rgba(c, 0.05, 0), 1, rgba(c, 0, 0)])
+			: radial(ES, [0, rgba(c, 1, 0), 0.16, rgba(c, 0.95, 0), 0.3, rgba(c, 0.35, 0), 0.6, rgba(c, 0.06, 0), 1, rgba(c, 0, 0)]);
+	}
+	const warm = rgb(hexes[1]), cool = rgb(hexes[2]);
+	glowSprite = radial(GS, [0, rgba(warm, 1, 0), 0.4, rgba(warm, 0.45, 0), 1, rgba(warm, 0, 0)]);
+	wispSprite = new OffscreenCanvas(64, 192);
+	const g = wispSprite.getContext('2d');
+	const grad = g.createLinearGradient(0, 192, 0, 0);
+	grad.addColorStop(0, rgba(cool, 1, 0));
+	grad.addColorStop(0.45, rgba(warm, 0.8, 0));
+	grad.addColorStop(1, rgba(rgb(hexes[0]), 0, 0));
+	g.fillStyle = grad;
+	g.globalAlpha = 0.12;
+	for (let k = 0; k < 9; k++) {
+		const s = 1 - k * 0.08;
+		g.beginPath();
+		g.moveTo(32 - 30 * s, 192);
+		g.bezierCurveTo(32 - 32 * s, 120, 32 - 6 * s, 80, 32 + 4 * s, 192 - 188 * s);
+		g.bezierCurveTo(32 + 14 * s, 90, 32 + 32 * s, 130, 32 + 30 * s, 192);
+		g.fill();
 	}
 }
 
-function resetEmber(i, scatter) {
-	const w = W || 800;
-	const h = H || 600;
-	emberX[i] = rand(w * (1 - CONFIG.emberSpawnSpread) / 2, w * (1 + CONFIG.emberSpawnSpread) / 2);
-	emberY[i] = scatter ? rand(0, h) : rand(h * 0.85, h * 1.05);
-	emberVx[i] = rand(-0.2, 0.2);
-	emberVy[i] = -(CONFIG.emberRiseSpeed + rand(0, CONFIG.emberRiseVariance));
-	emberCoreSize[i] = rand(CONFIG.emberMinCore, CONFIG.emberMaxCore);
-	emberGlowSize[i] = rand(CONFIG.emberMinGlow, CONFIG.emberMaxGlow);
-	emberPhase[i] = rand(0, Math.PI * 2);
-	emberSpeed[i] = rand(0.7, 1.3);
-	emberHue[i] = rand(8, 42); // Red-orange to yellow
-	emberLife[i] = 0;
-	emberMaxLife[i] = rand(6, 14); // Seconds
-	emberActive[i] = 1;
+function applyTheme(t) {
+	if (!t) return;
+	dark = t.dark !== false;
+	if (FOLLOW_THEME && t.colors) hexes = [mix(t.colors.accent, COLOR_HOT), mix(t.colors.accent2, COLOR_WARM), mix(t.colors.accent3, COLOR_COOL)];
+	if (ctx) buildSprites();
 }
 
-function updateEmbers(dt) {
-	const n = CONFIG.emberCount;
-	const fadeInY = H * (1 - CONFIG.emberFadeInZone);
-	const fadeOutY = H * CONFIG.emberFadeOutZone;
+function calm(x) {
+	const i = x >> 2;
+	return calmLut[i < 0 ? 0 : i >= calmLut.length ? calmLut.length - 1 : i];
+}
 
-	for (let i = 0; i < n; i++) {
-		if (!emberActive[i]) {
-			resetEmber(i, false);
-			continue;
-		}
+// Spawn in the bottom fifth, less often behind the chat column
+function spawn(i, scatter) {
+	let x = Math.random() * w;
+	for (let k = 0; k < 3 && Math.random() > calm(x); k++) x = Math.random() * w;
+	ex[i] = x;
+	ey0[i] = h * (0.82 + Math.random() * 0.2);
+	erise[i] = h * RISE_HEIGHT * (0.35 + Math.random() * 0.65);
+	ey[i] = scatter ? ey0[i] - erise[i] * Math.random() : ey0[i];
+	evx[i] = 0;
+	espd[i] = RISE_SPEED * (0.6 + Math.random() * 0.8);
+	esz[i] = (22 + Math.random() * 24) * EMBER_SIZE;
+	eph[i] = Math.random() * 6.283;
+	eage[i] = scatter ? 2 : 0;
+}
 
-		emberLife[i] += dt;
-		if (emberLife[i] > emberMaxLife[i] || emberY[i] < -20) {
-			resetEmber(i, false);
-			continue;
-		}
+function size(oldW, oldH) {
+	canvas.width = Math.max(1, Math.round(w * dpr));
+	canvas.height = Math.max(1, Math.round(h * dpr));
+	ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+	calmLut = new Float32Array((w >> 2) + 2);
+	for (let i = 0; i < calmLut.length; i++) {
+		const t = Math.min(1, Math.max(0, (Math.abs(i * 4 - w / 2) / BAND_WIDTH - 0.55) / 0.7));
+		calmLut[i] = 1 - CENTER_CALM * (1 - t * t * (3 - 2 * t));
+	}
+	if (oldW) {
+		const sx = w / oldW, sy = h / oldH;
+		for (let i = 0; i < EMBER_COUNT; i++) { ex[i] *= sx; ey[i] *= sy; ey0[i] *= sy; erise[i] *= sy; }
+		for (let i = 0; i < bcount; i++) { bx[i] *= sx; by[i] *= sy; }
+	} else {
+		for (let i = 0; i < EMBER_COUNT; i++) spawn(i, true);
+	}
+	for (let i = 0; i < 12; i++) resetWisp(i, true);
+	for (let i = 0; i < 6; i++) { const side = i % 2; px[i] = side ? w * (0.86 + Math.random() * 0.12) : w * (0.02 + Math.random() * 0.12); pph[i] = Math.random() * 6.283; }
+}
 
-		// Phase for pulsing
-		emberPhase[i] += CONFIG.emberPulseSpeed * dt * emberSpeed[i];
+function resetWisp(i, scatter) {
+	const side = Math.random() < 0.5;
+	wx[i] = side ? w * (0.03 + Math.random() * 0.25) : w * (0.72 + Math.random() * 0.25);
+	wy[i] = h + 30 + Math.random() * 40;
+	wspan[i] = 5 + Math.random() * 5;
+	wage[i] = scatter ? Math.random() * wspan[i] : 0;
+	wsc[i] = 0.6 + Math.random() * 0.7;
+	wph[i] = Math.random() * 6.283;
+}
 
-		// Sway
-		const sway = Math.sin(time * CONFIG.emberSwaySpeed + emberPhase[i]) * CONFIG.emberSwayAmount * 0.01;
-		emberVx[i] += sway * dt;
-
-		// Wind from mouse
-		const dx = emberX[i] - mouse.x;
-		const dy = emberY[i] - mouse.y;
-		const dist = Math.sqrt(dx * dx + dy * dy);
-		if (dist < CONFIG.windRadius && dist > 1) {
-			const force = (1 - dist / CONFIG.windRadius) * CONFIG.windStrength;
-			emberVx[i] += (dx / dist) * force * dt;
-		}
-
-		// Apply velocity
-		emberX[i] += emberVx[i];
-		emberY[i] += emberVy[i] * emberSpeed[i];
-
-		// Dampen horizontal drift
-		emberVx[i] *= 0.98;
-
-		// Wrap horizontally
-		if (emberX[i] < -20) emberX[i] = W + 20;
-		if (emberX[i] > W + 20) emberX[i] = -20;
-
-		// Calculate display alpha
-		const lifeFrac = emberLife[i] / emberMaxLife[i];
-		let alpha = 1;
-		if (lifeFrac < 0.1) alpha = lifeFrac / 0.1;         // Fade in
-		if (lifeFrac > 0.8) alpha = (1 - lifeFrac) / 0.2;   // Fade out
-		// Spatial fade
-		if (emberY[i] > fadeInY) alpha *= (H - emberY[i]) / (H * CONFIG.emberFadeInZone);
-		if (emberY[i] < fadeOutY) alpha *= emberY[i] / (H * CONFIG.emberFadeOutZone);
-		// Pulse
-		alpha *= 1 + Math.sin(emberPhase[i]) * CONFIG.emberPulseAmount;
-		emberAlpha[i] = Math.max(0, Math.min(1, alpha));
+function burst(x, y) {
+	const n = Math.round(BURST_SIZE * Math.max(0.3, calm(x)));
+	for (let k = 0; k < n && bcount < MAX_BURST; k++) {
+		const i = bcount++, a = Math.random() * 6.283, v = 40 + Math.random() * 110;
+		bx[i] = x; by[i] = y;
+		bvx[i] = Math.cos(a) * v; bvy[i] = Math.sin(a) * v - 50;
+		blife[i] = 1.2 + Math.random() * 1.2;
+		bsz[i] = (20 + Math.random() * 16) * EMBER_SIZE;
 	}
 }
 
-function drawEmbers() {
-	const n = CONFIG.emberCount;
-	for (let i = 0; i < n; i++) {
-		if (!emberActive[i] || emberAlpha[i] < 0.01) continue;
+function frame(now) {
+	requestAnimationFrame(frame);
+	const real = last ? Math.min((now - last) / 1000, 0.1) : 0;
+	last = now;
+	const dt = real * MOTION * (reduced ? REDUCED_SPEED : 1);
+	time += dt;
+	mouse.energy *= Math.exp(-real * 2.5);
+	ctx.clearRect(0, 0, w, h);
+	const lit = dark ? 1 : 0.9;
 
-		const x = emberX[i];
-		const y = emberY[i];
-		const a = emberAlpha[i];
-		const core = emberCoreSize[i];
-		const glow = emberGlowSize[i];
-		const hue = emberHue[i];
-
-		// Glow halo
-		const g = ctx.createRadialGradient(x, y, core * 0.5, x, y, glow);
-		const hotA = a * 0.3;
-		const coolA = 0;
-		g.addColorStop(0, `hsla(${hue}, 100%, 70%, ${hotA})`);
-		g.addColorStop(0.3, `hsla(${Math.max(5, hue - 15)}, 95%, 50%, ${hotA * 0.6})`);
-		g.addColorStop(1, `hsla(${Math.max(0, hue - 25)}, 90%, 35%, ${coolA})`);
-		ctx.beginPath();
-		ctx.arc(x, y, glow, 0, Math.PI * 2);
-		ctx.fillStyle = g;
-		ctx.fill();
-
-		// Bright core
-		const cg = ctx.createRadialGradient(x, y, 0, x, y, core);
-		cg.addColorStop(0, `hsla(45, 100%, 95%, ${a * 0.9})`);
-		cg.addColorStop(1, `hsla(${hue}, 100%, 70%, ${a * 0.4})`);
-		ctx.beginPath();
-		ctx.arc(x, y, core, 0, Math.PI * 2);
-		ctx.fillStyle = cg;
-		ctx.fill();
+	// Firelight pools and wisps along the bottom
+	ctx.globalCompositeOperation = dark ? 'lighter' : 'source-over';
+	for (let i = 0; i < GLOW_POOLS; i++) {
+		const d = 420 + 60 * Math.sin(time * 0.4 + pph[i]);
+		ctx.globalAlpha = (dark ? 0.13 : 0.05) * (0.75 + 0.25 * Math.sin(time * 0.9 + pph[i] * 3));
+		ctx.drawImage(glowSprite, px[i] - d / 2, h - d * 0.32, d, d);
 	}
-}
-
-// ─── FLAME WISPS ───────────────────────────────────────────────────────────────
-class Wisp {
-	constructor() {
-		this.reset();
+	for (let i = 0; i < WISPS; i++) {
+		wage[i] += dt;
+		if (wage[i] > wspan[i]) resetWisp(i, false);
+		const f = wage[i] / wspan[i], s = wsc[i];
+		ctx.globalAlpha = (dark ? 0.15 : 0.06) * Math.sin(f * 3.1416) * calm(wx[i]);
+		const fl = 1 + 0.12 * Math.sin(time * 5 + wph[i]), sk = 0.18 * Math.sin(time * 0.7 + wph[i]);
+		ctx.setTransform(dpr * s * fl, 0, dpr * sk * s, dpr * s * (1 - f * 0.3), dpr * wx[i], dpr * (wy[i] - f * 90));
+		ctx.drawImage(wispSprite, -32, -192);
 	}
+	ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-	reset() {
-		const w = W || 800;
-		const h = H || 600;
-		this.x = rand(w * 0.1, w * 0.9);
-		this.y = rand(h * 0.5, h * 1.1);
-		this.width = CONFIG.wispWidth * rand(0.5, 1.5);
-		this.height = CONFIG.wispHeight * rand(0.6, 1.4);
-		this.alpha = rand(CONFIG.wispMinAlpha, CONFIG.wispMaxAlpha);
-		this.phase = rand(0, Math.PI * 2);
-		this.speed = rand(0.6, 1.4);
-		this.swayPhase = rand(0, Math.PI * 2);
-	}
-
-	update(dt) {
-		this.y -= CONFIG.wispRiseSpeed * this.speed * dt * 60;
-		this.phase += CONFIG.wispFlickerSpeed * dt;
-		this.swayPhase += 0.3 * dt;
-
-		// Thin as it rises
-		this.width *= (1 - 0.001 * dt * 60);
-		this.height *= (1 - 0.0005 * dt * 60);
-
-		if (this.y + this.height < -50 || this.alpha < 0.005) {
-			this.reset();
-		}
-	}
-
-	draw() {
-		const cp = CONFIG.wispControlPoints;
-		const x = this.x + Math.sin(this.swayPhase) * CONFIG.wispSwayAmount;
-		const baseY = this.y;
-		const h = this.height;
-		const w = this.width;
-
-		// Build a flickering flame shape with bezier curves
-		ctx.beginPath();
-
-		// Left side (bottom to top)
-		ctx.moveTo(x, baseY);
-		for (let i = 1; i < cp; i++) {
-			const t = i / cp;
-			const py = baseY - h * t;
-			const widthAtT = w * 0.5 * (1 - t * t); // Parabolic taper
-			const flicker = Math.sin(this.phase * 3 + i * 1.7) * w * 0.08 * (1 - t);
-			const px = x - widthAtT + flicker;
-			ctx.lineTo(px, py);
-		}
-
-		// Tip
-		const tipFlicker = Math.sin(this.phase * 5) * w * 0.05;
-		ctx.lineTo(x + tipFlicker, baseY - h);
-
-		// Right side (top to bottom)
-		for (let i = cp - 1; i >= 1; i--) {
-			const t = i / cp;
-			const py = baseY - h * t;
-			const widthAtT = w * 0.5 * (1 - t * t);
-			const flicker = Math.sin(this.phase * 3.3 + i * 2.1 + 1) * w * 0.08 * (1 - t);
-			const px = x + widthAtT + flicker;
-			ctx.lineTo(px, py);
-		}
-
-		ctx.closePath();
-
-		// Gradient fill: red at base → orange mid → yellow tip
-		const grad = ctx.createLinearGradient(x, baseY, x, baseY - h);
-		const a = this.alpha;
-		const bc = CONFIG.wispColorBase;
-		const mc = CONFIG.wispColorMid;
-		const tc = CONFIG.wispColorTop;
-		grad.addColorStop(0, `hsla(${bc[0]}, ${bc[1]}%, ${bc[2]}%, ${a})`);
-		grad.addColorStop(0.4, `hsla(${mc[0]}, ${mc[1]}%, ${mc[2]}%, ${a * 0.8})`);
-		grad.addColorStop(0.7, `hsla(${tc[0]}, ${tc[1]}%, ${tc[2]}%, ${a * 0.5})`);
-		grad.addColorStop(1, `hsla(${tc[0]}, ${tc[1]}%, ${tc[2]}%, 0)`);
-		ctx.fillStyle = grad;
-		ctx.fill();
-	}
-}
-
-// ─── GLOW POOLS ────────────────────────────────────────────────────────────────
-class GlowPool {
-	constructor() {
-		this.x = rand(0, W || 800);
-		this.y = rand((H || 600) * 0.4, (H || 600) * 0.9);
-		this.radius = CONFIG.glowPoolRadius * rand(0.7, 1.3);
-		this.phase = rand(0, Math.PI * 2);
-		this.driftX = rand(-1, 1) * CONFIG.glowPoolDriftSpeed;
-		this.driftY = rand(-0.5, -0.1) * CONFIG.glowPoolDriftSpeed;
-	}
-
-	update(dt) {
-		this.x += this.driftX * dt * 60;
-		this.y += this.driftY * dt * 60;
-		this.phase += 0.2 * dt;
-
-		// Wrap
-		if (this.x < -this.radius) this.x = W + this.radius;
-		if (this.x > W + this.radius) this.x = -this.radius;
-		if (this.y < -this.radius) {
-			this.y = H * rand(0.6, 0.95);
-			this.x = rand(0, W);
-		}
-	}
-
-	draw() {
-		const pulse = 1 + Math.sin(this.phase) * 0.3;
-		const r = this.radius * pulse;
-		const a = CONFIG.glowPoolAlpha * (0.7 + Math.sin(this.phase * 0.7) * 0.3);
-		const c = CONFIG.glowPoolColor;
-
-		const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r);
-		g.addColorStop(0, `hsla(${c[0]}, ${c[1]}%, ${c[2]}%, ${a})`);
-		g.addColorStop(0.5, `hsla(${c[0]}, ${c[1]}%, ${c[2]}%, ${a * 0.4})`);
-		g.addColorStop(1, `hsla(${c[0]}, ${c[1]}%, ${c[2]}%, 0)`);
-		ctx.beginPath();
-		ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
-		ctx.fillStyle = g;
-		ctx.fill();
-	}
-}
-
-// ─── BURST EMBER ───────────────────────────────────────────────────────────────
-class BurstEmber {
-	constructor(x, y) {
-		const angle = rand(0, Math.PI * 2);
-		const speed = rand(1, CONFIG.burstSpeed);
-		this.x = x;
-		this.y = y;
-		this.vx = Math.cos(angle) * speed;
-		this.vy = Math.sin(angle) * speed - rand(0.5, 1.5); // Bias upward
-		this.size = rand(1.5, 4);
-		this.hue = rand(15, 50);
-		this.life = 1;
-		this.decay = CONFIG.burstDecay;
-	}
-
-	update(dt) {
-		this.x += this.vx * dt * 60;
-		this.y += this.vy * dt * 60;
-		this.vy += 0.02 * dt * 60; // Gentle gravity
-		this.life *= this.decay;
-		this.vx *= 0.99;
-		this.vy *= 0.99;
-		return this.life > 0.01;
-	}
-
-	draw() {
-		const a = this.life;
-		// Glow
-		const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 5);
-		g.addColorStop(0, `hsla(${this.hue}, 100%, 70%, ${a * 0.4})`);
-		g.addColorStop(1, `hsla(${this.hue}, 90%, 40%, 0)`);
-		ctx.beginPath();
-		ctx.arc(this.x, this.y, this.size * 5, 0, Math.PI * 2);
-		ctx.fillStyle = g;
-		ctx.fill();
-
-		// Core
-		ctx.beginPath();
-		ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-		ctx.fillStyle = `hsla(45, 100%, 90%, ${a * 0.9})`;
-		ctx.fill();
-	}
-}
-
-// ─── HEAT SHIMMER ──────────────────────────────────────────────────────────────
-function drawHeatShimmer() {
-	if (!CONFIG.shimmerEnabled) return;
-	const zoneTop = H * 0.65;
-	const alpha = CONFIG.shimmerAlpha;
-
-	for (let i = 0; i < CONFIG.shimmerWaveCount; i++) {
-		const y = zoneTop + (H - zoneTop) * (i / CONFIG.shimmerWaveCount);
-		const waveOffset = Math.sin(time * CONFIG.shimmerSpeed + i * 1.2) * 20;
-
-		ctx.beginPath();
-		for (let x = 0; x <= W; x += 4) {
-			const wy = y + Math.sin(x * 0.01 + time * CONFIG.shimmerSpeed * 2 + i) * 3 + waveOffset;
-			if (x === 0) ctx.moveTo(x, wy);
-			else ctx.lineTo(x, wy);
-		}
-		ctx.strokeStyle = `hsla(25, 80%, 50%, ${alpha * (1 - (i / CONFIG.shimmerWaveCount) * 0.5)})`;
-		ctx.lineWidth = rand(15, 30);
-		ctx.stroke();
-	}
-}
-
-// ─── INITIALIZATION ────────────────────────────────────────────────────────────
-function initScene() {
-	initEmberPool();
-
-	wisps = [];
-	for (let i = 0; i < CONFIG.wispCount; i++) {
-		wisps.push(new Wisp());
-	}
-
-	glowPools = [];
-	for (let i = 0; i < CONFIG.glowPoolCount; i++) {
-		glowPools.push(new GlowPool());
-	}
-
-	bursts = [];
-}
-
-function spawnBurst(x, y) {
-	for (let i = 0; i < CONFIG.burstCount; i++) {
-		bursts.push(new BurstEmber(x, y));
-	}
-	// Cap burst pool
-	if (bursts.length > 150) {
-		bursts.splice(0, bursts.length - 100);
-	}
-}
-
-// ─── RENDER ────────────────────────────────────────────────────────────────────
-function startAnimation() {
-	function render(now) {
-		if (!ctx) return;
-
-		const dt = Math.min((now - lastNow) / 1000, 0.1);
-		lastNow = now;
-		time += dt;
-
-		ctx.clearRect(0, 0, W, H);
-
-		// Layer 1: Heat shimmer (very bottom)
-		drawHeatShimmer();
-
-		// Layer 2: Glow pools (warm ambient light)
-		for (const pool of glowPools) {
-			pool.update(dt);
-			pool.draw();
-		}
-
-		// Layer 3: Flame wisps (ghostly, behind embers)
-		for (const wisp of wisps) {
-			wisp.update(dt);
-			wisp.draw();
-		}
-
-		// Layer 4: Embers (main attraction)
-		updateEmbers(dt);
-		drawEmbers();
-
-		// Layer 5: Burst embers (on top)
-		for (let i = bursts.length - 1; i >= 0; i--) {
-			if (!bursts[i].update(dt)) {
-				bursts.splice(i, 1);
-			} else {
-				bursts[i].draw();
+	// Embers: climb, sway, cool through three colors and burn out
+	const drag = Math.exp(-1.6 * dt), wind = WIND * mouse.energy * 900;
+	for (let i = 0; i < EMBER_COUNT; i++) {
+		eage[i] += dt;
+		ey[i] -= espd[i] * dt;
+		const r = (ey0[i] - ey[i]) / erise[i];
+		if (r >= 1) { spawn(i, false); continue; }
+		if (wind > 1) {
+			const dx = ex[i] - mouse.x, dy = ey[i] - mouse.y, dd = dx * dx + dy * dy;
+			if (dd < 32400 && dd > 1) {
+				const dist = Math.sqrt(dd);
+				evx[i] += (dx / dist) * (1 - dist / 180) * wind * dt;
+				ey[i] -= (1 - dist / 180) * wind * 0.15 * dt;
 			}
 		}
-
-		requestAnimationFrame(render);
+		evx[i] *= drag;
+		ex[i] += (evx[i] + Math.sin(time * 0.8 + eph[i]) * SWAY) * dt;
+		if (ex[i] < -20) ex[i] += w + 40; else if (ex[i] > w + 20) ex[i] -= w + 40;
+		const a = Math.min(1, eage[i] / 0.8) * (1 - r * r) * (0.7 + 0.3 * Math.sin(time * 3 + eph[i] * 5)) * calm(ex[i]) * lit;
+		if (a < 0.02) continue;
+		const d = esz[i] * (1 - r * 0.5);
+		ctx.globalAlpha = a;
+		ctx.drawImage(emberSprites[r < 0.3 ? 0 : r < 0.65 ? 1 : 2], ex[i] - d / 2, ey[i] - d / 2, d, d);
 	}
-	requestAnimationFrame(render);
+
+	// Tap bursts
+	const grav = 60 * dt;
+	for (let i = 0; i < bcount; i++) {
+		blife[i] -= dt;
+		if (blife[i] <= 0) {
+			const j = --bcount;
+			bx[i] = bx[j]; by[i] = by[j]; bvx[i] = bvx[j]; bvy[i] = bvy[j]; blife[i] = blife[j]; bsz[i] = bsz[j];
+			i--;
+			continue;
+		}
+		bvx[i] *= drag; bvy[i] = bvy[i] * drag + grav;
+		bx[i] += bvx[i] * dt; by[i] += bvy[i] * dt;
+		const f = Math.min(1, blife[i] / 1.2);
+		ctx.globalAlpha = f * lit * Math.max(0.35, calm(bx[i]));
+		const d = bsz[i] * (0.6 + 0.4 * f);
+		ctx.drawImage(emberSprites[f > 0.6 ? 0 : 1], bx[i] - d / 2, by[i] - d / 2, d, d);
+	}
+	ctx.globalAlpha = 1;
+	ctx.globalCompositeOperation = 'source-over';
 }
 
-// ─── MESSAGE HANDLER ───────────────────────────────────────────────────────────
+function move(x, y) {
+	if (mouse.x > -9000) mouse.energy = Math.min(1, mouse.energy + Math.hypot(x - mouse.x, y - mouse.y) / 60);
+	mouse.x = x; mouse.y = y;
+}
+
 self.onmessage = (e) => {
-	switch (e.data.type) {
+	const d = e.data;
+	switch (d.type) {
 		case 'init':
-			canvas = e.data.canvas;
+			canvas = d.canvas;
 			ctx = canvas.getContext('2d');
-			W = e.data.width;
-			H = e.data.height;
-			canvas.width = W;
-			canvas.height = H;
-			lastNow = performance.now();
-			initScene();
-			startAnimation();
+			w = d.width; h = d.height; dpr = Math.min(d.dpr || 1, 1);
+			reduced = !!d.reducedMotion;
+			applyTheme(d.theme);
+			buildSprites();
+			size(0, 0);
+			requestAnimationFrame(frame);
 			break;
-		case 'resize':
-			W = e.data.width;
-			H = e.data.height;
-			canvas.width = W;
-			canvas.height = H;
+		case 'resize': {
+			const ow = w, oh = h;
+			w = d.width; h = d.height; dpr = Math.min(d.dpr || 1, 1);
+			if (canvas) size(ow, oh);
+			break;
+		}
+		case 'theme':
+			applyTheme(d);
+			break;
+		case 'motion':
+			reduced = !!d.reducedMotion;
 			break;
 		case 'mousemove':
-			mouse.x = e.data.x;
-			mouse.y = e.data.y;
-			break;
-		case 'click':
-			spawnBurst(e.data.x, e.data.y);
-			break;
-		case 'mousedown':
-			break;
-		case 'mouseup':
-			break;
-		case 'touchstart':
-			if (e.data.touches && e.data.touches.length > 0) {
-				spawnBurst(e.data.touches[0].x, e.data.touches[0].y);
-			}
+			move(d.x, d.y);
 			break;
 		case 'touchmove':
-			if (e.data.touches && e.data.touches.length > 0) {
-				mouse.x = e.data.touches[0].x;
-				mouse.y = e.data.touches[0].y;
-			}
+			if (d.touches && d.touches.length) move(d.touches[0].x, d.touches[0].y);
 			break;
-		case 'touchend':
-			break;
-		case 'context':
+		case 'mousedown':
+			if (!reduced && BURST_SIZE > 0) burst(d.x, d.y);
 			break;
 	}
 };

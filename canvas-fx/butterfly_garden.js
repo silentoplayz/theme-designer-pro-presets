@@ -1,515 +1,299 @@
 /**
  * Title: Butterfly Garden
- * Description: A magical garden with colorful butterflies that flutter around.
- *   Move your mouse near butterflies to attract them into a gentle, playful swarm.
- *   Features realistic wing-flapping, sparkle trails, floating pollen, and tiny flowers.
+ * Description: Butterflies with wings in your theme's colors flutter along the sides of the screen leaving sparkle trails, flowers sway along the bottom edge, and a moving cursor draws the nearest butterflies after it.
  */
 
-let canvas, ctx, width, height;
-let mouse = { x: -5000, y: -5000 };
-let time = 0;
-let butterflies = [];
-let sparkles = [];
-let flowers = [];
-let pollen = [];
+/* ────────── CONFIGURABLE VARIABLES ────────── */
+const BUTTERFLIES   = 14;    // butterflies in the garden (2-40)
+const BUTTERFLY_SIZE = 20;  // wing length, in px (8-36)
+const FLIGHT_SPEED  = 55;    // cruising speed, in px per second (15-150)
+const FLAP_SPEED    = 7;     // wing beats per second (2-14)
+const SPARKLES      = 1;     // how many sparkles trail each butterfly (0-3)
+const FLOWERS       = 18;    // flowers along the bottom edge (0-40)
+const POLLEN        = 22;    // drifting pollen motes (0-60)
+const ATTRACT       = 1;     // how strongly a moving cursor draws butterflies (0-3)
+const MOTION        = 1;     // overall speed (0.2-2)
+const REDUCED_SPEED = 0.25;  // speed kept when the viewer asks to reduce motion (0-1)
+const CENTER_CALM   = 0.75;  // how much the garden fades and keeps clear of the chat column (0-1)
+const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const FOLLOW_THEME  = true;  // take the colors from the theme's palette
+const COLOR_A       = '#ff7fb0';  // first wing color when not following the theme
+const COLOR_B       = '#9b8cff';  // second wing color
+const COLOR_C       = '#ffc861';  // third wing color
+const STEM_COLOR    = '#5f8f62';  // flower stem color
+/* ──────────────────────────────────────────── */
 
-const CONFIG = {
-	butterflyCount: 25,
-	sparkleCount: 40,
-	flowerCount: 18,
-	pollenCount: 30,
-	attractRadius: 200,
-	attractForce: 0.08,
-	wanderSpeed: 0.8,
-	wingFlapSpeed: 6,
-	sparkleTrailLife: 40,
-	sparkleTrailInterval: 4,
-	wingColors: [
-		{ h1: 320, h2: 280, name: 'pink-purple' },
-		{ h1: 270, h2: 240, name: 'purple-blue' },
-		{ h1: 200, h2: 260, name: 'blue-violet' },
-		{ h1: 30, h2: 50, name: 'orange-yellow' },
-		{ h1: 340, h2: 20, name: 'rose-coral' },
-		{ h1: 50, h2: 80, name: 'gold-lime' },
-		{ h1: 180, h2: 220, name: 'teal-blue' },
-		{ h1: 290, h2: 330, name: 'violet-pink' },
-	],
-	flowerColors: [
-		'#ff6b9d', '#c084fc', '#60a5fa', '#fbbf24',
-		'#fb923c', '#f472b6', '#a78bfa', '#34d399',
-	],
-};
+const U = 44, MAX_SPARK = 220, NV = 3;
+let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, time = 0, reduced = false, dark = true;
+let calmLut = new Float32Array(1), hexes = [COLOR_A, COLOR_B, COLOR_C, STEM_COLOR], stemStyle = STEM_COLOR;
+const wings = [], stars = [], blooms = [];
+let body = null, mote = null;
+const mouse = { x: -10000, y: -10000, energy: 0 };
 
-setInterval(() => {
-	self.postMessage({ type: 'heartbeat' });
-}, 1000);
+const NB = BUTTERFLIES;
+const fx = new Float32Array(NB), fy = new Float32Array(NB), fvx = new Float32Array(NB), fvy = new Float32Array(NB);
+const fwa = new Float32Array(NB), fph = new Float32Array(NB), fsz = new Float32Array(NB), fside = new Float32Array(NB), ftimer = new Float32Array(NB);
+const fcol = new Uint8Array(NB);
+const sx = new Float32Array(MAX_SPARK), sy = new Float32Array(MAX_SPARK), svy = new Float32Array(MAX_SPARK), slife = new Float32Array(MAX_SPARK), scol = new Uint8Array(MAX_SPARK);
+let scount = 0;
+const gx = new Float32Array(40), gh = new Float32Array(40), gph = new Float32Array(40), gsz = new Float32Array(40), gcol = new Uint8Array(40);
+const px = new Float32Array(60), py = new Float32Array(60), pph = new Float32Array(60);
 
-function rand(a, b) { return Math.random() * (b - a) + a; }
-function lerp(a, b, t) { return a + (b - a) * t; }
-function dist(x1, y1, x2, y2) {
-	const dx = x2 - x1, dy = y2 - y1;
-	return Math.sqrt(dx * dx + dy * dy);
+function rgb(hex) {
+	const n = parseInt(hex.slice(1), 16);
+	return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+function rgba(c, a, k) {
+	k = k || 0; // k > 0 lifts toward white, k < 0 darkens
+	const f = (v) => Math.round(k >= 0 ? v + (255 - v) * k : v * (1 + k));
+	return 'rgba(' + f(c[0]) + ',' + f(c[1]) + ',' + f(c[2]) + ',' + a + ')';
+}
+function sprite(wd, ht) { const s = new OffscreenCanvas(wd, ht); return [s, s.getContext('2d')]; }
+
+function wingPath(g, ww, wh, upper) {
+	const y = upper ? -0.05 * wh : 0.03 * wh;
+	g.beginPath();
+	g.moveTo(0, y);
+	if (upper) {
+		g.bezierCurveTo(0.4 * ww, y - 0.75 * wh, 1.05 * ww, y - 0.65 * wh, ww, y - 0.1 * wh);
+		g.bezierCurveTo(0.9 * ww, y + 0.22 * wh, 0.3 * ww, y + 0.15 * wh, 0, y);
+	} else {
+		g.bezierCurveTo(0.5 * ww, y + 0.6 * wh, 0.95 * ww, y + 0.75 * wh, 0.72 * ww, y + 0.2 * wh);
+		g.bezierCurveTo(0.4 * ww, y - 0.05 * wh, 0.15 * ww, y - 0.05 * wh, 0, y);
+	}
+	g.closePath();
 }
 
-// ─── Sparkle Trail Particle ────────────────────────────────────────
-class SparkleTrail {
-	constructor(x, y, hue) {
-		this.x = x + rand(-3, 3);
-		this.y = y + rand(-3, 3);
-		this.vx = rand(-0.3, 0.3);
-		this.vy = rand(-0.6, -0.1);
-		this.life = CONFIG.sparkleTrailLife;
-		this.maxLife = this.life;
-		this.size = rand(1, 2.5);
-		this.hue = hue + rand(-20, 20);
-	}
-
-	update() {
-		this.x += this.vx;
-		this.y += this.vy;
-		this.vy -= 0.005;
-		this.life--;
-	}
-
-	draw(ctx) {
-		const alpha = (this.life / this.maxLife) * 0.6;
-		if (alpha <= 0) return;
-		const s = this.size * (this.life / this.maxLife);
-		ctx.save();
-		ctx.globalAlpha = alpha;
-		ctx.fillStyle = `hsla(${this.hue}, 90%, 80%, 1)`;
-		ctx.shadowColor = `hsla(${this.hue}, 100%, 85%, 0.8)`;
-		ctx.shadowBlur = 6;
-		// Tiny star shape
-		ctx.beginPath();
-		for (let i = 0; i < 4; i++) {
-			const a = (i / 4) * Math.PI * 2 - Math.PI / 4;
-			const ox = Math.cos(a) * s;
-			const oy = Math.sin(a) * s;
-			if (i === 0) ctx.moveTo(this.x + ox, this.y + oy);
-			else ctx.lineTo(this.x + ox, this.y + oy);
-			const midA = a + Math.PI / 4;
-			ctx.lineTo(this.x + Math.cos(midA) * s * 0.35, this.y + Math.sin(midA) * s * 0.35);
+// Right-hand wing pair per color pairing, drawn once at twice the size for crisp edges
+function buildSprites() {
+	const c = hexes.map(rgb);
+	for (let v = 0; v < NV; v++) {
+		const a = c[v], b = c[(v + 1) % 3];
+		const [s, g] = sprite(U * 2.4, U * 4.4);
+		g.scale(2, 2);
+		g.translate(1, U * 1.2);
+		for (let k = 0; k < 2; k++) {
+			const upper = k === 1, ww = upper ? U : U * 0.74, wh = upper ? U * 1.3 : U * 1.0;
+			wingPath(g, ww, wh, upper);
+			const grad = g.createLinearGradient(0, 0, ww, upper ? -wh * 0.4 : wh * 0.4);
+			grad.addColorStop(0, rgba(a, 0.95, dark ? 0.1 : -0.1));
+			grad.addColorStop(0.6, rgba(b, 0.9, dark ? 0.2 : 0));
+			grad.addColorStop(1, rgba(b, 0.85, dark ? 0.45 : 0.15));
+			g.fillStyle = grad;
+			g.fill();
+			// Dark edge band with pale spots, then veins: the pattern that says butterfly
+			g.save();
+			g.clip();
+			g.strokeStyle = rgba(a, 0.85, -0.6);
+			g.lineWidth = upper ? 4.5 : 3.5;
+			g.stroke();
+			g.fillStyle = rgba(b, 0.9, 0.8);
+			for (let i = 0; i < 4; i++) {
+				const t = 0.3 + i * 0.2;
+				g.beginPath();
+				g.arc(ww * (upper ? 0.35 + t * 0.6 : 0.3 + t * 0.4), upper ? -wh * (0.62 - t * 0.45) : wh * (0.45 + t * 0.1), 1.1, 0, 6.2832);
+				g.fill();
+			}
+			g.strokeStyle = rgba(a, 0.3, -0.5);
+			g.lineWidth = 0.6;
+			for (let i = 0; i < 3; i++) {
+				g.beginPath();
+				g.moveTo(0, upper ? -0.05 * wh : 0.03 * wh);
+				g.lineTo(ww * (0.55 + i * 0.15), upper ? -wh * (0.55 - i * 0.2) : wh * (0.5 - i * 0.12));
+				g.stroke();
+			}
+			g.restore();
 		}
-		ctx.closePath();
-		ctx.fill();
-		ctx.restore();
-	}
+		wings[v] = s;
 
-	get alive() { return this.life > 0; }
+		const [st, sg] = sprite(24, 24);
+		const sgr = sg.createRadialGradient(12, 12, 0, 12, 12, 12);
+		sgr.addColorStop(0, rgba(a, 1, dark ? 0.7 : 0)); sgr.addColorStop(0.25, rgba(a, 0.5, dark ? 0.2 : 0)); sgr.addColorStop(1, rgba(a, 0, 0));
+		sg.fillStyle = sgr; sg.fillRect(0, 0, 24, 24);
+		sg.fillStyle = rgba(a, 0.9, dark ? 0.8 : -0.1);
+		sg.beginPath(); sg.moveTo(12, 2); sg.lineTo(13.2, 10.8); sg.lineTo(22, 12); sg.lineTo(13.2, 13.2); sg.lineTo(12, 22); sg.lineTo(10.8, 13.2); sg.lineTo(2, 12); sg.lineTo(10.8, 10.8); sg.fill();
+		stars[v] = st;
+
+		const [fl, fg] = sprite(48, 48);
+		fg.translate(24, 24);
+		fg.fillStyle = rgba(a, dark ? 0.9 : 0.85, dark ? 0.15 : 0);
+		for (let i = 0; i < 6; i++) { fg.rotate(1.0472); fg.beginPath(); fg.ellipse(0, -11, 6, 11, 0, 0, 6.2832); fg.fill(); }
+		fg.fillStyle = rgba(c[(v + 2) % 3], 1, dark ? 0.5 : -0.2);
+		fg.beginPath(); fg.arc(0, 0, 5.5, 0, 6.2832); fg.fill();
+		blooms[v] = fl;
+	}
+	let g;
+	[body, g] = sprite(16, U * 2.4);
+	g.translate(8, U * 1.2);
+	g.fillStyle = rgba(c[0], 0.95, -0.7);
+	g.beginPath(); g.ellipse(0, 0, 2.6, U * 0.55, 0, 0, 6.2832); g.fill();
+	g.strokeStyle = g.fillStyle; g.lineWidth = 1.2;
+	g.beginPath(); g.moveTo(-1, -U * 0.5); g.quadraticCurveTo(-5, -U * 0.8, -6, -U * 1.0); g.moveTo(1, -U * 0.5); g.quadraticCurveTo(5, -U * 0.8, 6, -U * 1.0); g.stroke();
+	[mote, g] = sprite(12, 12);
+	const mg = g.createRadialGradient(6, 6, 0, 6, 6, 6);
+	mg.addColorStop(0, rgba(c[2], 1, dark ? 0.6 : 0)); mg.addColorStop(1, rgba(c[2], 0, 0));
+	g.fillStyle = mg; g.fillRect(0, 0, 12, 12);
+	stemStyle = rgba(rgb(hexes[3]), dark ? 0.55 : 0.6);
 }
 
-// ─── Floating Pollen / Sparkle ─────────────────────────────────────
-class Pollen {
-	constructor() { this.reset(); }
-
-	reset() {
-		this.x = rand(0, width || 800);
-		this.y = rand(0, height || 600);
-		this.vy = rand(-0.4, -0.1);
-		this.vx = rand(-0.2, 0.2);
-		this.size = rand(1, 3);
-		this.alpha = rand(0.15, 0.5);
-		this.phase = rand(0, Math.PI * 2);
-		this.drift = rand(0.3, 0.8);
-		this.hue = rand(40, 70); // warm golden
-	}
-
-	update() {
-		this.x += this.vx + Math.sin(time * 0.5 + this.phase) * this.drift * 0.3;
-		this.y += this.vy;
-		if (this.y < -10) { this.y = height + 10; this.x = rand(0, width); }
-		if (this.x < -10) this.x = width + 10;
-		if (this.x > width + 10) this.x = -10;
-	}
-
-	draw(ctx) {
-		const pulse = 0.7 + 0.3 * Math.sin(time * 2 + this.phase);
-		ctx.save();
-		ctx.globalAlpha = this.alpha * pulse;
-		const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 2);
-		grad.addColorStop(0, `hsla(${this.hue}, 100%, 90%, 1)`);
-		grad.addColorStop(1, `hsla(${this.hue}, 100%, 80%, 0)`);
-		ctx.fillStyle = grad;
-		ctx.beginPath();
-		ctx.arc(this.x, this.y, this.size * 2, 0, Math.PI * 2);
-		ctx.fill();
-		ctx.restore();
-	}
+function applyTheme(t) {
+	if (!t) return;
+	dark = t.dark !== false;
+	if (FOLLOW_THEME && t.colors) hexes = [t.colors.accent, t.colors.accent2, t.colors.accent3, t.colors.muted];
+	if (ctx) buildSprites();
 }
 
-// ─── Ground Flower ─────────────────────────────────────────────────
-class Flower {
-	constructor() {
-		this.x = rand(20, (width || 800) - 20);
-		this.y = (height || 600) - rand(5, 40);
-		this.petalCount = Math.floor(rand(5, 8));
-		this.petalSize = rand(5, 10);
-		this.color = CONFIG.flowerColors[Math.floor(rand(0, CONFIG.flowerColors.length))];
-		this.centerColor = `hsl(${rand(40, 60)}, 100%, 65%)`;
-		this.stemHeight = rand(15, 35);
-		this.phase = rand(0, Math.PI * 2);
-		this.alpha = rand(0.4, 0.7);
+function calm(x) {
+	const i = x >> 2;
+	return calmLut[i < 0 ? 0 : i >= calmLut.length ? calmLut.length - 1 : i];
+}
+function sideX(right, reach) { return right ? w - Math.random() * w * reach : Math.random() * w * reach; }
+
+function size() {
+	canvas.width = Math.max(1, Math.round(w * dpr));
+	canvas.height = Math.max(1, Math.round(h * dpr));
+	ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+	calmLut = new Float32Array((w >> 2) + 2);
+	for (let i = 0; i < calmLut.length; i++) {
+		const t = Math.min(1, Math.max(0, (Math.abs(i * 4 - w / 2) / BAND_WIDTH - 0.55) / 0.7));
+		calmLut[i] = 1 - CENTER_CALM * (1 - t * t * (3 - 2 * t));
 	}
-
-	draw(ctx) {
-		const sway = Math.sin(time * 0.5 + this.phase) * 3;
-		ctx.save();
-		ctx.globalAlpha = this.alpha;
-
-		// Stem
-		ctx.strokeStyle = 'hsla(120, 50%, 35%, 0.6)';
-		ctx.lineWidth = 1.5;
-		ctx.beginPath();
-		ctx.moveTo(this.x, this.y);
-		ctx.quadraticCurveTo(this.x + sway, this.y - this.stemHeight * 0.5, this.x + sway * 0.5, this.y - this.stemHeight);
-		ctx.stroke();
-
-		const fx = this.x + sway * 0.5;
-		const fy = this.y - this.stemHeight;
-
-		// Petals
-		for (let i = 0; i < this.petalCount; i++) {
-			const angle = (i / this.petalCount) * Math.PI * 2;
-			const px = fx + Math.cos(angle) * this.petalSize * 0.7;
-			const py = fy + Math.sin(angle) * this.petalSize * 0.7;
-			ctx.beginPath();
-			ctx.arc(px, py, this.petalSize * 0.45, 0, Math.PI * 2);
-			ctx.fillStyle = this.color;
-			ctx.fill();
-		}
-
-		// Center
-		ctx.beginPath();
-		ctx.arc(fx, fy, this.petalSize * 0.3, 0, Math.PI * 2);
-		ctx.fillStyle = this.centerColor;
-		ctx.fill();
-
-		ctx.restore();
+	for (let i = 0; i < NB; i++) {
+		fside[i] = i % 2; fx[i] = sideX(fside[i], 0.3); fy[i] = h * (0.1 + Math.random() * 0.7);
+		fvx[i] = fvy[i] = 0; fwa[i] = Math.random() * 6.283; fph[i] = Math.random() * 6.283;
+		fsz[i] = BUTTERFLY_SIZE * (0.75 + Math.random() * 0.5); fcol[i] = i % NV; ftimer[i] = Math.random() * 0.2;
 	}
+	for (let i = 0; i < FLOWERS; i++) {
+		let x = Math.random() * w;
+		for (let k = 0; k < 4 && Math.random() > calm(x) * calm(x); k++) x = Math.random() * w;
+		gx[i] = x; gh[i] = 18 + Math.random() * Math.min(70, h * 0.12); gph[i] = Math.random() * 6.283;
+		gsz[i] = 16 + Math.random() * 10; gcol[i] = Math.floor(Math.random() * NV);
+	}
+	for (let i = 0; i < POLLEN; i++) { px[i] = sideX(i % 2, 0.35); py[i] = Math.random() * h; pph[i] = Math.random() * 6.283; }
+	scount = 0;
 }
 
-// ─── Butterfly ─────────────────────────────────────────────────────
-class Butterfly {
-	constructor() {
-		this.x = rand(50, (width || 800) - 50);
-		this.y = rand(50, (height || 600) - 100);
-		this.vx = rand(-0.5, 0.5);
-		this.vy = rand(-0.5, 0.5);
-		this.size = rand(10, 18);
-		this.angle = rand(0, Math.PI * 2);
-		this.angularVel = 0;
-		this.flapPhase = rand(0, Math.PI * 2);
-		this.flapSpeed = rand(CONFIG.wingFlapSpeed * 0.8, CONFIG.wingFlapSpeed * 1.2);
-		this.wanderAngle = rand(0, Math.PI * 2);
-		this.wanderVel = 0;
-		this.palette = CONFIG.wingColors[Math.floor(rand(0, CONFIG.wingColors.length))];
-		this.lightness = rand(55, 75);
-		this.sparkleTimer = 0;
-		this.bobPhase = rand(0, Math.PI * 2);
-		this.bobAmount = rand(0.3, 0.8);
-		// Flight direction for perspective
-		this.heading = rand(0, Math.PI * 2);
+function frame(now) {
+	requestAnimationFrame(frame);
+	const real = last ? Math.min((now - last) / 1000, 0.1) : 0;
+	last = now;
+	const dt = real * MOTION * (reduced ? REDUCED_SPEED : 1);
+	time += dt;
+	mouse.energy *= Math.exp(-real * 1.2);
+	ctx.clearRect(0, 0, w, h);
+	const base = dark ? 0.9 : 0.85;
+
+	// Flowers: one stroke for every stem, then the blooms
+	ctx.strokeStyle = stemStyle;
+	ctx.lineWidth = 1.5;
+	ctx.beginPath();
+	for (let i = 0; i < FLOWERS; i++) {
+		const s = Math.sin(time * 0.8 + gph[i]) * gh[i] * 0.08;
+		ctx.moveTo(gx[i], h + 2);
+		ctx.quadraticCurveTo(gx[i] + s, h - gh[i] * 0.5, gx[i] + s * 0.6, h - gh[i]);
+	}
+	ctx.stroke();
+	for (let i = 0; i < FLOWERS; i++) {
+		const s = Math.sin(time * 0.8 + gph[i]) * gh[i] * 0.08, d = gsz[i];
+		ctx.globalAlpha = base * 0.85 * calm(gx[i]);
+		ctx.drawImage(blooms[gcol[i]], gx[i] + s * 0.6 - d / 2, h - gh[i] - d / 2, d, d);
 	}
 
-	update() {
-		const dx = mouse.x - this.x;
-		const dy = mouse.y - this.y;
-		const d = Math.sqrt(dx * dx + dy * dy);
-
-		// Attraction to mouse
-		if (d < CONFIG.attractRadius && d > 20) {
-			const force = CONFIG.attractForce * (1 - d / CONFIG.attractRadius);
-			this.vx += (dx / d) * force;
-			this.vy += (dy / d) * force;
-			// Flap faster near mouse (excited)
-			this.flapPhase += 0.02;
-		} else if (d <= 20 && d > 0) {
-			// Too close — gentle repel
-			this.vx -= (dx / d) * 0.1;
-			this.vy -= (dy / d) * 0.1;
-		}
-
-		// Random wandering
-		this.wanderVel += rand(-0.06, 0.06);
-		this.wanderVel *= 0.9;
-		this.wanderAngle += this.wanderVel;
-		const wx = Math.cos(this.wanderAngle) * CONFIG.wanderSpeed * 0.3;
-		const wy = Math.sin(this.wanderAngle) * CONFIG.wanderSpeed * 0.3;
-		this.vx += (wx - this.vx) * 0.02;
-		this.vy += (wy - this.vy) * 0.02;
-
-		// Vertical bob
-		this.vy += Math.sin(time * 1.5 + this.bobPhase) * 0.02 * this.bobAmount;
-
-		// Speed limit
-		const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-		const maxSpeed = 2.5;
-		if (speed > maxSpeed) {
-			this.vx = (this.vx / speed) * maxSpeed;
-			this.vy = (this.vy / speed) * maxSpeed;
-		}
-
-		// Damping
-		this.vx *= 0.98;
-		this.vy *= 0.98;
-
-		this.x += this.vx;
-		this.y += this.vy;
-
-		// Update heading based on velocity
-		if (speed > 0.2) {
-			const targetHeading = Math.atan2(this.vy, this.vx);
-			let diff = targetHeading - this.heading;
-			while (diff > Math.PI) diff -= Math.PI * 2;
-			while (diff < -Math.PI) diff += Math.PI * 2;
-			this.heading += diff * 0.08;
-		}
-
-		// Soft boundary
-		const margin = 40;
-		if (this.x < margin) this.vx += 0.1;
-		if (this.x > width - margin) this.vx -= 0.1;
-		if (this.y < margin) this.vy += 0.1;
-		if (this.y > height - margin - 40) this.vy -= 0.1;
-
-		// Wrap if way off screen
-		if (this.x < -80) this.x = width + 40;
-		if (this.x > width + 80) this.x = -40;
-		if (this.y < -80) this.y = height + 40;
-		if (this.y > height + 80) this.y = -40;
-
-		// Flap
-		this.flapPhase += this.flapSpeed * 0.016;
-
-		// Sparkle trail
-		this.sparkleTimer++;
-		if (this.sparkleTimer >= CONFIG.sparkleTrailInterval) {
-			this.sparkleTimer = 0;
-			sparkles.push(new SparkleTrail(this.x, this.y, this.palette.h1));
-		}
+	if (dark) ctx.globalCompositeOperation = 'lighter';
+	for (let i = 0; i < POLLEN; i++) {
+		py[i] -= 9 * dt;
+		px[i] += Math.sin(time * 0.5 + pph[i]) * 8 * dt;
+		if (py[i] < -8) { py[i] = h + 8; px[i] = sideX(i % 2, 0.35); }
+		ctx.globalAlpha = (dark ? 0.5 : 0.4) * (0.6 + 0.4 * Math.sin(time * 2 + pph[i])) * calm(px[i]);
+		ctx.drawImage(mote, px[i] - 4, py[i] - 4, 8, 8);
 	}
-
-	draw(ctx) {
-		const flap = Math.sin(this.flapPhase);
-		// Perspective: wings appear narrower when heading horizontally
-		const perspX = Math.cos(this.heading);
-		const perspScale = 0.3 + 0.7 * Math.abs(Math.sin(this.heading));
-
-		ctx.save();
-		ctx.translate(this.x, this.y);
-		// Tilt body slightly in direction of movement
-		ctx.rotate(this.heading * 0.15);
-
-		// === Draw Wings ===
-		const wingSpan = this.size;
-		// Flap creates a scale along the x-axis for each wing
-		const flapScale = flap; // -1 to 1
-
-		// Upper wings (larger)
-		this.drawWing(ctx, -1, wingSpan * 1.0, wingSpan * 1.3, flapScale, perspScale, true);
-		this.drawWing(ctx, 1, wingSpan * 1.0, wingSpan * 1.3, flapScale, perspScale, true);
-
-		// Lower wings (smaller, slightly behind)
-		this.drawWing(ctx, -1, wingSpan * 0.65, wingSpan * 0.85, flapScale * 0.8, perspScale, false);
-		this.drawWing(ctx, 1, wingSpan * 0.65, wingSpan * 0.85, flapScale * 0.8, perspScale, false);
-
-		// === Body ===
-		ctx.beginPath();
-		ctx.ellipse(0, 0, 1.5, this.size * 0.35, 0, 0, Math.PI * 2);
-		ctx.fillStyle = `hsla(${this.palette.h1}, 30%, 20%, 0.9)`;
-		ctx.fill();
-
-		// === Antennae ===
-		const antLen = this.size * 0.45;
-		ctx.strokeStyle = `hsla(${this.palette.h1}, 30%, 25%, 0.7)`;
-		ctx.lineWidth = 0.8;
-		for (const side of [-1, 1]) {
-			const wave = Math.sin(time * 3 + this.flapPhase + side) * 2;
-			ctx.beginPath();
-			ctx.moveTo(0, -this.size * 0.25);
-			ctx.quadraticCurveTo(
-				side * antLen * 0.5 + wave, -this.size * 0.25 - antLen * 0.6,
-				side * antLen * 0.6 + wave, -this.size * 0.25 - antLen
-			);
-			ctx.stroke();
-			// Antenna tip
-			ctx.beginPath();
-			ctx.arc(side * antLen * 0.6 + wave, -this.size * 0.25 - antLen, 1.2, 0, Math.PI * 2);
-			ctx.fillStyle = `hsla(${this.palette.h1}, 40%, 30%, 0.7)`;
-			ctx.fill();
+	// Sparkle trails
+	for (let i = 0; i < scount; i++) {
+		slife[i] -= dt;
+		if (slife[i] <= 0) {
+			const j = --scount;
+			sx[i] = sx[j]; sy[i] = sy[j]; svy[i] = svy[j]; slife[i] = slife[j]; scol[i] = scol[j];
+			i--;
+			continue;
 		}
-
-		ctx.restore();
+		sy[i] += svy[i] * dt;
+		const f = slife[i] / 0.9, d = 4 + 8 * f;
+		ctx.globalAlpha = (dark ? 0.85 : 0.6) * f * calm(sx[i]);
+		ctx.drawImage(stars[scol[i]], sx[i] - d / 2, sy[i] - d / 2, d, d);
 	}
+	ctx.globalCompositeOperation = 'source-over';
 
-	drawWing(ctx, side, ww, wh, flapScale, perspScale, isUpper) {
-		// side: -1 = left, 1 = right
-		const wingWidth = ww * Math.abs(flapScale) * (side === 1 ? perspScale : (2 - perspScale) * 0.5 + 0.5);
-		const wingHeight = wh;
-		const yOff = isUpper ? -wingHeight * 0.15 : wingHeight * 0.15;
-
-		ctx.save();
-		ctx.globalAlpha = 0.55 + 0.3 * Math.abs(flapScale);
-
-		// Wing shape using bezier curves
-		ctx.beginPath();
-		ctx.moveTo(0, yOff);
-		if (isUpper) {
-			ctx.bezierCurveTo(
-				side * wingWidth * 0.4, yOff - wingHeight * 0.7,
-				side * wingWidth * 1.0, yOff - wingHeight * 0.6,
-				side * wingWidth, yOff - wingHeight * 0.1
-			);
-			ctx.bezierCurveTo(
-				side * wingWidth * 0.9, yOff + wingHeight * 0.2,
-				side * wingWidth * 0.3, yOff + wingHeight * 0.15,
-				0, yOff
-			);
-		} else {
-			ctx.bezierCurveTo(
-				side * wingWidth * 0.5, yOff + wingHeight * 0.6,
-				side * wingWidth * 0.95, yOff + wingHeight * 0.7,
-				side * wingWidth * 0.7, yOff + wingHeight * 0.2
-			);
-			ctx.bezierCurveTo(
-				side * wingWidth * 0.4, yOff - wingHeight * 0.05,
-				side * wingWidth * 0.15, yOff - wingHeight * 0.05,
-				0, yOff
-			);
+	// Butterflies: wander, keep to their side of the screen, follow a moving cursor
+	const pull = ATTRACT * mouse.energy, maxV = FLIGHT_SPEED * 2.2;
+	for (let i = 0; i < NB; i++) {
+		fwa[i] += (Math.random() - 0.5) * 6 * dt;
+		let ax = (Math.cos(fwa[i]) * FLIGHT_SPEED - fvx[i]) * 1.2, ay = (Math.sin(fwa[i]) * FLIGHT_SPEED * 0.7 - fvy[i]) * 1.2;
+		const c = calm(fx[i]);
+		ax += (fside[i] ? 1 : -1) * (1 - c) * 160;
+		if (fy[i] < h * 0.08) ay += 80; else if (fy[i] > h * 0.88) ay -= 80;
+		if (fx[i] < 20) ax += 80; else if (fx[i] > w - 20) ax -= 80;
+		ay += Math.sin(time * 2.2 + fph[i]) * 40;
+		if (pull > 0.02) {
+			const dx = mouse.x - fx[i], dy = mouse.y - fy[i], dd = dx * dx + dy * dy;
+			if (dd < 62500 && dd > 400) { const dist = Math.sqrt(dd); ax += dx / dist * 220 * pull; ay += dy / dist * 220 * pull; }
 		}
-		ctx.closePath();
+		fvx[i] += ax * dt; fvy[i] += ay * dt;
+		const sp = Math.hypot(fvx[i], fvy[i]);
+		if (sp > maxV) { fvx[i] *= maxV / sp; fvy[i] *= maxV / sp; }
+		fx[i] += fvx[i] * dt; fy[i] += fvy[i] * dt;
+		if (Math.abs(fx[i] - w / 2) < w * 0.1 && mouse.energy < 0.05) fside[i] = fx[i] > w / 2 ? 1 : 0;
 
-		// Gradient fill
-		const gx1 = 0, gy1 = yOff;
-		const gx2 = side * wingWidth, gy2 = yOff;
-		const grad = ctx.createLinearGradient(gx1, gy1, gx2, gy2);
-		const h1 = this.palette.h1, h2 = this.palette.h2;
-		const L = this.lightness;
-		grad.addColorStop(0, `hsla(${h1}, 85%, ${L}%, 0.9)`);
-		grad.addColorStop(0.4, `hsla(${lerp(h1, h2, 0.4)}, 90%, ${L + 5}%, 0.85)`);
-		grad.addColorStop(0.7, `hsla(${h2}, 80%, ${L + 10}%, 0.75)`);
-		grad.addColorStop(1, `hsla(${h2}, 70%, ${L + 15}%, 0.5)`);
-		ctx.fillStyle = grad;
-		ctx.fill();
-
-		// Wing vein pattern — subtle inner line
-		ctx.strokeStyle = `hsla(${h1}, 50%, ${L - 15}%, 0.2)`;
-		ctx.lineWidth = 0.5;
-		ctx.beginPath();
-		ctx.moveTo(0, yOff);
-		ctx.lineTo(side * wingWidth * 0.6, yOff + (isUpper ? -wingHeight * 0.35 : wingHeight * 0.35));
-		ctx.stroke();
-		ctx.beginPath();
-		ctx.moveTo(0, yOff);
-		ctx.lineTo(side * wingWidth * 0.7, yOff + (isUpper ? -wingHeight * 0.1 : wingHeight * 0.15));
-		ctx.stroke();
-
-		// Spot decorations on upper wings
-		if (isUpper) {
-			const sx = side * wingWidth * 0.55;
-			const sy = yOff - wingHeight * 0.3;
-			const spotR = wingWidth * 0.12;
-			const spotGrad = ctx.createRadialGradient(sx, sy, 0, sx, sy, spotR);
-			spotGrad.addColorStop(0, `hsla(${h2 + 30}, 90%, 90%, 0.6)`);
-			spotGrad.addColorStop(1, `hsla(${h2}, 80%, 70%, 0)`);
-			ctx.beginPath();
-			ctx.arc(sx, sy, spotR, 0, Math.PI * 2);
-			ctx.fillStyle = spotGrad;
-			ctx.fill();
+		ftimer[i] -= dt;
+		if (SPARKLES > 0 && ftimer[i] <= 0 && scount < MAX_SPARK) {
+			const k = scount++;
+			sx[k] = fx[i] + (Math.random() - 0.5) * 6; sy[k] = fy[i] + fsz[i] * 0.3; svy[k] = 8 + Math.random() * 12;
+			slife[k] = 0.9; scol[k] = fcol[i];
+			ftimer[i] = 0.12 / SPARKLES;
 		}
 
-		// Wing edge glow
-		ctx.strokeStyle = `hsla(${h1}, 70%, ${L + 20}%, 0.15)`;
-		ctx.lineWidth = 1;
-		ctx.stroke();
-
-		ctx.restore();
+		fph[i] += FLAP_SPEED * 6.283 * dt * (1 + pull * 0.4);
+		const open = 0.18 + 0.82 * Math.abs(Math.sin(fph[i] * 0.5));
+		const k = fsz[i] / U, rot = Math.max(-0.4, Math.min(0.4, fvx[i] / maxV * 0.6));
+		const cs = Math.cos(rot), sn = Math.sin(rot), X = dpr * fx[i], Y = dpr * fy[i];
+		ctx.globalAlpha = base * Math.max(0.3, c);
+		const wsp = wings[fcol[i]], ow = k * 0.5 * open, oh = k * 0.5;
+		ctx.setTransform(dpr * cs * ow, dpr * sn * ow, -dpr * sn * oh, dpr * cs * oh, X, Y);
+		ctx.drawImage(wsp, -2, -U * 2.4);
+		ctx.setTransform(-dpr * cs * ow, -dpr * sn * ow, -dpr * sn * oh, dpr * cs * oh, X, Y);
+		ctx.drawImage(wsp, -2, -U * 2.4);
+		ctx.setTransform(dpr * cs * k, dpr * sn * k, -dpr * sn * k, dpr * cs * k, X, Y);
+		ctx.drawImage(body, -8, -U * 1.2);
 	}
+	ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+	ctx.globalAlpha = 1;
 }
 
-// ─── Scene Init ────────────────────────────────────────────────────
-function initScene() {
-	butterflies = [];
-	sparkles = [];
-	flowers = [];
-	pollen = [];
-
-	for (let i = 0; i < CONFIG.butterflyCount; i++) {
-		butterflies.push(new Butterfly());
-	}
-	for (let i = 0; i < CONFIG.flowerCount; i++) {
-		flowers.push(new Flower());
-	}
-	for (let i = 0; i < CONFIG.pollenCount; i++) {
-		pollen.push(new Pollen());
-	}
-}
-
-// ─── Render Loop ───────────────────────────────────────────────────
-function startAnimation() {
-	function render() {
-		if (!ctx) return;
-		time += 0.016;
-		ctx.clearRect(0, 0, width, height);
-
-		// Draw flowers (background layer)
-		for (const f of flowers) {
-			f.draw(ctx);
-		}
-
-		// Update and draw pollen
-		for (const p of pollen) {
-			p.update();
-			p.draw(ctx);
-		}
-
-		// Update and draw sparkle trails
-		for (let i = sparkles.length - 1; i >= 0; i--) {
-			sparkles[i].update();
-			sparkles[i].draw(ctx);
-			if (!sparkles[i].alive) sparkles.splice(i, 1);
-		}
-
-		// Cap sparkles to prevent memory issues
-		if (sparkles.length > 300) {
-			sparkles.splice(0, sparkles.length - 300);
-		}
-
-		// Update and draw butterflies
-		for (const b of butterflies) {
-			b.update();
-			b.draw(ctx);
-		}
-
-		requestAnimationFrame(render);
-	}
-	requestAnimationFrame(render);
-}
-
-// ─── Worker Message Handler ────────────────────────────────────────
 self.onmessage = (e) => {
-	switch (e.data.type) {
+	const d = e.data;
+	switch (d.type) {
 		case 'init':
-			canvas = e.data.canvas;
+			canvas = d.canvas;
 			ctx = canvas.getContext('2d');
-			width = e.data.width;
-			height = e.data.height;
-			canvas.width = width;
-			canvas.height = height;
-			initScene();
-			startAnimation();
+			w = d.width; h = d.height; dpr = Math.min(d.dpr || 1, 2);
+			reduced = !!d.reducedMotion;
+			applyTheme(d.theme);
+			buildSprites();
+			size();
+			requestAnimationFrame(frame);
 			break;
 		case 'resize':
-			width = e.data.width;
-			height = e.data.height;
-			canvas.width = width;
-			canvas.height = height;
-			initScene();
+			w = d.width; h = d.height; dpr = Math.min(d.dpr || 1, 2);
+			if (canvas) size();
+			break;
+		case 'theme':
+			applyTheme(d);
+			break;
+		case 'motion':
+			reduced = !!d.reducedMotion;
 			break;
 		case 'mousemove':
-			mouse.x = e.data.x;
-			mouse.y = e.data.y;
+			if (mouse.x > -9000) mouse.energy = Math.min(1, mouse.energy + Math.hypot(d.x - mouse.x, d.y - mouse.y) / 80);
+			mouse.x = d.x; mouse.y = d.y;
 			break;
 	}
 };
