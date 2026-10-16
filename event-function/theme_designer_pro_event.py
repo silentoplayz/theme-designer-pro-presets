@@ -9145,81 +9145,225 @@ location.reload();</code></pre>
 
     const DEFAULT_CANVAS_SCRIPT = `/**
  * Title: Tactical Liquid Grid
- * Description: An interactive grid of crosshairs that behaves like an elastic fabric.
+ * Description: A field of crosshairs that the cursor shoves aside like elastic fabric, lighting up in your theme's accents as they spring back, faded behind the chat.
  */
 
-let canvas, ctx, width, height;
-let points =[];
-let mouse = { x: -5000, y: -5000 };
+/* ────────── CONFIGURABLE VARIABLES ────────── */
+const SPACING       = 36;    // distance between crosshairs, in px (20-80)
+const CROSS_SIZE    = 4;     // half-length of each crosshair arm, in px (2-8)
+const GRID_ALPHA    = 1;     // visibility of the resting grid (0-1)
+const ACTIVE_ALPHA  = 0.9;   // visibility of crosshairs while they move (0-1)
+const MOUSE_RADIUS  = 150;   // reach of the cursor's shove, in px (60-300)
+const MOUSE_FORCE   = 1;     // strength of the shove (0-3)
+const SPRING        = 0.1;   // how firmly crosshairs return home (0.02-0.3)
+const FRICTION      = 0.85;  // how much motion each step keeps; lower settles faster (0.7-0.95)
+const MOTION        = 1;     // speed of the fabric; 0 freezes it (0-2)
+const REDUCED_FORCE = 0.25;  // share of the shove kept when the viewer asks to reduce motion (0-1)
+const CENTER_CALM   = 0.85;  // how much the grid fades behind the chat column (0-1)
+const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const COLOR_CYCLE   = false; // moving crosshairs drift through all three accents instead of one
+const CYCLE_SPEED   = 0.4;   // how fast the accents travel across the moving crosshairs (0-2)
+const FOLLOW_THEME  = true;  // take the colors from the theme's palette
+const GRID_COLOR    = '#c8ccd8';  // resting crosshair color when not following the theme
+const ACTIVE_COLOR  = '#00e5ff';  // moving crosshair color
+const ACTIVE_COLOR2 = '#7a6cff';  // second accent for the color cycle
+const ACTIVE_COLOR3 = '#ff5fb0';  // third accent for the color cycle
+/* ──────────────────────────────────────────── */
 
-const CONFIG = { spacing: 40, friction: 0.85, ease: 0.1, mouseDist: 150, mouseForce: 50, color: 'rgba(255, 255, 255, 0.15)', activeColor: '#00ffff' };
+// Alpha steps for the resting grid (one path each), and the springs' fixed rate, whatever the display's refresh
+const LEVELS = 5;
+const STEP = 1 / 60;
 
-setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);
+let canvas, ctx;
+let w = 0, h = 0, dpr = 1;
+let last = 0, acc = 0, phase = 0, reduced = false, dark = true, dirty = true;
+let count = 0;
+let ox, oy, px, py, vx, vy, lvl, calm;
+const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
+const palette = { grid: GRID_COLOR, accents: [ACTIVE_COLOR, ACTIVE_COLOR2, ACTIVE_COLOR3] };
+const restAlpha = new Float32Array(LEVELS);
+
+function applyTheme(t) {
+	if (t) {
+		dark = t.dark !== false;
+		if (FOLLOW_THEME && t.colors) {
+			palette.grid = t.colors.muted;
+			palette.accents[0] = t.colors.accent;
+			palette.accents[1] = t.colors.accent2;
+			palette.accents[2] = t.colors.accent3;
+		}
+	}
+	// Light backgrounds show everything, so the resting grid steps down there
+	const top = GRID_ALPHA * (dark ? 0.5 : 0.48);
+	for (let i = 0; i < LEVELS; i++) restAlpha[i] = top * (0.25 + 0.75 * i / (LEVELS - 1));
+	dirty = true;
+}
+
+function band(x) {
+	const b = Math.abs(x - w / 2) / BAND_WIDTH;
+	const s = Math.min(1, Math.max(0, (b - 0.55) / 0.7));
+	return 1 - CENTER_CALM * (1 - s * s * (3 - 2 * s));
+}
+
+function resize(width, height, ratio) {
+	w = width;
+	h = height;
+	dpr = Math.min(ratio || 1, 2);
+	if (!canvas) return;
+	canvas.width = Math.max(1, Math.round(w * dpr));
+	canvas.height = Math.max(1, Math.round(h * dpr));
+	ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+	const cols = Math.ceil(w / SPACING) + 1, rows = Math.ceil(h / SPACING) + 1;
+	count = cols * rows;
+	ox = new Float32Array(count); oy = new Float32Array(count);
+	px = new Float32Array(count); py = new Float32Array(count);
+	vx = new Float32Array(count); vy = new Float32Array(count);
+	calm = new Float32Array(count); lvl = new Uint8Array(count);
+	// Whole pixels plus a half at dpr 1, so the 1 px arms land crisp on the pixel grid
+	const snap = dpr < 1.5 ? 0.5 : 0;
+	const offX = Math.round((w - (cols - 1) * SPACING) / 2) + snap, offY = Math.round((h - (rows - 1) * SPACING) / 2) + snap;
+	let i = 0;
+	for (let c = 0; c < cols; c++) {
+		for (let r = 0; r < rows; r++, i++) {
+			ox[i] = px[i] = offX + c * SPACING;
+			oy[i] = py[i] = offY + r * SPACING;
+			calm[i] = band(ox[i]);
+			lvl[i] = Math.round(((calm[i] - (1 - CENTER_CALM)) / Math.max(0.001, CENTER_CALM)) * (LEVELS - 1));
+		}
+	}
+	dirty = true;
+}
+
+// One fixed spring step; returns whether anything is still moving
+function step() {
+	const r2 = MOUSE_RADIUS * MOUSE_RADIUS;
+	const force = MOUSE_FORCE * 50 * mouse.amount * (reduced ? REDUCED_FORCE : 1);
+	let moving = false;
+	for (let i = 0; i < count; i++) {
+		let ax = vx[i], ay = vy[i];
+		const dx = px[i] - mouse.x, dy = py[i] - mouse.y;
+		const d2 = dx * dx + dy * dy;
+		if (force > 0.01 && d2 < r2 && d2 > 0.01) {
+			const d = Math.sqrt(d2);
+			const f = ((MOUSE_RADIUS - d) / MOUSE_RADIUS) * force / d;
+			ax += dx * f;
+			ay += dy * f;
+		}
+		const hx = ox[i] - px[i], hy = oy[i] - py[i];
+		if (ax === 0 && ay === 0 && hx === 0 && hy === 0) continue;
+		ax = (ax + hx * SPRING) * FRICTION;
+		ay = (ay + hy * SPRING) * FRICTION;
+		px[i] += ax;
+		py[i] += ay;
+		// Settle exactly home once the motion is invisible, so a still grid costs nothing
+		if (Math.abs(ax) + Math.abs(ay) < 0.004 && Math.abs(hx) + Math.abs(hy) < 0.02 && force <= 0.01) {
+			px[i] = ox[i]; py[i] = oy[i]; ax = 0; ay = 0;
+		} else moving = true;
+		vx[i] = ax;
+		vy[i] = ay;
+	}
+	return moving;
+}
+
+function activity(i) {
+	const s = Math.abs(vx[i]) + Math.abs(vy[i]);
+	const disp = Math.abs(px[i] - ox[i]) + Math.abs(py[i] - oy[i]);
+	return Math.min(1, s * 0.15 + disp * 0.03);
+}
+
+function cross(i, s) {
+	ctx.moveTo(px[i] - s, py[i]); ctx.lineTo(px[i] + s, py[i]);
+	ctx.moveTo(px[i], py[i] - s); ctx.lineTo(px[i], py[i] + s);
+}
+
+// The accent a moving crosshair shows: one accent, or a slow wave through all three
+function accentOf(i) {
+	if (!COLOR_CYCLE) return 0;
+	const v = phase + (ox[i] + oy[i]) * 0.004;
+	return Math.floor(v - Math.floor(v / 3) * 3);
+}
+
+function draw() {
+	ctx.clearRect(0, 0, w, h);
+	ctx.globalCompositeOperation = 'source-over';
+	// Resting crosshairs, one path per alpha step
+	ctx.lineWidth = 1;
+	ctx.strokeStyle = palette.grid;
+	for (let l = 0; l < LEVELS; l++) {
+		ctx.globalAlpha = restAlpha[l];
+		ctx.beginPath();
+		for (let i = 0; i < count; i++) if (lvl[i] === l && activity(i) < 0.08) cross(i, CROSS_SIZE);
+		ctx.stroke();
+	}
+	// Moving crosshairs, bucketed by accent and brightness
+	ctx.lineWidth = 1.5;
+	const peak = ACTIVE_ALPHA * (dark ? 1 : 0.85);
+	for (let a = 0; a < (COLOR_CYCLE ? 3 : 1); a++) {
+		ctx.strokeStyle = palette.accents[a];
+		for (let b = 0; b < 3; b++) {
+			ctx.globalAlpha = peak * (b + 1) / 3;
+			ctx.beginPath();
+			for (let i = 0; i < count; i++) {
+				const act = activity(i);
+				if (act < 0.08 || accentOf(i) !== a) continue;
+				if (Math.min(2, Math.floor(act * calm[i] * 3)) !== b) continue;
+				cross(i, CROSS_SIZE + act * 2);
+			}
+			ctx.stroke();
+		}
+	}
+	ctx.globalAlpha = 1;
+}
+
+function frame(now) {
+	requestAnimationFrame(frame);
+	if (!ctx) return;
+	const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
+	last = now;
+	mouse.target = Math.max(0, mouse.target - dt * 0.6);
+	mouse.amount += (mouse.target - mouse.amount) * Math.min(1, dt * 6);
+	if (COLOR_CYCLE) phase = (phase + dt * CYCLE_SPEED * (reduced ? 0.25 : 1)) % 3;
+	acc += dt * MOTION;
+	let moving = false, n = 0;
+	while (acc >= STEP && n < 8) {
+		moving = step() || moving;
+		acc -= STEP;
+		n++;
+	}
+	if (n === 8) acc = 0;
+	if (moving || dirty) {
+		draw();
+		dirty = moving;
+	}
+}
 
 self.onmessage = (e) => {
-    switch (e.data.type) {
-        case 'init':
-            canvas = e.data.canvas;
-            ctx = canvas.getContext('2d');
-            resize(e.data.width, e.data.height);
-            startAnimation();
-            break;
-        case 'resize': resize(e.data.width, e.data.height); break;
-        case 'mousemove': mouse.x = e.data.x; mouse.y = e.data.y; break;
-    }
-};
-
-function resize(w, h) {
-    width = w; height = h;
-    if (canvas) { canvas.width = width; canvas.height = height; }
-    initGrid();
-}
-
-class Point {
-    constructor(x, y) { this.originX = x; this.originY = y; this.x = x; this.y = y; this.vx = 0; this.vy = 0; }
-    update() {
-        const dx = mouse.x - this.x, dy = mouse.y - this.y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        if (dist < CONFIG.mouseDist) {
-            const angle = Math.atan2(dy, dx);
-            const force = (CONFIG.mouseDist - dist) / CONFIG.mouseDist;
-            this.vx -= Math.cos(angle) * force * CONFIG.mouseForce;
-            this.vy -= Math.sin(angle) * force * CONFIG.mouseForce;
-        }
-        this.vx += (this.originX - this.x) * CONFIG.ease;
-        this.vy += (this.originY - this.y) * CONFIG.ease;
-        this.vx *= CONFIG.friction; this.vy *= CONFIG.friction;
-        this.x += this.vx; this.y += this.vy;
-    }
-    draw() {
-        const speed = Math.abs(this.vx) + Math.abs(this.vy);
-        ctx.strokeStyle = speed > 0.5 ? CONFIG.activeColor : CONFIG.color;
-        ctx.lineWidth = speed > 0.5 ? 1.5 : 1;
-        ctx.beginPath();
-        ctx.moveTo(this.x - 3, this.y); ctx.lineTo(this.x + 3, this.y);
-        ctx.moveTo(this.x, this.y - 3); ctx.lineTo(this.x, this.y + 3);
-        ctx.stroke();
-    }
-}
-
-function initGrid() {
-    points =[];
-    for (let x = 0; x <= width + CONFIG.spacing; x += CONFIG.spacing) {
-        for (let y = 0; y <= height + CONFIG.spacing; y += CONFIG.spacing) {
-            points.push(new Point(x, y));
-        }
-    }
-}
-
-function startAnimation() {
-    function render() {
-        if (!ctx) return;
-        ctx.clearRect(0, 0, width, height);
-        for (let i = 0; i < points.length; i++) { points[i].update(); points[i].draw(); }
-        requestAnimationFrame(render);
-    }
-    requestAnimationFrame(render);
-}`;
+	const d = e.data;
+	switch (d.type) {
+		case 'init':
+			canvas = d.canvas;
+			ctx = canvas.getContext('2d');
+			reduced = !!d.reducedMotion;
+			applyTheme(d.theme);
+			resize(d.width, d.height, d.dpr);
+			requestAnimationFrame(frame);
+			break;
+		case 'resize':
+			resize(d.width, d.height, d.dpr);
+			break;
+		case 'theme':
+			applyTheme(d);
+			break;
+		case 'motion':
+			reduced = !!d.reducedMotion;
+			break;
+		case 'mousemove':
+			mouse.x = d.x;
+			mouse.y = d.y;
+			mouse.target = 1;
+			break;
+	}
+};`;
 
     let CANVAS_PRESETS = Storage.get('canvas');
     if (!CANVAS_PRESETS || !Array.isArray(CANVAS_PRESETS) || CANVAS_PRESETS.length === 0) {
@@ -9238,7 +9382,7 @@ function startAnimation() {
         CSS_PRESETS =[
             {
                 name: "Tactical HUD",
-                code: "/* ==============================\n   Tactical HUD\n   Designed to pair with the\n   Tactical Liquid Grid canvas.\n   ============================== */\n\n/* --- Base: dark void + subtle grid --- */\nbody {\n  background-color: #020a12 !important;\n  background-image:\n    linear-gradient(rgba(0, 220, 255, 0.03) 1px, transparent 1px),\n    linear-gradient(90deg, rgba(0, 220, 255, 0.03) 1px, transparent 1px) !important;\n  background-size: 40px 40px !important;\n  background-attachment: fixed !important;\n}\n\n/* --- Transparency: let Canvas FX bleed through --- */\n#app, #app > div, #app > div > div, main, .app,\n[class*=\"bg-gray-\"]:not(button):not(a):not(input):not(select):not(.user-message *) {\n  background-color: transparent !important;\n  background-image: none !important;\n}\n\n/* --- Sidebar: frosted glass panel --- */\n#sidebar {\n  background-color: rgba(2, 10, 18, 0.82) !important;\n  backdrop-filter: blur(14px) saturate(1.2) !important;\n  -webkit-backdrop-filter: blur(14px) saturate(1.2) !important;\n  border-right: 1px solid rgba(0, 220, 255, 0.18) !important;\n  box-shadow: inset -6px 0 20px rgba(0, 220, 255, 0.04) !important;\n}\n\n/* Sidebar gradient overlays */\n.sidebar-bg-gradient-to-t,\n.sidebar-bg-gradient-to-b {\n  --tw-gradient-from: rgba(2, 10, 18, 0.9) !important;\n  --tw-gradient-to: transparent !important;\n}\n\n/* Active sidebar chat highlight */\n#sidebar a.bg-gray-100\\/10,\n#sidebar [class*=\"bg-gray-850\"] {\n  background-color: rgba(0, 220, 255, 0.08) !important;\n  border-left: 2px solid #00dcff !important;\n}\n\n/* --- Navbar gradient overlay --- */\n#navbar-bg-gradient-to-b {\n  background-image: linear-gradient(\n    to bottom,\n    rgba(2, 10, 18, 0.8),\n    transparent\n  ) !important;\n}\n\n/* --- Chat scroll overlay --- */\n#chat-container .bg-linear-to-t {\n  background-image: linear-gradient(\n    to top,\n    rgba(2, 10, 18, 0.85),\n    rgba(2, 10, 18, 0.3)\n  ) !important;\n}\n\n/* --- User message bubble --- */\n.user-message .rounded-3xl {\n  background-color: rgba(0, 220, 255, 0.07) !important;\n  border: 1px solid rgba(0, 220, 255, 0.15) !important;\n}\n\n/* --- Chat input area --- */\n#chat-input-container {\n  background-color: rgba(2, 10, 18, 0.7) !important;\n  backdrop-filter: blur(10px) !important;\n  -webkit-backdrop-filter: blur(10px) !important;\n  border: 1px solid rgba(0, 220, 255, 0.15) !important;\n  border-radius: 14px !important;\n  transition: border-color 0.3s, box-shadow 0.3s !important;\n}\n\n#chat-input-container:focus-within {\n  border-color: rgba(0, 220, 255, 0.5) !important;\n  box-shadow: 0 0 20px rgba(0, 220, 255, 0.1),\n              0 0 60px rgba(0, 220, 255, 0.04) !important;\n}\n\ntextarea {\n  background-color: transparent !important;\n}\n\n/* --- Send button: pulsing neon --- */\n#send-message-button {\n  background-color: rgba(0, 220, 255, 0.85) !important;\n  color: #020a12 !important;\n  box-shadow: 0 0 12px rgba(0, 220, 255, 0.35) !important;\n  animation: hud-pulse 2.5s ease-in-out infinite !important;\n}\n\n@keyframes hud-pulse {\n  0%, 100% { box-shadow: 0 0 8px rgba(0, 220, 255, 0.25); }\n  50% { box-shadow: 0 0 22px rgba(0, 220, 255, 0.55),\n                    0 0 50px rgba(0, 220, 255, 0.12); }\n}\n\n/* --- Prose / Markdown content --- */\n.prose {\n  color: #c4e8f0 !important;\n}\n\n.prose h1, .prose h2, .prose h3 {\n  color: #00dcff !important;\n}\n\n.prose a {\n  color: #00dcff !important;\n  text-decoration-color: rgba(0, 220, 255, 0.3) !important;\n}\n\n.prose strong {\n  color: #e0f4ff !important;\n}\n\n.prose hr {\n  border-color: rgba(0, 220, 255, 0.12) !important;\n}\n\n/* --- Code blocks --- */\n.prose pre {\n  background-color: rgba(2, 8, 16, 0.92) !important;\n  border: 1px solid rgba(0, 220, 255, 0.12) !important;\n  border-radius: 10px !important;\n  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;\n}\n\n.prose code:not(pre code) {\n  background-color: rgba(0, 220, 255, 0.1) !important;\n  color: #00dcff !important;\n  padding: 1px 5px !important;\n  border-radius: 4px !important;\n}\n\n/* --- Tables --- */\n.prose table {\n  border-color: rgba(0, 220, 255, 0.15) !important;\n}\n\n.prose th {\n  background-color: rgba(0, 220, 255, 0.06) !important;\n  color: #00dcff !important;\n  border-color: rgba(0, 220, 255, 0.15) !important;\n}\n\n.prose td {\n  border-color: rgba(0, 220, 255, 0.08) !important;\n}\n\n/* --- Inputs & textareas (settings, modals) --- */\ninput[type=\"text\"],\ninput[type=\"password\"],\ninput[type=\"email\"],\ninput[type=\"number\"],\ninput[type=\"search\"],\nselect {\n  background-color: rgba(2, 10, 18, 0.8) !important;\n  border-color: rgba(0, 220, 255, 0.15) !important;\n  color: #e0f4ff !important;\n}\n\ninput:focus, select:focus {\n  border-color: rgba(0, 220, 255, 0.4) !important;\n  box-shadow: 0 0 10px rgba(0, 220, 255, 0.08) !important;\n  outline: none !important;\n}\n\n/* --- Dialogs & modals --- */\n[role=\"dialog\"] > div {\n  background-color: rgba(5, 14, 24, 0.95) !important;\n  backdrop-filter: blur(16px) !important;\n  border: 1px solid rgba(0, 220, 255, 0.12) !important;\n}\n\n/* --- Tooltips (Tippy) --- */\n.tippy-box {\n  background-color: rgba(2, 12, 20, 0.95) !important;\n  border: 1px solid rgba(0, 220, 255, 0.2) !important;\n  color: #c4e8f0 !important;\n}\n\n.tippy-arrow::before {\n  color: rgba(2, 12, 20, 0.95) !important;\n}\n\n/* --- Global border tint --- */\n* {\n  border-color: rgba(0, 220, 255, 0.08) !important;\n}\n\n/* --- Scrollbar --- */\n::-webkit-scrollbar { width: 5px; }\n::-webkit-scrollbar-track { background: transparent; }\n::-webkit-scrollbar-thumb {\n  background: rgba(0, 220, 255, 0.25);\n  border-radius: 4px;\n}\n::-webkit-scrollbar-thumb:hover {\n  background: rgba(0, 220, 255, 0.5);\n}\n\n/* --- Selection highlight --- */\n::selection {\n  background: rgba(0, 220, 255, 0.25) !important;\n  color: #ffffff !important;\n}"
+                code: "/* Tactical HUD: a glass sidebar and input with a targeting glow, accent headings and table rules, all from the palette. Pairs with the Tactical Liquid Grid Canvas FX. */\n:root {\n\t--hud-accent: var(--color-gray-800);\n\t--hud-glass: color-mix(in oklab, var(--color-gray-50) 70%, transparent);\n\t--hud-line: color-mix(in oklab, var(--color-gray-600) 25%, transparent);\n\t--hud-glow: color-mix(in oklab, var(--color-gray-600) 40%, transparent);\n\t--hud-wash: color-mix(in oklab, var(--color-gray-500) 10%, transparent);\n\t--hud-fade: color-mix(in oklab, var(--color-gray-50) 80%, transparent);\n}\nhtml.dark {\n\t--hud-accent: var(--color-gray-200);\n\t--hud-glass: color-mix(in oklab, var(--color-gray-950) 75%, transparent);\n\t--hud-line: color-mix(in oklab, var(--color-gray-300) 20%, transparent);\n\t--hud-glow: color-mix(in oklab, var(--color-gray-300) 40%, transparent);\n\t--hud-wash: color-mix(in oklab, var(--color-gray-300) 8%, transparent);\n\t--hud-fade: color-mix(in oklab, var(--color-gray-950) 80%, transparent);\n}\n\n/* Glass panels. */\n#sidebar {\n\tbackground-color: var(--hud-glass) !important;\n\tbackdrop-filter: blur(14px) saturate(1.2);\n\tborder-inline-end: 1px solid var(--hud-line);\n}\n#sidebar-chat-item.selected {\n\tbackground-color: var(--hud-wash);\n\tbox-shadow: inset 2px 0 0 var(--hud-accent);\n}\n#navbar-bg-gradient-to-b {\n\tbackground-image: linear-gradient(to bottom, var(--hud-fade), transparent);\n}\n#message-input-container {\n\tbackground-color: var(--hud-glass) !important;\n\tborder-color: var(--hud-line);\n\tbackdrop-filter: blur(10px);\n\ttransition: border-color 0.3s, box-shadow 0.3s;\n}\n#message-input-container:focus-within {\n\tborder-color: var(--hud-glow);\n\tbox-shadow: 0 0 20px var(--hud-wash), 0 0 0 1px var(--hud-line);\n}\n.chat-user .rounded-3xl {\n\tbackground-color: var(--hud-wash) !important;\n\tbox-shadow: inset 0 0 0 1px var(--hud-line);\n}\n#send-message-button:enabled {\n\tbox-shadow: 0 0 12px var(--hud-glow);\n}\n\n/* Readouts. */\n.markdown-prose {\n\t--tw-prose-headings: var(--hud-accent);\n\t--tw-prose-links: var(--hud-accent);\n\t--tw-prose-hr: var(--hud-line);\n\t--tw-prose-th-borders: var(--hud-line);\n\t--tw-prose-td-borders: var(--hud-wash);\n}\n.markdown-prose th {\n\tbackground-color: var(--hud-wash);\n}\n.markdown-prose .codespan {\n\tcolor: var(--hud-accent);\n\tbox-shadow: inset 0 0 0 1px var(--hud-line);\n}\n::selection {\n\tbackground-color: var(--hud-glow);\n}\nhtml {\n\tscrollbar-color: var(--hud-line) transparent;\n}"
             }
         ];
         Storage.set('css', CSS_PRESETS);
