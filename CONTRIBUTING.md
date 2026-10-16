@@ -15,10 +15,10 @@ Before submitting a PR, ensure your preset meets these requirements:
 Every script follows the house standard in [`canvas-fx/README.md`](canvas-fx/README.md). In short:
 
 - [ ] **Runs in the worker:** no `document`, `window`, `alert` or `localStorage` in the code
-- [ ] **Handles** `init`, `resize` (with `dpr`), `theme`, `motion`, and the pointer or `context` messages it uses
+- [ ] **Handles** `init`, `resize` (with `dpr`), `theme`, `motion`, `layout`, and the pointer or `context` messages it uses
 - [ ] **No heartbeat:** the engine ignores anything a script posts back
 - [ ] **Follows the theme:** its own colors as defaults, the theme's when `FOLLOW_THEME` is on, recolored in place, no `'lighter'` on light themes
-- [ ] **Fits behind a chat:** a transparent canvas, a calm chat column (`CENTER_CALM`), focal points in the outer thirds or the bottom fifth, no flashes
+- [ ] **Fits behind a chat:** a transparent canvas, a calm band (`CENTER_CALM`) centered on the chat column the engine reports in `column`, focal points in the margins between the column and the chat area's edges or in the bottom fifth, no flashes
 - [ ] **Answers taps through `mousedown` only,** gently, since every click on the page reaches it
 - [ ] **Cheap:** elapsed-time motion with `dt` clamped to 0.1 s, nothing allocated per frame, sprites instead of per-particle gradients
 - [ ] **Respects reduced motion** and the screen's pixel ratio

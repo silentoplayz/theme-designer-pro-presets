@@ -20,7 +20,7 @@
 
 ### Canvas FX (the [house standard](canvas-fx/README.md))
 - [ ] Runs in the worker: no `document`, `window`, `localStorage` or `alert`, and no heartbeat
-- [ ] Handles `init`, `resize`, `theme`, `motion` and the pointer messages it uses; taps through `mousedown` only
+- [ ] Handles `init`, `resize`, `theme`, `motion`, `layout` and the pointer messages it uses; taps through `mousedown` only
 - [ ] Follows the theme, keeps the canvas transparent and the chat column calm
 - [ ] Elapsed-time motion, nothing allocated per frame, pixel ratio and reduced motion handled
 - [ ] A header with `Title` and a one-line `Description`, and at least 10 settings with `(min-max)` ranges

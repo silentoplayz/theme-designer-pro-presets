@@ -165,6 +165,9 @@ function validateCanvasFx() {
     if (!/['"]theme['"]/.test(code)) {
       warn(f, "doesn't follow the theme (no theme case)");
     }
+    if (!/['"]layout['"]/.test(code)) {
+      warn(f, "doesn't follow the chat column (no layout case)");
+    }
     if (code.includes("'lighter'") && !/\.dark\b/.test(code)) {
       warn(f, "draws with 'lighter' without checking for a light theme");
     }
