@@ -4,7 +4,8 @@ Usage: python3 tests/canvas-fx/analyze.py <outdir>  (needs Pillow)
 
 coverage: share of pixels that differ visibly from the theme background.
 calm: the chat column's average difference divided by the rest of the
-screen's (more than 200 px clear of the column). Under 1 means the column is
+screen's (more than 40 px clear of the column), leaving out the strip the
+harness's sidebar covers. Under 1 means the column is
 calmer, as the house standard asks. The column is where the harness said it was
 in that stage, so a script that ignores the layout message scores badly in
 3-dark-shifted.
@@ -35,11 +36,12 @@ def measure(png, column=None):
     col = column or {"x": w / 2, "width": 928}
     cx = col["x"] / w * sw
     half_band = col["width"] / 2 / w * sw
-    clear = half_band + 200 / w * sw
+    clear = half_band + 40 / w * sw
+    left = col.get("left", 0) / w * sw
     total = covered = 0
     center_sum = center_n = edge_sum = edge_n = 0
     for y in range(sh):
-        for x in range(sw):
+        for x in range(int(left), sw):
             v = px[x, y]
             total += 1
             covered += v > 6

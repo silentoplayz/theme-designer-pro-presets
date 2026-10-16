@@ -31,7 +31,8 @@ const PAGE = `<!doctype html><html><head><style>
 html, body { margin: 0; height: 100%; overflow: hidden; }
 #bg { position: fixed; inset: 0; }
 canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; }
-</style></head><body><div id="bg"></div><canvas id="c"></canvas></body></html>`;
+#sidebar { position: fixed; top: 0; bottom: 0; left: 0; width: 260px; backdrop-filter: blur(24px); }
+</style></head><body><div id="bg"></div><canvas id="c"></canvas><div id="sidebar"></div></body></html>`;
 
 // Counts frames and times each callback, out of the script's sight
 const PRELUDE = `(function () {
@@ -57,12 +58,14 @@ const PRELUDE = `(function () {
 	await page.setContent(PAGE);
 	// Where the chat column sits in each stage: the sidebar open at first, then moved
 	const COLUMNS = {
-		'1-dark': { x: 850, width: 928 }, '2-dark-interact': { x: 850, width: 928 },
-		'3-dark-shifted': { x: 1000, width: 700 }, '4-light': { x: 850, width: 928 },
-		'5-light-resized': { x: 630, width: 716 }, '6-light-dpr2-reduced': { x: 850, width: 928 },
+		'1-dark': { x: 850, width: 928, left: 260, right: 1440 }, '2-dark-interact': { x: 850, width: 928, left: 260, right: 1440 },
+		'3-dark-shifted': { x: 1000, width: 700, left: 260, right: 1440 }, '4-light': { x: 850, width: 928, left: 260, right: 1440 },
+		'5-light-resized': { x: 630, width: 716, left: 260, right: 1000 }, '6-light-dpr2-reduced': { x: 850, width: 928, left: 260, right: 1440 },
 	};
 	await page.evaluate(({ src, prelude, theme, column }) => {
 		document.getElementById('bg').style.background = theme.colors.background;
+		// A frosted sidebar over the left edge, as Open WebUI has with it open
+		document.getElementById('sidebar').style.background = theme.colors.surface + 'd9';
 		const worker = new Worker(URL.createObjectURL(new Blob([prelude, src], { type: 'application/javascript' })));
 		worker.onerror = (e) => console.error('worker error: ' + e.message + ' at line ' + e.lineno);
 		worker.onmessage = (e) => { if (e.data && e.data.type === 'harness-stats') window.__stats = e.data; };
@@ -102,7 +105,11 @@ const PRELUDE = `(function () {
 	await shot('3-dark-shifted');
 
 	await send({ type: 'layout', column: COLUMNS['4-light'] });
-	await page.evaluate((t) => { document.getElementById('bg').style.background = t.colors.background; window.__w.postMessage(t); }, THEMES.light);
+	await page.evaluate((t) => {
+		document.getElementById('bg').style.background = t.colors.background;
+		document.getElementById('sidebar').style.background = t.colors.surface + 'd9';
+		window.__w.postMessage(t);
+	}, THEMES.light);
 	await wait(3000);
 	await shot('4-light');
 

@@ -152,10 +152,12 @@ function updateBloom(dt) {
 	if (BLOOM_EVERY <= 0 || MOTION <= 0 || reduced || bloom.age < 10) return;
 	bloom.wait -= dt;
 	if (bloom.wait > 0) return;
-	const left = Math.max(0, colX() - colHalf()), right = Math.max(0, w - colX() - colHalf());
+	// The margins beside the column, inside the chat area so the sidebar can't cover a bloom
+	const lo = column ? column.left : 0, hi = column ? column.right : w;
+	const left = Math.max(0, colX() - colHalf() - lo), right = Math.max(0, hi - colX() - colHalf());
 	if (left + right < 80) return;
 	const r = Math.random() * (left + right);
-	bloom.x = r < left ? r * 0.85 : w - (r - left) * 0.85;
+	bloom.x = r < left ? lo + r * 0.85 : hi - (r - left) * 0.85;
 	bloom.y = h * (0.15 + Math.random() * 0.7);
 	bloom.strength = 0.5 + Math.random() * 0.5;
 	bloom.age = 0;

@@ -30,7 +30,7 @@ The engine sends messages to `self.onmessage`. A script handles `init` and `resi
 | `touchstart`, `touchmove`, `touchend` | `{ touches: [{ x, y }, ...] }` | For multi-touch effects |
 | `context` | `{ messages, chars, estimatedTokens }` or `{ exactTokens, ... }` | At most every 2 s while the chat changes |
 
-`column` is `{ x, width }` in CSS pixels, the column's center and width, or `null` on a page without a chat. With the sidebar open, the column sits right of the screen's center.
+`column` is `{ x, width, left, right }` in CSS pixels: the column's center and width, and the left and right edges of the chat area around it, which leave out the sidebar. It is `null` on a page without a chat. With the sidebar open, the column sits right of the screen's center and the sidebar covers the screen's left edge.
 
 `theme.colors` holds `background`, `surface`, `text`, `muted`, `accent`, `accent2` and `accent3` as `#rrggbb`, and `theme.rgb` the same colors as `[r, g, b]` from 0 to 1, ready for a WebGL uniform. `theme.dark` is false in Light and Her.
 
@@ -56,7 +56,7 @@ The engine listens to nothing a script posts back, so a script needs no heartbea
 ### Composition
 
 - Keep the canvas transparent. Clear each frame, or fade trails with `globalCompositeOperation = 'destination-out'`. Never paint a backdrop: the theme's own background shows through.
-- Keep the chat column calm. Open WebUI's messages and input sit in a column up to 928 px wide. Scale alpha and density there by `1 - CENTER_CALM * band(x)`, where `band` is 1 over the column and falls off smoothly beyond it. Center the band on `column.x` with a half-width of `column.width / 2 + 56`, falling back to the screen's center and 520 px when `column` is `null`, and rebuild anything cached from it on a `layout` message. Put focal points (a sun, a core, a bloom) in the outer thirds or the bottom fifth, away from the column.
+- Keep the chat column calm. Open WebUI's messages and input sit in a column up to 928 px wide. Scale alpha and density there by `1 - CENTER_CALM * band(x)`, where `band` is 1 over the column and falls off smoothly beyond it. Center the band on `column.x` with a half-width of `column.width / 2 + 56`, falling back to the screen's center and 520 px when `column` is `null`, and rebuild anything cached from it on a `layout` message. Put focal points (a sun, a core, a bloom) in the margins beside the column, measured from `column.left` and `column.right` so the sidebar doesn't cover them, or in the bottom fifth.
 - Start the cursor off screen and let its effect fade once it stops moving.
 - Every click on the page reaches the script, the Send button's included. Answer taps through `mousedown` alone, which also fires on touch, so one tap never acts twice, and keep the answer gentle.
 - No full-screen flashes or strobes, and no noise over the column.

@@ -2,14 +2,14 @@
 
 [`harness.js`](harness.js) runs one Canvas FX script the way Theme Designer Pro does, in a Web Worker with an `OffscreenCanvas`, and screenshots it through a fixed sequence:
 
-1. a dark theme, for 5 seconds, with the chat column where an open sidebar puts it
+1. a dark theme, for 5 seconds, with the chat column where an open sidebar puts it and a frosted panel standing in for the sidebar
 2. a cursor sweep and a tap on the right side
 3. the column moved further right and narrowed, through a `layout` message
 4. a live switch to a light theme
 5. a resize to 1000x700
 6. 1440x900 at a pixel ratio of 2, with reduced motion on
 
-It saves the six screenshots and a `summary.json` with any errors from the page or the worker, the frame rate, and the CPU time each frame takes. [`analyze.py`](analyze.py) then compares each screenshot with the theme's background and writes `report.json`: how much of the screen the effect covers, how busy the chat column is next to the rest of the screen (`calm`, under 1 means calmer), measured wherever the harness put the column in that stage, and flags for a blank canvas or a painted backdrop.
+It saves the six screenshots and a `summary.json` with any errors from the page or the worker, the frame rate, and the CPU time each frame takes. [`analyze.py`](analyze.py) then compares each screenshot with the theme's background and writes `report.json`: how much of the screen the effect covers, how busy the chat column is next to the rest of the screen (`calm`, under 1 means calmer), measured wherever the harness put the column in that stage and leaving out the sidebar's strip, and flags for a blank canvas or a painted backdrop.
 
 ```bash
 npm install --no-save playwright-core@1.56.1

@@ -1354,14 +1354,19 @@ class Event:
             }
 
             // The chat column, as the input pill shows it: its center and width in
-            // CSS pixels, or null on a page without one. With the sidebar open the
-            // column sits right of the screen's center.
+            // CSS pixels, plus the left and right edges of the chat area around it
+            // (the sidebar excluded), or null on a page without one. With the
+            // sidebar open the column sits right of the screen's center.
             function _columnLayout() {
                 var el = document.getElementById('message-input-container');
                 if (!el) return null;
                 var r = el.getBoundingClientRect();
                 if (r.width < 50) return null;
-                return { x: Math.round(r.left + r.width / 2), width: Math.round(r.width) };
+                var pane = document.getElementById('chat-container');
+                var p = pane ? pane.getBoundingClientRect() : null;
+                var left = p && p.width > r.width ? Math.max(0, Math.round(p.left)) : 0;
+                var right = p && p.width > r.width ? Math.min(window.innerWidth, Math.round(p.right)) : window.innerWidth;
+                return { x: Math.round(r.left + r.width / 2), width: Math.round(r.width), left: left, right: right };
             }
 
             function _prefersReducedMotion() {
@@ -1854,7 +1859,7 @@ class Event:
                             var _checkColumn = function() {
                                 var c = _columnLayout(), p = _lastColumn;
                                 if (!c && !p) return;
-                                if (c && p && Math.abs(c.x - p.x) < 3 && Math.abs(c.width - p.width) < 3) return;
+                                if (c && p && Math.abs(c.x - p.x) < 3 && Math.abs(c.width - p.width) < 3 && Math.abs(c.left - p.left) < 3 && Math.abs(c.right - p.right) < 3) return;
                                 _lastColumn = c;
                                 _sendLayout({ type: 'layout', column: c });
                             };
@@ -6620,7 +6625,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                                 <tr style="border-bottom: 1px solid var(--border);">
                                     <td><code>init</code></td>
                                     <td><code>{ canvas, width, height, dpr, reducedMotion, column, env, theme }</code></td>
-                                    <td>Fired once on startup. <code>theme</code> is the active mode's palette, the same object a <code>theme</code> message carries (see <b>Theme-Aware Animations</b>). <code>canvas</code> is an <code>OffscreenCanvas</code> transferred via <code>postMessage</code>. Call <code>canvas.getContext('2d')</code> for 2D drawing, or <code>canvas.getContext('webgl2')</code> (with <code>'webgl'</code> fallback) for GPU-accelerated shader rendering. <code>width</code> and <code>height</code> are the initial viewport dimensions, in CSS pixels. <code>dpr</code> is the screen&rsquo;s device pixel ratio, which a worker can&rsquo;t read for itself: size the canvas at <code>width * dpr</code> for sharp lines, within a pixel budget, since the canvas element is stretched to the viewport either way. <code>reducedMotion</code> is true when the viewer has asked their system to reduce motion; slow the animation down, drop flashes and sudden movement, or hold it still. <code>column</code> is where the chat column sits, as <code>{ x, width }</code> in CSS pixels (its center and width), or <code>null</code> on a page without a chat; with the sidebar open it sits right of the screen&rsquo;s center, so keep your calm band on it. <code>env</code> provides runtime context: <code>{ authToken, baseUrl, locale, timezone }</code>. <b>authToken is the token of whichever user is viewing the page</b>, and is an empty string unless an admin has enabled the Canvas API Access valve &mdash; a script given it can call the Open WebUI API as that user.</td>
+                                    <td>Fired once on startup. <code>theme</code> is the active mode's palette, the same object a <code>theme</code> message carries (see <b>Theme-Aware Animations</b>). <code>canvas</code> is an <code>OffscreenCanvas</code> transferred via <code>postMessage</code>. Call <code>canvas.getContext('2d')</code> for 2D drawing, or <code>canvas.getContext('webgl2')</code> (with <code>'webgl'</code> fallback) for GPU-accelerated shader rendering. <code>width</code> and <code>height</code> are the initial viewport dimensions, in CSS pixels. <code>dpr</code> is the screen&rsquo;s device pixel ratio, which a worker can&rsquo;t read for itself: size the canvas at <code>width * dpr</code> for sharp lines, within a pixel budget, since the canvas element is stretched to the viewport either way. <code>reducedMotion</code> is true when the viewer has asked their system to reduce motion; slow the animation down, drop flashes and sudden movement, or hold it still. <code>column</code> is where the chat column sits, as <code>{ x, width, left, right }</code> in CSS pixels: its center and width, and the left and right edges of the chat area around it, which leave out the sidebar. It is <code>null</code> on a page without a chat. With the sidebar open the column sits right of the screen&rsquo;s center, so keep your calm band on it, and put focal points in the margins between <code>left</code> and the column or the column and <code>right</code>, where the sidebar won&rsquo;t cover them. <code>env</code> provides runtime context: <code>{ authToken, baseUrl, locale, timezone }</code>. <b>authToken is the token of whichever user is viewing the page</b>, and is an empty string unless an admin has enabled the Canvas API Access valve &mdash; a script given it can call the Open WebUI API as that user.</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid var(--border);">
                                     <td><code>resize</code></td>
@@ -6680,7 +6685,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                                 <tr style="border-top: 1px solid var(--border);">
                                     <td><code>layout</code></td>
                                     <td><code>{ column }</code></td>
-                                    <td>Fired when the chat column moves or changes width: the sidebar opening or closing, a resize, or a page with or without a chat. <code>column</code> is <code>{ x, width }</code> or <code>null</code>, as in <code>init</code>.</td>
+                                    <td>Fired when the chat column moves or changes width: the sidebar opening or closing, a resize, or a page with or without a chat. <code>column</code> is <code>{ x, width, left, right }</code> or <code>null</code>, as in <code>init</code>.</td>
                                 </tr>
                             </tbody>
                         </table>
