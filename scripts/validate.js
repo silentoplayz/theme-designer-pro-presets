@@ -112,6 +112,14 @@ function validateSchema(data, schemaKey, file) {
 }
 
 // ── Canvas FX Validation ──
+// The house standard is in canvas-fx/README.md. Failures break it outright;
+// warnings are worth a look.
+
+// Comments removed, as the engine removes them before it checks for `document`
+function stripJsComments(source) {
+  return source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|\s)\/\/.*$/gm, '$1');
+}
+
 function validateCanvasFx() {
   const dir = path.join(ROOT, 'canvas-fx');
   if (!fs.existsSync(dir)) return;
@@ -121,46 +129,86 @@ function validateCanvasFx() {
 
   for (const f of files) {
     const content = fs.readFileSync(path.join(dir, f), 'utf8');
+    const code = stripJsComments(content);
+    const before = errors;
 
-    // Manual checks — schemas can't validate JS source content
-    if (!content.includes('self.onmessage') && !content.includes('onmessage')) {
+    if (!code.includes('onmessage')) {
       fail(f, 'missing self.onmessage handler');
       continue;
     }
-
-    if (!content.includes('heartbeat')) {
-      warn(f, 'missing heartbeat postMessage (recommended for worker keepalive)');
+    if (!/['"]init['"]/.test(code)) {
+      fail(f, 'missing an init case (it receives the canvas)');
+    }
+    if (!/['"]resize['"]/.test(code)) {
+      fail(f, 'missing a resize case');
+    }
+    if (/setInterval\([\s\S]{0,160}?heartbeat/.test(code)) {
+      fail(f, 'sends a heartbeat, which the engine ignores; remove the setInterval');
+    }
+    const dom = ['document', 'window', 'localStorage', 'alert'].find(word => new RegExp(`\\b${word}\\b`).test(code));
+    if (dom) {
+      fail(f, `uses \`${dom}\`, which moves it out of the worker`);
+    }
+    if (/getContext\(\s*['"]webgl2?['"]/.test(code) && !code.includes('webglcontextlost')) {
+      fail(f, 'uses WebGL without handling webglcontextlost');
     }
 
-    // Check for init message handler — required to receive the canvas
-    if (!content.includes("'init'") && !content.includes('"init"')) {
-      fail(f, 'missing init message handler (required to receive OffscreenCanvas)');
+    if (!code.includes('requestAnimationFrame')) {
+      warn(f, 'no requestAnimationFrame render loop');
+    }
+    if (!/['"]theme['"]/.test(code)) {
+      warn(f, "doesn't follow the theme (no theme case)");
+    }
+    if (code.includes("'lighter'") && !/\.dark\b/.test(code)) {
+      warn(f, "draws with 'lighter' without checking for a light theme");
+    }
+    if (/\*\s*Description:\s*.+\n(\s*\*\s{3,}\S)/.test(content)) {
+      warn(f, 'the Description runs over more than one line');
+    }
+    if (Buffer.byteLength(content) > 20 * 1024) {
+      warn(f, `is ${Math.round(Buffer.byteLength(content) / 1024)} KB, over the 20 KB budget`);
     }
 
-    // Check for requestAnimationFrame — recommended render loop
-    if (!content.includes('requestAnimationFrame')) {
-      warn(f, 'missing requestAnimationFrame (recommended for smooth render loop)');
-    }
-
-    // Check for multi-line JSDoc description (informational)
-    const descMatch = content.match(/\*\s*Description:\s*.+\n(\s*\*\s{3,}\S)/);
-    if (descMatch) {
-      warn(f, 'multi-line JSDoc Description detected (catalog captures full text across continuation lines)');
-    }
-
-    // Check for forbidden DOM access
-    const forbidden = ['document.', 'window.', 'localStorage', 'alert('];
-    let hasForbidden = false;
-    for (const word of forbidden) {
-      if (content.includes(word)) {
-        fail(f, `contains forbidden DOM access: "${word}"`);
-        hasForbidden = true;
-        break;
-      }
-    }
-
-    if (!hasForbidden) pass(f);
+    if (errors === before) pass(f);
   }
+}
+
+// ── CSS checks shared by CSS presets and theme custom CSS ──
+// Selectors that match nothing, or the wrong thing, on current Open WebUI.
+const DEAD_SELECTORS = [
+  [/(^|[^:\w-])\.bg-blue-(500|600)\b/, '.bg-blue-500/600 matches almost nothing in current Open WebUI'],
+  [/(^|[^:\w-])\.bg-gray-850\b/, '.bg-gray-850 only exists as dark:bg-gray-850'],
+  [/(^|[^:\w-])\.bg-black\b/, '.bg-black hits light-mode buttons and the image viewer, not dark surfaces'],
+  [/(^|[^:\w-])\.message-content\b/, '.message-content no longer exists'],
+];
+
+function cssSelectors(css) {
+  const clean = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const out = [];
+  const re = /([^{}]+)\{/g;
+  let m;
+  while ((m = re.exec(clean))) {
+    m[1].split(',').map(s => s.trim()).filter(s => s && !s.startsWith('@') && !/^(from|to|\d+%)$/.test(s)).forEach(s => out.push(s));
+  }
+  return out;
+}
+
+function checkCss(label, css) {
+  const before = errors;
+  const selectors = cssSelectors(css);
+  if (selectors.some(s => s.includes('#chat-input-container'))) {
+    fail(label, 'styles #chat-input-container, the square box inside the rounded input; style #message-input-container instead');
+  }
+  for (const [re, why] of DEAD_SELECTORS) {
+    if (selectors.some(s => re.test(s))) warn(label, why);
+  }
+  if (selectors.some(s => /(^|[\s>+~,(])(input|textarea)(?![\w-])(?![^\s]*\[)/.test(s) && !/[#.][\w-]/.test(s))) {
+    warn(label, 'a bare input or textarea rule restyles every field in Settings and hides checkbox states');
+  }
+  if (/(^|[\s,{])\*\s*\{[^}]*!important/.test(css.replace(/\/\*[\s\S]*?\*\//g, ''))) {
+    warn(label, 'a * rule with !important reaches every element, focus rings included');
+  }
+  return errors === before;
 }
 
 // ── CSS Preset Validation ──
@@ -179,13 +227,12 @@ function validateCssPresets() {
       continue;
     }
 
-    // Basic CSS syntax: should have at least one { } block or @rule
     if (!content.includes('{') && !content.includes('@')) {
       fail(f, 'does not appear to contain valid CSS');
       continue;
     }
 
-    pass(f);
+    if (checkCss(f, content)) pass(f);
   }
 }
 
@@ -246,6 +293,12 @@ function validateThemes() {
 
     if (!data.version || !data.version.trim()) {
       warn(f, 'missing "version" — use semver (e.g. "1.0.0") for update tracking');
+    }
+
+    // ── Custom CSS in each mode ──
+    for (const mode of ['dark', 'light', 'oled', 'her']) {
+      const m = data[mode];
+      if (m && m.customCSS && m.customCSS.trim() && m.customCssEnabled !== false) checkCss(`${f} (${mode})`, m.customCSS);
     }
 
     // ── Duplicate name detection ──
