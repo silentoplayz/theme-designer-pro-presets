@@ -1,281 +1,270 @@
 /**
  * Title: Ocean Waves
- * Description: Layered horizontal wave patterns at different depths, creating an
- *   ocean surface viewed from below. Each layer rolls at its own speed and
- *   frequency, with a lit crest line tracing the swell. Foam bubbles drift up
- *   through the water column and soft caustic patches wander across the scene.
- *   Deep blues and teals with varying opacity.
- *
- *   Move your mouse to push a swell through the waves — nearer layers react
- *   more strongly. Fully autonomous otherwise; no interaction required.
+ * Description: Layered translucent swells in your theme's colors roll across the lower screen with lit crests, rising bubbles and drifting caustic light, thin behind the chat and lift under the cursor.
  */
 
 /* ────────── CONFIGURABLE VARIABLES ────────── */
-/* ── Motion ── */
-const TIME_SCALE           = 1.0;      // global speed; 0.5 = languid, 2 = choppy
-const NUM_LAYERS           = 5;        // wave layers, back to front (1–12 sensible)
-
-/* ── Wave shape ── */
-const LAYER_TOP            = 0.25;     // topmost layer's Y, as a fraction of height
-const LAYER_SPAN           = 0.55;     // vertical spread of all layers (fraction of height)
-const AMPLITUDE_BACK       = 15;       // wave height of the deepest layer, px
-const AMPLITUDE_FRONT      = 40;       // wave height of the nearest layer, px
-const FREQUENCY_BACK       = 0.007;    // wavelength of deep layers; higher = tighter
-const FREQUENCY_FRONT      = 0.003;    // wavelength of near layers
-const SPEED_BACK           = 0.020;    // scroll speed of deep layers
-const SPEED_FRONT          = 0.008;    // scroll speed of near layers
-const HARMONIC_FREQ_MULT   = 2.3;      // 2nd wave frequency, relative to primary
-const HARMONIC_AMP_MULT    = 0.3;      // 2nd wave height, relative to primary
-const HARMONIC_SPEED_MULT  = 1.5;      // 2nd wave speed, relative to primary
-const RIPPLE_FREQ_MULT     = 4.7;      // fine surface chop frequency
-const RIPPLE_AMP_MULT      = 0.08;     // fine surface chop height
-const RIPPLE_SPEED_MULT    = 0.7;      // fine surface chop speed
-
-/* ── Color (HSL — shift the hues for a sunset or arctic ocean) ── */
-const HUE_DEEP             = 200;      // hue of the deepest layer
-const HUE_SHALLOW          = 220;      // hue of the nearest layer
-const SATURATION           = 70;       // wave saturation, %
-const LIGHTNESS_DEEP       = 15;       // lightness of the deepest layer, %
-const LIGHTNESS_SHALLOW    = 35;       // lightness of the nearest layer, %
-const ALPHA_DEEP           = 0.08;     // opacity of the deepest layer
-const ALPHA_SHALLOW        = 0.20;     // opacity of the nearest layer
-
-/* ── Crest highlight ── */
-const HIGHLIGHT_HUE_SHIFT  = -10;      // crest hue offset from its layer
-const HIGHLIGHT_SATURATION = 60;       // crest saturation, %
-const HIGHLIGHT_LIGHTNESS  = 15;       // crest lightness added to its layer, %
-const HIGHLIGHT_ALPHA_MULT = 0.5;      // crest opacity, relative to its layer
-const HIGHLIGHT_WIDTH      = 1.5;      // crest line thickness, px; 0 disables
-
-/* ── Mouse swell ── */
-const MOUSE_RADIUS         = 250;      // reach of the swell, px
-const MOUSE_SWELL          = 40;       // swell height, px; 0 disables interaction
-const MOUSE_DEPTH_FALLOFF  = 0.5;      // 0 = all layers react equally, 1 = front only
-
-/* ── Foam bubbles ── */
-const BUBBLE_COUNT         = 30;       // 0 disables bubbles
-const BUBBLE_COLOR         = [150, 200, 220];  // RGB
-const BUBBLE_RADIUS        = [0.5, 2.0];       // [min, max] px
-const BUBBLE_OPACITY       = [0.03, 0.09];     // [min, max]
-const BUBBLE_RISE          = [0.1, 0.4];       // [min, max] upward speed, px/frame
-const BUBBLE_DRIFT         = 0.3;      // horizontal wander, px/frame
-const BUBBLE_LIFETIME      = [0.001, 0.004];   // [min, max] fade rate per frame
-const BUBBLE_BAND          = [0.2, 0.8];       // spawn band, as fractions of height
-
-/* ── Caustic light patches ── */
-const CAUSTIC_COUNT        = 6;        // 0 disables caustics
-const CAUSTIC_COLOR        = [120, 200, 220];  // RGB
-const CAUSTIC_Y            = 0.4;      // vertical center, as a fraction of height
-const CAUSTIC_RADIUS       = 60;       // patch size, px
-const CAUSTIC_RADIUS_VARY  = 20;       // how much the size breathes, px
-const CAUSTIC_SWAY         = [80, 60]; // [horizontal, vertical] wander, px
-const CAUSTIC_ALPHA        = 0.015;    // base brightness
-const CAUSTIC_ALPHA_VARY   = 0.01;     // how much the brightness pulses
-const CAUSTIC_DRIFT        = 1.0;      // caustic movement speed multiplier
-
-/* ── Performance ── */
-const WAVE_STEP            = 4;        // px between wave sample points; raise to lighten
+const TIME_SCALE      = 1;     // wave speed; 0.5 is languid, 2 is choppy, 0 holds still (0-3)
+const REDUCED_SPEED   = 0.2;   // share of the speed kept when the viewer asks to reduce motion (0-1)
+const NUM_LAYERS      = 5;     // wave layers, back to front (1-10)
+const LAYER_TOP       = 0.6;   // height of the deepest layer, as a share of the screen (0.1-0.8)
+const LAYER_SPAN      = 0.3;   // vertical spread of the layers, as a share of the screen (0.1-0.8)
+const AMPLITUDE_BACK  = 15;    // wave height of the deepest layer, in px (0-60)
+const AMPLITUDE_FRONT = 40;    // wave height of the nearest layer, in px (0-100)
+const WAVE_LENGTH     = 1;     // length of the swells; higher is longer (0.4-3)
+const OPACITY         = 1;     // strength of the water (0.2-2)
+const CREST_WIDTH     = 1.5;   // thickness of the lit crest line, in px; 0 turns it off (0-4)
+const CENTER_CALM     = 0.7;   // how much the water thins behind the chat column (0-1)
+const BAND_WIDTH      = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const MOUSE_SWELL     = 40;    // height of the swell under the cursor, in px; 0 turns it off (0-100)
+const MOUSE_RADIUS    = 250;   // reach of the swell, in px (80-500)
+const BUBBLES         = 30;    // rising foam bubbles; 0 turns them off (0-120)
+const CAUSTICS        = 6;     // drifting patches of caustic light; 0 turns them off (0-12)
+const WAVE_STEP       = 4;     // px between wave samples; raise to lighten the load (2-12)
+const FOLLOW_THEME    = true;  // take the colors from the theme's palette
+const HUE_DEEP        = 200;   // hue of the deepest layer when not following the theme (0-360)
+const HUE_SHALLOW     = 220;   // hue of the nearest layer when not following the theme (0-360)
 /* ──────────────────────────────────────────── */
 
 const TAU = Math.PI * 2;
-// Every other knob degrades gracefully at 0; this one would spin the sample loop forever.
-const STEP = Math.max(1, WAVE_STEP);
+const STEP = Math.max(2, WAVE_STEP);
+const L = Math.max(1, Math.min(10, Math.round(NUM_LAYERS)));
+const NB = Math.max(0, Math.min(120, Math.round(BUBBLES)));
+const NC = Math.max(0, Math.min(12, Math.round(CAUSTICS)));
 
-let canvas, ctx, width, height;
-let mouse = { x: -9999, y: -9999 };
-let time = 0;
-let layers = [];
-let bubbles = [];
+let canvas, ctx;
+let w = 0, h = 0, dpr = 1;
+let last = 0, time = 0, reduced = false, dark = true, theme = null;
+const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
 
-setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);
+// Per-layer wave traits
+const yBase = new Float32Array(L), amp = new Float32Array(L), freq = new Float32Array(L);
+const speed = new Float32Array(L), phase = new Float32Array(L), depth = new Float32Array(L);
+let pts = new Float32Array(2);
+const fills = [], crests = [];
+let calmMask = null;
+// Bubbles
+const bx = new Float32Array(NB), by = new Float32Array(NB), br = new Float32Array(NB);
+const bvx = new Float32Array(NB), bvy = new Float32Array(NB), bop = new Float32Array(NB);
+const blife = new Float32Array(NB), bdecay = new Float32Array(NB);
+let bubbleSprite = null, causticSprite = null;
+
+for (let i = 0; i < L; i++) phase[i] = Math.random() * TAU;
 
 function lerp(a, b, t) { return a + (b - a) * t; }
-function randIn(range) { return range[0] + Math.random() * (range[1] - range[0]); }
 
-// ── Wave layers ──
+function hexToRgb(hex) {
+	const n = parseInt(String(hex).slice(1, 7), 16) || 0;
+	return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
 
-class WaveLayer {
-	constructor(index, total) {
-		this.phase = Math.random() * TAU;
-		this.recalc(index, total);
+function mix(a, b, t) {
+	return [Math.round(lerp(a[0], b[0], t)), Math.round(lerp(a[1], b[1], t)), Math.round(lerp(a[2], b[2], t))];
+}
+
+function hsl(hue, s, l) {
+	s /= 100; l /= 100;
+	const k = (n) => (n + hue / 30) % 12;
+	const a = s * Math.min(l, 1 - l);
+	const f = (n) => Math.round(255 * (l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)))));
+	return [f(0), f(8), f(4)];
+}
+
+function rgba(c, a) {
+	return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + Math.max(0, a).toFixed(3) + ')';
+}
+
+function band(x) {
+	const d = Math.abs(x - w * 0.5) / BAND_WIDTH;
+	const s = Math.min(1, Math.max(0, (d - 0.35) / 1.0)); // a wide, slow falloff, so the water has no visible seam
+	return 1 - s * s * (3 - 2 * s);
+}
+
+function sprite(c) {
+	const s = new OffscreenCanvas(128, 128);
+	const g = s.getContext('2d');
+	const grad = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+	for (let k = 0; k <= 8; k++) grad.addColorStop(k / 8, rgba(c, Math.exp(-k * k / 14) * (1 - k / 8)));
+	g.fillStyle = grad;
+	g.fillRect(0, 0, 128, 128);
+	return s;
+}
+
+// Colors, cached gradients and sprites; rebuilt on theme change and resize only
+function build() {
+	if (!ctx || !w) return;
+	const c = FOLLOW_THEME && theme && theme.colors ? theme.colors : null;
+	let back, front, crestTint, foam, glow;
+	if (c) {
+		const a = hexToRgb(c.accent), a3 = hexToRgb(c.accent3), bg = hexToRgb(c.background), tx = hexToRgb(c.text);
+		back = dark ? mix(a3, bg, 0.45) : mix(a3, bg, 0.2);
+		front = dark ? mix(a, a3, 0.3) : a;
+		crestTint = dark ? tx : mix(a, tx, 0.35);
+		foam = dark ? mix(a3, tx, 0.5) : a3;
+		glow = dark ? mix(a3, tx, 0.3) : [255, 255, 255];
+	} else {
+		back = hsl(HUE_DEEP, 70, dark ? 15 : 40);
+		front = hsl(HUE_SHALLOW, 70, dark ? 35 : 45);
+		crestTint = dark ? hsl(HUE_SHALLOW - 10, 60, 70) : hsl(HUE_SHALLOW, 70, 30);
+		foam = [150, 200, 220];
+		glow = dark ? [120, 200, 220] : [255, 255, 255];
 	}
-
-	recalc(index, total) {
-		// Sized for the widest the canvas can be between resizes, +1 for the x=0 point
-		this.points = new Float64Array((Math.ceil(width / STEP) + 2) * 2);
-		// t: 0 = deepest/back, 1 = shallowest/front
-		const t = total > 1 ? index / (total - 1) : 0;
-		this.depth = t;
-		this.yBase = height * (LAYER_TOP + t * LAYER_SPAN);
-		this.amplitude = lerp(AMPLITUDE_BACK, AMPLITUDE_FRONT, t);
-		this.frequency = lerp(FREQUENCY_BACK, FREQUENCY_FRONT, t);
-		this.speed = lerp(SPEED_BACK, SPEED_FRONT, t);
-		this.secondaryFreq = this.frequency * HARMONIC_FREQ_MULT;
-		this.secondaryAmp = this.amplitude * HARMONIC_AMP_MULT;
-
-		const hue = lerp(HUE_DEEP, HUE_SHALLOW, t);
-		const lightness = lerp(LIGHTNESS_DEEP, LIGHTNESS_SHALLOW, t);
-		const alpha = lerp(ALPHA_DEEP, ALPHA_SHALLOW, t);
-		this.color = `hsla(${hue}, ${SATURATION}%, ${lightness}%, ${alpha})`;
-		this.highlightColor = `hsla(${hue + HIGHLIGHT_HUE_SHIFT}, ${HIGHLIGHT_SATURATION}%, ` +
-			`${lightness + HIGHLIGHT_LIGHTNESS}%, ${alpha * HIGHLIGHT_ALPHA_MULT})`;
+	const a0 = (dark ? 0.08 : 0.05) * OPACITY, a1 = (dark ? 0.2 : 0.13) * OPACITY;
+	for (let i = 0; i < L; i++) {
+		const t = depth[i];
+		const col = mix(back, front, t);
+		const alpha = lerp(a0, a1, t);
+		const crest = mix(col, crestTint, dark ? 0.4 : 0.5);
+		const crestA = alpha * (dark ? 0.6 : 1.4) * 1.5;
+		fills[i] = rgba(col, alpha);
+		crests[i] = rgba(crest, Math.min(1, crestA));
 	}
+	// One mask thins everything behind the chat in a single pass, which bands far less than per-layer gradients
+	calmMask = ctx.createLinearGradient(0, 0, w, 0);
+	for (let s = 0; s <= 48; s++) calmMask.addColorStop(s / 48, 'rgba(0,0,0,' + (CENTER_CALM * band((s / 48) * w)).toFixed(3) + ')');
+	bubbleSprite = sprite(foam);
+	causticSprite = sprite(glow);
+}
 
-	getY(x, t, mouseInfluence) {
-		let y = this.yBase + Math.sin(x * this.frequency + t * this.speed + this.phase) * this.amplitude;
-		y += Math.sin(x * this.secondaryFreq + t * this.speed * HARMONIC_SPEED_MULT + this.phase * 2) *
-			this.secondaryAmp;
-		y += Math.sin(x * this.frequency * RIPPLE_FREQ_MULT + t * this.speed * RIPPLE_SPEED_MULT) *
-			this.amplitude * RIPPLE_AMP_MULT;
-		return y + mouseInfluence;
+function resetBubble(i) {
+	bx[i] = Math.random() * w;
+	by[i] = h * (0.35 + Math.random() * 0.6);
+	br[i] = 0.5 + Math.random() * 1.5;
+	bop[i] = (0.03 + Math.random() * 0.06) * (dark ? 2.5 : 2);
+	bvx[i] = (Math.random() - 0.5) * 18;
+	bvy[i] = -(6 + Math.random() * 18);
+	blife[i] = 1;
+	bdecay[i] = 0.06 + Math.random() * 0.18;
+}
+
+function size(nw, nh, ndpr) {
+	w = nw;
+	h = nh;
+	dpr = Math.min(2, ndpr || 1);
+	canvas.width = Math.max(1, Math.round(w * dpr));
+	canvas.height = Math.max(1, Math.round(h * dpr));
+	ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+	ctx.lineJoin = 'round';
+	pts = new Float32Array(Math.ceil(w / STEP) + 2);
+	for (let i = 0; i < L; i++) {
+		const t = L > 1 ? i / (L - 1) : 0;
+		depth[i] = t;
+		yBase[i] = h * (LAYER_TOP + t * LAYER_SPAN);
+		amp[i] = lerp(AMPLITUDE_BACK, AMPLITUDE_FRONT, t);
+		freq[i] = lerp(0.007, 0.003, t) / WAVE_LENGTH;
+		speed[i] = lerp(0.02, 0.008, t);
 	}
+	for (let i = 0; i < NB; i++) { resetBubble(i); blife[i] = Math.random(); }
+	build();
+}
 
-	getMouseInfluence(x) {
-		if (MOUSE_SWELL === 0) return 0;
-		const dx = x - mouse.x;
-		const dy = this.yBase - mouse.y;
-		const dist = Math.sqrt(dx * dx + dy * dy);
-		if (dist >= MOUSE_RADIUS) return 0;
-		const strength = 1 - dist / MOUSE_RADIUS;
-		return -strength * strength * MOUSE_SWELL * (1 - this.depth * MOUSE_DEPTH_FALLOFF);
-	}
-
-	draw(ctx, t) {
-		// Sample once into a reused buffer: the fill and the crest stroke trace the
-		// same curve, and each sample costs several sin() plus a sqrt for the swell.
-		const pts = this.points;
-		let n = 0;
-		for (let x = 0; x <= width; x += STEP) {
-			pts[n++] = x;
-			pts[n++] = this.getY(x, t, this.getMouseInfluence(x));
+function drawLayer(i, t) {
+	const f = freq[i], a = amp[i], sp = speed[i], ph = phase[i], yb = yBase[i];
+	const swell = MOUSE_SWELL * mouse.amount * (1 - depth[i] * 0.5) * (reduced ? 0.4 : 1);
+	const dy = yb - mouse.y;
+	const near = swell > 0.5 && Math.abs(dy) < MOUSE_RADIUS;
+	const r2 = MOUSE_RADIUS * MOUSE_RADIUS;
+	let n = 0;
+	// Sample once into a reused buffer: the fill and the crest trace the same curve
+	for (let x = 0; x <= w + STEP; x += STEP) {
+		let y = yb + Math.sin(x * f + t * sp + ph) * a
+			+ Math.sin(x * f * 2.3 + t * sp * 1.5 + ph * 2) * a * 0.3
+			+ Math.sin(x * f * 4.7 + t * sp * 0.7) * a * 0.08;
+		if (near) {
+			const dx = x - mouse.x, d2 = dx * dx + dy * dy;
+			if (d2 < r2) { const s = 1 - Math.sqrt(d2) / MOUSE_RADIUS; y -= s * s * swell; }
 		}
-
-		ctx.beginPath();
-		ctx.moveTo(0, height);
-		for (let i = 0; i < n; i += 2) ctx.lineTo(pts[i], pts[i + 1]);
-		ctx.lineTo(width, height);
-		ctx.closePath();
-		ctx.fillStyle = this.color;
-		ctx.fill();
-
-		if (HIGHLIGHT_WIDTH <= 0) return;
-		ctx.beginPath();
-		ctx.moveTo(pts[0], pts[1]);
-		for (let i = 2; i < n; i += 2) ctx.lineTo(pts[i], pts[i + 1]);
-		ctx.strokeStyle = this.highlightColor;
-		ctx.lineWidth = HIGHLIGHT_WIDTH;
-		ctx.stroke();
+		pts[n++] = y;
 	}
+	ctx.beginPath();
+	ctx.moveTo(0, h);
+	for (let k = 0; k < n; k++) ctx.lineTo(k * STEP, pts[k]);
+	ctx.lineTo((n - 1) * STEP, h);
+	ctx.closePath();
+	ctx.fillStyle = fills[i];
+	ctx.fill();
+	if (CREST_WIDTH <= 0) return;
+	ctx.beginPath();
+	ctx.moveTo(0, pts[0]);
+	for (let k = 1; k < n; k++) ctx.lineTo(k * STEP, pts[k]);
+	ctx.strokeStyle = crests[i];
+	ctx.lineWidth = CREST_WIDTH;
+	ctx.stroke();
 }
 
-// ── Foam bubbles ──
-
-class Bubble {
-	constructor() { this.reset(); }
-
-	reset() {
-		this.x = Math.random() * (width || 800);
-		this.y = (height || 600) * randIn(BUBBLE_BAND);
-		this.radius = randIn(BUBBLE_RADIUS);
-		this.opacity = randIn(BUBBLE_OPACITY);
-		this.vx = (Math.random() - 0.5) * BUBBLE_DRIFT;
-		this.vy = -randIn(BUBBLE_RISE);
-		this.life = 1;
-		this.decay = randIn(BUBBLE_LIFETIME);
-	}
-
-	update(frames) {
-		this.x += this.vx * frames;
-		this.y += this.vy * frames;
-		this.life -= this.decay * frames;
-		if (this.life <= 0 || this.y < 0) this.reset();
-	}
-
-	draw(ctx) {
-		ctx.beginPath();
-		ctx.arc(this.x, this.y, this.radius, 0, TAU);
-		ctx.fillStyle = `rgba(${BUBBLE_COLOR[0]}, ${BUBBLE_COLOR[1]}, ${BUBBLE_COLOR[2]}, ` +
-			`${this.opacity * this.life})`;
-		ctx.fill();
-	}
-}
-
-// ── Caustics ──
-
-function drawCaustics(t) {
-	const [cr, cg, cb] = CAUSTIC_COLOR;
-	for (let i = 0; i < CAUSTIC_COUNT; i++) {
-		const d = t * CAUSTIC_DRIFT;
-		const cx = width * (0.15 + 0.7 * (i / CAUSTIC_COUNT)) + Math.sin(d * 0.003 + i * 1.5) * CAUSTIC_SWAY[0];
-		const cy = height * CAUSTIC_Y + Math.cos(d * 0.004 + i * 2.1) * CAUSTIC_SWAY[1];
-		const r = CAUSTIC_RADIUS + Math.sin(d * 0.005 + i) * CAUSTIC_RADIUS_VARY;
-		if (r <= 0) continue;
-		const alpha = CAUSTIC_ALPHA + CAUSTIC_ALPHA_VARY * Math.sin(d * 0.006 + i * 3);
-		const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-		grad.addColorStop(0, `rgba(${cr}, ${cg}, ${cb}, ${Math.max(0, alpha)})`);
-		grad.addColorStop(1, `rgba(${cr}, ${cg}, ${cb}, 0)`);
-		ctx.beginPath();
-		ctx.arc(cx, cy, r, 0, TAU);
-		ctx.fillStyle = grad;
-		ctx.fill();
-	}
-}
-
-function initAll() {
-	layers = [];
-	for (let i = 0; i < NUM_LAYERS; i++) layers.push(new WaveLayer(i, NUM_LAYERS));
-	bubbles = [];
-	for (let i = 0; i < BUBBLE_COUNT; i++) bubbles.push(new Bubble());
-}
-
-let lastTime = 0;
-function render(timestamp) {
-	if (!ctx) return;
-	// Delta-based so the swell runs at the same pace on 60Hz and 144Hz displays.
-	// One unit of `time` = one frame at 60fps, which is what the wave maths expects.
-	const dt = lastTime ? Math.min((timestamp - lastTime) / 1000, 0.1) : 1 / 60;
-	lastTime = timestamp;
-	const frames = dt * 60 * TIME_SCALE;
-	time += frames;
-
-	ctx.clearRect(0, 0, width, height);
-
-	for (let i = 0; i < layers.length; i++) layers[i].draw(ctx, time);
-
-	for (let i = 0; i < bubbles.length; i++) {
-		bubbles[i].update(frames);
-		bubbles[i].draw(ctx);
-	}
-
-	drawCaustics(time);
+function frame(now) {
+	requestAnimationFrame(frame);
+	if (!ctx || !bubbleSprite) return;
+	const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
+	last = now;
+	const pace = TIME_SCALE * (reduced ? REDUCED_SPEED : 1);
+	time += dt * 60 * pace; // one unit is one frame at 60 fps, which the wave constants expect
+	mouse.target = Math.max(0, mouse.target - dt * 0.6);
+	mouse.amount += (mouse.target - mouse.amount) * Math.min(1, dt * 2.5);
 
 	ctx.globalAlpha = 1;
-	requestAnimationFrame(render);
+	ctx.globalCompositeOperation = 'source-over';
+	ctx.clearRect(0, 0, w, h);
+	for (let i = 0; i < L; i++) drawLayer(i, time);
+
+	ctx.globalCompositeOperation = dark ? 'lighter' : 'source-over';
+	for (let i = 0; i < NB; i++) {
+		bx[i] += bvx[i] * dt * pace;
+		by[i] += bvy[i] * dt * pace;
+		blife[i] -= bdecay[i] * dt * pace;
+		if (blife[i] <= 0 || by[i] < h * 0.2) resetBubble(i);
+		const a = bop[i] * blife[i] * Math.min(1, (1 - blife[i]) * 8);
+		if (a < 0.003) continue;
+		const s = br[i] * 4;
+		ctx.globalAlpha = Math.min(1, a * 3);
+		ctx.drawImage(bubbleSprite, bx[i] - s * 0.5, by[i] - s * 0.5, s, s);
+	}
+
+	for (let i = 0; i < NC; i++) {
+		const cx = w * (0.08 + 0.84 * ((i + 0.5) / NC)) + Math.sin(time * 0.003 + i * 1.5) * 80;
+		const cy = h * (LAYER_TOP + LAYER_SPAN * 0.35) + Math.cos(time * 0.004 + i * 2.1) * 60;
+		const r = 60 + Math.sin(time * 0.005 + i) * 20;
+		const a = (0.015 + 0.01 * Math.sin(time * 0.006 + i * 3)) * (dark ? 3 : 8);
+		if (a <= 0.002) continue;
+		ctx.globalAlpha = Math.min(1, a);
+		ctx.drawImage(causticSprite, cx - r, cy - r, r * 2, r * 2);
+	}
+	ctx.globalAlpha = 1;
+	if (CENTER_CALM > 0) {
+		ctx.globalCompositeOperation = 'destination-out';
+		ctx.fillStyle = calmMask;
+		ctx.fillRect(0, 0, w, h);
+	}
+	ctx.globalCompositeOperation = 'source-over';
 }
 
 self.onmessage = (e) => {
-	switch (e.data.type) {
+	const d = e.data;
+	switch (d.type) {
 		case 'init':
-			canvas = e.data.canvas;
+			canvas = d.canvas;
 			ctx = canvas.getContext('2d');
-			width = e.data.width;
-			height = e.data.height;
-			canvas.width = width;
-			canvas.height = height;
-			initAll();
-			requestAnimationFrame(render);
+			reduced = !!d.reducedMotion;
+			theme = d.theme || null;
+			dark = !theme || theme.dark !== false;
+			size(d.width, d.height, d.dpr);
+			requestAnimationFrame(frame);
 			break;
 		case 'resize':
-			width = e.data.width;
-			height = e.data.height;
-			canvas.width = width;
-			canvas.height = height;
-			for (let i = 0; i < layers.length; i++) layers[i].recalc(i, NUM_LAYERS);
-			for (let i = 0; i < bubbles.length; i++) bubbles[i].reset();
+			if (ctx) size(d.width, d.height, d.dpr);
+			break;
+		case 'theme':
+			theme = d;
+			dark = d.dark !== false;
+			build();
+			break;
+		case 'motion':
+			reduced = !!d.reducedMotion;
 			break;
 		case 'mousemove':
-			mouse.x = e.data.x;
-			mouse.y = e.data.y;
+			mouse.x = d.x;
+			mouse.y = d.y;
+			mouse.target = 1;
 			break;
 	}
 };

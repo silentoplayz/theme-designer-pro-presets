@@ -1,446 +1,377 @@
 /**
  * Title: Deep Ocean
- * Description: A layered deep-sea vista rendered from the seafloor looking up
- *   toward the surface. God-rays pierce down through the water column, caustic
- *   light networks ripple across the sandy floor, bioluminescent jellyfish
- *   pulse at different depths, kelp fronds sway in the current, and tiny
- *   plankton particles drift through the mid-water. A distant whale song
- *   pulse (visual only) occasionally sweeps across the scene. Five distinct
- *   depth layers create true parallax. Mouse interaction gently shifts the
- *   current direction, swaying kelp and drifting jellyfish.
- *
- *   Fully autonomous — no interaction required.
+ * Description: A seafloor in your theme's colors, with light shafts, glowing jellyfish, plankton, swaying kelp and caustics on the sand, kept to the sides of the chat; the cursor stirs the current and a tap sends a sonar ring.
  */
 
 /* ────────── CONFIGURABLE VARIABLES ────────── */
-const JELLY_COUNT         = 7;        // bioluminescent jellyfish
-const KELP_STRANDS        = 12;       // kelp fronds along the floor
-const PLANKTON_COUNT      = 120;      // tiny drifting particles
-const RAY_COUNT           = 5;        // volumetric light shafts
-const CAUSTIC_SCALE       = 0.008;    // caustic pattern frequency
-const CURRENT_SPEED       = 0.3;      // base ocean current speed
-const MOUSE_INFLUENCE     = 0.15;     // how much mouse shifts current
-const WHALE_PULSE_CHANCE  = 0.001;    // per-frame chance of visual whale pulse
-const BG_DEEP             = [4, 8, 22];      // deep water color
-const BG_MID              = [8, 28, 58];      // mid water color
-const BG_SURFACE          = [15, 55, 95];     // near-surface glow
+const JELLY_COUNT   = 7;     // glowing jellyfish (0-16)
+const KELP_STRANDS  = 12;    // kelp fronds along the floor (0-24)
+const PLANKTON      = 120;   // tiny drifting particles (0-300)
+const RAY_COUNT     = 5;     // shafts of light from the surface (0-10)
+const CURRENT       = 1;     // speed of the whole scene; 0 holds it still (0-3)
+const REDUCED_SPEED = 0.2;   // share of the speed kept when the viewer asks to reduce motion (0-1)
+const MOUSE_CURRENT = 1;     // how strongly the cursor stirs the current and nudges the jellies (0-3)
+const PULSE_EVERY   = 45;    // average seconds between distant sonar rings; 0 turns them off (0-300)
+const WATER_TINT    = 1;     // strength of the light glow from the surface (0-2)
+const CAUSTICS      = 1;     // strength of the caustic light on the sand (0-2)
+const FLOOR_HEIGHT  = 0.15;  // height of the sandy floor, as a share of the screen (0.05-0.3)
+const CENTER_CALM   = 0.75;  // how much the scene fades behind the chat column (0-1)
+const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const FOLLOW_THEME  = true;  // take the colors from the theme's palette
+const WATER_COLOR   = '#3c96c8';  // surface glow and light shafts when not following the theme
+const JELLY_A       = '#5ee0f0';  // first jellyfish color
+const JELLY_B       = '#b27cf0';  // second jellyfish color
+const KELP_COLOR    = '#3a6e28';  // kelp
+const SAND_COLOR    = '#2a2e1e';  // sandy floor
 /* ──────────────────────────────────────────── */
 
-let canvas, ctx, w, h;
-let mouse = { x: 0.5, y: 0.5 }; // normalized 0-1
-let jellies = [];
-let kelp = [];
-let plankton = [];
-let rays = [];
-let whalePulses = [];
-let time = 0;
-
 const TAU = Math.PI * 2;
+const NJ = Math.min(16, JELLY_COUNT | 0), NK = Math.min(24, KELP_STRANDS | 0), NP = Math.min(300, PLANKTON | 0), NR = Math.min(10, RAY_COUNT | 0);
+const SEGS = 12, TW = 160, TH = 80, RINGS = 4;
 
-setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);
+let canvas, ctx;
+let w = 0, h = 0, dpr = 1, floorY = 0;
+let last = 0, T = 0, reduced = false, dark = true, theme = null, nextPulse = PULSE_EVERY * 0.5;
+const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
 
-// ── Jellyfish ──
+// Pools
+const jx = new Float32Array(NJ), jy = new Float32Array(NJ), jsz = new Float32Array(NJ), jdepth = new Float32Array(NJ);
+const jvx = new Float32Array(NJ), jrise = new Float32Array(NJ), jphase = new Float32Array(NJ), jtone = new Uint8Array(NJ), jtent = new Uint8Array(NJ);
+const ppx = new Float32Array(NP), ppy = new Float32Array(NP), pps = new Float32Array(NP), ppd = new Float32Array(NP), ppa = new Float32Array(NP);
+const rx = new Float32Array(NR), rw = new Float32Array(NR), rph = new Float32Array(NR), ra = new Float32Array(NR);
+const kx = new Float32Array(NK), kh = new Float32Array(NK), kw = new Float32Array(NK), kph = new Float32Array(NK), kleaf = new Int8Array(NK * SEGS);
+const kpx = new Float32Array(SEGS + 1), kpy = new Float32Array(SEGS + 1);
+const ringX = new Float32Array(RINGS), ringY = new Float32Array(RINGS), ringR = new Float32Array(RINGS), ringA = new Float32Array(RINGS);
 
-function makeJelly(forceY) {
-	const depth = Math.random(); // 0 = near surface, 1 = deep
-	return {
-		x: Math.random() * (w + 200) - 100,
-		y: forceY !== undefined ? forceY : Math.random() * h * 0.7 + h * 0.05,
-		depth,
-		size: 12 + (1 - depth) * 18 + Math.random() * 10,
-		hue: Math.random() > 0.5 ? 180 + Math.random() * 40 : 270 + Math.random() * 50,
-		pulseSpeed: 0.02 + Math.random() * 0.015,
-		pulsePhase: Math.random() * TAU,
-		driftSpeed: 0.1 + Math.random() * 0.3,
-		wobblePhase: Math.random() * TAU,
-		tentacleCount: Math.floor(Math.random() * 4) + 5,
-		glowIntensity: 0.3 + Math.random() * 0.4
-	};
+// Cached colors, gradients and sprites (rebuilt on theme change and resize)
+const C = {};
+let tint, rayGrad, calmMask, ringStyle, floorImg, caustic, glows = [];
+let causticField = null;
+
+function hexToRgb(hex) { const n = parseInt(String(hex).slice(1, 7), 16) || 0; return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function mix(a, b, t) { return [0, 1, 2].map((k) => Math.round(a[k] + (b[k] - a[k]) * t)); }
+function rgba(c, a) { return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + Math.max(0, Math.min(1, a)).toFixed(3) + ')'; }
+function side() { return Math.random() < 0.5 ? Math.random() * 0.3 : 0.7 + Math.random() * 0.3; } // outer thirds
+function band(x) { const d = Math.abs(x - w * 0.5) / BAND_WIDTH, s = Math.min(1, Math.max(0, (d - 0.5) / 0.8)); return 1 - s * s * (3 - 2 * s); }
+
+function palette() {
+	const c = FOLLOW_THEME && theme && theme.colors ? theme.colors : null;
+	if (c) {
+		const a = hexToRgb(c.accent), a2 = hexToRgb(c.accent2), a3 = hexToRgb(c.accent3), tx = hexToRgb(c.text), mu = hexToRgb(c.muted), bg = hexToRgb(c.background);
+		return { water: a3, ray: dark ? mix(a3, tx, 0.3) : a3, jelly: [a3, a2], core: dark ? tx : a, kelp: dark ? mix(mix(a3, mu, 0.5), bg, 0.3) : mix(a3, tx, 0.35), sand: dark ? mix(mu, bg, 0.6) : mix(mu, bg, 0.3), light: dark ? mix(a3, tx, 0.4) : bg, mote: dark ? mix(a3, tx, 0.5) : a3 };
+	}
+	const water = hexToRgb(WATER_COLOR);
+	return { water, ray: mix(water, [255, 255, 255], 0.25), jelly: [hexToRgb(JELLY_A), hexToRgb(JELLY_B)], core: [220, 250, 255], kelp: hexToRgb(KELP_COLOR), sand: hexToRgb(SAND_COLOR), light: [80, 180, 220], mote: [140, 200, 220] };
 }
 
-function drawJelly(j) {
-	const pulse = 0.7 + 0.3 * Math.sin(time * j.pulseSpeed + j.pulsePhase);
-	const wobble = Math.sin(time * 0.008 + j.wobblePhase) * 8;
-	const cx = j.x + wobble;
-	const cy = j.y;
-	const sz = j.size * pulse;
-	const alpha = (0.3 + j.depth * 0.4) * j.glowIntensity;
+function glowSprite(c) {
+	const s = new OffscreenCanvas(64, 64), g = s.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+	gr.addColorStop(0, rgba(c, 0.6)); gr.addColorStop(0.4, rgba(c, 0.18)); gr.addColorStop(1, rgba(c, 0));
+	g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+	return s;
+}
 
-	// Glow halo
-	ctx.globalAlpha = alpha * 0.2 * pulse;
-	const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, sz * 3);
-	glow.addColorStop(0, `hsla(${j.hue}, 80%, 70%, 0.5)`);
-	glow.addColorStop(1, `hsla(${j.hue}, 80%, 70%, 0)`);
-	ctx.fillStyle = glow;
+// Wrapping cell-edge field for the caustic network, computed once
+function buildField() {
+	causticField = new Float32Array(TW * TH);
+	const N = 11, sx = [], sy = [];
+	for (let i = 0; i < N; i++) { sx.push(Math.random() * TW); sy.push(Math.random() * TH); }
+	for (let y = 0; y < TH; y++) for (let x = 0; x < TW; x++) {
+		let f1 = 1e9, f2 = 1e9;
+		for (let i = 0; i < N; i++) {
+			// A periodic warp curves the cell edges like real caustics and keeps the tile seamless
+			let dx = Math.abs(x + Math.sin(y / TH * TAU * 2) * 5 - sx[i]), dy = Math.abs(y + Math.sin(x / TW * TAU * 3) * 4 - sy[i]);
+			if (dx > TW) dx -= TW;
+			if (dx > TW / 2) dx = TW - dx;
+			if (dy > TH / 2) dy = TH - dy;
+			const d = Math.sqrt(dx * dx + dy * dy);
+			if (d < f1) { f2 = f1; f1 = d; } else if (d < f2) f2 = d;
+		}
+		const e = Math.max(0, 1 - (f2 - f1) / 9);
+		const v = y / TH; // fades in from the top of the floor, so the tile needs no mask
+		causticField[y * TW + x] = e * e * e * Math.min(1, v * 3) * (1 - v * 0.3);
+	}
+}
+
+function build() {
+	if (!ctx || !w) return;
+	const p = palette();
+	if (!causticField) buildField();
+	const fh = h - floorY;
+	tint = ctx.createLinearGradient(0, 0, 0, h * 0.7);
+	tint.addColorStop(0, rgba(p.water, (dark ? 0.14 : 0.09) * WATER_TINT));
+	tint.addColorStop(1, rgba(p.water, 0));
+	rayGrad = ctx.createLinearGradient(0, 0, 0, floorY);
+	rayGrad.addColorStop(0, rgba(p.ray, 0.5)); rayGrad.addColorStop(0.5, rgba(p.ray, 0.16)); rayGrad.addColorStop(1, rgba(p.ray, 0));
+	calmMask = ctx.createLinearGradient(0, 0, w, 0);
+	for (let s = 0; s <= 40; s++) calmMask.addColorStop(s / 40, 'rgba(0,0,0,' + (CENTER_CALM * band((s / 40) * w)).toFixed(3) + ')');
+	ringStyle = rgba(p.water, dark ? 0.6 : 0.5);
+	glows = [glowSprite(p.jelly[0]), glowSprite(p.jelly[1])];
+	C.bell = p.jelly.map((c) => rgba(c, dark ? 0.45 : 0.4));
+	C.inner = p.jelly.map((c) => rgba(mix(c, p.core, 0.5), dark ? 0.5 : 0.35));
+	C.tent = p.jelly.map((c) => rgba(c, dark ? 0.35 : 0.3));
+	C.kelp = rgba(p.kelp, dark ? 0.8 : 0.55);
+	C.leaf = rgba(mix(p.kelp, p.light, 0.15), dark ? 0.55 : 0.4);
+	C.mote = rgba(p.mote, 1);
+	// Floor (sand and soft dunes) and the caustic tile, pre-rendered once
+	floorImg = new OffscreenCanvas(Math.ceil(w * dpr), Math.ceil((fh + 60) * dpr));
+	const g = floorImg.getContext('2d');
+	g.scale(dpr, dpr);
+	const fg = g.createLinearGradient(0, 0, 0, fh + 60);
+	fg.addColorStop(0, rgba(p.sand, 0)); fg.addColorStop(0.4, rgba(p.sand, dark ? 0.6 : 0.4)); fg.addColorStop(1, rgba(p.sand, dark ? 0.75 : 0.55));
+	g.fillStyle = fg; g.fillRect(0, 0, w, fh + 60);
+	g.fillStyle = rgba(mix(p.sand, p.light, 0.25), dark ? 0.25 : 0.2);
+	for (let i = 0; i < 34; i++) {
+		g.beginPath();
+		g.ellipse((i / 34) * w + Math.sin(i * 4.7) * 20, 66 + Math.sin(i * 2.1) * 8, 22 + Math.sin(i * 3) * 10, 4, 0, 0, TAU);
+		g.fill();
+	}
+	caustic = new OffscreenCanvas(TW, TH);
+	const cg = caustic.getContext('2d'), img = cg.createImageData(TW, TH);
+	for (let i = 0; i < TW * TH; i++) { img.data[i * 4] = p.light[0]; img.data[i * 4 + 1] = p.light[1]; img.data[i * 4 + 2] = p.light[2]; img.data[i * 4 + 3] = causticField[i] * 255; }
+	cg.putImageData(img, 0, 0);
+}
+
+function spawnJelly(i, anywhere) {
+	jdepth[i] = Math.random();
+	jsz[i] = 12 + (1 - jdepth[i]) * 16 + Math.random() * 8;
+	jx[i] = side() * w;
+	jy[i] = anywhere ? h * (0.08 + Math.random() * 0.6) : floorY + jsz[i] * 3;
+	jvx[i] = 0;
+	jrise[i] = 1.5 + Math.random() * 3.5;
+	jphase[i] = Math.random() * TAU;
+	jtone[i] = Math.random() < 0.5 ? 0 : 1;
+	jtent[i] = 5 + ((Math.random() * 4) | 0);
+}
+
+function seed() {
+	for (let i = 0; i < NJ; i++) spawnJelly(i, true);
+	for (let i = 0; i < NP; i++) { ppx[i] = Math.random() * w; ppy[i] = Math.random() * h; pps[i] = 0.05 + Math.random() * 0.15; ppd[i] = Math.random() * TAU; ppa[i] = 0.15 + Math.random() * 0.35; }
+	for (let i = 0; i < NR; i++) { rx[i] = side() * w; rw[i] = 30 + Math.random() * 70; rph[i] = Math.random() * TAU; ra[i] = 0.04 + Math.random() * 0.05; }
+	for (let i = 0; i < NK; i++) {
+		const f = (i + 0.5) / NK;
+		kx[i] = (f < 0.5 ? f * 0.62 : 0.38 + f * 0.62) * w + (Math.random() - 0.5) * 30;
+		kh[i] = 0.18 + Math.random() * 0.22;
+		kw[i] = 2 + Math.random() * 2.5;
+		kph[i] = Math.random() * TAU;
+		for (let s = 0; s < SEGS; s++) kleaf[i * SEGS + s] = s > 1 && Math.random() > 0.25 ? (s & 1 ? 1 : -1) : 0;
+	}
+}
+
+function size(nw, nh, ndpr) {
+	const sx = w ? nw / w : 1, sy = h ? nh / h : 1, had = w > 0;
+	w = nw; h = nh;
+	dpr = Math.min(2, ndpr || 1);
+	floorY = h * (1 - FLOOR_HEIGHT);
+	canvas.width = Math.max(1, Math.round(w * dpr));
+	canvas.height = Math.max(1, Math.round(h * dpr));
+	ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+	ctx.lineCap = 'round';
+	if (!had) seed();
+	else {
+		// Keep the scene on a resize: move everything with the screen instead of re-rolling it
+		for (let i = 0; i < NJ; i++) { jx[i] *= sx; jy[i] *= sy; }
+		for (let i = 0; i < NP; i++) { ppx[i] *= sx; ppy[i] *= sy; }
+		for (let i = 0; i < NR; i++) rx[i] *= sx;
+		for (let i = 0; i < NK; i++) kx[i] *= sx;
+	}
+	build();
+}
+
+function drawJelly(i, t) {
+	const pulse = 0.75 + 0.25 * Math.sin(t * 0.03 + jphase[i]);
+	const cx = jx[i] + Math.sin(t * 0.008 + jphase[i]) * 8, cy = jy[i], sz = jsz[i] * pulse, k = jtone[i];
+	const a = (0.55 + (1 - jdepth[i]) * 0.45);
+	ctx.globalAlpha = a * (0.6 + 0.4 * pulse);
+	ctx.drawImage(glows[k], cx - sz * 3, cy - sz * 3, sz * 6, sz * 6);
+	ctx.globalAlpha = a;
+	ctx.fillStyle = C.bell[k];
 	ctx.beginPath();
-	ctx.arc(cx, cy, sz * 3, 0, TAU);
+	ctx.ellipse(cx, cy, sz * 0.7, sz * 0.5 * pulse + 2, 0, Math.PI, 0);
 	ctx.fill();
-
-	// Bell (dome shape)
-	ctx.globalAlpha = alpha * 0.7;
-	ctx.fillStyle = `hsla(${j.hue}, 70%, 65%, 0.6)`;
+	ctx.fillStyle = C.inner[k];
 	ctx.beginPath();
-	ctx.ellipse(cx, cy, sz * 0.7, sz * 0.5 * pulse, 0, Math.PI, 0);
+	ctx.ellipse(cx, cy + sz * 0.05, sz * 0.4, sz * 0.25 * pulse + 1, 0, Math.PI, 0);
 	ctx.fill();
-
-	// Inner bell luminance
-	ctx.globalAlpha = alpha * 0.4 * pulse;
-	ctx.fillStyle = `hsla(${j.hue}, 90%, 80%, 0.5)`;
-	ctx.beginPath();
-	ctx.ellipse(cx, cy + sz * 0.05, sz * 0.4, sz * 0.25 * pulse, 0, Math.PI, 0);
-	ctx.fill();
-
-	// Tentacles
-	ctx.globalAlpha = alpha * 0.35;
-	ctx.strokeStyle = `hsla(${j.hue}, 60%, 60%, 0.4)`;
+	ctx.strokeStyle = C.tent[k];
 	ctx.lineWidth = 1;
-	ctx.lineCap = 'round';
-	for (let t = 0; t < j.tentacleCount; t++) {
-		const tx = cx + ((t / (j.tentacleCount - 1)) - 0.5) * sz * 1.0;
-		const tentLen = sz * (1.2 + Math.sin(time * 0.012 + t * 1.3) * 0.4);
+	ctx.beginPath();
+	const n = jtent[i];
+	for (let s = 0; s < n; s++) {
+		const tx = cx + (s / (n - 1) - 0.5) * sz, len = sz * (1.4 + Math.sin(t * 0.012 + s * 1.3) * 0.4);
+		ctx.moveTo(tx, cy + 1);
+		ctx.bezierCurveTo(tx + Math.sin(t * 0.015 + s * 2) * 8, cy + len * 0.5, tx + Math.sin(t * 0.01 + s * 3) * 12, cy + len * 0.8, tx + Math.sin(t * 0.008 + s) * 10, cy + len);
+	}
+	ctx.stroke();
+}
+
+// A frond bends as one wave, so it curves instead of zigzagging
+function drawKelp(i, t, cur) {
+	const segH = h * kh[i] / SEGS;
+	kpx[0] = kx[i]; kpy[0] = h + 4;
+	for (let s = 1; s <= SEGS; s++) {
+		const prog = s / SEGS;
+		kpx[s] = kx[i] + Math.sin(t * 0.012 + kph[i] - s * 0.45) * (2 + s * 1.6) + cur * prog * prog * 200;
+		kpy[s] = h + 4 - segH * s;
+	}
+	for (let half = 0; half < 2; half++) {
+		const a = half ? SEGS >> 1 : 0, b = half ? SEGS : SEGS >> 1;
+		ctx.lineWidth = kw[i] * (half ? 0.65 : 1);
 		ctx.beginPath();
-		ctx.moveTo(tx, cy + sz * 0.1);
-		const cp1x = tx + Math.sin(time * 0.015 + t * 2) * 10;
-		const cp1y = cy + tentLen * 0.5;
-		const cp2x = tx + Math.sin(time * 0.01 + t * 3) * 15;
-		const cp2y = cy + tentLen * 0.8;
-		const endY = cy + tentLen;
-		ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, tx + Math.sin(time * 0.008 + t) * 12, endY);
+		ctx.moveTo(kpx[a], kpy[a]);
+		for (let s = a + 1; s <= b; s++) ctx.quadraticCurveTo(kpx[s - 1], kpy[s - 1], (kpx[s - 1] + kpx[s]) * 0.5, (kpy[s - 1] + kpy[s]) * 0.5);
+		ctx.lineTo(kpx[b], kpy[b]);
 		ctx.stroke();
 	}
-}
-
-// ── Kelp ──
-
-function makeKelp(x) {
-	const segments = Math.floor(Math.random() * 6) + 8;
-	const segArr = [];
-	for (let i = 0; i < segments; i++) {
-		segArr.push({
-			phaseOffset: Math.random() * TAU,
-			swayAmount: 3 + Math.random() * 5 + i * 0.8,
-			leafSide: Math.random() > 0.5 ? 1 : -1,
-			hasLeaf: i > 2 && Math.random() > 0.3
-		});
+	ctx.beginPath();
+	for (let s = 1; s < SEGS; s++) {
+		const sd = kleaf[i * SEGS + s];
+		if (!sd) continue;
+		const x = kpx[s], y = kpy[s], len = (10 + (1 - s / SEGS) * 14) * (0.8 + 0.2 * Math.sin(t * 0.016 + kph[i] + s));
+		ctx.moveTo(x, y);
+		ctx.quadraticCurveTo(x + sd * len * 0.5, y - 7, x + sd * len, y - 4);
+		ctx.quadraticCurveTo(x + sd * len * 0.5, y + 3, x, y + 2);
 	}
-	return {
-		x: x,
-		baseY: h,
-		height: h * (0.15 + Math.random() * 0.25),
-		segments: segArr,
-		hue: 100 + Math.random() * 30,
-		width: 2 + Math.random() * 2
-	};
+	ctx.fill();
 }
 
-function drawKelp(k, currentOffset) {
-	const segH = k.height / k.segments.length;
-	let prevX = k.x;
-	let prevY = k.baseY;
-
-	ctx.lineCap = 'round';
-
-	for (let i = 0; i < k.segments.length; i++) {
-		const seg = k.segments[i];
-		const progress = i / k.segments.length;
-		const sway = Math.sin(time * 0.006 + seg.phaseOffset) * seg.swayAmount
-			+ currentOffset * (progress * 30);
-		const nx = k.x + sway;
-		const ny = k.baseY - segH * (i + 1);
-		const thickness = k.width * (1 - progress * 0.5);
-
-		// Stem
-		ctx.globalAlpha = 0.6 - progress * 0.2;
-		ctx.strokeStyle = `hsl(${k.hue}, 50%, ${25 + progress * 15}%)`;
-		ctx.lineWidth = thickness;
-		ctx.beginPath();
-		ctx.moveTo(prevX, prevY);
-		ctx.quadraticCurveTo(prevX + sway * 0.4, (prevY + ny) / 2, nx, ny);
-		ctx.stroke();
-
-		// Leaf blade
-		if (seg.hasLeaf) {
-			const leafLen = 8 + (1 - progress) * 12;
-			const leafSway = Math.sin(time * 0.008 + seg.phaseOffset + 1) * 5;
-			const lx = nx + seg.leafSide * (leafLen + leafSway);
-			const ly = ny + 3;
-			ctx.globalAlpha = 0.4;
-			ctx.fillStyle = `hsl(${k.hue}, 55%, ${30 + progress * 10}%)`;
-			ctx.beginPath();
-			ctx.moveTo(nx, ny);
-			ctx.quadraticCurveTo(
-				nx + seg.leafSide * leafLen * 0.5, ny - 4,
-				lx, ly
-			);
-			ctx.quadraticCurveTo(
-				nx + seg.leafSide * leafLen * 0.5, ny + 6,
-				nx, ny + 2
-			);
-			ctx.fill();
-		}
-
-		prevX = nx;
-		prevY = ny;
-	}
+function ring(x, y) {
+	let k = 0;
+	for (let i = 1; i < RINGS; i++) if (ringA[i] < ringA[k]) k = i;
+	ringX[k] = x; ringY[k] = y; ringR[k] = 0; ringA[k] = 0.14;
 }
 
-// ── Plankton ──
+function frame(now) {
+	requestAnimationFrame(frame);
+	if (!ctx || !caustic) return;
+	const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
+	last = now;
+	const pace = CURRENT * (reduced ? REDUCED_SPEED : 1), f = dt * 60 * pace;
+	T += f;
+	const t = T;
+	mouse.target = Math.max(0, mouse.target - dt * 0.5);
+	mouse.amount += (mouse.target - mouse.amount) * Math.min(1, dt * 2);
+	const cur = (Math.min(w, Math.max(0, mouse.x)) / w - 0.5) * 0.15 * MOUSE_CURRENT * mouse.amount;
 
-function makePlankton() {
-	return {
-		x: Math.random() * w,
-		y: Math.random() * h,
-		size: 0.5 + Math.random() * 1.5,
-		speed: 0.05 + Math.random() * 0.15,
-		drift: Math.random() * TAU,
-		alpha: 0.15 + Math.random() * 0.35
-	};
-}
-
-function resetPlankton(p) {
-	p.x = Math.random() * w;
-	p.y = -5;
-	p.drift = Math.random() * TAU;
-}
-
-// ── Light rays ──
-
-function makeRay() {
-	return {
-		x: Math.random() * w,
-		width: 30 + Math.random() * 80,
-		speed: 0.1 + Math.random() * 0.2,
-		phase: Math.random() * TAU,
-		alpha: 0.03 + Math.random() * 0.04
-	};
-}
-
-// ── Caustics ──
-
-function drawCaustics() {
-	const floorY = h * 0.85;
-	const floorH = h - floorY;
-
-	ctx.globalAlpha = 0.08;
-	for (let x = 0; x < w; x += 4) {
-		const n1 = Math.sin((x * CAUSTIC_SCALE + time * 0.003) * 3) *
-			Math.cos((x * CAUSTIC_SCALE * 0.7 + time * 0.004) * 5);
-		const n2 = Math.sin((x * CAUSTIC_SCALE * 1.3 + time * 0.002) * 4) *
-			Math.cos((x * CAUSTIC_SCALE * 0.5 + time * 0.005) * 3);
-		const brightness = (n1 + n2 + 2) / 4; // 0 to 1
-
-		if (brightness > 0.55) {
-			const intensity = (brightness - 0.55) / 0.45;
-			ctx.fillStyle = `rgba(80, 180, 220, ${intensity * 0.5})`;
-			const cy = floorY + Math.sin(x * 0.02 + time * 0.001) * 5;
-			ctx.fillRect(x, cy, 4 + intensity * 6, 2 + intensity * 3);
-		}
-	}
-}
-
-// ── Whale pulse (visual sonar sweep) ──
-
-function spawnWhalePulse() {
-	whalePulses.push({
-		x: Math.random() * w,
-		y: h * 0.3 + Math.random() * h * 0.3,
-		radius: 0,
-		maxRadius: Math.max(w, h) * 0.8,
-		speed: 2 + Math.random() * 1.5,
-		alpha: 0.12
-	});
-}
-
-function drawWhalePulses() {
-	for (let i = whalePulses.length - 1; i >= 0; i--) {
-		const p = whalePulses[i];
-		p.radius += p.speed;
-		p.alpha *= 0.995;
-		if (p.radius > p.maxRadius || p.alpha < 0.005) {
-			whalePulses.splice(i, 1);
-			continue;
-		}
-		ctx.globalAlpha = p.alpha;
-		ctx.strokeStyle = `rgba(60, 140, 200, 0.6)`;
-		ctx.lineWidth = 2;
-		ctx.beginPath();
-		ctx.arc(p.x, p.y, p.radius, 0, TAU);
-		ctx.stroke();
-	}
-}
-
-// ── Sandy floor ──
-
-function drawFloor() {
-	const floorY = h * 0.85;
-	const grad = ctx.createLinearGradient(0, floorY - 20, 0, h);
-	grad.addColorStop(0, `rgba(${BG_DEEP[0]}, ${BG_DEEP[1]}, ${BG_DEEP[2]}, 0)`);
-	grad.addColorStop(0.15, 'rgb(18, 22, 15)');
-	grad.addColorStop(0.5, 'rgb(22, 26, 18)');
-	grad.addColorStop(1, 'rgb(12, 14, 10)');
 	ctx.globalAlpha = 1;
-	ctx.fillStyle = grad;
-	ctx.fillRect(0, floorY - 20, w, h - floorY + 20);
+	ctx.globalCompositeOperation = 'source-over';
+	ctx.clearRect(0, 0, w, h);
+	ctx.fillStyle = tint;
+	ctx.fillRect(0, 0, w, h * 0.7);
+	const glow = dark ? 'lighter' : 'source-over';
+	ctx.globalCompositeOperation = glow;
 
-	// Sandy bumps
-	ctx.fillStyle = 'rgba(35, 38, 25, 0.4)';
-	for (let i = 0; i < 30; i++) {
-		const bx = (i / 30) * w + Math.sin(i * 4.7) * 20;
-		const by = floorY + 5 + Math.sin(i * 2.1) * 8;
-		ctx.globalAlpha = 0.2 + Math.sin(i * 1.5) * 0.1;
+	// Light shafts, in the outer thirds
+	ctx.fillStyle = rayGrad;
+	for (let i = 0; i < NR; i++) {
+		const sway = Math.sin(t * 0.003 + rph[i]) * 40 + cur * 300, top = rx[i] + sway, half = rw[i] * 0.9;
+		ctx.globalAlpha = ra[i] * (0.7 + 0.3 * Math.sin(t * 0.004 + rph[i])) * (dark ? 1.4 : 1);
 		ctx.beginPath();
-		ctx.ellipse(bx, by, 20 + Math.sin(i * 3) * 10, 4, 0, 0, TAU);
-		ctx.fill();
-	}
-}
-
-// ── Init ──
-
-function initAll() {
-	jellies = [];
-	for (let i = 0; i < JELLY_COUNT; i++) jellies.push(makeJelly());
-
-	kelp = [];
-	for (let i = 0; i < KELP_STRANDS; i++) {
-		kelp.push(makeKelp(w * 0.05 + (i / KELP_STRANDS) * w * 0.9 + (Math.random() - 0.5) * 40));
-	}
-
-	plankton = [];
-	for (let i = 0; i < PLANKTON_COUNT; i++) plankton.push(makePlankton());
-
-	rays = [];
-	for (let i = 0; i < RAY_COUNT; i++) rays.push(makeRay());
-
-	whalePulses = [];
-}
-
-// ── Render ──
-
-function animate() {
-	if (!ctx) return;
-	time++;
-
-	const currentOffset = (mouse.x - 0.5) * MOUSE_INFLUENCE;
-
-	// Background: deep water gradient
-	const grad = ctx.createLinearGradient(0, 0, 0, h);
-	grad.addColorStop(0, `rgb(${BG_SURFACE[0]}, ${BG_SURFACE[1]}, ${BG_SURFACE[2]})`);
-	grad.addColorStop(0.35, `rgb(${BG_MID[0]}, ${BG_MID[1]}, ${BG_MID[2]})`);
-	grad.addColorStop(0.7, `rgb(${BG_DEEP[0]}, ${BG_DEEP[1]}, ${BG_DEEP[2]})`);
-	grad.addColorStop(1, 'rgb(2, 4, 12)');
-	ctx.globalAlpha = 1;
-	ctx.fillStyle = grad;
-	ctx.fillRect(0, 0, w, h);
-
-	// Surface shimmer (faint light from above)
-	ctx.globalAlpha = 0.04 + Math.sin(time * 0.005) * 0.015;
-	const shimmer = ctx.createRadialGradient(w * 0.5, -h * 0.1, 0, w * 0.5, -h * 0.1, h * 0.8);
-	shimmer.addColorStop(0, 'rgba(80, 160, 200, 0.3)');
-	shimmer.addColorStop(1, 'rgba(80, 160, 200, 0)');
-	ctx.fillStyle = shimmer;
-	ctx.fillRect(0, 0, w, h * 0.5);
-
-	// Light rays
-	for (let i = 0; i < rays.length; i++) {
-		const r = rays[i];
-		const sway = Math.sin(time * 0.003 + r.phase) * 40 + currentOffset * 60;
-		const alpha = r.alpha * (0.7 + 0.3 * Math.sin(time * r.speed * 0.02 + r.phase));
-		ctx.globalAlpha = alpha;
-
-		const grad2 = ctx.createLinearGradient(0, 0, 0, h * 0.85);
-		grad2.addColorStop(0, 'rgba(100, 190, 230, 0.3)');
-		grad2.addColorStop(0.5, 'rgba(60, 140, 180, 0.1)');
-		grad2.addColorStop(1, 'rgba(60, 140, 180, 0)');
-		ctx.fillStyle = grad2;
-
-		ctx.beginPath();
-		const topX = r.x + sway;
-		const botSpread = r.width * 1.8;
-		ctx.moveTo(topX - r.width * 0.3, 0);
-		ctx.lineTo(topX + r.width * 0.3, 0);
-		ctx.lineTo(topX + botSpread * 0.5 + sway * 0.5, h * 0.85);
-		ctx.lineTo(topX - botSpread * 0.5 + sway * 0.5, h * 0.85);
-		ctx.closePath();
+		ctx.moveTo(top - rw[i] * 0.3, 0); ctx.lineTo(top + rw[i] * 0.3, 0);
+		ctx.lineTo(top + half + sway * 0.5, floorY); ctx.lineTo(top - half + sway * 0.5, floorY);
 		ctx.fill();
 	}
 
-	// Whale pulse
-	if (Math.random() < WHALE_PULSE_CHANCE) spawnWhalePulse();
-	drawWhalePulses();
-
-	// Plankton (behind jellyfish)
-	ctx.fillStyle = 'rgba(140, 200, 220, 1)';
-	for (let i = 0; i < plankton.length; i++) {
-		const p = plankton[i];
-		p.x += Math.sin(time * 0.005 + p.drift) * p.speed + currentOffset * CURRENT_SPEED;
-		p.y += p.speed * 0.5 + Math.cos(time * 0.003 + p.drift) * 0.1;
-		if (p.y > h + 5 || p.x < -10 || p.x > w + 10) resetPlankton(p);
-
-		ctx.globalAlpha = p.alpha * (0.5 + 0.5 * Math.sin(time * 0.02 + p.drift));
+	// Sonar rings: rare and distant, or from a tap
+	if (PULSE_EVERY > 0 && !reduced && pace > 0) {
+		nextPulse -= dt;
+		if (nextPulse <= 0) { ring(side() * w, h * (0.3 + Math.random() * 0.3)); nextPulse = PULSE_EVERY * (0.6 + Math.random() * 0.8); }
+	}
+	ctx.strokeStyle = ringStyle;
+	ctx.lineWidth = 1.5;
+	for (let i = 0; i < RINGS; i++) {
+		if (ringA[i] < 0.004) continue;
+		ringR[i] += 150 * dt * pace;
+		ringA[i] *= Math.exp(-0.35 * dt * pace);
+		if (ringR[i] > Math.max(w, h)) { ringA[i] = 0; continue; }
+		ctx.globalAlpha = ringA[i] * Math.min(1, ringR[i] / 40);
 		ctx.beginPath();
-		ctx.arc(p.x, p.y, p.size, 0, TAU);
-		ctx.fill();
+		ctx.arc(ringX[i], ringY[i], ringR[i], 0, TAU);
+		ctx.stroke();
 	}
 
-	// Jellyfish (mid-water)
-	for (let i = 0; i < jellies.length; i++) {
-		const j = jellies[i];
-		j.x += Math.sin(time * 0.003 + j.wobblePhase) * 0.3 + currentOffset * CURRENT_SPEED * (1 - j.depth * 0.5);
-		j.y -= j.driftSpeed * 0.15;
-		if (j.y < -j.size * 3) {
-			j.y = h + j.size * 2;
-			j.x = Math.random() * w;
-		}
-		if (j.x < -100) j.x = w + 50;
-		if (j.x > w + 100) j.x = -50;
-		drawJelly(j);
+	// Plankton
+	ctx.fillStyle = C.mote;
+	for (let i = 0; i < NP; i++) {
+		ppx[i] += (Math.sin(t * 0.005 + ppd[i]) * pps[i] + cur * 6) * f;
+		ppy[i] += (pps[i] * 0.5 + Math.cos(t * 0.003 + ppd[i]) * 0.1) * f;
+		if (ppy[i] > h + 5 || ppx[i] < -10 || ppx[i] > w + 10) { ppx[i] = Math.random() * w; ppy[i] = -5; }
+		ctx.globalAlpha = ppa[i] * (0.5 + 0.5 * Math.sin(t * 0.02 + ppd[i])) * (dark ? 1 : 0.8);
+		ctx.fillRect(ppx[i] - 1, ppy[i] - 1, 2, 2);
 	}
 
-	// Sandy floor
-	drawFloor();
-
-	// Caustic light on floor
-	drawCaustics();
-
-	// Kelp (foreground, rooted in floor)
-	for (let i = 0; i < kelp.length; i++) {
-		drawKelp(kelp[i], currentOffset);
+	// Jellyfish rise slowly and ease away from the cursor
+	ctx.globalCompositeOperation = 'source-over';
+	for (let i = 0; i < NJ; i++) {
+		const dx = jx[i] - mouse.x, dy = jy[i] - mouse.y, d2 = dx * dx + dy * dy;
+		if (d2 < 32400 && d2 > 1) jvx[i] += dx / Math.sqrt(d2) * 30 * MOUSE_CURRENT * mouse.amount * dt;
+		jvx[i] *= 1 - Math.min(1, dt * 0.8);
+		jx[i] += (Math.sin(t * 0.003 + jphase[i]) * 0.3 + cur * 5 * (1 - jdepth[i] * 0.5)) * f + jvx[i] * dt * pace;
+		jy[i] -= jrise[i] * dt * pace;
+		if (jy[i] < -jsz[i] * 3) spawnJelly(i, false);
+		if (jx[i] < -100) jx[i] = w + 50; else if (jx[i] > w + 100) jx[i] = -50;
+		drawJelly(i, t);
 	}
 
+	// Floor and its caustic network: two scales of one tile slide past each other
 	ctx.globalAlpha = 1;
-	requestAnimationFrame(animate);
-}
+	ctx.drawImage(floorImg, 0, floorY - 60, w, h - floorY + 60);
+	if (CAUSTICS > 0) {
+		ctx.globalCompositeOperation = glow;
+		ctx.globalAlpha = Math.min(1, CAUSTICS * (dark ? 0.15 : 0.55));
+		for (let k = 0; k < 2; k++) {
+			const tw = TW * (k ? 2.3 : 1.6), off = k ? (t * 0.25) % tw : tw - (t * 0.18) % tw;
+			for (let x = -off; x < w; x += tw) ctx.drawImage(caustic, x, floorY, tw, h - floorY);
+		}
+		ctx.globalCompositeOperation = 'source-over';
+	}
 
-// ── Message handler ──
+	// Kelp in front, in the outer thirds
+	ctx.globalAlpha = 1;
+	ctx.strokeStyle = C.kelp;
+	ctx.fillStyle = C.leaf;
+	for (let i = 0; i < NK; i++) drawKelp(i, t, cur);
+
+	// One pass thins everything behind the chat column
+	if (CENTER_CALM > 0) {
+		ctx.globalCompositeOperation = 'destination-out';
+		ctx.fillStyle = calmMask;
+		ctx.fillRect(0, 0, w, h);
+	}
+	ctx.globalCompositeOperation = 'source-over';
+	ctx.globalAlpha = 1;
+}
 
 self.onmessage = (e) => {
-	switch (e.data.type) {
+	const d = e.data;
+	switch (d.type) {
 		case 'init':
-			canvas = e.data.canvas;
+			canvas = d.canvas;
 			ctx = canvas.getContext('2d');
-			w = e.data.width;
-			h = e.data.height;
-			canvas.width = w;
-			canvas.height = h;
-			initAll();
-			animate();
+			reduced = !!d.reducedMotion;
+			theme = d.theme || null;
+			dark = !theme || theme.dark !== false;
+			size(d.width, d.height, d.dpr);
+			requestAnimationFrame(frame);
 			break;
-
 		case 'resize':
-			w = e.data.width;
-			h = e.data.height;
-			canvas.width = w;
-			canvas.height = h;
-			initAll();
+			if (ctx) size(d.width, d.height, d.dpr);
 			break;
-
+		case 'theme':
+			theme = d;
+			dark = d.dark !== false;
+			build();
+			break;
+		case 'motion':
+			reduced = !!d.reducedMotion;
+			break;
 		case 'mousemove':
-			mouse.x = e.data.x / w;
-			mouse.y = e.data.y / h;
+			mouse.x = d.x;
+			mouse.y = d.y;
+			mouse.target = 1;
 			break;
-
-		case 'click':
-			spawnWhalePulse();
+		case 'mousedown':
+			if (!reduced) ring(d.x, d.y);
 			break;
 	}
 };

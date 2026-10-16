@@ -1,193 +1,207 @@
 /**
  * Title: Lava Lamp
- * Description: Large, soft, amorphous blobs that slowly rise, merge, split,
- *   and sink like a lava lamp. Warm colors (deep reds, oranges, magentas)
- *   with very low opacity and heavy blur. Mouse attracts nearby blobs.
- *   Follows your theme's colors when the designer sends them.
+ * Description: Soft blobs in your theme's colors warm at the bottom, rise, cool and sink again like a lava lamp, glowing where they meet, thinning behind the chat and drifting toward the cursor.
  */
 
-let canvas, ctx, width, height;
-let mouse = { x: -5000, y: -5000 };
-let blobs = [];
-let time = 0;
+/* ────────── CONFIGURABLE VARIABLES ────────── */
+const BLOB_COUNT    = 12;    // number of blobs (3-30)
+const BLOB_SIZE     = 1;     // size of the blobs (0.5-2)
+const SPEED         = 1;     // how fast the blobs rise and sink; 0 holds them still (0-3)
+const REDUCED_SPEED = 0.15;  // share of the speed kept when the viewer asks to reduce motion (0-1)
+const INTENSITY     = 1;     // strength of the blobs (0.2-2)
+const LIGHT_ALPHA   = 0.4;   // blob strength on light themes, so dark text stays readable (0.1-1)
+const CENTER_CALM   = 0.7;   // how much the blobs fade behind the chat column (0-1)
+const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const CURSOR_PULL   = 1;     // how strongly blobs drift toward the cursor (0-3)
+const CURSOR_RADIUS = 260;   // reach of the cursor, in px (100-500)
+const RENDER_SCALE  = 0.5;   // resolution of the blobs; they are soft, so half is plenty (0.25-1)
+const MAX_FPS       = 30;    // frame cap; the blobs move slowly (15-60)
+const FOLLOW_THEME  = true;  // take the colors from the theme's palette
+const COLOR_A       = '#b41e14';  // first blob color when not following the theme
+const COLOR_B       = '#d8500e';  // second blob color
+const COLOR_C       = '#a01450';  // third blob color
+/* ──────────────────────────────────────────── */
 
-const FOLLOW_THEME = true; // Draw in the theme's colors when the designer sends them (true/false)
-const BLOB_COUNT = 12;
-const MOUSE_ATTRACT_RADIUS = 250;
-const MOUSE_ATTRACT_STRENGTH = 0.4;
+const MAX = 30;
+const N = Math.max(3, Math.min(MAX, Math.round(BLOB_COUNT)));
+const TONES = 6;
 
-// Heartbeat to keep worker alive
-setInterval(() => {
-	self.postMessage({ type: 'heartbeat' });
-}, 1000);
+let canvas, ctx;
+let w = 0, h = 0, scale = RENDER_SCALE;
+let last = 0, time = 0, reduced = false, dark = true;
+const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
 
-// Warm color palette: deep reds, oranges, magentas
-const COLORS = [
-	{ r: 180, g: 30, b: 20 }, // deep red
-	{ r: 200, g: 60, b: 10 }, // burnt orange
-	{ r: 160, g: 20, b: 80 }, // magenta
-	{ r: 220, g: 80, b: 20 }, // orange
-	{ r: 140, g: 10, b: 50 }, // dark crimson
-	{ r: 190, g: 40, b: 60 } // rose red
-];
+const bx = new Float32Array(N), by = new Float32Array(N), vx = new Float32Array(N), vy = new Float32Array(N);
+const home = new Float32Array(N), rad = new Float32Array(N), temp = new Float32Array(N), rate = new Float32Array(N);
+const alpha = new Float32Array(N), phase = new Float32Array(N), pulse = new Float32Array(N);
+const tone = new Uint8Array(N);
 
-// Theme role for each color above, in the same order
-const COLOR_ROLES = ['accent', 'accent2', 'accent3', 'accent2', 'accent3', 'accent'];
-let palette = COLORS;
-let fadeStyle = 'rgba(0, 0, 0, 0.08)';
-let alphaScale = 1;
+let base = [COLOR_A, COLOR_B, COLOR_C].map(hexToRgb);
+const sprites = [];
 
 function hexToRgb(hex) {
-	const n = parseInt(hex.slice(1), 16);
-	return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+	const n = parseInt(String(hex).slice(1, 7), 16) || 0;
+	return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
-// Swap the palette and recolor existing blobs in place
+function mix(a, b, t) {
+	return [Math.round(a[0] + (b[0] - a[0]) * t), Math.round(a[1] + (b[1] - a[1]) * t), Math.round(a[2] + (b[2] - a[2]) * t)];
+}
+
+function calm(x) {
+	const d = Math.abs(x - w * 0.5) / BAND_WIDTH;
+	const s = Math.min(1, Math.max(0, (d - 0.55) / 0.7));
+	return 1 - CENTER_CALM * (1 - s * s * (3 - 2 * s));
+}
+
 function applyTheme(t) {
-	if (!FOLLOW_THEME || !t || !t.colors) return;
-	palette = COLOR_ROLES.map((role) => hexToRgb(t.colors[role] || t.colors.accent || '#808080'));
-	const bg = hexToRgb(t.colors.background || (t.dark === false ? '#ffffff' : '#000000'));
-	fadeStyle = `rgba(${bg.r}, ${bg.g}, ${bg.b}, 0.08)`;
-	alphaScale = t.dark === false ? 0.4 : 1; // lighter blobs keep dark text readable
-	for (const blob of blobs) blob.color = palette[blob.colorIndex];
+	if (!t) return;
+	dark = t.dark !== false;
+	if (FOLLOW_THEME && t.colors) base = [hexToRgb(t.colors.accent), hexToRgb(t.colors.accent2), hexToRgb(t.colors.accent3)];
+	build();
 }
 
-class Blob {
-	constructor() {
-		this.reset();
-	}
-
-	reset() {
-		this.x = Math.random() * width;
-		this.y = Math.random() * height;
-		this.radius = 60 + Math.random() * 100;
-		this.baseRadius = this.radius;
-		this.vx = (Math.random() - 0.5) * 0.3;
-		this.vy = -0.2 - Math.random() * 0.5; // drift upward
-		this.colorIndex = Math.floor(Math.random() * COLORS.length);
-		this.color = palette[this.colorIndex];
-		this.phase = Math.random() * Math.PI * 2;
-		this.pulseSpeed = 0.005 + Math.random() * 0.01;
-		this.wobbleAmpX = 0.3 + Math.random() * 0.5;
-		this.wobbleAmpY = 0.2 + Math.random() * 0.3;
-		this.wobbleFreqX = 0.008 + Math.random() * 0.006;
-		this.wobbleFreqY = 0.006 + Math.random() * 0.008;
-		this.alpha = 0.04 + Math.random() * 0.06;
-	}
-
-	update() {
-		// Slow organic drift
-		this.x += this.vx + Math.sin(time * this.wobbleFreqX + this.phase) * this.wobbleAmpX;
-		this.y += this.vy + Math.cos(time * this.wobbleFreqY + this.phase) * this.wobbleAmpY;
-
-		// Pulsing radius
-		this.radius = this.baseRadius + Math.sin(time * this.pulseSpeed + this.phase) * 20;
-
-		// Mouse attraction
-		const dx = mouse.x - this.x;
-		const dy = mouse.y - this.y;
-		const dist = Math.sqrt(dx * dx + dy * dy);
-		if (dist < MOUSE_ATTRACT_RADIUS && dist > 1) {
-			const force = (1 - dist / MOUSE_ATTRACT_RADIUS) * MOUSE_ATTRACT_STRENGTH;
-			this.x += (dx / dist) * force;
-			this.y += (dy / dist) * force;
-		}
-
-		// Wrap around vertically — blobs that rise off top reappear at bottom
-		if (this.y + this.radius < -50) {
-			this.y = height + this.radius + 50;
-			this.x = Math.random() * width;
-		}
-		// Occasionally sink back down (some blobs drift downward)
-		if (this.y - this.radius > height + 100) {
-			this.y = -this.radius - 50;
-			this.x = Math.random() * width;
-		}
-
-		// Soft horizontal bounds
-		if (this.x < -this.radius * 2) this.x = width + this.radius;
-		if (this.x > width + this.radius * 2) this.x = -this.radius;
-	}
-
-	draw() {
-		const { r, g, b } = this.color;
-
-		// Draw multiple layered radial gradients for a soft, blurred look
-		for (let layer = 0; layer < 3; layer++) {
-			const layerScale = 1 + layer * 0.4;
-			const layerAlpha = (this.alpha * alphaScale) / (layer + 1);
-			const rad = this.radius * layerScale;
-
-			const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, rad);
-			gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${layerAlpha})`);
-			gradient.addColorStop(0.4, `rgba(${r}, ${g}, ${b}, ${layerAlpha * 0.6})`);
-			gradient.addColorStop(0.7, `rgba(${r}, ${g}, ${b}, ${layerAlpha * 0.2})`);
-			gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
-
-			ctx.beginPath();
-			ctx.arc(this.x, this.y, rad, 0, Math.PI * 2);
-			ctx.fillStyle = gradient;
-			ctx.fill();
-		}
+// One soft sprite per tone; blobs keep their tone, so a theme change recolors them in place
+function build() {
+	const [a, b, c] = base;
+	const tones = [a, b, c, mix(a, b, 0.5), mix(b, c, 0.5), mix(a, c, 0.5)];
+	for (let k = 0; k < TONES; k++) {
+		const col = tones[k];
+		const sp = sprites[k] || new OffscreenCanvas(128, 128);
+		const g = sp.getContext('2d');
+		g.clearRect(0, 0, 128, 128);
+		const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+		const rgb = col[0] + ',' + col[1] + ',' + col[2];
+		// A full body with a soft rim reads as a blob of wax, and keeps the falloff short enough not to band
+		gr.addColorStop(0, 'rgba(' + rgb + ',1)');
+		gr.addColorStop(0.4, 'rgba(' + rgb + ',0.92)');
+		gr.addColorStop(0.62, 'rgba(' + rgb + ',0.55)');
+		gr.addColorStop(0.8, 'rgba(' + rgb + ',0.16)');
+		gr.addColorStop(1, 'rgba(' + rgb + ',0)');
+		g.fillStyle = gr;
+		g.fillRect(0, 0, 128, 128);
+		sprites[k] = sp;
 	}
 }
 
-function initBlobs() {
-	blobs = [];
-	for (let i = 0; i < BLOB_COUNT; i++) {
-		blobs.push(new Blob());
+function seed() {
+	for (let i = 0; i < N; i++) {
+		// Most blobs live in the outer thirds; a few wander through the middle
+		const r = Math.random();
+		home[i] = r < 0.4 ? Math.random() * 0.3 : r < 0.8 ? 0.7 + Math.random() * 0.3 : 0.3 + Math.random() * 0.4;
+		bx[i] = home[i] * w;
+		by[i] = Math.random() * h;
+		vx[i] = vy[i] = 0;
+		rad[i] = (60 + Math.random() * 100) * BLOB_SIZE;
+		temp[i] = Math.random();
+		rate[i] = 0.05 + Math.random() * 0.07;
+		alpha[i] = 0.24 + Math.random() * 0.2;
+		phase[i] = Math.random() * Math.PI * 2;
+		pulse[i] = 0.3 + Math.random() * 0.6;
+		tone[i] = (Math.random() * TONES) | 0;
 	}
+}
+
+function size(nw, nh) {
+	// Keep the blobs on a resize: scale their positions instead of re-rolling them
+	if (w && h) for (let i = 0; i < N; i++) { bx[i] *= nw / w; by[i] *= nh / h; }
+	w = nw;
+	h = nh;
+	scale = Math.max(0.25, Math.min(1, RENDER_SCALE));
+	canvas.width = Math.max(1, Math.round(w * scale));
+	canvas.height = Math.max(1, Math.round(h * scale));
+	ctx.setTransform(scale, 0, 0, scale, 0, 0);
+}
+
+function frame(now) {
+	requestAnimationFrame(frame);
+	if (!ctx) return;
+	if (last && now - last < 1000 / MAX_FPS - 2) return;
+	const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
+	last = now;
+	const pace = SPEED * (reduced ? REDUCED_SPEED : 1);
+	time += dt * pace;
+	mouse.target = Math.max(0, mouse.target - dt * 0.5);
+	mouse.amount += (mouse.target - mouse.amount) * Math.min(1, dt * 2);
+	const pull = CURSOR_PULL * mouse.amount * 60;
+	const relax = Math.min(1, dt * 0.6);
+
+	for (let i = 0; i < N; i++) {
+		// Heat at the bottom, cool at the top: warm blobs rise, cool ones sink
+		const heat = by[i] > h * 0.75 ? 1 : by[i] < h * 0.3 ? -1 : 0;
+		temp[i] = Math.min(1, Math.max(0, temp[i] + heat * rate[i] * dt * pace));
+		let tx = (home[i] * w - bx[i]) * 0.05 + Math.sin(time * 0.4 + phase[i]) * 10;
+		let ty = -(temp[i] - 0.45) * 70;
+		// Drift toward the cursor while it moves, at a capped speed, and let go once it rests
+		const dx = mouse.x - bx[i], dy = mouse.y - by[i], d2 = dx * dx + dy * dy;
+		if (pull > 0 && d2 < CURSOR_RADIUS * CURSOR_RADIUS && d2 > 400) {
+			const d = Math.sqrt(d2), f = pull * (1 - d / CURSOR_RADIUS);
+			tx += dx / d * f;
+			ty += dy / d * f;
+		}
+		vx[i] += (tx - vx[i]) * relax;
+		vy[i] += (ty - vy[i]) * relax;
+		bx[i] += vx[i] * dt * pace;
+		by[i] += vy[i] * dt * pace;
+		if (by[i] < -rad[i]) temp[i] = Math.min(temp[i], 0.2);
+		if (by[i] > h + rad[i]) temp[i] = Math.max(temp[i], 0.8);
+	}
+
+	ctx.globalAlpha = 1;
+	ctx.globalCompositeOperation = 'source-over';
+	ctx.clearRect(0, 0, w, h);
+	ctx.globalCompositeOperation = dark ? 'lighter' : 'source-over';
+	const k = INTENSITY * (dark ? 1 : LIGHT_ALPHA * 1.5); // source-over on light needs a little more than the dark glow
+	// The heat at the base of the lamp: a low glow in each bottom corner
+	ctx.globalAlpha = Math.min(1, 0.22 * k);
+	ctx.drawImage(sprites[0], -w * 0.15, h * 0.8, w * 0.45, h * 0.45);
+	ctx.drawImage(sprites[1], w * 0.7, h * 0.8, w * 0.45, h * 0.45);
+	for (let i = 0; i < N; i++) {
+		const r = (rad[i] + Math.sin(time * pulse[i] + phase[i]) * 18 * BLOB_SIZE) * 2.2;
+		const stretch = 1 + Math.min(0.35, Math.abs(vy[i]) / 120); // wax stretches as it moves
+		const a = alpha[i] * k * calm(bx[i]);
+		if (a < 0.004) continue;
+		ctx.globalAlpha = Math.min(1, a);
+		ctx.drawImage(sprites[tone[i]], bx[i] - r * 0.5 / stretch, by[i] - r * 0.5 * stretch, r / stretch, r * stretch);
+	}
+	ctx.globalAlpha = 1;
+	ctx.globalCompositeOperation = 'source-over';
 }
 
 self.onmessage = (e) => {
-	switch (e.data.type) {
+	const d = e.data;
+	switch (d.type) {
 		case 'init':
-			canvas = e.data.canvas;
+			canvas = d.canvas;
 			ctx = canvas.getContext('2d');
-			width = e.data.width;
-			height = e.data.height;
-			canvas.width = width;
-			canvas.height = height;
-			initBlobs();
-			applyTheme(e.data.theme);
-			startAnimation();
+			reduced = !!d.reducedMotion;
+			w = d.width;
+			h = d.height;
+			seed();
+			size(d.width, d.height);
+			applyTheme(d.theme || {});
+			requestAnimationFrame(frame);
 			break;
 		case 'resize':
-			width = e.data.width;
-			height = e.data.height;
-			canvas.width = width;
-			canvas.height = height;
-			initBlobs();
-			break;
-		case 'mousemove':
-			mouse.x = e.data.x;
-			mouse.y = e.data.y;
+			if (ctx) size(d.width, d.height);
 			break;
 		case 'theme':
-			applyTheme(e.data);
+			applyTheme(d);
+			break;
+		case 'motion':
+			reduced = !!d.reducedMotion;
+			break;
+		case 'mousemove':
+			mouse.x = d.x;
+			mouse.y = d.y;
+			mouse.target = 1;
+			break;
+		case 'mousedown':
+			// A tap warms the blobs nearby, so they start to rise
+			for (let i = 0; i < N; i++) {
+				const dx = bx[i] - d.x, dy = by[i] - d.y;
+				if (dx * dx + dy * dy < 220 * 220) temp[i] = Math.min(1, temp[i] + (reduced ? 0.1 : 0.35));
+			}
 			break;
 	}
 };
-
-function startAnimation() {
-	function render() {
-		if (!ctx) return;
-
-		// Soft fade instead of full clear for trailing effect
-		ctx.fillStyle = fadeStyle;
-		ctx.fillRect(0, 0, width, height);
-
-		time++;
-
-		// Update and draw blobs
-		for (const blob of blobs) {
-			blob.update();
-		}
-		for (const blob of blobs) {
-			blob.draw();
-		}
-
-		requestAnimationFrame(render);
-	}
-	requestAnimationFrame(render);
-}
