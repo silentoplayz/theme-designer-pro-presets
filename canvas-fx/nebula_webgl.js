@@ -6,6 +6,7 @@
 /* ────────── CONFIGURABLE VARIABLES ────────── */
 const INTENSITY     = 0.85;  // how strongly the gas shows (0-1)
 const MOTION        = 1;     // drift speed; 0 holds the nebula still and stops blooms (0-2)
+const REDUCED_SPEED = 0.15;  // share of the drift kept when the viewer asks to reduce motion (0-1)
 const CENTER_CALM   = 0.75;  // how much the gas thins behind the chat column (0-1)
 const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
 const GAS_SCALE     = 1.6;   // size of the cloud structures; lower is larger (0.6-4)
@@ -87,7 +88,7 @@ const FRAG = [
 let canvas, gl, program, buffer;
 let loc = {};
 let w = 0, h = 0;
-let last = 0, time = 0;
+let last = 0, time = 0, reduced = false;
 const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
 const bloom = { x: 0, y: 0, age: 1000, strength: 0, wait: BLOOM_EVERY * 0.5 };
 const colors = { c1: hexToRgb(COLOR_A), c2: hexToRgb(COLOR_B), c3: hexToRgb(COLOR_C), dark: 1 };
@@ -143,7 +144,7 @@ function size() {
 // ── Blooms: a slow swell of light in the outer thirds, never over the chat ──
 function updateBloom(dt) {
 	bloom.age += dt;
-	if (BLOOM_EVERY <= 0 || MOTION <= 0 || bloom.age < 10) return;
+	if (BLOOM_EVERY <= 0 || MOTION <= 0 || reduced || bloom.age < 10) return;
 	bloom.wait -= dt;
 	if (bloom.wait > 0) return;
 	const side = Math.random() < 0.5 ? 0 : 1;
@@ -160,7 +161,7 @@ function frame(now) {
 	if (last && now - last < 1000 / MAX_FPS - 2) return;
 	const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
 	last = now;
-	time = (time + dt * MOTION) % 3000;
+	time = (time + dt * MOTION * (reduced ? REDUCED_SPEED : 1)) % 3000;
 	mouse.target = Math.max(0, mouse.target - dt * 0.4);
 	mouse.amount += (mouse.target - mouse.amount) * Math.min(1, dt * 3);
 	updateBloom(dt);
@@ -202,6 +203,7 @@ self.onmessage = (e) => {
 			canvas = d.canvas;
 			w = d.width;
 			h = d.height;
+			reduced = !!d.reducedMotion;
 			applyTheme(d.theme);
 			start();
 			break;
@@ -212,6 +214,9 @@ self.onmessage = (e) => {
 			break;
 		case 'theme':
 			applyTheme(d);
+			break;
+		case 'motion':
+			reduced = !!d.reducedMotion;
 			break;
 		case 'mousemove':
 			mouse.x = d.x;
