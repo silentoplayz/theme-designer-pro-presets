@@ -145,10 +145,15 @@ function validateCanvasFx() {
     if (/setInterval\([\s\S]{0,160}?heartbeat/.test(code)) {
       fail(f, 'sends a heartbeat, which the engine ignores; remove the setInterval');
     }
-    // Globals only: a property such as colors.alert is fine
-    const dom = ['document', 'window', 'localStorage', 'alert\\s*\\('].find(word => new RegExp(`(^|[^.\\w$])${word}`).test(code) && (word.startsWith('alert') || new RegExp(`(^|[^.\\w$])${word}\\b`).test(code)));
+    // The engine moves a script whose code says `document` anywhere, strings
+    // included, to the main thread; the other globals only count when used
+    const used = (re) => re.test(code);
+    const dom = used(/(^|[^.\w$])document\b/) ? 'document'
+      : used(/(^|[^.\w$])window\s*[.[]/) ? 'window'
+      : used(/(^|[^.\w$])localStorage\b/) ? 'localStorage'
+      : used(/(^|[^.\w$])alert\s*\(/) ? 'alert' : null;
     if (dom) {
-      fail(f, `uses \`${dom.replace(/\\.*/, '')}\`, which moves it out of the worker`);
+      fail(f, `uses \`${dom}\`, which moves it out of the worker`);
     }
     if (/getContext\(\s*['"]webgl2?['"]/.test(code) && !code.includes('webglcontextlost')) {
       fail(f, 'uses WebGL without handling webglcontextlost');
