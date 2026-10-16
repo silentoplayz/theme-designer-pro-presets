@@ -1,4 +1,4 @@
-# Theme format 1.0
+# Theme format 1.1
 
 This page is for anyone who writes a tool that reads or writes Theme Designer Pro themes, and for anyone who changes how the designer or the Studio handles them. It says what a theme file holds, how a reader fills in what a file leaves out, and how the format changes.
 
@@ -44,10 +44,15 @@ Each mode is an object with the fields below. Only `h`, `c` and `l` are required
 | `c` | number, 0 to 150 | 0 | Chroma, in thousandths: 18 is an OKLCH chroma of 0.018 |
 | `l` | number, 0 to 100 | 20 | How light the palette is, in OKLCH percent. At 20 it matches Open WebUI's own grays, and every step moves with it. |
 | `paletteEnabled` | boolean | true | Off, the mode keeps Open WebUI's own grays and ignores `h`, `c` and `l` |
+| `accent` | `#rrggbb` or `""` | `""` | The mode's first accent. Empty, it is generated from the palette: the hue `h` at OKLCH lightness 0.74 on Dark and OLED or 0.56 on Light and Her, with a chroma of `c` / 250 kept between 0.06 and 0.18, or 0 when `c` is 0 or the palette is off. |
+| `accent2` | `#rrggbb` or `""` | `""` | The second accent. Empty, it is generated the same way at `h` + 40. |
+| `accent3` | `#rrggbb` or `""` | `""` | The third accent. Empty, it is generated the same way at `h` − 40. |
 | `overrides` | object | `{}` | Colors set for single palette steps, such as `"--color-gray-50": "#f8f9ff"`. Names are custom properties, values CSS colors of at most 64 characters. |
 | `locks` | object | `{}` | Palette steps kept when the palette is regenerated, each `true` or `false` |
 | `manualOverrides` | string | `""` | Palette steps written as CSS, one `--color-gray-N: value;` per line |
 | `manualOverridesEnabled` | boolean | false | Whether `manualOverrides` applies |
+
+The accents, set or generated, reach Canvas FX scripts as `colors.accent`, `accent2` and `accent3` in the theme payload, and the mode's CSS as `--tdp-accent`, `--tdp-accent-2` and `--tdp-accent-3`.
 
 ### Custom CSS and Canvas FX
 
@@ -100,7 +105,7 @@ A reader takes a file the way the designer does:
 2. A missing `oled` is a copy of `dark` with `l` set to 0. A missing `her` is a copy of `light`.
 3. A field left out of a mode takes its default. The one exception is `manualOverridesEnabled`: left out while `manualOverrides` has text, it is true, because files from before the switch existed meant their overrides to apply.
 4. `null` in a switch reads as false. Older builds wrote `gradientAnimation: null`.
-5. A number outside its range is moved to the nearest end of it. A value of the wrong type, a choice that isn't listed, or a color that isn't shaped like one takes the default. `overrides` names that aren't custom properties are dropped, and lists stop at 32 items.
+5. A number outside its range is moved to the nearest end of it. A value of the wrong type, a choice that isn't listed, or a color that isn't shaped like one takes the default. An accent counts only as `#` and six hex digits, read in lowercase; anything else is `""`. `overrides` names that aren't custom properties are dropped, and lists stop at 32 items.
 6. `customCSS`, `canvasScript` and `manualOverrides` are read as written, since they are code. A Canvas FX script runs in the browser of everyone who sees the theme, so the designer asks before it applies a theme that has one.
 7. Fields a reader doesn't know are ignored at the top level and kept as they are in a mode.
 
@@ -134,7 +139,7 @@ The Studio opens a gallery theme or a submitted one and downloads a new theme. I
 
 ## Versions
 
-This is version 1.0 of the format. Files don't name the version they follow, because 1.0 is the first one written down and every file so far fits it.
+This is version 1.1 of the format. Files don't name the version they follow: 1.0 was the first one written down, and a 1.0 file reads the same under 1.1.
 
 - **A new field** that leaves older files looking the same, with a default that does what files without it already did, makes a minor version: 1.1, 1.2 and so on. The designer, the Studio, the schema and this page change together in one commit.
 - **Any change that makes an existing file look different**, such as a new meaning for a field or a new default, makes a major version: 2.0. It also needs a field in the file that tells readers which version it follows, added in that same version.
@@ -146,4 +151,5 @@ Two tests keep the copies of the format in step:
 
 ### Changes
 
+- **1.1** (2026-10-16): A mode gained `accent`, `accent2` and `accent3`, each `#rrggbb` to set that accent or `""` to keep the generated one, which is what every file without them gets.
 - **1.0** (2026-10-11): First written version. The schema gained the gradient, palette switch and manual override fields that files already carried, `c` gained its upper limit of 150, and empty links became valid.

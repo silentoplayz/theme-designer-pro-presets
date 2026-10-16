@@ -44,7 +44,7 @@ Every script follows the house standard in [`canvas-fx/README.md`](canvas-fx/REA
 These rules apply to theme custom CSS too. CI checks the first and warns on the others.
 
 - [ ] **Style the rounded input pill, `#message-input-container`,** never `#chat-input-container`, the square box inside it
-- [ ] **Recolor through the palette first.** Open WebUI's surfaces read `var(--color-gray-*)`, so most of a look comes from the palette, and CSS adds only what the palette can't
+- [ ] **Recolor through the palette first.** Open WebUI's surfaces read `var(--color-gray-*)`, so most of a look comes from the palette, and CSS adds only what the palette can't. For accent colors, use `var(--tdp-accent)`, `var(--tdp-accent-2)` and `var(--tdp-accent-3)` instead of hex: every mode defines them, with the accents the theme sets in the Design Studio or the ones generated from its palette
 - [ ] **Stable hooks only:** IDs such as `#sidebar`, `#message-input-container`, `#sidebar-chat-item`, classes such as `.chat-user`, `.chat-assistant`, `.markdown-prose`. No Tailwind utility classes as selectors, and none of the stale ones CI warns about
 - [ ] **Keep Open WebUI's shapes:** the input is a pill, bubbles and cards are rounded; don't square them off or box text in
 - [ ] **No blanket `input`, `textarea` or `*` rules,** which restyle every field in Settings and hide focus rings

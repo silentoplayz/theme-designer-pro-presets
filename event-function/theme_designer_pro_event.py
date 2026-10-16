@@ -1303,7 +1303,7 @@ class Event:
                 return [d[0], d[1], d[2]];
             }
             // The same function builds the payload on the website's previews
-            function buildCanvasTheme(readVar, toRgb, mode, hue, chroma) {
+            function buildCanvasTheme(readVar, toRgb, mode, hue, chroma, set) {
                 var dark = mode === 'dark' || mode === 'oled';
                 var hex = function(c) { return '#' + c.map(function(v) { return (v < 16 ? '0' : '') + v.toString(16); }).join(''); };
                 var ramp = {}, rampRgb = {};
@@ -1315,10 +1315,16 @@ class Event:
                 var ac = chroma > 0 ? Math.min(0.18, Math.max(0.06, chroma / 250)) : 0;
                 var al = dark ? 0.74 : 0.56;
                 var accent = function(dh) { return toRgb('oklch(' + al + ' ' + ac.toFixed(3) + ' ' + ((hue + dh + 360) % 360).toFixed(1) + ')'); };
+                // A theme can set its own accents as '#rrggbb'. Checked again
+                // here: the state can come from an older build or be edited.
+                var pick = function(k, dh) {
+                    var v = set && set[k];
+                    return typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v) ? toRgb(v.toLowerCase()) : accent(dh);
+                };
                 var src = {
                     background: rampRgb[dark ? 900 : 50], surface: rampRgb[dark ? 850 : 100],
                     text: rampRgb[dark ? 100 : 900], muted: rampRgb[dark ? 400 : 500],
-                    accent: accent(0), accent2: accent(40), accent3: accent(-40)
+                    accent: pick('accent', 0), accent2: pick('accent2', 40), accent3: pick('accent3', -40)
                 };
                 var colors = {}, rgb = {};
                 Object.keys(src).forEach(function(k) {
@@ -1331,7 +1337,7 @@ class Event:
                 var hue = Number(config.h) || 0;
                 var chroma = config.paletteEnabled === false ? 0 : (Number(config.c) || 0);
                 var cs = getComputedStyle(document.documentElement);
-                return buildCanvasTheme(function(name) { return cs.getPropertyValue(name).trim(); }, _colorToRgb, mode, hue, chroma);
+                return buildCanvasTheme(function(name) { return cs.getPropertyValue(name).trim(); }, _colorToRgb, mode, hue, chroma, config);
             }
             function pushCanvasTheme() {
                 if (!_canvasThemeSend) return;
@@ -5532,6 +5538,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         .var-picker::-webkit-color-swatch { border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 10px; }
         .var-picker::-moz-color-swatch { border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 10px; }
         .var-picker-wrap { position: relative; width: 40px; height: 40px; flex-shrink: 0; }
+        .accent-grid { grid-template-columns: repeat(3, 1fr); }
         .var-picker-aa { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; pointer-events: none; z-index: 1; font-family: 'Inter', sans-serif; letter-spacing: 0.02em; text-shadow: 0 0 3px rgba(0,0,0,0.15); }
         
         .var-action-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-muted); font-size: 0.78rem; font-weight: 600; padding: 8px 16px; border-radius: 10px; cursor: pointer; transition: 0.2s; z-index: 10; }
@@ -5696,6 +5703,8 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
             /* Variable grid: single column on small screens */
             .var-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
             .var-item { padding: 14px; }
+            .accent-grid { grid-template-columns: repeat(3, 1fr); }
+            .accent-grid .var-item { flex-wrap: wrap; gap: 8px; }
 
             /* Preset grid */
             .preset-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
@@ -5953,6 +5962,10 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         <label data-reset="l"><span data-tooltip="Double-click to reset" style="cursor:pointer">Lightness</span> <span class="slider-val" id="val-l">20%</span></label>
                         <input type="range" id="sl-l" min="0" max="100" value="20">
                     </div>
+                </div>
+                <div class="slider-row accent-row">
+                    <label data-reset="accents"><span data-tooltip="Double-click to reset all three to automatic" style="cursor:pointer">Accent Colors</span> <span class="slider-val" id="val-accents" data-tooltip="Canvas FX scripts that follow the theme draw in these, and theme CSS reads them as var(--tdp-accent), var(--tdp-accent-2) and var(--tdp-accent-3)">Auto</span></label>
+                    <div class="var-grid accent-grid" id="accent-grid"></div>
                 </div>
                 <div style="display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end;">
                     <button class="btn" id="random-btn" data-tooltip="Generate random base colors" style="font-size: 0.62rem; padding: 8px 14px;">✦ Randomize</button>
@@ -6425,6 +6438,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         <ul>
                             <li><b>Global Modes:</b> Easily switch between <b>Dark</b>, <b>OLED</b> (pure black), <b>Light</b>, <b>Her</b>, and <b>System</b> modes using the segmented toggle. Settings, variables, and CSS are managed entirely separately for each mode. System mode proxies to your OS preference (see Section 8). In Live mode, picking a mode tab also switches Open WebUI itself, in your other tabs and in Settings around the embedded designer; in Draft mode it switches only the designer. <i>Note: when the page loads, the designer reads Open WebUI&rsquo;s <code>enable_easter_eggs</code> setting from <code>/api/config</code> and shows the Her tab if it&rsquo;s on, or if Open WebUI is already in Her mode.</i></li>
                             <li><b>Hue / Chroma / Lightness:</b> Control the base angle, intensity, and brightness. <i>(Pro-Tip: Double-click any slider label to reset it to default).</i></li>
+                            <li><b>Accent Colors:</b> Under the sliders, three swatches show the mode&rsquo;s accents. Each starts on <b>Auto</b>: the palette&rsquo;s hue, lighter on dark modes and deeper on light ones, with the second and third 40&deg; to either side, so they follow the sliders. Pick a color to set one for this mode, for a theme whose look is two colors the hue can&rsquo;t give, and click &#10226; to set it back to automatic (double-click the row&rsquo;s label for all three). Canvas FX scripts that follow the theme draw in them, and theme CSS reads them as <code>var(--tdp-accent)</code>, <code>var(--tdp-accent-2)</code> and <code>var(--tdp-accent-3)</code>; click an accent&rsquo;s name to copy its variable. Sync copies them with the palette.</li>
                             <li><b>Tonal Ramp:</b> Below the sliders, the OKLCH Tonal Ramp visualizes the generated 12-step color scale. Click any block in the ramp to copy its hex value to your clipboard.</li>
 
                             <li><b>Sync:</b> Click the <b>Sync</b> button in the footer to selectively copy palette, overrides, CSS, Canvas FX, Gradient Background, or auth settings from the current mode to one or more target modes. Colored badges appear next to each option indicating whether the source and target are already <span style="color:#10b981;">in sync</span> or have <span style="color:#f59e0b;">differences</span>. The <b>Auto Sync</b> valve skips this dialog and adds a <b>Sync All</b> switch to the footer instead.</li>
@@ -6507,6 +6521,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                             <li><b>Auto-Scope:</b> When enabled, your CSS is wrapped in the mode&rsquo;s selector as a native CSS nesting block, and <code>:root</code> becomes <code>&amp;</code>. <code>@keyframes</code> blocks are extracted and placed outside the wrapper. This prevents your Dark mode CSS from accidentally ruining your Light mode styling.</li>
                             <li><b>Raw Mode:</b> Disable Auto-Scope if you prefer to write global rules or your own target selectors. In this mode, <code>:root</code> references become <code>:is(&lt;mode selector&gt;)</code>.</li>
                             <li><b>System Mode:</b> Dark and Light custom CSS is also emitted inside <code>@media (prefers-color-scheme)</code> blocks for people on System.</li>
+                            <li><b>Accent Colors:</b> Use <code>var(--tdp-accent)</code>, <code>var(--tdp-accent-2)</code> and <code>var(--tdp-accent-3)</code> for highlights instead of hex values. Every mode defines them, with the colors set under <b>Accent Colors</b> in the Design Studio or the ones generated from the palette, so one rule follows each mode and every later palette change.</li>
                             <li><b>Show on Auth Pages:</b> Toggle whether your custom CSS applies on Login/Signup screens. Enabled by default. The <b>Enable Auth Page Theming</b> valve hides it and turns it off.</li>
                             <li><b>Personal Themes:</b> Custom CSS in a personal theme affects only its owner.</li>
                             <li><b>Import/Export:</b> Drag and drop native <code>.css</code> files directly into the UI, or export your snippets for easy sharing.</li>
@@ -6946,6 +6961,7 @@ window.dispatchEvent(new CustomEvent('owui-canvas-context', {
                         <ul>
                             <li><code>background</code>: the page color for this mode. <code>surface</code>: one step raised, like the input bar. <code>text</code> and <code>muted</code>: the main and secondary text colors.</li>
                             <li><code>accent</code>: the palette&rsquo;s hue at a color made for the mode, lighter on dark modes and deeper on light ones, and as colorful as the theme itself. <code>accent2</code> and <code>accent3</code> sit 40&deg; to either side of it. A neutral theme gets gray accents.</li>
+                            <li>A theme can set any of the three for a mode under <b>Accent Colors</b> in the Design Studio, for a look made of colors the hue can&rsquo;t give, such as amber and teal. A set accent arrives in place of the generated one, so a script keeps <code>followTheme</code> on instead of hard-coding the theme&rsquo;s colors. The theme&rsquo;s CSS gets the same three as <code>var(--tdp-accent)</code>, <code>var(--tdp-accent-2)</code> and <code>var(--tdp-accent-3)</code>.</li>
                             <li>The colors are read from the page, so per-step overrides and the OLED blacks are already in them.</li>
                         </ul>
 
@@ -7250,6 +7266,7 @@ self.onmessage = function(e) {
                             </table>
                         </div>
                         <p>These are the Dark, Light and Her defaults, at a Lightness slider of 20%. Moving the slider shifts every step by the same amount (step + slider &minus; 20), kept between 0% and 98%. OLED starts at a slider of 0%, so its 900 and 950 steps are 0%, pure black.</p>
+                        <p>Every mode also defines its three accents, for theme CSS: <span class="doc-code-inline">--tdp-accent</span>, <span class="doc-code-inline">--tdp-accent-2</span> and <span class="doc-code-inline">--tdp-accent-3</span>. Each is the color set under <b>Accent Colors</b>, or the generated <code>oklch(0.74 C H)</code> on Dark and OLED and <code>oklch(0.56 C H)</code> on Light and Her, where H is the hue (then 40&deg; more, and 40&deg; less) and C is four times the palette&rsquo;s chroma, kept between 0.06 and 0.18, or 0 for a neutral theme or a mode with its palette off.</p>
                     </div>
                 </details>
 
@@ -7414,7 +7431,7 @@ self.onmessage = function(e) {
                             <div class="doc-sub-inner">
                         <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85;">Understanding the injection order helps debug cascade conflicts. The final CSS is assembled in this order:</p>
                         <ol style="font-size: 0.72rem; line-height: 1.7; padding-left: 18px;">
-                            <li><b>OKLCH Variable Declarations</b> — <code>--color-gray-*</code> palette ramps per mode</li>
+                            <li><b>OKLCH Variable Declarations</b> — <code>--color-gray-*</code> palette ramps and <code>--tdp-accent*</code> accents per mode</li>
                             <li><b>Manual Variable Overrides</b> — user-defined CSS custom properties (injected after palette for priority)</li>
                             <li><b>Structural Background Rules</b> — when Canvas FX or a gradient is active, transparency rules on the app containers plus <code>body</code>/<code>#sidebar</code> backdrops; otherwise just opaque <code>body</code>/<code>#sidebar</code> rules</li>
                             <li><b>Gradient Background CSS</b> — <code>background-image</code>, sidebar blur, and chat overlay rules</li>
@@ -8089,6 +8106,7 @@ location.reload();</code></pre>
             if (resetEl) {
                 const fn = resetEl.dataset.reset;
                 if (fn === 'h' || fn === 'c' || fn === 'l') resetSlider(fn);
+                else if (fn === 'accents') resetAccents();
                 else if (fn === 'gradient-angle') resetGradientAngle();
                 else if (fn === 'gradient-intensity') resetGradientIntensity();
                 else if (fn === 'gradient-speed') resetGradientSpeed();
@@ -8707,7 +8725,8 @@ location.reload();</code></pre>
     // === V1.5.8 DRY Utilities ===
     const DEFAULT_MODE_DATA = {
         h: 250, c: 0, l: 20, overrides: {}, locks: {},
-        paletteEnabled: true, customCSS: "", customCssEnabled: false,
+        paletteEnabled: true, accent: "", accent2: "", accent3: "",
+        customCSS: "", customCssEnabled: false,
         autoScope: true, canvasEnabled: false, canvasScript: "",
         manualOverrides: "", manualOverridesEnabled: false,
         gradientEnabled: false, gradientType: 'linear', gradientAngle: 135,
@@ -8722,6 +8741,40 @@ location.reload();</code></pre>
     function createDefaultModeData(overrides = {}) {
         return { ...DEFAULT_MODE_DATA, overrides: {}, locks: {}, gradientStops: [], gradientMeshPoints: [], ...overrides };
     }
+
+    // The theme's three accents. A mode field set to '#rrggbb' sets one; ''
+    // leaves it generated from the palette's hue, the same color the Canvas
+    // FX payload gets (buildCanvasTheme in the bootloader). The theme CSS
+    // carries each as its custom property, for theme CSS to use.
+    const ACCENT_FIELDS = [
+        { key: 'accent', cssVar: '--tdp-accent', shift: 0, label: 'Accent' },
+        { key: 'accent2', cssVar: '--tdp-accent-2', shift: 40, label: 'Accent 2' },
+        { key: 'accent3', cssVar: '--tdp-accent-3', shift: -40, label: 'Accent 3' }
+    ];
+
+    // A set accent, lowercase, or '' for anything that isn't '#' and six hex digits
+    function _accentHex(v) {
+        return typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : '';
+    }
+
+    // Lighter on dark modes, deeper on light ones, as colorful as the
+    // palette, and gray with the palette off
+    function generatedAccent(config, mode, shift) {
+        const dark = mode === 'dark' || mode === 'oled';
+        const hue = _cssNum(config.h, 0);
+        const chroma = config.paletteEnabled === false ? 0 : _cssNum(config.c, 0);
+        const ac = chroma > 0 ? Math.min(0.18, Math.max(0.06, chroma / 250)) : 0;
+        return `oklch(${dark ? 0.74 : 0.56} ${ac.toFixed(3)} ${((hue + shift + 360) % 360).toFixed(1)})`;
+    }
+
+    // { '--tdp-accent': color, ... } for a mode, set or generated
+    function accentVars(config, mode) {
+        const out = {};
+        ACCENT_FIELDS.forEach(a => { out[a.cssVar] = _accentHex(config[a.key]) || generatedAccent(config, mode, a.shift); });
+        return out;
+    }
+
+    const accentsMatch = (m1, m2) => ACCENT_FIELDS.every(({ key }) => _accentHex(m1[key]) === _accentHex(m2[key]));
 
     function readHiddenBackgrounds(v) {
         const out = { models: [], folders: [] };
@@ -8920,7 +8973,9 @@ location.reload();</code></pre>
             if (d[k] !== undefined && typeof d[k] !== 'string') d[k] = def[k];
         });
         // Colour-valued fields: constrained to the CSS colour grammar, unlike
-        // the free-form CSS fields above.
+        // the free-form CSS fields above. Accents are stricter still: they
+        // also go to Canvas FX, so only '#rrggbb' counts.
+        ACCENT_FIELDS.forEach(({ key }) => { if (d[key] !== undefined) d[key] = _accentHex(d[key]); });
         if (d.gradientMeshBgColor !== undefined) {
             d.gradientMeshBgColor = _cssTok(d.gradientMeshBgColor, def.gradientMeshBgColor);
         }
@@ -10045,6 +10100,7 @@ self.onmessage = (e) => {
         if (!m1 || !m2) return false;
         return m1.h === m2.h && m1.c === m2.c && m1.l === m2.l && 
                !!m1.paletteEnabled === !!m2.paletteEnabled &&
+               accentsMatch(m1, m2) &&
                isOverridesMatch(m1, m2) && 
                (m1.customCSS || "") === (m2.customCSS || "") && 
                (m1.customCssEnabled !== false) === (m2.customCssEnabled !== false) && 
@@ -10435,6 +10491,7 @@ self.onmessage = (e) => {
         }
 
         renderVariableGrid(config, activeVars);
+        renderAccentGrid(config, dm);
         // Generate the CSS sections once and pass to all consumers (was generated
         // 3x per change). Pass pre-computed activeVars for the current mode so
         // generateThemeSections() can skip recomputing getVariablesMap() for it.
@@ -10920,6 +10977,89 @@ self.onmessage = (e) => {
         });
     }
 
+    // The Accent Colors row: one swatch per accent, showing the color in use.
+    // An automatic one follows the hue and chroma and says Auto; a picked one
+    // is pinned like a locked variable until ⟲ sets it back to automatic.
+    // Built once and updated in place, so a picker in use is never replaced.
+    function renderAccentGrid(config, dataMode) {
+        const grid = $('accent-grid');
+        if (!grid) return;
+        if (grid.childElementCount !== ACCENT_FIELDS.length) {
+            grid.innerHTML = ACCENT_FIELDS.map(a => `
+            <div class="var-item" data-accent-item="${a.key}">
+                <span class="var-name" data-copy-accent="${a.cssVar}" style="font-size: 0.6rem;" data-tooltip="Copy var(${a.cssVar})">${a.label}</span>
+                <div class="var-controls">
+                    <div class="var-reset" data-accent="${a.key}" data-tooltip="Back to automatic" role="button" aria-label="Set ${a.label} back to automatic">⟲</div>
+                    <div class="var-picker-wrap">
+                        <span class="var-picker-aa"></span>
+                        <input type="color" class="var-picker" data-accent="${a.key}" aria-label="${a.label} color">
+                    </div>
+                </div>
+            </div>`).join('');
+        }
+        const vars = accentVars(config, dataMode);
+        let custom = 0;
+        ACCENT_FIELDS.forEach(a => {
+            const item = grid.querySelector(`[data-accent-item="${a.key}"]`);
+            if (!item) return;
+            const set = _accentHex(config[a.key]);
+            if (set) custom++;
+            const hex = set || oklchToHex(vars[a.cssVar]);
+            item.classList.toggle('is-locked', !!set);
+            const reset = item.querySelector('.var-reset');
+            reset.style.visibility = set ? '' : 'hidden';
+            const aa = item.querySelector('.var-picker-aa');
+            aa.textContent = set ? '' : 'Auto';
+            aa.style.color = getEffectiveLightness(hex) > 0.45 ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.8)';
+            const picker = item.querySelector('.var-picker');
+            if (picker !== document.activeElement || !set) picker.value = hex;
+            picker.dataset.tooltip = set ? hex.toUpperCase() : `Automatic: ${hex.toUpperCase()}`;
+        });
+        const val = $('val-accents');
+        if (val) val.innerText = custom ? `${custom} set` : 'Auto';
+    }
+
+    function setupAccentGridDelegation() {
+        const grid = $('accent-grid');
+        if (!grid) return;
+        // Live while dragging, like the variable pickers; the undo point
+        // lands on change
+        grid.addEventListener('input', (e) => {
+            const picker = e.target.closest('.var-picker[data-accent]');
+            if (!picker) return;
+            themeData[getActiveDataMode()][picker.dataset.accent] = _accentHex(picker.value);
+            commitChange({ clearRef: false, push: false });
+        });
+        grid.addEventListener('change', (e) => {
+            if (!e.target.closest('.var-picker[data-accent]')) return;
+            pushState();
+        });
+        grid.addEventListener('click', (e) => {
+            const reset = e.target.closest('.var-reset[data-accent]');
+            if (reset) {
+                themeData[getActiveDataMode()][reset.dataset.accent] = '';
+                commitChange({ clearRef: false });
+                const a = ACCENT_FIELDS.find(f => f.key === reset.dataset.accent);
+                showToast(`${a ? a.label : 'Accent'} is automatic again`);
+                return;
+            }
+            const name = e.target.closest('[data-copy-accent]');
+            if (name) {
+                const text = `var(${name.dataset.copyAccent})`;
+                navigator.clipboard.writeText(text).then(() => showToast(`Copied ${text}`));
+            }
+        });
+    }
+
+    // Double-click on the row's label
+    function resetAccents() {
+        const dm = getActiveDataMode();
+        if (ACCENT_FIELDS.every(({ key }) => !_accentHex(themeData[dm][key]))) return;
+        ACCENT_FIELDS.forEach(({ key }) => { themeData[dm][key] = ''; });
+        commitChange({ clearRef: false });
+        showToast('Accents are automatic again');
+    }
+
     function renderVariableGrid(config, activeVars) {
         const grid = document.getElementById('variable-grid');
         if (!grid) return;
@@ -11350,6 +11490,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             } else {
                 vars = (varsCache && varsCache[m.id]) || getVariablesMap(modeData, m.id);
             }
+            // The accents, palette on or off, so theme CSS can always use them
+            vars = { ...vars, ...accentVars(modeData, m.id) };
 
             // Palette variables
             varsCss += `/*[OWUI_PAL_${modeTag}_START]*/\n`;
@@ -13505,8 +13647,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 if (aOk !== bOk) return false;
                 return Math.abs(a - b) <= eps;
             };
-            const pMatch = pairsMatch(sourceData.h, targetData.h) && pairsMatch(sourceData.c, targetData.c) && pairsMatch(incomingL, targetData.l);
-            syncDiffData.palette.push({ mode, match: pMatch, src: { h: targetData.h, c: targetData.c, l: targetData.l }, tgt: { h: sourceData.h, c: sourceData.c, l: incomingL }, srcOverrides: targetData.overrides, tgtOverrides: sourceData.overrides });
+            const pMatch = pairsMatch(sourceData.h, targetData.h) && pairsMatch(sourceData.c, targetData.c) && pairsMatch(incomingL, targetData.l) && accentsMatch(sourceData, targetData);
+            syncDiffData.palette.push({ mode, match: pMatch, src: { h: targetData.h, c: targetData.c, l: targetData.l, accents: _accentList(targetData) }, tgt: { h: sourceData.h, c: sourceData.c, l: incomingL, accents: _accentList(sourceData) }, srcOverrides: targetData.overrides, tgtOverrides: sourceData.overrides });
             if (!pMatch) paletteDiffs++;
 
             // === Overrides ===
@@ -13660,8 +13802,17 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         h += `<span>H: ${fmt(s.h)}→${fmt(t.h)}${dH && dH !== '0.0' ? ` <span class="delta">(Δ${dH > 0 ? '+':''}${dH})</span>` : ''}</span>`;
         h += `<span>C: ${fmt(s.c)}→${fmt(t.c)}${dC && dC !== '0.0' ? ` <span class="delta">(Δ${dC > 0 ? '+':''}${dC})</span>` : ''}</span>`;
         h += `<span>L: ${fmt(s.l)}→${fmt(t.l)}${dL && dL !== '0.0' ? ` <span class="delta">(Δ${dL > 0 ? '+':''}${dL})</span>` : ''}</span>`;
+        // Counted, not shown: update diffs feed this remote data
+        const sa = s.accents || [], ta = t.accents || [];
+        const fmtA = (list) => { const n = list.filter(Boolean).length; return n ? `${n} set` : 'auto'; };
+        if (sa.join() !== ta.join()) h += `<span>Accents: ${fmtA(sa)}→${fmtA(ta)}</span>`;
         h += `</div>`;
         return h;
+    }
+
+    // A mode's three accents as set ('' for each generated one)
+    function _accentList(config) {
+        return ACCENT_FIELDS.map(({ key }) => _accentHex(config && config[key]));
     }
 
     function _renderOverridesDiff(entry) {
@@ -13831,6 +13982,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             // Off means the default ramp ships, so the h/c/l above only count
             // with it. Missing on themes saved before the switch: on.
             themeData[mode].paletteEnabled = sourceData.paletteEnabled !== false;
+            ACCENT_FIELDS.forEach(({ key }) => { themeData[mode][key] = _accentHex(sourceData[key]); });
         }
         if (opts.syncOverrides) {
             themeData[mode].overrides = structuredClone(sourceData.overrides || {});
@@ -15160,6 +15312,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             if (!mode) return null;
             return stableStringify({
                 h: mode.h, c: mode.c, l: mode.l,
+                accents: _accentList(mode),
                 overrides: mode.overrides || {},
                 customCSS: mode.customCSS || '',
                 customCssEnabled: !!mode.customCssEnabled,
@@ -16709,10 +16862,10 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             const changes = [];
 
             // Palette
-            const paletteChanged = lm.h !== rm.h || lm.c !== rm.c || lm.l !== rm.l;
+            const paletteChanged = lm.h !== rm.h || lm.c !== rm.c || lm.l !== rm.l || !accentsMatch(lm, rm);
             if (paletteChanged) {
                 changes.push({ name: 'Palette', html: _renderPaletteDiff({
-                    src: { h: lm.h, c: lm.c, l: lm.l }, tgt: { h: rm.h, c: rm.c, l: rm.l },
+                    src: { h: lm.h, c: lm.c, l: lm.l, accents: _accentList(lm) }, tgt: { h: rm.h, c: rm.c, l: rm.l, accents: _accentList(rm) },
                     srcOverrides: lm.overrides || {}, tgtOverrides: rm.overrides || {}
                 }) });
             }
@@ -18027,6 +18180,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     // Initialize (toolbars and icons already hydrated at L2486-2487)
     setupDelegation();
     setupVariableGridDelegation();
+    setupAccentGridDelegation();
     commitChange({ clearRef: false, snapshots: true }); // Seed undo history with initial state
     // A theme the chat asked for through the Theme Designer Pro Launcher tool,
     // applied once the designer has loaded the theme it starts from.

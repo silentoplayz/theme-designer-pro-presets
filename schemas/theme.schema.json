@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$comment": "Theme format 1.0. The written spec, with the rules for reading and writing a file, is schemas/theme-format.md. tests/theme-format/check.js keeps this file, the designer and the Studio in step.",
+  "$comment": "Theme format 1.1. The written spec, with the rules for reading and writing a file, is schemas/theme-format.md. tests/theme-format/check.js keeps this file, the designer and the Studio in step.",
   "title": "Theme Preset",
   "description": "A complete Theme Designer Pro theme with per-mode configurations (dark, light, OLED, her)",
   "type": "object",
@@ -47,6 +47,12 @@
       "description": "A CSS color, such as '#6366f1' or 'oklch(0.5 0.1 250)'"
     },
     "percent": { "type": "number", "minimum": 0, "maximum": 100 },
+    "accent": {
+      "type": "string",
+      "pattern": "^(#[0-9a-fA-F]{6})?$",
+      "default": "",
+      "description": "A color as '#rrggbb', or empty for the generated one"
+    },
     "themeMode": {
       "type": "object",
       "description": "Configuration for a single theme mode. A reader fills in any field left out with its default.",
@@ -77,6 +83,18 @@
           "type": "boolean",
           "default": true,
           "description": "Whether the palette from h, c and l applies. Off, the mode keeps Open WebUI's own grays."
+        },
+        "accent": {
+          "$ref": "#/$defs/accent",
+          "description": "The mode's first accent as '#rrggbb', or empty to generate it from the palette's hue"
+        },
+        "accent2": {
+          "$ref": "#/$defs/accent",
+          "description": "The mode's second accent as '#rrggbb', or empty to generate it 40 degrees past the hue"
+        },
+        "accent3": {
+          "$ref": "#/$defs/accent",
+          "description": "The mode's third accent as '#rrggbb', or empty to generate it 40 degrees short of the hue"
         },
         "overrides": {
           "type": "object",

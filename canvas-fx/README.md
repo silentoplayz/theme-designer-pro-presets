@@ -34,6 +34,8 @@ The engine sends messages to `self.onmessage`. A script handles `init` and `resi
 
 `theme.colors` holds `background`, `surface`, `text`, `muted`, `accent`, `accent2` and `accent3` as `#rrggbb`, and `theme.rgb` the same colors as `[r, g, b]` from 0 to 1, ready for a WebGL uniform. `theme.dark` is false in Light and Her.
 
+A theme can set its own accents per mode (Design Studio > Accent Colors). A set accent arrives in `colors.accent`, `accent2` or `accent3` (and `rgb`) in place of the generated one, so keep `FOLLOW_THEME` on rather than hard-coding a theme's colors. Theme CSS gets the same three as `var(--tdp-accent)`, `var(--tdp-accent-2)` and `var(--tdp-accent-3)`.
+
 The engine listens to nothing a script posts back, so a script needs no heartbeat.
 
 ## The house standard

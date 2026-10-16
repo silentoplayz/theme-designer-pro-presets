@@ -14,7 +14,8 @@
   // The designer's DEFAULT_MODE_DATA (theme_designer_pro_event.py)
   const DEFAULT_MODE = {
     h: 250, c: 0, l: 20, overrides: {}, locks: {},
-    paletteEnabled: true, customCSS: '', customCssEnabled: false,
+    paletteEnabled: true, accent: '', accent2: '', accent3: '',
+    customCSS: '', customCssEnabled: false,
     autoScope: true, canvasEnabled: false, canvasScript: '',
     manualOverrides: '', manualOverridesEnabled: false,
     gradientEnabled: false, gradientType: 'linear', gradientAngle: 135,
@@ -621,14 +622,19 @@
   }
 
   // A mode as the designer reads it from a file (schemas/theme-format.md):
-  // a missing OLED is Dark at lightness 0, a missing Her is Light, and
-  // override text from before the switch existed is on
+  // a missing OLED is Dark at lightness 0, a missing Her is Light,
+  // override text from before the switch existed is on, and an accent
+  // that isn't a color is generated
   function readMode(theme, k) {
     const from = theme[k] || (k === 'oled' ? Object.assign(clone(theme.dark || {}), { l: 0 }) : k === 'her' ? theme.light || theme.dark : null) || {};
     const m = Object.assign(clone(DEFAULT_MODE), clone(from));
     if (from.manualOverridesEnabled === undefined && typeof from.manualOverrides === 'string' && from.manualOverrides.trim()) {
       m.manualOverridesEnabled = true;
     }
+    // An accent is '#rrggbb', stored lowercase, or '' for the generated one
+    ['accent', 'accent2', 'accent3'].forEach((f) => {
+      m[f] = typeof m[f] === 'string' && /^#[0-9a-fA-F]{6}$/.test(m[f]) ? m[f].toLowerCase() : '';
+    });
     return m;
   }
 

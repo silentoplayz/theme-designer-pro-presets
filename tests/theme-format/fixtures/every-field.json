@@ -19,6 +19,9 @@
       "--color-gray-950": false
     },
     "paletteEnabled": false,
+    "accent": "#f5a524",
+    "accent2": "#2dd4bf",
+    "accent3": "#e4007c",
     "customCSS": "/* dark */\nhtml { --fixture-dark: 1; }",
     "customCssEnabled": true,
     "autoScope": false,
@@ -87,6 +90,9 @@
       "--color-gray-950": true
     },
     "paletteEnabled": true,
+    "accent": "#b45309",
+    "accent2": "",
+    "accent3": "",
     "customCSS": "/* light */\nhtml { --fixture-light: 1; }",
     "customCssEnabled": true,
     "autoScope": true,
@@ -155,6 +161,9 @@
       "--color-gray-950": false
     },
     "paletteEnabled": false,
+    "accent": "",
+    "accent2": "#14b8a6",
+    "accent3": "",
     "customCSS": "/* oled */\nhtml { --fixture-oled: 1; }",
     "customCssEnabled": true,
     "autoScope": false,
@@ -223,6 +232,9 @@
       "--color-gray-950": true
     },
     "paletteEnabled": true,
+    "accent": "",
+    "accent2": "",
+    "accent3": "",
     "customCSS": "/* her */\nhtml { --fixture-her: 1; }",
     "customCssEnabled": true,
     "autoScope": true,

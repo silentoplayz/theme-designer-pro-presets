@@ -18,7 +18,18 @@
     600: 0.51, 700: 0.42, 800: 0.32, 850: 0.27, 900: 0.2, 950: 0.16,
   };
 
-  function themeVars(mode) {
+  // The accents a theme's CSS reads: [mode field, custom property, hue shift]
+  const ACCENTS = [['accent', '--tdp-accent', 0], ['accent2', '--tdp-accent-2', 40], ['accent3', '--tdp-accent-3', -40]];
+
+  // The designer's generated accent (generatedAccent), c in thousandths
+  function accentColor(h, c, dark, shift) {
+    const ac = c > 0 ? Math.min(0.18, Math.max(0.06, c / 250)) : 0;
+    return `oklch(${dark ? 0.74 : 0.56} ${ac.toFixed(3)} ${((h + shift + 360) % 360).toFixed(1)})`;
+  }
+
+  // modeKey ('dark', 'oled', 'light' or 'her', Dark when left out) only
+  // decides how light the generated accents are
+  function themeVars(mode, modeKey) {
     const vars = {};
     const paletteOn = !mode || mode.paletteEnabled !== false;
     const h = mode && mode.h != null ? mode.h : 250;
@@ -34,6 +45,14 @@
       const targetL = Math.max(0, Math.min(0.98, LIGHTNESS_MAP[step] + deltaL));
       const computed = `oklch(${targetL.toFixed(3)} ${c.toFixed(3)} ${c === 0 ? 0 : h})`;
       vars[`--color-gray-${step}`] = ov[`--color-gray-${step}`] || computed;
+    });
+
+    // The theme's accents for its CSS: a mode's own '#rrggbb', or the one
+    // the designer generates from the hue (as buildCanvasTheme does)
+    const dark = modeKey !== 'light' && modeKey !== 'her';
+    ACCENTS.forEach(([key, name, shift]) => {
+      const set = mode && typeof mode[key] === 'string' && /^#[0-9a-fA-F]{6}$/.test(mode[key]) ? mode[key].toLowerCase() : '';
+      vars[name] = set || accentColor(Number(h) || 0, paletteOn && mode ? Number(mode.c) || 0 : 0, dark, shift);
     });
 
     // Manual variable overrides win over the generated palette
@@ -1520,7 +1539,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     return [d[0], d[1], d[2]];
   };
   // The same function as the designer's bootloader (theme_designer_pro_event.py)
-  function buildCanvasTheme(readVar, toRgb, mode, hue, chroma) {
+  function buildCanvasTheme(readVar, toRgb, mode, hue, chroma, set) {
     var dark = mode === 'dark' || mode === 'oled';
     var hex = function(c) { return '#' + c.map(function(v) { return (v < 16 ? '0' : '') + v.toString(16); }).join(''); };
     var ramp = {}, rampRgb = {};
@@ -1532,10 +1551,16 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     var ac = chroma > 0 ? Math.min(0.18, Math.max(0.06, chroma / 250)) : 0;
     var al = dark ? 0.74 : 0.56;
     var accent = function(dh) { return toRgb('oklch(' + al + ' ' + ac.toFixed(3) + ' ' + ((hue + dh + 360) % 360).toFixed(1) + ')'); };
+    // A theme can set its own accents as '#rrggbb'. Checked again
+    // here: the state can come from an older build or be edited.
+    var pick = function(k, dh) {
+      var v = set && set[k];
+      return typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v) ? toRgb(v.toLowerCase()) : accent(dh);
+    };
     var src = {
       background: rampRgb[dark ? 900 : 50], surface: rampRgb[dark ? 850 : 100],
       text: rampRgb[dark ? 100 : 900], muted: rampRgb[dark ? 400 : 500],
-      accent: accent(0), accent2: accent(40), accent3: accent(-40)
+      accent: pick('accent', 0), accent2: pick('accent2', 40), accent3: pick('accent3', -40)
     };
     var colors = {}, rgb = {};
     Object.keys(src).forEach(function(k) {
@@ -1571,8 +1596,10 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
         var cs = getComputedStyle(document.documentElement);
         var dt = document.documentElement.getAttribute('data-theme');
         var mode = dt === 'oled-dark' ? 'oled' : dt === 'her' || dt === 'light' ? dt : 'dark';
+        // A set accent reaches the frame as a hex --tdp-accent, a generated one as oklch()
+        var set = { accent: cs.getPropertyValue('--tdp-accent').trim(), accent2: cs.getPropertyValue('--tdp-accent-2').trim(), accent3: cs.getPropertyValue('--tdp-accent-3').trim() };
         var t = buildCanvasTheme(function (n) { return cs.getPropertyValue(n).trim(); }, toRgb, mode,
-          parseFloat(cs.getPropertyValue('--tdp-hue')) || 0, parseFloat(cs.getPropertyValue('--tdp-chroma')) || 0);
+          parseFloat(cs.getPropertyValue('--tdp-hue')) || 0, parseFloat(cs.getPropertyValue('--tdp-chroma')) || 0, set);
         lastTheme = JSON.stringify(t);
         return t;
       } catch (e) { return null; }
@@ -3312,7 +3339,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       // The home page's hue slider recolors the mock without rebuilding it
       Object.keys(d.vars).forEach(function (k) {
         var v = d.vars[k];
-        if (/^--color-gray-\\d+$/.test(k) && typeof v === 'string' && !/[;{}<]/.test(v)) root.style.setProperty(k, v);
+        if (/^--(color-gray-\\d+|tdp-accent(-2|-3)?)$/.test(k) && typeof v === 'string' && !/[;{}<]/.test(v)) root.style.setProperty(k, v);
         else if (/^--tdp-(hue|chroma)$/.test(k) && isFinite(Number(v))) root.style.setProperty(k, String(Number(v)));
       });
       window.dispatchEvent(new Event('tdp-palette'));
@@ -3347,7 +3374,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     buildMockSrcdoc,
     mountMockFrame,
     modeVars(mode, modeKey) {
-      const vars = themeVars(mode);
+      const vars = themeVars(mode, modeKey);
       if (modeKey === 'oled') {
         vars['--color-gray-800'] = '#101010';
         vars['--color-gray-850'] = '#050505';
@@ -3518,7 +3545,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   // values Open WebUI applies for oled-dark (Settings/General.svelte L182-186)
   // on the designer's default ramp.
   function defaultModeVars(modeKey) {
-    const vars = themeVars(null);
+    const vars = themeVars(null, modeKey);
     if (modeKey === 'oled') {
       vars['--color-gray-800'] = '#101010';
       vars['--color-gray-850'] = '#050505';
@@ -3659,7 +3686,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
           stage,
           buildMockSrcdoc({
             modeKey,
-            vars: themeVars(mode),
+            vars: themeVars(mode, modeKey),
             customCSS: mode.customCssEnabled !== false ? mode.customCSS || '' : '',
             canvasScript: hasCanvas ? mode.canvasScript : null,
             gradient: gLayers,

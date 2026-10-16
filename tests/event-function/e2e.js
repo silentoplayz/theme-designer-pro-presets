@@ -571,6 +571,58 @@ test('the designer opens without errors and with nothing to undo', async ({ admi
   if (page.errors.length) throw new Error('page errors: ' + page.errors.join(' | '));
 });
 
+test('a theme\'s own accent reaches theme CSS and Canvas FX, and other accents stay generated', async ({ admin }) => {
+  // Reports the colors it was given, every 200ms, to the page
+  const script = [
+    'var colors = null, channel = new BroadcastChannel("tdp-accent");',
+    'self.onmessage = function (e) {',
+    '  var t = e.data && e.data.type === "init" ? e.data.theme : e.data && e.data.type === "theme" ? e.data : null;',
+    '  if (t && t.colors) colors = t.colors;',
+    '};',
+    'setInterval(function () { if (colors) channel.postMessage(colors); }, 200);',
+  ].join('\n');
+  const theme = markerTheme('instance', { h: 200, c: 40, canvasEnabled: true, canvasScript: script });
+  const state = JSON.parse(theme.state);
+  // Uppercase, as a hand-edited file might have it
+  state.dark.accent = '#FF8800';
+  await saveTheme(admin, { ...theme, state: JSON.stringify(state) });
+  // The designer writes the theme CSS from the state it opens
+  const designer = await openDesigner(admin);
+  await designer.context().close();
+
+  const accents = (page) => page.evaluate(() => {
+    const style = getComputedStyle(document.documentElement);
+    return ['--tdp-accent', '--tdp-accent-2', '--tdp-accent-3'].map((n) => style.getPropertyValue(n).trim());
+  });
+  const page = await openPage({ token: admin });
+  await page.goto(BASE + '/');
+  await loaderReady(page);
+  await page.evaluate(() => {
+    window.tdpAccentColors = null;
+    new BroadcastChannel('tdp-accent').onmessage = (e) => { window.tdpAccentColors = e.data; };
+  });
+  // Dark sets the first accent; the other two come from hue 200 on a dark mode
+  await waitFor('the accents in Dark', async () => {
+    const a = await accents(page);
+    return a[0] === '#ff8800' && a[1] === 'oklch(0.74 0.160 240.0)' && a[2] === 'oklch(0.74 0.160 160.0)' ? true : a;
+  });
+  await waitFor('the set accent in the Canvas FX theme', async () => {
+    const c = await page.evaluate(() => window.tdpAccentColors);
+    return c && c.accent === '#ff8800' && /^#[0-9a-f]{6}$/.test(c.accent2) && c.accent2 !== '#ff8800' ? true : c;
+  });
+
+  // Light sets none, so its first accent is generated too
+  const light = await openPage({ token: admin });
+  await light.addInitScript(() => localStorage.setItem('theme', 'light'));
+  await light.goto(BASE + '/');
+  await loaderReady(light);
+  await waitFor('the accents in Light', async () => {
+    const a = await accents(light);
+    return a[0] === 'oklch(0.56 0.160 200.0)' ? true : a;
+  });
+  if (page.errors.length || light.errors.length) throw new Error('page errors: ' + [...page.errors, ...light.errors].join(' | '));
+});
+
 test('the designer moves an older browser copy of its gallery to the server and keeps none', async ({ admin }) => {
   const LIBRARY_KEYS = ['owui_theme_snapshots', 'owui_canvas_presets', 'owui_css_presets', 'owui_gradient_presets'];
   await saveTheme(admin, markerTheme('instance'));
