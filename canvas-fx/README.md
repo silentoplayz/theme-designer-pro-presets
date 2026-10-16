@@ -19,15 +19,18 @@ The engine sends messages to `self.onmessage`. A script handles `init` and `resi
 
 | Type | Payload | When |
 |---|---|---|
-| `init` | `{ canvas, width, height, dpr, reducedMotion, env, theme }` | Once, at start. `width` and `height` are in CSS pixels. `dpr` is the screen's pixel ratio, `reducedMotion` whether the viewer asked their system to reduce motion, `theme` the palette (below). |
+| `init` | `{ canvas, width, height, dpr, reducedMotion, column, env, theme }` | Once, at start. `width` and `height` are in CSS pixels. `dpr` is the screen's pixel ratio, `reducedMotion` whether the viewer asked their system to reduce motion, `column` where the chat column sits, `theme` the palette (below). |
 | `resize` | `{ width, height, dpr }` | 150 ms after the window stops resizing, and after a zoom |
 | `theme` | `{ mode, dark, hue, chroma, colors, rgb, ramp }` | When the palette changes while the script runs |
 | `motion` | `{ reducedMotion }` | When the viewer turns reduce motion on or off |
+| `layout` | `{ column }` | When the chat column moves or changes width: the sidebar opening, a resize, a page with or without a chat |
 | `mousemove` | `{ x, y }` | At most once per frame |
 | `mousedown`, `mouseup` | `{ x, y }` | On a press and release, and on a touch's start and end |
 | `click` | `{ x, y }` | On a click. Also fires after a `mousedown` and `mouseup` |
 | `touchstart`, `touchmove`, `touchend` | `{ touches: [{ x, y }, ...] }` | For multi-touch effects |
 | `context` | `{ messages, chars, estimatedTokens }` or `{ exactTokens, ... }` | At most every 2 s while the chat changes |
+
+`column` is `{ x, width }` in CSS pixels, the column's center and width, or `null` on a page without a chat. With the sidebar open, the column sits right of the screen's center.
 
 `theme.colors` holds `background`, `surface`, `text`, `muted`, `accent`, `accent2` and `accent3` as `#rrggbb`, and `theme.rgb` the same colors as `[r, g, b]` from 0 to 1, ready for a WebGL uniform. `theme.dark` is false in Light and Her.
 
@@ -51,7 +54,7 @@ The engine listens to nothing a script posts back, so a script needs no heartbea
 ### Composition
 
 - Keep the canvas transparent. Clear each frame, or fade trails with `globalCompositeOperation = 'destination-out'`. Never paint a backdrop: the theme's own background shows through.
-- Keep the chat column calm. Open WebUI's messages and input sit in a column up to 928 px wide near the middle of the screen. Scale alpha and density there by `1 - CENTER_CALM * band(x)`, where `band` falls off smoothly about 520 px either side of center. Put focal points (a sun, a core, a bloom) in the outer thirds or the bottom fifth.
+- Keep the chat column calm. Open WebUI's messages and input sit in a column up to 928 px wide. Scale alpha and density there by `1 - CENTER_CALM * band(x)`, where `band` is 1 over the column and falls off smoothly beyond it. Center the band on `column.x` with a half-width of `column.width / 2 + 56`, falling back to the screen's center and 520 px when `column` is `null`, and rebuild anything cached from it on a `layout` message. Put focal points (a sun, a core, a bloom) in the outer thirds or the bottom fifth, away from the column.
 - Start the cursor off screen and let its effect fade once it stops moving.
 - Every click on the page reaches the script, the Send button's included. Answer taps through `mousedown` alone, which also fires on touch, so one tap never acts twice, and keep the answer gentle.
 - No full-screen flashes or strobes, and no noise over the column.

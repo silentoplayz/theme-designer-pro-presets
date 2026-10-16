@@ -1,5 +1,6 @@
 // Runs one Canvas FX script the way Theme Designer Pro does (a worker with an
-// OffscreenCanvas) and screenshots it through a fixed sequence of messages.
+// OffscreenCanvas) and screenshots it through a fixed sequence of messages,
+// telling it where the chat column is, as the engine does.
 // Usage: node tests/canvas-fx/harness.js canvas-fx/<script>.js <outdir>
 // Needs playwright-core (npm install --no-save playwright-core@1.56.1) and Google Chrome.
 const fs = require('fs');
@@ -54,16 +55,22 @@ const PRELUDE = `(function () {
 	page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') errors.push(`console ${m.type()}: ${m.text()}`); });
 	page.on('worker', (w) => w.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') errors.push(`worker ${m.type()}: ${m.text()}`); }));
 	await page.setContent(PAGE);
-	await page.evaluate(({ src, prelude, theme }) => {
+	// Where the chat column sits in each stage: the sidebar open at first, then moved
+	const COLUMNS = {
+		'1-dark': { x: 850, width: 928 }, '2-dark-interact': { x: 850, width: 928 },
+		'3-dark-shifted': { x: 1000, width: 700 }, '4-light': { x: 850, width: 928 },
+		'5-light-resized': { x: 630, width: 716 }, '6-light-dpr2-reduced': { x: 850, width: 928 },
+	};
+	await page.evaluate(({ src, prelude, theme, column }) => {
 		document.getElementById('bg').style.background = theme.colors.background;
 		const worker = new Worker(URL.createObjectURL(new Blob([prelude, src], { type: 'application/javascript' })));
 		worker.onerror = (e) => console.error('worker error: ' + e.message + ' at line ' + e.lineno);
 		worker.onmessage = (e) => { if (e.data && e.data.type === 'harness-stats') window.__stats = e.data; };
 		const off = document.getElementById('c').transferControlToOffscreen();
-		worker.postMessage({ type: 'init', canvas: off, width: innerWidth, height: innerHeight, dpr: 1, reducedMotion: false,
+		worker.postMessage({ type: 'init', canvas: off, width: innerWidth, height: innerHeight, dpr: 1, reducedMotion: false, column,
 			env: { authToken: '', baseUrl: location.origin, locale: 'en-US', timezone: 'UTC' }, theme }, [off]);
 		window.__w = worker;
-	}, { src: script, prelude: PRELUDE, theme: THEMES.dark });
+	}, { src: script, prelude: PRELUDE, theme: THEMES.dark, column: COLUMNS['1-dark'] });
 
 	const send = (msg) => page.evaluate((m) => window.__w.postMessage(m), msg);
 	const shot = (name) => page.screenshot({ path: path.join(outDir, name + '.png') });
@@ -90,21 +97,28 @@ const PRELUDE = `(function () {
 	await wait(1200);
 	await shot('2-dark-interact');
 
+	await send({ type: 'layout', column: COLUMNS['3-dark-shifted'] });
+	await wait(2500);
+	await shot('3-dark-shifted');
+
+	await send({ type: 'layout', column: COLUMNS['4-light'] });
 	await page.evaluate((t) => { document.getElementById('bg').style.background = t.colors.background; window.__w.postMessage(t); }, THEMES.light);
 	await wait(3000);
-	await shot('3-light');
+	await shot('4-light');
 
 	await page.setViewportSize({ width: 1000, height: 700 });
 	await send({ type: 'resize', width: 1000, height: 700, dpr: 1 });
+	await send({ type: 'layout', column: COLUMNS['5-light-resized'] });
 	await wait(2500);
-	await shot('4-light-resized');
+	await shot('5-light-resized');
 
 	await page.setViewportSize({ width: 1440, height: 900 });
 	await send({ type: 'resize', width: 1440, height: 900, dpr: 2 });
+	await send({ type: 'layout', column: COLUMNS['6-light-dpr2-reduced'] });
 	await send({ type: 'motion', reducedMotion: true });
 	await wait(2500);
 	const s2 = await stats();
-	await shot('5-light-dpr2-reduced');
+	await shot('6-light-dpr2-reduced');
 
 	const perFrame = (s) => (s && s.frames ? +(s.busy / s.frames).toFixed(2) : null);
 	const summary = {
@@ -114,6 +128,7 @@ const PRELUDE = `(function () {
 		msPerFrame: perFrame(s1),
 		msPerFrameAtDpr2: perFrame(s2),
 		errors,
+		columns: COLUMNS,
 	};
 	fs.writeFileSync(path.join(outDir, 'summary.json'), JSON.stringify(summary, null, 2));
 	console.log(JSON.stringify(summary));

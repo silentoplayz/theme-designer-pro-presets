@@ -1347,6 +1347,17 @@ class Event:
                 _canvasThemeSend(t);
             }
 
+            // The chat column, as the input pill shows it: its center and width in
+            // CSS pixels, or null on a page without one. With the sidebar open the
+            // column sits right of the screen's center.
+            function _columnLayout() {
+                var el = document.getElementById('message-input-container');
+                if (!el) return null;
+                var r = el.getBoundingClientRect();
+                if (r.width < 50) return null;
+                return { x: Math.round(r.left + r.width / 2), width: Math.round(r.width) };
+            }
+
             function _prefersReducedMotion() {
                 return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
             }
@@ -1535,7 +1546,7 @@ class Event:
                                 locale: navigator.language || 'en-US',
                                 timezone: (function() { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(e) { return ''; } })()
                             };
-                            worker.postMessage({ type: 'init', canvas: offscreen, width: window.innerWidth, height: window.innerHeight, dpr: window.devicePixelRatio || 1, reducedMotion: _prefersReducedMotion(), env: _env, theme: _initTheme },[offscreen]);
+                            worker.postMessage({ type: 'init', canvas: offscreen, width: window.innerWidth, height: window.innerHeight, dpr: window.devicePixelRatio || 1, reducedMotion: _prefersReducedMotion(), column: _columnLayout(), env: _env, theme: _initTheme },[offscreen]);
                             
                             // Throttle mousemove via rAF coalescing — on high-refresh displays,
                             // mousemove fires at 120Hz+. Coalescing to once per animation frame
@@ -1807,7 +1818,7 @@ class Event:
                                                 locale: navigator.language || 'en-US',
                                                 timezone: (function() { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(e) { return ''; } })()
                                             };
-                                            finalHandler({ data: { type: 'init', canvas: _canvas, width: window.innerWidth, height: window.innerHeight, dpr: window.devicePixelRatio || 1, reducedMotion: ${_prefersReducedMotion()}, env: _fbEnv, theme: ${JSON.stringify(_initTheme)} } });
+                                            finalHandler({ data: { type: 'init', canvas: _canvas, width: window.innerWidth, height: window.innerHeight, dpr: window.devicePixelRatio || 1, reducedMotion: ${_prefersReducedMotion()}, column: ${JSON.stringify(_columnLayout())}, env: _fbEnv, theme: ${JSON.stringify(_initTheme)} } });
                                         }
                                     })();
                                 })();
@@ -1830,6 +1841,20 @@ class Event:
                                 _motionQuery.addEventListener('change', _onMotion);
                                 window.owuiCanvasCleanups.push(function() { _motionQuery.removeEventListener('change', _onMotion); });
                             }
+                            // The column moves with the window, the sidebar and the page; a
+                            // light check each second catches what resize events don't
+                            var _sendLayout = _canvasSend;
+                            var _lastColumn = _columnLayout();
+                            var _checkColumn = function() {
+                                var c = _columnLayout(), p = _lastColumn;
+                                if (!c && !p) return;
+                                if (c && p && Math.abs(c.x - p.x) < 3 && Math.abs(c.width - p.width) < 3) return;
+                                _lastColumn = c;
+                                _sendLayout({ type: 'layout', column: c });
+                            };
+                            var _columnTimer = setInterval(_checkColumn, 1000);
+                            window.addEventListener('resize', _checkColumn);
+                            window.owuiCanvasCleanups.push(function() { clearInterval(_columnTimer); window.removeEventListener('resize', _checkColumn); });
                             var _ctxCleanup = startContextObserver(_canvasSend);
                             window.owuiCanvasCleanups.push(_ctxCleanup);
                             _canvasThemeSend = _canvasSend;
@@ -6553,7 +6578,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         <p>Inject interactive JavaScript animations directly into the background of Open WebUI. The designer automatically applies a <i>Structural Layer</i> that makes native UI components transparent so the animation shines through.</p>
                         <ul>
                             <li><b>Background Worker Execution:</b> By default, scripts run in a true background Web Worker utilizing <code>OffscreenCanvas</code> (if supported by your browser) to ensure high-performance rendering without blocking the UI thread. Both <b>Canvas 2D</b> and <b>WebGL/WebGL2</b> contexts are supported &mdash; call <code>canvas.getContext('2d')</code> for standard drawing or <code>canvas.getContext('webgl2')</code> for GPU-accelerated shader rendering (see <i>WebGL Rendering</i> below). A script that uses the word <code>document</code> in its code, outside comments, is sent straight to the main thread. The status badge in the designer shows the <i>predicted</i> execution mode, from the browser&rsquo;s capabilities and that text check: <b style="color:#10b981">Background Worker</b> (OffscreenCanvas), <b style="color:#60a5fa">Main Thread (DOM Access)</b> (the script contains <code>document</code>), or <b style="color:#f59e0b">Main Thread (Fallback)</b> (the browser lacks <code>OffscreenCanvas</code>). If the Worker reports an uncaught error, the engine also moves the script to the main thread; the badge doesn&rsquo;t change in that case, because it shows the prediction, not the live path. Next to it, a <b>WebGL</b> badge appears when the script asks for a WebGL context, and a <b>Context</b> badge when it handles <code>context</code> messages.</li>
-                            <li><b>Event Handling:</b> Twelve message types are sent to your script via <code>self.onmessage</code>: <code>init</code>, <code>resize</code>, <code>mousemove</code>, <code>click</code>, <code>mousedown</code>, <code>mouseup</code>, <code>touchstart</code>, <code>touchmove</code>, <code>touchend</code>, <code>context</code>, <code>theme</code> and <code>motion</code>. Touch events also generate synthetic mouse equivalents for cross-device compatibility.</li>
+                            <li><b>Event Handling:</b> Thirteen message types are sent to your script via <code>self.onmessage</code>: <code>init</code>, <code>resize</code>, <code>mousemove</code>, <code>click</code>, <code>mousedown</code>, <code>mouseup</code>, <code>touchstart</code>, <code>touchmove</code>, <code>touchend</code>, <code>context</code>, <code>theme</code>, <code>motion</code> and <code>layout</code>. Touch events also generate synthetic mouse equivalents for cross-device compatibility.</li>
                             <li><b>Show on Auth Pages:</b> Toggle whether canvas animations appear on Login/Signup screens. Enabled by default. When the <b>Enable Auth Page Theming</b> valve is off, this checkbox is hidden and off in every mode.</li>
                             <li><b>Animation Settings:</b> Under the editor, the script&rsquo;s own settings appear as sliders, switches and color pickers, read from its <code>CONFIG</code> object or the constants at its top. A change rewrites that one value in the script, as if you had typed it, so the animation restarts with it. <b>Reset to the script&rsquo;s values</b> puts back the script as it was before your first change, and <b>Undo</b> works too. A range written in the setting&rsquo;s comment, such as <code>(0.5-3)</code>, sets the slider&rsquo;s range.</li>
                             <li><b>Preset Gallery:</b> Save, rename, overwrite with the editor&rsquo;s script, delete, and export individual animations, and import native <code>.js</code> animation files by dragging them into the designer. The gallery has search, a sort, and a type filter (All, WebGL, Context, Follows Theme, DOM Access).</li>
@@ -6567,7 +6592,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         <p>Your Canvas FX script runs inside a <b>Web Worker</b> with an <code>OffscreenCanvas</code>. The runtime communicates with your script using a structured message protocol via <code>self.onmessage</code>. Understanding this contract is essential for writing reliable animations.</p>
 
                         <p class="doc-subheading">Inbound Messages (Runtime &rarr; Your Script)</p>
-                        <p>Twelve message types are dispatched to your script's <code>self.onmessage</code> handler:</p>
+                        <p>Thirteen message types are dispatched to your script's <code>self.onmessage</code> handler:</p>
                         <table class="doc-table-compact">
                             <thead>
                                 <tr style="border-bottom: 1px solid var(--border);">
@@ -6579,8 +6604,8 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                             <tbody>
                                 <tr style="border-bottom: 1px solid var(--border);">
                                     <td><code>init</code></td>
-                                    <td><code>{ canvas, width, height, dpr, reducedMotion, env, theme }</code></td>
-                                    <td>Fired once on startup. <code>theme</code> is the active mode's palette, the same object a <code>theme</code> message carries (see <b>Theme-Aware Animations</b>). <code>canvas</code> is an <code>OffscreenCanvas</code> transferred via <code>postMessage</code>. Call <code>canvas.getContext('2d')</code> for 2D drawing, or <code>canvas.getContext('webgl2')</code> (with <code>'webgl'</code> fallback) for GPU-accelerated shader rendering. <code>width</code> and <code>height</code> are the initial viewport dimensions, in CSS pixels. <code>dpr</code> is the screen&rsquo;s device pixel ratio, which a worker can&rsquo;t read for itself: size the canvas at <code>width * dpr</code> for sharp lines, within a pixel budget, since the canvas element is stretched to the viewport either way. <code>reducedMotion</code> is true when the viewer has asked their system to reduce motion; slow the animation down, drop flashes and sudden movement, or hold it still. <code>env</code> provides runtime context: <code>{ authToken, baseUrl, locale, timezone }</code>. <b>authToken is the token of whichever user is viewing the page</b>, and is an empty string unless an admin has enabled the Canvas API Access valve &mdash; a script given it can call the Open WebUI API as that user.</td>
+                                    <td><code>{ canvas, width, height, dpr, reducedMotion, column, env, theme }</code></td>
+                                    <td>Fired once on startup. <code>theme</code> is the active mode's palette, the same object a <code>theme</code> message carries (see <b>Theme-Aware Animations</b>). <code>canvas</code> is an <code>OffscreenCanvas</code> transferred via <code>postMessage</code>. Call <code>canvas.getContext('2d')</code> for 2D drawing, or <code>canvas.getContext('webgl2')</code> (with <code>'webgl'</code> fallback) for GPU-accelerated shader rendering. <code>width</code> and <code>height</code> are the initial viewport dimensions, in CSS pixels. <code>dpr</code> is the screen&rsquo;s device pixel ratio, which a worker can&rsquo;t read for itself: size the canvas at <code>width * dpr</code> for sharp lines, within a pixel budget, since the canvas element is stretched to the viewport either way. <code>reducedMotion</code> is true when the viewer has asked their system to reduce motion; slow the animation down, drop flashes and sudden movement, or hold it still. <code>column</code> is where the chat column sits, as <code>{ x, width }</code> in CSS pixels (its center and width), or <code>null</code> on a page without a chat; with the sidebar open it sits right of the screen&rsquo;s center, so keep your calm band on it. <code>env</code> provides runtime context: <code>{ authToken, baseUrl, locale, timezone }</code>. <b>authToken is the token of whichever user is viewing the page</b>, and is an empty string unless an admin has enabled the Canvas API Access valve &mdash; a script given it can call the Open WebUI API as that user.</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid var(--border);">
                                     <td><code>resize</code></td>
@@ -6637,6 +6662,11 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                                     <td><code>{ reducedMotion }</code></td>
                                     <td>Fired when the viewer turns the system&rsquo;s reduce-motion setting on or off while your script runs. The starting value arrives with <code>init</code>.</td>
                                 </tr>
+                                <tr style="border-top: 1px solid var(--border);">
+                                    <td><code>layout</code></td>
+                                    <td><code>{ column }</code></td>
+                                    <td>Fired when the chat column moves or changes width: the sidebar opening or closing, a resize, or a page with or without a chat. <code>column</code> is <code>{ x, width }</code> or <code>null</code>, as in <code>init</code>.</td>
+                                </tr>
                             </tbody>
                         </table>
 
@@ -6673,7 +6703,7 @@ const FOLLOW_THEME = true; // take the color from the theme's palette
 /* ──────────────────────────────────────────── */
 
 let canvas, ctx, w = 0, h = 0, dpr = 1;
-let reduced = false, last = 0;
+let reduced = false, last = 0, column = null;
 let color = '#8ab4ff', dark = true;
 const mouse = { x: -10000, y: -10000 };
 const xs = new Float32Array(COUNT), ys = new Float32Array(COUNT);
@@ -6693,7 +6723,8 @@ function size() {
 
 // 1 at the screen's edges, down to 1 - CENTER_CALM over the chat column
 function calm(x) {
-  const d = Math.min(1, Math.abs(x - w / 2) / 520);
+  const cx = column ? column.x : w / 2, half = column ? column.width / 2 + 56 : 520;
+  const d = Math.min(1, Math.abs(x - cx) / half);
   return 1 - CENTER_CALM * (1 - d * d);
 }
 
@@ -6721,6 +6752,7 @@ self.onmessage = (e) =&gt; {
       ctx = canvas.getContext('2d');
       w = d.width; h = d.height; dpr = Math.min(d.dpr || 1, 2);
       reduced = !!d.reducedMotion;
+      column = d.column || null;
       applyTheme(d.theme);
       size();
       requestAnimationFrame(frame);
@@ -6734,6 +6766,9 @@ self.onmessage = (e) =&gt; {
       break;
     case 'motion':
       reduced = d.reducedMotion;
+      break;
+    case 'layout':
+      column = d.column || null;
       break;
     case 'mousemove':
       mouse.x = d.x; mouse.y = d.y;

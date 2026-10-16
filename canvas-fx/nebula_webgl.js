@@ -8,7 +8,7 @@ const INTENSITY     = 0.85;  // how strongly the gas shows (0-1)
 const MOTION        = 1;     // drift speed; 0 holds the nebula still and stops blooms (0-2)
 const REDUCED_SPEED = 0.15;  // share of the drift kept when the viewer asks to reduce motion (0-1)
 const CENTER_CALM   = 0.75;  // how much the gas thins behind the chat column (0-1)
-const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH    = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const GAS_SCALE     = 1.6;   // size of the cloud structures; lower is larger (0.6-4)
 const WARP          = 3;     // how swirled the gas is (0-6)
 const STAR_DENSITY  = 0.5;   // faint stars behind the gas, dark themes only (0-1)
@@ -39,6 +39,7 @@ const FRAG = [
 	'uniform vec3 u_c3;',
 	'uniform float u_dark;',
 	'uniform vec4 u_bloom;',
+	'uniform vec2 u_col;',
 	'float hash(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }',
 	'float noise(vec2 p) {',
 	'	vec2 i = floor(p), f = fract(p), u = f * f * (3.0 - 2.0 * f);',
@@ -65,7 +66,7 @@ const FRAG = [
 	'	float dens = smoothstep(0.38, 0.95, f) * 0.85 + smoothstep(0.62, 0.95, length(r)) * 0.3;',
 	'	vec3 col = mix(u_c1, u_c2, clamp(q.x * 1.4 - 0.2, 0.0, 1.0));',
 	'	col = mix(col, u_c3, clamp(r.y * r.y * 1.4, 0.0, 1.0));',
-	'	float band = abs(px.x - res.x * 0.5) / ' + BAND_WIDTH.toFixed(1) + ';',
+	'	float band = abs(px.x - u_col.x) / u_col.y;',
 	'	float calm = 1.0 - ' + CENTER_CALM.toFixed(3) + ' * (1.0 - smoothstep(0.55, 1.25, band));',
 	'	float edge = 0.7 + 0.3 * smoothstep(0.1, 0.75, length(px / res - 0.5));',
 	'	float a = dens * calm * edge * ' + INTENSITY.toFixed(3) + ' * mix(0.65, 0.9, u_dark);',
@@ -88,7 +89,7 @@ const FRAG = [
 let canvas, gl, program, buffer;
 let loc = {};
 let w = 0, h = 0;
-let last = 0, time = 0, reduced = false;
+let last = 0, time = 0, reduced = false, column = null;
 const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
 const bloom = { x: 0, y: 0, age: 1000, strength: 0, wait: BLOOM_EVERY * 0.5 };
 const colors = { c1: hexToRgb(COLOR_A), c2: hexToRgb(COLOR_B), c3: hexToRgb(COLOR_C), dark: 1 };
@@ -128,7 +129,7 @@ function setup() {
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
 	gl.enableVertexAttribArray(0);
 	gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-	['u_res', 'u_scale', 'u_time', 'u_mouse', 'u_c1', 'u_c2', 'u_c3', 'u_dark', 'u_bloom'].forEach((name) => {
+	['u_res', 'u_scale', 'u_time', 'u_mouse', 'u_c1', 'u_c2', 'u_c3', 'u_dark', 'u_bloom', 'u_col'].forEach((name) => {
 		loc[name] = gl.getUniformLocation(program, name);
 	});
 	gl.disable(gl.BLEND);
@@ -141,14 +142,20 @@ function size() {
 	if (gl && !gl.isContextLost()) gl.viewport(0, 0, canvas.width, canvas.height);
 }
 
-// ── Blooms: a slow swell of light in the outer thirds, never over the chat ──
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+
+// ── Blooms: a slow swell of light beside the chat column, never over it ──
 function updateBloom(dt) {
 	bloom.age += dt;
 	if (BLOOM_EVERY <= 0 || MOTION <= 0 || reduced || bloom.age < 10) return;
 	bloom.wait -= dt;
 	if (bloom.wait > 0) return;
-	const side = Math.random() < 0.5 ? 0 : 1;
-	bloom.x = side ? w - Math.random() * w * 0.22 : Math.random() * w * 0.22;
+	const left = Math.max(0, colX() - colHalf()), right = Math.max(0, w - colX() - colHalf());
+	if (left + right < 80) return;
+	const r = Math.random() * (left + right);
+	bloom.x = r < left ? r * 0.85 : w - (r - left) * 0.85;
 	bloom.y = h * (0.15 + Math.random() * 0.7);
 	bloom.strength = 0.5 + Math.random() * 0.5;
 	bloom.age = 0;
@@ -174,6 +181,7 @@ function frame(now) {
 	gl.uniform3fv(loc.u_c3, colors.c3);
 	gl.uniform1f(loc.u_dark, colors.dark);
 	gl.uniform4f(loc.u_bloom, bloom.x, bloom.y, bloom.age, bloom.strength);
+	gl.uniform2f(loc.u_col, colX(), colHalf());
 	gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
 
@@ -204,6 +212,7 @@ self.onmessage = (e) => {
 			w = d.width;
 			h = d.height;
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			start();
 			break;
@@ -217,6 +226,9 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

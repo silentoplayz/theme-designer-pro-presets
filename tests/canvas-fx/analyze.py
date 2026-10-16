@@ -3,8 +3,11 @@
 Usage: python3 tests/canvas-fx/analyze.py <outdir>  (needs Pillow)
 
 coverage: share of pixels that differ visibly from the theme background.
-calm: the chat column's average difference divided by the edges'. Under 1
-means the column is calmer than the edges, as the house standard asks.
+calm: the chat column's average difference divided by the rest of the
+screen's (more than 200 px clear of the column). Under 1 means the column is
+calmer, as the house standard asks. The column is where the harness said it was
+in that stage, so a script that ignores the layout message scores badly in
+3-dark-shifted.
 Flags: blank (nothing drawn), opaque (the backdrop is painted over).
 """
 
@@ -21,7 +24,7 @@ def stage_background(name):
     return BACKGROUNDS["dark" if "dark" in name else "light"]
 
 
-def measure(png):
+def measure(png, column=None):
     img = Image.open(png).convert("RGB")
     w, h = img.size
     img = img.resize((w // 4, h // 4))
@@ -29,7 +32,10 @@ def measure(png):
     bg = Image.new("RGB", img.size, stage_background(png.stem))
     diff = ImageChops.difference(img, bg).convert("L")
     px = diff.load()
-    half_band = 464 / w * sw
+    col = column or {"x": w / 2, "width": 928}
+    cx = col["x"] / w * sw
+    half_band = col["width"] / 2 / w * sw
+    clear = half_band + 200 / w * sw
     total = covered = 0
     center_sum = center_n = edge_sum = edge_n = 0
     for y in range(sh):
@@ -37,10 +43,10 @@ def measure(png):
             v = px[x, y]
             total += 1
             covered += v > 6
-            if abs(x - sw / 2) < half_band:
+            if abs(x - cx) < half_band:
                 center_sum += v
                 center_n += 1
-            elif x < sw * 0.18 or x > sw * 0.82:
+            elif abs(x - cx) > clear:
                 edge_sum += v
                 edge_n += 1
     coverage = covered / total
@@ -62,8 +68,9 @@ def measure(png):
 
 def main():
     out = Path(sys.argv[1])
-    report = {png.stem: measure(png) for png in sorted(out.glob("*.png"))}
     summary = json.loads((out / "summary.json").read_text()) if (out / "summary.json").exists() else {}
+    columns = summary.get("columns", {})
+    report = {png.stem: measure(png, columns.get(png.stem)) for png in sorted(out.glob("*.png"))}
     summary["stages"] = report
     (out / "report.json").write_text(json.dumps(summary, indent=2))
     print(json.dumps(summary, indent=2))
