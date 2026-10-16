@@ -88,11 +88,12 @@ function columnFade(col, a) {
 function build() {
 	sunR = Math.max(40, Math.min(w, h) * SUN_SIZE);
 	horizonY = Math.round(h * HORIZON);
-	// The sun sits just past the calm band on its preferred side, or the other side when that one has no room
-	const lo = sunR * 1.1, hi = w - sunR * 1.1, off = colHalf() + sunR * 0.2;
-	const right = Math.max(w * SUN_X, colX() + off), left = Math.min(w * SUN_X, colX() - off);
+	// The sun sits just past the calm band on its preferred side, or the other side when that one has no room, inside the chat area
+	const L = column ? column.left : 0, R = column ? column.right : w, pref = L + (R - L) * SUN_X;
+	const lo = L + sunR * 1.1, hi = R - sunR * 1.1, off = colHalf() + sunR * 0.2;
+	const right = Math.max(pref, colX() + off), left = Math.min(pref, colX() - off);
 	const first = SUN_X > 0.5 ? right : left, other = SUN_X > 0.5 ? left : right;
-	sunX = Math.abs(SUN_X - 0.5) <= 0.05 ? w * SUN_X : first >= lo && first <= hi ? first : other >= lo && other <= hi ? other : first;
+	sunX = Math.abs(SUN_X - 0.5) <= 0.05 ? pref : first >= lo && first <= hi ? first : other >= lo && other <= hi ? other : first;
 	sunX = Math.max(lo, Math.min(hi, sunX));
 	const s = Math.ceil(sunR * 2 * dpr) + 4;
 	sunBody = new OffscreenCanvas(s, s);

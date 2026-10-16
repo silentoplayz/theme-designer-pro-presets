@@ -31,6 +31,7 @@ let canvas, ctx, cache, cctx;
 let w = 0, h = 0, dpr = 1;
 let last = 0, reduced = false, dark = true, spawnWait = 0.5, column = null;
 let zoneL = 0, zoneR = 0; // widths of the left and right glitch zones, beside the chat column
+let zoneA = 0, zoneB = 0; // where the zones start and end: the chat area's edges, which leave out the sidebar
 const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
 const col = { grid: GRID_COLOR, a: GLITCH_COLOR, b: GLITCH_COLOR2, scan: SCAN_COLOR, font: '10px monospace' };
 // Six floats per slot: x, y, life, maxLife, then alpha+color, alpha+speed or width+shift
@@ -79,14 +80,15 @@ function resize(width, height, ratio) {
 	layout();
 }
 
-// The glitch zones between the screen's edges and the chat column, and the sector marks in them; rebuilt on resize and layout
+// The glitch zones between the chat area's edges and the chat column, and the sector marks in them; rebuilt on resize and layout
 function layout() {
-	zoneL = Math.max(CELL_SIZE * 2, Math.min(w / 3, colX() - colHalf() * 0.6));
-	zoneR = Math.max(CELL_SIZE * 2, Math.min(w / 3, w - colX() - colHalf() * 0.6));
+	zoneA = column ? column.left : 0; zoneB = column ? column.right : w;
+	zoneL = Math.max(CELL_SIZE * 2, Math.min(w / 3, colX() - colHalf() * 0.6 - zoneA));
+	zoneR = Math.max(CELL_SIZE * 2, Math.min(w / 3, zoneB - colX() - colHalf() * 0.6));
 	for (let i = 0; i < 6; i++) {
 		const cw = 2 + Math.floor(Math.random() * 2), ch = 1 + Math.floor(Math.random() * 2);
 		const span = Math.max(1, Math.floor((i % 2 ? zoneL : zoneR) / CELL_SIZE) - cw);
-		const c = i % 2 ? Math.floor(Math.random() * span) : Math.floor(w / CELL_SIZE) - cw - Math.floor(Math.random() * span);
+		const c = i % 2 ? Math.ceil(zoneA / CELL_SIZE) + Math.floor(Math.random() * span) : Math.floor(zoneB / CELL_SIZE) - cw - Math.floor(Math.random() * span);
 		sectors[i * 4] = c * CELL_SIZE;
 		sectors[i * 4 + 1] = (1 + Math.floor(Math.random() * Math.max(1, Math.floor(h / CELL_SIZE) - ch - 2))) * CELL_SIZE;
 		sectors[i * 4 + 2] = cw * CELL_SIZE;
@@ -132,7 +134,7 @@ function buildCache() {
 		g.globalAlpha = Math.min(0.5, a * 5);
 		g.beginPath();
 		for (let x = major; x < w; x += major) {
-			if (x > zoneL && x < w - zoneR) continue;
+			if (x > zoneA + zoneL && x < zoneB - zoneR) continue;
 			g.moveTo(x + off, 0); g.lineTo(x + off, 6);
 			g.textAlign = 'center';
 			g.fillText(String(x / CELL_SIZE), x, 17);
@@ -160,7 +162,7 @@ function buildCache() {
 // A random x inside one of the two outer zones, by their widths
 function zoneX() {
 	const x = Math.random() * (zoneL + zoneR);
-	return x < zoneL ? x : w - (x - zoneL);
+	return x < zoneL ? zoneA + x : zoneB - (x - zoneL);
 }
 
 function free(pool, n) {
@@ -169,7 +171,7 @@ function free(pool, n) {
 }
 
 function spawn() {
-	const near = mouse.amount > 0.2 && (mouse.x < zoneL || mouse.x > w - zoneR);
+	const near = mouse.amount > 0.2 && ((mouse.x >= zoneA && mouse.x < zoneA + zoneL) || (mouse.x > zoneB - zoneR && mouse.x <= zoneB));
 	let k = free(cells, MAX_CELLS);
 	if (k >= 0) {
 		const x = near && Math.random() < 0.6 ? mouse.x + (Math.random() - 0.5) * 240 : zoneX();
@@ -205,11 +207,11 @@ function placeDim(d) {
 	d.horiz = Math.random() < 0.5;
 	if (d.horiz) {
 		const span = Math.max(major, snap(zone * (0.4 + Math.random() * 0.4)));
-		d.a = left ? inZone(span) : w - inZone(span) - span;
+		d.a = left ? snap(zoneA) + inZone(span) : zoneB - inZone(span) - span;
 		d.b = d.a + span;
 		d.at = snap(major + Math.random() * Math.max(0, h - major * 2));
 	} else {
-		d.at = left ? inZone(0) : w - inZone(0);
+		d.at = left ? snap(zoneA) + inZone(0) : zoneB - inZone(0);
 		d.a = snap(major * 0.5 + Math.random() * h * 0.4);
 		d.b = Math.min(h - major * 0.5, d.a + snap(h * (0.2 + Math.random() * 0.3)));
 	}
@@ -314,7 +316,7 @@ function frame(now) {
 		scans[k + 1] += scans[k + 5] * dt * MOTION;
 		const fade = age(scans, k, dt, 0.2, 0.3);
 		if (fade <= 0 || scans[k + 1] < 0 || scans[k + 1] > h) { scans[k + 2] = 0; continue; }
-		const zone = scans[k] ? zoneR : zoneL, x0 = scans[k] ? w - zone : 0, y = scans[k + 1];
+		const zone = scans[k] ? zoneR : zoneL, x0 = scans[k] ? zoneB - zone : zoneA, y = scans[k + 1];
 		ctx.globalAlpha = scans[k + 4] * fade * lightK;
 		ctx.fillStyle = col.a;
 		ctx.fillRect(x0, y, zone, 1.5);

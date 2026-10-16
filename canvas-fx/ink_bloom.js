@@ -103,10 +103,11 @@ function spawnSomewhere() {
 		spawn(mouse.x + (Math.random() - 0.5) * 220, mouse.y + (Math.random() - 0.5) * 220, false);
 		return;
 	}
-	// Beside the chat column, either side by its room, weighted toward the edges
-	const left = Math.max(40, colX() - colHalf() * 0.5), right = Math.max(40, w - colX() - colHalf() * 0.5);
+	// Beside the chat column, either side by its room inside the chat area, weighted toward the edges
+	const lo = column ? column.left : 0, hi = column ? column.right : w;
+	const left = Math.max(40, colX() - colHalf() * 0.5 - lo), right = Math.max(40, hi - colX() - colHalf() * 0.5);
 	const onLeft = Math.random() * (left + right) < left, e = Math.pow(Math.random(), 1.4) * (onLeft ? left : right);
-	spawn(onLeft ? e : w - e, h * (0.06 + Math.random() * 0.88), false);
+	spawn(onLeft ? lo + e : hi - e, h * (0.06 + Math.random() * 0.88), false);
 }
 
 function drawBloom(i) {

@@ -48,11 +48,12 @@ function smooth(a, b, x) { const t = Math.min(1, Math.max(0, (x - a) / (b - a)))
 function colX() { return column ? column.x : w * 0.5; }
 function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
 function band(x) { return 1 - smooth(0.55, 1.25, Math.abs(x - colX()) / colHalf()); }
-// The arc's center: on ARC_X's side of the chat column at a matching distance, mirrored when it would leave the screen
+// The arc's center: on ARC_X's side of the chat column at a matching distance, mirrored when it would leave the chat area
 function arcX() {
 	if (!column) return ARC_X * w;
+	const lo = column.left, hi = column.right;
 	const off = Math.abs(ARC_X - 0.5) / 0.34 * colHalf() * 0.94, s = ARC_X < 0.5 ? -1 : 1, a = colX() + s * off, b = colX() - s * off;
-	return a >= 60 && a <= w - 60 ? a : b >= 60 && b <= w - 60 ? b : Math.min(w - 60, Math.max(60, a));
+	return a >= lo + 60 && a <= hi - 60 ? a : b >= lo + 60 && b <= hi - 60 ? b : Math.min(hi - 60, Math.max(lo + 60, a));
 }
 function calm(x) { return 1 - CENTER_CALM * band(x); }
 function ridge(v) { const r = 1 - Math.abs(Math.sin(v)); return r * r; }
@@ -250,7 +251,7 @@ function frame(now) {
 			shoot.wait -= dt;
 			if (shoot.wait <= 0 && night > 0.6) {
 				let side = Math.random() < 0.5 ? -1 : 1;
-				if ((side > 0 ? w - colX() : colX()) - colHalf() < 80) side = -side;
+				if ((side > 0 ? (column ? column.right : w) - colX() : colX() - (column ? column.left : 0)) - colHalf() < 80) side = -side;
 				shoot.x = colX() + side * (colHalf() + Math.random() * w * 0.2); shoot.y = h * (0.05 + Math.random() * 0.25);
 				shoot.vx = side * (260 + Math.random() * 200); shoot.vy = 120;
 				shoot.age = 0; shoot.wait = SHOOTING_EVERY * (0.5 + Math.random());

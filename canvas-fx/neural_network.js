@@ -91,8 +91,9 @@ function build() {
 	pl.fill(-1);
 	const layers = Math.max(2, Math.min(9, LAYERS));
 	let prevStart = 0, prevCount = 0;
-	// Free space left and right of the calm band, each at least an eighth of the screen wide (reaching into the band's fade when short)
-	const m = w * 0.05, room = Math.max(80, w * 0.125), l0 = m, l1 = Math.max(l0 + room, colX() - colHalf()), r1 = w - m, r0 = Math.min(r1 - room, colX() + colHalf());
+	// Free space left and right of the calm band inside the chat area, each at least an eighth of the screen wide (reaching into the band's fade when short)
+	const lo = column ? column.left : 0, hi = column ? column.right : w;
+	const m = w * 0.05, room = Math.max(80, w * 0.125), l0 = lo + m, l1 = Math.max(l0 + room, colX() - colHalf()), r1 = hi - m, r0 = Math.min(r1 - room, colX() + colHalf());
 	for (let l = 0; l < layers; l++) {
 		const edge = l === 0 || l === layers - 1;
 		const count = Math.min(MAX_NODES - nodeCount, edge ? 3 + Math.floor(Math.random() * 3) : 5 + Math.floor(Math.random() * 5));

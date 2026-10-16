@@ -59,12 +59,13 @@ function calm(x) {
 }
 
 // A blob's home in px: 0.3-0.7 maps across the chat column; the rest beside it, shared between
-// the two sides by the room each has
+// the two sides by the room each has inside the chat area
 function homeX(v) {
-	const a = Math.min(w, Math.max(0, colX() - colHalf() * 0.55)), b = Math.min(w, Math.max(a, colX() + colHalf() * 0.55));
+	const lo = column ? column.left : 0, hi = column ? column.right : w;
+	const a = Math.min(hi, Math.max(lo, colX() - colHalf() * 0.55)), b = Math.min(hi, Math.max(a, colX() + colHalf() * 0.55));
 	if (v >= 0.3 && v < 0.7) return a + (v - 0.3) / 0.4 * (b - a);
-	const x = (v < 0.3 ? v / 0.6 : 0.5 + (v - 0.7) / 0.6) * (a + w - b);
-	return x < a ? x : b + (x - a);
+	const x = (v < 0.3 ? v / 0.6 : 0.5 + (v - 0.7) / 0.6) * (a - lo + hi - b);
+	return x < a - lo ? lo + x : b + (x - (a - lo));
 }
 
 function applyTheme(t) {

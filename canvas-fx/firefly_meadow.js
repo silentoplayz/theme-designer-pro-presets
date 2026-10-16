@@ -55,15 +55,17 @@ function band(x) {
 function calm(x) { return 1 - CENTER_CALM * band(x); }
 function sideX() {
 	for (let i = 0; i < 6; i++) { const x = Math.random() * w; if (Math.random() < calm(x)) return x; }
-	// Otherwise beside the column, on either side by the room each has
-	const left = Math.max(0, colX() - colHalf()), right = Math.max(0, w - colX() - colHalf()), r = Math.random() * (left + right);
-	if (left + right < 40) return Math.random() < 0.5 ? Math.random() * w * 0.2 : w - Math.random() * w * 0.2;
-	return r < left ? r : w - (r - left);
+	// Otherwise beside the column, on either side by the room each has, inside the chat area so the sidebar can't cover it
+	const lo = column ? column.left : 0, hi = column ? column.right : w;
+	const left = Math.max(0, colX() - colHalf() - lo), right = Math.max(0, hi - colX() - colHalf()), r = Math.random() * (left + right);
+	if (left + right < 40) return Math.random() < 0.5 ? lo + Math.random() * w * 0.2 : hi - Math.random() * w * 0.2;
+	return r < left ? lo + r : hi - (r - left);
 }
 // The moon's x: beside the column on the right, or mirrored to the left when it would not fit
 function moonX() {
+	const lo = column ? column.left : 0, hi = column ? column.right : w;
 	const off = colHalf() * 0.94, right = colX() + off, left = colX() - off;
-	return right <= w - 60 || left < 60 ? Math.min(right, w - 60) : left;
+	return right <= hi - 60 || left < lo + 60 ? Math.min(right, hi - 60) : left;
 }
 
 function sprite(size, col, a0, a1) {

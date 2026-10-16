@@ -40,12 +40,13 @@ function css(c, a) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2
 function colX() { return column ? column.x : w * 0.5; }
 function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
 function band(x) { const t = Math.min(1, Math.max(0, (Math.abs(x - colX()) / colHalf() - 0.55) / 0.7)); return 1 - t * t * (3 - 2 * t); }
-// A random x in one side's outer zone, between the screen's edge and the column; a side with no room hands over to the other
+// A random x in one side's outer zone, between the chat area's edge and the column; a side with no room hands over to the other
 function sideX(s) {
-	const pad = w * 0.03, inner = colHalf() * 0.64, left = colX() - inner - pad, right = w - pad - colX() - inner;
+	const lo = column ? column.left : 0, hi = column ? column.right : w;
+	const pad = w * 0.03, inner = colHalf() * 0.64, left = colX() - inner - pad - lo, right = hi - pad - colX() - inner;
 	if (s ? right < 60 && left > right : left < 60 && right > left) s = 1 - s;
 	const room = Math.max(0, s ? right : left) * Math.random();
-	return s ? w - pad - room : pad + room;
+	return s ? hi - pad - room : lo + pad + room;
 }
 
 function applyTheme(t) {

@@ -35,6 +35,7 @@ const FRAG = [
 	'#endif',
 	'uniform vec2 u_res;',
 	'uniform vec2 u_col;', // the chat column's center and the calm band's half-width
+	'uniform vec2 u_edge;', // the chat area's left and right edges, which leave out the sidebar
 	'uniform float u_scale;',
 	'uniform float u_time;',
 	'uniform vec3 u_mouse;',
@@ -78,9 +79,9 @@ const FRAG = [
 	'	float spec = (pow(max(dot(n, normalize(vec3(0.35, 0.55, 1.0))), 0.0), 48.0) + streak) * ' + REFLECTIVITY.toFixed(3) + ';',
 	'	vec3 shimmer = mix(u_c1, u_c2, smoothstep(0.25, 0.75, q.x + 0.3 * sin(t * 0.2 + f * 6.0)));',
 	'	vec3 metal = mix(u_metal, shimmer, ' + IRIDESCENCE.toFixed(3) + ' * (0.4 + 0.6 * (1.0 - sky)));',
-	// The pool lies along the left and right edges, each reaching the same share of the room beside the chat column,
+	// The pool lies along the left and right edges, each reaching the same share of the room beside the chat column inside the chat area,
 	// and bulges into the corners; the surface ripples its shoreline
-	'	float side = px.x < u_col.x ? (u_col.x - px.x) / max(u_col.x, 1.0) : (px.x - u_col.x) / max(res.x - u_col.x, 1.0);',
+	'	float side = px.x < u_col.x ? (u_col.x - px.x) / max(u_col.x - u_edge.x, 1.0) : (px.x - u_col.x) / max(u_edge.y - u_col.x, 1.0);',
 	'	vec2 r = vec2(side, abs(px.y - res.y * 0.5) / (res.y * 0.5));',
 	'	float edge = r.x + 0.3 * r.y * r.y * r.y;',
 	'	float shore = 1.0 - ' + POOL_SIZE.toFixed(3) + ' + (f - 0.5) * 0.5 - near * 0.2 * ' + MOUSE_PULL.toFixed(3) + ';',
@@ -152,7 +153,7 @@ function setup() {
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
 	gl.enableVertexAttribArray(0);
 	gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-	['u_res', 'u_col', 'u_scale', 'u_time', 'u_mouse', 'u_metal', 'u_c1', 'u_c2', 'u_hi', 'u_dark'].forEach((name) => {
+	['u_res', 'u_col', 'u_edge', 'u_scale', 'u_time', 'u_mouse', 'u_metal', 'u_c1', 'u_c2', 'u_hi', 'u_dark'].forEach((name) => {
 		loc[name] = gl.getUniformLocation(program, name);
 	});
 	gl.disable(gl.BLEND);
@@ -176,6 +177,7 @@ function frame(now) {
 	mouse.amount += (mouse.target - mouse.amount) * Math.min(1, dt * (reduced ? 1 : 2.5));
 	gl.uniform2f(loc.u_res, canvas.width, canvas.height);
 	gl.uniform2f(loc.u_col, colX(), colHalf());
+	gl.uniform2f(loc.u_edge, column ? column.left : 0, column ? column.right : w);
 	gl.uniform1f(loc.u_scale, canvas.width / Math.max(1, w));
 	gl.uniform1f(loc.u_time, time);
 	gl.uniform3f(loc.u_mouse, mouse.x, mouse.y, mouse.amount);

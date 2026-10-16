@@ -221,9 +221,10 @@ function colX() { return column ? column.x : w * 0.5; }
 function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
 const inColumn = (x) => (1 - smooth(0.5, 0.85, Math.abs(x - colX()) / colHalf())) * CENTER_CALM;
 
-// A random x beside the chat column on one side (-1 left, 1 right)
+// A random x beside the chat column on one side (-1 left, 1 right), inside the chat area so the sidebar can't cover it
 function sideX(side) {
-	const cx = colX(), room = side < 0 ? cx : w - cx, inner = Math.min(colHalf() * 0.85, room * 0.62);
+	const lo = column ? column.left : 0, hi = column ? column.right : w;
+	const cx = colX(), room = side < 0 ? cx - lo : hi - cx, inner = Math.min(colHalf() * 0.85, room * 0.62);
 	return cx + side * (inner + Math.random() * Math.max(10, room - FISH_SIZE * 1.6 - inner));
 }
 
