@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.14.3-blue)
+![Version](https://img.shields.io/badge/version-1.15.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -508,6 +508,20 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
 
 ---
+
+## 📝 What's New in 1.15.0
+
+Canvas FX and the preset gallery fit Open WebUI better. Nothing to change on your side: paste it in and save.
+
+**Your messages keep their bubble.** With a Canvas FX script or a gradient on, your own messages lost their bubble and their text floated on the animation. The bubble now stays, in Open WebUI's own shape.
+
+**No dark band at the top of every chat.** The fade under the chat's top bar stayed solid over Canvas FX and gradients. It's cleared again.
+
+**Sharper, calmer scripts.** Scripts now learn the screen's pixel ratio, so lines can be sharp on high-resolution screens, and whether you've asked your system to reduce motion, so they can slow down or hold still. A script that changes when you toggle the setting hears about it right away.
+
+**A fresh start that follows the rules.** A new designer starts with the rewritten Tactical Liquid Grid and Tactical HUD, which follow your theme's colors and keep the input's rounded shape.
+
+**The gallery, rebuilt.** Every Canvas FX script, theme and CSS preset in the [gallery](https://github.com/silentoplayz/theme-designer-pro-presets) was rewritten to one standard: scripts take your theme's colors, keep the canvas transparent, stay quiet behind the chat column and cost little, and theme CSS styles Open WebUI's rounded input instead of drawing a box inside it. Duplicates were retired: 36 scripts and 29 themes remain, each designed in every mode. Updating a theme you installed replaces all four of its modes, so changes you made to it are lost.
 
 ## 📝 What's New in 1.14.3
 
