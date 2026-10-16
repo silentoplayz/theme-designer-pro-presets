@@ -18,7 +18,7 @@ const CURSOR_WIND    = 0.5;   // how far the cursor turns the breeze; settles wh
 const MIST           = 0.5;   // ground mist along the grass line (0-1)
 const MOON_PHASE     = 0.22;  // 0 new, 0.5 full (0-1)
 const CENTER_CALM    = 0.8;   // how much everything thins behind the chat column (0-1)
-const BAND_WIDTH     = 520;   // half-width of the calm band, in px (300-900)
+const BAND_WIDTH     = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const FOLLOW_THEME   = true;  // draw in the theme's colors
 /* ──────────────────────────────────────────── */
 
@@ -26,7 +26,7 @@ const DEFAULT = { background: '#0b1018', surface: '#121a24', text: '#eef0e6', mu
 const MAX_FLIES = 120, MAX_BLADES = 900, MAX_STARS = 140, TRAIL = 28, TAU = Math.PI * 2;
 const F = (n) => new Float32Array(n);
 
-let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, reduced = false, dark = true, colors = DEFAULT;
+let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, reduced = false, dark = true, colors = DEFAULT, column = null;
 let grassStyle = [], flySprite = [], coreStyle = [], groundCache, mistSprite, moonSprite, moonGlow, starStyle = '#fff', trailStyle = '#fff';
 let time = 0, wind = 0;
 const fx = F(MAX_FLIES), fy = F(MAX_FLIES), fpx = F(MAX_FLIES), fpy = F(MAX_FLIES), fsz = F(MAX_FLIES);
@@ -45,14 +45,25 @@ const mouse = { x: 0, amount: 0 };
 function hex(c) { const n = parseInt(c.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
 function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
 function rgba(c, a) { return 'rgba(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ',' + a.toFixed(3) + ')'; }
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
 function band(x) {
-	const t = Math.min(1, Math.max(0, (Math.abs(x - w / 2) / BAND_WIDTH - 0.55) / 0.7));
+	const t = Math.min(1, Math.max(0, (Math.abs(x - colX()) / colHalf() - 0.55) / 0.7));
 	return 1 - t * t * (3 - 2 * t);
 }
 function calm(x) { return 1 - CENTER_CALM * band(x); }
 function sideX() {
 	for (let i = 0; i < 6; i++) { const x = Math.random() * w; if (Math.random() < calm(x)) return x; }
-	return Math.random() < 0.5 ? Math.random() * w * 0.2 : w - Math.random() * w * 0.2;
+	// Otherwise beside the column, on either side by the room each has
+	const left = Math.max(0, colX() - colHalf()), right = Math.max(0, w - colX() - colHalf()), r = Math.random() * (left + right);
+	if (left + right < 40) return Math.random() < 0.5 ? Math.random() * w * 0.2 : w - Math.random() * w * 0.2;
+	return r < left ? r : w - (r - left);
+}
+// The moon's x: beside the column on the right, or mirrored to the left when it would not fit
+function moonX() {
+	const off = colHalf() * 0.94, right = colX() + off, left = colX() - off;
+	return right <= w - 60 || left < 60 ? Math.min(right, w - 60) : left;
 }
 
 function sprite(size, col, a0, a1) {
@@ -126,6 +137,13 @@ function size() {
 	ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 	flies = Math.min(MAX_FLIES, Math.round(FIREFLY_COUNT * Math.max(0.5, w / 1440)));
 	for (let i = 0; i < flies; i++) resetFly(i);
+	place();
+	arc.fly = -1;
+	buildGround();
+}
+
+// Grass and stars, thinned behind the chat column; rebuilt on resize and layout
+function place() {
 	// Blades grouped by layer and shade so each group strokes as one path
 	const per = Math.min(Math.floor(MAX_BLADES / 24), Math.round(w / 1440 * 12 * GRASS_DENSITY));
 	let n = 0;
@@ -146,14 +164,12 @@ function size() {
 		stx[i] = Math.random() * w; sty[i] = Math.random() * h * 0.5;
 		sts[i] = (0.3 + Math.random() * 0.7) * calm(stx[i]);
 	}
-	arc.fly = -1;
-	buildGround();
 }
 
 // Starts a J arc for firefly i, heading away from the chat column
 function startArc(i) {
 	if (i < 0 || reduced) return;
-	const dir = fx[i] < w / 2 ? -1 : 1, s = Math.min(1, h / 900);
+	const dir = fx[i] < colX() ? -1 : 1, s = Math.min(1, h / 900);
 	arc.fly = i; arc.t = 0; arc.fade = 1;
 	arc.x0 = fx[i]; arc.y0 = fy[i];
 	arc.cx = fx[i] + dir * 50 * s; arc.cy = fy[i] + 120 * s;
@@ -182,7 +198,7 @@ function frame(now) {
 			ctx.fillRect(stx[i], sty[i], 1.2, 1.2);
 		}
 	}
-	const mx = w * 0.84, my = h * 0.17;
+	const mx = moonX(), my = h * 0.17;
 	ctx.globalAlpha = 1;
 	ctx.drawImage(moonGlow, mx - 110, my - 110, 220, 220);
 	ctx.drawImage(moonSprite, mx - 24, my - 24, 48, 48);
@@ -290,6 +306,7 @@ self.onmessage = (e) => {
 			ctx = canvas.getContext('2d');
 			w = d.width; h = d.height; dpr = Math.min(d.dpr || 1, 2);
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			size();
 			requestAnimationFrame(frame);
@@ -303,6 +320,10 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			if (canvas && w) place();
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

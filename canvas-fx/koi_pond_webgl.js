@@ -9,7 +9,7 @@ const FISH_SIZE        = 46;     // koi half-length in px, tail not counted (24-
 const SPEED            = 1;      // pace of the koi and the water; 0 holds the pond still (0-2)
 const REDUCED_SPEED    = 0.3;    // share of the pace kept when the viewer asks to reduce motion (0-1)
 const CENTER_CALM      = 0.8;    // how much the water, light and koi quiet down behind the chat column (0-1)
-const BAND_WIDTH       = 520;    // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH       = 520;    // half-width of the calm band when the page has no chat column, in px (300-900)
 const WATER_TINT       = 0.6;    // strength of the water wash over the theme background (0-1)
 const CAUSTICS         = 0.6;    // brightness of the dancing light webs (0-1)
 const REFRACTION       = 1;      // how much the surface wobbles everything below it (0-2)
@@ -42,7 +42,7 @@ precision highp float;
 #else
 precision mediump float;
 #endif
-uniform vec2 u_res;
+uniform vec2 u_res, u_col;
 uniform float u_scale, u_time, u_dark;
 uniform vec4 u_fa[${N}], u_fb[${N}], u_rip[${RN}], u_pad[${Math.max(1, P)}];
 uniform vec3 u_c[9]; // deep, shallow, light, shadow, pad, cream, orange, red, gold
@@ -87,7 +87,7 @@ float pad(vec2 d, vec4 pd, float e) {
 void main() {
 	vec2 px = vec2(gl_FragCoord.x, u_res.y - gl_FragCoord.y) / u_scale, res = u_res / u_scale;
 	float t = u_time, ep = 1.0 / u_scale, dk = u_dark;
-	float band = 1.0 - smoothstep(0.45, 1.2, abs(px.x - res.x * 0.5) / ${n3(BAND_WIDTH)});
+	float band = 1.0 - smoothstep(0.45, 1.2, abs(px.x - u_col.x) / u_col.y);
 	// Ripples: a travelling wave packet that bends the view and catches the light
 	vec2 off = vec2(0.0); float rl = 0.0;
 	for (int i = 0; i < ${RN}; i++) {
@@ -145,7 +145,7 @@ void main() {
 
 let canvas, gl, program;
 const loc = {};
-let w = 0, h = 0, last = 0, time = 0, reduced = false, dark = 1, kissWait = KISS_EVERY * 0.6;
+let w = 0, h = 0, last = 0, time = 0, reduced = false, dark = 1, kissWait = KISS_EVERY * 0.6, column = null;
 const mouse = { x: -10000, y: -10000, amount: 0 };
 const arr = (n) => new Float32Array(n || N);
 const fx = arr(), fy = arr(), fang = arr(), fspd = arr(), fph = arr(), fdep = arr();
@@ -201,7 +201,7 @@ function setup() {
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
 	gl.enableVertexAttribArray(0);
 	gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-	['u_res', 'u_scale', 'u_time', 'u_dark', 'u_fa', 'u_fb', 'u_rip', 'u_pad', 'u_c'].forEach((name) => {
+	['u_res', 'u_col', 'u_scale', 'u_time', 'u_dark', 'u_fa', 'u_fb', 'u_rip', 'u_pad', 'u_c'].forEach((name) => {
 		loc[name] = gl.getUniformLocation(program, name);
 	});
 	gl.disable(gl.BLEND);
@@ -216,21 +216,28 @@ function size() {
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const smooth = (a, b, x) => { const k = clamp((x - a) / (b - a), 0, 1); return k * k * (3 - 2 * k); };
-const inColumn = (x) => (1 - smooth(0.5, 0.85, Math.abs(x - w * 0.5) / BAND_WIDTH)) * CENTER_CALM;
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+const inColumn = (x) => (1 - smooth(0.5, 0.85, Math.abs(x - colX()) / colHalf())) * CENTER_CALM;
 
-// ── Koi: wander targets sit in the outer thirds; a koi crossing the chat column dives and fades ──
+// A random x beside the chat column on one side (-1 left, 1 right)
+function sideX(side) {
+	const cx = colX(), room = side < 0 ? cx : w - cx, inner = Math.min(colHalf() * 0.85, room * 0.62);
+	return cx + side * (inner + Math.random() * Math.max(10, room - FISH_SIZE * 1.6 - inner));
+}
+
+// ── Koi: wander targets sit beside the chat column; a koi crossing it dives and fades ──
 function pickTarget(i) {
-	const half = w * 0.5, m = FISH_SIZE * 1.6;
-	const inner = Math.min(BAND_WIDTH * 0.85, half * 0.62), outer = Math.max(inner + 10, half - m);
-	const side = (fx[i] < half ? -1 : 1) * (Math.random() < 0.08 ? -1 : 1);
-	ftx[i] = half + side * (inner + Math.random() * (outer - inner));
+	const m = FISH_SIZE * 1.6;
+	ftx[i] = sideX((fx[i] < colX() ? -1 : 1) * (Math.random() < 0.08 ? -1 : 1));
 	fty[i] = m + Math.random() * Math.max(1, h - 2 * m);
 	ftime[i] = 10 + Math.random() * 14;
 }
 
 function seedFish() {
 	for (let i = 0; i < N; i++) {
-		fx[i] = w * (i % 2 ? 0.82 + Math.random() * 0.12 : 0.06 + Math.random() * 0.12);
+		fx[i] = sideX(i % 2 ? 1 : -1);
 		fy[i] = h * (0.12 + 0.76 * ((i * 0.37 + Math.random() * 0.2) % 1));
 		fang[i] = Math.random() * 6.283;
 		fspd[i] = FISH_SIZE * 0.8;
@@ -318,6 +325,7 @@ function frame(now) {
 	updateFish(sdt);
 	updateWater(sdt);
 	gl.uniform2f(loc.u_res, canvas.width, canvas.height);
+	gl.uniform2f(loc.u_col, colX(), colHalf());
 	gl.uniform1f(loc.u_scale, canvas.width / Math.max(1, w));
 	gl.uniform1f(loc.u_time, time);
 	gl.uniform1f(loc.u_dark, dark);
@@ -356,6 +364,7 @@ self.onmessage = (e) => {
 			w = d.width;
 			h = d.height;
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			seedFish();
 			updateWater(0);
@@ -377,6 +386,10 @@ self.onmessage = (e) => {
 		case 'motion':
 			reduced = !!d.reducedMotion;
 			if (reduced) { RP.fill(-1); fdart.fill(0); }
+			break;
+		case 'layout':
+			column = d.column || null;
+			for (let i = 0; i < N; i++) pickTarget(i);
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

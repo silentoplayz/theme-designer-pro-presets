@@ -14,7 +14,7 @@ const BUMP          = 0.9;   // depth of the surface relief (0.2-2)
 const REFLECTIVITY  = 0.8;   // strength of the reflected highlights (0-1)
 const IRIDESCENCE   = 0.7;   // how much the accents shimmer through the metal (0-1)
 const CENTER_CALM   = 0.9;   // how much the chrome fades behind the chat column (0-1)
-const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH    = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const MOUSE_PULL    = 1;     // how far the liquid leans toward the cursor (0-2)
 const RENDER_SCALE  = 0.5;   // resolution of the surface; it is soft, so half is plenty (0.25-1)
 const MAX_FPS       = 30;    // frame cap; the liquid moves slowly (15-60)
@@ -34,6 +34,7 @@ const FRAG = [
 	'precision mediump float;',
 	'#endif',
 	'uniform vec2 u_res;',
+	'uniform vec2 u_col;', // the chat column's center and the calm band's half-width
 	'uniform float u_scale;',
 	'uniform float u_time;',
 	'uniform vec3 u_mouse;',
@@ -77,13 +78,15 @@ const FRAG = [
 	'	float spec = (pow(max(dot(n, normalize(vec3(0.35, 0.55, 1.0))), 0.0), 48.0) + streak) * ' + REFLECTIVITY.toFixed(3) + ';',
 	'	vec3 shimmer = mix(u_c1, u_c2, smoothstep(0.25, 0.75, q.x + 0.3 * sin(t * 0.2 + f * 6.0)));',
 	'	vec3 metal = mix(u_metal, shimmer, ' + IRIDESCENCE.toFixed(3) + ' * (0.4 + 0.6 * (1.0 - sky)));',
-	// The pool lies along the left and right edges and bulges into the corners; the surface ripples its shoreline
-	'	vec2 r = abs(px - res * 0.5) / (res * 0.5);',
+	// The pool lies along the left and right edges, each reaching the same share of the room beside the chat column,
+	// and bulges into the corners; the surface ripples its shoreline
+	'	float side = px.x < u_col.x ? (u_col.x - px.x) / max(u_col.x, 1.0) : (px.x - u_col.x) / max(res.x - u_col.x, 1.0);',
+	'	vec2 r = vec2(side, abs(px.y - res.y * 0.5) / (res.y * 0.5));',
 	'	float edge = r.x + 0.3 * r.y * r.y * r.y;',
 	'	float shore = 1.0 - ' + POOL_SIZE.toFixed(3) + ' + (f - 0.5) * 0.5 - near * 0.2 * ' + MOUSE_PULL.toFixed(3) + ';',
 	'	float pool = smoothstep(shore, shore + 0.05, edge);',
 	'	float rim = smoothstep(shore - 0.01, shore + 0.02, edge) * (1.0 - smoothstep(shore + 0.02, shore + 0.06, edge));',
-	'	float band = abs(px.x - res.x * 0.5) / ' + BAND_WIDTH.toFixed(1) + ';',
+	'	float band = abs(px.x - u_col.x) / u_col.y;',
 	'	float calm = 1.0 - ' + CENTER_CALM.toFixed(3) + ' * (1.0 - smoothstep(0.55, 1.25, band));',
 	'	float k = calm * ' + INTENSITY.toFixed(3) + ';',
 	'	vec3 col;',
@@ -105,7 +108,7 @@ const FRAG = [
 let canvas, gl, program, buffer;
 let loc = {};
 let w = 0, h = 0;
-let last = 0, time = 0, reduced = false;
+let last = 0, time = 0, reduced = false, column = null;
 const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
 const colors = { metal: hexToRgb(CHROME_COLOR), c1: hexToRgb(COLOR_A), c2: hexToRgb(COLOR_B), hi: hexToRgb(COLOR_C), dark: 1 };
 
@@ -123,6 +126,10 @@ function applyTheme(t) {
 	colors.c2 = t.rgb.accent2;
 	colors.hi = colors.dark ? t.rgb.text : t.rgb.accent3;
 }
+
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
 
 function compile(type, source) {
 	const shader = gl.createShader(type);
@@ -145,7 +152,7 @@ function setup() {
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
 	gl.enableVertexAttribArray(0);
 	gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-	['u_res', 'u_scale', 'u_time', 'u_mouse', 'u_metal', 'u_c1', 'u_c2', 'u_hi', 'u_dark'].forEach((name) => {
+	['u_res', 'u_col', 'u_scale', 'u_time', 'u_mouse', 'u_metal', 'u_c1', 'u_c2', 'u_hi', 'u_dark'].forEach((name) => {
 		loc[name] = gl.getUniformLocation(program, name);
 	});
 	gl.disable(gl.BLEND);
@@ -168,6 +175,7 @@ function frame(now) {
 	mouse.target = Math.max(0, mouse.target - dt * 0.35);
 	mouse.amount += (mouse.target - mouse.amount) * Math.min(1, dt * (reduced ? 1 : 2.5));
 	gl.uniform2f(loc.u_res, canvas.width, canvas.height);
+	gl.uniform2f(loc.u_col, colX(), colHalf());
 	gl.uniform1f(loc.u_scale, canvas.width / Math.max(1, w));
 	gl.uniform1f(loc.u_time, time);
 	gl.uniform3f(loc.u_mouse, mouse.x, mouse.y, mouse.amount);
@@ -206,6 +214,7 @@ self.onmessage = (e) => {
 			w = d.width;
 			h = d.height;
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			start();
 			break;
@@ -219,6 +228,9 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

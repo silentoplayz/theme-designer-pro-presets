@@ -16,7 +16,7 @@ const BURST_SIZE    = 24;    // embers thrown by a tap; 0 turns taps off (0-60)
 const MOTION        = 1;     // overall speed (0.2-2)
 const REDUCED_SPEED = 0.25;  // speed kept when the viewer asks to reduce motion (0-1)
 const CENTER_CALM   = 0.8;   // how much the embers thin out behind the chat column (0-1)
-const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH    = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const FOLLOW_THEME  = true;  // take the colors from the theme's palette
 const COLOR_HOT     = '#ffd98a';  // fresh ember color when not following the theme
 const COLOR_WARM    = '#ff8c3a';  // ember color halfway up
@@ -25,7 +25,7 @@ const FIRE_WARMTH   = 0.3;   // how far theme colors lean toward firelight (0-1)
 /* ──────────────────────────────────────────── */
 
 const MAX_BURST = 150, ES = 32, GS = 128;
-let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, time = 0, reduced = false, dark = true;
+let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, time = 0, reduced = false, dark = true, column = null;
 let calmLut = new Float32Array(1), hexes = [COLOR_HOT, COLOR_WARM, COLOR_COOL];
 const emberSprites = [], mouse = { x: -10000, y: -10000, energy: 0 };
 let glowSprite = null, wispSprite = null;
@@ -98,6 +98,20 @@ function applyTheme(t) {
 	if (ctx) buildSprites();
 }
 
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+
+// Density and alpha factor across the screen, rebuilt on resize and layout
+function buildCalm() {
+	calmLut = new Float32Array((w >> 2) + 2);
+	const cx = colX(), half = colHalf();
+	for (let i = 0; i < calmLut.length; i++) {
+		const t = Math.min(1, Math.max(0, (Math.abs(i * 4 - cx) / half - 0.55) / 0.7));
+		calmLut[i] = 1 - CENTER_CALM * (1 - t * t * (3 - 2 * t));
+	}
+}
+
 function calm(x) {
 	const i = x >> 2;
 	return calmLut[i < 0 ? 0 : i >= calmLut.length ? calmLut.length - 1 : i];
@@ -122,11 +136,7 @@ function size(oldW, oldH) {
 	canvas.width = Math.max(1, Math.round(w * dpr));
 	canvas.height = Math.max(1, Math.round(h * dpr));
 	ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-	calmLut = new Float32Array((w >> 2) + 2);
-	for (let i = 0; i < calmLut.length; i++) {
-		const t = Math.min(1, Math.max(0, (Math.abs(i * 4 - w / 2) / BAND_WIDTH - 0.55) / 0.7));
-		calmLut[i] = 1 - CENTER_CALM * (1 - t * t * (3 - 2 * t));
-	}
+	buildCalm();
 	if (oldW) {
 		const sx = w / oldW, sy = h / oldH;
 		for (let i = 0; i < EMBER_COUNT; i++) { ex[i] *= sx; ey[i] *= sy; ey0[i] *= sy; erise[i] *= sy; }
@@ -138,9 +148,11 @@ function size(oldW, oldH) {
 	for (let i = 0; i < 6; i++) { const side = i % 2; px[i] = side ? w * (0.86 + Math.random() * 0.12) : w * (0.02 + Math.random() * 0.12); pph[i] = Math.random() * 6.283; }
 }
 
+// Wisps rise beside the chat column, on either side by the room each has
 function resetWisp(i, scatter) {
-	const side = Math.random() < 0.5;
-	wx[i] = side ? w * (0.03 + Math.random() * 0.25) : w * (0.72 + Math.random() * 0.25);
+	const pad = w * 0.03, left = Math.max(0, colX() - colHalf() * 0.6 - pad), right = Math.max(0, w - pad - colX() - colHalf() * 0.6);
+	const r = Math.random() * (left + right);
+	wx[i] = left + right < 40 ? Math.random() * w : r < left ? pad + r : w - pad - (r - left);
 	wy[i] = h + 30 + Math.random() * 40;
 	wspan[i] = 5 + Math.random() * 5;
 	wage[i] = scatter ? Math.random() * wspan[i] : 0;
@@ -246,6 +258,7 @@ self.onmessage = (e) => {
 			ctx = canvas.getContext('2d');
 			w = d.width; h = d.height; dpr = Math.min(d.dpr || 1, 1);
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			buildSprites();
 			size(0, 0);
@@ -262,6 +275,10 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			if (canvas) buildCalm();
 			break;
 		case 'mousemove':
 			move(d.x, d.y);

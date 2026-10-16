@@ -7,7 +7,7 @@
 const CORNER        = 1;     // where the panel docks: 0 top-left, 1 top-right, 2 bottom-left, 3 bottom-right (0-3)
 const PANEL_WIDTH   = 230;   // widest the panel gets, in px; it narrows to stay clear of the chat column (180-320)
 const MARGIN        = 12;    // gap between the panel and the screen's edge, in px (0-48)
-const BAND_WIDTH    = 470;   // half-width of the chat column the panel stays clear of, in px (300-900)
+const BAND_WIDTH    = 470;   // half-width of the chat column the panel stays clear of when the page has no chat column, in px (300-900)
 const FONT_SIZE     = 10;    // text size, in px (9-13)
 const LOG_ROWS      = 5;     // event log lines; fewer show when the screen is short (0-10)
 const REFRESH_HZ    = 4;     // how often the text updates per second (1-30)
@@ -25,8 +25,8 @@ const COLOR_HEADER  = '#00ccee'; // section headers
 
 // Channels in the runtime's protocol, and how fast each goes stale:
 // 0 once (init never goes stale), 1 continuous (5 s), 2 on demand (STALE_SECONDS)
-const CH = ['init', 'resize', 'theme', 'motion', 'mousemove', 'mousedown', 'mouseup', 'click', 'touchstart', 'touchmove', 'touchend', 'context'];
-const KIND = [0, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2];
+const CH = ['init', 'resize', 'theme', 'motion', 'layout', 'mousemove', 'mousedown', 'mouseup', 'click', 'touchstart', 'touchmove', 'touchend', 'context'];
+const KIND = [0, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2];
 const count = new Float64Array(CH.length), lastAt = new Float64Array(CH.length), pulse = new Float32Array(CH.length);
 const frames = new Float32Array(120), fpsHist = new Float32Array(48);
 const log = [];
@@ -35,7 +35,7 @@ const isWorker = typeof WorkerGlobalScope !== 'undefined';
 const FONT = FONT_SIZE + 'px ui-monospace, SFMono-Regular, Menlo, monospace', BOLD = '600 ' + FONT;
 const LH = Math.round(FONT_SIZE * 1.45);
 
-let canvas, ctx, panel, pctx, w = 0, h = 0, dpr = 1, last = 0, start = 0, reduced = false, dark = true, themeMode = 'none', themeHue = 0;
+let canvas, ctx, panel, pctx, w = 0, h = 0, dpr = 1, last = 0, start = 0, reduced = false, column = null, dark = true, themeMode = 'none', themeHue = 0;
 let fi = 0, fpsCount = 0, fpsAt = 0, fps = 0, hi = 0, evCount = 0, evRate = 0, logHead = 0, logLen = 0, paintedAt = -1e9;
 let px = 0, py = 0, pw = 0, ph = 0, compact = false, rows = 0, dotX = 0, dotY = 0;
 let ctxDom = null, ctxApi = null;
@@ -45,7 +45,11 @@ const c = {};
 
 function rgbOf(hex) { const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
 function css(v, a) { return 'rgba(' + v[0] + ',' + v[1] + ',' + v[2] + ',' + a + ')'; }
-function band(x) { const t = Math.min(1, Math.max(0, (Math.abs(x - w / 2) / 520 - 0.55) / 0.7)); return 1 - t * t * (3 - 2 * t); }
+// The chat column's center, the calm band's half-width and the half-width the panel stays clear of
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : 520; }
+function panelHalf() { return column ? column.width * 0.5 + 6 : BAND_WIDTH; }
+function band(x) { const t = Math.min(1, Math.max(0, (Math.abs(x - colX()) / colHalf() - 0.55) / 0.7)); return 1 - t * t * (3 - 2 * t); }
 
 function applyTheme(t) {
 	if (t) {
@@ -70,11 +74,13 @@ function applyTheme(t) {
 
 // Dock in the chosen corner, inside the space beside the chat column
 function layout() {
-	const gap = w / 2 - BAND_WIDTH - MARGIN;
+	// Room between the chat column and the docking corner's edge
+	const room = CORNER % 2 ? w - colX() - panelHalf() : colX() - panelHalf();
+	const gap = room - MARGIN;
 	// Too little room for the panel: a slim strip of status dots in the edge's gap instead
 	compact = gap < 160;
 	const edge = compact ? 4 : MARGIN;
-	pw = compact ? Math.min(28, w / 2 - BAND_WIDTH - 8) : Math.min(PANEL_WIDTH, gap);
+	pw = compact ? Math.min(28, room - 8) : Math.min(PANEL_WIDTH, gap);
 	if (pw < 14) pw = 0;
 	const fixed = 72 + LH * (11 + CH.length);
 	rows = compact ? 0 : Math.max(0, Math.min(LOG_ROWS, Math.floor((h - MARGIN * 2 - fixed - LH - 8) / LH)));
@@ -319,6 +325,7 @@ self.onmessage = (e) => {
 			h = d.height;
 			dpr = Math.min(d.dpr || 1, 2);
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			start = fpsAt = now;
 			applyTheme(d.theme);
 			size();
@@ -339,6 +346,11 @@ self.onmessage = (e) => {
 		case 'motion':
 			reduced = !!d.reducedMotion;
 			addLog('motion', reduced ? 'reduced' : 'full', now);
+			break;
+		case 'layout':
+			column = d.column || null;
+			if (canvas) layout();
+			addLog('layout', column ? (column.x | 0) + ' · ' + (column.width | 0) + 'w' : 'none', now);
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

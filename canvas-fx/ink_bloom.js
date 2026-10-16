@@ -13,7 +13,7 @@ const TIDE_LINE    = 1;      // darkness of the ring where the ink's edge dries 
 const TENDRILS     = 1;      // how ragged the edges are (0-2)
 const CURSOR_BLOOM = 0.35;   // share of drops that fall near a moving cursor (0-1)
 const CENTER_CALM  = 0.85;   // how much the ink fades over the chat column (0-1)
-const BAND_WIDTH   = 520;    // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH   = 520;    // half-width of the calm band when the page has no chat column, in px (300-900)
 const RENDER_SCALE = 0.75;   // resolution of the ink; it is soft, so less is fine (0.5-1)
 const MAX_FPS      = 30;     // frame cap; the ink moves slowly (15-60)
 const FOLLOW_THEME = true;   // take the colors from the theme's palette
@@ -30,14 +30,17 @@ const bvx = F(MAXB), bvy = F(MAXB), bu = F(MAXB), bstr = F(MAXB), alive = new Ui
 const tPh = F(MAXB * HARM), tAmp = F(MAXB * HARM), prof = F(STEPS);
 const LAYER_SCALE = [1, 0.76, 0.52, 0.26], LAYER_ALPHA = [0.4, 0.3, 0.35, 0.5], LAYER_RAG = [1.4, 1, 0.75, 0.5];
 
-let canvas, ctx, w = 0, h = 0, dpr = 1, scale = 1, last = 0, reduced = false, dark = true, wait = 0, mask = null;
+let canvas, ctx, w = 0, h = 0, dpr = 1, scale = 1, last = 0, reduced = false, dark = true, wait = 0, mask = null, column = null;
 const mouse = { x: -10000, y: -10000, amount: 0 };
 const ink = { fill: [], halo: [] };
 
 function rgbOf(hex) { const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
 function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
 function css(c, a) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + (a === undefined ? 1 : a) + ')'; }
-function band(x) { const t = Math.min(1, Math.max(0, (Math.abs(x - w / 2) / BAND_WIDTH - 0.55) / 0.7)); return 1 - t * t * (3 - 2 * t); }
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+function band(x) { const t = Math.min(1, Math.max(0, (Math.abs(x - colX()) / colHalf() - 0.55) / 0.7)); return 1 - t * t * (3 - 2 * t); }
 
 function sprite(c) {
 	const s = new OffscreenCanvas(64, 64), g = s.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -65,7 +68,11 @@ function size() {
 	canvas.width = Math.max(1, Math.round(w * scale));
 	canvas.height = Math.max(1, Math.round(h * scale));
 	ctx.setTransform(scale, 0, 0, scale, 0, 0);
-	// A horizontal mask that erases ink over the chat column, built once per size
+	buildMask();
+}
+
+// A horizontal mask that erases ink over the chat column, rebuilt on resize and layout
+function buildMask() {
 	mask = ctx.createLinearGradient(0, 0, w, 0);
 	for (let i = 0; i <= 24; i++) mask.addColorStop(i / 24, 'rgba(0,0,0,' + (CENTER_CALM * band((w * i) / 24)).toFixed(3) + ')');
 }
@@ -96,9 +103,10 @@ function spawnSomewhere() {
 		spawn(mouse.x + (Math.random() - 0.5) * 220, mouse.y + (Math.random() - 0.5) * 220, false);
 		return;
 	}
-	// Outer thirds, weighted toward the edges
-	const e = Math.pow(Math.random(), 1.4) * w * 0.32;
-	spawn(Math.random() < 0.5 ? e : w - e, h * (0.06 + Math.random() * 0.88), false);
+	// Beside the chat column, either side by its room, weighted toward the edges
+	const left = Math.max(40, colX() - colHalf() * 0.5), right = Math.max(40, w - colX() - colHalf() * 0.5);
+	const onLeft = Math.random() * (left + right) < left, e = Math.pow(Math.random(), 1.4) * (onLeft ? left : right);
+	spawn(onLeft ? e : w - e, h * (0.06 + Math.random() * 0.88), false);
 }
 
 function drawBloom(i) {
@@ -195,6 +203,7 @@ self.onmessage = (e) => {
 			h = d.height;
 			dpr = d.dpr || 1;
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			size();
 			// Start with a few drops already spreading, at different stages
@@ -217,6 +226,10 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			if (canvas) buildMask();
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

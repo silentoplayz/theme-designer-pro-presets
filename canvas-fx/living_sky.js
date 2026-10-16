@@ -6,7 +6,7 @@
 /* ────────── CONFIGURABLE VARIABLES ────────── */
 const PREVIEW_CYCLE  = 0;     // seconds per preview day; 0 follows the clock (0-600)
 const THEME_TINT     = 0.35;  // how far the sky leans toward the theme (0-1)
-const ARC_X          = 0.84;  // where the sun and moon ride, share of the width (0-1)
+const ARC_X          = 0.84;  // where the sun and moon ride, share of the width; with a chat column, the same side and distance from it (0-1)
 const BODY_SIZE      = 22;    // sun and moon radius, in px (10-50)
 const CLOUD_AMOUNT   = 1;     // how many clouds drift by (0-2)
 const CLOUD_SPEED    = 10;    // cloud drift, in px per second (0-60)
@@ -17,13 +17,13 @@ const TERRAIN_HEIGHT = 0.17;  // mountain height, share of the screen (0.05-0.2)
 const PARALLAX       = 10;    // mountain shift with the cursor, in px (0-40)
 const GLOW           = 1;     // horizon and zenith glow (0-2)
 const CENTER_CALM    = 0.8;   // how much the sky quiets behind the chat (0-1)
-const BAND_WIDTH     = 520;   // half-width of the calm band, in px (300-900)
+const BAND_WIDTH     = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const FOLLOW_THEME   = true;  // lean the palette toward the theme
 /* ──────────────────────────────────────────── */
 
 const MAX_STARS = 260, MAX_CLOUDS = 12, PUFFS = 6, TAU = Math.PI * 2;
 
-let canvas, ctx, w = 0, h = 0, last = 0, reduced = false, dark = true;
+let canvas, ctx, w = 0, h = 0, last = 0, reduced = false, dark = true, column = null;
 let theme = null, hour = 12, clock = 0, refreshAt = 0, elapsed = 0;
 let glowCache, glowG, sunSprite, moonSprite, moonHalo, haloSprite, twiSprite, cloudSprite, layers = [], layerG = [];
 let starStyle = '', day = 1, twilight = 0, night = 0;
@@ -44,7 +44,16 @@ function hex(c) { const n = parseInt(c.slice(1), 16); return [((n >> 16) & 255) 
 function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
 function rgba(c, a) { return 'rgba(' + Math.round(c[0] * 255) + ',' + Math.round(c[1] * 255) + ',' + Math.round(c[2] * 255) + ',' + a.toFixed(3) + ')'; }
 function smooth(a, b, x) { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); }
-function band(x) { return 1 - smooth(0.55, 1.25, Math.abs(x - w / 2) / BAND_WIDTH); }
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+function band(x) { return 1 - smooth(0.55, 1.25, Math.abs(x - colX()) / colHalf()); }
+// The arc's center: on ARC_X's side of the chat column at a matching distance, mirrored when it would leave the screen
+function arcX() {
+	if (!column) return ARC_X * w;
+	const off = Math.abs(ARC_X - 0.5) / 0.34 * colHalf() * 0.94, s = ARC_X < 0.5 ? -1 : 1, a = colX() + s * off, b = colX() - s * off;
+	return a >= 60 && a <= w - 60 ? a : b >= 60 && b <= w - 60 ? b : Math.min(w - 60, Math.max(60, a));
+}
 function calm(x) { return 1 - CENTER_CALM * band(x); }
 function ridge(v) { const r = 1 - Math.abs(Math.sin(v)); return r * r; }
 
@@ -117,8 +126,8 @@ function refresh() {
 	glowG.fillRect(0, 0, gw, gh * 0.28);
 	glowG.globalCompositeOperation = 'destination-out';
 	grad = glowG.createLinearGradient(0, 0, gw, 0);
-	const s = gw / Math.max(1, w), mid = gw / 2;
-	const inner = BAND_WIDTH * 0.55 * s, outer = BAND_WIDTH * 1.25 * s;
+	const s = gw / Math.max(1, w), mid = colX() * s;
+	const inner = colHalf() * 0.55 * s, outer = colHalf() * 1.25 * s;
 	const cut = rgba([0, 0, 0], CENTER_CALM * 0.75), none = 'rgba(0,0,0,0)';
 	grad.addColorStop(Math.max(0, (mid - outer) / gw), none);
 	grad.addColorStop(Math.max(0, (mid - inner) / gw), cut);
@@ -197,7 +206,7 @@ function size() {
 
 function body(f, haloA, halo, hr, disc, dr, discA) {
 	const hz = h * (1 - TERRAIN_HEIGHT * 0.55);
-	const x = ARC_X * w + (f - 0.5) * 2 * Math.min(w * 0.11, 180);
+	const x = arcX() + (f - 0.5) * 2 * Math.min(w * 0.11, 180);
 	const y = hz - Math.sin(Math.min(1, Math.max(0, f)) * Math.PI) * (hz - h * 0.12);
 	ctx.globalCompositeOperation = dark ? 'lighter' : 'source-over';
 	ctx.globalAlpha = haloA;
@@ -240,8 +249,9 @@ function frame(now) {
 		if (SHOOTING_EVERY > 0 && !reduced) {
 			shoot.wait -= dt;
 			if (shoot.wait <= 0 && night > 0.6) {
-				const side = Math.random() < 0.5 ? -1 : 1;
-				shoot.x = w / 2 + side * (BAND_WIDTH + Math.random() * w * 0.2); shoot.y = h * (0.05 + Math.random() * 0.25);
+				let side = Math.random() < 0.5 ? -1 : 1;
+				if ((side > 0 ? w - colX() : colX()) - colHalf() < 80) side = -side;
+				shoot.x = colX() + side * (colHalf() + Math.random() * w * 0.2); shoot.y = h * (0.05 + Math.random() * 0.25);
 				shoot.vx = side * (260 + Math.random() * 200); shoot.vy = 120;
 				shoot.age = 0; shoot.wait = SHOOTING_EVERY * (0.5 + Math.random());
 			}
@@ -297,6 +307,7 @@ self.onmessage = (e) => {
 			ctx = canvas.getContext('2d');
 			w = d.width; h = d.height;
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			theme = d.theme;
 			dark = !theme || theme.dark !== false;
 			hour = currentHour();
@@ -314,6 +325,10 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			if (glowCache) refresh();
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

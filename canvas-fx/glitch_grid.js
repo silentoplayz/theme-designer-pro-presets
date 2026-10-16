@@ -15,7 +15,7 @@ const DIMENSIONS    = 4;     // drafting dimension lines fading in and out at th
 const SECTORS       = 4;     // faint bracketed sector blocks at the sides (0-6)
 const MOTION        = 1;     // speed of scan lines and fades (0.2-2)
 const CENTER_CALM   = 0.7;   // how much the grid fades behind the chat column (0-1)
-const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH    = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const CURSOR_GLOW   = 0.6;   // how brightly intersections near the cursor glow (0-1)
 const FOLLOW_THEME  = true;  // take the colors from the theme's palette
 const GRID_COLOR    = '#64c8b4';  // grid and label color without the theme
@@ -29,8 +29,8 @@ const DASH = [4, 3], SOLID = [];
 
 let canvas, ctx, cache, cctx;
 let w = 0, h = 0, dpr = 1;
-let last = 0, reduced = false, dark = true, spawnWait = 0.5;
-let zone = 0; // width of each outer glitch zone
+let last = 0, reduced = false, dark = true, spawnWait = 0.5, column = null;
+let zoneL = 0, zoneR = 0; // widths of the left and right glitch zones, beside the chat column
 const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
 const col = { grid: GRID_COLOR, a: GLITCH_COLOR, b: GLITCH_COLOR2, scan: SCAN_COLOR, font: '10px monospace' };
 // Six floats per slot: x, y, life, maxLife, then alpha+color, alpha+speed or width+shift
@@ -54,8 +54,12 @@ function applyTheme(t) {
 	buildCache();
 }
 
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+
 function band(x) {
-	const b = Math.abs(x - w / 2) / BAND_WIDTH;
+	const b = Math.abs(x - colX()) / colHalf();
 	const s = Math.min(1, Math.max(0, (b - 0.55) / 0.7));
 	return 1 - CENTER_CALM * (1 - s * s * (3 - 2 * s));
 }
@@ -64,7 +68,6 @@ function resize(width, height, ratio) {
 	w = width;
 	h = height;
 	dpr = Math.min(ratio || 1, 2);
-	zone = Math.max(CELL_SIZE * 2, Math.min(w / 3, w / 2 - BAND_WIDTH * 0.6));
 	if (!canvas) return;
 	canvas.width = Math.max(1, Math.round(w * dpr));
 	canvas.height = Math.max(1, Math.round(h * dpr));
@@ -73,9 +76,16 @@ function resize(width, height, ratio) {
 	cctx = cache.getContext('2d');
 	cells.fill(0); scans.fill(0); blocks.fill(0);
 	for (let i = 0; i < MAX_DIMS; i++) dims[i].life = 0;
+	layout();
+}
+
+// The glitch zones between the screen's edges and the chat column, and the sector marks in them; rebuilt on resize and layout
+function layout() {
+	zoneL = Math.max(CELL_SIZE * 2, Math.min(w / 3, colX() - colHalf() * 0.6));
+	zoneR = Math.max(CELL_SIZE * 2, Math.min(w / 3, w - colX() - colHalf() * 0.6));
 	for (let i = 0; i < 6; i++) {
 		const cw = 2 + Math.floor(Math.random() * 2), ch = 1 + Math.floor(Math.random() * 2);
-		const span = Math.max(1, Math.floor(zone / CELL_SIZE) - cw);
+		const span = Math.max(1, Math.floor((i % 2 ? zoneL : zoneR) / CELL_SIZE) - cw);
 		const c = i % 2 ? Math.floor(Math.random() * span) : Math.floor(w / CELL_SIZE) - cw - Math.floor(Math.random() * span);
 		sectors[i * 4] = c * CELL_SIZE;
 		sectors[i * 4 + 1] = (1 + Math.floor(Math.random() * Math.max(1, Math.floor(h / CELL_SIZE) - ch - 2))) * CELL_SIZE;
@@ -122,7 +132,7 @@ function buildCache() {
 		g.globalAlpha = Math.min(0.5, a * 5);
 		g.beginPath();
 		for (let x = major; x < w; x += major) {
-			if (Math.abs(x - w / 2) < w / 2 - zone) continue;
+			if (x > zoneL && x < w - zoneR) continue;
 			g.moveTo(x + off, 0); g.lineTo(x + off, 6);
 			g.textAlign = 'center';
 			g.fillText(String(x / CELL_SIZE), x, 17);
@@ -147,10 +157,10 @@ function buildCache() {
 	g.globalCompositeOperation = 'source-over';
 }
 
-// A random x inside one of the two outer zones
+// A random x inside one of the two outer zones, by their widths
 function zoneX() {
-	const x = Math.random() * zone;
-	return Math.random() < 0.5 ? x : w - x;
+	const x = Math.random() * (zoneL + zoneR);
+	return x < zoneL ? x : w - (x - zoneL);
 }
 
 function free(pool, n) {
@@ -159,7 +169,7 @@ function free(pool, n) {
 }
 
 function spawn() {
-	const near = mouse.amount > 0.2 && (mouse.x < zone || mouse.x > w - zone);
+	const near = mouse.amount > 0.2 && (mouse.x < zoneL || mouse.x > w - zoneR);
 	let k = free(cells, MAX_CELLS);
 	if (k >= 0) {
 		const x = near && Math.random() < 0.6 ? mouse.x + (Math.random() - 0.5) * 240 : zoneX();
@@ -190,15 +200,16 @@ function spawn() {
 // Dimension lines in the outer zones, snapped to the major grid
 function placeDim(d) {
 	const major = CELL_SIZE * 4, snap = (v) => Math.round(v / major) * major;
+	const left = Math.random() < 0.5, zone = left ? zoneL : zoneR;
 	const inZone = (len) => snap(major * 0.5 + Math.random() * Math.max(0, zone - len - major));
 	d.horiz = Math.random() < 0.5;
 	if (d.horiz) {
 		const span = Math.max(major, snap(zone * (0.4 + Math.random() * 0.4)));
-		d.a = Math.random() < 0.5 ? inZone(span) : w - inZone(span) - span;
+		d.a = left ? inZone(span) : w - inZone(span) - span;
 		d.b = d.a + span;
 		d.at = snap(major + Math.random() * Math.max(0, h - major * 2));
 	} else {
-		d.at = Math.random() < 0.5 ? inZone(0) : w - inZone(0);
+		d.at = left ? inZone(0) : w - inZone(0);
 		d.a = snap(major * 0.5 + Math.random() * h * 0.4);
 		d.b = Math.min(h - major * 0.5, d.a + snap(h * (0.2 + Math.random() * 0.3)));
 	}
@@ -238,7 +249,7 @@ function drawDims(dt) {
 		}
 		ctx.stroke();
 		if (d.horiz) ctx.fillText(d.label, mid, d.at - 9);
-		else ctx.fillText(d.label, d.at + (d.at < w / 2 ? 22 : -22), (d.a + d.b) / 2);
+		else ctx.fillText(d.label, d.at + (d.at < colX() ? 22 : -22), (d.a + d.b) / 2);
 	}
 }
 
@@ -303,7 +314,7 @@ function frame(now) {
 		scans[k + 1] += scans[k + 5] * dt * MOTION;
 		const fade = age(scans, k, dt, 0.2, 0.3);
 		if (fade <= 0 || scans[k + 1] < 0 || scans[k + 1] > h) { scans[k + 2] = 0; continue; }
-		const x0 = scans[k] ? w - zone : 0, y = scans[k + 1];
+		const zone = scans[k] ? zoneR : zoneL, x0 = scans[k] ? w - zone : 0, y = scans[k + 1];
 		ctx.globalAlpha = scans[k + 4] * fade * lightK;
 		ctx.fillStyle = col.a;
 		ctx.fillRect(x0, y, zone, 1.5);
@@ -337,6 +348,7 @@ self.onmessage = (e) => {
 			canvas = d.canvas;
 			ctx = canvas.getContext('2d');
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			resize(d.width, d.height, d.dpr);
 			requestAnimationFrame(frame);
@@ -349,6 +361,10 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			if (canvas && w) layout();
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

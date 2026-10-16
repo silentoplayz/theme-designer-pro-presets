@@ -13,7 +13,7 @@ const TRAIL         = 1;     // trail length (0.3-2)
 const BRIGHTNESS    = 0.9;   // overall strength of the glyphs (0.2-1)
 const MUTATE        = 1;     // how often trail glyphs flicker to a new symbol (0-3)
 const CENTER_CALM   = 0.85;  // how much quieter the rain is behind the chat column (0-1)
-const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH    = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const CURSOR_BOOST  = 1.5;   // extra speed for columns near the cursor (0-3)
 const MIRROR        = true;  // mirror the katakana, as in the film
 const FOLLOW_THEME  = true;  // take the colors from the theme's palette
@@ -31,7 +31,7 @@ const MAX_COLS = 400;
 
 let canvas, ctx, atlas;
 let w = 0, h = 0, dpr = 1, rows = 0, cols = 0;
-let last = 0, reduced = false, dark = true;
+let last = 0, reduced = false, dark = true, column = null;
 let cw = 1, chh = 1;                  // atlas cell in device px
 const mouse = { x: -10000, amount: 0, target: 0 };
 
@@ -101,10 +101,19 @@ function buildAtlas() {
 	}
 }
 
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+
 function band(x) {
-	const d = Math.abs(x - w * 0.5) / BAND_WIDTH;
+	const d = Math.abs(x - colX()) / colHalf();
 	const s = Math.min(1, Math.max(0, (d - 0.55) / 0.7));
 	return 1 - s * s * (3 - 2 * s);
+}
+
+// Each rain column's alpha factor, rebuilt on resize and layout
+function buildCalm() {
+	for (let i = 0; i < cols; i++) calmF[i] = 1 - CENTER_CALM * band((i + 0.5) * FONT_SIZE);
 }
 
 function restart(i, first) {
@@ -131,8 +140,8 @@ function size(nw, nh, ndpr) {
 	buildAtlas();
 	// Seed the columns mid-run, trails already drawn, so the rain looks settled at once
 	const base = BRIGHTNESS * (dark ? 1 : 0.9);
+	buildCalm();
 	for (let i = 0; i < cols; i++) {
-		calmF[i] = 1 - CENTER_CALM * band((i + 0.5) * FONT_SIZE);
 		restart(i, true);
 		if (wait[i] > 0) continue;
 		const top = Math.floor(head[i]);
@@ -223,6 +232,7 @@ self.onmessage = (e) => {
 			canvas = d.canvas;
 			ctx = canvas.getContext('2d');
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			if (d.theme) applyTheme(d.theme);
 			size(d.width, d.height, d.dpr);
 			requestAnimationFrame(frame);
@@ -235,6 +245,10 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			buildCalm();
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

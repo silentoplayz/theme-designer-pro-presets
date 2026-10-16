@@ -11,7 +11,7 @@ const REDUCED_SPEED = 0.15;  // share of the speed kept when the viewer asks to 
 const INTENSITY     = 1;     // strength of the blobs (0.2-2)
 const LIGHT_ALPHA   = 0.4;   // blob strength on light themes, so dark text stays readable (0.1-1)
 const CENTER_CALM   = 0.7;   // how much the blobs fade behind the chat column (0-1)
-const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH    = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const CURSOR_PULL   = 1;     // how strongly blobs drift toward the cursor (0-3)
 const CURSOR_RADIUS = 260;   // reach of the cursor, in px (100-500)
 const RENDER_SCALE  = 0.5;   // resolution of the blobs; they are soft, so half is plenty (0.25-1)
@@ -28,7 +28,7 @@ const TONES = 6;
 
 let canvas, ctx;
 let w = 0, h = 0, scale = RENDER_SCALE;
-let last = 0, time = 0, reduced = false, dark = true;
+let last = 0, time = 0, reduced = false, dark = true, column = null;
 const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
 
 const bx = new Float32Array(N), by = new Float32Array(N), vx = new Float32Array(N), vy = new Float32Array(N);
@@ -48,10 +48,23 @@ function mix(a, b, t) {
 	return [Math.round(a[0] + (b[0] - a[0]) * t), Math.round(a[1] + (b[1] - a[1]) * t), Math.round(a[2] + (b[2] - a[2]) * t)];
 }
 
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+
 function calm(x) {
-	const d = Math.abs(x - w * 0.5) / BAND_WIDTH;
+	const d = Math.abs(x - colX()) / colHalf();
 	const s = Math.min(1, Math.max(0, (d - 0.55) / 0.7));
 	return 1 - CENTER_CALM * (1 - s * s * (3 - 2 * s));
+}
+
+// A blob's home in px: 0.3-0.7 maps across the chat column; the rest beside it, shared between
+// the two sides by the room each has
+function homeX(v) {
+	const a = Math.min(w, Math.max(0, colX() - colHalf() * 0.55)), b = Math.min(w, Math.max(a, colX() + colHalf() * 0.55));
+	if (v >= 0.3 && v < 0.7) return a + (v - 0.3) / 0.4 * (b - a);
+	const x = (v < 0.3 ? v / 0.6 : 0.5 + (v - 0.7) / 0.6) * (a + w - b);
+	return x < a ? x : b + (x - a);
 }
 
 function applyTheme(t) {
@@ -86,10 +99,10 @@ function build() {
 
 function seed() {
 	for (let i = 0; i < N; i++) {
-		// Most blobs live in the outer thirds; a few wander through the middle
+		// Most blobs live beside the chat column; a few wander through it
 		const r = Math.random();
 		home[i] = r < 0.4 ? Math.random() * 0.3 : r < 0.8 ? 0.7 + Math.random() * 0.3 : 0.3 + Math.random() * 0.4;
-		bx[i] = home[i] * w;
+		bx[i] = homeX(home[i]);
 		by[i] = Math.random() * h;
 		vx[i] = vy[i] = 0;
 		rad[i] = (60 + Math.random() * 100) * BLOB_SIZE;
@@ -130,7 +143,7 @@ function frame(now) {
 		// Heat at the bottom, cool at the top: warm blobs rise, cool ones sink
 		const heat = by[i] > h * 0.75 ? 1 : by[i] < h * 0.3 ? -1 : 0;
 		temp[i] = Math.min(1, Math.max(0, temp[i] + heat * rate[i] * dt * pace));
-		let tx = (home[i] * w - bx[i]) * 0.05 + Math.sin(time * 0.4 + phase[i]) * 10;
+		let tx = (homeX(home[i]) - bx[i]) * 0.05 + Math.sin(time * 0.4 + phase[i]) * 10;
 		let ty = -(temp[i] - 0.45) * 70;
 		// Drift toward the cursor while it moves, at a capped speed, and let go once it rests
 		const dx = mouse.x - bx[i], dy = mouse.y - by[i], d2 = dx * dx + dy * dy;
@@ -175,6 +188,7 @@ self.onmessage = (e) => {
 			canvas = d.canvas;
 			ctx = canvas.getContext('2d');
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			w = d.width;
 			h = d.height;
 			seed();
@@ -190,6 +204,9 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
 			break;
 		case 'mousemove':
 			mouse.x = d.x;
