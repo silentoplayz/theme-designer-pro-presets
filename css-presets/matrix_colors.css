@@ -1,31 +1,53 @@
-/* Green-line grid */ body {
-	background-image: linear-gradient(rgba(26, 255, 26, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(26, 255, 26, 0.05) 1px, transparent 1px) !important;
-	background-size: 20px 20px !important;
-	background-position: center top !important;
+/* Matrix Colors: phosphor-green accents, a faint green grid behind the chat and monospace replies, in fixed greens that read on light and dark palettes. Pairs with Matrix Rain. */
+:root {
+	--mx-green: #0a7d2c;
+	--mx-on-green: #ffffff;
+	--mx-line: rgb(10 125 44 / 0.3);
+	--mx-wash: rgb(10 125 44 / 0.1);
+	--mx-grid: rgb(10 125 44 / 0.07);
 }
-/* Mono font — set at the root so it inherits (incl. portaled menus) */
-html, body {
-	font-family: 'JetBrains Mono', 'Monaco', monospace !important;
+html.dark {
+	--mx-green: #3dff6e;
+	--mx-on-green: #021a07;
+	--mx-line: rgb(61 255 110 / 0.28);
+	--mx-wash: rgb(61 255 110 / 0.09);
+	--mx-grid: rgb(61 255 110 / 0.05);
 }
-/* Phosphor borders */ .app * {
-	border-color: rgba(26, 255, 26, 0.25) !important;
+
+#chat-container {
+	background-image: linear-gradient(var(--mx-grid) 1px, transparent 1px), linear-gradient(90deg, var(--mx-grid) 1px, transparent 1px);
+	background-size: 24px 24px;
 }
-input, textarea, #chat-input-container, .markdown-prose {
-	background-color: rgba(10, 26, 10, 0.85) !important;
-	border: 1px solid rgba(26, 255, 26, 0.35) !important;
+#message-input-container {
+	border-color: var(--mx-line);
+	caret-color: var(--mx-green);
 }
-/* Green accent buttons */ button.bg-blue-500, button.bg-blue-600 {
-	background-color: #1aff1a !important;
-	border: 1px solid #eaffea !important;
-	color: #020402 !important;
-	text-transform: uppercase;
-	letter-spacing: 1px;
-	font-weight: bold;
+#message-input-container:focus-within {
+	border-color: var(--mx-green);
+	box-shadow: 0 0 18px var(--mx-wash);
 }
-/* Scrollbar */ ::-webkit-scrollbar-thumb {
-	background: #1aff1a !important;
-	border-radius: 0;
+.chat-user .rounded-3xl {
+	background-color: var(--mx-wash) !important;
+	box-shadow: inset 0 0 0 1px var(--mx-line);
 }
-::-webkit-scrollbar-track {
-	background: #0a1a0a;
+#sidebar-chat-item.selected {
+	background-color: var(--mx-wash);
+	box-shadow: inset 2px 0 0 var(--mx-green);
+}
+#send-message-button:enabled {
+	background-color: var(--mx-green);
+	color: var(--mx-on-green);
+}
+.markdown-prose {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+	--tw-prose-headings: var(--mx-green);
+	--tw-prose-links: var(--mx-green);
+	--tw-prose-code: var(--mx-green);
+	--tw-prose-bullets: var(--mx-green);
+}
+::selection {
+	background-color: var(--mx-line);
+}
+html {
+	scrollbar-color: var(--mx-line) transparent;
 }

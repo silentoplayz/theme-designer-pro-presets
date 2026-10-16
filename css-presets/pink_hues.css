@@ -1,59 +1,57 @@
+/* Pink Hues: a blush sidebar, a pink bubble and hot-pink accents in fixed pinks, burgundy ink on light and soft rose on dark. Pairs with the Pink Hues theme. */
 :root {
-  --primary-text: #8b1538;
-  --primary-pink: #ff69b4;
-  --primary-bg: #ffe0ec;
-  --hover-bg: #ffc0db;
+	--pink: #d63384;
+	--pink-on: #ffffff;
+	--pink-ink: #8b1538;
+	--pink-sidebar: #ffe0ec;
+	--pink-bubble: #ffd0e4;
+	--pink-wash: rgb(214 51 132 / 0.14);
+	--pink-line: rgb(214 51 132 / 0.3);
 }
-
-.app * {
-  color: var(--primary-text) !important;
-}
-
-#send-message-button {
-  background-color: var(--primary-pink) !important;
+html.dark {
+	--pink: #ff69b4;
+	--pink-on: #2a0716;
+	--pink-ink: #ffd6e7;
+	--pink-sidebar: color-mix(in oklab, var(--color-gray-950) 88%, #ff69b4);
+	--pink-bubble: color-mix(in oklab, var(--color-gray-850) 75%, #ff69b4);
+	--pink-wash: rgb(255 105 180 / 0.16);
+	--pink-line: rgb(255 105 180 / 0.3);
 }
 
 #sidebar {
-  background-color: var(--primary-bg) !important;
+	background-color: var(--pink-sidebar) !important;
 }
-
-#sidebar > div *:hover {
-  background-color: var(--hover-bg) !important;
+#sidebar-chat-item.selected {
+	background-color: var(--pink-wash);
 }
-
-[aria-label="Voice mode"] {
-  background-color: var(--primary-pink) !important;
+.chat-user .rounded-3xl {
+	background-color: var(--pink-bubble) !important;
 }
-
-.tippy-content {
-  background-color: var(--primary-pink) !important;
-  border-color: var(--primary-pink) !important;
+#message-input-container {
+	border-color: var(--pink-line);
 }
-
-.tippy-box {
-  background-color: var(--primary-pink) !important;
-  border-color: var(--primary-pink) !important;
+#message-input-container:focus-within {
+	border-color: var(--pink);
+	box-shadow: 0 0 0 3px var(--pink-wash);
 }
-
-button[type="submit"] {
-  background-color: var(--primary-pink) !important;
-}
-
+#send-message-button:enabled,
 [role="switch"][aria-checked="true"] {
-  background-color: var(--primary-pink) !important;
+	background-color: var(--pink);
+	color: var(--pink-on);
 }
-
-button.px-3\.5.py-1\.5.text-sm.font-medium.bg-black.hover\:bg-gray-900.text-white.dark\:bg-white.dark\:text-black.dark\:hover\:bg-gray-100.transition.rounded-full {
-  background-color: var(--primary-pink) !important;
+.markdown-prose {
+	--tw-prose-headings: var(--pink-ink);
+	--tw-prose-bold: var(--pink-ink);
+	--tw-prose-links: var(--pink);
+	--tw-prose-bullets: var(--pink);
 }
-
-/* Dark modes: burgundy text vanishes on dark surfaces — flip the chat side
-   to a soft pink while the light-pink sidebar keeps its burgundy text
-   (id selector outranks the mode override). */
-html.dark .app * {
-  color: #ffd6e7 !important;
+.tippy-box {
+	background-color: var(--pink);
+	color: var(--pink-on);
 }
-
-#sidebar, #sidebar * {
-  color: #8b1538 !important;
+::selection {
+	background-color: var(--pink-line);
+}
+html {
+	scrollbar-color: var(--pink-line) transparent;
 }

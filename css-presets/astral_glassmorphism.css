@@ -1,56 +1,56 @@
-/* --- ASTRAL GLASSMORPHISM --- */
-.app * {
-	border-color: rgba(100, 150, 255, 0.15) !important;
+/* Astral Glassmorphism: frosted glass input, bubble and sidebar with a soft starlight glow, all from the palette. Pairs with any Canvas FX theme, made for Astral Projection. */
+:root {
+	--astral-glass: color-mix(in oklab, var(--color-gray-50) 60%, transparent);
+	--astral-sidebar: color-mix(in oklab, var(--color-gray-50) 66%, transparent);
+	--astral-bubble: color-mix(in oklab, var(--color-gray-200) 55%, transparent);
+	--astral-line: color-mix(in oklab, var(--color-gray-500) 28%, transparent);
+	--astral-glow: color-mix(in oklab, var(--color-gray-500) 26%, transparent);
+	--astral-star: var(--color-gray-700);
+	--astral-focus: color-mix(in oklab, var(--color-gray-500) 55%, transparent);
+}
+html.dark {
+	--astral-glass: color-mix(in oklab, var(--color-gray-900) 55%, transparent);
+	--astral-sidebar: color-mix(in oklab, var(--color-gray-950) 62%, transparent);
+	--astral-bubble: color-mix(in oklab, var(--color-gray-700) 40%, transparent);
+	--astral-line: color-mix(in oklab, var(--color-gray-300) 20%, transparent);
+	--astral-glow: color-mix(in oklab, var(--color-gray-300) 30%, transparent);
+	--astral-star: var(--color-gray-200);
+	--astral-focus: color-mix(in oklab, var(--color-gray-300) 50%, transparent);
 }
 
-/* Ethereal Typography */
-.markdown-prose h1, .markdown-prose h2, .markdown-prose h3, .markdown-prose h4 {
-	color: #aaddff !important;
-	text-shadow: 0 0 15px rgba(136, 187, 255, 0.2);
+#message-input-container {
+	background-color: var(--astral-glass) !important;
+	border-color: var(--astral-line);
+	backdrop-filter: blur(16px) saturate(1.3);
+	transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
-.markdown-prose code {
-	color: #cdd3f5 !important;
-	background-color: rgba(136, 187, 255, 0.1) !important;
-	border: 1px solid rgba(136, 187, 255, 0.2);
-	border-radius: 6px;
+#message-input-container:focus-within {
+	border-color: var(--astral-focus);
+	box-shadow: 0 0 24px var(--astral-glow);
 }
-
-/* Frosted Glass Inputs */
-input, textarea, #chat-input-container, .bg-gray-850 {
-	background-color: rgba(10, 11, 20, 0.5) !important;
-	backdrop-filter: blur(12px) !important;
-	-webkit-backdrop-filter: blur(12px) !important;
-	border: 1px solid rgba(136, 187, 255, 0.2) !important;
-	border-radius: 12px !important;
-	box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
-	transition: all 0.3s ease;
+.chat-user .rounded-3xl {
+	background-color: var(--astral-bubble) !important;
+	backdrop-filter: blur(12px);
+	box-shadow: inset 0 0 0 1px var(--astral-line);
 }
-input:focus, textarea:focus, #chat-input-container:focus-within {
-	border-color: #88bbff !important;
-	background-color: rgba(16, 18, 35, 0.7) !important;
-	box-shadow: 0 0 20px rgba(136, 187, 255, 0.2), inset 0 0 10px rgba(0, 0, 0, 0.5) !important;
+#sidebar {
+	background-color: var(--astral-sidebar) !important;
+	backdrop-filter: blur(20px) saturate(1.2);
+	border-inline-end: 1px solid var(--astral-line);
 }
-
-/* Starship Buttons */
-button.bg-blue-500, button.bg-blue-600, .bg-black {
-	background: linear-gradient(135deg, #4488ff, #8855ff) !important;
-	border: none !important;
-	color: #ffffff !important;
-	font-weight: 600 !important;
-	border-radius: 20px !important;
-	box-shadow: 0 4px 15px rgba(68, 136, 255, 0.3);
-	transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
+#sidebar-chat-item.selected {
+	box-shadow: inset 0 0 0 1px var(--astral-line);
 }
-button.bg-blue-500:hover, button.bg-blue-600:hover, .bg-black:hover {
-	transform: translateY(-3px) scale(1.02);
-	box-shadow: 0 8px 25px rgba(136, 85, 255, 0.5) !important;
+#send-message-button:enabled {
+	box-shadow: 0 0 14px var(--astral-glow);
 }
-
-/* Liquid Scrollbar */
-::-webkit-scrollbar-thumb {
-	background: linear-gradient(to bottom, #4488ff, #8855ff) !important;
-	border-radius: 10px;
+.markdown-prose :is(h1, h2, h3, h4) {
+	color: var(--astral-star);
+	text-shadow: 0 0 16px var(--astral-glow);
 }
-::-webkit-scrollbar-track {
-	background: rgba(5, 5, 10, 0.5) !important;
+::selection {
+	background-color: var(--astral-glow);
+}
+html {
+	scrollbar-color: var(--astral-line) transparent;
 }

@@ -1,87 +1,72 @@
-.app * {
-    color: #e0def4 !important;
-    stroke: #907aa9 !important;
+/* Rosé Pine: the Rosé Pine palette (main in dark modes, Dawn in light) laid onto Open WebUI's gray scale, with its accents on replies, the input and selection. Fixed colors; pairs with the Rosé Pine theme or any plain one. */
+body {
+	/* Dawn. Set on body so it overrides the theme palette for everything inside, menus included. */
+	--color-white: #faf4ed;
+	--color-gray-50: #fffaf3;
+	--color-gray-100: #f2e9e1;
+	--color-gray-200: #dfdad9;
+	--color-gray-300: #cecacd;
+	--color-gray-400: #9893a5;
+	--color-gray-500: #9893a5;
+	--color-gray-600: #797593;
+	--color-gray-700: #575279;
+	--color-gray-800: #575279;
+	--color-gray-850: #575279;
+	--color-gray-900: #575279;
+	--color-gray-950: #464261;
+	--rp-text: #575279; --rp-subtle: #797593; --rp-muted: #9893a5; --rp-hl: #dfdad9; --rp-overlay: #f2e9e1;
+	--rp-love: #b4637a; --rp-gold: #ea9d34; --rp-rose: #d7827e; --rp-bold: #b4637a;
+	--rp-pine: #286983; --rp-foam: #56949f; --rp-iris: #907aa9;
+}
+html.dark body {
+	--color-white: #ffffff;
+	--color-gray-50: #e0def4;
+	--color-gray-100: #e0def4;
+	--color-gray-200: #e0def4;
+	--color-gray-300: #908caa;
+	--color-gray-400: #908caa;
+	--color-gray-500: #6e6a86;
+	--color-gray-600: #6e6a86;
+	--color-gray-700: #524f67;
+	--color-gray-800: #403d52;
+	--color-gray-850: #26233a;
+	--color-gray-900: #191724;
+	--color-gray-950: #1f1d2e;
+	--rp-text: #e0def4; --rp-subtle: #908caa; --rp-muted: #6e6a86; --rp-hl: #403d52; --rp-overlay: #26233a;
+	--rp-love: #eb6f92; --rp-gold: #f6c177; --rp-rose: #ebbcba; --rp-bold: #ebbcba;
+	--rp-pine: #31748f; --rp-foam: #9ccfd8; --rp-iris: #c4a7e7;
 }
 
-.app > * {
-    background-color: #1f1d2e !important;
+.markdown-prose {
+	--tw-prose-body: var(--rp-text);
+	--tw-prose-headings: var(--rp-iris);
+	--tw-prose-bold: var(--rp-bold);
+	--tw-prose-links: var(--rp-foam);
+	--tw-prose-code: var(--rp-bold);
+	--tw-prose-quotes: var(--rp-subtle);
+	--tw-prose-quote-borders: var(--rp-hl);
+	--tw-prose-bullets: var(--rp-muted);
+	--tw-prose-counters: var(--rp-subtle);
+	--tw-prose-hr: var(--rp-hl);
+	--tw-prose-th-borders: var(--rp-hl);
+	--tw-prose-td-borders: var(--rp-hl);
 }
-
-nav {
-    background-color: #191724;
+#message-input-container:focus-within {
+	border-color: var(--rp-iris);
 }
-
-.py-2\.5.my-auto.flex.flex-col.justify-between.h-screen {
-    background: #191724;
+.chat-user .rounded-3xl {
+	background-color: var(--rp-overlay) !important;
 }
-
-.bg-white.dark\:bg-gray-800 {
-    background: #26233a;
+#sidebar-chat-item.selected {
+	background-color: var(--rp-hl);
 }
-
-.w-4.h-4 {
-    fill: #c4a7e7;
+#send-message-button:enabled {
+	background-color: var(--rp-pine);
+	color: #fffaf3;
 }
-
-
-#chat-input {
-    background: #393552;
-    margin: 0.3rem;
-    padding: 0.5rem;
+::selection {
+	background-color: var(--rp-hl);
 }
-
-#chat-container .bg-linear-to-t {
-    background: #26233a !important;
-    padding-top: 0.6rem;
-}
-
-#send-message-button.disabled {
-    background-color: #6e6a86;
-    transition: background 0.2s ease-out linear;
-}
-
-#send-message-button.w-7.h-7.self-center {
-    background-color: #286983;
-    transition: background 0.2s ease-out linear;
-}
-
-#send-message-button.w-7.h-7.self-center > * {
-    fill: #9ccfd8 !important;
-    transition: fill 0.2s ease-out linear;
-}
-
-.w-full.flex.justify-between.rounded-md.px-3.py-2.hover\:bg-gray-900.bg-gray-900.transition.whitespace-nowrap.text-ellipsis {
-    background-color: #56526e;
-    font-weight: bold;
-}
-
-.hover\:bg-gray-900:hover {
-    --tw-bg-opacity: 1;
-    background-color: rgb(57 53 82 / var(--tw-bg-opacity));
-}
-
-.text-xs.text-gray-700.uppercase.bg-gray-50.dark\:bg-gray-700.dark\:text-gray-400 {
-    background-color: #403d52;
-}
-
-.scrollbar-hidden.relative.overflow-x-auto.whitespace-nowrap.svelte-3g4avz {
-    border-radius: 16px 16px 0 0;
-}
-
-.base.enter.svelte-ug60r4 {
-    background-color: #393552;
-}
-
-.message.svelte-1nauejd {
-    color: #e0def4 !important;
-}
-
-.svelte-1ee93ns {
-    --primary: #eb6f92 !important;
-    --secondary: #e0def4 !important;
-}
-
-.svelte-11kvm4p {
-    --primary: #9ccfd8 !important;
-    --secondary: #1f1d2e !important;
+html {
+	scrollbar-color: var(--rp-muted) transparent;
 }

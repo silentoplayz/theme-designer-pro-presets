@@ -1,57 +1,47 @@
-/* --- SOLAR FLARE LUXURY UI --- */
-.app * {
-	border-color: rgba(255, 180, 50, 0.15) !important;
+/* Solar Flare: gold headings with a faint corona, amber hairlines and a sunflare send button, in fixed golds that read on light and dark. Pairs with the Solar Flare theme. */
+:root {
+	--sf-gold: #a15c00;
+	--sf-flare: linear-gradient(135deg, #f2b600, #e65c00);
+	--sf-corona: transparent;
+	--sf-line: rgb(180 100 0 / 0.3);
+	--sf-wash: rgb(230 140 0 / 0.12);
+}
+html.dark {
+	--sf-gold: #ffcc33;
+	--sf-flare: linear-gradient(135deg, #ffcc00, #ff6600);
+	--sf-corona: rgb(255 204 0 / 0.3);
+	--sf-line: rgb(255 180 50 / 0.25);
+	--sf-wash: rgb(255 170 0 / 0.1);
 }
 
-/* Golden Prose */
-.markdown-prose h1, .markdown-prose h2, .markdown-prose h3 {
-	color: #ffcc00 !important;
-	text-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
-	font-weight: 800 !important;
+.markdown-prose {
+	--tw-prose-headings: var(--sf-gold);
+	--tw-prose-links: var(--sf-gold);
+	--tw-prose-code: var(--sf-gold);
 }
-.markdown-prose code {
-	color: #ffaa00 !important;
-	background-color: rgba(255, 170, 0, 0.1) !important;
-	border: 1px solid rgba(255, 170, 0, 0.3);
+.markdown-prose :is(h1, h2, h3) {
+	text-shadow: 0 0 12px var(--sf-corona);
 }
-
-/* Obsidian Frosted Inputs */
-input, textarea, #chat-input-container, .bg-gray-850 {
-	background-color: rgba(18, 9, 2, 0.6) !important;
-	backdrop-filter: blur(10px) !important;
-	-webkit-backdrop-filter: blur(10px) !important;
-	border: 1px solid rgba(255, 180, 50, 0.2) !important;
-	border-radius: 12px !important;
-	transition: all 0.3s ease;
+#message-input-container {
+	border-color: var(--sf-line);
 }
-input:focus, textarea:focus, #chat-input-container:focus-within {
-	border-color: #ffcc00 !important;
-	box-shadow: 0 0 15px rgba(255, 204, 0, 0.15) !important;
+#message-input-container:focus-within {
+	border-color: var(--sf-gold);
+	box-shadow: 0 0 18px var(--sf-wash);
 }
-
-/* Sunflare Gradient Buttons */
-button.bg-blue-500, button.bg-blue-600, .bg-black {
-	background: linear-gradient(135deg, #ffcc00, #ff6600) !important;
-	border: none !important;
-	color: #26150a !important;
-	font-weight: 700 !important;
-	letter-spacing: 0.5px;
-	box-shadow: 0 4px 15px rgba(255, 102, 0, 0.3);
-	border-radius: 24px !important;
-	transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+.chat-user .rounded-3xl {
+	box-shadow: inset 0 0 0 1px var(--sf-line);
 }
-button.bg-blue-500:hover, button.bg-blue-600:hover {
-	transform: translateY(-2px) scale(1.03);
-	box-shadow: 0 8px 25px rgba(255, 102, 0, 0.5) !important;
+#sidebar-chat-item.selected {
+	background-color: var(--sf-wash);
 }
-
-/* Molten Scrollbar */
-::-webkit-scrollbar-thumb {
-	background: #ffaa00 !important;
-	border: 3px solid transparent;
-	background-clip: content-box;
-	border-radius: 10px;
+#send-message-button:enabled {
+	background-image: var(--sf-flare);
+	color: #26150a;
 }
-::-webkit-scrollbar-track {
-	background: transparent !important;
+::selection {
+	background-color: var(--sf-line);
+}
+html {
+	scrollbar-color: var(--sf-line) transparent;
 }

@@ -1,36 +1,37 @@
-/* Animated gradient — Aurora Borealis */
+/* Gradient Background: a slow diagonal gradient drawn from the palette behind a see-through chat, with a frosted sidebar. For themes without Canvas FX or a Gradient tab background. */
+:root {
+	--gb-edge: var(--color-gray-50);
+	--gb-mid: var(--color-gray-200);
+	--gb-glass: color-mix(in oklab, var(--color-gray-50) 72%, transparent);
+}
+html.dark {
+	--gb-edge: var(--color-gray-950);
+	--gb-mid: var(--color-gray-800);
+	--gb-glass: color-mix(in oklab, var(--color-gray-950) 72%, transparent);
+}
+
 body {
-  background-image: linear-gradient(135deg, #0a0a2e, #1a3a5c, #0d7377, #1a3a5c, #0a0a2e) !important;
-  background-attachment: fixed !important;
-  background-size: 400% 400% !important;
-  animation: auroraShift 16s ease infinite !important;
+	background-image: linear-gradient(135deg, var(--gb-edge), var(--gb-mid), var(--gb-edge), var(--gb-mid), var(--gb-edge));
+	background-size: 400% 400%;
+	background-attachment: fixed;
+	animation: gb-drift 60s ease-in-out infinite;
 }
-@keyframes auroraShift {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+@keyframes gb-drift {
+	0%, 100% { background-position: 0% 50%; }
+	50% { background-position: 100% 50%; }
 }
-
-/* Make layout containers transparent (scoped to .app / #app-container —
-   there is no #app element in Open WebUI; portaled menus stay opaque) */
-.app, .app > div, .app > div > div, main,
-.app :where([class*="bg-gray-9"]):not(button):not(a):not(input):not(select) {
-  background-color: transparent !important;
-  background-image: none !important;
+@media (prefers-reduced-motion: reduce) {
+	body { animation: none; }
 }
 
-/* Blend chat/folder background images with gradient */
-#chat-container .bg-linear-to-t {
-  background-image: linear-gradient(
-    to top, rgba(10, 10, 46, 0.7), rgba(13, 115, 119, 0.35)
-  ) !important;
+/* Open WebUI's full-screen shell is the one opaque layer over body. */
+.app > div {
+	background-color: transparent;
 }
-
-/* Sidebar & input readability */
+#navbar-bg-gradient-to-b {
+	background-image: linear-gradient(to bottom, var(--gb-glass), transparent);
+}
 #sidebar {
-  background-color: rgba(10, 10, 46, 0.7) !important;
-  backdrop-filter: blur(12px) !important;
+	background-color: var(--gb-glass) !important;
+	backdrop-filter: blur(16px);
 }
-textarea {
-  background-color: rgba(10, 10, 46, 0.5) !important;
-  backdrop-filter: blur(8px) !important;

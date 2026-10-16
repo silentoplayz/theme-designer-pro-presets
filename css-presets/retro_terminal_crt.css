@@ -1,1 +1,55 @@
-body { background: #0a0a0a; color: #a8ffa8; font-family: 'VT323', 'Courier New', monospace; font-size: 1.05rem; text-shadow: 0 0 3px #00ff00, 0 0 6px rgba(0, 255, 0, 0.7); } body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999; background: linear-gradient(rgba(0, 0, 0, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.15) 1px, transparent 1px); background-size: 100% 3px, 100% 100%; animation: scan 7s linear infinite; } @keyframes scan { 0% { background-position: 0 0; } 100% { background-position: 0 100%; } } [class*="bg-gray-800"], [class*="bg-gray-850"], [class*="bg-gray-900"] { background: rgba(8, 24, 8, 0.85) !important; border: 1px solid #00ff00; box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.25), 0 0 10px rgba(0, 255, 0, 0.4); border-radius: 0; } input, textarea, #chat-input-container, .markdown-prose { background: #031a03 !important; border: 1px solid #00ff00; color: #a8ffa8; caret-color: #00ff00; box-shadow: inset 0 0 8px rgba(0, 255, 0, 0.35); } button.bg-blue-500, button.bg-blue-600 { background: #00ff00 !important; color: #0a0a0a; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border: none; border-radius: 0; box-shadow: 0 0 6px #00ff00; } ::-webkit-scrollbar-thumb { background: #00ff00; border-radius: 0; } ::-webkit-scrollbar-track { background: #020f02; }
+/* Retro Terminal CRT: still scanlines over the app, a phosphor glow on monospace replies and a lit input, tinted by the palette. Pairs with Retro Terminal, Matrix Rain or any green or amber theme. */
+:root {
+	--crt-phosphor: var(--color-gray-800);
+	--crt-bright: var(--color-gray-900);
+	--crt-glow: transparent;
+	--crt-line: color-mix(in oklab, var(--color-gray-600) 35%, transparent);
+	--crt-wash: color-mix(in oklab, var(--color-gray-500) 14%, transparent);
+	--crt-scan: rgb(0 0 0 / 0.035);
+}
+html.dark {
+	--crt-phosphor: var(--color-gray-200);
+	--crt-bright: var(--color-gray-50);
+	--crt-glow: color-mix(in oklab, var(--color-gray-300) 45%, transparent);
+	--crt-line: color-mix(in oklab, var(--color-gray-400) 35%, transparent);
+	--crt-wash: color-mix(in oklab, var(--color-gray-400) 12%, transparent);
+	--crt-scan: rgb(0 0 0 / 0.16);
+}
+
+/* Scanlines sit over the sidebar and chat, under menus and dialogs, and never move. */
+.app::after {
+	content: "";
+	position: fixed;
+	inset: 0;
+	z-index: 40;
+	pointer-events: none;
+	background-image: repeating-linear-gradient(to bottom, var(--crt-scan) 0 1px, transparent 1px 3px);
+}
+.markdown-prose {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+	text-shadow: 0 0 6px var(--crt-glow);
+	--tw-prose-body: var(--crt-phosphor);
+	--tw-prose-headings: var(--crt-bright);
+	--tw-prose-bold: var(--crt-bright);
+	--tw-prose-links: var(--crt-bright);
+}
+#message-input-container {
+	border-color: var(--crt-line);
+	caret-color: var(--crt-bright);
+}
+#message-input-container:focus-within {
+	box-shadow: 0 0 16px var(--crt-glow), inset 0 0 12px var(--crt-wash);
+}
+.chat-user .rounded-3xl {
+	box-shadow: inset 0 0 0 1px var(--crt-line);
+}
+#sidebar-chat-item.selected {
+	background-color: var(--crt-wash);
+	box-shadow: inset 2px 0 0 var(--crt-bright);
+}
+::selection {
+	background-color: var(--crt-line);
+}
+html {
+	scrollbar-color: var(--crt-line) transparent;
+}
