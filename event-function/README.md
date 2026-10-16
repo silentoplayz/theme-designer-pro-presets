@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.14.2-blue)
+![Version](https://img.shields.io/badge/version-1.14.3-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -508,6 +508,12 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
 
 ---
+
+## 📝 What's New in 1.14.3
+
+A fix release. Nothing to change on your side: paste it in and save.
+
+**A Canvas FX animation you can't see no longer fills your memory.** Firefox doesn't pause an animation that runs in a worker when its tab is hidden or its window is covered by another app, so a Canvas FX script kept drawing frames nobody saw. When the page came back, Firefox handed the whole backlog to the graphics card at once: the page froze, and the graphics card's memory, then your RAM, filled until the system started closing apps. Canvas FX now holds every script's frames whenever the page stops getting frames, and resumes the animation where it left off when you come back. Every script gets this without changes, and a page on screen runs as before.
 
 ## 📝 What's New in 1.14.2
 
