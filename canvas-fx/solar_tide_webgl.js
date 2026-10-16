@@ -195,9 +195,10 @@ function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
 
 // Sun and moon rise at the outer edge of the wider margin and set beside the chat column
 function placeBodies(hour) {
-	const left = colX() - colHalf(), right = w - colX() - colHalf();
+	const lo = column ? column.left : 0, hi = column ? column.right : w;
+	const left = colX() - colHalf() - lo, right = hi - colX() - colHalf();
 	const onLeft = left >= right, room = Math.max(left, right, 120);
-	const mid = onLeft ? room * 0.5 : w - room * 0.5, half = room * 0.38, dir = onLeft ? 1 : -1;
+	const mid = onLeft ? lo + room * 0.5 : hi - room * 0.5, half = room * 0.38, dir = onLeft ? 1 : -1;
 	const hy = h * HORIZON, arc = (h - hy) * 0.7;
 	const sf = (hour - 6) / 12, sunH = Math.sin(sf * Math.PI);
 	const mh = hour < 6 ? hour + 24 : hour, mf = (mh - 18) / 12, moonH = Math.sin(Math.min(Math.max(mf, 0), 1) * Math.PI);

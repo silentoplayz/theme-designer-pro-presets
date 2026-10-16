@@ -115,12 +115,13 @@ function calmBuild() {
 	}
 }
 
-// A spot beside the chat column, on the side with room, kept off the screen's very edge
+// A spot beside the chat column, on the side with room, inside the chat area so the sidebar can't cover it, kept off its very edge
 function besideX() {
-	const left = Math.max(0, colX() - colHalf()), right = Math.max(0, w - colX() - colHalf());
-	if (left + right < 60) return Math.random() < 0.5 ? w * (0.04 + Math.random() * 0.17) : w - w * (0.04 + Math.random() * 0.17);
+	const lo = column ? column.left : 0, hi = column ? column.right : w;
+	const left = Math.max(0, colX() - colHalf() - lo), right = Math.max(0, hi - colX() - colHalf());
+	if (left + right < 60) return Math.random() < 0.5 ? lo + w * (0.04 + Math.random() * 0.17) : hi - w * (0.04 + Math.random() * 0.17);
 	const r = Math.random() * (left + right);
-	return Math.max(w * 0.03, Math.min(w * 0.97, r < left ? r * 0.85 : w - (r - left) * 0.85));
+	return Math.max(lo + w * 0.03, Math.min(hi - w * 0.03, r < left ? lo + r * 0.85 : hi - (r - left) * 0.85));
 }
 
 function calm(x) {

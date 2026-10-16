@@ -56,12 +56,13 @@ function band(x) {
 	return 1 - t * t * (3 - 2 * t);
 }
 function calm(x) { return 1 - CENTER_CALM * band(x); }
-// A spot within a share f of the screen beside the chat column, on the side with room
+// A spot within a share f of the screen beside the chat column, on the side with room, inside the chat area so the sidebar can't cover it
 function edge(f) {
-	const left = Math.max(0, colX() - colHalf()), right = Math.max(0, w - colX() - colHalf()), m = w * f;
-	if (left + right < 60) return Math.random() < 0.5 ? Math.random() * m : w - Math.random() * m;
+	const lo = column ? column.left : 0, hi = column ? column.right : w;
+	const left = Math.max(0, colX() - colHalf() - lo), right = Math.max(0, hi - colX() - colHalf()), m = w * f;
+	if (left + right < 60) return Math.random() < 0.5 ? lo + Math.random() * m : hi - Math.random() * m;
 	const r = Math.random() * (left + right);
-	return r < left ? (r / left) * Math.min(left, m) : w - ((r - left) / right) * Math.min(right, m);
+	return r < left ? lo + (r / left) * Math.min(left, m) : hi - ((r - left) / right) * Math.min(right, m);
 }
 
 function sprite(size, col, a0, a1) {
@@ -197,13 +198,13 @@ function addLine(x0, y0, ang, len, depth) {
 
 // Strikes land outside the calm band, nudged outward when called over the column
 function strikeX(x) {
-	const mid = colX(), reach = colHalf() * 0.95;
+	const mid = colX(), reach = colHalf() * 0.95, lo = (column ? column.left : 0) + w * 0.04, hi = (column ? column.right : w) - w * 0.04;
 	if (Math.abs(x - mid) < reach) {
 		// Toward the nearer side, or the other one when the nearer has no room
 		const out = x < mid ? mid - reach : mid + reach;
-		x = out < w * 0.04 ? mid + reach : out > w * 0.96 ? mid - reach : out;
+		x = out < lo ? mid + reach : out > hi ? mid - reach : out;
 	}
-	return Math.max(w * 0.04, Math.min(w * 0.96, x));
+	return Math.max(lo, Math.min(hi, x));
 }
 
 function strike(x) {

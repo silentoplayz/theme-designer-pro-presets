@@ -201,12 +201,13 @@ function size() {
 function colX() { return column ? column.x : w * 0.5; }
 function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
 
-// The window fills the wider margin beside the chat column, cropped by the screen's edge when the margin is narrow
+// The window fills the wider margin beside the chat column, measured inside the chat area so the sidebar can't cover it, cropped at the area's edge when the margin is narrow
 function placeWindow(dt) {
-	const left = colX() - colHalf(), right = w - colX() - colHalf();
+	const lo = column ? column.left : 0, hi = column ? column.right : w;
+	const left = colX() - colHalf() - lo, right = hi - colX() - colHalf();
 	const room = Math.max(left, right);
 	const r = Math.min(h * WINDOW_SIZE, Math.max(room * 0.85, h * 0.26));
-	const x = left >= right ? room - r : w - room + r;
+	const x = left >= right ? lo + room - r : hi - room + r;
 	const k = win.x < 0 ? 1 : Math.min(1, dt * 1.5);
 	win.x += (x - win.x) * k;
 	win.r += (r - win.r) * k;

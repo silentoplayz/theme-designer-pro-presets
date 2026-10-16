@@ -196,8 +196,9 @@ function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
 
 // The sun sits in the middle of the wider margin beside the chat column
 function sunTargetX() {
-	const left = colX() - colHalf(), right = w - colX() - colHalf();
-	return left >= right ? Math.max(left * 0.5, h * 0.08) : w - Math.max(right * 0.5, h * 0.08);
+	const lo = column ? column.left : 0, hi = column ? column.right : w;
+	const left = colX() - colHalf() - lo, right = hi - colX() - colHalf();
+	return left >= right ? lo + Math.max(left * 0.5, h * 0.08) : hi - Math.max(right * 0.5, h * 0.08);
 }
 
 function frame(now) {

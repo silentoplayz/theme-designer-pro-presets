@@ -98,17 +98,19 @@ function burst(cx, cy, r, p) {
 	}
 }
 
-// A fresh colony beside the chat column, on the side with room
+// A fresh colony beside the chat column, on the side with room, inside the chat area so the sidebar can't cover it
 function outerBurst() {
+	const lo = column ? column.left : 0, hi = column ? column.right : w;
+	const c0 = Math.max(0, Math.ceil((lo - ox) / CELL_SIZE)), c1 = Math.min(cols, Math.floor((hi - ox) / CELL_SIZE) + 1);
 	const lc = Math.floor((colX() - colHalf() - ox) / CELL_SIZE), rc = Math.ceil((colX() + colHalf() - ox) / CELL_SIZE);
-	const left = Math.max(0, lc - 2), right = Math.max(0, cols - 3 - rc), y = Math.floor(Math.random() * rows);
+	const left = Math.max(0, lc - c0 - 2), right = Math.max(0, c1 - 3 - rc), y = Math.floor(Math.random() * rows);
 	if (left + right < 4) {
-		const e = Math.floor(Math.random() * cols * 0.28);
-		burst(Math.random() < 0.5 ? e + 2 : cols - 3 - e, y, 6, 0.4);
+		const e = Math.floor(Math.random() * (c1 - c0) * 0.28);
+		burst(Math.random() < 0.5 ? c0 + e + 2 : c1 - 3 - e, y, 6, 0.4);
 		return;
 	}
 	const r = Math.floor(Math.random() * (left + right));
-	burst(r < left ? 2 + r : cols - 3 - (r - left), y, 6, 0.4);
+	burst(r < left ? c0 + 2 + r : c1 - 3 - (r - left), y, 6, 0.4);
 }
 
 // One generation: birth on 3, survival on 2 or 3; the column thins a little each step
