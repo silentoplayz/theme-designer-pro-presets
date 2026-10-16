@@ -1,282 +1,251 @@
 /**
  * Title: Voronoi Prism (WebGL)
- * Description: A crystalline mosaic of animated Voronoi cells with glowing
- *   prismatic edges. Each cell slowly drifts and morphs as its seed point
- *   orbits in Lissajous curves, creating a living stained-glass window effect.
- *   Cell interiors have faceted gem gradients that shift hue over time. Edges
- *   glow with bright neon light — white-blue cores with colored bloom. A second
- *   larger-scale Voronoi layer adds depth at 40% opacity. Mouse proximity
- *   acts as a flashlight on crystal, pulsing nearby cells brighter and flaring
- *   their edges.
- *
- *   Showcases: WebGL shaders, Voronoi distance fields, mousemove
+ * Description: Two layers of drifting stained-glass Voronoi cells tinted with your theme's accents, fading behind the chat, with edges that flare under the cursor.
  */
 
-/* ────────── CONFIGURABLE ────────── */
-var CELL_COUNT       = 6.0;     // grid size (NxN seed points per unit)
-var ANIMATION_SPEED  = 0.25;    // seed orbit speed
-var EDGE_WIDTH       = 1.8;     // edge thickness multiplier (1.0 = thin, 3.0 = thick)
-var EDGE_BRIGHTNESS  = 2.5;     // edge glow intensity
-var CELL_SATURATION  = 0.65;    // cell interior color saturation (0-1)
-var MOUSE_RADIUS     = 0.35;    // mouse flashlight influence radius
-/* ──────────────────────────────────── */
+/* ────────── CONFIGURABLE VARIABLES ────────── */
+const CELLS         = 5;     // cells across the screen's height; higher is smaller glass (2-12)
+const MOTION        = 1;     // how fast the seeds orbit; 0 holds the glass still (0-3)
+const REDUCED_SPEED = 0.15;  // share of the motion kept when the viewer asks to reduce motion (0-1)
+const CELL_FILL     = 0.6;   // how strongly the cell glass is tinted (0-1)
+const EDGE_WIDTH    = 1.2;   // thickness of the leading between cells (0.4-3)
+const EDGE_GLOW     = 0.8;   // brightness of the leading and its glow (0-1.5)
+const DEPTH_LAYER   = 0.45;  // strength of the larger, slower layer behind (0-1)
+const HUE_DRIFT     = 1;     // how quickly each cell's tint wanders between the accents (0-3)
+const CENTER_CALM   = 0.8;   // how much the glass fades behind the chat column (0-1)
+const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const FLASHLIGHT    = 1;     // how much the cursor brightens cells and flares edges (0-2)
+const FLASH_RADIUS  = 260;   // reach of the cursor's light, in px (80-600)
+const RENDER_SCALE  = 0.75;  // resolution of the glass relative to the screen (0.4-1)
+const MAX_FPS       = 30;    // frame cap; the glass moves slowly (15-60)
+const FOLLOW_THEME  = true;  // take the colors from the theme's palette
+const COLOR_A       = '#5fb8e8';  // first glass tint when not following the theme
+const COLOR_B       = '#b06ce0';  // second glass tint
+const COLOR_C       = '#e8a24f';  // third glass tint
+const EDGE_COLOR    = '#8c95b0';  // leading color
+/* ──────────────────────────────────────────── */
 
-var canvas, gl, program;
-var uTime, uRes, uMouse, uCfg;
-var startTime = 0;
-var mouseNX = 0.5, mouseNY = 0.5;
-var w = 0, h = 0;
+const VERT = 'attribute vec2 a_pos; void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }';
 
-setInterval(function() { self.postMessage({ type: 'heartbeat' }); }, 1000);
-
-var VERT = 'attribute vec2 a_pos;void main(){gl_Position=vec4(a_pos,0,1);}';
-
-var FRAG = [
-'precision highp float;',
-'uniform float u_time;',
-'uniform vec2 u_res;',
-'uniform vec2 u_mouse;',
-'uniform vec4 u_cfg;', // edgeWidth, edgeBright, cellSat, mouseRadius
-'',
-'// ── Hash functions ──',
-'vec2 hash2(vec2 p){',
-'  p=vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3)));',
-'  return fract(sin(p)*43758.5453);',
-'}',
-'',
-'float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}',
-'float hash3(vec3 p){p=fract(p*.3183099+.1);p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}',
-'',
-'// ── OKLCH-inspired perceptual hue-to-RGB ──',
-'// Attempt perceptually uniform colors: convert hue + saturation to RGB',
-'// via a curated palette that avoids the harsh neon of raw HSV',
-'vec3 oklchColor(float hue, float sat, float light){',
-'  // Six curated anchor colors for smooth perceptual interpolation',
-'  vec3 c0=vec3(0.90,0.25,0.30); // red-coral',
-'  vec3 c1=vec3(0.95,0.60,0.20); // amber',
-'  vec3 c2=vec3(0.45,0.85,0.30); // green',
-'  vec3 c3=vec3(0.20,0.75,0.85); // teal',
-'  vec3 c4=vec3(0.35,0.40,0.95); // blue-violet',
-'  vec3 c5=vec3(0.80,0.30,0.75); // magenta',
-'  float h=fract(hue)*6.0;',
-'  vec3 col;',
-'  if(h<1.0) col=mix(c0,c1,h);',
-'  else if(h<2.0) col=mix(c1,c2,h-1.0);',
-'  else if(h<3.0) col=mix(c2,c3,h-2.0);',
-'  else if(h<4.0) col=mix(c3,c4,h-3.0);',
-'  else if(h<5.0) col=mix(c4,c5,h-4.0);',
-'  else col=mix(c5,c0,h-5.0);',
-'  // Apply saturation (desaturate toward luminance)',
-'  float lum=dot(col,vec3(0.2126,0.7152,0.0722));',
-'  col=mix(vec3(lum),col,sat);',
-'  return col*light;',
-'}',
-'',
-'// ── Voronoi with animated seeds ──',
-'// Returns: x = dist to nearest, y = dist to 2nd nearest,',
-'//          z = cell hash, w = dist to nearest seed from pixel',
-'vec4 voronoi(vec2 uv, float scale, float t, float speed){',
-'  vec2 p=uv*scale;',
-'  vec2 ip=floor(p);',
-'  vec2 fp=fract(p);',
-'  float d1=10.0, d2=10.0;',
-'  float cellId=0.0;',
-'  vec2 nearestSeed=vec2(0.0);',
-'  for(int j=-1;j<=1;j++){',
-'    for(int i=-1;i<=1;i++){',
-'      vec2 nb=vec2(float(i),float(j));',
-'      vec2 o=hash2(ip+nb);',
-'      // Lissajous orbit: each seed has unique freq from its hash',
-'      float hx=hash(ip+nb+0.5);',
-'      float hy=hash(ip+nb+1.7);',
-'      vec2 anim=vec2(',
-'        sin(t*speed*(0.8+hx*0.6)+hx*6.2831)*0.35,',
-'        cos(t*speed*(0.6+hy*0.8)+hy*6.2831)*0.35',
-'      );',
-'      vec2 seedPos=nb+o+anim-fp;',
-'      float d=dot(seedPos,seedPos);',
-'      if(d<d1){',
-'        d2=d1; d1=d;',
-'        cellId=hash(ip+nb);',
-'        nearestSeed=seedPos;',
-'      } else if(d<d2){',
-'        d2=d;',
-'      }',
-'    }',
-'  }',
-'  return vec4(sqrt(d1),sqrt(d2),cellId,length(nearestSeed));',
-'}',
-'',
-'void main(){',
-'  vec2 uv=(2.0*gl_FragCoord.xy-u_res)/min(u_res.x,u_res.y);',
-'  float t=u_time;',
-'  float edgeW=u_cfg.x;',
-'  float edgeB=u_cfg.y;',
-'  float cellSat=u_cfg.z;',
-'  float mRad=u_cfg.w;',
-'',
-'  // ── Mouse position in UV space ──',
-'  vec2 mp=(2.0*u_mouse*u_res-u_res)/min(u_res.x,u_res.y);',
-'  float mDist=length(uv-mp);',
-'  float mInfluence=smoothstep(mRad,0.0,mDist);',
-'',
-'  // ── Primary Voronoi layer ──',
-'  vec4 v1=voronoi(uv,' + CELL_COUNT.toFixed(1) + ',t,1.0);',
-'  float dist1=v1.x;',
-'  float dist2=v1.y;',
-'  float cId1=v1.z;',
-'  float seedDist1=v1.w;',
-'',
-'  // ── Edge detection ──',
-'  // Edge factor: thin where d2-d1 is small',
-'  float edgeDelta=dist2-dist1;',
-'  float edgeBase=0.02*edgeW;',
-'  float edgeFade=0.06*edgeW;',
-'  // Mouse flares edges wider',
-'  float edgeFlare=1.0+mInfluence*2.5;',
-'  float edge=1.0-smoothstep(edgeBase*edgeFlare,edgeFade*edgeFlare,edgeDelta);',
-'',
-'  // ── Cell interior color ──',
-'  // Hue from cell hash + slow time rotation',
-'  float hue=cId1+t*0.04;',
-'  float cellLight=0.35+0.15*sin(cId1*17.3+t*0.3);',
-'  vec3 cellCol=oklchColor(hue,cellSat,cellLight);',
-'',
-'  // Faceted gem gradient: brighter near center, darker near edge',
-'  float facet=smoothstep(0.7,0.0,seedDist1)*0.6+0.4;',
-'  cellCol*=facet;',
-'',
-'  // Subtle inner glow (soft light reflecting inward from edges)',
-'  float innerGlow=smoothstep(0.35,0.08,edgeDelta)*0.2;',
-'  vec3 innerGlowCol=oklchColor(hue+0.15,0.8,0.7);',
-'  cellCol+=innerGlowCol*innerGlow;',
-'',
-'  // ── Mouse flashlight on cell interiors ──',
-'  cellCol*=1.0+mInfluence*1.8;',
-'',
-'  // ── Edge glow color ──',
-'  // White-blue core with colored bloom falloff',
-'  vec3 edgeCoreCol=vec3(0.85,0.92,1.0); // white-blue',
-'  vec3 edgeBloomCol=oklchColor(hue+0.3,0.9,1.0);',
-'  float coreVsBloom=smoothstep(0.0,edgeFade*0.5,edgeDelta);',
-'  vec3 edgeCol=mix(edgeCoreCol,edgeBloomCol,coreVsBloom);',
-'  edgeCol*=edgeB*(1.0+mInfluence*2.0);',
-'',
-'  // ── Compose primary layer ──',
-'  vec3 layer1=mix(cellCol,edgeCol,edge);',
-'',
-'  // ── Secondary Voronoi layer (larger scale, for depth) ──',
-'  vec4 v2=voronoi(uv,' + (CELL_COUNT * 0.4).toFixed(1) + ',t*0.7,0.6);',
-'  float edgeDelta2=v2.y-v2.x;',
-'  float edge2=1.0-smoothstep(0.03*edgeW,0.09*edgeW,edgeDelta2);',
-'  float hue2=v2.z+t*0.025;',
-'  vec3 cell2=oklchColor(hue2,cellSat*0.7,0.25);',
-'  float facet2=smoothstep(0.8,0.0,v2.w)*0.5+0.5;',
-'  cell2*=facet2;',
-'  vec3 edgeCol2=vec3(0.6,0.75,0.95)*edgeB*0.5;',
-'  vec3 layer2=mix(cell2,edgeCol2,edge2);',
-'',
-'  // ── Blend layers ──',
-'  vec3 col=layer1+layer2*0.4;',
-'',
-'  // ── Dark background base ──',
-'  // The cell colors already sit on near-black; ensure minimum darkness',
-'  col=max(col,vec3(0.01,0.012,0.02));',
-'',
-'  // ── Vignette ──',
-'  vec2 vUV=gl_FragCoord.xy/u_res;',
-'  float vig=1.0-dot(vUV-0.5,vUV-0.5)*1.4;',
-'  col*=max(vig,0.0);',
-'',
-'  // ── Film grain ──',
-'  col+=hash3(vec3(gl_FragCoord.xy,t*100.0))*0.02-0.01;',
-'',
-'  gl_FragColor=vec4(col,1.0);',
-'}',
+const FRAG = [
+	'#ifdef GL_FRAGMENT_PRECISION_HIGH',
+	'precision highp float;',
+	'#else',
+	'precision mediump float;',
+	'#endif',
+	'uniform vec2 u_res;',
+	'uniform float u_scale;',
+	'uniform float u_time;',
+	'uniform vec3 u_mouse;',
+	'uniform vec3 u_c1;',
+	'uniform vec3 u_c2;',
+	'uniform vec3 u_c3;',
+	'uniform vec3 u_edge;',
+	'uniform vec3 u_core;',
+	'uniform float u_dark;',
+	'vec2 hash2(vec2 p) { p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3))); return fract(sin(p) * 43758.5453); }',
+	'float hash(vec2 p) { return fract(sin(dot(p, vec2(41.3, 289.1))) * 45758.5453); }',
+	// x: nearest distance, y: second nearest, z: cell id, w: distance to the seed
+	'vec4 voronoi(vec2 p, float t) {',
+	'	vec2 ip = floor(p), fp = fract(p);',
+	'	float d1 = 8.0, d2 = 8.0, id = 0.0;',
+	'	for (int j = -1; j <= 1; j++) {',
+	'		for (int i = -1; i <= 1; i++) {',
+	'			vec2 nb = vec2(float(i), float(j));',
+	'			vec2 o = hash2(ip + nb);',
+	'			vec2 orbit = 0.32 * vec2(sin(t * (0.8 + o.x * 0.6) + o.y * 6.2831), cos(t * (0.6 + o.y * 0.8) + o.x * 6.2831));',
+	'			vec2 s = nb + 0.5 + (o - 0.5) * 0.5 + orbit - fp;',
+	'			float d = dot(s, s);',
+	'			if (d < d1) { d2 = d1; d1 = d; id = hash(ip + nb); }',
+	'			else if (d < d2) { d2 = d; }',
+	'		}',
+	'	}',
+	'	d1 = sqrt(d1);',
+	'	return vec4(d1, sqrt(d2), id, d1);',
+	'}',
+	// A cyclic blend through the three accents, so each pane's tint wanders smoothly
+	'vec3 tint(float h) {',
+	'	h = fract(h) * 3.0;',
+	'	if (h < 1.0) return mix(u_c1, u_c2, smoothstep(0.0, 1.0, h));',
+	'	if (h < 2.0) return mix(u_c2, u_c3, smoothstep(1.0, 2.0, h));',
+	'	return mix(u_c3, u_c1, smoothstep(2.0, 3.0, h));',
+	'}',
+	'void main() {',
+	'	vec2 px = gl_FragCoord.xy / u_scale;',
+	'	vec2 res = u_res / u_scale;',
+	'	float t = u_time;',
+	'	vec2 m = vec2(u_mouse.x, res.y - u_mouse.y);',
+	'	float flash = u_mouse.z * ' + FLASHLIGHT.toFixed(3) + ' * smoothstep(' + FLASH_RADIUS.toFixed(1) + ', 0.0, length(px - m));',
+	'	vec2 uv = px / res.y * ' + CELLS.toFixed(3) + ';',
+	'	float ew = 0.022 * ' + EDGE_WIDTH.toFixed(3) + ' * (1.0 + flash * 1.2);',
+	// Front layer: tinted panes with faceted shading and glowing leading
+	'	vec4 v = voronoi(uv, t);',
+	'	float gap = v.y - v.x;',
+	'	float lead = 1.0 - smoothstep(ew * 0.4, ew, gap);',
+	'	float halo = exp(-gap / (ew * 3.5)) * (1.0 - lead);',
+	'	float hue = v.z + t * 0.05 * ' + HUE_DRIFT.toFixed(3) + ';',
+	'	vec3 pane = tint(hue);',
+	'	float facet = 0.35 + 0.65 * smoothstep(0.75, 0.0, v.w);',
+	'	float shimmer = 0.75 + 0.25 * sin(v.z * 17.3 + t * 0.6);',
+	'	float paneA = ' + CELL_FILL.toFixed(3) + ' * 0.5 * facet * shimmer * (1.0 + flash * 1.2) * mix(1.5, 1.0, u_dark);',
+	'	vec3 leadCol = mix(u_edge, tint(hue + 0.33), 0.5);',
+	'	leadCol = mix(leadCol, u_core, flash * 0.6 * u_dark);',
+	'	float leadA = ' + EDGE_GLOW.toFixed(3) + ' * (lead * 0.7 + halo * 0.22) * (1.0 + flash * 1.5);',
+	// Back layer: larger, slower panes for depth
+	'	vec4 b = voronoi(uv * 0.42 + vec2(17.3, 5.1), t * 0.6);',
+	'	float gap2 = b.y - b.x;',
+	'	float lead2 = 1.0 - smoothstep(ew * 0.3, ew * 0.9, gap2);',
+	'	vec3 pane2 = tint(b.z + 0.5 + t * 0.03 * ' + HUE_DRIFT.toFixed(3) + ');',
+	'	float back = ' + DEPTH_LAYER.toFixed(3) + ';',
+	'	float pane2A = back * 0.22 * (0.5 + 0.5 * smoothstep(0.9, 0.0, b.w));',
+	'	float lead2A = back * lead2 * 0.3 * ' + EDGE_GLOW.toFixed(3) + ';',
+	// Fade behind the chat column, gather toward the screen edges
+	'	float band = abs(px.x - res.x * 0.5) / ' + BAND_WIDTH.toFixed(1) + ';',
+	'	float calm = 1.0 - ' + CENTER_CALM.toFixed(3) + ' * (1.0 - smoothstep(0.55, 1.25, band));',
+	'	float edgeBias = 0.65 + 0.35 * smoothstep(0.15, 0.7, length(px / res - 0.5));',
+	'	float k = calm * edgeBias * mix(0.8, 1.0, u_dark);',
+	// Premultiplied composite: back layer, panes, then leading on top
+	'	vec3 col = pane2 * pane2A + u_edge * lead2A;',
+	'	float a = pane2A + lead2A * (1.0 - pane2A);',
+	'	col = pane * paneA + col * (1.0 - paneA);',
+	'	a = paneA + a * (1.0 - paneA);',
+	'	leadA = clamp(leadA, 0.0, 0.9);',
+	'	col = leadCol * leadA + col * (1.0 - leadA);',
+	'	a = leadA + a * (1.0 - leadA);',
+	'	a = clamp(a * k, 0.0, 1.0);',
+	'	col *= k;',
+	'	gl_FragColor = vec4(min(col, vec3(a)), a);',
+	'}',
 ].join('\n');
 
-/* ── GL setup ── */
-function compile(type, src) {
-    var s = gl.createShader(type);
-    gl.shaderSource(s, src);
-    gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-        throw new Error(gl.getShaderInfoLog(s));
-    }
-    return s;
+let canvas, gl, program, buffer;
+let loc = {};
+let w = 0, h = 0, dpr = 1;
+let last = 0, time = 0, reduced = false;
+const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
+const colors = { c1: hexToRgb(COLOR_A), c2: hexToRgb(COLOR_B), c3: hexToRgb(COLOR_C), edge: hexToRgb(EDGE_COLOR), core: [0.92, 0.95, 1], dark: 1 };
+
+function hexToRgb(hex) {
+	const n = parseInt(hex.slice(1), 16);
+	return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
 }
 
-function initGL() {
-    var vs = compile(gl.VERTEX_SHADER, VERT);
-    var fs = compile(gl.FRAGMENT_SHADER, FRAG);
-    program = gl.createProgram();
-    gl.attachShader(program, vs);
-    gl.attachShader(program, fs);
-    gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        throw new Error(gl.getProgramInfoLog(program));
-    }
-    gl.useProgram(program);
-
-    var buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
-    var a = gl.getAttribLocation(program, 'a_pos');
-    gl.enableVertexAttribArray(a);
-    gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
-
-    uTime = gl.getUniformLocation(program, 'u_time');
-    uRes = gl.getUniformLocation(program, 'u_res');
-    uMouse = gl.getUniformLocation(program, 'u_mouse');
-    uCfg = gl.getUniformLocation(program, 'u_cfg');
-    startTime = performance.now() / 1000;
+function applyTheme(t) {
+	if (!t) return;
+	colors.dark = t.dark === false ? 0 : 1;
+	if (!FOLLOW_THEME || !t.rgb) return;
+	colors.c1 = t.rgb.accent;
+	colors.c2 = t.rgb.accent2;
+	colors.c3 = t.rgb.accent3;
+	colors.edge = t.rgb.muted;
+	colors.core = t.rgb.text;
 }
 
-function render() {
-    var t = (performance.now() / 1000 - startTime) * ANIMATION_SPEED;
-    gl.viewport(0, 0, w, h);
-    gl.uniform1f(uTime, t);
-    gl.uniform2f(uRes, w, h);
-    gl.uniform2f(uMouse, mouseNX, mouseNY);
-    gl.uniform4f(uCfg, EDGE_WIDTH, EDGE_BRIGHTNESS, CELL_SATURATION, MOUSE_RADIUS);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-    requestAnimationFrame(render);
+function compile(type, source) {
+	const shader = gl.createShader(type);
+	gl.shaderSource(shader, source);
+	gl.compileShader(shader);
+	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(shader));
+	return shader;
 }
 
-/* ── Message handler ── */
-self.onmessage = function(e) {
-    switch (e.data.type) {
-        case 'init':
-            canvas = e.data.canvas;
-            w = e.data.width; h = e.data.height;
-            canvas.width = w; canvas.height = h;
-            gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-            if (!gl) {
-                var c = canvas.getContext('2d');
-                c.fillStyle = '#050510'; c.fillRect(0, 0, w, h);
-                c.fillStyle = '#ff4466'; c.font = '16px monospace';
-                c.textAlign = 'center';
-                c.fillText('WebGL not available', w / 2, h / 2);
-                return;
-            }
-            try { initGL(); render(); }
-            catch (err) {
-                var c = canvas.getContext('2d');
-                if (c) {
-                    c.fillStyle = '#050510'; c.fillRect(0, 0, w, h);
-                    c.fillStyle = '#ff4466'; c.font = '12px monospace';
-                    c.textAlign = 'center';
-                    c.fillText('Shader: ' + err.message, w / 2, h / 2);
-                }
-            }
-            break;
-        case 'resize':
-            w = e.data.width; h = e.data.height;
-            canvas.width = w; canvas.height = h;
-            break;
-        case 'mousemove':
-            mouseNX = e.data.x / w;
-            mouseNY = 1.0 - (e.data.y / h);
-            break;
-    }
+function setup() {
+	program = gl.createProgram();
+	gl.attachShader(program, compile(gl.VERTEX_SHADER, VERT));
+	gl.attachShader(program, compile(gl.FRAGMENT_SHADER, FRAG));
+	gl.bindAttribLocation(program, 0, 'a_pos');
+	gl.linkProgram(program);
+	if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program));
+	gl.useProgram(program);
+	buffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+	gl.enableVertexAttribArray(0);
+	gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+	['u_res', 'u_scale', 'u_time', 'u_mouse', 'u_c1', 'u_c2', 'u_c3', 'u_edge', 'u_core', 'u_dark'].forEach((name) => {
+		loc[name] = gl.getUniformLocation(program, name);
+	});
+	gl.disable(gl.BLEND);
+	size();
+}
+
+// The leading is line art, so a dense screen gets more pixels, never past full size
+function size() {
+	const scale = Math.min(1, RENDER_SCALE * Math.min(dpr, 2));
+	canvas.width = Math.max(1, Math.round(w * scale));
+	canvas.height = Math.max(1, Math.round(h * scale));
+	if (gl && !gl.isContextLost()) gl.viewport(0, 0, canvas.width, canvas.height);
+}
+
+function frame(now) {
+	requestAnimationFrame(frame);
+	if (!program || gl.isContextLost()) return;
+	if (last && now - last < 1000 / MAX_FPS - 2) return;
+	const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
+	last = now;
+	time = (time + dt * 0.25 * MOTION * (reduced ? REDUCED_SPEED : 1)) % 3000;
+	mouse.target = Math.max(0, mouse.target - dt * 0.35);
+	mouse.amount += (mouse.target - mouse.amount) * Math.min(1, dt * (reduced ? 1.5 : 4));
+	gl.uniform2f(loc.u_res, canvas.width, canvas.height);
+	gl.uniform1f(loc.u_scale, canvas.width / Math.max(1, w));
+	gl.uniform1f(loc.u_time, time);
+	gl.uniform3f(loc.u_mouse, mouse.x, mouse.y, mouse.amount);
+	gl.uniform3fv(loc.u_c1, colors.c1);
+	gl.uniform3fv(loc.u_c2, colors.c2);
+	gl.uniform3fv(loc.u_c3, colors.c3);
+	gl.uniform3fv(loc.u_edge, colors.edge);
+	gl.uniform3fv(loc.u_core, colors.core);
+	gl.uniform1f(loc.u_dark, colors.dark);
+	gl.drawArrays(gl.TRIANGLES, 0, 3);
+}
+
+function start() {
+	const opts = { alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false, powerPreference: 'low-power' };
+	gl = canvas.getContext('webgl2', opts) || canvas.getContext('webgl', opts);
+	if (!gl) {
+		console.warn('Voronoi Prism: WebGL is not available, so the glass is not drawn.');
+		return;
+	}
+	canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); program = null; });
+	canvas.addEventListener('webglcontextrestored', () => {
+		try { setup(); } catch (err) { console.error('Voronoi Prism:', err.message); }
+	});
+	try {
+		setup();
+		requestAnimationFrame(frame);
+	} catch (err) {
+		console.error('Voronoi Prism:', err.message);
+	}
+}
+
+self.onmessage = (e) => {
+	const d = e.data;
+	switch (d.type) {
+		case 'init':
+			canvas = d.canvas;
+			w = d.width;
+			h = d.height;
+			dpr = d.dpr || 1;
+			reduced = !!d.reducedMotion;
+			applyTheme(d.theme);
+			start();
+			break;
+		case 'resize':
+			w = d.width;
+			h = d.height;
+			dpr = d.dpr || 1;
+			if (canvas) size();
+			break;
+		case 'theme':
+			applyTheme(d);
+			break;
+		case 'motion':
+			reduced = !!d.reducedMotion;
+			break;
+		case 'mousemove':
+			mouse.x = d.x;
+			mouse.y = d.y;
+			mouse.target = 1;
+			break;
+	}
 };

@@ -1,316 +1,302 @@
 /**
  * Title: Circuit Board
- * Description: Animated circuit board traces drawn in real-time. Lines travel horizontally
- *   and vertically with 90-degree turns. Glowing nodes at junctions/endpoints.
- *   Mouse creates signal pulses that race along nearby traces. Subtle cyan/green palette.
- *   Follows your theme's colors when the designer sends them.
+ * Description: Circuit traces grow along a grid at the sides of the screen, glow at their pads, retire and regrow, and carry signal pulses wherever the cursor passes or taps.
  */
 
-let canvas, ctx, width, height;
-let mouse = { x: -5000, y: -5000 };
+/* ────────── CONFIGURABLE VARIABLES ────────── */
+const GRID          = 20;    // grid the traces follow, in px (10-40)
+const MAX_TRACES    = 48;    // traces on the board at once (10-80)
+const GROW_SPEED    = 120;   // how fast a trace draws itself, in px per second (30-400)
+const TRACE_LIFE    = 30;    // average seconds a finished trace stays before it retires (8-120)
+const TRACE_ALPHA   = 0.3;   // visibility of finished traces (0.1-0.6)
+const PULSE_SPEED   = 180;   // speed of signal pulses, in px per second (60-500)
+const MAX_PULSES    = 24;    // signal pulses at once (0-40)
+const CURSOR_REACH  = 150;   // how near the cursor must pass a pad to send a pulse, in px (50-300)
+const MOTION        = 1;     // overall speed (0.2-2)
+const REDUCED_SPEED = 0.3;   // share of the speed kept when the viewer asks to reduce motion (0-1)
+const CENTER_CALM   = 0.85;  // how much traces fade behind the chat column (0-1)
+const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const FOLLOW_THEME  = true;  // take the colors from the theme's palette
+const TRACE_COLOR   = '#00b4a0';  // finished trace color when not following the theme
+const NODE_COLOR    = '#00dcb4';  // pad and growing trace color
+const TIP_COLOR     = '#00ffdc';  // growing tip color
+const PULSE_COLOR   = '#00ffc8';  // signal pulse color
+/* ──────────────────────────────────────────── */
 
-const FOLLOW_THEME = true; // Draw in the theme's colors when the designer sends them (true/false)
-const GRID = 20; // grid spacing
-const MAX_TRACES = 60;
-const MAX_PULSES = 40;
-const TRACE_COLOR = 'rgba(0, 180, 160, 0.2)';
-const NODE_COLOR = 'rgba(0, 220, 180, 0.5)';
-const PULSE_COLOR = 'rgba(0, 255, 200, 0.9)';
+const MAX_PTS = 12;
+const DIRS_X = [1, 0, -1, 0], DIRS_Y = [0, 1, 0, -1];
+const FREE = 0, GROWING = 1, DONE = 2, FADING = 3;
 
-let traces = [];
-let pulses = [];
-let activeTraces = []; // traces currently being drawn
-let lastPulseTime = 0;
+let canvas, ctx;
+let w = 0, h = 0, dpr = 1;
+let last = 0, reduced = false, dark = true, spawnWait = 0, pulseWait = 0;
+const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
+const col = { trace: TRACE_COLOR, node: NODE_COLOR, tip: TIP_COLOR, pulse: PULSE_COLOR };
+let tipSprite = null, pulseSprite = null;
+// Trace pool: points, then per-trace state
+const tx = new Float32Array(MAX_TRACES * MAX_PTS), ty = new Float32Array(MAX_TRACES * MAX_PTS);
+const tn = new Uint8Array(MAX_TRACES), ts = new Uint8Array(MAX_TRACES), tseg = new Uint8Array(MAX_TRACES);
+const tprog = new Float32Array(MAX_TRACES), tlife = new Float32Array(MAX_TRACES);
+const talpha = new Float32Array(MAX_TRACES), tfade = new Float32Array(MAX_TRACES);
+// Pulse pool: trace, segment, progress in px, life
+const pt = new Int16Array(MAX_PULSES).fill(-1), pseg = new Uint8Array(MAX_PULSES);
+const pprog = new Float32Array(MAX_PULSES), plife = new Float32Array(MAX_PULSES);
 
-// Palette (r, g, b); the theme replaces these when it arrives
-let traceRgb = '0, 180, 160';
-let nodeRgb = '0, 220, 180';
-let tipRgb = '0, 255, 220';
-let pulseRgb = '0, 255, 200';
+// A soft round glow in one color: the color filled, then masked by a radial falloff
+function sprite(color, r) {
+	const c = new OffscreenCanvas(r * 2, r * 2), g = c.getContext('2d');
+	g.fillStyle = color;
+	g.fillRect(0, 0, r * 2, r * 2);
+	const grad = g.createRadialGradient(r, r, 0, r, r, r);
+	grad.addColorStop(0, 'rgba(255,255,255,1)');
+	grad.addColorStop(0.2, 'rgba(255,255,255,0.9)');
+	grad.addColorStop(0.45, 'rgba(255,255,255,0.25)');
+	grad.addColorStop(1, 'rgba(255,255,255,0)');
+	g.globalCompositeOperation = 'destination-in';
+	g.fillStyle = grad;
+	g.fillRect(0, 0, r * 2, r * 2);
+	return c;
+}
 
-setInterval(() => {
-	self.postMessage({ type: 'heartbeat' });
-}, 1000);
+function applyTheme(t) {
+	if (t) {
+		dark = t.dark !== false;
+		if (FOLLOW_THEME && t.colors) {
+			col.trace = t.colors.muted;
+			col.node = t.colors.accent;
+			col.tip = t.colors.accent2;
+			col.pulse = t.colors.accent3;
+		}
+	}
+	tipSprite = sprite(col.tip, 12);
+	pulseSprite = sprite(col.pulse, 12);
+}
+
+function band(x) {
+	const b = Math.abs(x - w / 2) / BAND_WIDTH;
+	const s = Math.min(1, Math.max(0, (b - 0.55) / 0.7));
+	return 1 - CENTER_CALM * (1 - s * s * (3 - 2 * s));
+}
+
+const snap = (v) => Math.round(v / GRID) * GRID;
+
+// Lays a new trace inside one side's region, turning 90 degrees at each joint and never doubling onto itself
+function lay(i) {
+	const inner = BAND_WIDTH * 0.5;
+	const left = Math.random() < 0.5;
+	let x0 = left ? GRID : w / 2 + inner, x1 = left ? w / 2 - inner : w - GRID;
+	if (x1 - x0 < GRID * 4) { x0 = GRID; x1 = w - GRID; }
+	let x = snap(x0 + Math.random() * (x1 - x0)), y = snap(GRID + Math.random() * (h - GRID * 2));
+	let dir = Math.floor(Math.random() * 4);
+	const o = i * MAX_PTS, want = 4 + Math.floor(Math.random() * (MAX_PTS - 4));
+	tx[o] = x; ty[o] = y;
+	let n = 1;
+	for (let tries = 0; n < want && tries < want * 3; tries++) {
+		const len = (2 + Math.floor(Math.random() * 7)) * GRID;
+		let nx = x + DIRS_X[dir] * len, ny = y + DIRS_Y[dir] * len;
+		// Bounce off the region's edge rather than pile up along it
+		if (nx < x0 || nx > x1 || ny < GRID || ny > h - GRID) { nx = x - DIRS_X[dir] * len; ny = y - DIRS_Y[dir] * len; }
+		dir = (dir + (Math.random() < 0.5 ? 1 : 3)) % 4;
+		if (nx < x0 || nx > x1 || ny < GRID || ny > h - GRID) continue;
+		x = snap(nx); y = snap(ny);
+		tx[o + n] = x; ty[o + n] = y;
+		n++;
+	}
+	tn[i] = n;
+	tseg[i] = 0;
+	tprog[i] = 0;
+	tfade[i] = 1;
+	talpha[i] = TRACE_ALPHA * (0.6 + Math.random() * 0.4) * band(tx[o]);
+	tlife[i] = TRACE_LIFE * (0.6 + Math.random() * 0.8);
+	ts[i] = n > 1 ? GROWING : FREE;
+}
+
+function segLen(i, s) {
+	const o = i * MAX_PTS + s;
+	return Math.abs(tx[o + 1] - tx[o]) + Math.abs(ty[o + 1] - ty[o]);
+}
+
+// A full board at start and after each resize, its traces at staggered ages so they retire one by one
+function seed() {
+	ts.fill(FREE);
+	pt.fill(-1);
+	for (let i = 0; i < Math.floor(MAX_TRACES * 0.7); i++) {
+		lay(i);
+		if (ts[i] === FREE) continue;
+		ts[i] = DONE;
+		tseg[i] = tn[i] - 1;
+		tlife[i] *= Math.random();
+	}
+}
+
+function resize(width, height, ratio) {
+	w = width;
+	h = height;
+	dpr = Math.min(ratio || 1, 2);
+	if (!canvas) return;
+	canvas.width = Math.max(1, Math.round(w * dpr));
+	canvas.height = Math.max(1, Math.round(h * dpr));
+	ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+	seed();
+}
+
+// Sends one pulse down the trace with a pad nearest to (x, y), if any is within reach
+function pulseNear(x, y) {
+	let best = -1, bestD = CURSOR_REACH * CURSOR_REACH;
+	for (let i = 0; i < MAX_TRACES; i++) {
+		if (ts[i] !== DONE) continue;
+		for (let k = 0, o = i * MAX_PTS; k < tn[i]; k++) {
+			const dx = tx[o + k] - x, dy = ty[o + k] - y, d = dx * dx + dy * dy;
+			if (d < bestD) { bestD = d; best = i; }
+		}
+	}
+	if (best < 0) return;
+	for (let p = 0; p < MAX_PULSES; p++) {
+		if (pt[p] >= 0) continue;
+		pt[p] = best; pseg[p] = 0; pprog[p] = 0; plife[p] = 1;
+		return;
+	}
+}
+
+function update(dt) {
+	const speed = dt * MOTION * (reduced ? REDUCED_SPEED : 1);
+	let growing = 0, oldest = -1;
+	for (let i = 0; i < MAX_TRACES; i++) {
+		if (ts[i] === GROWING) {
+			growing++;
+			tprog[i] += GROW_SPEED * speed;
+			while (ts[i] === GROWING && tprog[i] >= segLen(i, tseg[i])) {
+				tprog[i] -= segLen(i, tseg[i]);
+				if (++tseg[i] >= tn[i] - 1) ts[i] = DONE;
+			}
+		} else if (ts[i] === DONE) {
+			tlife[i] -= speed;
+			if (tlife[i] <= 0) ts[i] = FADING;
+			if (oldest < 0 || tlife[i] < tlife[oldest]) oldest = i;
+		} else if (ts[i] === FADING) {
+			tfade[i] -= speed * 0.4;
+			if (tfade[i] <= 0) ts[i] = FREE;
+		}
+	}
+	spawnWait -= speed;
+	if (spawnWait <= 0 && growing < 3) {
+		spawnWait = 0.4 + Math.random() * 0.6;
+		const slot = ts.indexOf(FREE);
+		if (slot >= 0) lay(slot);
+		else if (oldest >= 0) ts[oldest] = FADING; // a full board retires its oldest trace so a new one can grow
+	}
+	pulseWait -= dt;
+	if (mouse.amount > 0.3 && pulseWait <= 0) {
+		pulseWait = 0.25;
+		pulseNear(mouse.x, mouse.y);
+	}
+	for (let p = 0; p < MAX_PULSES; p++) {
+		const i = pt[p];
+		if (i < 0) continue;
+		if (ts[i] === FREE) { pt[p] = -1; continue; }
+		pprog[p] += PULSE_SPEED * speed;
+		while (pt[p] >= 0 && pprog[p] >= segLen(i, pseg[p])) {
+			pprog[p] -= segLen(i, pseg[p]);
+			if (++pseg[p] >= tn[i] - 1) pt[p] = -1;
+		}
+		plife[p] -= speed * 0.15;
+		if (plife[p] <= 0) pt[p] = -1;
+	}
+}
+
+// Path of a trace up to its growth point; returns the tip's position through tip[]
+const tip = new Float32Array(2);
+function path(i) {
+	const o = i * MAX_PTS, s = tseg[i];
+	ctx.moveTo(tx[o], ty[o]);
+	for (let k = 1; k <= s; k++) ctx.lineTo(tx[o + k], ty[o + k]);
+	if (ts[i] === GROWING) {
+		const len = segLen(i, s) || 1, f = Math.min(1, tprog[i] / len);
+		tip[0] = tx[o + s] + (tx[o + s + 1] - tx[o + s]) * f;
+		tip[1] = ty[o + s] + (ty[o + s + 1] - ty[o + s]) * f;
+		ctx.lineTo(tip[0], tip[1]);
+	}
+}
+
+function draw() {
+	ctx.clearRect(0, 0, w, h);
+	const k = dark ? 1 : 0.8;
+	ctx.lineWidth = 1.5;
+	ctx.lineJoin = 'round';
+	for (let i = 0; i < MAX_TRACES; i++) {
+		if (ts[i] === FREE) continue;
+		const a = talpha[i] * tfade[i] * k;
+		ctx.globalAlpha = ts[i] === GROWING ? Math.min(1, a * 1.8) : a;
+		ctx.strokeStyle = ts[i] === GROWING ? col.node : col.trace;
+		ctx.beginPath();
+		path(i);
+		ctx.stroke();
+		// Pads at each joint, brighter where the cursor is
+		ctx.fillStyle = col.node;
+		const o = i * MAX_PTS, end = ts[i] === GROWING ? tseg[i] : tn[i] - 1;
+		for (let n = 0; n <= end; n++) {
+			const dx = tx[o + n] - mouse.x, dy = ty[o + n] - mouse.y;
+			const near = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) / 120) * mouse.amount;
+			ctx.globalAlpha = Math.min(1, a * (1.6 + near * 2.5));
+			const r = n === 0 || n === tn[i] - 1 ? 2.5 : 1.75;
+			ctx.fillRect(tx[o + n] - r, ty[o + n] - r, r * 2, r * 2);
+		}
+		if (ts[i] === GROWING) {
+			ctx.globalAlpha = Math.min(1, band(tip[0]) * (dark ? 0.9 : 0.7));
+			ctx.drawImage(tipSprite, tip[0] - 12, tip[1] - 12);
+		}
+	}
+	for (let p = 0; p < MAX_PULSES; p++) {
+		const i = pt[p];
+		if (i < 0) continue;
+		const o = i * MAX_PTS + pseg[p];
+		const f = Math.min(1, pprog[p] / (segLen(i, pseg[p]) || 1));
+		const x = tx[o] + (tx[o + 1] - tx[o]) * f, y = ty[o] + (ty[o + 1] - ty[o]) * f;
+		ctx.globalAlpha = Math.min(1, plife[p] * 1.5) * tfade[i] * band(x) * (dark ? 0.95 : 0.75);
+		ctx.drawImage(pulseSprite, x - 12, y - 12);
+	}
+	ctx.globalAlpha = 1;
+}
+
+function frame(now) {
+	requestAnimationFrame(frame);
+	if (!ctx) return;
+	const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
+	last = now;
+	mouse.target = Math.max(0, mouse.target - dt * 0.8);
+	mouse.amount += (mouse.target - mouse.amount) * Math.min(1, dt * 5);
+	update(dt);
+	draw();
+}
 
 self.onmessage = (e) => {
-	switch (e.data.type) {
+	const d = e.data;
+	switch (d.type) {
 		case 'init':
-			canvas = e.data.canvas;
+			canvas = d.canvas;
 			ctx = canvas.getContext('2d');
-			width = e.data.width;
-			height = e.data.height;
-			canvas.width = width;
-			canvas.height = height;
-			init();
-			applyTheme(e.data.theme);
-			startAnimation();
+			reduced = !!d.reducedMotion;
+			applyTheme(d.theme);
+			resize(d.width, d.height, d.dpr);
+			requestAnimationFrame(frame);
 			break;
 		case 'resize':
-			width = e.data.width;
-			height = e.data.height;
-			canvas.width = width;
-			canvas.height = height;
-			traces = [];
-			activeTraces = [];
-			pulses = [];
-			break;
-		case 'mousemove':
-			mouse.x = e.data.x;
-			mouse.y = e.data.y;
+			resize(d.width, d.height, d.dpr);
 			break;
 		case 'theme':
-			applyTheme(e.data);
+			applyTheme(d);
+			break;
+		case 'motion':
+			reduced = !!d.reducedMotion;
+			break;
+		case 'mousemove':
+			mouse.x = d.x;
+			mouse.y = d.y;
+			mouse.target = 1;
+			break;
+		case 'mousedown':
+			// A tap sends a few pulses from the pads around it; one when motion is reduced
+			for (let n = reduced ? 1 : 3; n > 0; n--) pulseNear(d.x + (Math.random() - 0.5) * 60, d.y + (Math.random() - 0.5) * 60);
 			break;
 	}
 };
-
-function themeRgb(t, key) {
-	const c = t.rgb && t.rgb[key];
-	if (c) return c.map((v) => Math.round(Math.max(0, Math.min(1, v || 0)) * 255)).join(', ');
-	const hex = t.colors[key] || '#808080';
-	return [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) || 0).join(', ');
-}
-
-// Finished traces take the muted text color, nodes and signals the accents
-function applyTheme(t) {
-	if (!FOLLOW_THEME || !t || !t.colors) return;
-	traceRgb = themeRgb(t, 'muted');
-	nodeRgb = themeRgb(t, 'accent');
-	tipRgb = themeRgb(t, 'accent2');
-	pulseRgb = themeRgb(t, 'accent3');
-}
-
-function snapToGrid(v) {
-	return Math.round(v / GRID) * GRID;
-}
-
-function init() {
-	traces = [];
-	activeTraces = [];
-	pulses = [];
-}
-
-// A trace is a series of connected segments (polyline on the grid)
-function spawnTrace() {
-	const startX = snapToGrid(Math.random() * width);
-	const startY = snapToGrid(Math.random() * height);
-	// Direction: 0=right, 1=down, 2=left, 3=up
-	const dir = Math.floor(Math.random() * 4);
-	const segmentCount = 3 + Math.floor(Math.random() * 8);
-
-	return {
-		points: [{ x: startX, y: startY }],
-		targetPoints: generatePath(startX, startY, dir, segmentCount),
-		currentSegment: 0,
-		progress: 0, // 0-1 along current segment
-		speed: 0.02 + Math.random() * 0.03,
-		complete: false,
-		opacity: 0.15 + Math.random() * 0.15
-	};
-}
-
-function generatePath(sx, sy, startDir, count) {
-	const pts = [{ x: sx, y: sy }];
-	let dir = startDir;
-	let cx = sx,
-		cy = sy;
-
-	for (let i = 0; i < count; i++) {
-		const len = (2 + Math.floor(Math.random() * 8)) * GRID;
-		const dx = [1, 0, -1, 0][dir];
-		const dy = [0, 1, 0, -1][dir];
-		cx += dx * len;
-		cy += dy * len;
-		// Clamp to canvas
-		cx = Math.max(0, Math.min(width, cx));
-		cy = Math.max(0, Math.min(height, cy));
-		pts.push({ x: cx, y: cy });
-		// Turn 90 degrees (randomly left or right)
-		dir = (dir + (Math.random() < 0.5 ? 1 : 3)) % 4;
-	}
-	return pts;
-}
-
-function spawnPulse(trace) {
-	if (trace.targetPoints.length < 2) return;
-	return {
-		trace: trace,
-		segment: 0,
-		progress: 0,
-		speed: 0.03 + Math.random() * 0.02,
-		life: 1.0
-	};
-}
-
-function startAnimation() {
-	let frameCount = 0;
-
-	function render(time) {
-		if (!ctx) return;
-		frameCount++;
-
-		ctx.clearRect(0, 0, width, height);
-
-		// Spawn new traces periodically
-		if (frameCount % 30 === 0 && activeTraces.length < 3 && traces.length < MAX_TRACES) {
-			activeTraces.push(spawnTrace());
-		}
-
-		// Update and draw active (growing) traces
-		for (let i = activeTraces.length - 1; i >= 0; i--) {
-			const t = activeTraces[i];
-
-			if (t.currentSegment < t.targetPoints.length - 1) {
-				t.progress += t.speed;
-				if (t.progress >= 1) {
-					t.progress = 0;
-					t.currentSegment++;
-					// Add completed point
-					if (t.currentSegment < t.targetPoints.length) {
-						t.points.push({
-							x: t.targetPoints[t.currentSegment].x,
-							y: t.targetPoints[t.currentSegment].y
-						});
-					}
-				}
-			} else {
-				t.complete = true;
-				traces.push(t);
-				activeTraces.splice(i, 1);
-			}
-		}
-
-		// Remove oldest traces if over limit
-		while (traces.length > MAX_TRACES) {
-			traces.shift();
-		}
-
-		// Draw all completed traces
-		for (const t of traces) {
-			drawTrace(t);
-		}
-
-		// Draw active traces (partially drawn)
-		for (const t of activeTraces) {
-			drawActiveTrace(t);
-		}
-
-		// Mouse pulse spawning — find nearby completed traces
-		if (time - lastPulseTime > 300) {
-			for (const t of traces) {
-				if (pulses.length >= MAX_PULSES) break;
-				for (const pt of t.targetPoints) {
-					const dx = pt.x - mouse.x;
-					const dy = pt.y - mouse.y;
-					if (dx * dx + dy * dy < 150 * 150) {
-						const p = spawnPulse(t);
-						if (p) pulses.push(p);
-						lastPulseTime = time;
-						break;
-					}
-				}
-			}
-		}
-
-		// Update and draw pulses
-		for (let i = pulses.length - 1; i >= 0; i--) {
-			const p = pulses[i];
-			p.progress += p.speed;
-			if (p.progress >= 1) {
-				p.progress = 0;
-				p.segment++;
-			}
-			p.life -= 0.005;
-
-			if (p.segment >= p.trace.targetPoints.length - 1 || p.life <= 0) {
-				pulses.splice(i, 1);
-				continue;
-			}
-
-			// Interpolate pulse position
-			const a = p.trace.targetPoints[p.segment];
-			const b = p.trace.targetPoints[p.segment + 1];
-			const px = a.x + (b.x - a.x) * p.progress;
-			const py = a.y + (b.y - a.y) * p.progress;
-
-			ctx.beginPath();
-			ctx.arc(px, py, 3, 0, Math.PI * 2);
-			ctx.fillStyle = `rgba(${pulseRgb}, ${p.life * 0.8})`;
-			ctx.shadowColor = `rgba(${pulseRgb}, 0.6)`;
-			ctx.shadowBlur = 10;
-			ctx.fill();
-			ctx.shadowBlur = 0;
-		}
-
-		requestAnimationFrame(render);
-	}
-
-	requestAnimationFrame(render);
-}
-
-function drawTrace(t) {
-	if (t.targetPoints.length < 2) return;
-
-	ctx.beginPath();
-	ctx.moveTo(t.targetPoints[0].x, t.targetPoints[0].y);
-	for (let i = 1; i < t.targetPoints.length; i++) {
-		ctx.lineTo(t.targetPoints[i].x, t.targetPoints[i].y);
-	}
-	ctx.strokeStyle = `rgba(${traceRgb}, ${t.opacity})`;
-	ctx.lineWidth = 1.5;
-	ctx.stroke();
-
-	// Draw nodes at junctions
-	for (let i = 0; i < t.targetPoints.length; i++) {
-		const pt = t.targetPoints[i];
-		// Glow brighter if mouse is near
-		const dx = pt.x - mouse.x;
-		const dy = pt.y - mouse.y;
-		const dist = Math.sqrt(dx * dx + dy * dy);
-		const glow = dist < 120 ? 0.6 + (1 - dist / 120) * 0.4 : 0.3;
-
-		ctx.beginPath();
-		ctx.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2);
-		ctx.fillStyle = `rgba(${nodeRgb}, ${glow * t.opacity * 2})`;
-		ctx.fill();
-	}
-}
-
-function drawActiveTrace(t) {
-	if (t.points.length < 1 || t.currentSegment >= t.targetPoints.length - 1) return;
-
-	// Draw completed segments
-	ctx.beginPath();
-	ctx.moveTo(t.points[0].x, t.points[0].y);
-	for (let i = 1; i < t.points.length; i++) {
-		ctx.lineTo(t.points[i].x, t.points[i].y);
-	}
-
-	// Draw current segment (in progress)
-	const a = t.targetPoints[t.currentSegment];
-	const b = t.targetPoints[t.currentSegment + 1];
-	const cx = a.x + (b.x - a.x) * t.progress;
-	const cy = a.y + (b.y - a.y) * t.progress;
-	ctx.lineTo(cx, cy);
-
-	ctx.strokeStyle = `rgba(${nodeRgb}, ${t.opacity * 1.5})`;
-	ctx.lineWidth = 1.5;
-	ctx.stroke();
-
-	// Glowing tip
-	ctx.beginPath();
-	ctx.arc(cx, cy, 3, 0, Math.PI * 2);
-	ctx.fillStyle = `rgba(${tipRgb}, 0.8)`;
-	ctx.shadowColor = `rgba(${tipRgb}, 0.6)`;
-	ctx.shadowBlur = 8;
-	ctx.fill();
-	ctx.shadowBlur = 0;
-
-	// Draw completed nodes
-	for (const pt of t.points) {
-		ctx.beginPath();
-		ctx.arc(pt.x, pt.y, 2, 0, Math.PI * 2);
-		ctx.fillStyle = `rgba(${nodeRgb}, ${t.opacity * 2})`;
-		ctx.fill();
-	}
-}

@@ -1,252 +1,229 @@
 /**
  * Title: Liquid Chrome (WebGL)
- * Description: A flowing metallic liquid surface rendered with GPU shaders.
- *   Multiple layers of warped noise create a convincing reflective chrome
- *   membrane that ripples and morphs organically. Mouse interaction creates
- *   a deep gravity well that pulls the liquid surface toward the cursor,
- *   revealing iridescent prismatic reflections underneath.
- *
- *   Showcases: WebGL shaders, metallic rendering, mousemove
+ * Description: A domain-warped pool of liquid chrome tinted by your theme that gathers at the screen's edges and corners, leaves the chat clear and leans toward the cursor.
  */
 
-/* ────────── CONFIGURABLE ────────── */
-var SPEED           = 0.15;     // flow speed
-var SCALE           = 1.8;      // noise zoom level (lower = bigger features)
-var WARP_DEPTH      = 3;        // domain warp passes (1-4, higher = more complex)
-var REFLECTIVITY    = 0.7;      // chrome reflection intensity
-var IRIDESCENCE     = 0.5;      // rainbow refraction amount
-var MOUSE_PULL      = 0.25;     // mouse gravity well strength
-var MOUSE_RADIUS    = 0.3;      // mouse influence radius
-var EDGE_LIGHT      = 1.3;      // rim/edge lighting intensity
-/* ──────────────────────────────────── */
+/* ────────── CONFIGURABLE VARIABLES ────────── */
+const INTENSITY     = 0.8;   // how strongly the chrome shows (0-1)
+const MOTION        = 1;     // flow speed; 0 freezes the surface (0-3)
+const REDUCED_SPEED = 0.15;  // share of the flow kept when the viewer asks to reduce motion (0-1)
+const POOL_SIZE     = 0.38;  // how far the chrome reaches in from the edges (0.1-0.8)
+const SCALE         = 1.6;   // size of the ripples; lower is larger (0.6-4)
+const WARP          = 1.4;   // how swirled the liquid is (0-3)
+const BUMP          = 0.9;   // depth of the surface relief (0.2-2)
+const REFLECTIVITY  = 0.8;   // strength of the reflected highlights (0-1)
+const IRIDESCENCE   = 0.7;   // how much the accents shimmer through the metal (0-1)
+const CENTER_CALM   = 0.9;   // how much the chrome fades behind the chat column (0-1)
+const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const MOUSE_PULL    = 1;     // how far the liquid leans toward the cursor (0-2)
+const RENDER_SCALE  = 0.5;   // resolution of the surface; it is soft, so half is plenty (0.25-1)
+const MAX_FPS       = 30;    // frame cap; the liquid moves slowly (15-60)
+const FOLLOW_THEME  = true;  // take the colors from the theme's palette
+const CHROME_COLOR  = '#9aa3b5';  // base metal color when not following the theme
+const COLOR_A       = '#7fa8ff';  // first shimmer color
+const COLOR_B       = '#c58cf0';  // second shimmer color
+const COLOR_C       = '#f2f4ff';  // highlight color
+/* ──────────────────────────────────────────── */
 
-var canvas, gl, program;
-var uTime, uRes, uMouse, uCfg;
-var startTime = 0;
-var mouseNX = 0.5, mouseNY = 0.5;
-var w = 0, h = 0;
+const VERT = 'attribute vec2 a_pos; void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }';
 
-setInterval(function() { self.postMessage({ type: 'heartbeat' }); }, 1000);
-
-var VERT = 'attribute vec2 a_pos;void main(){gl_Position=vec4(a_pos,0,1);}';
-
-var FRAG = [
-'precision highp float;',
-'uniform float u_time;',
-'uniform vec2 u_res;',
-'uniform vec2 u_mouse;',
-'uniform vec4 u_cfg;', // reflectivity, iridescence, mousePull, edgeLight
-'',
-'// ── Noise foundation ──',
-'vec3 mod289(vec3 x){return x-floor(x*(1./289.))*289.;}',
-'vec4 mod289(vec4 x){return x-floor(x*(1./289.))*289.;}',
-'vec4 perm(vec4 x){return mod289(((x*34.)+1.)*x);}',
-'',
-'float snoise(vec3 v){',
-'  vec3 C=vec3(1./6.,1./3.,0.);',
-'  vec3 i=floor(v+dot(v,C.yyy));',
-'  vec3 x0=v-i+dot(i,C.xxx);',
-'  vec3 g=step(x0.yzx,x0.xyz);',
-'  vec3 l=1.-g;',
-'  vec3 i1=min(g,l.zxy);',
-'  vec3 i2=max(g,l.zxy);',
-'  vec3 x1=x0-i1+C.x;',
-'  vec3 x2=x0-i2+C.y;',
-'  vec3 x3=x0-.5;',
-'  i=mod289(i);',
-'  vec4 p=perm(perm(perm(',
-'    i.z+vec4(0,i1.z,i2.z,1))',
-'    +i.y+vec4(0,i1.y,i2.y,1))',
-'    +i.x+vec4(0,i1.x,i2.x,1));',
-'  vec4 j=p-49.*floor(p*(1./49.));',
-'  vec4 x_=floor(j*(1./7.));',
-'  vec4 y_=floor(j-7.*x_);',
-'  vec4 ox=(x_*2.+.5)/7.-1.;',
-'  vec4 oy=(y_*2.+.5)/7.-1.;',
-'  vec4 dg=vec4(dot(vec3(ox.x,oy.x,0),x0),dot(vec3(ox.y,oy.y,0),x1),',
-'               dot(vec3(ox.z,oy.z,0),x2),dot(vec3(ox.w,oy.w,0),x3));',
-'  vec4 m=max(.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.);',
-'  m=m*m;',
-'  return 42.*dot(m*m,dg);',
-'}',
-'',
-'float fbm(vec3 p){',
-'  float f=0.,a=.5;',
-'  for(int i=0;i<6;i++){f+=a*snoise(p);p*=2.02;a*=.48;}',
-'  return f;',
-'}',
-'',
-'// ── Iridescent palette ──',
-'vec3 iridescent(float t,float iri){',
-'  vec3 a=vec3(.5);vec3 b=vec3(.5);',
-'  vec3 c=vec3(1.);vec3 d=vec3(.0,.33,.67);',
-'  vec3 base=a+b*cos(6.28318*(c*t+d));',
-'  return mix(vec3(dot(base,vec3(.299,.587,.114))),base,iri);',
-'}',
-'',
-'// ── Chrome reflection model ──',
-'vec3 chromeReflect(vec2 p,float t,float nDot,float refl){',
-'  // Fake environment map — gradient sky + ground',
-'  float envY=nDot*.8+.1;',
-'  vec3 sky=mix(vec3(.05,.05,.12),vec3(.2,.25,.35),smoothstep(0.,.8,envY));',
-'  vec3 ground=mix(vec3(.08,.06,.05),vec3(.15,.12,.1),smoothstep(-.5,0.,envY));',
-'  vec3 env=mix(ground,sky,smoothstep(-.1,.1,envY));',
-'  // Bright highlights',
-'  float highlight=pow(max(nDot,0.),12.)*.8;',
-'  env+=vec3(highlight);',
-'  return env*refl;',
-'}',
-'',
-'void main(){',
-'  vec2 uv=(2.*gl_FragCoord.xy-u_res)/min(u_res.x,u_res.y);',
-'  float t=u_time;',
-'  float refl=u_cfg.x;',
-'  float iri=u_cfg.y;',
-'  float mPull=u_cfg.z;',
-'  float eLit=u_cfg.w;',
-'',
-'  // ── Mouse gravity well ──',
-'  vec2 mp=(2.*u_mouse*u_res-u_res)/min(u_res.x,u_res.y);',
-'  float md=length(uv-mp);',
-'  float mInfl=mPull/(1.+md*md/('+MOUSE_RADIUS.toFixed(2)+'*'+MOUSE_RADIUS.toFixed(2)+'));',
-'  vec2 p=uv+(mp-uv)*mInfl;',
-'',
-'  // ── Multi-pass domain warping for organic flow ──',
-'  vec3 q=vec3(p*' + SCALE.toFixed(1) + ',t);',
-'  float n1=fbm(q);',
-'  float n2=fbm(q+vec3(n1*1.4,n1*0.9,0.3));',
-'  float n3=fbm(q+vec3(n2*1.2,-n2*1.1,n1*0.5+t*0.15));',
-'',
-'  // ── Surface normal estimation (for lighting) ──',
-'  float eps=0.008;',
-'  float nR=fbm(vec3((p.x+eps)*' + SCALE.toFixed(1) + ',p.y*' + SCALE.toFixed(1) + ',t)',
-'           +vec3(n2*1.2,-n2*1.1,n1*0.5+t*0.15));',
-'  float nU=fbm(vec3(p.x*' + SCALE.toFixed(1) + ',(p.y+eps)*' + SCALE.toFixed(1) + ',t)',
-'           +vec3(n2*1.2,-n2*1.1,n1*0.5+t*0.15));',
-'  vec3 normal=normalize(vec3((n3-nR)/eps,(n3-nU)/eps,1.));',
-'',
-'  // ── Lighting ──',
-'  vec3 lightDir=normalize(vec3(0.4,0.6,1.0));',
-'  float nDot=dot(normal,lightDir);',
-'  float diffuse=max(nDot,0.)*0.3;',
-'',
-'  // Specular',
-'  vec3 viewDir=vec3(0.,0.,1.);',
-'  vec3 halfDir=normalize(lightDir+viewDir);',
-'  float spec=pow(max(dot(normal,halfDir),0.),64.)*1.2;',
-'',
-'  // Rim/edge lighting',
-'  float rim=pow(1.-max(dot(normal,viewDir),0.),3.)*eLit;',
-'',
-'  // ── Color composition ──',
-'  // Base chrome reflection',
-'  vec3 chrome=chromeReflect(p,t,nDot,refl);',
-'',
-'  // Iridescent layer — prismatic refraction from surface curvature',
-'  float curvature=n3*0.5+0.5;',
-'  vec3 prism=iridescent(curvature+t*0.05,iri);',
-'',
-'  // Combine',
-'  vec3 col=chrome+prism*0.35;',
-'  col+=vec3(spec)*vec3(1.,0.97,0.9);',
-'  col+=vec3(rim)*mix(vec3(0.2,0.25,0.4),prism*0.4,iri);',
-'  col+=diffuse*vec3(0.1,0.1,0.15);',
-'',
-'  // Depth — subtle darkening of valleys',
-'  float depth=smoothstep(-0.3,0.5,n3);',
-'  col*=0.6+depth*0.5;',
-'',
-'  // ── Mouse proximity glow ──',
-'  float mouseGlow=exp(-md*md*4.)*0.15;',
-'  col+=prism*mouseGlow;',
-'',
-'  // ── Vignette ──',
-'  vec2 vUV=gl_FragCoord.xy/u_res;',
-'  float vig=1.-dot(vUV-.5,vUV-.5)*1.3;',
-'  col*=max(vig,0.);',
-'',
-'  gl_FragColor=vec4(col,1.);',
-'}'
+const FRAG = [
+	'#ifdef GL_FRAGMENT_PRECISION_HIGH',
+	'precision highp float;',
+	'#else',
+	'precision mediump float;',
+	'#endif',
+	'uniform vec2 u_res;',
+	'uniform float u_scale;',
+	'uniform float u_time;',
+	'uniform vec3 u_mouse;',
+	'uniform vec3 u_metal;',
+	'uniform vec3 u_c1;',
+	'uniform vec3 u_c2;',
+	'uniform vec3 u_hi;',
+	'uniform float u_dark;',
+	'float hash(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }',
+	'float noise(vec2 p) {',
+	'	vec2 i = floor(p), f = fract(p);',
+	'	vec2 u = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);',
+	'	return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);',
+	'}',
+	'float fbm(vec2 p) {',
+	'	float v = 0.0, a = 0.5;',
+	'	mat2 m = mat2(1.6, 1.2, -1.2, 1.6);',
+	'	for (int i = 0; i < 4; i++) { v += a * noise(p); p = m * p; a *= 0.5; }',
+	'	return v;',
+	'}',
+	'void main() {',
+	'	vec2 px = gl_FragCoord.xy / u_scale;',
+	'	vec2 res = u_res / u_scale;',
+	'	float t = u_time;',
+	'	vec2 m = vec2(u_mouse.x, res.y - u_mouse.y);',
+	'	vec2 dm = m - px;',
+	'	float near = u_mouse.z * exp(-dot(dm, dm) / 52000.0);',
+	'	vec2 p = (px + dm * near * 0.18 * ' + MOUSE_PULL.toFixed(3) + ') / res.y * ' + SCALE.toFixed(3) + ';',
+	'	vec2 q = vec2(fbm(p + vec2(0.0, t * 0.11)), fbm(p + vec2(5.2, 1.3) - t * 0.09));',
+	'	vec2 w = p + ' + WARP.toFixed(3) + ' * q + vec2(t * 0.05, -t * 0.04);',
+	'	float e = 0.02;',
+	'	float f = fbm(w);',
+	'	float fx = fbm(w + vec2(e, 0.0));',
+	'	float fy = fbm(w + vec2(0.0, e));',
+	'	vec3 n = normalize(vec3((f - fx) / e * 0.15 * ' + BUMP.toFixed(3) + ', (f - fy) / e * 0.15 * ' + BUMP.toFixed(3) + ', 0.2));',
+	// A fake studio environment: dark floor, a hard wavy horizon, a bright sky, one key light and contour streaks
+	'	float env = n.y * 0.8 + n.x * 0.3;',
+	'	float sky = smoothstep(-0.03, 0.03, env + 0.12 * sin(n.x * 4.0 + t * 0.3));',
+	'	float lum = mix(0.08 + 0.25 * smoothstep(-1.0, 0.0, env), 0.5 + 0.5 * smoothstep(0.0, 0.9, env), sky);',
+	'	float streak = pow(0.5 + 0.5 * cos(f * 18.0 + env * 4.0), 10.0) * 0.45;',
+	'	float spec = (pow(max(dot(n, normalize(vec3(0.35, 0.55, 1.0))), 0.0), 48.0) + streak) * ' + REFLECTIVITY.toFixed(3) + ';',
+	'	vec3 shimmer = mix(u_c1, u_c2, smoothstep(0.25, 0.75, q.x + 0.3 * sin(t * 0.2 + f * 6.0)));',
+	'	vec3 metal = mix(u_metal, shimmer, ' + IRIDESCENCE.toFixed(3) + ' * (0.4 + 0.6 * (1.0 - sky)));',
+	// The pool lies along the left and right edges and bulges into the corners; the surface ripples its shoreline
+	'	vec2 r = abs(px - res * 0.5) / (res * 0.5);',
+	'	float edge = r.x + 0.3 * r.y * r.y * r.y;',
+	'	float shore = 1.0 - ' + POOL_SIZE.toFixed(3) + ' + (f - 0.5) * 0.5 - near * 0.2 * ' + MOUSE_PULL.toFixed(3) + ';',
+	'	float pool = smoothstep(shore, shore + 0.05, edge);',
+	'	float rim = smoothstep(shore - 0.01, shore + 0.02, edge) * (1.0 - smoothstep(shore + 0.02, shore + 0.06, edge));',
+	'	float band = abs(px.x - res.x * 0.5) / ' + BAND_WIDTH.toFixed(1) + ';',
+	'	float calm = 1.0 - ' + CENTER_CALM.toFixed(3) + ' * (1.0 - smoothstep(0.55, 1.25, band));',
+	'	float k = calm * ' + INTENSITY.toFixed(3) + ';',
+	'	vec3 col;',
+	'	float a;',
+	'	if (u_dark > 0.5) {',
+	// On dark themes the metal glows: brightness becomes light
+	'		col = metal * lum + mix(u_hi, shimmer, 0.3) * (spec * pool + rim * 0.4);',
+	'		a = pool * (0.1 + 0.6 * lum + spec * 0.8) + rim * 0.3;',
+	'	} else {',
+	// On light themes the metal is ink: its shadowed side darkens, highlights let the page through
+	'		col = mix(metal, shimmer, 0.55) * 0.7;',
+	'		a = pool * (0.04 + 0.7 * pow(1.0 - lum, 1.3)) * (1.0 - min(spec, 1.0) * 0.85) + rim * 0.3;',
+	'	}',
+	'	a = clamp(a * k, 0.0, 0.95);',
+	'	gl_FragColor = vec4(min(col * a, vec3(a)), a);',
+	'}',
 ].join('\n');
 
-/* ── GL setup ── */
-function compile(type, src) {
-    var s = gl.createShader(type);
-    gl.shaderSource(s, src);
-    gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-        throw new Error(gl.getShaderInfoLog(s));
-    }
-    return s;
+let canvas, gl, program, buffer;
+let loc = {};
+let w = 0, h = 0;
+let last = 0, time = 0, reduced = false;
+const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
+const colors = { metal: hexToRgb(CHROME_COLOR), c1: hexToRgb(COLOR_A), c2: hexToRgb(COLOR_B), hi: hexToRgb(COLOR_C), dark: 1 };
+
+function hexToRgb(hex) {
+	const n = parseInt(hex.slice(1), 16);
+	return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
 }
 
-function initGL() {
-    var vs = compile(gl.VERTEX_SHADER, VERT);
-    var fs = compile(gl.FRAGMENT_SHADER, FRAG);
-    program = gl.createProgram();
-    gl.attachShader(program, vs);
-    gl.attachShader(program, fs);
-    gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        throw new Error(gl.getProgramInfoLog(program));
-    }
-    gl.useProgram(program);
-
-    var buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
-    var a = gl.getAttribLocation(program, 'a_pos');
-    gl.enableVertexAttribArray(a);
-    gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
-
-    uTime = gl.getUniformLocation(program, 'u_time');
-    uRes = gl.getUniformLocation(program, 'u_res');
-    uMouse = gl.getUniformLocation(program, 'u_mouse');
-    uCfg = gl.getUniformLocation(program, 'u_cfg');
-    startTime = performance.now() / 1000;
+function applyTheme(t) {
+	if (!t) return;
+	colors.dark = t.dark === false ? 0 : 1;
+	if (!FOLLOW_THEME || !t.rgb) return;
+	colors.metal = t.rgb.muted;
+	colors.c1 = t.rgb.accent;
+	colors.c2 = t.rgb.accent2;
+	colors.hi = colors.dark ? t.rgb.text : t.rgb.accent3;
 }
 
-function render() {
-    var t = (performance.now() / 1000 - startTime) * SPEED;
-    gl.viewport(0, 0, w, h);
-    gl.uniform1f(uTime, t);
-    gl.uniform2f(uRes, w, h);
-    gl.uniform2f(uMouse, mouseNX, mouseNY);
-    gl.uniform4f(uCfg, REFLECTIVITY, IRIDESCENCE, MOUSE_PULL, EDGE_LIGHT);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-    requestAnimationFrame(render);
+function compile(type, source) {
+	const shader = gl.createShader(type);
+	gl.shaderSource(shader, source);
+	gl.compileShader(shader);
+	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(shader));
+	return shader;
 }
 
-self.onmessage = function(e) {
-    switch (e.data.type) {
-        case 'init':
-            canvas = e.data.canvas;
-            w = e.data.width; h = e.data.height;
-            canvas.width = w; canvas.height = h;
-            gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-            if (!gl) {
-                var c = canvas.getContext('2d');
-                c.fillStyle = '#0a0a1a'; c.fillRect(0,0,w,h);
-                c.fillStyle = '#ff4466'; c.font = '16px monospace';
-                c.textAlign = 'center';
-                c.fillText('WebGL not available', w/2, h/2);
-                return;
-            }
-            try { initGL(); render(); }
-            catch(err) {
-                var c = canvas.getContext('2d');
-                if(c){c.fillStyle='#0a0a1a';c.fillRect(0,0,w,h);
-                c.fillStyle='#ff4466';c.font='12px monospace';c.textAlign='center';
-                c.fillText('Shader: '+err.message,w/2,h/2);}
-            }
-            break;
-        case 'resize':
-            w = e.data.width; h = e.data.height;
-            canvas.width = w; canvas.height = h;
-            break;
-        case 'mousemove':
-            mouseNX = e.data.x / w;
-            mouseNY = 1.0 - (e.data.y / h);
-            break;
-    }
+function setup() {
+	program = gl.createProgram();
+	gl.attachShader(program, compile(gl.VERTEX_SHADER, VERT));
+	gl.attachShader(program, compile(gl.FRAGMENT_SHADER, FRAG));
+	gl.bindAttribLocation(program, 0, 'a_pos');
+	gl.linkProgram(program);
+	if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program));
+	gl.useProgram(program);
+	buffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+	gl.enableVertexAttribArray(0);
+	gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+	['u_res', 'u_scale', 'u_time', 'u_mouse', 'u_metal', 'u_c1', 'u_c2', 'u_hi', 'u_dark'].forEach((name) => {
+		loc[name] = gl.getUniformLocation(program, name);
+	});
+	gl.disable(gl.BLEND);
+	size();
+}
+
+function size() {
+	canvas.width = Math.max(1, Math.round(w * RENDER_SCALE));
+	canvas.height = Math.max(1, Math.round(h * RENDER_SCALE));
+	if (gl && !gl.isContextLost()) gl.viewport(0, 0, canvas.width, canvas.height);
+}
+
+function frame(now) {
+	requestAnimationFrame(frame);
+	if (!program || gl.isContextLost()) return;
+	if (last && now - last < 1000 / MAX_FPS - 2) return;
+	const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
+	last = now;
+	time = (time + dt * 0.2 * MOTION * (reduced ? REDUCED_SPEED : 1)) % 2000;
+	mouse.target = Math.max(0, mouse.target - dt * 0.35);
+	mouse.amount += (mouse.target - mouse.amount) * Math.min(1, dt * (reduced ? 1 : 2.5));
+	gl.uniform2f(loc.u_res, canvas.width, canvas.height);
+	gl.uniform1f(loc.u_scale, canvas.width / Math.max(1, w));
+	gl.uniform1f(loc.u_time, time);
+	gl.uniform3f(loc.u_mouse, mouse.x, mouse.y, mouse.amount);
+	gl.uniform3fv(loc.u_metal, colors.metal);
+	gl.uniform3fv(loc.u_c1, colors.c1);
+	gl.uniform3fv(loc.u_c2, colors.c2);
+	gl.uniform3fv(loc.u_hi, colors.hi);
+	gl.uniform1f(loc.u_dark, colors.dark);
+	gl.drawArrays(gl.TRIANGLES, 0, 3);
+}
+
+function start() {
+	const opts = { alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false, powerPreference: 'low-power' };
+	gl = canvas.getContext('webgl2', opts) || canvas.getContext('webgl', opts);
+	if (!gl) {
+		console.warn('Liquid Chrome: WebGL is not available, so the chrome is not drawn.');
+		return;
+	}
+	canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); program = null; });
+	canvas.addEventListener('webglcontextrestored', () => {
+		try { setup(); } catch (err) { console.error('Liquid Chrome:', err.message); }
+	});
+	try {
+		setup();
+		requestAnimationFrame(frame);
+	} catch (err) {
+		console.error('Liquid Chrome:', err.message);
+	}
+}
+
+self.onmessage = (e) => {
+	const d = e.data;
+	switch (d.type) {
+		case 'init':
+			canvas = d.canvas;
+			w = d.width;
+			h = d.height;
+			reduced = !!d.reducedMotion;
+			applyTheme(d.theme);
+			start();
+			break;
+		case 'resize':
+			w = d.width;
+			h = d.height;
+			if (canvas) size();
+			break;
+		case 'theme':
+			applyTheme(d);
+			break;
+		case 'motion':
+			reduced = !!d.reducedMotion;
+			break;
+		case 'mousemove':
+			mouse.x = d.x;
+			mouse.y = d.y;
+			mouse.target = 1;
+			break;
+	}
 };
