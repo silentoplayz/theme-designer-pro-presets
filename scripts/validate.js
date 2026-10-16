@@ -145,9 +145,10 @@ function validateCanvasFx() {
     if (/setInterval\([\s\S]{0,160}?heartbeat/.test(code)) {
       fail(f, 'sends a heartbeat, which the engine ignores; remove the setInterval');
     }
-    const dom = ['document', 'window', 'localStorage', 'alert'].find(word => new RegExp(`\\b${word}\\b`).test(code));
+    // Globals only: a property such as colors.alert is fine
+    const dom = ['document', 'window', 'localStorage', 'alert\\s*\\('].find(word => new RegExp(`(^|[^.\\w$])${word}`).test(code) && (word.startsWith('alert') || new RegExp(`(^|[^.\\w$])${word}\\b`).test(code)));
     if (dom) {
-      fail(f, `uses \`${dom}\`, which moves it out of the worker`);
+      fail(f, `uses \`${dom.replace(/\\.*/, '')}\`, which moves it out of the worker`);
     }
     if (/getContext\(\s*['"]webgl2?['"]/.test(code) && !code.includes('webglcontextlost')) {
       fail(f, 'uses WebGL without handling webglcontextlost');
