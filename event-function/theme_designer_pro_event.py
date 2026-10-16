@@ -1465,10 +1465,43 @@ class Event:
                         
                         if (useWorker) {
                             // REAL WORKER MODE (OffscreenCanvas)
-                            const blob = new Blob([config.canvasScript], { type: 'application/javascript' });
+                            // Firefox keeps running a worker's frames while the page gets none,
+                            // and hands the whole backlog to the GPU when it returns, enough to
+                            // fill RAM. This runs ahead of the script and holds its frame
+                            // requests meanwhile. One line, so the script's line numbers hold.
+                            const _framePause = [
+                                '(function () {',
+                                'var raf = self.requestAnimationFrame, caf = self.cancelAnimationFrame;',
+                                'if (!raf) return;',
+                                'var hold = false, next = 0, frames = new Map();',
+                                'function ask(id, f) { f.n = raf.call(self, function (t) { frames.delete(id); f.cb(t); }); }',
+                                'self.requestAnimationFrame = function (cb) { var id = ++next, f = { cb: cb, n: 0 }; frames.set(id, f); if (!hold) ask(id, f); return id; };',
+                                'self.cancelAnimationFrame = function (id) { var f = frames.get(id); if (!f) return; frames.delete(id); if (f.n) caf.call(self, f.n); };',
+                                'self.addEventListener("message", function (e) {',
+                                'if (!e.data || e.data.type !== "owui-hold-frames") return;',
+                                'e.stopImmediatePropagation();',
+                                'hold = !!e.data.hold;',
+                                'frames.forEach(function (f, id) { if (hold && f.n) { caf.call(self, f.n); f.n = 0; } else if (!hold && !f.n) ask(id, f); });',
+                                '});',
+                                '})();'
+                            ].join(' ');
+                            const blob = new Blob([_framePause, config.canvasScript], { type: 'application/javascript' });
                             const objectURL = URL.createObjectURL(blob);
                             const worker = new Worker(objectURL);
                             let workerFailed = false;
+                            // The page gets no frames while hidden, and also while its window is
+                            // covered, which Firefox still reports as visible. Timers keep running
+                            // then, so a stale page frame is what holds the worker's frames.
+                            let _lastPageFrame = performance.now(), _framesHeld = null;
+                            const _syncFrames = () => {
+                                const hold = document.visibilityState === 'hidden' || performance.now() - _lastPageFrame > 500;
+                                if (hold === _framesHeld) return;
+                                _framesHeld = hold;
+                                worker.postMessage({ type: 'owui-hold-frames', hold: hold });
+                            };
+                            _syncFrames();
+                            document.addEventListener('visibilitychange', _syncFrames);
+                            const _framesTimer = setInterval(_syncFrames, 250);
 
                             // Fallback: if the script throws (e.g., uses `document` which Workers lack),
                             // terminate the worker and re-run via main-thread fallback mode.
@@ -1576,6 +1609,8 @@ class Event:
                             cancelAnimationFrame(_mouseRaf);
                             (function _sendInput() {
                                 _mouseRaf = requestAnimationFrame(_sendInput);
+                                _lastPageFrame = performance.now();
+                                if (_framesHeld) _syncFrames();
                                 if (_mouseDirty) { worker.postMessage({ type: 'mousemove', x: _mouseX, y: _mouseY }); _mouseDirty = false; }
                                 if (_touchDirty) { worker.postMessage({ type: 'touchmove', touches: _touchData }); _touchDirty = false; }
                             })();
@@ -1584,6 +1619,8 @@ class Event:
                             window.addEventListener('touchend', _onTouchEnd, { passive: true });
                             
                             window.owuiCanvasCleanups.push(() => {
+                                document.removeEventListener('visibilitychange', _syncFrames);
+                                clearInterval(_framesTimer);
                                 window.removeEventListener('mousemove', _onMouse);
                                 window.removeEventListener('resize', _onResize);
                                 window.removeEventListener('message', _onIframeMsg);
@@ -6590,7 +6627,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         <p>The runtime doesn&rsquo;t listen to anything your script posts back with <code>self.postMessage()</code>. A <code>heartbeat</code> message, which many bundled presets still send, does nothing and is optional; a script needs no keepalive to keep running.</p>
 
                         <p class="doc-subheading">Animation Loop</p>
-                        <p><code>requestAnimationFrame()</code> is available inside Web Workers that hold an <code>OffscreenCanvas</code>. Use it for your render loop. Avoid using <code>setInterval</code> for rendering &mdash; <code>requestAnimationFrame</code> syncs to the display refresh rate and pauses when the tab is hidden.</p>
+                        <p><code>requestAnimationFrame()</code> is available inside Web Workers that hold an <code>OffscreenCanvas</code>. Use it for your render loop. Avoid using <code>setInterval</code> for rendering &mdash; <code>requestAnimationFrame</code> syncs to the display refresh rate, and whenever the page stops getting frames, because its tab is hidden or its window is covered, the runtime holds its callbacks until frames come back. Firefox doesn&rsquo;t pause a worker&rsquo;s frames on its own, and a page that keeps drawing unseen can fill the GPU&rsquo;s memory. A <code>setInterval</code> loop keeps drawing all the same.</p>
 
                         <p class="doc-subheading">Lifecycle &amp; Cleanup</p>
                         <p>The runtime terminates the worker and revokes its Blob URL when the script or its enabled state changes: switching to a mode with a different script, turning Canvas FX off, or opening a login page where <b>Show on Auth Pages</b> is off. Switching between modes that use the same script keeps the running worker. Your script doesn&rsquo;t need to clean up after itself; termination is immediate.</p>

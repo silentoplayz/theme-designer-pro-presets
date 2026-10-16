@@ -316,6 +316,64 @@ test('a Canvas FX animation runs on app pages and not where it\'s hidden', async
   if (await auth.$('#owui-theme-canvas-bg')) throw new Error('the canvas runs on the sign-in page');
 });
 
+test('a Canvas FX animation draws no frames while the page gets none', async ({ admin }) => {
+  // Counts its frames and reports them, and any message it shouldn't see, to the page
+  const script = [
+    'var frames = 0, channel = new BroadcastChannel("tdp-frames");',
+    'function tick() { frames++; requestAnimationFrame(tick); }',
+    'self.onmessage = function (e) {',
+    '  if (e.data && e.data.type === "init") requestAnimationFrame(tick);',
+    '  if (e.data && e.data.type === "owui-hold-frames") channel.postMessage("seen");',
+    '};',
+    'setInterval(function () { channel.postMessage(frames); }, 100);',
+  ].join('\n');
+  await saveTheme(admin, markerTheme('instance', { canvasEnabled: true, canvasScript: script }));
+  const page = await openPage({ token: admin });
+  await page.goto(BASE + '/');
+  await loaderReady(page);
+  await page.evaluate(() => {
+    window.tdpFrames = 0;
+    window.tdpSeen = false;
+    new BroadcastChannel('tdp-frames').onmessage = (e) => {
+      if (e.data === 'seen') window.tdpSeen = true;
+      else window.tdpFrames = e.data;
+    };
+  });
+  const frames = () => page.evaluate(() => window.tdpFrames);
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  // A hidden tab, and a window covered by another app: Firefox calls the
+  // second visible, but the page gets no frames until it's uncovered
+  const ways = {
+    hidden: (on) => page.evaluate((h) => {
+      Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => (h ? 'hidden' : 'visible') });
+      document.dispatchEvent(new Event('visibilitychange'));
+    }, on),
+    covered: (on) => page.evaluate((c) => {
+      if (c) {
+        window.tdpHeldFrames = [];
+        window.tdpRaf = window.requestAnimationFrame;
+        window.requestAnimationFrame = (cb) => { window.tdpHeldFrames.push(cb); return 0; };
+      } else {
+        window.requestAnimationFrame = window.tdpRaf;
+        window.tdpHeldFrames.forEach((cb) => window.requestAnimationFrame(cb));
+      }
+    }, on),
+  };
+  for (const [way, set] of Object.entries(ways)) {
+    const before = await frames();
+    await waitFor(`frames on screen, before ${way}`, async () => (await frames()) > before + 10 || await frames());
+    await set(true);
+    await wait(1000);
+    const heldAt = await frames();
+    await wait(1500);
+    const drawn = (await frames()) - heldAt;
+    if (drawn > 0) throw new Error(`the script drew ${drawn} frames while the page was ${way}`);
+    await set(false);
+    await waitFor(`frames again once no longer ${way}`, async () => (await frames()) > heldAt + 10 || await frames());
+  }
+  if (await page.evaluate(() => window.tdpSeen)) throw new Error('the script received the message that holds its frames');
+});
+
 // Open WebUI's own shortcut for Settings, once the app listens for it
 async function openSettings(page) {
   await waitFor('Settings to open', async () => {
