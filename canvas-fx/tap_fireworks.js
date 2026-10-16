@@ -1,6 +1,6 @@
 /**
  * Title: Tap Fireworks
- * Description: Tap anywhere to burst a firework in your theme's accent colors, quick taps on one spot build bigger bursts, and small rockets go up in the outer thirds while you rest.
+ * Description: Tap anywhere to burst a firework in your theme's accent colors, quick taps on one spot build bigger bursts, and small rockets go up beside the chat column while you rest.
  */
 
 /* ────────── CONFIGURABLE VARIABLES ────────── */
@@ -14,7 +14,7 @@ const MOTION        = 1;     // overall speed of the show (0.2-2)
 const REDUCED_SPEED = 0.3;   // speed kept when the viewer asks to reduce motion (0-1)
 const IDLE_EVERY    = 1.9;   // average seconds between resting rockets; 0 turns them off (0-30)
 const CENTER_CALM   = 0.7;   // how much bursts soften behind the chat column (0-1)
-const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH    = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const MAX_SPARKS    = 900;   // hard cap on live sparks (200-2000)
 const FOLLOW_THEME  = true;  // take the colors from the theme's palette
 const COLOR_A       = '#ff8f6b';  // first burst color when not following the theme
@@ -24,7 +24,7 @@ const SPARK_COLOR   = '#ffd77a';  // glitter color
 /* ──────────────────────────────────────────── */
 
 const SPRITE = 32, MAX_ROCKETS = 8, NCOL = 4;
-let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, time = 0, reduced = false, dark = true;
+let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, time = 0, reduced = false, dark = true, column = null;
 let calmLut = new Float32Array(1), idleWait = 0.4, lastTap = -10, tapX = 0, tapY = 0, combo = 0;
 const sprites = [];
 let palette = [COLOR_A, COLOR_B, COLOR_C, SPARK_COLOR];
@@ -93,17 +93,34 @@ function size(oldW, oldH) {
 	canvas.width = Math.max(1, Math.round(w * dpr));
 	canvas.height = Math.max(1, Math.round(h * dpr));
 	ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-	calmLut = new Float32Array((w >> 2) + 2);
-	for (let i = 0; i < calmLut.length; i++) {
-		const d = Math.abs(i * 4 - w / 2) / BAND_WIDTH;
-		const t = Math.min(1, Math.max(0, (d - 0.55) / 0.7));
-		calmLut[i] = 1 - CENTER_CALM * (1 - t * t * (3 - 2 * t));
-	}
+	calmBuild();
 	if (!oldW) return;
 	// Keep the show in place on the resized screen
 	const sx = w / oldW, sy = h / oldH;
 	for (let i = 0; i < count; i++) { px[i] *= sx; py[i] *= sy; }
 	for (let i = 0; i < MAX_ROCKETS; i++) { rx[i] *= sx; ry[i] *= sy; bx[i] *= sx; by[i] *= sy; }
+}
+
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+
+// The calm table, from where the chat column sits; rebuilt on resize and layout
+function calmBuild() {
+	calmLut = new Float32Array((w >> 2) + 2);
+	for (let i = 0; i < calmLut.length; i++) {
+		const d = Math.abs(i * 4 - colX()) / colHalf();
+		const t = Math.min(1, Math.max(0, (d - 0.55) / 0.7));
+		calmLut[i] = 1 - CENTER_CALM * (1 - t * t * (3 - 2 * t));
+	}
+}
+
+// A spot beside the chat column, on the side with room, kept off the screen's very edge
+function besideX() {
+	const left = Math.max(0, colX() - colHalf()), right = Math.max(0, w - colX() - colHalf());
+	if (left + right < 60) return Math.random() < 0.5 ? w * (0.04 + Math.random() * 0.17) : w - w * (0.04 + Math.random() * 0.17);
+	const r = Math.random() * (left + right);
+	return Math.max(w * 0.03, Math.min(w * 0.97, r < left ? r * 0.85 : w - (r - left) * 0.85));
 }
 
 function calm(x) {
@@ -134,8 +151,7 @@ function burst(x, y, power, c, gentle) {
 function launch() {
 	for (let i = 0; i < MAX_ROCKETS; i++) {
 		if (ron[i]) continue;
-		const side = Math.random() < 0.5;
-		rx[i] = side ? w - w * (0.04 + Math.random() * 0.17) : w * (0.04 + Math.random() * 0.17);
+		rx[i] = besideX();
 		ry[i] = h + 6;
 		const rise = h * (0.5 + Math.random() * 0.3);
 		rvy[i] = -Math.sqrt(2 * 420 * rise);
@@ -147,9 +163,7 @@ function launch() {
 
 // Reduced motion: no rockets, only a slow bloom that opens in place
 function bloom() {
-	const side = Math.random() < 0.5;
-	const x = side ? w - w * (0.05 + Math.random() * 0.2) : w * (0.05 + Math.random() * 0.2);
-	burst(x, h * (0.2 + Math.random() * 0.4), 1.4, Math.floor(Math.random() * 3), true);
+	burst(besideX(), h * (0.2 + Math.random() * 0.4), 1.4, Math.floor(Math.random() * 3), true);
 }
 
 function frame(now) {
@@ -247,6 +261,7 @@ self.onmessage = (e) => {
 			ctx = canvas.getContext('2d');
 			w = d.width; h = d.height; dpr = Math.min(d.dpr || 1, 2);
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			buildSprites();
 			size(0, 0);
@@ -263,6 +278,10 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			if (canvas) calmBuild();
 			break;
 		case 'mousedown':
 			tap(d.x, d.y);

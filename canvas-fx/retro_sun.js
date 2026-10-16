@@ -17,7 +17,7 @@ const PULSE_SPEED   = 0.5;   // speed of the glow's slow breathing (0-3)
 const CURSOR_GLOW   = 1;     // how much the glow swells near the cursor (0-2)
 const REDUCED_SPEED = 0.15;  // share of the motion kept under reduced motion (0-1)
 const CENTER_CALM   = 0.8;   // how much the grid and stars fade behind the chat column (0-1)
-const BAND_WIDTH    = 520;   // half-width of the calm band, in px (300-900)
+const BAND_WIDTH    = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const FOLLOW_THEME  = true;  // take the colors from the theme's accents
 const SUN_TOP       = '#ff6ec7';  // sun's upper color when not following the theme
 const SUN_BOTTOM    = '#ffb347';  // sun's lower color
@@ -26,7 +26,7 @@ const GRID_COLOR    = '#b45cff';  // grid and horizon
 
 const MAX_STARS = 300, TAU = Math.PI * 2;
 
-let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, reduced = false, dark = true;
+let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, reduced = false, dark = true, column = null;
 let top = hex(SUN_TOP), bottom = hex(SUN_BOTTOM), grid = hex(GRID_COLOR), star = [255, 255, 255];
 let sunBody, sunCut, sunG, glowSprite, hazeSprite, gridStyle, horizonStyle, starStyle;
 let sunR = 100, sunX = 0, horizonY = 0, stripePhase = 0, gridPhase = 0, pulseT = 0;
@@ -38,8 +38,11 @@ const mouse = { x: -10000, y: -10000, amount: 0, boost: 0 };
 function hex(c) { const n = parseInt(c.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
 function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
 function rgba(c, a) { return 'rgba(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ',' + a.toFixed(3) + ')'; }
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
 function band(x) {
-	const t = Math.min(1, Math.max(0, (Math.abs(x - w / 2) / BAND_WIDTH - 0.55) / 0.7));
+	const t = Math.min(1, Math.max(0, (Math.abs(x - colX()) / colHalf() - 0.55) / 0.7));
 	return 1 - t * t * (3 - 2 * t);
 }
 function calm(x) { return 1 - CENTER_CALM * band(x); }
@@ -70,23 +73,27 @@ function sprite(size, col, a0, a1) {
 
 // A horizontal gradient that fades a stroke over the chat column
 function columnFade(col, a) {
-	const g = ctx.createLinearGradient(0, 0, w, 0), k = 1 - CENTER_CALM;
+	const g = ctx.createLinearGradient(0, 0, w, 0), k = 1 - CENTER_CALM, c = colX() / w, b = colHalf() / w;
+	const at = (u) => Math.min(1, Math.max(0, u));
 	g.addColorStop(0, rgba(col, a));
-	g.addColorStop(Math.max(0, 0.5 - BAND_WIDTH * 1.25 / w), rgba(col, a));
-	g.addColorStop(Math.max(0, 0.5 - BAND_WIDTH * 0.55 / w), rgba(col, a * k));
-	g.addColorStop(Math.min(1, 0.5 + BAND_WIDTH * 0.55 / w), rgba(col, a * k));
-	g.addColorStop(Math.min(1, 0.5 + BAND_WIDTH * 1.25 / w), rgba(col, a));
+	g.addColorStop(at(c - b * 1.25), rgba(col, a));
+	g.addColorStop(at(c - b * 0.55), rgba(col, a * k));
+	g.addColorStop(at(c + b * 0.55), rgba(col, a * k));
+	g.addColorStop(at(c + b * 1.25), rgba(col, a));
 	g.addColorStop(1, rgba(col, a));
 	return g;
 }
 
-// Caches rebuilt on resize and theme change: the sun body, its glow and the grid styles
+// Caches rebuilt on resize, layout and theme change: the sun body, its glow and the grid styles
 function build() {
 	sunR = Math.max(40, Math.min(w, h) * SUN_SIZE);
 	horizonY = Math.round(h * HORIZON);
-	sunX = w * SUN_X;
-	if (Math.abs(SUN_X - 0.5) > 0.05) sunX = SUN_X > 0.5 ? Math.max(sunX, w / 2 + BAND_WIDTH * 0.9) : Math.min(sunX, w / 2 - BAND_WIDTH * 0.9);
-	sunX = Math.max(sunR * 1.1, Math.min(w - sunR * 1.1, sunX));
+	// The sun sits just past the calm band on its preferred side, or the other side when that one has no room
+	const lo = sunR * 1.1, hi = w - sunR * 1.1, off = colHalf() + sunR * 0.2;
+	const right = Math.max(w * SUN_X, colX() + off), left = Math.min(w * SUN_X, colX() - off);
+	const first = SUN_X > 0.5 ? right : left, other = SUN_X > 0.5 ? left : right;
+	sunX = Math.abs(SUN_X - 0.5) <= 0.05 ? w * SUN_X : first >= lo && first <= hi ? first : other >= lo && other <= hi ? other : first;
+	sunX = Math.max(lo, Math.min(hi, sunX));
 	const s = Math.ceil(sunR * 2 * dpr) + 4;
 	sunBody = new OffscreenCanvas(s, s);
 	const g = sunBody.getContext('2d');
@@ -229,6 +236,7 @@ self.onmessage = (e) => {
 			ctx = canvas.getContext('2d');
 			w = d.width; h = d.height; dpr = Math.min(d.dpr || 1, 2);
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			size();
 			requestAnimationFrame(frame);
@@ -242,6 +250,10 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			if (canvas) size();
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

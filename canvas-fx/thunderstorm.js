@@ -1,6 +1,6 @@
 /**
  * Title: Thunderstorm
- * Description: Slanting rain at three depths under drifting cloud banks, with branching lightning that strikes the outer thirds above a low city skyline; tap to call a strike.
+ * Description: Slanting rain at three depths under drifting cloud banks, with branching lightning that strikes beside the chat column above a low city skyline; tap to call a strike.
  */
 
 /* ────────── CONFIGURABLE VARIABLES ────────── */
@@ -16,7 +16,7 @@ const BRANCHING       = 0.55;  // how much the bolts fork (0-1)
 const CLOUD_COVER     = 1;     // how thick the cloud banks are (0-2)
 const SKYLINE_HEIGHT  = 0.13;  // tallest building as a share of the screen height (0-0.2)
 const CENTER_CALM     = 0.8;   // how much rain and cloud thin behind the chat column (0-1)
-const BAND_WIDTH      = 520;   // half-width of the calm band, in px (300-900)
+const BAND_WIDTH      = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const FOLLOW_THEME    = true;  // take the colors from the theme's palette
 const RAIN_COLOR      = '#9fb4cc';  // rain when not following the theme
 const CLOUD_COLOR     = '#3a4152';  // cloud banks
@@ -26,7 +26,7 @@ const WINDOW_COLOR    = '#e8c27a';  // lit windows in the skyline
 
 const MAX_DROPS = 1100, MAX_PTS = 700, MAX_LINES = 36;
 
-let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, reduced = false, dark = true;
+let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, reduced = false, dark = true, column = null;
 let pal = { rain: hex(RAIN_COLOR), cloud: hex(CLOUD_COLOR), bolt: hex(BOLT_COLOR), win: hex(WINDOW_COLOR), bg: [26, 24, 38], text: [235, 238, 245] };
 let rainStyle = ['', '', ''], boltGlow = '', boltCore = '', boltHot = '';
 let cloudSprite, litSprite, flashSprite, skyline, skyW = 0, skyH = 0;
@@ -47,13 +47,22 @@ const mouse = { x: 0, amount: 0 };
 function hex(c) { const n = parseInt(c.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
 function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
 function rgba(c, a) { return 'rgba(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ',' + a.toFixed(3) + ')'; }
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
 function band(x) {
-	const d = Math.abs(x - w / 2) / BAND_WIDTH;
+	const d = Math.abs(x - colX()) / colHalf();
 	const t = Math.min(1, Math.max(0, (d - 0.55) / 0.7));
 	return 1 - t * t * (3 - 2 * t);
 }
 function calm(x) { return 1 - CENTER_CALM * band(x); }
-function edge(f) { return Math.random() < 0.5 ? Math.random() * w * f : w - Math.random() * w * f; }
+// A spot within a share f of the screen beside the chat column, on the side with room
+function edge(f) {
+	const left = Math.max(0, colX() - colHalf()), right = Math.max(0, w - colX() - colHalf()), m = w * f;
+	if (left + right < 60) return Math.random() < 0.5 ? Math.random() * m : w - Math.random() * m;
+	const r = Math.random() * (left + right);
+	return r < left ? (r / left) * Math.min(left, m) : w - ((r - left) / right) * Math.min(right, m);
+}
 
 function sprite(size, col, a0, a1) {
 	const c = new OffscreenCanvas(size, size), g = c.getContext('2d');
@@ -94,7 +103,7 @@ function buildColors() {
 	if (w) buildSkyline();
 }
 
-// ── Skyline: drawn once per resize or theme into a cached strip along the bottom fifth ──
+// ── Skyline: drawn once per resize, layout or theme into a cached strip along the bottom fifth ──
 function buildSkyline() {
 	skyH = Math.max(8, Math.round(h * Math.max(0.03, SKYLINE_HEIGHT) + 8));
 	skyW = Math.max(1, w);
@@ -188,8 +197,12 @@ function addLine(x0, y0, ang, len, depth) {
 
 // Strikes land outside the calm band, nudged outward when called over the column
 function strikeX(x) {
-	const mid = w / 2, reach = BAND_WIDTH * 0.95;
-	if (Math.abs(x - mid) < reach) x = mid + (x < mid ? -reach : reach);
+	const mid = colX(), reach = colHalf() * 0.95;
+	if (Math.abs(x - mid) < reach) {
+		// Toward the nearer side, or the other one when the nearer has no room
+		const out = x < mid ? mid - reach : mid + reach;
+		x = out < w * 0.04 ? mid + reach : out > w * 0.96 ? mid - reach : out;
+	}
 	return Math.max(w * 0.04, Math.min(w * 0.96, x));
 }
 
@@ -197,7 +210,7 @@ function strike(x) {
 	if (reduced || bolt.cool > 0) { glowAt(x); return; }
 	const x0 = strikeX(x);
 	const top = h * (0.06 + Math.random() * 0.06), bottom = h * (0.84 + Math.random() * 0.08);
-	const lean = (x0 < w / 2 ? -1 : 1) * Math.random() * 0.18;
+	const lean = (x0 < colX() ? -1 : 1) * Math.random() * 0.18;
 	nPts = 0; nLines = 0; qCount = 0;
 	addLine(x0, top, Math.PI / 2 + lean, bottom - top, 0);
 	for (let q = 0; q < qCount; q++) addLine(qx[q], qy[q], qa[q], ql[q], qd[q]);
@@ -315,6 +328,7 @@ self.onmessage = (e) => {
 			ctx = canvas.getContext('2d');
 			w = d.width; h = d.height; dpr = Math.min(d.dpr || 1, 2);
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			size();
 			requestAnimationFrame(frame);
@@ -328,6 +342,10 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			if (canvas && w && h) buildSkyline();
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

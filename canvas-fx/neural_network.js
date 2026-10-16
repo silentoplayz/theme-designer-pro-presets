@@ -16,7 +16,7 @@ const MOTION        = 1;     // overall speed (0.2-2)
 const REDUCED_SPEED = 0.3;   // share of the speed kept when the viewer asks to reduce motion (0-1)
 const CURSOR_REACH  = 200;   // how near the cursor must come to wake a node, in px (60-400)
 const CENTER_CALM   = 0.8;   // how much the network fades behind the chat column (0-1)
-const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH    = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const FOLLOW_THEME  = true;  // take the colors from the theme's palette
 const LINK_COLOR    = '#64a0ff';  // connection color when not following the theme
 const NODE_COLOR    = '#78b4ff';  // node and pulse color
@@ -28,7 +28,7 @@ const MAX_NODES = 90, MAX_LINKS = 300;
 
 let canvas, ctx;
 let w = 0, h = 0, dpr = 1;
-let last = 0, reduced = false, dark = true, fireWait = 1, wakeWait = 0;
+let last = 0, reduced = false, dark = true, fireWait = 1, wakeWait = 0, column = null;
 let nodeCount = 0, linkCount = 0, firstOfLast = 0, inputs = 1;
 const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
 const col = { link: LINK_COLOR, node: NODE_COLOR, glow: GLOW_COLOR, core: CORE_COLOR };
@@ -76,8 +76,12 @@ function applyTheme(t) {
 	haloSprite = sprite(col.glow, 16);
 }
 
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+
 function band(x) {
-	const b = Math.abs(x - w / 2) / BAND_WIDTH;
+	const b = Math.abs(x - colX()) / colHalf();
 	const s = Math.min(1, Math.max(0, (b - 0.55) / 0.7));
 	return 1 - CENTER_CALM * (1 - s * s * (3 - 2 * s));
 }
@@ -87,13 +91,15 @@ function build() {
 	pl.fill(-1);
 	const layers = Math.max(2, Math.min(9, LAYERS));
 	let prevStart = 0, prevCount = 0;
+	// Free space left and right of the calm band, each at least an eighth of the screen wide (reaching into the band's fade when short)
+	const m = w * 0.05, room = Math.max(80, w * 0.125), l0 = m, l1 = Math.max(l0 + room, colX() - colHalf()), r1 = w - m, r0 = Math.min(r1 - room, colX() + colHalf());
 	for (let l = 0; l < layers; l++) {
 		const edge = l === 0 || l === layers - 1;
 		const count = Math.min(MAX_NODES - nodeCount, edge ? 3 + Math.floor(Math.random() * 3) : 5 + Math.floor(Math.random() * 5));
 		const start = nodeCount;
-		// Layers gather in the outer thirds; long faint links bridge the chat column between them
+		// Layers gather on either side of the chat column; long faint links bridge it from a middle layer
 		const u = l / (layers - 1);
-		const x = w * (u < 0.5 ? 0.05 + u * 0.5 : u > 0.5 ? 0.7 + (u - 0.5) * 0.5 : 0.5);
+		const x = u < 0.5 ? l0 + (l1 - l0) * u * 1.7 : u > 0.5 ? r1 - (r1 - r0) * (1 - u) * 1.7 : colX();
 		for (let n = 0; n < count; n++) {
 			const i = nodeCount++;
 			hx[i] = gx[i] = nx[i] = x + (Math.random() - 0.5) * 30;
@@ -259,6 +265,7 @@ self.onmessage = (e) => {
 			canvas = d.canvas;
 			ctx = canvas.getContext('2d');
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			resize(d.width, d.height, d.dpr);
 			requestAnimationFrame(frame);
@@ -271,6 +278,10 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			if (canvas) build();
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

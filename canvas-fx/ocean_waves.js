@@ -15,7 +15,7 @@ const WAVE_LENGTH     = 1;     // length of the swells; higher is longer (0.4-3)
 const OPACITY         = 1;     // strength of the water (0.2-2)
 const CREST_WIDTH     = 1.5;   // thickness of the lit crest line, in px; 0 turns it off (0-4)
 const CENTER_CALM     = 0.7;   // how much the water thins behind the chat column (0-1)
-const BAND_WIDTH      = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH      = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const MOUSE_SWELL     = 40;    // height of the swell under the cursor, in px; 0 turns it off (0-100)
 const MOUSE_RADIUS    = 250;   // reach of the swell, in px (80-500)
 const BUBBLES         = 30;    // rising foam bubbles; 0 turns them off (0-120)
@@ -34,7 +34,7 @@ const NC = Math.max(0, Math.min(12, Math.round(CAUSTICS)));
 
 let canvas, ctx;
 let w = 0, h = 0, dpr = 1;
-let last = 0, time = 0, reduced = false, dark = true, theme = null;
+let last = 0, time = 0, reduced = false, dark = true, theme = null, column = null;
 const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
 
 // Per-layer wave traits
@@ -74,8 +74,12 @@ function rgba(c, a) {
 	return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + Math.max(0, a).toFixed(3) + ')';
 }
 
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+
 function band(x) {
-	const d = Math.abs(x - w * 0.5) / BAND_WIDTH;
+	const d = Math.abs(x - colX()) / colHalf();
 	const s = Math.min(1, Math.max(0, (d - 0.35) / 1.0)); // a wide, slow falloff, so the water has no visible seam
 	return 1 - s * s * (3 - 2 * s);
 }
@@ -90,7 +94,7 @@ function sprite(c) {
 	return s;
 }
 
-// Colors, cached gradients and sprites; rebuilt on theme change and resize only
+// Colors, cached gradients and sprites; rebuilt on theme change, resize and layout only
 function build() {
 	if (!ctx || !w) return;
 	const c = FOLLOW_THEME && theme && theme.colors ? theme.colors : null;
@@ -245,6 +249,7 @@ self.onmessage = (e) => {
 			canvas = d.canvas;
 			ctx = canvas.getContext('2d');
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			theme = d.theme || null;
 			dark = !theme || theme.dark !== false;
 			size(d.width, d.height, d.dpr);
@@ -260,6 +265,10 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			build();
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

@@ -17,12 +17,12 @@ const MAX_FPS         = 20;      // redraws per second; the terrain moves slowly
 const HILL_RADIUS     = 200;     // radius of the cursor's hill, in px (0-400)
 const HILL_HEIGHT     = 0.35;    // height of the cursor's hill (0-1)
 const CENTER_CALM     = 0.8;     // how much lines and fills fade behind the chat column (0-1)
-const BAND_WIDTH      = 520;     // half-width of the calm band, in px (300-900)
+const BAND_WIDTH      = 520;     // half-width of the calm band when the page has no chat column, in px (300-900)
 const FOLLOW_THEME    = true;    // draw in the theme's colors
 const PALETTE         = ['#0a2463', '#1e6091', '#168aad', '#34a0a4', '#52b69a', '#76c893', '#99d98c', '#d9ed92', '#f0f3bd'];  // low to high when not following the theme
 /* ──────────────────────────────────────────── */
 
-let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, drawn = 0, reduced = false, dark = true;
+let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, drawn = 0, reduced = false, dark = true, column = null;
 let cols = 1, rows = 1, grid = new Float32Array(1), calmCol = new Float32Array(1);
 let fillCanvas, fillCtx, imageData, pixels;
 let palette = PALETTE, alphaScale = 1, lutDirty = true, levelStyle = [];
@@ -70,6 +70,10 @@ function applyTheme(t) {
 	lutDirty = true;
 }
 
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+
 // The color LUT and one column-fading stroke style per contour level
 function rebuildLUT() {
 	lutDirty = false;
@@ -78,19 +82,29 @@ function rebuildLUT() {
 		const t = i / 255 * (n - 1), lo = Math.floor(t), hi = Math.min(lo + 1, n - 1), f = t - lo;
 		for (let k = 0; k < 3; k++) LUT[i * 3 + k] = pal[lo][k] + (pal[hi][k] - pal[lo][k]) * f;
 	}
-	const a = CONTOUR_OPACITY * alphaScale, k = 1 - CENTER_CALM, i0 = BAND_WIDTH * 0.55 / Math.max(1, w), o0 = BAND_WIDTH * 1.25 / Math.max(1, w);
+	const a = CONTOUR_OPACITY * alphaScale, k = 1 - CENTER_CALM, m = colX() / Math.max(1, w), i0 = colHalf() * 0.55 / Math.max(1, w), o0 = colHalf() * 1.25 / Math.max(1, w);
+	const at = (u) => Math.min(1, Math.max(0, u));
 	for (let l = 0; l < CONTOURS; l++) {
 		const ci = Math.round((l + 1) / (CONTOURS + 1) * 255) * 3;
 		const rgb = LUT[ci] + ',' + LUT[ci + 1] + ',' + LUT[ci + 2] + ',';
 		const g = ctx.createLinearGradient(0, 0, Math.max(1, w), 0);
 		g.addColorStop(0, 'rgba(' + rgb + a + ')');
-		g.addColorStop(Math.max(0, 0.5 - o0), 'rgba(' + rgb + a + ')');
-		g.addColorStop(Math.max(0, 0.5 - i0), 'rgba(' + rgb + a * k + ')');
-		g.addColorStop(Math.min(1, 0.5 + i0), 'rgba(' + rgb + a * k + ')');
-		g.addColorStop(Math.min(1, 0.5 + o0), 'rgba(' + rgb + a + ')');
+		g.addColorStop(at(m - o0), 'rgba(' + rgb + a + ')');
+		g.addColorStop(at(m - i0), 'rgba(' + rgb + a * k + ')');
+		g.addColorStop(at(m + i0), 'rgba(' + rgb + a * k + ')');
+		g.addColorStop(at(m + o0), 'rgba(' + rgb + a + ')');
 		g.addColorStop(1, 'rgba(' + rgb + a + ')');
 		levelStyle[l] = g;
 	}
+}
+
+// Each grid column's calm, from where the chat column sits; rebuilt on layout with the stroke styles
+function calmBuild() {
+	for (let c = 0; c < cols; c++) {
+		const d = Math.abs(c * GRID_STEP - colX()) / colHalf(), t = Math.min(1, Math.max(0, (d - 0.55) / 0.7));
+		calmCol[c] = 1 - CENTER_CALM * (1 - t * t * (3 - 2 * t));
+	}
+	lutDirty = true;
 }
 
 function size() {
@@ -101,10 +115,7 @@ function size() {
 	rows = Math.max(2, Math.ceil(h / GRID_STEP) + 2);
 	grid = new Float32Array(cols * rows);
 	calmCol = new Float32Array(cols);
-	for (let c = 0; c < cols; c++) {
-		const d = Math.abs(c * GRID_STEP - w / 2) / BAND_WIDTH, t = Math.min(1, Math.max(0, (d - 0.55) / 0.7));
-		calmCol[c] = 1 - CENTER_CALM * (1 - t * t * (3 - 2 * t));
-	}
+	calmBuild();
 	// The fill lives at one pixel per grid cell and is scaled up smoothly when drawn
 	fillCanvas = new OffscreenCanvas(cols, rows);
 	fillCtx = fillCanvas.getContext('2d');
@@ -221,6 +232,7 @@ self.onmessage = (e) => {
 			ctx = canvas.getContext('2d');
 			w = d.width; h = d.height; dpr = Math.min(d.dpr || 1, 2);
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			size();
 			requestAnimationFrame(frame);
@@ -234,6 +246,10 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			if (canvas) calmBuild();
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

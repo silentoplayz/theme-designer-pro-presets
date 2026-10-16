@@ -16,14 +16,14 @@ const OPACITY       = 0.85;  // flake strength (0.2-1)
 const MOTION        = 1;     // overall speed (0.2-2)
 const REDUCED_SPEED = 0.25;  // speed kept when the viewer asks to reduce motion (0-1)
 const CENTER_CALM   = 0.75;  // how much the snow thins behind the chat column (0-1)
-const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH    = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const FOLLOW_THEME  = true;  // take the colors from the theme's palette
 const SNOW_COLOR    = '#f2f6ff';  // flake color when not following the theme
 const GLINT_COLOR   = '#bfe0ff';  // glint color when not following the theme
 /* ──────────────────────────────────────────── */
 
 const N = FLAKE_COUNT, COL = 8;
-let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, time = 0, reduced = false, dark = true;
+let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, time = 0, reduced = false, dark = true, column = null;
 let calmLut = new Float32Array(1), drift = new Float32Array(1), cap = new Float32Array(1);
 let snowHex = SNOW_COLOR, glintHex = GLINT_COLOR, dot = null, crystal = null, glow = null, driftFill = '#fff', driftEdge = '#fff';
 const mouse = { x: -10000, y: -10000, energy: 0 };
@@ -92,6 +92,10 @@ function applyTheme(t) {
 }
 function hex(c) { return '#' + ((1 << 24) | (c[0] << 16) | (c[1] << 8) | c[2]).toString(16).slice(1); }
 
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+
 function calm(x) {
 	const i = x >> 2;
 	return calmLut[i < 0 ? 0 : i >= calmLut.length ? calmLut.length - 1 : i];
@@ -118,21 +122,27 @@ function size(oldW, oldH) {
 	canvas.width = Math.max(1, Math.round(w * dpr));
 	canvas.height = Math.max(1, Math.round(h * dpr));
 	ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-	calmLut = new Float32Array((w >> 2) + 2);
-	for (let i = 0; i < calmLut.length; i++) {
-		const t = Math.min(1, Math.max(0, (Math.abs(i * 4 - w / 2) / BAND_WIDTH - 0.55) / 0.7));
-		calmLut[i] = 1 - CENTER_CALM * (1 - t * t * (3 - 2 * t));
-	}
-	// The drift starts settled, lower behind the chat column so the message box stays clear
+	// The drift starts settled
 	const n = Math.ceil(w / COL) + 2;
 	drift = new Float32Array(n); cap = new Float32Array(n);
-	for (let i = 0; i < n; i++) {
-		const x = i * COL;
-		cap[i] = DRIFT_HEIGHT * (0.3 + 0.7 * (calm(x) - 1 + CENTER_CALM) / Math.max(0.01, CENTER_CALM)) * (0.75 + 0.25 * Math.sin(x * 0.013) * Math.sin(x * 0.0051 + 1));
-		drift[i] = cap[i] * 0.9;
-	}
+	calmBuild();
+	for (let i = 0; i < n; i++) drift[i] = cap[i] * 0.9;
 	if (oldW) for (let i = 0; i < N; i++) { fx[i] *= w / oldW; fy[i] *= h / oldH; }
 	else for (let i = 0; i < N; i++) spawn(i, true);
+}
+
+// The calm table and the drift's height cap, lower behind the chat column so the message box stays clear; rebuilt on layout
+function calmBuild() {
+	calmLut = new Float32Array((w >> 2) + 2);
+	for (let i = 0; i < calmLut.length; i++) {
+		const t = Math.min(1, Math.max(0, (Math.abs(i * 4 - colX()) / colHalf() - 0.55) / 0.7));
+		calmLut[i] = 1 - CENTER_CALM * (1 - t * t * (3 - 2 * t));
+	}
+	for (let i = 0; i < cap.length; i++) {
+		const x = i * COL;
+		cap[i] = DRIFT_HEIGHT * (0.3 + 0.7 * (calm(x) - 1 + CENTER_CALM) / Math.max(0.01, CENTER_CALM)) * (0.75 + 0.25 * Math.sin(x * 0.013) * Math.sin(x * 0.0051 + 1));
+		drift[i] = Math.min(drift[i], cap[i]);
+	}
 }
 
 function land(x, s) {
@@ -231,6 +241,7 @@ self.onmessage = (e) => {
 			ctx = canvas.getContext('2d');
 			w = d.width; h = d.height; dpr = Math.min(d.dpr || 1, 2);
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			buildSprites();
 			size(0, 0);
@@ -247,6 +258,10 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			if (canvas) calmBuild();
 			break;
 		case 'mousemove':
 			if (mouse.x > -9000) mouse.energy = Math.min(1, mouse.energy + Math.hypot(d.x - mouse.x, d.y - mouse.y) / 80);

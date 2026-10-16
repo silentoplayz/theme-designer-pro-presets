@@ -13,9 +13,9 @@ const WAVE_SPEED   = 1.2;    // speed of the breathing wave (0-4)
 const PARALLAX     = 1;      // how far the mesh tilts toward the cursor (0-3)
 const NODE_SIZE    = 0.32;   // node radius as a share of the spacing (0.1-0.5)
 const FABRIC       = 1;      // strength of the faint mesh of empty cells (0-2)
-const RESEED_EVERY = 5;      // seconds between fresh colonies in the outer thirds; 0 turns them off (0-120)
+const RESEED_EVERY = 5;      // seconds between fresh colonies beside the chat column; 0 turns them off (0-120)
 const CENTER_CALM  = 0.8;    // how much the mesh thins and fades over the chat column (0-1)
-const BAND_WIDTH   = 520;    // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH   = 520;    // half-width of the calm band when the page has no chat column, in px (300-900)
 const FOLLOW_THEME = true;   // take the colors from the theme's palette
 const COLOR_ALIVE  = '#00ffb4'; // color of a living node when not following the theme
 const COLOR_DYING  = '#7a3cf0'; // color a node fades through as it dies
@@ -25,14 +25,17 @@ const K = 5, TAU = Math.PI * 2;
 let cols = 0, rows = 0, total = 0, ox = 0, oy = 0;
 let grid = new Uint8Array(0), next = new Uint8Array(0), vis = new Float32Array(0), calmOf = new Float32Array(0);
 let dist = new Float32Array(0), ptX = new Float32Array(0), ptY = new Float32Array(0);
-let canvas, ctx, mask = null, w = 0, h = 0, dpr = 1, last = 0, reduced = false, dark = true, time = 0, acc = 0, reseed = 0;
+let canvas, ctx, mask = null, w = 0, h = 0, dpr = 1, last = 0, reduced = false, dark = true, time = 0, acc = 0, reseed = 0, column = null;
 const mouse = { x: -10000, y: -10000, amount: 0, px: 0, py: 0 };
 const col = { node: [], bond: [], fabric: '' };
 
 function rgbOf(hex) { const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
 function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
 function css(c) { return 'rgb(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ')'; }
-function band(x) { const t = Math.min(1, Math.max(0, (Math.abs(x - w / 2) / BAND_WIDTH - 0.55) / 0.7)); return 1 - t * t * (3 - 2 * t); }
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+function band(x) { const t = Math.min(1, Math.max(0, (Math.abs(x - colX()) / colHalf() - 0.55) / 0.7)); return 1 - t * t * (3 - 2 * t); }
 
 // K color steps from dying to alive, for nodes and for the bonds between them
 function applyTheme(t) {
@@ -66,15 +69,23 @@ function size() {
 	dist = new Float32Array(total);
 	ptX = new Float32Array(total);
 	ptY = new Float32Array(total);
-	mask = ctx.createLinearGradient(0, 0, w, 0);
-	for (let i = 0; i <= 24; i++) mask.addColorStop(i / 24, 'rgba(0,0,0,' + (CENTER_CALM * band((w * i) / 24)).toFixed(3) + ')');
+	calmBuild();
 	for (let y = 0; y < rows; y++) {
 		for (let x = 0; x < cols; x++) {
 			const i = y * cols + x, bx = ox + x * CELL_SIZE, by = oy + y * CELL_SIZE;
-			calmOf[i] = 1 - CENTER_CALM * band(bx);
 			dist[i] = Math.hypot(bx - w / 2, by - h / 2) * 0.008;
 			grid[i] = vis[i] = Math.random() < DENSITY * (0.25 + 0.75 * calmOf[i]) ? 1 : 0;
 		}
+	}
+}
+
+// The fabric's erase mask and each cell's calm, from where the chat column sits; rebuilt on layout
+function calmBuild() {
+	mask = ctx.createLinearGradient(0, 0, w, 0);
+	for (let i = 0; i <= 24; i++) mask.addColorStop(i / 24, 'rgba(0,0,0,' + (CENTER_CALM * band((w * i) / 24)).toFixed(3) + ')');
+	for (let x = 0; x < cols; x++) {
+		const c = 1 - CENTER_CALM * band(ox + x * CELL_SIZE);
+		for (let y = 0; y < rows; y++) calmOf[y * cols + x] = c;
 	}
 }
 
@@ -87,9 +98,17 @@ function burst(cx, cy, r, p) {
 	}
 }
 
+// A fresh colony beside the chat column, on the side with room
 function outerBurst() {
-	const e = Math.floor(Math.random() * cols * 0.28);
-	burst(Math.random() < 0.5 ? e + 2 : cols - 3 - e, Math.floor(Math.random() * rows), 6, 0.4);
+	const lc = Math.floor((colX() - colHalf() - ox) / CELL_SIZE), rc = Math.ceil((colX() + colHalf() - ox) / CELL_SIZE);
+	const left = Math.max(0, lc - 2), right = Math.max(0, cols - 3 - rc), y = Math.floor(Math.random() * rows);
+	if (left + right < 4) {
+		const e = Math.floor(Math.random() * cols * 0.28);
+		burst(Math.random() < 0.5 ? e + 2 : cols - 3 - e, y, 6, 0.4);
+		return;
+	}
+	const r = Math.floor(Math.random() * (left + right));
+	burst(r < left ? 2 + r : cols - 3 - (r - left), y, 6, 0.4);
 }
 
 // One generation: birth on 3, survival on 2 or 3; the column thins a little each step
@@ -226,6 +245,7 @@ self.onmessage = (e) => {
 			h = d.height;
 			dpr = Math.min(d.dpr || 1, 2);
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			size();
 			requestAnimationFrame(frame);
@@ -241,6 +261,10 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			if (canvas) calmBuild();
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

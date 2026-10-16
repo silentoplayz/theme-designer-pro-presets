@@ -15,7 +15,7 @@ const FRICTION      = 0.85;  // how much motion each step keeps; lower settles f
 const MOTION        = 1;     // speed of the fabric; 0 freezes it (0-2)
 const REDUCED_FORCE = 0.25;  // share of the shove kept when the viewer asks to reduce motion (0-1)
 const CENTER_CALM   = 0.85;  // how much the grid fades behind the chat column (0-1)
-const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH    = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const COLOR_CYCLE   = false; // moving crosshairs drift through all three accents instead of one
 const CYCLE_SPEED   = 0.4;   // how fast the accents travel across the moving crosshairs (0-2)
 const FOLLOW_THEME  = true;  // take the colors from the theme's palette
@@ -31,7 +31,7 @@ const STEP = 1 / 60;
 
 let canvas, ctx;
 let w = 0, h = 0, dpr = 1;
-let last = 0, acc = 0, phase = 0, reduced = false, dark = true, dirty = true;
+let last = 0, acc = 0, phase = 0, reduced = false, dark = true, dirty = true, column = null;
 let count = 0;
 let ox, oy, px, py, vx, vy, lvl, calm;
 const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
@@ -54,8 +54,12 @@ function applyTheme(t) {
 	dirty = true;
 }
 
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+
 function band(x) {
-	const b = Math.abs(x - w / 2) / BAND_WIDTH;
+	const b = Math.abs(x - colX()) / colHalf();
 	const s = Math.min(1, Math.max(0, (b - 0.55) / 0.7));
 	return 1 - CENTER_CALM * (1 - s * s * (3 - 2 * s));
 }
@@ -82,9 +86,16 @@ function resize(width, height, ratio) {
 		for (let r = 0; r < rows; r++, i++) {
 			ox[i] = px[i] = offX + c * SPACING;
 			oy[i] = py[i] = offY + r * SPACING;
-			calm[i] = band(ox[i]);
-			lvl[i] = Math.round(((calm[i] - (1 - CENTER_CALM)) / Math.max(0.001, CENTER_CALM)) * (LEVELS - 1));
 		}
+	}
+	calmBuild();
+}
+
+// Each point's calm and resting alpha step, from where the chat column sits; rebuilt on layout
+function calmBuild() {
+	for (let i = 0; i < count; i++) {
+		calm[i] = band(ox[i]);
+		lvl[i] = Math.round(((calm[i] - (1 - CENTER_CALM)) / Math.max(0.001, CENTER_CALM)) * (LEVELS - 1));
 	}
 	dirty = true;
 }
@@ -199,6 +210,7 @@ self.onmessage = (e) => {
 			canvas = d.canvas;
 			ctx = canvas.getContext('2d');
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			resize(d.width, d.height, d.dpr);
 			requestAnimationFrame(frame);
@@ -211,6 +223,10 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			if (canvas) calmBuild();
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

@@ -16,7 +16,7 @@ const LOW_WEIGHT     = 0.6;   // how much the sand gathers toward the ground (0-
 const SHELTER        = 150;   // radius of the calm pocket around the cursor, in px (0-400)
 const THEME_TINT     = 0.35;  // how far the sand leans toward the theme's colors (0-1)
 const CENTER_CALM    = 0.8;   // how much the sand thins behind the chat column (0-1)
-const BAND_WIDTH     = 520;   // half-width of the calm band, in px (300-900)
+const BAND_WIDTH     = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const FOLLOW_THEME   = true;  // tint the sand with the theme's palette
 const SAND_PALE      = '#e6cf9e';  // palest sand
 const SAND_DEEP      = '#a87f4a';  // deepest sand
@@ -25,7 +25,7 @@ const SAND_DEEP      = '#a87f4a';  // deepest sand
 const MAX_GRAINS = 1500, SHADES = 4, MAX_STREAKS = 24, TAU = Math.PI * 2;
 const F = (n) => new Float32Array(n);
 
-let canvas, ctx, w = 0, h = 0, last = 0, reduced = false, dark = true;
+let canvas, ctx, w = 0, h = 0, last = 0, reduced = false, dark = true, column = null;
 let pale = hex(SAND_PALE), deep = hex(SAND_DEEP), tint = null;
 let grainSprite = [], hazeSprite, duneCache;
 const gx = F(MAX_GRAINS), gy = F(MAX_GRAINS), gz = F(MAX_GRAINS), gs = F(MAX_GRAINS), gph = F(MAX_GRAINS), ga = F(MAX_GRAINS);
@@ -40,8 +40,11 @@ let alphaScale = 1;
 function hex(c) { const n = parseInt(c.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
 function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
 function rgba(c, a) { return 'rgba(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ',' + a.toFixed(3) + ')'; }
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
 function band(x) {
-	const t = Math.min(1, Math.max(0, (Math.abs(x - w / 2) / BAND_WIDTH - 0.55) / 0.7));
+	const t = Math.min(1, Math.max(0, (Math.abs(x - colX()) / colHalf() - 0.55) / 0.7));
 	return 1 - t * t * (3 - 2 * t);
 }
 
@@ -73,7 +76,7 @@ function applyTheme(t) {
 	if (w) buildDunes(p, d);
 }
 
-// Ground, cached: low dust over two soft dune ridges, both quieter behind the column
+// Ground, cached and rebuilt on layout: low dust over two soft dune ridges, both quieter behind the column
 function buildDunes(p, d) {
 	const ch = Math.max(2, Math.round(h * 0.32)), dh = Math.round(h * DUNE_HEIGHT);
 	duneCache = new OffscreenCanvas(Math.max(1, Math.round(w)), ch);
@@ -85,11 +88,12 @@ function buildDunes(p, d) {
 	g.fillRect(0, 0, w, ch);
 	g.globalCompositeOperation = 'destination-out';
 	grad = g.createLinearGradient(0, 0, w, 0);
-	const cut = rgba([0, 0, 0], CENTER_CALM * 0.8), none = 'rgba(0,0,0,0)', m = 0.5, i0 = BAND_WIDTH * 0.55 / w, o0 = BAND_WIDTH * 1.25 / w;
-	grad.addColorStop(Math.max(0, m - o0), none);
-	grad.addColorStop(Math.max(0, m - i0), cut);
-	grad.addColorStop(Math.min(1, m + i0), cut);
-	grad.addColorStop(Math.min(1, m + o0), none);
+	const cut = rgba([0, 0, 0], CENTER_CALM * 0.8), none = 'rgba(0,0,0,0)', m = colX() / w, i0 = colHalf() * 0.55 / w, o0 = colHalf() * 1.25 / w;
+	const at = (u) => Math.min(1, Math.max(0, u));
+	grad.addColorStop(at(m - o0), none);
+	grad.addColorStop(at(m - i0), cut);
+	grad.addColorStop(at(m + i0), cut);
+	grad.addColorStop(at(m + o0), none);
 	g.fillStyle = grad;
 	g.fillRect(0, 0, w, ch);
 	g.globalCompositeOperation = 'source-over';
@@ -226,6 +230,7 @@ self.onmessage = (e) => {
 			ctx = canvas.getContext('2d');
 			w = d.width; h = d.height;
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			size();
 			requestAnimationFrame(frame);
@@ -239,6 +244,10 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			if (canvas) applyTheme(null);
 			break;
 		case 'mousemove':
 			mouse.x = d.x;
