@@ -1,192 +1,252 @@
 /**
  * Title: Retro Sun
- * Description: Synthwave sunset with a glowing semi-circle sun, animated horizontal
- *   stripe cutouts, twinkling stars, and a rich gradient sky. Mouse proximity
- *   intensifies the sun's glow.
+ * Description: A synthwave sun with scrolling stripe cutouts sets low in an outer third over a perspective grid that rolls toward you, under calm twinkling stars; the glow swells when the cursor comes near.
  */
 
-// ═══════════════════════════════════════════════════════════
-// ██  CONFIGURATION — Tweak these values to customize!   ██
-// ═══════════════════════════════════════════════════════════
-const CONFIG = {
-  // -- Sun --
-  sunColorTop: '#ff6ec7',                 // Top gradient color of the sun
-  sunColorBottom: '#ffb347',              // Bottom gradient color of the sun
-  sunRadius: 120,                         // Sun radius in pixels
-  sunPositionY: 0.55,                     // Sun vertical position (0=top, 1=bottom)
-  glowIntensity: 1.2,                     // Base glow brightness (0-3)
-  glowPulseSpeed: 0.8,                    // Glow pulse animation speed (0-5)
+/* ────────── CONFIGURABLE VARIABLES ────────── */
+const SUN_X         = 0.8;   // where the sun sits, as a share of the width (0-1)
+const SUN_SIZE      = 0.16;  // sun radius as a share of the smaller screen side (0.06-0.3)
+const HORIZON       = 0.8;   // height of the horizon, as a share of the screen (0.6-0.9)
+const STRIPES       = 7;     // stripe cutouts across the sun's lower half (0-14)
+const STRIPE_SPEED  = 6;     // how fast the stripes drift down, in px per second (0-30)
+const GRID_SPEED    = 0.35;  // how fast the grid rolls toward you (0-2)
+const GRID_LINES    = 22;    // vertical grid lines (6-40)
+const STAR_COUNT    = 110;   // stars in the sky (0-300)
+const GLOW          = 1;     // strength of the sun's glow and the horizon haze (0-2)
+const PULSE_SPEED   = 0.5;   // speed of the glow's slow breathing (0-3)
+const CURSOR_GLOW   = 1;     // how much the glow swells near the cursor (0-2)
+const REDUCED_SPEED = 0.15;  // share of the motion kept under reduced motion (0-1)
+const CENTER_CALM   = 0.8;   // how much the grid and stars fade behind the chat column (0-1)
+const BAND_WIDTH    = 520;   // half-width of the calm band, in px (300-900)
+const FOLLOW_THEME  = true;  // take the colors from the theme's accents
+const SUN_TOP       = '#ff6ec7';  // sun's upper color when not following the theme
+const SUN_BOTTOM    = '#ffb347';  // sun's lower color
+const GRID_COLOR    = '#b45cff';  // grid and horizon
+/* ──────────────────────────────────────────── */
 
-  // -- Stripes --
-  stripeCount: 8,                         // Number of horizontal stripe cutouts
-  stripeSpacing: 6,                       // Spacing between stripes in pixels
-  stripeWidth: 4,                         // Width of each stripe in pixels
-  stripeScrollSpeed: 0.3,                 // Speed stripes scroll upward
+const MAX_STARS = 300, TAU = Math.PI * 2;
 
-  // -- Horizon --
-  horizonEnabled: true,                   // Show a horizon line
-  horizonColor: '#ff6ec7',                // Horizon line color
+let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, reduced = false, dark = true;
+let top = hex(SUN_TOP), bottom = hex(SUN_BOTTOM), grid = hex(GRID_COLOR), star = [255, 255, 255];
+let sunBody, sunCut, sunG, glowSprite, hazeSprite, gridStyle, horizonStyle, starStyle;
+let sunR = 100, sunX = 0, horizonY = 0, stripePhase = 0, gridPhase = 0, pulseT = 0;
+const sx = new Float32Array(MAX_STARS), sy = new Float32Array(MAX_STARS), ss = new Float32Array(MAX_STARS);
+const sp = new Float32Array(MAX_STARS), sph = new Float32Array(MAX_STARS), sa = new Float32Array(MAX_STARS);
+let stars = 0;
+const mouse = { x: -10000, y: -10000, amount: 0, boost: 0 };
 
-  // -- Background --
-  bgGradientTop: '#0a001a',              // Sky gradient top color (deep purple/black)
-  bgGradientBottom: '#1a0033',           // Sky gradient bottom color
+function hex(c) { const n = parseInt(c.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
+function rgba(c, a) { return 'rgba(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ',' + a.toFixed(3) + ')'; }
+function band(x) {
+	const t = Math.min(1, Math.max(0, (Math.abs(x - w / 2) / BAND_WIDTH - 0.55) / 0.7));
+	return 1 - t * t * (3 - 2 * t);
+}
+function calm(x) { return 1 - CENTER_CALM * band(x); }
 
-  // -- Stars --
-  starCount: 80,                          // Number of twinkling stars
-  starColor: 'rgba(255, 255, 255, 0.8)', // Star color
-
-  // -- Mouse --
-  mouseGlowRadius: 300,                  // Mouse influence radius for glow boost
-};
-// ═══════════════════════════════════════════════════════════
-
-let canvas, ctx, width, height;
-let mouse = { x: -5000, y: -5000 };
-let stars = [];
-let time = 0;
-let stripeOffset = 0;
-
-setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);
-
-function hexToRgb(hex) {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return { r, g, b };
+function applyTheme(t) {
+	if (!t) return;
+	dark = t.dark !== false;
+	if (FOLLOW_THEME && t.colors) {
+		top = hex(t.colors.accent2);
+		bottom = mix(hex(t.colors.accent), hex(t.colors.accent2), 0.2);
+		grid = hex(t.colors.accent3);
+		star = dark ? mix(hex(t.colors.text), [255, 255, 255], 0.5) : hex(t.colors.muted);
+	} else star = dark ? [255, 255, 255] : [90, 90, 120];
+	if (w) build();
 }
 
-function initStars() {
-  stars = [];
-  const sunY = height * CONFIG.sunPositionY;
-  for (let i = 0; i < CONFIG.starCount; i++) {
-    stars.push({
-      x: Math.random() * width,
-      y: Math.random() * sunY * 0.9,
-      size: Math.random() * 1.8 + 0.5,
-      twinkleSpeed: Math.random() * 0.03 + 0.01,
-      twinkleOffset: Math.random() * Math.PI * 2,
-    });
-  }
+// A soft radial sprite in one color
+function sprite(size, col, a0, a1) {
+	const c = new OffscreenCanvas(size, size), g = c.getContext('2d'), r = size / 2;
+	const grad = g.createRadialGradient(r, r, 0, r, r, r);
+	grad.addColorStop(0, rgba(col, a0));
+	grad.addColorStop(0.4, rgba(col, a1));
+	grad.addColorStop(1, rgba(col, 0));
+	g.fillStyle = grad;
+	g.fillRect(0, 0, size, size);
+	return c;
 }
 
-function startAnimation() {
-  function render() {
-    if (!ctx) return;
-    time += 0.016;
-    stripeOffset = (stripeOffset + CONFIG.stripeScrollSpeed) % (CONFIG.stripeSpacing + CONFIG.stripeWidth);
+// A horizontal gradient that fades a stroke over the chat column
+function columnFade(col, a) {
+	const g = ctx.createLinearGradient(0, 0, w, 0), k = 1 - CENTER_CALM;
+	g.addColorStop(0, rgba(col, a));
+	g.addColorStop(Math.max(0, 0.5 - BAND_WIDTH * 1.25 / w), rgba(col, a));
+	g.addColorStop(Math.max(0, 0.5 - BAND_WIDTH * 0.55 / w), rgba(col, a * k));
+	g.addColorStop(Math.min(1, 0.5 + BAND_WIDTH * 0.55 / w), rgba(col, a * k));
+	g.addColorStop(Math.min(1, 0.5 + BAND_WIDTH * 1.25 / w), rgba(col, a));
+	g.addColorStop(1, rgba(col, a));
+	return g;
+}
 
-    const sunY = height * CONFIG.sunPositionY;
-    const sunX = width / 2;
+// Caches rebuilt on resize and theme change: the sun body, its glow and the grid styles
+function build() {
+	sunR = Math.max(40, Math.min(w, h) * SUN_SIZE);
+	horizonY = Math.round(h * HORIZON);
+	sunX = w * SUN_X;
+	if (Math.abs(SUN_X - 0.5) > 0.05) sunX = SUN_X > 0.5 ? Math.max(sunX, w / 2 + BAND_WIDTH * 0.9) : Math.min(sunX, w / 2 - BAND_WIDTH * 0.9);
+	sunX = Math.max(sunR * 1.1, Math.min(w - sunR * 1.1, sunX));
+	const s = Math.ceil(sunR * 2 * dpr) + 4;
+	sunBody = new OffscreenCanvas(s, s);
+	const g = sunBody.getContext('2d');
+	g.setTransform(dpr, 0, 0, dpr, 2, 2);
+	const grad = g.createLinearGradient(0, 0, 0, sunR * 2);
+	grad.addColorStop(0, rgba(mix(top, [255, 255, 255], dark ? 0.15 : 0), 1));
+	grad.addColorStop(0.55, rgba(mix(top, bottom, 0.6), 1));
+	grad.addColorStop(1, rgba(bottom, 1));
+	g.fillStyle = grad;
+	g.beginPath();
+	g.arc(sunR, sunR, sunR, 0, TAU);
+	g.fill();
+	sunCut = new OffscreenCanvas(s, s);
+	sunG = sunCut.getContext('2d');
+	const a = dark ? 1 : 0.4;
+	glowSprite = sprite(256, mix(top, bottom, 0.4), 0.7 * a, 0.22 * a);
+	hazeSprite = sprite(256, top, 0.55 * a, 0.22 * a);
+	gridStyle = columnFade(grid, dark ? 0.55 : 0.45);
+	horizonStyle = columnFade(mix(top, grid, 0.3), dark ? 0.85 : 0.7);
+	starStyle = rgba(star, 1);
+}
 
-    // -- Background gradient --
-    const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
-    bgGrad.addColorStop(0, CONFIG.bgGradientTop);
-    bgGrad.addColorStop(0.6, CONFIG.bgGradientBottom);
-    bgGrad.addColorStop(1, '#000000');
-    ctx.fillStyle = bgGrad;
-    ctx.fillRect(0, 0, width, height);
+function size() {
+	canvas.width = Math.max(1, Math.round(w * dpr));
+	canvas.height = Math.max(1, Math.round(h * dpr));
+	ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+	build();
+	stars = Math.min(MAX_STARS, Math.round(STAR_COUNT * Math.max(0.5, w * h / (1440 * 900))));
+	for (let i = 0; i < stars; i++) {
+		sx[i] = Math.random() * w;
+		sy[i] = Math.pow(Math.random(), 1.2) * horizonY * 0.92;
+		ss[i] = Math.random() < 0.15 ? 2 : 1;
+		sp[i] = 0.5 + Math.random() * 1.5;
+		sph[i] = Math.random() * TAU;
+		sa[i] = (0.35 + Math.random() * 0.65) * calm(sx[i]);
+	}
+}
 
-    // -- Stars --
-    for (const star of stars) {
-      const twinkle = 0.3 + 0.7 * Math.abs(Math.sin(time * star.twinkleSpeed * 60 + star.twinkleOffset));
-      ctx.beginPath();
-      ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-      ctx.fillStyle = CONFIG.starColor.replace(/[\d.]+\)$/, (twinkle * 0.8).toFixed(2) + ')');
-      ctx.fill();
-    }
+function frame(now) {
+	requestAnimationFrame(frame);
+	const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
+	last = now;
+	if (!w || !h) return;
+	const motion = reduced ? REDUCED_SPEED : 1;
+	stripePhase = (stripePhase + STRIPE_SPEED * motion * dt) % 1000;
+	gridPhase = (gridPhase + GRID_SPEED * motion * dt) % 1;
+	pulseT = (pulseT + PULSE_SPEED * motion * dt) % 1000;
+	ctx.clearRect(0, 0, w, h);
+	ctx.globalCompositeOperation = 'source-over';
 
-    // -- Sun glow (behind sun) --
-    const dx = mouse.x - sunX;
-    const dy = mouse.y - sunY;
-    const mouseDist = Math.sqrt(dx * dx + dy * dy);
-    const mouseBoost = Math.max(0, 1 - mouseDist / CONFIG.mouseGlowRadius) * 0.6;
-    const pulse = Math.sin(time * CONFIG.glowPulseSpeed) * 0.15 + 0.85;
-    const glowAlpha = CONFIG.glowIntensity * pulse * 0.15 + mouseBoost * 0.1;
+	// Stars, dimmer near the horizon and behind the column
+	ctx.fillStyle = starStyle;
+	const starA = dark ? 0.8 : 0.35;
+	for (let i = 0; i < stars; i++) {
+		const tw = 0.45 + 0.55 * Math.abs(Math.sin(now / 1000 * sp[i] * (reduced ? 0.25 : 1) + sph[i]));
+		ctx.globalAlpha = starA * sa[i] * tw * (1 - sy[i] / horizonY * 0.7);
+		ctx.fillRect(sx[i], sy[i], ss[i], ss[i]);
+	}
 
-    const topRgb = hexToRgb(CONFIG.sunColorTop);
-    for (let i = 3; i >= 1; i--) {
-      const r = CONFIG.sunRadius * (1 + i * 0.8);
-      const glow = ctx.createRadialGradient(sunX, sunY, CONFIG.sunRadius * 0.5, sunX, sunY, r);
-      glow.addColorStop(0, `rgba(${topRgb.r}, ${topRgb.g}, ${topRgb.b}, ${glowAlpha * (0.4 / i)})`);
-      glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      ctx.fillStyle = glow;
-      ctx.fillRect(0, 0, width, height);
-    }
+	// Glow and haze, swelling a little when the cursor lingers near the sun
+	mouse.amount = Math.max(0, mouse.amount - dt * 0.5);
+	const dx = mouse.x - sunX, dy = mouse.y - horizonY;
+	const near = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) / (sunR * 3)) * mouse.amount * CURSOR_GLOW;
+	mouse.boost += (near - mouse.boost) * Math.min(1, dt * 2);
+	const pulse = 0.85 + 0.15 * Math.sin(pulseT * TAU / 4);
+	ctx.globalCompositeOperation = dark ? 'lighter' : 'source-over';
+	ctx.globalAlpha = Math.min(1, GLOW * pulse * 0.7 + mouse.boost * 0.35);
+	const gr = sunR * 3.6;
+	ctx.drawImage(glowSprite, sunX - gr, horizonY - sunR * 0.4 - gr, gr * 2, gr * 2);
+	ctx.globalAlpha = Math.min(1, GLOW * 0.55);
+	ctx.drawImage(hazeSprite, sunX - w * 0.25, horizonY - h * 0.08, w * 0.5, h * 0.16);
+	ctx.globalCompositeOperation = 'source-over';
 
-    // -- Sun body (semi-circle above horizon) --
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(0, 0, width, sunY);
-    ctx.clip();
+	// Sun: the cached body, with stripes cut out of its lower half each frame
+	const s = sunCut.width;
+	sunG.setTransform(1, 0, 0, 1, 0, 0);
+	sunG.globalCompositeOperation = 'source-over';
+	sunG.clearRect(0, 0, s, s);
+	sunG.drawImage(sunBody, 0, 0);
+	if (STRIPES > 0) {
+		sunG.globalCompositeOperation = 'destination-out';
+		sunG.fillStyle = '#000';
+		const gap = sunR * 0.8 / STRIPES;
+		for (let k = -1; k < STRIPES; k++) {
+			const y = sunR * 0.6 + k * gap + (stripePhase % gap);
+			const t = (y - sunR * 0.55) / (sunR * 0.8);
+			if (t <= 0) continue;
+			const thick = gap * (0.1 + 0.5 * t);
+			sunG.fillRect(0, (y - thick / 2) * dpr + 2, s, thick * dpr);
+		}
+	}
+	const lift = sunR * 0.35;
+	ctx.save();
+	ctx.beginPath();
+	ctx.rect(sunX - sunR - 2, horizonY - sunR * 2, sunR * 2 + 4, sunR * 2);
+	ctx.clip();
+	ctx.globalAlpha = dark ? 0.95 : 0.8;
+	ctx.drawImage(sunCut, sunX - sunR - 2 / dpr, horizonY - sunR - lift - 2 / dpr, s / dpr, s / dpr);
+	ctx.restore();
 
-    const sunGrad = ctx.createLinearGradient(sunX, sunY - CONFIG.sunRadius, sunX, sunY + CONFIG.sunRadius * 0.3);
-    sunGrad.addColorStop(0, CONFIG.sunColorTop);
-    sunGrad.addColorStop(1, CONFIG.sunColorBottom);
-    ctx.fillStyle = sunGrad;
-    ctx.beginPath();
-    ctx.arc(sunX, sunY, CONFIG.sunRadius, 0, Math.PI * 2);
-    ctx.fill();
+	// Horizon line
+	ctx.globalAlpha = 1;
+	ctx.strokeStyle = horizonStyle;
+	ctx.lineWidth = 1.5;
+	ctx.beginPath();
+	ctx.moveTo(0, horizonY);
+	ctx.lineTo(w, horizonY);
+	ctx.stroke();
 
-    // -- Stripe cutouts on sun --
-    ctx.globalCompositeOperation = 'destination-out';
-    const stripeStart = sunY - CONFIG.sunRadius;
-    const stripeEnd = sunY;
-    for (let y = stripeStart + stripeOffset; y < stripeEnd; y += CONFIG.stripeSpacing + CONFIG.stripeWidth) {
-      if (y > stripeStart + CONFIG.sunRadius * 0.3) {
-        ctx.fillStyle = 'rgba(0, 0, 0, 1)';
-        ctx.fillRect(sunX - CONFIG.sunRadius - 10, y, CONFIG.sunRadius * 2 + 20, CONFIG.stripeWidth);
-      }
-    }
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.restore();
-
-    // -- Horizon line --
-    if (CONFIG.horizonEnabled) {
-      ctx.strokeStyle = CONFIG.horizonColor;
-      ctx.lineWidth = 2;
-      ctx.globalAlpha = 0.6;
-      ctx.beginPath();
-      ctx.moveTo(0, sunY);
-      ctx.lineTo(width, sunY);
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-    }
-
-    // -- Ground reflection glow --
-    const groundGrad = ctx.createLinearGradient(0, sunY, 0, height);
-    const bottomRgb = hexToRgb(CONFIG.sunColorBottom);
-    groundGrad.addColorStop(0, `rgba(${bottomRgb.r}, ${bottomRgb.g}, ${bottomRgb.b}, 0.08)`);
-    groundGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = groundGrad;
-    ctx.fillRect(0, sunY, width, height - sunY);
-
-    requestAnimationFrame(render);
-  }
-  requestAnimationFrame(render);
+	// Grid: lines from a vanishing point under the sun, rows rolling toward the viewer
+	const depth = h - horizonY;
+	ctx.strokeStyle = gridStyle;
+	ctx.lineWidth = 1;
+	ctx.globalAlpha = 0.8;
+	ctx.beginPath();
+	const spread = w * 2.4;
+	for (let i = 0; i <= GRID_LINES; i++) {
+		const bx = sunX + (i / GRID_LINES - 0.5) * spread;
+		ctx.moveTo(sunX + (bx - sunX) * 0.04, horizonY);
+		ctx.lineTo(bx, h);
+	}
+	ctx.stroke();
+	for (let r = 0; r < 12; r++) {
+		const z = (r + 1 - gridPhase) / 12;
+		const y = horizonY + depth * z * z;
+		ctx.globalAlpha = Math.min(1, z * 1.6) * 0.85;
+		ctx.beginPath();
+		ctx.moveTo(0, y);
+		ctx.lineTo(w, y);
+		ctx.stroke();
+	}
+	ctx.globalAlpha = 1;
 }
 
 self.onmessage = (e) => {
-  switch (e.data.type) {
-    case 'init':
-      canvas = e.data.canvas;
-      ctx = canvas.getContext('2d');
-      width = e.data.width;
-      height = e.data.height;
-      canvas.width = width;
-      canvas.height = height;
-      initStars();
-      startAnimation();
-      break;
-    case 'resize':
-      width = e.data.width;
-      height = e.data.height;
-      canvas.width = width;
-      canvas.height = height;
-      initStars();
-      break;
-    case 'mousemove':
-      mouse.x = e.data.x;
-      mouse.y = e.data.y;
-      break;
-  }
+	const d = e.data;
+	switch (d.type) {
+		case 'init':
+			canvas = d.canvas;
+			ctx = canvas.getContext('2d');
+			w = d.width; h = d.height; dpr = Math.min(d.dpr || 1, 2);
+			reduced = !!d.reducedMotion;
+			applyTheme(d.theme);
+			size();
+			requestAnimationFrame(frame);
+			break;
+		case 'resize':
+			w = d.width; h = d.height; dpr = Math.min(d.dpr || 1, 2);
+			if (canvas) size();
+			break;
+		case 'theme':
+			applyTheme(d);
+			break;
+		case 'motion':
+			reduced = !!d.reducedMotion;
+			break;
+		case 'mousemove':
+			mouse.x = d.x;
+			mouse.y = d.y;
+			mouse.amount = 1;
+			break;
+	}
 };

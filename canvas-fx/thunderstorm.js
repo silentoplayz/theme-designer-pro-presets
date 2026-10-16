@@ -1,403 +1,340 @@
 /**
  * Title: Thunderstorm
- * Description: A full-atmosphere thunderstorm viewed from a sheltered vantage
- *   point. Rain falls in dense sheets at three parallax depths, with wind
- *   gusts that periodically shift the rain angle. Lightning cracks illuminate
- *   the entire scene — a bright white flash followed by branching bolt geometry
- *   that forks recursively. Rolling cloud banks drift overhead with volumetric
- *   shading, lit from within by distant heat lightning. Puddle reflections
- *   shimmer along the bottom. Thunder rumble is visualized as a low-frequency
- *   screen shake that decays after each strike. A distant city skyline
- *   silhouette anchors the horizon.
- *
- *   Fully autonomous — click anywhere to trigger a lightning strike.
+ * Description: Slanting rain at three depths under drifting cloud banks, with branching lightning that strikes the outer thirds above a low city skyline; tap to call a strike.
  */
 
 /* ────────── CONFIGURABLE VARIABLES ────────── */
-const RAIN_LAYERS         = 3;        // parallax rain depth layers
-const DROPS_PER_LAYER     = [200, 150, 80]; // drops per layer [near, mid, far]
-const RAIN_SPEED_BASE     = 12;       // base rain speed
-const RAIN_ANGLE_BASE     = 0.15;     // base rain slant (radians)
-const WIND_GUST_CHANCE    = 0.003;    // per-frame chance of wind gust
-const WIND_GUST_STRENGTH  = 0.4;      // max additional slant from gust
-const LIGHTNING_CHANCE     = 0.0015;   // per-frame auto-lightning chance
-const LIGHTNING_BRANCHES   = 5;       // max fork depth for bolt geometry
-const CLOUD_COUNT         = 6;        // drifting storm clouds
-const BUILDING_COUNT      = 18;       // distant skyline buildings
-const PUDDLE_REFLECTIONS  = true;     // shimmer along bottom
-const SCREEN_SHAKE        = true;     // rumble after lightning
+const RAIN_DENSITY    = 1;     // how much rain falls (0-2)
+const RAIN_SPEED      = 1;     // fall speed; also slows the clouds (0.2-2)
+const REDUCED_SPEED   = 0.25;  // share of the speed kept under reduced motion (0-1)
+const WIND            = 0.16;  // base slant of the rain, in radians (0-0.5)
+const GUST_STRENGTH   = 0.22;  // extra slant a gust adds (0-0.5)
+const CURSOR_WIND     = 1;     // how far the cursor tilts the rain; eases back when it stops (0-2)
+const STRIKE_EVERY    = 16;    // average seconds between strikes; 0 for taps only (0-120)
+const FLASH_INTENSITY = 0.3;   // how strongly a strike lights the sky near it (0-1)
+const BRANCHING       = 0.55;  // how much the bolts fork (0-1)
+const CLOUD_COVER     = 1;     // how thick the cloud banks are (0-2)
+const SKYLINE_HEIGHT  = 0.13;  // tallest building as a share of the screen height (0-0.2)
+const CENTER_CALM     = 0.8;   // how much rain and cloud thin behind the chat column (0-1)
+const BAND_WIDTH      = 520;   // half-width of the calm band, in px (300-900)
+const FOLLOW_THEME    = true;  // take the colors from the theme's palette
+const RAIN_COLOR      = '#9fb4cc';  // rain when not following the theme
+const CLOUD_COLOR     = '#3a4152';  // cloud banks
+const BOLT_COLOR      = '#bcd0ff';  // lightning glow
+const WINDOW_COLOR    = '#e8c27a';  // lit windows in the skyline
 /* ──────────────────────────────────────────── */
 
-let canvas, ctx, w, h;
-let rainLayers = [];
-let clouds = [];
-let buildings = [];
-let bolts = [];
-let time = 0;
-let windAngle = RAIN_ANGLE_BASE;
-let windTarget = RAIN_ANGLE_BASE;
-let flashAlpha = 0;
-let shakeX = 0, shakeY = 0;
-let shakeDecay = 0;
+const MAX_DROPS = 1100, MAX_PTS = 700, MAX_LINES = 36;
 
-const TAU = Math.PI * 2;
+let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, reduced = false, dark = true;
+let pal = { rain: hex(RAIN_COLOR), cloud: hex(CLOUD_COLOR), bolt: hex(BOLT_COLOR), win: hex(WINDOW_COLOR), bg: [26, 24, 38], text: [235, 238, 245] };
+let rainStyle = ['', '', ''], boltGlow = '', boltCore = '', boltHot = '';
+let cloudSprite, litSprite, flashSprite, skyline, skyW = 0, skyH = 0;
 
-setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);
+const F = (n) => new Float32Array(n), MAX_PUFFS = 140;
+const rx = F(MAX_DROPS), ry = F(MAX_DROPS), rs = F(MAX_DROPS), rl = F(MAX_DROPS);
+const cx = F(MAX_PUFFS), cy = F(MAX_PUFFS), cr = F(MAX_PUFFS), cv = F(MAX_PUFFS), ca = F(MAX_PUFFS);
+let drops = 0, puffs = 0;
 
-// ── Rain ──
+// Bolt geometry: polylines packed in typed arrays, branches queued so each line stays contiguous
+const px = F(MAX_PTS), py = F(MAX_PTS), qx = F(MAX_LINES), qy = F(MAX_LINES), qa = F(MAX_LINES), ql = F(MAX_LINES);
+const lStart = new Uint16Array(MAX_LINES), lLen = new Uint16Array(MAX_LINES), lDepth = new Uint8Array(MAX_LINES), qd = new Uint8Array(MAX_LINES);
+let nPts = 0, nLines = 0, qCount = 0;
+const bolt = { age: 99, x: 0, glowAge: 99, glowX: 0, wait: STRIKE_EVERY * 0.4, glowWait: 5, cool: 0 };
+let wind = WIND, gust = 0, gustTarget = 0, gustWait = 6;
+const mouse = { x: 0, amount: 0 };
 
-function makeDrop(layer) {
-	const depth = 1 - layer / RAIN_LAYERS;
-	return {
-		x: Math.random() * (w + 100) - 50,
-		y: Math.random() * h * 1.2 - h * 0.2,
-		speed: (RAIN_SPEED_BASE + Math.random() * 4) * (0.4 + depth * 0.6),
-		length: (8 + Math.random() * 12) * (0.3 + depth * 0.7),
-		alpha: (0.15 + Math.random() * 0.2) * (0.3 + depth * 0.7),
-		width: depth > 0.6 ? 1.5 : 1
-	};
+function hex(c) { const n = parseInt(c.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
+function rgba(c, a) { return 'rgba(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ',' + a.toFixed(3) + ')'; }
+function band(x) {
+	const d = Math.abs(x - w / 2) / BAND_WIDTH;
+	const t = Math.min(1, Math.max(0, (d - 0.55) / 0.7));
+	return 1 - t * t * (3 - 2 * t);
+}
+function calm(x) { return 1 - CENTER_CALM * band(x); }
+function edge(f) { return Math.random() < 0.5 ? Math.random() * w * f : w - Math.random() * w * f; }
+
+function sprite(size, col, a0, a1) {
+	const c = new OffscreenCanvas(size, size), g = c.getContext('2d');
+	const grad = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+	grad.addColorStop(0, rgba(col, a0));
+	grad.addColorStop(0.5, rgba(col, a1));
+	grad.addColorStop(1, rgba(col, 0));
+	g.fillStyle = grad;
+	g.fillRect(0, 0, size, size);
+	return c;
 }
 
-function initRain() {
-	rainLayers = [];
-	for (let l = 0; l < RAIN_LAYERS; l++) {
-		const drops = [];
-		for (let i = 0; i < DROPS_PER_LAYER[l]; i++) drops.push(makeDrop(l));
-		rainLayers.push(drops);
-	}
-}
-
-function drawRain() {
-	const cosA = Math.cos(windAngle + Math.PI / 2);
-	const sinA = Math.sin(windAngle + Math.PI / 2);
-
-	for (let l = 0; l < rainLayers.length; l++) {
-		const drops = rainLayers[l];
-		const depth = 1 - l / RAIN_LAYERS;
-
-		for (let i = 0; i < drops.length; i++) {
-			const d = drops[i];
-			d.x += sinA * d.speed * 0.3;
-			d.y += cosA * d.speed;
-
-			if (d.y > h + 20 || d.x < -60 || d.x > w + 60) {
-				d.x = Math.random() * (w + 100) - 50;
-				d.y = -10 - Math.random() * 30;
-			}
-
-			ctx.globalAlpha = d.alpha + flashAlpha * 0.1;
-			ctx.strokeStyle = `rgba(180, 200, 220, ${0.4 + depth * 0.3})`;
-			ctx.lineWidth = d.width;
-			ctx.beginPath();
-			ctx.moveTo(d.x, d.y);
-			ctx.lineTo(d.x + sinA * d.length, d.y + cosA * d.length);
-			ctx.stroke();
+function applyTheme(t) {
+	if (t) {
+		dark = t.dark !== false;
+		if (FOLLOW_THEME && t.colors) {
+			const c = t.colors, m = hex(c.muted), bg = hex(c.background), a3 = hex(c.accent3);
+			pal = {
+				rain: dark ? mix(m, a3, 0.35) : mix(m, hex(c.text), 0.25),
+				cloud: dark ? mix(bg, m, 0.3) : mix(m, hex(c.text), 0.35),
+				bolt: dark ? mix(a3, [255, 255, 255], 0.35) : hex(c.accent),
+				win: hex(c.accent2), bg: bg, text: hex(c.text),
+			};
 		}
 	}
+	buildColors();
 }
 
-// ── Lightning bolts ──
-
-function createBolt(x1, y1, x2, y2, depth) {
-	if (depth <= 0) return [];
-
-	const segments = [];
-	const dx = x2 - x1;
-	const dy = y2 - y1;
-	const len = Math.sqrt(dx * dx + dy * dy);
-	const steps = Math.max(3, Math.floor(len / 20));
-
-	let cx = x1, cy = y1;
-	for (let i = 0; i < steps; i++) {
-		const t = (i + 1) / steps;
-		const nx = x1 + dx * t + (Math.random() - 0.5) * 40 * (depth / LIGHTNING_BRANCHES);
-		const ny = y1 + dy * t + (Math.random() - 0.5) * 15;
-		segments.push({ x1: cx, y1: cy, x2: nx, y2: ny, alpha: 1, width: depth * 1.5 });
-		cx = nx;
-		cy = ny;
-
-		// Branch fork
-		if (depth > 1 && Math.random() < 0.3) {
-			const branchAngle = (Math.random() - 0.5) * 1.2;
-			const branchLen = len * (0.2 + Math.random() * 0.3) * (depth / LIGHTNING_BRANCHES);
-			const bx = cx + Math.cos(Math.atan2(dy, dx) + branchAngle) * branchLen;
-			const by = cy + Math.sin(Math.atan2(dy, dx) + branchAngle) * branchLen;
-			segments.push(...createBolt(cx, cy, bx, by, depth - 1));
-		}
-	}
-	return segments;
+function buildColors() {
+	const k = dark ? 1 : 0.55;
+	for (let l = 0; l < 3; l++) rainStyle[l] = rgba(pal.rain, (0.22 + l * 0.17) * k);
+	boltGlow = rgba(pal.bolt, dark ? 0.16 : 0.12);
+	boltCore = rgba(pal.bolt, dark ? 0.85 : 0.6);
+	boltHot = dark ? rgba(mix(pal.bolt, [255, 255, 255], 0.7), 0.95) : rgba(mix(pal.bolt, pal.text, 0.5), 0.75);
+	cloudSprite = sprite(128, pal.cloud, dark ? 0.7 : 0.26, dark ? 0.4 : 0.14);
+	litSprite = sprite(128, dark ? mix(pal.bolt, pal.cloud, 0.35) : mix(pal.bolt, pal.bg, 0.5), dark ? 0.5 : 0.25, 0.18);
+	flashSprite = sprite(256, dark ? pal.bolt : mix(pal.bolt, pal.bg, 0.3), dark ? 0.32 : 0.16, 0.1);
+	if (w) buildSkyline();
 }
 
-function strikeLightning(x) {
-	const strikeX = x !== undefined ? x : Math.random() * w * 0.8 + w * 0.1;
-	const segments = createBolt(strikeX, 0, strikeX + (Math.random() - 0.5) * 80, h * 0.75, LIGHTNING_BRANCHES);
-	bolts.push({ segments, life: 1, decay: 0.03 + Math.random() * 0.02 });
-	flashAlpha = 0.6 + Math.random() * 0.3;
-
-	if (SCREEN_SHAKE) {
-		shakeDecay = 1;
-	}
-}
-
-function drawBolts() {
-	for (let i = bolts.length - 1; i >= 0; i--) {
-		const bolt = bolts[i];
-		bolt.life -= bolt.decay;
-		if (bolt.life <= 0) { bolts.splice(i, 1); continue; }
-
-		for (let s = 0; s < bolt.segments.length; s++) {
-			const seg = bolt.segments[s];
-			// Core (bright white)
-			ctx.globalAlpha = bolt.life * 0.9;
-			ctx.strokeStyle = `rgba(220, 230, 255, ${bolt.life})`;
-			ctx.lineWidth = seg.width;
-			ctx.lineCap = 'round';
-			ctx.beginPath();
-			ctx.moveTo(seg.x1, seg.y1);
-			ctx.lineTo(seg.x2, seg.y2);
-			ctx.stroke();
-
-			// Glow (wider, dimmer)
-			ctx.globalAlpha = bolt.life * 0.25;
-			ctx.strokeStyle = `rgba(150, 180, 255, ${bolt.life * 0.5})`;
-			ctx.lineWidth = seg.width * 4;
-			ctx.beginPath();
-			ctx.moveTo(seg.x1, seg.y1);
-			ctx.lineTo(seg.x2, seg.y2);
-			ctx.stroke();
-		}
-	}
-}
-
-// ── Clouds ──
-
-function makeCloud() {
-	return {
-		x: Math.random() * (w + 400) - 200,
-		y: Math.random() * h * 0.2,
-		width: 200 + Math.random() * 300,
-		height: 40 + Math.random() * 50,
-		speed: 0.1 + Math.random() * 0.2,
-		puffs: (() => {
-			const n = Math.floor(Math.random() * 5) + 4;
-			const arr = [];
-			for (let j = 0; j < n; j++) {
-				arr.push({
-					ox: (Math.random() - 0.5) * 0.9,
-					oy: (Math.random() - 0.5) * 0.6,
-					r: 0.25 + Math.random() * 0.35,
-					lightPhase: Math.random() * TAU
-				});
-			}
-			return arr;
-		})()
-	};
-}
-
-function initClouds() {
-	clouds = [];
-	for (let i = 0; i < CLOUD_COUNT; i++) clouds.push(makeCloud());
-}
-
-function drawClouds() {
-	for (let i = 0; i < clouds.length; i++) {
-		const c = clouds[i];
-		c.x += c.speed;
-		if (c.x > w + c.width) c.x = -c.width;
-
-		for (let j = 0; j < c.puffs.length; j++) {
-			const p = c.puffs[j];
-			const heatFlicker = Math.sin(time * 0.02 + p.lightPhase) > 0.97 ? 0.15 : 0;
-			const baseLum = 18 + flashAlpha * 60 + heatFlicker * 40;
-			ctx.globalAlpha = 0.5 + flashAlpha * 0.3;
-			ctx.fillStyle = `rgb(${baseLum}, ${baseLum + 2}, ${baseLum + 5})`;
-			ctx.beginPath();
-			ctx.ellipse(
-				c.x + p.ox * c.width,
-				c.y + p.oy * c.height,
-				c.width * p.r * 0.5,
-				c.height * p.r,
-				0, 0, TAU
-			);
-			ctx.fill();
-		}
-	}
-}
-
-// ── City skyline ──
-
-function initBuildings() {
-	buildings = [];
-	for (let i = 0; i < BUILDING_COUNT; i++) {
-		const bw = 15 + Math.random() * 35;
-		buildings.push({
-			x: (i / BUILDING_COUNT) * w + (Math.random() - 0.5) * 20,
-			width: bw,
-			height: 30 + Math.random() * 80,
-			windows: Math.floor(Math.random() * 6) + 2,
-			windowFloors: Math.floor(Math.random() * 8) + 3
-		});
-	}
-}
-
-function drawSkyline() {
-	const horizonY = h * 0.72;
-
-	for (let i = 0; i < buildings.length; i++) {
-		const b = buildings[i];
-		const bx = b.x;
-		const by = horizonY - b.height;
-		const lit = flashAlpha > 0 ? 22 + flashAlpha * 30 : 10;
-
-		ctx.globalAlpha = 0.6 + flashAlpha * 0.3;
-		ctx.fillStyle = `rgb(${lit}, ${lit + 1}, ${lit + 3})`;
-		ctx.fillRect(bx, by, b.width, b.height);
-
-		// Windows (faint warm glow)
-		const winW = b.width / (b.windows * 2 + 1);
-		const winH = 2;
-		ctx.fillStyle = 'rgba(200, 180, 100, 0.15)';
-		for (let wy = 0; wy < b.windowFloors; wy++) {
-			for (let wx = 0; wx < b.windows; wx++) {
-				if (Math.sin((wx + wy) * 3.7 + i * 2.1) > 0) {
-					ctx.fillRect(
-						bx + winW + wx * winW * 2,
-						by + 4 + wy * (b.height / b.windowFloors),
-						winW * 0.8,
-						winH
-					);
+// ── Skyline: drawn once per resize or theme into a cached strip along the bottom fifth ──
+function buildSkyline() {
+	skyH = Math.max(8, Math.round(h * Math.max(0.03, SKYLINE_HEIGHT) + 8));
+	skyW = Math.max(1, w);
+	skyline = new OffscreenCanvas(Math.round(skyW * dpr), Math.round(skyH * dpr));
+	const g = skyline.getContext('2d');
+	g.setTransform(dpr, 0, 0, dpr, 0, 0);
+	const body = dark ? mix(pal.bg, [0, 0, 0], 0.5) : mix(pal.cloud, pal.bg, 0.25);
+	const back = dark ? mix(pal.bg, pal.cloud, 0.6) : mix(pal.cloud, pal.bg, 0.55);
+	for (let row = 0; row < 2; row++) {
+		let x = -10 - Math.random() * 30;
+		while (x < skyW + 10) {
+			const bw = 16 + Math.random() * 44;
+			const quiet = band(x + bw / 2);
+			const tall = (row ? 0.35 : 0.6) + Math.random() * (row ? 0.65 : 0.4);
+			const bh = Math.max(6, (skyH - 8) * tall * (1 - 0.55 * quiet));
+			const top = skyH - bh;
+			g.globalAlpha = (row ? (dark ? 0.85 : 0.5) : (dark ? 0.55 : 0.3)) * (1 - 0.5 * CENTER_CALM * quiet);
+			g.fillStyle = rgba(row ? body : back, 1);
+			g.fillRect(x, top, bw, bh);
+			if (row && quiet < 0.5) {
+				g.fillStyle = rgba(pal.win, 1);
+				for (let fy = top + 5; fy < skyH - 4; fy += 6) {
+					for (let fx = x + 3; fx < x + bw - 4; fx += 5) {
+						if (Math.random() < 0.12) { g.globalAlpha = (dark ? 0.35 : 0.3) * (0.4 + Math.random() * 0.6); g.fillRect(fx, fy, 2, 2); }
+					}
 				}
 			}
+			x += bw + (row ? 2 + Math.random() * 10 : -4 + Math.random() * 14);
+		}
+	}
+}
+
+// ── Rain: spawn rejected over the chat column so it stays thin there ──
+function spawnX() {
+	for (let tries = 0; tries < 4; tries++) {
+		const x = Math.random() * (w + 200) - 100;
+		if (Math.random() < 1 - 0.85 * CENTER_CALM * band(x)) return x;
+	}
+	return edge(0.15);
+}
+function resetDrop(i, anywhere) {
+	const z = i % 3;
+	rx[i] = spawnX();
+	ry[i] = anywhere ? Math.random() * h : -20 - Math.random() * 60;
+	rs[i] = (480 + z * 330) * (0.85 + Math.random() * 0.3);
+	rl[i] = (7 + z * 6) * (0.8 + Math.random() * 0.4);
+}
+
+function size() {
+	canvas.width = Math.max(1, Math.round(w * dpr));
+	canvas.height = Math.max(1, Math.round(h * dpr));
+	ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+	drops = Math.min(MAX_DROPS, Math.round(w * h / 2400 * RAIN_DENSITY));
+	for (let i = 0; i < drops; i++) resetDrop(i, true);
+	puffs = Math.min(MAX_PUFFS, Math.round(w / 24 * CLOUD_COVER));
+	const s = Math.max(0.6, Math.min(1.2, h / 900));
+	for (let i = 0; i < puffs; i++) {
+		cx[i] = Math.random() * (w + 400) - 200;
+		cy[i] = h * (Math.pow(Math.random(), 1.6) * 0.2 - 0.01);
+		cr[i] = (70 + Math.random() * 110) * s;
+		cv[i] = 5 + Math.random() * 9;
+		ca[i] = 0.55 + Math.random() * 0.45;
+	}
+	if (w && h) buildSkyline();
+}
+
+// ── Lightning: a mean-reverting walk for the channel, forks queued and tapering ──
+function addLine(x0, y0, ang, len, depth) {
+	if (nLines >= MAX_LINES || nPts >= MAX_PTS - 4) return;
+	const li = nLines++;
+	lStart[li] = nPts; lDepth[li] = depth;
+	const steps = Math.max(4, Math.min(48, Math.floor(len / 13), MAX_PTS - nPts - 1));
+	const seg = len / steps, ca2 = Math.cos(ang), sa2 = Math.sin(ang);
+	let off = 0;
+	px[nPts] = x0; py[nPts] = y0; nPts++;
+	for (let i = 1; i <= steps; i++) {
+		off = off * 0.82 + (Math.random() - 0.5) * seg * 1.7;
+		const d = i * seg;
+		const x = x0 + ca2 * d - sa2 * off, y = y0 + sa2 * d + ca2 * off;
+		px[nPts] = x; py[nPts] = y; nPts++;
+		const t = i / steps;
+		if (depth < 3 && i > 2 && i < steps - 2 && Math.random() < BRANCHING * (depth ? 0.08 : 0.14) * (1.1 - t)) {
+			if (qCount >= MAX_LINES) continue;
+			qx[qCount] = x; qy[qCount] = y; qd[qCount] = depth + 1;
+			qa[qCount] = ang + (Math.random() < 0.5 ? -1 : 1) * (0.35 + Math.random() * 0.6);
+			ql[qCount++] = len * (1 - t) * (0.3 + Math.random() * 0.35);
+		}
+	}
+	lLen[li] = nPts - lStart[li];
+}
+
+// Strikes land outside the calm band, nudged outward when called over the column
+function strikeX(x) {
+	const mid = w / 2, reach = BAND_WIDTH * 0.95;
+	if (Math.abs(x - mid) < reach) x = mid + (x < mid ? -reach : reach);
+	return Math.max(w * 0.04, Math.min(w * 0.96, x));
+}
+
+function strike(x) {
+	if (reduced || bolt.cool > 0) { glowAt(x); return; }
+	const x0 = strikeX(x);
+	const top = h * (0.06 + Math.random() * 0.06), bottom = h * (0.84 + Math.random() * 0.08);
+	const lean = (x0 < w / 2 ? -1 : 1) * Math.random() * 0.18;
+	nPts = 0; nLines = 0; qCount = 0;
+	addLine(x0, top, Math.PI / 2 + lean, bottom - top, 0);
+	for (let q = 0; q < qCount; q++) addLine(qx[q], qy[q], qa[q], ql[q], qd[q]);
+	bolt.x = x0; bolt.age = 0; bolt.cool = 0.9;
+}
+function glowAt(x) { bolt.glowX = strikeX(x); bolt.glowAge = 0; }
+
+// A strike flickers twice, then fades over half a second
+function boltLight(a) { return a < 0.06 ? 1 : a < 0.12 ? 0.35 : a < 0.2 ? 0.9 : Math.max(0, Math.exp(-(a - 0.2) * 6) - 0.01); }
+
+function drawBolt(light) {
+	ctx.lineCap = 'round';
+	ctx.lineJoin = 'round';
+	for (let pass = 0; pass < 3; pass++) {
+		ctx.strokeStyle = pass === 0 ? boltGlow : pass === 1 ? boltCore : boltHot;
+		for (let l = 0; l < nLines; l++) {
+			const fade = lDepth[l] ? Math.pow(0.55, lDepth[l]) : 1;
+			if (pass === 2 && lDepth[l] > 1) continue;
+			ctx.globalAlpha = light * fade;
+			ctx.lineWidth = (pass === 0 ? 9 : pass === 1 ? 2.6 : 1.1) * (lDepth[l] ? 0.7 / lDepth[l] : 1);
+			ctx.beginPath();
+			const s = lStart[l], e = s + lLen[l];
+			ctx.moveTo(px[s], py[s]);
+			for (let i = s + 1; i < e; i++) ctx.lineTo(px[i], py[i]);
+			ctx.stroke();
+		}
+	}
+}
+
+function frame(now) {
+	requestAnimationFrame(frame);
+	const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
+	last = now;
+	if (!w || !h) return;
+	const sp = RAIN_SPEED * (reduced ? REDUCED_SPEED : 1);
+
+	// Wind: base slant, slow gusts, and a cursor tilt that eases back after the cursor stops
+	gustWait -= dt;
+	if (gustWait <= 0) { gustTarget = reduced ? 0 : (Math.random() - 0.25) * GUST_STRENGTH; gustWait = 5 + Math.random() * 9; }
+	if (gustWait < 3) gustTarget *= 1 - Math.min(1, dt * 0.4);
+	gust += (gustTarget - gust) * Math.min(1, dt * 0.8);
+	mouse.amount = Math.max(0, mouse.amount - dt * 0.25);
+	const tilt = (mouse.x / w - 0.5) * 0.35 * CURSOR_WIND * mouse.amount;
+	wind += (WIND + gust + tilt - wind) * Math.min(1, dt * 1.5);
+	const vx = Math.sin(wind), vy = Math.cos(wind);
+
+	// Strike timers
+	bolt.age += dt; bolt.glowAge += dt; bolt.cool -= dt;
+	if (STRIKE_EVERY > 0) {
+		bolt.wait -= dt;
+		if (bolt.wait <= 0) { strike(edge(0.3)); bolt.wait = STRIKE_EVERY * (0.5 + Math.random()); }
+	}
+	bolt.glowWait -= dt;
+	if (bolt.glowWait <= 0) { glowAt(edge(0.25)); bolt.glowWait = 6 + Math.random() * 10; }
+	const light = bolt.age < 1.2 ? boltLight(bolt.age) : 0;
+	const glow = bolt.glowAge < 3 ? Math.sin(Math.PI * bolt.glowAge / 3) * (reduced ? 0.5 : 0.6) : 0;
+
+	ctx.clearRect(0, 0, w, h);
+
+	// Flash: a soft swell over the sky around the strike, never across the column
+	if (light > 0.01 && FLASH_INTENSITY > 0) {
+		ctx.globalAlpha = Math.min(1, light * FLASH_INTENSITY * 1.6);
+		ctx.drawImage(flashSprite, bolt.x - w * 0.32, -h * 0.35, w * 0.64, h * 0.95);
+	}
+
+	// Cloud banks, lit from within near a strike or a distant glow
+	const drift = dt * sp * 1.4;
+	for (let i = 0; i < puffs; i++) {
+		cx[i] += cv[i] * drift;
+		if (cx[i] > w + 200) cx[i] -= w + 400;
+		const r = cr[i], c = calm(cx[i]);
+		ctx.globalAlpha = ca[i] * c;
+		ctx.drawImage(cloudSprite, cx[i] - r, cy[i] - r * 0.55, r * 2, r * 1.1);
+		let lit = 0;
+		if (light > 0.01) lit += light * FLASH_INTENSITY * 2.2 * Math.max(0, 1 - Math.abs(cx[i] - bolt.x) / (w * 0.3));
+		if (glow > 0.01) lit += glow * Math.max(0, 1 - Math.abs(cx[i] - bolt.glowX) / 260);
+		if (lit > 0.01) {
+			ctx.globalAlpha = Math.min(1, lit) * c;
+			ctx.drawImage(litSprite, cx[i] - r * 0.8, cy[i] - r * 0.4, r * 1.6, r * 0.8);
 		}
 	}
 
-	// Ground plane
-	ctx.globalAlpha = 1;
-	const groundGrad = ctx.createLinearGradient(0, horizonY, 0, h);
-	groundGrad.addColorStop(0, 'rgb(8, 10, 14)');
-	groundGrad.addColorStop(1, 'rgb(5, 6, 10)');
-	ctx.fillStyle = groundGrad;
-	ctx.fillRect(0, horizonY, w, h - horizonY);
-}
+	if (light > 0.01) drawBolt(light);
 
-// ── Puddle reflections ──
+	if (skyline) { ctx.globalAlpha = 1; ctx.drawImage(skyline, 0, h - skyH, skyW, skyH); }
 
-function drawPuddles() {
-	if (!PUDDLE_REFLECTIONS) return;
-	const puddleY = h * 0.85;
-
-	ctx.globalAlpha = 0.04 + flashAlpha * 0.08;
-	for (let i = 0; i < 12; i++) {
-		const px = (i / 12) * w + Math.sin(i * 5.3) * 40;
-		const pw = 40 + Math.sin(i * 3.1) * 20;
-		const shimmer = Math.sin(time * 0.02 + i * 2) * 0.02;
-
-		const pGrad = ctx.createRadialGradient(px, puddleY, 0, px, puddleY, pw);
-		pGrad.addColorStop(0, `rgba(100, 130, 180, ${0.2 + shimmer + flashAlpha * 0.3})`);
-		pGrad.addColorStop(1, 'rgba(100, 130, 180, 0)');
-		ctx.fillStyle = pGrad;
+	// Rain, one path per depth layer
+	for (let l = 0; l < 3; l++) {
+		ctx.strokeStyle = rainStyle[l];
+		ctx.lineWidth = l === 2 ? 1.2 : 1;
+		ctx.globalAlpha = 1;
 		ctx.beginPath();
-		ctx.ellipse(px, puddleY, pw, 6, 0, 0, TAU);
-		ctx.fill();
-	}
-}
-
-// ── Init ──
-
-function initAll() {
-	initRain();
-	initClouds();
-	initBuildings();
-}
-
-// ── Render ──
-
-function animate() {
-	if (!ctx) return;
-	time++;
-
-	// Wind gusts
-	if (Math.random() < WIND_GUST_CHANCE) {
-		windTarget = RAIN_ANGLE_BASE + (Math.random() - 0.3) * WIND_GUST_STRENGTH;
-	}
-	windAngle += (windTarget - windAngle) * 0.02;
-	windTarget += (RAIN_ANGLE_BASE - windTarget) * 0.005;
-
-	// Flash decay
-	flashAlpha *= 0.92;
-	if (flashAlpha < 0.005) flashAlpha = 0;
-
-	// Screen shake decay
-	if (shakeDecay > 0) {
-		shakeX = (Math.random() - 0.5) * 6 * shakeDecay;
-		shakeY = (Math.random() - 0.5) * 3 * shakeDecay;
-		shakeDecay *= 0.93;
-		if (shakeDecay < 0.01) { shakeDecay = 0; shakeX = 0; shakeY = 0; }
+		for (let i = l; i < drops; i += 3) {
+			const v = rs[i] * sp;
+			rx[i] += vx * v * dt;
+			ry[i] += vy * v * dt;
+			if (ry[i] > h + 20) resetDrop(i, false);
+			else if (rx[i] > w + 120) rx[i] -= w + 220;
+			else if (rx[i] < -120) rx[i] += w + 220;
+			const len = rl[i] * (0.6 + 0.4 * sp);
+			ctx.moveTo(rx[i], ry[i]);
+			ctx.lineTo(rx[i] - vx * len, ry[i] - vy * len);
+		}
+		ctx.stroke();
 	}
 
-	ctx.save();
-	if (SCREEN_SHAKE) ctx.translate(shakeX, shakeY);
-
-	// Storm sky
-	const skyGrad = ctx.createLinearGradient(0, 0, 0, h * 0.7);
-	skyGrad.addColorStop(0, `rgb(${8 + flashAlpha * 40}, ${10 + flashAlpha * 42}, ${18 + flashAlpha * 45})`);
-	skyGrad.addColorStop(0.5, `rgb(${12 + flashAlpha * 30}, ${14 + flashAlpha * 32}, ${22 + flashAlpha * 35})`);
-	skyGrad.addColorStop(1, `rgb(${10 + flashAlpha * 25}, ${12 + flashAlpha * 28}, ${20 + flashAlpha * 30})`);
 	ctx.globalAlpha = 1;
-	ctx.fillStyle = skyGrad;
-	ctx.fillRect(-10, -10, w + 20, h + 20);
-
-	// Flash overlay
-	if (flashAlpha > 0.01) {
-		ctx.globalAlpha = flashAlpha * 0.3;
-		ctx.fillStyle = 'rgba(200, 210, 230, 1)';
-		ctx.fillRect(-10, -10, w + 20, h + 20);
-	}
-
-	drawClouds();
-
-	if (Math.random() < LIGHTNING_CHANCE) strikeLightning();
-	drawBolts();
-
-	drawSkyline();
-	drawPuddles();
-	drawRain();
-
-	ctx.restore();
-	ctx.globalAlpha = 1;
-
-	requestAnimationFrame(animate);
 }
-
-// ── Message handler ──
 
 self.onmessage = (e) => {
-	switch (e.data.type) {
+	const d = e.data;
+	switch (d.type) {
 		case 'init':
-			canvas = e.data.canvas;
+			canvas = d.canvas;
 			ctx = canvas.getContext('2d');
-			w = e.data.width;
-			h = e.data.height;
-			canvas.width = w;
-			canvas.height = h;
-			initAll();
-			animate();
+			w = d.width; h = d.height; dpr = Math.min(d.dpr || 1, 2);
+			reduced = !!d.reducedMotion;
+			applyTheme(d.theme);
+			size();
+			requestAnimationFrame(frame);
 			break;
-
 		case 'resize':
-			w = e.data.width;
-			h = e.data.height;
-			canvas.width = w;
-			canvas.height = h;
-			initAll();
+			w = d.width; h = d.height; dpr = Math.min(d.dpr || 1, 2);
+			if (canvas) size();
 			break;
-
-		case 'click':
-			strikeLightning(e.data.x);
+		case 'theme':
+			applyTheme(d);
 			break;
-
+		case 'motion':
+			reduced = !!d.reducedMotion;
+			break;
 		case 'mousemove':
-			windTarget = RAIN_ANGLE_BASE + ((e.data.x / w) - 0.5) * 0.2;
+			mouse.x = d.x;
+			mouse.amount = 1;
+			break;
+		case 'mousedown':
+			strike(d.x);
 			break;
 	}
 };
