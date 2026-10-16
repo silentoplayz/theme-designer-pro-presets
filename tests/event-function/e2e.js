@@ -821,7 +821,8 @@ test('a theme file keeps every setting through the Studio and the designer', asy
   const catalog = read('docs/catalog.json');
   const built = [
     ...['mesh', 'radial'].map((type) => ({ type, hash: 'gradient=' + catalog.gradients.find((g) => g.type === type).file })),
-    { hash: 'fx=' + catalog.canvasFx[0].file },
+    // The catalog is rebuilt by CI after a merge, so it can list a script that was just removed
+    { hash: 'fx=' + catalog.canvasFx.find((x) => fs.existsSync(path.join(REPO_ROOT, 'canvas-fx', x.file))).file },
   ];
   const hashes = [
     ...fixtures.map((f) => 'theme=' + encodeURIComponent(RAW + f)),
