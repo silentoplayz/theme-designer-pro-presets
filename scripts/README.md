@@ -175,8 +175,8 @@ npm run validate
 
 | Category | Hard Errors | Warnings |
 |---|---|---|
-| Canvas FX | Missing `onmessage` handler, forbidden DOM access (`document`, `window`, `localStorage`, `alert`) | Missing heartbeat |
-| CSS Presets | Empty file, no CSS syntax detected | — |
+| Canvas FX | Missing `onmessage` handler or `init`/`resize` case, DOM access (`document`, `window`, `localStorage`, `alert`), a heartbeat, WebGL without `webglcontextlost` | No theme support, `'lighter'` without a light-theme check, a multi-line Description, over 20 KB |
+| CSS (presets and theme custom CSS) | A rule on `#chat-input-container` | Selectors that match nothing in current Open WebUI, blanket `input`, `textarea` or `*` rules |
 | Themes | Invalid JSON, missing `name`, missing `dark`/`light` modes, OKLCH `h`/`c`/`l` fields (via JSON Schema) | — |
 | Gradients | Invalid JSON, missing `name`/`type`, invalid type, wrong subdirectory, missing stops/meshPoints | — |
 | Bundles | Invalid JSON, backup flag without matching array | — |

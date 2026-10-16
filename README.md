@@ -122,8 +122,8 @@ Three [GitHub Actions workflows](.github/workflows/) validate presets, build the
 Runs on pushes to `main` that change a preset or a script: `.js` in `canvas-fx/`, `.css` in `css-presets/`, `.json` in `themes/`, `gradients/` or `schemas/`, or `.js` in `scripts/`. Edits to documentation don't start it.
 
 1. **Validate.** [`scripts/validate.js`](scripts/validate.js) checks every preset:
-   - **Canvas FX:** an `onmessage` handler, no DOM access, and a heartbeat (a warning when it's missing)
-   - **CSS:** not empty, and valid syntax
+   - **Canvas FX:** the [house standard](canvas-fx/README.md): `init` and `resize` cases, no DOM access, no heartbeat, WebGL context loss handled, with warnings for no theme support or more than 20 KB
+   - **CSS** (presets and every theme's custom CSS): no rule on `#chat-input-container`, the square box inside the rounded input, with warnings for selectors that match nothing in current Open WebUI and for blanket `input`, `textarea` or `*` rules
    - **Themes:** a `name`, an `updateUrl`, at least one mode, and valid OKLCH color fields
    - **Gradients:** the type, the stops, and the right subfolder
    - **Bundles:** flags that match what each bundle contains

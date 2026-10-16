@@ -18,17 +18,18 @@
 - [ ] Files are in the correct directory with `lowercase_with_underscores` naming
 - [ ] Ran `node scripts/validate.js` locally — no errors
 
-### Canvas FX
-- [ ] Web Worker compatible — no `document`, `window`, `localStorage`, or `alert`
-- [ ] Handles `init`, `resize`, `mousemove`, `click`, `mousedown`, `mouseup`, `touchstart`, `touchmove`, `touchend`, `context` messages
-- [ ] Includes heartbeat (`self.postMessage({ type: 'heartbeat' })`)
-- [ ] Uses `requestAnimationFrame` for the render loop
-- [ ] Has a JSDoc header with `Title` and `Description`
-- [ ] Performs well — no visible lag on mid-range hardware
+### Canvas FX (the [house standard](canvas-fx/README.md))
+- [ ] Runs in the worker: no `document`, `window`, `localStorage` or `alert`, and no heartbeat
+- [ ] Handles `init`, `resize`, `theme`, `motion` and the pointer messages it uses; taps through `mousedown` only
+- [ ] Follows the theme, keeps the canvas transparent and the chat column calm
+- [ ] Elapsed-time motion, nothing allocated per frame, pixel ratio and reduced motion handled
+- [ ] A header with `Title` and a one-line `Description`, and at least 10 settings with `(min-max)` ranges
+- [ ] Checked with `tests/canvas-fx/harness.js`: no errors or flags
 
 ### Themes
-- [ ] Valid JSON exported from Theme Designer Pro
-- [ ] Includes `dark` and `light` mode configurations at minimum
+- [ ] Valid JSON exported from Theme Designer Pro, every mode designed
+- [ ] Custom CSS styles the rounded `#message-input-container`, never `#chat-input-container`
+- [ ] `version` raised on any change to an existing theme
 - [ ] Tested on desktop and mobile viewports
 
 ### CSS Presets
