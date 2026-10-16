@@ -1,285 +1,269 @@
 {
   "manifestVersion": "1.0",
-  "generated": "2026-10-11T17:33:22.964Z",
+  "generated": "2026-10-16T15:34:03.402Z",
   "manifestUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/manifest.json",
   "themes": {
     "aether_nebula_flow": {
-      "name": "AETHER // NEBULA FLOW",
-      "version": "1.0.0",
+      "name": "Aether Nebula",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Atmospheric translucent UI with gaseous nebula Canvas FX and holographic shimmer accents. Cool blue tones with frosted glass panels.",
+      "description": "Slow nebula gas in the theme's own colors gathers at the edges and thins behind the chat, under frosted glass that keeps Open WebUI's shapes. Every mode designed, Light and Her included.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/aether_nebula_flow.json",
       "file": "themes/aether_nebula_flow.json"
     },
-    "amber": {
-      "name": "Amber",
-      "version": "1.0.0",
-      "author": "silentoplayz (G30)",
-      "description": "Warm golden-olive palette reminiscent of polished amber, with a subtle gradient glow.",
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/amber.json",
-      "file": "themes/amber.json"
-    },
     "amber_command_1979": {
       "name": "Amber Command: 1979",
-      "version": "1.1.0",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Vintage CRT terminal aesthetic with amber monochrome tones, scan-line flicker effects, and Geometric Mainframe Canvas FX.",
+      "description": "An amber phosphor terminal: monospace replies with a prompt before each heading, and packets of amber light streaming along faint lanes at the sides. Light and Her print the same terminal in amber ink on warm paper.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/amber_command_1979.json",
       "file": "themes/amber_command_1979.json"
     },
     "amethyst": {
       "name": "Amethyst",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Vibrant purple tones inspired by amethyst crystals, with a deep violet gradient.",
+      "description": "Violet glass over a deep amethyst gradient in Dark, pale lilac in Light, orchid in Her. Headings, links and the input ring take the stone's violet.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/amethyst.json",
       "file": "themes/amethyst.json"
     },
     "apollo_analogue_futurism": {
-      "name": "Apollo // Analogue Futurism",
-      "version": "1.1.0",
+      "name": "Apollo Analogue Futurism",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "NASA-era analogue hardware interface with industrial chassis textures, Vector Telemetry Canvas FX, and muted steel-blue tones.",
+      "description": "A 1960s flight console in warm gray and cream with signal orange for focus and links, and a brass orrery turning in the lower corner. Light and Her are cream and warm beige panels with dark lettering.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/apollo_analogue_futurism.json",
       "file": "themes/apollo_analogue_futurism.json"
     },
     "astral_projection": {
       "name": "Astral Projection",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Deep space glassmorphism with ethereal violet-blue tones, Hyperspace Warp Drive Canvas FX, and luminous translucent panels.",
+      "description": "Faint violet-blue constellations drift in the outer thirds of the screen behind frosted glass panels. Light and Her keep the same star chart, drawn in deep blue and lilac ink on pale paper.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/astral_projection.json",
       "file": "themes/astral_projection.json"
     },
     "bio_digital_synthesis": {
       "name": "Bio-Digital Synthesis",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Living bio-organic UI with pulsing borders, Synaptic Network Canvas FX, and vibrant magenta-purple neural tones.",
+      "description": "A neural net of magenta links and cyan pulses fires in the outer thirds of the screen behind frosted membrane glass. Light is pale aqua with magenta headings, Her a soft pink with teal ones.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/bio_digital_synthesis.json",
       "file": "themes/bio_digital_synthesis.json"
     },
     "bioluminescence": {
       "name": "Bioluminescence",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Deep ocean bioluminescent aesthetic with glowing cyan accents, jellyfish-inspired Canvas FX, and frosted glass panels.",
+      "description": "Glowing cyan and violet jellyfish drift over a dark seafloor at the edges of the screen, with cyan headings and frosted panels. Light and Her are sunlit shallow water, with caustics on pale sand and teal ink.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/bioluminescence.json",
       "file": "themes/bioluminescence.json"
     },
     "blue_lightning": {
       "name": "Blue Lightning",
-      "version": "1.1.0",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Electric aurora borealis gradients with Blue Lightning Twinkle Canvas FX and vibrant cerulean-teal tones.",
+      "description": "Cerulean rain slants past a low skyline while pale blue lightning forks in the outer thirds of the screen, with soft flashes. Light and Her keep the storm in slate and periwinkle ink on a pale sky.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/blue_lightning.json",
       "file": "themes/blue_lightning.json"
     },
-    "emerald": {
-      "name": "Emerald",
+    "chongqing_fog_city": {
+      "name": "Chongqing Fog City",
       "version": "1.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Rich green hues evoking a dense, jewel-toned forest with matching gradient.",
+      "description": "A river city of layered neon towers drifts past in mist and mirrors onto the water, dimmed and lowered behind the chat. Amber, magenta and cyan windows over cool fog grey, dark blue-grey at night, true black on OLED, pale mist in Light and a warm lantern haze in Her.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/chongqing_fog_city.json",
+      "file": "themes/chongqing_fog_city.json"
+    },
+    "emerald": {
+      "name": "Emerald",
+      "version": "2.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "Green glass over a deep emerald gradient in Dark, pale mint in Light, warmer jade in Her. Headings, links and the input ring take the stone's green.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/emerald.json",
       "file": "themes/emerald.json"
     },
     "entropy_data_storm": {
-      "name": "ENTROPY // DATA-STORM",
-      "version": "1.0.0",
+      "name": "Entropy Data Storm",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Industrial containment UI with corroded amber warning tones, Bit-Stream Corruption Canvas FX, and JetBrains Mono typography.",
+      "description": "A containment console in black and hazard yellow: a faint glitching grid at the edges, a yellow focus ring and sidebar edge, and uppercase monospace headings underlined in yellow. Light and Her set the same marks on concrete gray and warm cream.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/entropy_data_storm.json",
       "file": "themes/entropy_data_storm.json"
     },
     "four_seasons_desynced": {
-      "name": "Four Seasons (Desynced)",
-      "version": "1.0.0",
+      "name": "Four Seasons",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Nature-inspired seasonal palette with emerald canopy tones, Fireflies Canvas FX, and soft rounded corners.",
+      "description": "One season in each mode: a summer night with fireflies over the grass in Dark, falling autumn leaves on warm parchment in Light, snow on a winter night in OLED, and butterflies in a spring garden in Her. Each mode has its own palette and accent.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/four_seasons_desynced.json",
       "file": "themes/four_seasons_desynced.json"
     },
-    "kinetic_thermal_plasma_core": {
-      "name": "Kinetic Thermal // Plasma Core",
+    "iridescent_liquid_glass": {
+      "name": "Iridescent Liquid Glass",
       "version": "1.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Fusion reactor control interface with industrial plating, Plasma Arc Discharge Canvas FX, and cool blue containment tones.",
+      "description": "Veins of thin-film glass fold slowly at the screen's edges in teal, violet and rose, thinning behind the chat under clear frosted surfaces. Rose-violet glass at night, true black on OLED, pearl in Light and a rosier pearl in Her.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/iridescent_liquid_glass.json",
+      "file": "themes/iridescent_liquid_glass.json"
+    },
+    "kinetic_thermal_plasma_core": {
+      "name": "Plasma Core",
+      "version": "2.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "A fusion core in the lower corner glows cool blue on a new chat and heats to orange and red as the conversation fills the context, under console glass with orange monospace headings. Light and Her show the core as colored ink on pale steel and warm sand.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/kinetic_thermal_plasma_core.json",
       "file": "themes/kinetic_thermal_plasma_core.json"
     },
     "koi_pond": {
       "name": "Koi Pond",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Companion palette for the Koi Pond canvas. Cool pond-water teal on every surface, with text that reads like sunlight on the water; the gradient is the pond floor when the canvas is off. Dark and OLED carry the Koi Pond (WebGL) canvas itself; Light and Her keep the light pond-water gradient.",
+      "description": "Koi glide along the edges of a clear teal pond under lily pads and moving light, calmer behind the chat, with frosted glass over the water. Every mode is the same pond: deep teal at night, true black on OLED, and pale clear water in Light and Her.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/koi_pond.json",
       "file": "themes/koi_pond.json"
     },
     "lumina_aurora": {
-      "name": "LUMINA // AURORA",
-      "version": "1.0.0",
+      "name": "Lumina Aurora",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Premium glassmorphism with layered frosted panels, Fluid Aurora Borealis Canvas FX, and deep indigo-violet tones.",
+      "description": "Aurora ribbons in indigo, violet and blue sway across the top of the screen behind layered frosted glass with a thin highlight along its top edge. Indigo night in Dark, true black in OLED, pale lavender in Light and orchid in Her.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/lumina_aurora.json",
       "file": "themes/lumina_aurora.json"
     },
     "matrix_rain": {
       "name": "Matrix Rain",
-      "version": "1.1.0",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Hacker terminal aesthetic with phosphor-green grid lines, Matrix code rain Canvas FX, and monochrome dark palette.",
+      "description": "Green digital rain of mixed katakana and Latin glyphs at the sides of the screen, with monospace replies in green phosphor. Light and Her keep the green as ink on pale paper.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/matrix_rain.json",
       "file": "themes/matrix_rain.json"
     },
-    "midnight": {
-      "name": "Midnight",
-      "version": "1.0.0",
-      "author": "silentoplayz (G30)",
-      "description": "Deep indigo tones with a dark linear gradient backdrop. A refined nocturnal palette.",
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/midnight.json",
-      "file": "themes/midnight.json"
-    },
     "midsummer": {
       "name": "Midsummer",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "author": "Claude",
-      "description": "A summer day in four modes. Dark is the meadow at night: fireflies blink over swaying grass under a crescent moon, and the palette matches that night sky, so the sidebar and the scene read as one. OLED looks up from the meadow to the midnight sky, true black with slow constellations. Light is a clear morning in sage and cream with nothing moving, for focused work. Her is golden hour, honey and parchment with warm pollen drifting up.",
+      "description": "A summer day in four modes: fireflies over the meadow at night in Dark, a sky that follows your clock over sage in Light, slow constellations on true black in OLED, and rising embers in honey and parchment at golden hour in Her.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/midsummer.json",
       "file": "themes/midsummer.json"
     },
-    "neo_tactical_archive_01": {
-      "name": "NEO-TACTICAL // ARCHIVE 01",
+    "molten_forge": {
+      "name": "Molten Forge",
       "version": "1.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Military console interface with Lidar Topographical Scan Canvas FX, monospace typography, and stealth blue-gray tones.",
+      "description": "Lava rivers glow through cracked crust along the screen's sides and floor with rising embers, cooling to faint cracks behind the chat. Deep orange, ember red and amber over near-black crust at night, true black on OLED, warm ash in Light and terracotta ash in Her.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/molten_forge.json",
+      "file": "themes/molten_forge.json"
+    },
+    "neo_tactical_archive_01": {
+      "name": "Neo-Tactical Archive",
+      "version": "2.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "A military console in slate gray with safety orange for focus, status marks and links, over slowly flowing topographic contours at the sides. Light reads as a cool field manual, Her as desert sand.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neo_tactical_archive_01.json",
       "file": "themes/neo_tactical_archive_01.json"
     },
-    "neon_overdrive": {
-      "name": "Neon Overdrive",
-      "version": "1.1.0",
-      "author": "silentoplayz (G30)",
-      "description": "High-octane cyberpunk UI with intense neon magenta and electric blue accents, glitch-styled animations, and Neon Pulse Canvas FX on a deep midnight backdrop.",
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/neon_overdrive.json",
-      "file": "themes/neon_overdrive.json"
-    },
     "obsidian": {
       "name": "Obsidian",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Pure achromatic darkness with a subtle charcoal-to-navy gradient.",
+      "description": "Black volcanic glass with no color: neutral grays, a faint black-to-navy gradient in Dark, pure black in OLED and cool or warm paper grays in Light and Her.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/obsidian.json",
       "file": "themes/obsidian.json"
     },
+    "parallax_vista": {
+      "name": "Parallax Vista",
+      "version": "1.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "Layered dusk mountain ranges part into a valley behind the chat, with a soft apricot sun beside it, mist in the folds and drifting fireflies. Navy and violet at night, true black on OLED, a pale lavender morning in Light and an apricot dawn in Her.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/parallax_vista.json",
+      "file": "themes/parallax_vista.json"
+    },
     "pink_hues": {
       "name": "Pink Hues",
-      "version": "1.1.0",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Soft pink and rose color palette with warm pastel accents, gentle floating bokeh Canvas FX, and full color overrides.",
+      "description": "Soft pink and rose blobs drift slowly like out-of-focus lights behind frosted glass, thinning behind the chat. Deep rose in Dark, true black with pink accents in OLED, pale blush in Light and peach in Her.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/pink_hues.json",
       "file": "themes/pink_hues.json"
     },
     "project_singularity": {
       "name": "Project Singularity",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Void interface with gravitational distortion effects, Accretion Canvas FX, and deep violet-black tones with phase-shift animations.",
+      "description": "A dark, slowly warping surface bends the edges of the screen like space around a black hole, leaving the chat clear under deep violet glass. Light and Her show the same distortion as faint ink on pale lavender and orchid.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/project_singularity.json",
       "file": "themes/project_singularity.json"
     },
-    "retro_terminal_crt": {
-      "name": "Retro Terminal (CRT)",
-      "version": "1.1.0",
-      "author": "silentoplayz (G30)",
-      "description": "Classic green phosphor CRT terminal with VT323 font, scan-line overlay, Matrix code Canvas FX, and authentic retro glow.",
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/retro_terminal_crt.json",
-      "file": "themes/retro_terminal_crt.json"
-    },
     "rose_pine": {
       "name": "Rosé Pine",
-      "version": "1.1.0",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Adaptation of the Rosé Pine color scheme with muted lavender, rose, and pine tones, firefly constellation Canvas FX, and full color overrides.",
+      "description": "A port of the Rosé Pine palette: Main in Dark, Moon's accents on true black in OLED, Dawn in Light, and a rose-lit Dawn in Her. Iris, foam, pine, rose and love mark headings, links and focus.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/rose_pine.json",
       "file": "themes/rose_pine.json"
     },
     "ruby": {
       "name": "Ruby",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Deep crimson and rose tones with a rich red gradient backdrop.",
+      "description": "Crimson glass over a deep ruby gradient in Dark, pale rose in Light, coral in Her. Headings, links and the input ring take the stone's red.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/ruby.json",
       "file": "themes/ruby.json"
     },
     "sapphire": {
       "name": "Sapphire",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Cool blue tones reminiscent of a deep sapphire, with a matching ocean-depth gradient.",
+      "description": "Blue glass over a deep sapphire gradient in Dark, pale sky in Light, periwinkle in Her. Headings, links and the input ring take the stone's blue.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/sapphire.json",
       "file": "themes/sapphire.json"
     },
     "solar_flare": {
       "name": "Solar Flare",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Luxury golden UI with warm amber accents, Solar Wind Embers Canvas FX, and rich copper-toned glassmorphism.",
+      "description": "Golden embers rise from the bottom of the screen behind warm glass edged with a gold hairline, with gold headings in replies. Amber dark in Dark, true black in OLED, champagne in Light and rose gold in Her.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/solar_flare.json",
       "file": "themes/solar_flare.json"
     },
     "sovereign": {
       "name": "Sovereign",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Architectural material design with Prismatic Caustics Canvas FX, premium glassmorphism panels, and deep navy-indigo tones.",
+      "description": "Slow, faint stained-glass cells drift at the edges behind navy glass with crisp hairlines and spaced headings. Navy in Dark, true black in OLED, cool porcelain in Light and slate wisteria in Her.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/sovereign.json",
       "file": "themes/sovereign.json"
     },
     "synthwave_1984": {
       "name": "Synthwave 1984",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Retro-futuristic synthwave aesthetic with neon magenta glow, Perspective Grid Canvas FX, and chrome-styled accents.",
+      "description": "A striped neon sun sets over a cyan grid at the edge of the screen, with hot pink headings and cyan links on deep purple. Light and Her are a pastel vaporwave daylight in lavender and aqua.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/synthwave_1984.json",
       "file": "themes/synthwave_1984.json"
     },
     "the_cyanotype": {
       "name": "The Cyanotype",
-      "version": "1.1.0",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Blueprint-inspired design with architectural grid overlay, deep navy tones, and technical drawing aesthetics. CSS-only — no Canvas FX.",
+      "description": "A blueprint: white schematic traces grow at the sides of a Prussian blue page, with lettered headings and dashed rules. Light and Her turn it into blueprint ink on a white page and violet diazo ink on a pale one.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/the_cyanotype.json",
       "file": "themes/the_cyanotype.json"
     },
-    "topaz": {
-      "name": "Topaz",
-      "version": "1.0.0",
-      "author": "silentoplayz (G30)",
-      "description": "Warm bronze and sienna tones with an earthy gradient backdrop.",
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/topaz.json",
-      "file": "themes/topaz.json"
-    },
     "toxic_nebula_smog_core": {
-      "name": "Toxic Nebula // Smog-Core",
-      "version": "1.0.0",
+      "name": "Toxic Nebula",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Hazardous atmosphere UI with corrosive green accents, Smog particle Canvas FX, and toxic purple-violet tones with liquid pulse animations.",
+      "description": "Acid green and violet cell cultures grow and split in the outer thirds of the screen over violet smog, with green headings and a dashed hazard rule. Light and Her are pale lilac and orchid lab glass with deep green ink.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/toxic_nebula_smog_core.json",
       "file": "themes/toxic_nebula_smog_core.json"
     },
-    "wasteland_uplink_amber": {
-      "name": "Wasteland Uplink (Amber)",
-      "version": "1.1.0",
-      "author": "silentoplayz (G30)",
-      "description": "Post-apocalyptic terminal with Radiation Dust Canvas FX, VT323 monospace font, amber phosphor glow, and weathered UI elements.",
-      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/wasteland_uplink_amber.json",
-      "file": "themes/wasteland_uplink_amber.json"
-    },
     "windows_hotdog_stand": {
-      "name": "Windows Hotdog Stand",
-      "version": "1.1.0",
+      "name": "Windows Hot Dog Stand",
+      "version": "2.0.0",
       "author": "silentoplayz (G30)",
-      "description": "Faithful recreation of the infamous Windows 3.1 Hot Dog Stand color scheme with retro pixel rain Canvas FX.",
+      "description": "The Windows 3.1 Hot Dog Stand colors, ketchup red, mustard yellow and black, with flat drop shadows. Dark is a deep red page with a black sidebar, Light a mustard page, Her a bun-colored page with a mustard sidebar, OLED black with red edges.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/windows_hotdog_stand.json",
       "file": "themes/windows_hotdog_stand.json"
     }

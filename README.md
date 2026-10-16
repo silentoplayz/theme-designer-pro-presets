@@ -1,9 +1,9 @@
 # Theme Designer Pro
 
 [![Build Bundles](https://github.com/silentoplayz/theme-designer-pro-presets/actions/workflows/build-bundles.yml/badge.svg)](https://github.com/silentoplayz/theme-designer-pro-presets/actions/workflows/build-bundles.yml)
-![Canvas FX](https://img.shields.io/badge/Canvas_FX-73_animations-blue)
-![CSS Presets](https://img.shields.io/badge/CSS-12_presets-purple)
-![Themes](https://img.shields.io/badge/Themes-35_themes-green)
+![Canvas FX](https://img.shields.io/badge/Canvas_FX-47_animations-blue)
+![CSS Presets](https://img.shields.io/badge/CSS-8_presets-purple)
+![Themes](https://img.shields.io/badge/Themes-33_themes-green)
 ![Gradients](https://img.shields.io/badge/Gradients-13_presets-orange)
 
 Theme Designer Pro themes your whole [Open WebUI](https://github.com/open-webui/open-webui): a palette built from one hue, animated Canvas FX backgrounds, gradients and custom CSS. Admins set the theme every user sees, and each user can have a theme of their own. This repository holds Theme Designer Pro itself and its community presets.
