@@ -9141,7 +9141,8 @@ location.reload();</code></pre>
             // deliver a payload from anywhere.
             if (res.redirected) assertImportHostAllowed(res.url);
             if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-            const text = await readCappedText(res);
+            // A pasted URL can be a whole gallery bundle, so it gets the bundle ceiling
+            const text = await readCappedText(res, MAX_BUNDLE_BYTES);
             const fileName = url.split('/').pop().split('?')[0] || defaultName;
 
             let isJson = fileName.endsWith('.json');
@@ -15190,7 +15191,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             let importedCount = 0, skippedCount = 0;
             for (const file of files) {
                 try {
-                    if (file.size > 2 * 1024 * 1024) { showToast(`File too large: ${_esc(file.name)} (max 2MB)`); skippedCount++; continue; }
+                    if (file.size > 16 * 1024 * 1024) { showToast(`File too large: ${_esc(file.name)} (max 16MB)`); skippedCount++; continue; }
                     const text = await file.text();
                     const result = parseFile(file, text);
                     importedCount += result.imported;
@@ -15404,7 +15405,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         
         for (const file of files) {
             try {
-                if (file.size > 2 * 1024 * 1024) { showToast(`File too large: ${_esc(file.name)} (max 2MB)`); skippedCount++; continue; }
+                if (file.size > 16 * 1024 * 1024) { showToast(`File too large: ${_esc(file.name)} (max 16MB)`); skippedCount++; continue; }
                 const text = await file.text();
                 const data = JSON.parse(text);
                 
@@ -16022,7 +16023,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     // Without this, one hostile updateUrl could hang or OOM the admin tab during
     // an automatic "Check for Updates" sweep across the whole library.
     const MAX_REMOTE_BYTES = 2 * 1024 * 1024;
-    // "Install All" ships every theme in one document, so it gets its own ceiling.
+    // "Install All" and a bundle pasted into an import ship every theme in one
+    // document, so they get their own ceiling.
     const MAX_BUNDLE_BYTES = 16 * 1024 * 1024;
 
     async function readCappedText(res, cap = MAX_REMOTE_BYTES) {

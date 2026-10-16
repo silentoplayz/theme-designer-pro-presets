@@ -525,6 +525,8 @@ Canvas FX and the preset gallery fit Open WebUI better. Nothing to change on you
 
 **Questions that can't be silenced.** Update All, Use instance theme, Wipe Everything and applying an imported Canvas FX theme asked with the browser's own dialog. A browser lets you stop a page's dialogs, Firefox after a few in a row, and from then on every one of those answered no without asking: updates failed with "Updated 0 of 28" and Use instance theme did nothing. They now ask in the designer's own dialog, and Update All asks once for the whole batch instead of once per theme.
 
+**The whole gallery imports in one go.** Importing a file, or a URL pasted under Import, now takes up to 16 MB instead of 2 MB, so a gallery bundle such as `everything.json` imports in one step.
+
 **A fresh start that follows the rules.** A new designer starts with the rewritten Tactical Liquid Grid and Tactical HUD, which follow your theme's colors and keep the input's rounded shape.
 
 **The gallery, rebuilt.** Every Canvas FX script, theme and CSS preset in the [gallery](https://github.com/silentoplayz/theme-designer-pro-presets) was rewritten to one standard: scripts take your theme's colors, keep the canvas transparent, stay quiet behind the chat column and cost little, and theme CSS styles Open WebUI's rounded input instead of drawing a box inside it. Duplicates were retired and new ones added: 47 scripts and 33 themes, each theme designed in every mode. Updating a theme you installed replaces all four of its modes, so changes you made to it are lost.
