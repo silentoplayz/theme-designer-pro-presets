@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.14.1-blue)
+![Version](https://img.shields.io/badge/version-1.14.2-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -508,6 +508,20 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
 
 ---
+
+## 📝 What's New in 1.14.2
+
+Theme Designer Pro now carries version 5 of the [Shared Assets Protocol](https://github.com/Classic298/open-webui-plugins/tree/main/shared-assets-protocol), the code that lets it share `/static/loader.js` and `/static/custom.css` with other plugins. Nothing to change on your side: paste it in and save.
+
+**No plugin can overwrite another's code.** Each plugin's code in the shared files is now filed under its own Open WebUI ID, so two plugins can never claim the same slot. Updating from 1.14.1 or earlier removes the code that version left behind, without a restart.
+
+**One plugin's script can't stop another's.** The scripts in `loader.js` are now separated so that one ending without a semicolon no longer runs into the next.
+
+**A deleted plugin's code goes away.** Deleting a plugin that uses the protocol now removes its code from the shared files right away, instead of leaving it until the server restarts.
+
+**Browsers behind a compressing proxy stay current.** A proxy that compresses responses no longer makes browsers download `loader.js` and `custom.css` again on every page load.
+
+**Live updates come back after a Redis outage.** With several containers or workers, the live reload that carries your saves to every container now reconnects on its own when Redis comes back.
 
 ## 📝 What's New in 1.14.1
 
