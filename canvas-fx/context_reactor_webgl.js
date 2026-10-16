@@ -44,6 +44,7 @@ const FRAG = [
 	'uniform vec3 u_core;',
 	'uniform float u_dark;',
 	'uniform vec2 u_col;',
+	'uniform vec2 u_area;',
 	'float hash(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }',
 	'float noise(vec2 p) {',
 	'	vec2 i = floor(p), f = fract(p), u = f * f * (3.0 - 2.0 * f);',
@@ -61,9 +62,12 @@ const FRAG = [
 	'	float t = u_time;',
 	'	float ctx = u_ctx;',
 	'	float reach = res.y * ' + CORE_SIZE.toFixed(3) + ' * (0.75 + 0.45 * ctx);',
-	// On narrow screens, or with the chat column close, the core slides outward so it stays clear of the column
-	'	float cx = ' + CORE_X.toFixed(3) + ' * res.x;',
-	'	cx = cx > u_col.x ? min(max(cx, u_col.x + u_col.y * 0.85), res.x - reach * 0.3) : max(min(cx, u_col.x - u_col.y * 0.85), reach * 0.3);',
+	// On narrow screens, or with the chat column close, the core slides outward so it stays clear of the column;
+	// it is placed across the chat area (u_area), which leaves out the sidebar
+	'	float cx = u_area.x + ' + CORE_X.toFixed(3) + ' * (u_area.y - u_area.x);',
+	'	float roomR = u_area.y - (u_col.x + u_col.y), roomL = (u_col.x - u_col.y) - u_area.x;',
+	'	if (cx > u_col.x ? (roomR < reach * 0.5 && roomL > roomR) : (roomL < reach * 0.5 && roomR > roomL)) cx = 2.0 * u_col.x - cx;',
+	'	cx = cx > u_col.x ? min(max(cx, u_col.x + u_col.y * 0.85), u_area.y - reach * 0.3) : max(min(cx, u_col.x - u_col.y * 0.85), u_area.x + reach * 0.3);',
 	'	vec2 c = vec2(cx, (1.0 - ' + CORE_Y.toFixed(3) + ') * res.y);',
 	'	vec2 rel = (px - c) / reach;',
 	'	float d = length(rel);',
@@ -163,7 +167,7 @@ function setup() {
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
 	gl.enableVertexAttribArray(0);
 	gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-	['u_res', 'u_scale', 'u_time', 'u_ctx', 'u_mouse', 'u_cool', 'u_warm', 'u_hot', 'u_core', 'u_dark', 'u_col'].forEach((name) => {
+	['u_res', 'u_scale', 'u_time', 'u_ctx', 'u_mouse', 'u_cool', 'u_warm', 'u_hot', 'u_core', 'u_dark', 'u_col', 'u_area'].forEach((name) => {
 		loc[name] = gl.getUniformLocation(program, name);
 	});
 	gl.disable(gl.BLEND);
@@ -197,6 +201,7 @@ function frame(now) {
 	gl.uniform3fv(loc.u_core, colors.core);
 	gl.uniform1f(loc.u_dark, colors.dark);
 	gl.uniform2f(loc.u_col, colX(), colHalf());
+	gl.uniform2f(loc.u_area, column ? column.left : 0, column ? column.right : w);
 	gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
 

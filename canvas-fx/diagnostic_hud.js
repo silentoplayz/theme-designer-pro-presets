@@ -74,8 +74,9 @@ function applyTheme(t) {
 
 // Dock in the chosen corner, inside the space beside the chat column
 function layout() {
-	// Room between the chat column and the docking corner's edge
-	const room = CORNER % 2 ? w - colX() - panelHalf() : colX() - panelHalf();
+	// Room between the chat column and the docking side's edge of the chat area, which leaves out the sidebar
+	const lo = column ? column.left : 0, hi = column ? column.right : w;
+	const room = CORNER % 2 ? hi - colX() - panelHalf() : colX() - panelHalf() - lo;
 	const gap = room - MARGIN;
 	// Too little room for the panel: a slim strip of status dots in the edge's gap instead
 	compact = gap < 160;
@@ -85,7 +86,7 @@ function layout() {
 	const fixed = 72 + LH * (11 + CH.length);
 	rows = compact ? 0 : Math.max(0, Math.min(LOG_ROWS, Math.floor((h - MARGIN * 2 - fixed - LH - 8) / LH)));
 	ph = compact ? 30 + CH.length * 18 : Math.min(h - MARGIN * 2, fixed + (rows ? LH * (rows + 1) + 8 : 0));
-	px = CORNER % 2 ? w - edge - pw : edge;
+	px = CORNER % 2 ? hi - edge - pw : lo + edge;
 	py = CORNER > 1 ? h - edge - ph : edge;
 	panel = new OffscreenCanvas(Math.max(1, Math.ceil(pw * dpr)), Math.max(1, Math.ceil(ph * dpr)));
 	pctx = panel.getContext('2d');

@@ -111,12 +111,14 @@ function build() {
 	seed = 42;
 	groundY = h - Math.max(14, Math.min(30, h * 0.032));
 	const topLimit = h * (1 - GROW_HEIGHT), k = Math.max(0.7, Math.min(1.2, h / 900));
-	const right = w * 0.97 - (SHOW_BADGE ? 170 : 0), mid = Math.min(colX(), right), half = Math.max(0, right - mid);
+	// Measured across the chat area, which leaves out the sidebar
+	const lo = column ? column.left : 0, hi = column ? column.right : w;
+	const right = hi - w * 0.03 - (SHOW_BADGE ? 170 : 0), mid = Math.min(colX(), right), half = Math.max(0, right - mid);
 	nCl = Math.min(24, CLUSTERS);
 	mCount = tCount = 0;
 	for (let i = 0; i < nCl; i++) {
 		// Even spacing with jitter, pushed out to either side of the chat column, each side's share by its room
-		const left = Math.max(0, mid - w * 0.03), share = left / Math.max(1, left + half), u = (i + 0.2 + rand() * 0.6) / nCl;
+		const left = Math.max(0, mid - lo - w * 0.03), share = left / Math.max(1, left + half), u = (i + 0.2 + rand() * 0.6) / nCl;
 		const s = u < share ? -(1 - u / share) : (u - share) / Math.max(0.001, 1 - share);
 		const x = mid + Math.sign(s) * Math.pow(Math.abs(s), 0.75) * (s < 0 ? left : half);
 		const b = band(x), scale = 1 - 0.5 * CENTER_CALM * b;

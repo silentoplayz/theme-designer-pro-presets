@@ -112,12 +112,15 @@ function build() {
 // Room between a star at x and the chat column's edge
 function room(x) { const cx = colX(), e = colHalf() - 36; return x >= cx ? x - (cx + e) : (cx - e) - x; }
 
-// Places the orrery so its outer ring stays clear of the chat column, on the far side when its own side is cramped
+// Places the orrery so its outer ring stays clear of the chat column, on the far side when its own side is cramped and the far side roomier
+// (the column sits centered in the chat area, so both sides often measure the same; then it stays put)
 function place() {
-	ox = w * ORRERY_X; oy = h * ORRERY_Y;
+	// Measured across the chat area, which leaves out the sidebar
+	const lo = column ? column.left : 0, aw = (column ? column.right : w) - lo;
+	ox = lo + aw * ORRERY_X; oy = h * ORRERY_Y;
 	let clear = room(ox);
-	const flip = room(w * (1 - ORRERY_X));
-	if (clear - 16 < ORRERY_SIZE * Math.min(w, h) * 0.3 && flip > clear) { ox = w * (1 - ORRERY_X); clear = flip; }
+	const flip = room(lo + aw * (1 - ORRERY_X));
+	if (clear - 16 < ORRERY_SIZE * Math.min(w, h) * 0.3 && flip > clear + 1) { ox = lo + aw * (1 - ORRERY_X); clear = flip; }
 	R = Math.max(70, Math.min(ORRERY_SIZE * Math.min(w, h) * 0.5, clear - 16));
 	fade = clear - 16 >= 70 ? 1 : 0.6;
 	const n = Math.min(MAX_P, PLANETS);

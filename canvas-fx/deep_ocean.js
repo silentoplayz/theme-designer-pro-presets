@@ -55,10 +55,13 @@ function rgba(c, a) { return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + Ma
 function colX() { return column ? column.x : w * 0.5; }
 function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
 
+// The chat area's edges, which leave out the sidebar
+function areaL() { return column ? column.left : 0; }
+function areaR() { return column ? column.right : w; }
 // Room beside the chat column on one side, at most reach of the screen wide
-function room(right, reach) { const e = colX() + (right ? 1 : -1) * colHalf() * 0.5; return Math.max(40, Math.min(w * reach, right ? w - e : e)); }
+function room(right, reach) { const e = colX() + (right ? 1 : -1) * colHalf() * 0.5; return Math.max(40, Math.min(w * reach, right ? areaR() - e : e - areaL())); }
 // A spot in the outer thirds, or nearer the edge when the chat column leaves less room
-function side() { return Math.random() < 0.5 ? Math.random() * room(false, 0.3) : w - Math.random() * room(true, 0.3); }
+function side() { return Math.random() < 0.5 ? areaL() + Math.random() * room(false, 0.3) : areaR() - Math.random() * room(true, 0.3); }
 function band(x) { const d = Math.abs(x - colX()) / colHalf(), s = Math.min(1, Math.max(0, (d - 0.5) / 0.8)); return 1 - s * s * (3 - 2 * s); }
 
 function palette() {
@@ -112,7 +115,7 @@ function placeSides() {
 	for (let i = 0; i < NR; i++) rx[i] = side();
 	for (let i = 0; i < NK; i++) {
 		const f = (i + 0.5) / NK;
-		kx[i] = (f < 0.5 ? f * 2 * L : w - (1 - f) * 2 * R) + (Math.random() - 0.5) * 30;
+		kx[i] = (f < 0.5 ? areaL() + f * 2 * L : areaR() - (1 - f) * 2 * R) + (Math.random() - 0.5) * 30;
 	}
 }
 

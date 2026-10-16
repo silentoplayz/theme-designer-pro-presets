@@ -37,6 +37,9 @@ function css(c, a) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2
 function colX() { return column ? column.x : w * 0.5; }
 function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
 
+// The chat area's edges, which leave out the sidebar
+function areaL() { return column ? column.left : 0; }
+function areaR() { return column ? column.right : w; }
 function band(px) { const t = Math.min(1, Math.max(0, (Math.abs(px - colX()) / colHalf() - 0.55) / 0.7)); return 1 - t * t * (3 - 2 * t); }
 
 // A soft cytoplasm disc with a brighter rim, drawn once per color
@@ -97,9 +100,9 @@ function seed() {
 	alive.fill(0);
 	for (let k = 0; k < Math.min(START_CELLS, CELL_COUNT, MAX); k++) {
 		// Outer thirds, or the room beside the chat column when it is narrower
-		const side = k % 2, edge = colX() + (side ? 1 : -1) * colHalf() * 0.55;
-		const reach = Math.max(0.08 * w, Math.min(0.3 * w, side ? w - edge : edge));
-		const px = side ? w - (0.04 * w + Math.random() * (reach - 0.04 * w)) : 0.04 * w + Math.random() * (reach - 0.04 * w);
+		const lo = areaL(), hi = areaR(), side = k % 2, edge = colX() + (side ? 1 : -1) * colHalf() * 0.55;
+		const reach = Math.max(0.08 * w, Math.min(0.3 * w, side ? hi - edge : edge - lo));
+		const px = side ? hi - (0.04 * w + Math.random() * (reach - 0.04 * w)) : lo + 0.04 * w + Math.random() * (reach - 0.04 * w);
 		add(px, h * (0.1 + Math.random() * 0.8), Math.random() * CYCLE, k % 3);
 	}
 }
@@ -146,8 +149,10 @@ function update(dt) {
 		x[i] += vx[i] * dt;
 		y[i] += vy[i] * dt;
 		const r = radius(i) * (1 + 0.5 * div[i]);
-		if (x[i] < r) { x[i] = r; vx[i] = Math.abs(vx[i]) * 0.5; }
-		if (x[i] > w - r) { x[i] = w - r; vx[i] = -Math.abs(vx[i]) * 0.5; }
+		// The chat area's edges; a cell the sidebar now covers drifts out rather than jumping
+		const lo = areaL() + r, hi = areaR() - r;
+		if (x[i] < lo) { if (lo - x[i] < 8) { x[i] = lo; vx[i] = Math.abs(vx[i]) * 0.5; } else vx[i] += (lo - x[i]) * 3 * dt; }
+		if (x[i] > hi) { if (x[i] - hi < 8) { x[i] = hi; vx[i] = -Math.abs(vx[i]) * 0.5; } else vx[i] -= (x[i] - hi) * 3 * dt; }
 		if (y[i] < r) { y[i] = r; vy[i] = Math.abs(vy[i]) * 0.5; }
 		if (y[i] > h - r) { y[i] = h - r; vy[i] = -Math.abs(vy[i]) * 0.5; }
 	}

@@ -161,11 +161,14 @@ function calm(x) {
 	const i = x >> 2;
 	return calmLut[i < 0 ? 0 : i >= calmLut.length ? calmLut.length - 1 : i];
 }
+// The chat area's edges, which leave out the sidebar
+function areaL() { return column ? column.left : 0; }
+function areaR() { return column ? column.right : w; }
 // A spot on one side of the chat column, at most reach of the screen wide
 function sideX(right, reach) {
-	const edge = colX() + (right ? 1 : -1) * colHalf() * 0.55;
-	const z = Math.max(40, Math.min(w * reach, right ? w - edge : edge));
-	return right ? w - Math.random() * z : Math.random() * z;
+	const lo = areaL(), hi = areaR(), edge = colX() + (right ? 1 : -1) * colHalf() * 0.55;
+	const z = Math.max(40, Math.min(w * reach, right ? hi - edge : edge - lo));
+	return right ? hi - Math.random() * z : lo + Math.random() * z;
 }
 
 function size() {
@@ -246,7 +249,7 @@ function frame(now) {
 		const c = calm(fx[i]);
 		ax += (fside[i] ? 1 : -1) * (1 - c) * 160;
 		if (fy[i] < h * 0.08) ay += 80; else if (fy[i] > h * 0.88) ay -= 80;
-		if (fx[i] < 20) ax += 80; else if (fx[i] > w - 20) ax -= 80;
+		if (fx[i] < areaL() + 20) ax += 80; else if (fx[i] > areaR() - 20) ax -= 80;
 		ay += Math.sin(time * 2.2 + fph[i]) * 40;
 		if (pull > 0.02) {
 			const dx = mouse.x - fx[i], dy = mouse.y - fy[i], dd = dx * dx + dy * dy;

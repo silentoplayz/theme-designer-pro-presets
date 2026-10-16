@@ -14,7 +14,7 @@ const MAX_PULSES    = 24;    // signal pulses at once (0-40)
 const CURSOR_REACH  = 150;   // how near the cursor must pass a pad to send a pulse, in px (50-300)
 const MOTION        = 1;     // overall speed (0.2-2)
 const REDUCED_SPEED = 0.3;   // share of the speed kept when the viewer asks to reduce motion (0-1)
-const CENTER_CALM   = 0.85;  // how much traces fade behind the chat column (0-1)
+const CENTER_CALM   = 0.92;  // how much traces fade behind the chat column (0-1)
 const BAND_WIDTH    = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const FOLLOW_THEME  = true;  // take the colors from the theme's palette
 const TRACE_COLOR   = '#00b4a0';  // finished trace color when not following the theme
@@ -29,7 +29,7 @@ const FREE = 0, GROWING = 1, DONE = 2, FADING = 3;
 
 let canvas, ctx;
 let w = 0, h = 0, dpr = 1;
-let last = 0, reduced = false, dark = true, spawnWait = 0, pulseWait = 0, column = null;
+let last = 0, reduced = false, dark = true, spawnWait = 0, pulseWait = 0, column = null, insetL = 0, insetR = 0;
 const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
 const col = { trace: TRACE_COLOR, node: NODE_COLOR, tip: TIP_COLOR, pulse: PULSE_COLOR };
 let tipSprite = null, pulseSprite = null;
@@ -82,14 +82,18 @@ function band(x) {
 	return 1 - CENTER_CALM * (1 - s * s * (3 - 2 * s));
 }
 
+// The chat area's edges as insets from the screen's, so a board laid on resize, before the next layout message, still fits the new width
+function setArea(width) { insetL = column ? column.left : 0; insetR = column ? Math.max(0, width - column.right) : 0; }
+
 const snap = (v) => Math.round(v / GRID) * GRID;
 
 // Lays a new trace inside one side's region, turning 90 degrees at each joint and never doubling onto itself
 function lay(i) {
-	const inner = colHalf() * 0.5, cx = colX();
+	// Inside the chat area, which leaves out the sidebar
+	const inner = colHalf() * 0.5, cx = colX(), lo = insetL, hi = w - insetR;
 	const left = Math.random() < 0.5;
-	let x0 = left ? GRID : cx + inner, x1 = left ? cx - inner : w - GRID;
-	if (x1 - x0 < GRID * 4) { x0 = GRID; x1 = w - GRID; }
+	let x0 = left ? lo + GRID : cx + inner, x1 = left ? cx - inner : hi - GRID;
+	if (x1 - x0 < GRID * 4) { x0 = lo + GRID; x1 = hi - GRID; }
 	let x = snap(x0 + Math.random() * (x1 - x0)), y = snap(GRID + Math.random() * (h - GRID * 2));
 	let dir = Math.floor(Math.random() * 4);
 	const o = i * MAX_PTS, want = 4 + Math.floor(Math.random() * (MAX_PTS - 4));
@@ -133,13 +137,13 @@ function seed() {
 	}
 }
 
-// After the chat column moves, traces that now cross it retire and regrow beside it
+// After the chat column moves, traces that now cross it or sit outside the chat area retire and regrow beside it
 function clearColumn() {
-	const a = colX() - colHalf() * 0.5, b = colX() + colHalf() * 0.5;
+	const a = colX() - colHalf() * 0.5, b = colX() + colHalf() * 0.5, lo = insetL, hi = w - insetR;
 	for (let i = 0; i < MAX_TRACES; i++) {
 		if (ts[i] !== DONE && ts[i] !== GROWING) continue;
 		for (let k = 0, o = i * MAX_PTS; k < tn[i]; k++) {
-			if (tx[o + k] > a && tx[o + k] < b) { ts[i] = FADING; break; }
+			if ((tx[o + k] > a && tx[o + k] < b) || tx[o + k] < lo || tx[o + k] > hi) { ts[i] = FADING; break; }
 		}
 	}
 }
@@ -292,6 +296,7 @@ self.onmessage = (e) => {
 			ctx = canvas.getContext('2d');
 			reduced = !!d.reducedMotion;
 			column = d.column || null;
+			setArea(d.width);
 			applyTheme(d.theme);
 			resize(d.width, d.height, d.dpr);
 			requestAnimationFrame(frame);
@@ -307,6 +312,7 @@ self.onmessage = (e) => {
 			break;
 		case 'layout':
 			column = d.column || null;
+			setArea(w);
 			if (canvas) clearColumn();
 			break;
 		case 'mousemove':

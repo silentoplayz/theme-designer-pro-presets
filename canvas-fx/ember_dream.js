@@ -150,9 +150,11 @@ function size(oldW, oldH) {
 
 // Wisps rise beside the chat column, on either side by the room each has
 function resetWisp(i, scatter) {
-	const pad = w * 0.03, left = Math.max(0, colX() - colHalf() * 0.6 - pad), right = Math.max(0, w - pad - colX() - colHalf() * 0.6);
+	// Measured from the chat area's edges, which leave out the sidebar
+	const lo = column ? column.left : 0, hi = column ? column.right : w;
+	const pad = w * 0.03, left = Math.max(0, colX() - colHalf() * 0.6 - pad - lo), right = Math.max(0, hi - pad - colX() - colHalf() * 0.6);
 	const r = Math.random() * (left + right);
-	wx[i] = left + right < 40 ? Math.random() * w : r < left ? pad + r : w - pad - (r - left);
+	wx[i] = left + right < 40 ? lo + Math.random() * (hi - lo) : r < left ? lo + pad + r : hi - pad - (r - left);
 	wy[i] = h + 30 + Math.random() * 40;
 	wspan[i] = 5 + Math.random() * 5;
 	wage[i] = scatter ? Math.random() * wspan[i] : 0;
