@@ -11049,7 +11049,8 @@ function startAnimation() {
         };
         
         const getBgRules = (mode, selector, bgBody, bgSidebar) => {
-            const gEx = ':not(button):not(a):not(input):not(select):not(label):not(span)';
+            // Your own message bubble stays: cleared, its text floats on the canvas.
+            const gEx = ':not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *)';
             const gWhere = ['[class^="bg-gray-"]', '[class*=" bg-gray-"]', '[class^="dark:bg-gray-"]', '[class*=" dark:bg-gray-"]'].map(s => s + gEx).join(', ');
             const config = themeData[mode];
             const hasCanvas = config.canvasEnabled && config.canvasScript && config.canvasScript.trim();
@@ -11069,7 +11070,7 @@ ${selector} .app :where(${gWhere}) { background-color: transparent !important; b
 ${selector} #theme-designer-container :where(${gWhere}) { background-color: transparent !important; background-image: none !important; }
 ${selector} #auth-page :where(${gWhere}):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
 ${selector} .app :where(.message-content) { background-color: transparent !important; }
-${selector} .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]) { background-color: transparent !important; background-image: none !important; }
+${selector} .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"], [class*="bg-linear-to"]) { background-color: transparent !important; background-image: none !important; }
 ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; }
 `;
             } else {
