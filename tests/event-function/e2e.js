@@ -284,6 +284,64 @@ test('a personal save before a page claims its stream still reaches it, and noth
   if (reads !== 1) throw new Error(`the personal theme was fetched ${reads} times on one load`);
 });
 
+// The designer asks in its own dialog: a browser can stop a page's native
+// dialogs, and then confirm() answers no without showing anything
+async function silenceNativeDialogs(page) {
+  await page.evaluate(() => { window.confirm = () => false; });
+}
+
+async function answerAsk(page) {
+  await page.waitForSelector('#ask-modal', { state: 'visible', timeout: WAIT_MS });
+  await page.click('#ask-modal-confirm-btn');
+}
+
+test('Use instance theme works with the browser\'s dialogs turned off', async ({ admin, user }) => {
+  await saveTheme(admin, markerTheme('instance'));
+  await saveTheme(user, markerTheme('personal', {}, ['custom']), true);
+  const page = await openPage({ token: user });
+  await page.context().addCookies([{ name: 'token', value: user, url: BASE }]);
+  await page.goto(BASE + ROUTE + '?embed=settings&scope=me');
+  await page.waitForSelector('#tdp-use-instance-btn', { state: 'visible', timeout: WAIT_MS });
+  await silenceNativeDialogs(page);
+  // Settled now, so a failure before it is awaited stays a failed test, not a crash
+  const reloaded = page.waitForEvent('load', { timeout: WAIT_MS }).catch((e) => e);
+  await page.click('#tdp-use-instance-btn');
+  await answerAsk(page);
+  const load = await reloaded;
+  if (load instanceof Error) throw load;
+  const app = await openPage({ token: user });
+  await app.goto(BASE + '/');
+  await loaderReady(app);
+  await expectParts(app, { vars: 'instance', custom: 'instance' }, 'after Use instance theme');
+});
+
+test('Update All asks once and installs every update with the browser\'s dialogs turned off', async ({ admin }) => {
+  const script = 'self.onmessage = function () {};';
+  const old = (name) => ({ name, version: '1.0.0', updateUrl: 'https://example.test/' + name + '.json', ...JSON.parse(markerTheme(name).state) });
+  const remote = (name) => ({ ...old(name), version: '2.0.0', ...Object.fromEntries(MODES.map((m) => [m, { ...JSON.parse(markerTheme(name).state)[m], canvasEnabled: true, canvasScript: script }])) });
+  await api('POST', ROUTE, { css: '', state: '', library: JSON.stringify({ snapshots: [old('first'), old('second')] }) }, admin);
+  const page = await openDesigner(admin);
+  await silenceNativeDialogs(page);
+  await page.evaluate((updates) => {
+    window._pendingBatchIndices = [0, 1];
+    window._pendingBatchUpdates = { 0: updates[0], 1: updates[1] };
+    window._pendingBatchMeta = {};
+  }, [remote('first'), remote('second')]);
+  const done = page.evaluate(() => window.applyAllBatchUpdates()).catch((e) => e);
+  await answerAsk(page);
+  const result = await done;
+  if (result instanceof Error) throw result;
+  const asked = await page.evaluate(() => document.getElementById('ask-modal').style.display);
+  if (asked === 'flex') throw new Error('the designer asked again after the batch question');
+  await waitFor('both themes updated', async () => {
+    const res = await api('GET', ROUTE + '/library.json', undefined, admin);
+    const snaps = (res.json && res.json.snapshots) || [];
+    const versions = snaps.map((t) => t.version);
+    return (versions.length === 2 && versions.every((v) => v === '2.0.0')) || versions;
+  });
+  await page.context().close();
+});
+
 test('Enable Auth Page Theming off keeps the sign-in page on Open WebUI\'s look', async ({ admin }) => {
   await saveTheme(admin, markerTheme('instance'));
   await setValves(admin, { enable_auth_page_theming: false });
@@ -817,8 +875,14 @@ async function throughDesigner(admin, themes) {
   // An empty gallery, so none is skipped as a duplicate
   await api('POST', ROUTE, { css: '', state: '', library: JSON.stringify({ snapshots: [] }) }, admin);
   const page = await openDesigner(admin);
-  // The Canvas FX question before a theme with a script is applied
-  page.on('dialog', (d) => d.accept());
+  // The Canvas FX question before a theme with a script is applied, asked in
+  // the designer's own dialog
+  await page.evaluate(() => {
+    const modal = document.getElementById('ask-modal');
+    new MutationObserver(() => {
+      if (modal.style.display === 'flex') document.getElementById('ask-modal-confirm-btn').click();
+    }).observe(modal, { attributes: true, attributeFilter: ['style'] });
+  });
   await page.evaluate((files) => {
     const dt = new DataTransfer();
     files.forEach((f) => dt.items.add(new File([f.text], f.name, { type: 'application/json' })));

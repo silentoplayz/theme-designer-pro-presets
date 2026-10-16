@@ -4895,8 +4895,12 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         btn.setAttribute('data-tooltip', 'Remove your personal theme and go back to the theme everyone else sees');
         btn.hidden = !hasTheme;
         btn.addEventListener('click', function () {
-            if (!window.confirm('Remove your personal theme and use the instance theme again? Your saved themes stay in your gallery.')) return;
-            post({ reset: true }).then(function () { location.reload(); });
+            var message = 'Remove your personal theme and use the instance theme again? Your saved themes stay in your gallery.';
+            var ask = window.askConfirm ? window.askConfirm('Use the instance theme?', message, 'Use instance theme') : Promise.resolve(window.confirm(message));
+            ask.then(function (ok) {
+                if (!ok) return;
+                post({ reset: true }).then(function () { location.reload(); });
+            });
         });
         reset.parentNode.insertBefore(btn, reset.nextSibling);
     }
@@ -8670,6 +8674,8 @@ location.reload();</code></pre>
         const canvasWarning = `<div id="canvas-warning" style="display:none; background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.3); border-radius:12px; padding:12px; margin-bottom:20px; text-align:left;"><div style="color:#ef4444; font-size:0.7rem; font-weight:bold; margin-bottom:4px; display:flex; align-items:center; gap:6px;"><span>\u26A0\uFE0F</span> Security Warning</div><p style="font-size:0.65rem; color:var(--text-muted); margin:0;">This theme contains <b>Canvas FX animation scripts</b>. Only import if you trust the source.</p></div>`;
 
         const defs = [
+            // ── Confirm: any question askConfirm puts ──
+            { t:'c', id:'ask-modal', icon:'!', title:'Are you sure?', msg:'', msgId:'ask-modal-msg', confirmId:'ask-modal-confirm-btn', confirmLabel:'Continue', zClass:'z-top' },
             // ── Confirm: Delete with name ──
             { t:'c', id:'delete-modal', icon:'!', title:'Delete Theme?', msg:'Are you sure you want to permanently remove "'+nameSpan('delete-theme-name')+'"?', confirmId:'confirm-delete-btn', confirmLabel:'Delete' },
             { t:'c', id:'overwrite-modal', icon:'💾', title:'Overwrite Theme?', msg:'This will replace all saved data in "'+nameSpan('overwrite-theme-name')+'" with your current configuration. This cannot be undone.', confirmId:'confirm-overwrite-btn', confirmLabel:'Overwrite', variant:'info' },
@@ -9768,6 +9774,38 @@ self.onmessage = (e) => {
 
     function showModal(id) { $(id).style.display = 'flex'; }
     function hideModal(id) { $(id).style.display = 'none'; }
+
+    // Asks in the designer's own dialog. A browser lets the user stop a page's
+    // native dialogs, after which confirm() answers no without asking, and an
+    // update or reset behind it failed with no explanation. Cancel, Escape or
+    // the backdrop close the dialog, which counts as no.
+    function askConfirm(title, message, confirmLabel) {
+        const modal = $('ask-modal');
+        if (!modal) return Promise.resolve(window.confirm(message));
+        return new Promise(resolve => {
+            $('ask-modal-title').textContent = title;
+            const msg = $('ask-modal-msg');
+            msg.textContent = message;
+            msg.style.whiteSpace = 'pre-line';
+            const btn = $('ask-modal-confirm-btn');
+            btn.textContent = confirmLabel || 'Continue';
+            let settled = false;
+            const settle = (ok) => {
+                if (settled) return;
+                settled = true;
+                btn.removeEventListener('click', onConfirm);
+                watch.disconnect();
+                hideModal('ask-modal');
+                resolve(ok);
+            };
+            const onConfirm = () => settle(true);
+            const watch = new MutationObserver(() => { if (modal.style.display === 'none') settle(false); });
+            btn.addEventListener('click', onConfirm);
+            watch.observe(modal, { attributes: true, attributeFilter: ['style'] });
+            showModal('ask-modal');
+        });
+    }
+    window.askConfirm = askConfirm;
 
     function restoreHistoryState(state) {
         const dm = getActiveDataMode();
@@ -13426,12 +13464,12 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         nuclearReset(false, saveBackup);
     };
     $('factory-reset-btn').onclick = () => showModal('factory-reset-modal');
-    $('confirm-factory-reset-btn').onclick = () => {
+    $('confirm-factory-reset-btn').onclick = async () => {
         const backupCb = $('factory-backup-cb');
         if (backupCb && backupCb.checked) {
             // Up to four files, and the browser may ask before allowing more
             // than one; wiping and reloading at once could lose the rest
-            if (downloadAllBackups() > 0 && !window.confirm('Your backup files are downloading. Wipe everything once they have saved?')) return;
+            if (downloadAllBackups() > 0 && !(await askConfirm('Wipe everything?', 'Your backup files are downloading. Wipe everything once they have saved?', 'Wipe everything'))) return;
         }
         const keysToWipe =[
             'owui_dev_theme_v1', 
@@ -15491,7 +15529,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             if (applyAfter && !canvasConfirmed) {
                 const first = snapshots[0];
                 const runsScript = MODES.some(m => first[m] && first[m].canvasEnabled && first[m].canvasScript);
-                if (runsScript && !window.confirm(`"${first.name || 'This theme'}" runs a Canvas FX script, which is JavaScript that runs in the browser of everyone who sees this theme. Apply it now? It stays in your gallery either way.`)) {
+                if (runsScript && !(await askConfirm('Apply this theme?', `"${first.name || 'This theme'}" runs a Canvas FX script, which is JavaScript that runs in the browser of everyone who sees this theme. Apply it now? It stays in your gallery either way.`, 'Apply'))) {
                     applyAfter = false;
                 }
             }
@@ -16385,7 +16423,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             if (existingIdx >= 0) {
                 // Through the same gate as every other update, so a new Canvas
                 // FX script or custom CSS asks first
-                if (applyThemeUpdate(existingIdx, remote)) showToast(`✓ Updated "${newTheme.name}" to v${newTheme.version}`);
+                if (await applyThemeUpdate(existingIdx, remote)) showToast(`✓ Updated "${newTheme.name}" to v${newTheme.version}`);
             } else {
                 snapshots.unshift(newTheme);
                 saveSnapshots(snapshots);
@@ -16749,13 +16787,13 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 if (idx === null) return;
                 const remote = (window._pendingBatchUpdates || {})[idx];
                 if (!remote) return;
-                if (applyThemeUpdate(idx, remote)) markApplied(batchBtn);
+                if (await applyThemeUpdate(idx, remote)) markApplied(batchBtn);
                 return;
             }
         });
     })();
 
-    window.applyThemeUpdate = function(index, remoteData, opts) {
+    window.applyThemeUpdate = async function(index, remoteData, opts) {
         const snapshots = getSnapshots();
         if (!snapshots[index]) return false;
 
@@ -16772,10 +16810,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             }
             if (reasons.length) {
                 const name = snapshots[index].name || 'This theme';
-                if (!window.confirm(
-                    `${name} ${reasons.join(', and ')}.\n\n` +
-                    `Only continue if you trust the source.\n\nInstall this update?`
-                )) {
+                if (!(await askConfirm('Install this update?',
+                    `${name} ${reasons.join(', and ')}.\n\nOnly continue if you trust the source.`, 'Install'))) {
                     showToast('Update cancelled');
                     return false;
                 }
@@ -17153,12 +17189,12 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         btn.textContent = isOpen ? '▸ View Changes' : '▾ Hide Changes';
     });
     
-    $('update-confirm-btn').addEventListener('click', () => {
+    $('update-confirm-btn').addEventListener('click', async () => {
         if (pendingUpdate && !pendingUpdate.error) {
             // The modal rendered the Canvas FX / custom-CSS warning above this
             // button, so clicking it IS the confirmation. Prompting again here
             // would be the same question twice.
-            if (applyThemeUpdate(pendingUpdate.index, pendingUpdate.remote, { alreadyConfirmed: true })) {
+            if (await applyThemeUpdate(pendingUpdate.index, pendingUpdate.remote, { alreadyConfirmed: true })) {
                 showToast(`Updated "${pendingUpdate.local.name}" to v${pendingUpdate.remoteVersion}!`);
             }
         }
@@ -17176,14 +17212,28 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         // count regardless told the admin seven themes updated while nothing
         // had changed — and with the allowlist configured that is the expected
         // path, not a rare network blip.
+        // One question for the batch. A question per theme was dozens of dialogs
+        // in a row, the point where a browser offers to stop the page asking.
+        const snaps = getSnapshots();
+        const risky = indices.some(idx => {
+            const remote = window._pendingBatchUpdates[idx];
+            return !remote || updateAddsCanvasCode(snaps[idx], remote) || updateAddsRemoteCss(snaps[idx], remote);
+        });
+        if (risky && !(await askConfirm(`Install ${indices.length} update${indices.length === 1 ? '' : 's'}?`,
+            'Some of these updates add or change a Canvas FX script, JavaScript that runs in the browser of every user on this instance, or custom CSS, which is applied instance-wide. Each update replaces all four of its theme\'s modes, so changes you made to them are lost.\n\nOnly continue if you trust the source.',
+            'Install all'))) {
+            showToast('Updates cancelled');
+            return;
+        }
+
         let okCount = 0;
         const failed = [];
         for (const idx of indices) {
             const remote = window._pendingBatchUpdates[idx];
             const manifestUrl = window._pendingBatchMeta[idx];
             let ok = false;
-            if (remote) ok = applyThemeUpdate(idx, remote);
-            else if (manifestUrl) ok = await applyManifestUpdate(idx, manifestUrl);
+            if (remote) ok = await applyThemeUpdate(idx, remote, { alreadyConfirmed: true });
+            else if (manifestUrl) ok = await applyManifestUpdate(idx, manifestUrl, { alreadyConfirmed: true });
             else continue;
             if (ok) okCount++;
             else failed.push(idx);
