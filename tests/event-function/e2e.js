@@ -868,9 +868,12 @@ const modesOf = (t) => Object.fromEntries(MODES.map((m) => [m, t[m]]));
 test('a theme file keeps every setting through the Studio and the designer', async ({ admin }) => {
   const read = (rel) => JSON.parse(fs.readFileSync(path.join(REPO_ROOT, rel), 'utf8'));
   const fixtures = fs.readdirSync(path.join(REPO_ROOT, FIXTURES)).filter((f) => f.endsWith('.json')).map((f) => `${FIXTURES}/${f}`);
-  const gallery = fs.readdirSync(path.join(REPO_ROOT, 'themes')).filter((f) => f.endsWith('.json'));
-  const originals = [...fixtures.map(read), ...gallery.map((f) => read('themes/' + f))];
   const catalog = read('docs/catalog.json');
+  // The Studio opens gallery themes through the catalog, which CI rebuilds
+  // after a merge, so a theme added on a branch joins this test then
+  const listed = new Set((catalog.themes || []).map((t) => t.file));
+  const gallery = fs.readdirSync(path.join(REPO_ROOT, 'themes')).filter((f) => f.endsWith('.json') && listed.has(f));
+  const originals = [...fixtures.map(read), ...gallery.map((f) => read('themes/' + f))];
   const built = [
     ...['mesh', 'radial'].map((type) => ({ type, hash: 'gradient=' + catalog.gradients.find((g) => g.type === type).file })),
     // The catalog is rebuilt by CI after a merge, so it can list a script that was just removed
