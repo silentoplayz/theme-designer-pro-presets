@@ -1,193 +1,164 @@
 {
   "name": "Obsidian",
-  "version": "1.0.0",
-  "targetVersion": "0.10.0",
+  "version": "2.0.0",
   "author": "silentoplayz (G30)",
-  "description": "Pure achromatic darkness with a subtle charcoal-to-navy gradient.",
+  "description": "Black volcanic glass with no color: neutral grays, a faint black-to-navy gradient in Dark, pure black in OLED and cool or warm paper grays in Light and Her.",
+  "targetVersion": "0.12.0",
   "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/obsidian.json",
   "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
   "dark": {
-    "h": 0,
+    "h": 250,
     "c": 0,
-    "l": 10,
+    "l": 15,
+    "paletteEnabled": true,
     "overrides": {},
-    "customCSS": "",
-    "customCssEnabled": false,
-    "autoScope": true,
     "locks": {},
+    "manualOverrides": "",
+    "manualOverridesEnabled": false,
+    "customCSS": ":root {\n\t--obs-glass: color-mix(in oklab, var(--color-gray-900) 76%, transparent);\n\t--obs-sidebar: color-mix(in oklab, var(--color-gray-950) 82%, transparent);\n\t--obs-bubble: color-mix(in oklab, var(--color-gray-800) 70%, transparent);\n\t--obs-selected: color-mix(in oklab, var(--color-gray-600) 30%, transparent);\n\t--obs-line: color-mix(in oklab, var(--color-gray-400) 16%, transparent);\n\t--obs-sheen: color-mix(in oklab, white 7%, transparent);\n\t--obs-shade: color-mix(in oklab, black 75%, transparent);\n\t--obs-focus: color-mix(in oklab, var(--color-gray-300) 45%, transparent);\n\t--obs-ring: color-mix(in oklab, var(--color-gray-300) 10%, transparent);\n\t--obs-heading: var(--color-gray-50);\n\t--obs-mark: color-mix(in oklab, var(--color-gray-400) 35%, transparent);\n}\n\n/* Volcanic glass: no color at all, one lit edge along the top of the\n   input and your bubble. Shapes are Open WebUI's own. */\n#message-input-container {\n\tbackground-color: var(--obs-glass) !important;\n\tborder-color: var(--obs-line) !important;\n\tbackdrop-filter: blur(16px);\n\tbox-shadow: inset 0 1px 0 var(--obs-sheen), 0 12px 36px -18px var(--obs-shade);\n\ttransition: border-color 0.25s ease, box-shadow 0.25s ease;\n}\n#message-input-container:focus-within {\n\tborder-color: var(--obs-focus) !important;\n\tbox-shadow: inset 0 1px 0 var(--obs-sheen), 0 0 0 3px var(--obs-ring), 0 12px 36px -18px var(--obs-shade);\n}\n.chat-user .rounded-3xl {\n\tbackground-color: var(--obs-bubble) !important;\n\tbox-shadow: inset 0 0 0 1px var(--obs-line), inset 0 1px 0 var(--obs-sheen);\n}\n#sidebar {\n\tbackground-color: var(--obs-sidebar) !important;\n\tborder-inline-end: 1px solid var(--obs-line);\n}\n#sidebar-chat-item.selected { background-color: var(--obs-selected); }\n.markdown-prose :is(h1, h2, h3) { color: var(--obs-heading); letter-spacing: -0.01em; }\n.markdown-prose a { color: inherit; text-decoration-color: var(--obs-focus); text-underline-offset: 3px; }\n.markdown-prose :is(hr, blockquote) { border-color: var(--obs-line); }\nhtml { scrollbar-color: var(--obs-line) transparent; }\n::selection { background-color: var(--obs-mark); }\n",
+    "customCssEnabled": true,
+    "autoScope": true,
     "canvasEnabled": false,
     "canvasScript": "",
-    "canvasShowAuth": false,
-    "themeShowAuth": false,
-    "customCssShowAuth": false,
     "gradientEnabled": true,
     "gradientType": "linear",
-    "gradientAngle": 135,
+    "gradientAngle": 160,
     "gradientStops": [
       {
-        "color": "#000000",
+        "color": "#0b0b0c",
         "position": 0
       },
       {
-        "color": "#1a1a2e",
-        "position": 33
+        "color": "#0d0e11",
+        "position": 55
       },
       {
-        "color": "#16213e",
-        "position": 66
-      },
-      {
-        "color": "#0a0a1a",
+        "color": "#0f121a",
         "position": 100
       }
     ],
     "gradientIntensity": 100,
-    "gradientAnimation": null,
-    "gradientAnimationSpeed": 5,
-    "gradientShowAuth": true,
+    "gradientAnimation": false,
+    "gradientAnimationSpeed": 8,
     "gradientRadialPosX": 50,
     "gradientRadialPosY": 50,
     "gradientRadialShape": "ellipse",
     "gradientRadialSize": "farthest-corner",
     "gradientMeshPoints": [],
-    "gradientMeshBgColor": "#000000"
+    "gradientMeshBgColor": "#0a0a12",
+    "themeShowAuth": true,
+    "customCssShowAuth": true,
+    "canvasShowAuth": true,
+    "gradientShowAuth": true
   },
   "light": {
-    "h": 0,
+    "h": 250,
     "c": 0,
-    "l": 10,
+    "l": 20,
+    "paletteEnabled": true,
     "overrides": {},
-    "customCSS": "",
-    "customCssEnabled": false,
-    "autoScope": true,
     "locks": {},
+    "manualOverrides": "",
+    "manualOverridesEnabled": false,
+    "customCSS": ":root {\n\t--obs-glass: color-mix(in oklab, var(--color-gray-50) 80%, transparent);\n\t--obs-sidebar: color-mix(in oklab, var(--color-gray-50) 70%, transparent);\n\t--obs-bubble: color-mix(in oklab, var(--color-gray-200) 60%, transparent);\n\t--obs-selected: color-mix(in oklab, var(--color-gray-300) 36%, transparent);\n\t--obs-line: color-mix(in oklab, var(--color-gray-500) 26%, transparent);\n\t--obs-sheen: color-mix(in oklab, white 80%, transparent);\n\t--obs-shade: color-mix(in oklab, var(--color-gray-600) 25%, transparent);\n\t--obs-focus: color-mix(in oklab, var(--color-gray-700) 45%, transparent);\n\t--obs-ring: color-mix(in oklab, var(--color-gray-600) 12%, transparent);\n\t--obs-heading: var(--color-gray-950);\n\t--obs-mark: color-mix(in oklab, var(--color-gray-500) 30%, transparent);\n}\n\n/* Volcanic glass: no color at all, one lit edge along the top of the\n   input and your bubble. Shapes are Open WebUI's own. */\n#message-input-container {\n\tbackground-color: var(--obs-glass) !important;\n\tborder-color: var(--obs-line) !important;\n\tbackdrop-filter: blur(16px);\n\tbox-shadow: inset 0 1px 0 var(--obs-sheen), 0 12px 36px -18px var(--obs-shade);\n\ttransition: border-color 0.25s ease, box-shadow 0.25s ease;\n}\n#message-input-container:focus-within {\n\tborder-color: var(--obs-focus) !important;\n\tbox-shadow: inset 0 1px 0 var(--obs-sheen), 0 0 0 3px var(--obs-ring), 0 12px 36px -18px var(--obs-shade);\n}\n.chat-user .rounded-3xl {\n\tbackground-color: var(--obs-bubble) !important;\n\tbox-shadow: inset 0 0 0 1px var(--obs-line), inset 0 1px 0 var(--obs-sheen);\n}\n#sidebar {\n\tbackground-color: var(--obs-sidebar) !important;\n\tborder-inline-end: 1px solid var(--obs-line);\n}\n#sidebar-chat-item.selected { background-color: var(--obs-selected); }\n.markdown-prose :is(h1, h2, h3) { color: var(--obs-heading); letter-spacing: -0.01em; }\n.markdown-prose a { color: inherit; text-decoration-color: var(--obs-focus); text-underline-offset: 3px; }\n.markdown-prose :is(hr, blockquote) { border-color: var(--obs-line); }\nhtml { scrollbar-color: var(--obs-line) transparent; }\n::selection { background-color: var(--obs-mark); }\n",
+    "customCssEnabled": true,
+    "autoScope": true,
     "canvasEnabled": false,
     "canvasScript": "",
-    "canvasShowAuth": false,
-    "themeShowAuth": false,
-    "customCssShowAuth": false,
     "gradientEnabled": true,
     "gradientType": "linear",
-    "gradientAngle": 135,
+    "gradientAngle": 160,
     "gradientStops": [
       {
-        "color": "#000000",
+        "color": "#fbfbfb",
         "position": 0
       },
       {
-        "color": "#1a1a2e",
-        "position": 33
+        "color": "#f3f3f4",
+        "position": 55
       },
       {
-        "color": "#16213e",
-        "position": 66
-      },
-      {
-        "color": "#0a0a1a",
+        "color": "#eceef1",
         "position": 100
       }
     ],
     "gradientIntensity": 100,
-    "gradientAnimation": null,
-    "gradientAnimationSpeed": 5,
-    "gradientShowAuth": true,
+    "gradientAnimation": false,
+    "gradientAnimationSpeed": 8,
     "gradientRadialPosX": 50,
     "gradientRadialPosY": 50,
     "gradientRadialShape": "ellipse",
     "gradientRadialSize": "farthest-corner",
     "gradientMeshPoints": [],
-    "gradientMeshBgColor": "#000000"
+    "gradientMeshBgColor": "#0a0a12",
+    "themeShowAuth": true,
+    "customCssShowAuth": true,
+    "canvasShowAuth": true,
+    "gradientShowAuth": true
   },
   "oled": {
-    "h": 0,
+    "h": 250,
     "c": 0,
     "l": 0,
+    "paletteEnabled": true,
     "overrides": {},
-    "customCSS": "",
-    "customCssEnabled": false,
-    "autoScope": true,
     "locks": {},
+    "manualOverrides": "",
+    "manualOverridesEnabled": false,
+    "customCSS": ":root {\n\t--obs-glass: color-mix(in oklab, var(--color-gray-900) 76%, transparent);\n\t--obs-sidebar: color-mix(in oklab, var(--color-gray-950) 82%, transparent);\n\t--obs-bubble: color-mix(in oklab, var(--color-gray-800) 70%, transparent);\n\t--obs-selected: color-mix(in oklab, var(--color-gray-600) 30%, transparent);\n\t--obs-line: color-mix(in oklab, var(--color-gray-400) 16%, transparent);\n\t--obs-sheen: color-mix(in oklab, white 7%, transparent);\n\t--obs-shade: color-mix(in oklab, black 75%, transparent);\n\t--obs-focus: color-mix(in oklab, var(--color-gray-300) 45%, transparent);\n\t--obs-ring: color-mix(in oklab, var(--color-gray-300) 10%, transparent);\n\t--obs-heading: var(--color-gray-50);\n\t--obs-mark: color-mix(in oklab, var(--color-gray-400) 35%, transparent);\n}\n\n/* Volcanic glass: no color at all, one lit edge along the top of the\n   input and your bubble. Shapes are Open WebUI's own. */\n#message-input-container {\n\tbackground-color: var(--obs-glass) !important;\n\tborder-color: var(--obs-line) !important;\n\tbackdrop-filter: blur(16px);\n\tbox-shadow: inset 0 1px 0 var(--obs-sheen), 0 12px 36px -18px var(--obs-shade);\n\ttransition: border-color 0.25s ease, box-shadow 0.25s ease;\n}\n#message-input-container:focus-within {\n\tborder-color: var(--obs-focus) !important;\n\tbox-shadow: inset 0 1px 0 var(--obs-sheen), 0 0 0 3px var(--obs-ring), 0 12px 36px -18px var(--obs-shade);\n}\n.chat-user .rounded-3xl {\n\tbackground-color: var(--obs-bubble) !important;\n\tbox-shadow: inset 0 0 0 1px var(--obs-line), inset 0 1px 0 var(--obs-sheen);\n}\n#sidebar {\n\tbackground-color: var(--obs-sidebar) !important;\n\tborder-inline-end: 1px solid var(--obs-line);\n}\n#sidebar-chat-item.selected { background-color: var(--obs-selected); }\n.markdown-prose :is(h1, h2, h3) { color: var(--obs-heading); letter-spacing: -0.01em; }\n.markdown-prose a { color: inherit; text-decoration-color: var(--obs-focus); text-underline-offset: 3px; }\n.markdown-prose :is(hr, blockquote) { border-color: var(--obs-line); }\nhtml { scrollbar-color: var(--obs-line) transparent; }\n::selection { background-color: var(--obs-mark); }\n",
+    "customCssEnabled": true,
+    "autoScope": true,
     "canvasEnabled": false,
     "canvasScript": "",
-    "canvasShowAuth": false,
-    "themeShowAuth": false,
-    "customCssShowAuth": false,
-    "gradientEnabled": true,
-    "gradientType": "linear",
-    "gradientAngle": 135,
-    "gradientStops": [
-      {
-        "color": "#000000",
-        "position": 0
-      },
-      {
-        "color": "#1a1a2e",
-        "position": 33
-      },
-      {
-        "color": "#16213e",
-        "position": 66
-      },
-      {
-        "color": "#0a0a1a",
-        "position": 100
-      }
-    ],
-    "gradientIntensity": 100,
-    "gradientAnimation": null,
-    "gradientAnimationSpeed": 5,
-    "gradientShowAuth": true,
-    "gradientRadialPosX": 50,
-    "gradientRadialPosY": 50,
-    "gradientRadialShape": "ellipse",
-    "gradientRadialSize": "farthest-corner",
-    "gradientMeshPoints": [],
-    "gradientMeshBgColor": "#000000"
+    "gradientEnabled": false,
+    "themeShowAuth": true,
+    "customCssShowAuth": true,
+    "canvasShowAuth": true,
+    "gradientShowAuth": true
   },
   "her": {
-    "h": 0,
-    "c": 0,
-    "l": 10,
+    "h": 70,
+    "c": 4,
+    "l": 20,
+    "paletteEnabled": true,
     "overrides": {},
-    "customCSS": "",
-    "customCssEnabled": false,
-    "autoScope": true,
     "locks": {},
+    "manualOverrides": "",
+    "manualOverridesEnabled": false,
+    "customCSS": ":root {\n\t--obs-glass: color-mix(in oklab, var(--color-gray-50) 80%, transparent);\n\t--obs-sidebar: color-mix(in oklab, var(--color-gray-50) 70%, transparent);\n\t--obs-bubble: color-mix(in oklab, var(--color-gray-200) 60%, transparent);\n\t--obs-selected: color-mix(in oklab, var(--color-gray-300) 36%, transparent);\n\t--obs-line: color-mix(in oklab, var(--color-gray-500) 26%, transparent);\n\t--obs-sheen: color-mix(in oklab, white 80%, transparent);\n\t--obs-shade: color-mix(in oklab, var(--color-gray-600) 25%, transparent);\n\t--obs-focus: color-mix(in oklab, var(--color-gray-700) 45%, transparent);\n\t--obs-ring: color-mix(in oklab, var(--color-gray-600) 12%, transparent);\n\t--obs-heading: var(--color-gray-950);\n\t--obs-mark: color-mix(in oklab, var(--color-gray-500) 30%, transparent);\n}\n\n/* Volcanic glass: no color at all, one lit edge along the top of the\n   input and your bubble. Shapes are Open WebUI's own. */\n#message-input-container {\n\tbackground-color: var(--obs-glass) !important;\n\tborder-color: var(--obs-line) !important;\n\tbackdrop-filter: blur(16px);\n\tbox-shadow: inset 0 1px 0 var(--obs-sheen), 0 12px 36px -18px var(--obs-shade);\n\ttransition: border-color 0.25s ease, box-shadow 0.25s ease;\n}\n#message-input-container:focus-within {\n\tborder-color: var(--obs-focus) !important;\n\tbox-shadow: inset 0 1px 0 var(--obs-sheen), 0 0 0 3px var(--obs-ring), 0 12px 36px -18px var(--obs-shade);\n}\n.chat-user .rounded-3xl {\n\tbackground-color: var(--obs-bubble) !important;\n\tbox-shadow: inset 0 0 0 1px var(--obs-line), inset 0 1px 0 var(--obs-sheen);\n}\n#sidebar {\n\tbackground-color: var(--obs-sidebar) !important;\n\tborder-inline-end: 1px solid var(--obs-line);\n}\n#sidebar-chat-item.selected { background-color: var(--obs-selected); }\n.markdown-prose :is(h1, h2, h3) { color: var(--obs-heading); letter-spacing: -0.01em; }\n.markdown-prose a { color: inherit; text-decoration-color: var(--obs-focus); text-underline-offset: 3px; }\n.markdown-prose :is(hr, blockquote) { border-color: var(--obs-line); }\nhtml { scrollbar-color: var(--obs-line) transparent; }\n::selection { background-color: var(--obs-mark); }\n",
+    "customCssEnabled": true,
+    "autoScope": true,
     "canvasEnabled": false,
     "canvasScript": "",
-    "canvasShowAuth": false,
-    "themeShowAuth": false,
-    "customCssShowAuth": false,
     "gradientEnabled": true,
     "gradientType": "linear",
-    "gradientAngle": 135,
+    "gradientAngle": 200,
     "gradientStops": [
       {
-        "color": "#000000",
+        "color": "#fbfaf8",
         "position": 0
       },
       {
-        "color": "#1a1a2e",
-        "position": 33
+        "color": "#f3f1ed",
+        "position": 55
       },
       {
-        "color": "#16213e",
-        "position": 66
-      },
-      {
-        "color": "#0a0a1a",
+        "color": "#eeebe6",
         "position": 100
       }
     ],
     "gradientIntensity": 100,
-    "gradientAnimation": null,
-    "gradientAnimationSpeed": 5,
-    "gradientShowAuth": true,
+    "gradientAnimation": false,
+    "gradientAnimationSpeed": 8,
     "gradientRadialPosX": 50,
     "gradientRadialPosY": 50,
     "gradientRadialShape": "ellipse",
     "gradientRadialSize": "farthest-corner",
     "gradientMeshPoints": [],
-    "gradientMeshBgColor": "#000000"
+    "gradientMeshBgColor": "#0a0a12",
+    "themeShowAuth": true,
+    "customCssShowAuth": true,
+    "canvasShowAuth": true,
+    "gradientShowAuth": true
   }
 }

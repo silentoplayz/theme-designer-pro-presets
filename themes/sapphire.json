@@ -1,193 +1,193 @@
 {
   "name": "Sapphire",
-  "version": "1.0.0",
-  "targetVersion": "0.10.0",
+  "version": "2.0.0",
   "author": "silentoplayz (G30)",
-  "description": "Cool blue tones reminiscent of a deep sapphire, with a matching ocean-depth gradient.",
+  "description": "Blue glass over a deep sapphire gradient in Dark, pale sky in Light, periwinkle in Her. Headings, links and the input ring take the stone's blue.",
+  "targetVersion": "0.12.0",
   "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/sapphire.json",
   "repositoryUrl": "https://github.com/silentoplayz/theme-designer-pro-presets",
   "dark": {
-    "h": 210,
-    "c": 25,
-    "l": 18,
+    "h": 258,
+    "c": 36,
+    "l": 17,
+    "paletteEnabled": true,
     "overrides": {},
-    "customCSS": "",
-    "customCssEnabled": false,
-    "autoScope": true,
     "locks": {},
+    "manualOverrides": "",
+    "manualOverridesEnabled": false,
+    "customCSS": ":root {\n\t--gem-glass: color-mix(in oklab, var(--color-gray-900) 72%, transparent);\n\t--gem-sidebar: color-mix(in oklab, var(--color-gray-950) 78%, transparent);\n\t--gem-bubble: color-mix(in oklab, var(--color-gray-800) 72%, transparent);\n\t--gem-selected: color-mix(in oklab, var(--color-gray-600) 30%, transparent);\n\t--gem-line: color-mix(in oklab, var(--color-gray-400) 18%, transparent);\n\t--gem-facet: color-mix(in oklab, var(--color-gray-200) 9%, transparent);\n\t--gem-shade: color-mix(in oklab, black 70%, transparent);\n\t--gem-accent: #95c0ff;\n\t--gem-glow: color-mix(in oklab, #609efa 60%, transparent);\n\t--gem-ring: color-mix(in oklab, #609efa 18%, transparent);\n\t--gem-mark: color-mix(in oklab, #4885df 38%, transparent);\n}\n\n/* Cut-stone surfaces in Open WebUI's own shapes: a lit top facet, a ring\n   in the stone's color on focus. !important only where a gradient clears\n   the background first. */\n#message-input-container {\n\tbackground-color: var(--gem-glass) !important;\n\tborder-color: var(--gem-line) !important;\n\tbackdrop-filter: blur(16px) saturate(1.2);\n\tbox-shadow: inset 0 1px 0 var(--gem-facet), 0 12px 36px -18px var(--gem-shade);\n\ttransition: border-color 0.25s ease, box-shadow 0.25s ease;\n}\n#message-input-container:focus-within {\n\tborder-color: var(--gem-glow) !important;\n\tbox-shadow: inset 0 1px 0 var(--gem-facet), 0 0 0 3px var(--gem-ring), 0 12px 36px -18px var(--gem-shade);\n}\n.chat-user .rounded-3xl {\n\tbackground-color: var(--gem-bubble) !important;\n\tbox-shadow: inset 0 0 0 1px var(--gem-line), inset 0 1px 0 var(--gem-facet);\n}\n#sidebar {\n\tbackground-color: var(--gem-sidebar) !important;\n\tbackdrop-filter: blur(20px);\n\tborder-inline-end: 1px solid var(--gem-line);\n}\n#sidebar-chat-item.selected { background-color: var(--gem-selected); }\n.markdown-prose :is(h1, h2, h3) { color: var(--gem-accent); }\n.markdown-prose a { color: var(--gem-accent); text-decoration-color: var(--gem-glow); }\n.markdown-prose blockquote { border-inline-start-color: var(--gem-glow); }\nhtml { scrollbar-color: var(--gem-line) transparent; }\n::selection { background-color: var(--gem-mark); }\n",
+    "customCssEnabled": true,
+    "autoScope": true,
     "canvasEnabled": false,
     "canvasScript": "",
-    "canvasShowAuth": false,
-    "themeShowAuth": false,
-    "customCssShowAuth": false,
     "gradientEnabled": true,
     "gradientType": "linear",
-    "gradientAngle": 135,
+    "gradientAngle": 155,
     "gradientStops": [
       {
-        "color": "#0a1628",
+        "color": "#051223",
         "position": 0
       },
       {
-        "color": "#0d3b66",
-        "position": 33
+        "color": "#071a36",
+        "position": 50
       },
       {
-        "color": "#0a2540",
-        "position": 66
-      },
-      {
-        "color": "#0a1628",
+        "color": "#050b19",
         "position": 100
       }
     ],
     "gradientIntensity": 100,
-    "gradientAnimation": null,
-    "gradientAnimationSpeed": 5,
-    "gradientShowAuth": true,
+    "gradientAnimation": false,
+    "gradientAnimationSpeed": 8,
     "gradientRadialPosX": 50,
     "gradientRadialPosY": 50,
     "gradientRadialShape": "ellipse",
     "gradientRadialSize": "farthest-corner",
     "gradientMeshPoints": [],
-    "gradientMeshBgColor": "#000000"
+    "gradientMeshBgColor": "#0a0a12",
+    "themeShowAuth": true,
+    "customCssShowAuth": true,
+    "canvasShowAuth": true,
+    "gradientShowAuth": true
   },
   "light": {
-    "h": 210,
-    "c": 25,
-    "l": 18,
+    "h": 250,
+    "c": 22,
+    "l": 20,
+    "paletteEnabled": true,
     "overrides": {},
-    "customCSS": "",
-    "customCssEnabled": false,
-    "autoScope": true,
     "locks": {},
+    "manualOverrides": "",
+    "manualOverridesEnabled": false,
+    "customCSS": ":root {\n\t--gem-glass: color-mix(in oklab, var(--color-gray-50) 78%, transparent);\n\t--gem-sidebar: color-mix(in oklab, var(--color-gray-50) 66%, transparent);\n\t--gem-bubble: color-mix(in oklab, var(--color-gray-200) 62%, transparent);\n\t--gem-selected: color-mix(in oklab, var(--color-gray-300) 34%, transparent);\n\t--gem-line: color-mix(in oklab, var(--color-gray-500) 26%, transparent);\n\t--gem-facet: color-mix(in oklab, white 75%, transparent);\n\t--gem-shade: color-mix(in oklab, var(--color-gray-600) 28%, transparent);\n\t--gem-accent: #1654a9;\n\t--gem-glow: color-mix(in oklab, #2d6fcd 55%, transparent);\n\t--gem-ring: color-mix(in oklab, #427fd8 18%, transparent);\n\t--gem-mark: color-mix(in oklab, #8fb9f7 55%, transparent);\n}\n\n/* Cut-stone surfaces in Open WebUI's own shapes: a lit top facet, a ring\n   in the stone's color on focus. !important only where a gradient clears\n   the background first. */\n#message-input-container {\n\tbackground-color: var(--gem-glass) !important;\n\tborder-color: var(--gem-line) !important;\n\tbackdrop-filter: blur(16px) saturate(1.2);\n\tbox-shadow: inset 0 1px 0 var(--gem-facet), 0 12px 36px -18px var(--gem-shade);\n\ttransition: border-color 0.25s ease, box-shadow 0.25s ease;\n}\n#message-input-container:focus-within {\n\tborder-color: var(--gem-glow) !important;\n\tbox-shadow: inset 0 1px 0 var(--gem-facet), 0 0 0 3px var(--gem-ring), 0 12px 36px -18px var(--gem-shade);\n}\n.chat-user .rounded-3xl {\n\tbackground-color: var(--gem-bubble) !important;\n\tbox-shadow: inset 0 0 0 1px var(--gem-line), inset 0 1px 0 var(--gem-facet);\n}\n#sidebar {\n\tbackground-color: var(--gem-sidebar) !important;\n\tbackdrop-filter: blur(20px);\n\tborder-inline-end: 1px solid var(--gem-line);\n}\n#sidebar-chat-item.selected { background-color: var(--gem-selected); }\n.markdown-prose :is(h1, h2, h3) { color: var(--gem-accent); }\n.markdown-prose a { color: var(--gem-accent); text-decoration-color: var(--gem-glow); }\n.markdown-prose blockquote { border-inline-start-color: var(--gem-glow); }\nhtml { scrollbar-color: var(--gem-line) transparent; }\n::selection { background-color: var(--gem-mark); }\n",
+    "customCssEnabled": true,
+    "autoScope": true,
     "canvasEnabled": false,
     "canvasScript": "",
-    "canvasShowAuth": false,
-    "themeShowAuth": false,
-    "customCssShowAuth": false,
     "gradientEnabled": true,
     "gradientType": "linear",
-    "gradientAngle": 135,
+    "gradientAngle": 155,
     "gradientStops": [
       {
-        "color": "#0a1628",
+        "color": "#f2f9ff",
         "position": 0
       },
       {
-        "color": "#0d3b66",
-        "position": 33
+        "color": "#e3efff",
+        "position": 55
       },
       {
-        "color": "#0a2540",
-        "position": 66
-      },
-      {
-        "color": "#0a1628",
+        "color": "#ecf6ff",
         "position": 100
       }
     ],
     "gradientIntensity": 100,
-    "gradientAnimation": null,
-    "gradientAnimationSpeed": 5,
-    "gradientShowAuth": true,
+    "gradientAnimation": false,
+    "gradientAnimationSpeed": 8,
     "gradientRadialPosX": 50,
     "gradientRadialPosY": 50,
     "gradientRadialShape": "ellipse",
     "gradientRadialSize": "farthest-corner",
     "gradientMeshPoints": [],
-    "gradientMeshBgColor": "#000000"
+    "gradientMeshBgColor": "#0a0a12",
+    "themeShowAuth": true,
+    "customCssShowAuth": true,
+    "canvasShowAuth": true,
+    "gradientShowAuth": true
   },
   "oled": {
-    "h": 210,
-    "c": 25,
+    "h": 260,
+    "c": 40,
     "l": 0,
+    "paletteEnabled": true,
     "overrides": {},
-    "customCSS": "",
-    "customCssEnabled": false,
-    "autoScope": true,
     "locks": {},
+    "manualOverrides": "",
+    "manualOverridesEnabled": false,
+    "customCSS": ":root {\n\t--gem-glass: color-mix(in oklab, var(--color-gray-900) 72%, transparent);\n\t--gem-sidebar: color-mix(in oklab, var(--color-gray-950) 78%, transparent);\n\t--gem-bubble: color-mix(in oklab, var(--color-gray-800) 72%, transparent);\n\t--gem-selected: color-mix(in oklab, var(--color-gray-600) 30%, transparent);\n\t--gem-line: color-mix(in oklab, var(--color-gray-400) 18%, transparent);\n\t--gem-facet: color-mix(in oklab, var(--color-gray-200) 9%, transparent);\n\t--gem-shade: color-mix(in oklab, black 70%, transparent);\n\t--gem-accent: #95c0ff;\n\t--gem-glow: color-mix(in oklab, #5c9eff 60%, transparent);\n\t--gem-ring: color-mix(in oklab, #609efa 18%, transparent);\n\t--gem-mark: color-mix(in oklab, #4885df 38%, transparent);\n}\n\n/* Cut-stone surfaces in Open WebUI's own shapes: a lit top facet, a ring\n   in the stone's color on focus. !important only where a gradient clears\n   the background first. */\n#message-input-container {\n\tbackground-color: var(--gem-glass) !important;\n\tborder-color: var(--gem-line) !important;\n\tbackdrop-filter: blur(16px) saturate(1.2);\n\tbox-shadow: inset 0 1px 0 var(--gem-facet), 0 12px 36px -18px var(--gem-shade);\n\ttransition: border-color 0.25s ease, box-shadow 0.25s ease;\n}\n#message-input-container:focus-within {\n\tborder-color: var(--gem-glow) !important;\n\tbox-shadow: inset 0 1px 0 var(--gem-facet), 0 0 0 3px var(--gem-ring), 0 12px 36px -18px var(--gem-shade);\n}\n.chat-user .rounded-3xl {\n\tbackground-color: var(--gem-bubble) !important;\n\tbox-shadow: inset 0 0 0 1px var(--gem-line), inset 0 1px 0 var(--gem-facet);\n}\n#sidebar {\n\tbackground-color: var(--gem-sidebar) !important;\n\tbackdrop-filter: blur(20px);\n\tborder-inline-end: 1px solid var(--gem-line);\n}\n#sidebar-chat-item.selected { background-color: var(--gem-selected); }\n.markdown-prose :is(h1, h2, h3) { color: var(--gem-accent); }\n.markdown-prose a { color: var(--gem-accent); text-decoration-color: var(--gem-glow); }\n.markdown-prose blockquote { border-inline-start-color: var(--gem-glow); }\nhtml { scrollbar-color: var(--gem-line) transparent; }\n::selection { background-color: var(--gem-mark); }\n",
+    "customCssEnabled": true,
+    "autoScope": true,
     "canvasEnabled": false,
     "canvasScript": "",
-    "canvasShowAuth": false,
-    "themeShowAuth": false,
-    "customCssShowAuth": false,
     "gradientEnabled": true,
-    "gradientType": "linear",
-    "gradientAngle": 135,
+    "gradientType": "radial",
+    "gradientAngle": 160,
     "gradientStops": [
       {
-        "color": "#0a1628",
+        "color": "#01081d",
         "position": 0
       },
       {
-        "color": "#0d3b66",
-        "position": 33
+        "color": "#000107",
+        "position": 32
       },
       {
-        "color": "#0a2540",
-        "position": 66
+        "color": "#000000",
+        "position": 70
       },
       {
-        "color": "#0a1628",
+        "color": "#000000",
         "position": 100
       }
     ],
     "gradientIntensity": 100,
-    "gradientAnimation": null,
-    "gradientAnimationSpeed": 5,
-    "gradientShowAuth": true,
-    "gradientRadialPosX": 50,
-    "gradientRadialPosY": 50,
+    "gradientAnimation": false,
+    "gradientAnimationSpeed": 8,
+    "gradientRadialPosX": 92,
+    "gradientRadialPosY": 0,
     "gradientRadialShape": "ellipse",
     "gradientRadialSize": "farthest-corner",
     "gradientMeshPoints": [],
-    "gradientMeshBgColor": "#000000"
+    "gradientMeshBgColor": "#0a0a12",
+    "themeShowAuth": true,
+    "customCssShowAuth": true,
+    "canvasShowAuth": true,
+    "gradientShowAuth": true
   },
   "her": {
-    "h": 210,
-    "c": 25,
-    "l": 18,
+    "h": 275,
+    "c": 24,
+    "l": 20,
+    "paletteEnabled": true,
     "overrides": {},
-    "customCSS": "",
-    "customCssEnabled": false,
-    "autoScope": true,
     "locks": {},
+    "manualOverrides": "",
+    "manualOverridesEnabled": false,
+    "customCSS": ":root {\n\t--gem-glass: color-mix(in oklab, var(--color-gray-50) 78%, transparent);\n\t--gem-sidebar: color-mix(in oklab, var(--color-gray-50) 66%, transparent);\n\t--gem-bubble: color-mix(in oklab, var(--color-gray-200) 62%, transparent);\n\t--gem-selected: color-mix(in oklab, var(--color-gray-300) 34%, transparent);\n\t--gem-line: color-mix(in oklab, var(--color-gray-500) 26%, transparent);\n\t--gem-facet: color-mix(in oklab, white 75%, transparent);\n\t--gem-shade: color-mix(in oklab, var(--color-gray-600) 28%, transparent);\n\t--gem-accent: #434baa;\n\t--gem-glow: color-mix(in oklab, #5965cd 55%, transparent);\n\t--gem-ring: color-mix(in oklab, #6875d8 18%, transparent);\n\t--gem-mark: color-mix(in oklab, #a4b3f8 55%, transparent);\n}\n\n/* Cut-stone surfaces in Open WebUI's own shapes: a lit top facet, a ring\n   in the stone's color on focus. !important only where a gradient clears\n   the background first. */\n#message-input-container {\n\tbackground-color: var(--gem-glass) !important;\n\tborder-color: var(--gem-line) !important;\n\tbackdrop-filter: blur(16px) saturate(1.2);\n\tbox-shadow: inset 0 1px 0 var(--gem-facet), 0 12px 36px -18px var(--gem-shade);\n\ttransition: border-color 0.25s ease, box-shadow 0.25s ease;\n}\n#message-input-container:focus-within {\n\tborder-color: var(--gem-glow) !important;\n\tbox-shadow: inset 0 1px 0 var(--gem-facet), 0 0 0 3px var(--gem-ring), 0 12px 36px -18px var(--gem-shade);\n}\n.chat-user .rounded-3xl {\n\tbackground-color: var(--gem-bubble) !important;\n\tbox-shadow: inset 0 0 0 1px var(--gem-line), inset 0 1px 0 var(--gem-facet);\n}\n#sidebar {\n\tbackground-color: var(--gem-sidebar) !important;\n\tbackdrop-filter: blur(20px);\n\tborder-inline-end: 1px solid var(--gem-line);\n}\n#sidebar-chat-item.selected { background-color: var(--gem-selected); }\n.markdown-prose :is(h1, h2, h3) { color: var(--gem-accent); }\n.markdown-prose a { color: var(--gem-accent); text-decoration-color: var(--gem-glow); }\n.markdown-prose blockquote { border-inline-start-color: var(--gem-glow); }\nhtml { scrollbar-color: var(--gem-line) transparent; }\n::selection { background-color: var(--gem-mark); }\n",
+    "customCssEnabled": true,
+    "autoScope": true,
     "canvasEnabled": false,
     "canvasScript": "",
-    "canvasShowAuth": false,
-    "themeShowAuth": false,
-    "customCssShowAuth": false,
     "gradientEnabled": true,
     "gradientType": "linear",
-    "gradientAngle": 135,
+    "gradientAngle": 200,
     "gradientStops": [
       {
-        "color": "#0a1628",
+        "color": "#f5f6ff",
         "position": 0
       },
       {
-        "color": "#0d3b66",
-        "position": 33
+        "color": "#e9eeff",
+        "position": 50
       },
       {
-        "color": "#0a2540",
-        "position": 66
-      },
-      {
-        "color": "#0a1628",
+        "color": "#f2f6ff",
         "position": 100
       }
     ],
     "gradientIntensity": 100,
-    "gradientAnimation": null,
-    "gradientAnimationSpeed": 5,
-    "gradientShowAuth": true,
+    "gradientAnimation": false,
+    "gradientAnimationSpeed": 8,
     "gradientRadialPosX": 50,
     "gradientRadialPosY": 50,
     "gradientRadialShape": "ellipse",
     "gradientRadialSize": "farthest-corner",
     "gradientMeshPoints": [],
-    "gradientMeshBgColor": "#000000"
+    "gradientMeshBgColor": "#0a0a12",
+    "themeShowAuth": true,
+    "customCssShowAuth": true,
+    "canvasShowAuth": true,
+    "gradientShowAuth": true
   }
 }
