@@ -15,7 +15,7 @@ const CORE_Y        = 0.8;    // vertical position of the core, as a share of th
 const CORE_SIZE     = 0.42;   // reach of the plasma, as a share of the screen's height (0.15-0.9)
 const INTENSITY     = 0.9;    // overall brightness of the reactor (0-1)
 const CENTER_CALM   = 0.85;   // how much the plasma fades behind the chat column (0-1)
-const BAND_WIDTH    = 520;    // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH    = 520;    // half-width of the calm band when the page has no chat column, in px (300-900)
 const CURSOR_GLOW   = 0.6;    // soft plasma bloom that follows the cursor and fades when it stops (0-1)
 const RENDER_SCALE  = 0.5;    // resolution of the plasma; it is soft, so half is plenty (0.25-1)
 const MAX_FPS       = 30;     // frame cap (15-60)
@@ -43,6 +43,7 @@ const FRAG = [
 	'uniform vec3 u_hot;',
 	'uniform vec3 u_core;',
 	'uniform float u_dark;',
+	'uniform vec2 u_col;',
 	'float hash(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }',
 	'float noise(vec2 p) {',
 	'	vec2 i = floor(p), f = fract(p), u = f * f * (3.0 - 2.0 * f);',
@@ -60,9 +61,9 @@ const FRAG = [
 	'	float t = u_time;',
 	'	float ctx = u_ctx;',
 	'	float reach = res.y * ' + CORE_SIZE.toFixed(3) + ' * (0.75 + 0.45 * ctx);',
-	// On narrow screens the core slides outward so it stays clear of the chat column
+	// On narrow screens, or with the chat column close, the core slides outward so it stays clear of the column
 	'	float cx = ' + CORE_X.toFixed(3) + ' * res.x;',
-	'	cx = cx > res.x * 0.5 ? min(max(cx, res.x * 0.5 + ' + (BAND_WIDTH * 0.85).toFixed(1) + '), res.x - reach * 0.3) : max(min(cx, res.x * 0.5 - ' + (BAND_WIDTH * 0.85).toFixed(1) + '), reach * 0.3);',
+	'	cx = cx > u_col.x ? min(max(cx, u_col.x + u_col.y * 0.85), res.x - reach * 0.3) : max(min(cx, u_col.x - u_col.y * 0.85), reach * 0.3);',
 	'	vec2 c = vec2(cx, (1.0 - ' + CORE_Y.toFixed(3) + ') * res.y);',
 	'	vec2 rel = (px - c) / reach;',
 	'	float d = length(rel);',
@@ -96,7 +97,7 @@ const FRAG = [
 	'	float bloom = u_mouse.z * ' + CURSOR_GLOW.toFixed(3) + ' * exp(-length(px - m) / 110.0) * 0.35;',
 	'	col += mix(u_warm, u_cool, ctx) * bloom;',
 	// Dim when idle, full when the context is full; quiet behind the chat column
-	'	float band = abs(px.x - res.x * 0.5) / ' + BAND_WIDTH.toFixed(1) + ';',
+	'	float band = abs(px.x - u_col.x) / u_col.y;',
 	'	float calm = 1.0 - ' + CENTER_CALM.toFixed(3) + ' * (1.0 - smoothstep(0.55, 1.25, band));',
 	'	col *= mix(0.35, 1.25, ctx) * 1.6 * calm * ' + INTENSITY.toFixed(3) + ';',
 	'	float a;',
@@ -115,7 +116,7 @@ const FRAG = [
 let canvas, gl, program, buffer;
 let loc = {};
 let w = 0, h = 0;
-let last = 0, time = 0, reduced = false;
+let last = 0, time = 0, reduced = false, column = null;
 let target = 0, fill = 0;
 const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
 const colors = { cool: hexToRgb(COLOR_COOL), warm: hexToRgb(COLOR_WARM), hot: hexToRgb(COLOR_HOT), core: [1, 0.96, 0.9], dark: 1 };
@@ -136,6 +137,10 @@ function applyTheme(t) {
 	colors.hot = [0, 1, 2].map((i) => t.rgb.accent2[i] * 0.3 + warmth[i] * 0.7);
 	colors.core = t.rgb.text;
 }
+
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
 
 function compile(type, source) {
 	const shader = gl.createShader(type);
@@ -158,7 +163,7 @@ function setup() {
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
 	gl.enableVertexAttribArray(0);
 	gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-	['u_res', 'u_scale', 'u_time', 'u_ctx', 'u_mouse', 'u_cool', 'u_warm', 'u_hot', 'u_core', 'u_dark'].forEach((name) => {
+	['u_res', 'u_scale', 'u_time', 'u_ctx', 'u_mouse', 'u_cool', 'u_warm', 'u_hot', 'u_core', 'u_dark', 'u_col'].forEach((name) => {
 		loc[name] = gl.getUniformLocation(program, name);
 	});
 	gl.disable(gl.BLEND);
@@ -191,6 +196,7 @@ function frame(now) {
 	gl.uniform3fv(loc.u_hot, colors.hot);
 	gl.uniform3fv(loc.u_core, colors.core);
 	gl.uniform1f(loc.u_dark, colors.dark);
+	gl.uniform2f(loc.u_col, colX(), colHalf());
 	gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
 
@@ -221,6 +227,7 @@ self.onmessage = (e) => {
 			w = d.width;
 			h = d.height;
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			start();
 			break;
@@ -234,6 +241,9 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

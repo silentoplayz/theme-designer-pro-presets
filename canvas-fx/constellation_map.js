@@ -13,7 +13,7 @@ const DRIFT          = 1;     // drift speed of the stars; 0 holds them still (0
 const REDUCED_SPEED  = 0.2;   // share of the drift kept when the viewer asks to reduce motion (0-1)
 const TWINKLE        = 1;     // how much the stars twinkle (0-2)
 const CENTER_CALM    = 0.7;   // how much the stars and lines fade behind the chat column (0-1)
-const BAND_WIDTH     = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH     = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const CURSOR_GRAVITY = 1;     // how strongly nearby stars lean toward the cursor (0-3)
 const CURSOR_RADIUS  = 250;   // reach of the cursor, in px (100-400)
 const MAX_PULL       = 40;    // top speed the cursor can give a star, in px per second (5-120)
@@ -34,7 +34,7 @@ const SPRITE = 64;             // star sprite size in device px
 
 let canvas, ctx;
 let w = 0, h = 0, dpr = 1;
-let last = 0, time = 0, reduced = false, dark = true;
+let last = 0, time = 0, reduced = false, dark = true, column = null;
 const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
 const tap = { x: -10000, y: -10000, age: 10 };
 
@@ -61,8 +61,12 @@ function rgba(c, a) {
 	return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a.toFixed(3) + ')';
 }
 
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+
 function calm(x) {
-	const d = Math.abs(x - w * 0.5) / BAND_WIDTH;
+	const d = Math.abs(x - colX()) / colHalf();
 	const s = Math.min(1, Math.max(0, (d - 0.55) / 0.7));
 	return 1 - CENTER_CALM * (1 - s * s * (3 - 2 * s));
 }
@@ -255,6 +259,7 @@ self.onmessage = (e) => {
 			canvas = d.canvas;
 			ctx = canvas.getContext('2d');
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			size2d(d.width, d.height, d.dpr);
 			seed();
 			applyTheme(d.theme || {});
@@ -268,6 +273,9 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

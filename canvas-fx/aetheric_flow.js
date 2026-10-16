@@ -16,7 +16,7 @@ const CURSOR_CURL   = 1;     // how strongly a moving cursor bends the flow (0-3
 const MOTION        = 1;     // overall speed (0.2-2)
 const REDUCED_SPEED = 0.2;   // speed kept when the viewer asks to reduce motion (0-1)
 const CENTER_CALM   = 0.8;   // how much the filaments fade behind the chat column (0-1)
-const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH    = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const FOLLOW_THEME  = true;  // take the colors from the theme's palette
 const COLOR_A       = '#5fd4e8';  // first filament color when not following the theme
 const COLOR_B       = '#7a8cff';  // second filament color
@@ -25,7 +25,7 @@ const COLOR_D       = '#6c7a99';  // quiet structure color
 /* ──────────────────────────────────────────── */
 
 const NC = 4, NT = 4, NB = NC * NT;
-let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, time = 0, reduced = false, dark = true, fadeDebt = 0;
+let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, time = 0, reduced = false, dark = true, fadeDebt = 0, column = null;
 let calmLut = new Float32Array(1), hexes = [COLOR_A, COLOR_B, COLOR_C, COLOR_D];
 const styles = new Array(NB).fill('#000');
 const mouse = { x: -10000, y: -10000, energy: 0 };
@@ -73,6 +73,20 @@ function applyTheme(t) {
 	buildStyles();
 }
 
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+
+// Fade per 4 px across the screen, rebuilt on resize and layout
+function buildCalm() {
+	calmLut = new Float32Array((w >> 2) + 2);
+	const cx = colX(), half = colHalf();
+	for (let i = 0; i < calmLut.length; i++) {
+		const t = Math.min(1, Math.max(0, (Math.abs(i * 4 - cx) / half - 0.55) / 0.7));
+		calmLut[i] = 1 - CENTER_CALM * (1 - t * t * (3 - 2 * t));
+	}
+}
+
 function calm(x) {
 	const i = x >> 2;
 	return calmLut[i < 0 ? 0 : i >= calmLut.length ? calmLut.length - 1 : i];
@@ -95,11 +109,7 @@ function size(oldW, oldH) {
 	canvas.width = Math.max(1, Math.round(w * dpr));
 	canvas.height = Math.max(1, Math.round(h * dpr));
 	ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-	calmLut = new Float32Array((w >> 2) + 2);
-	for (let i = 0; i < calmLut.length; i++) {
-		const t = Math.min(1, Math.max(0, (Math.abs(i * 4 - w / 2) / BAND_WIDTH - 0.55) / 0.7));
-		calmLut[i] = 1 - CENTER_CALM * (1 - t * t * (3 - 2 * t));
-	}
+	buildCalm();
 	if (oldW) {
 		// Keep the flow where it was, scaled to the new size
 		const sx = w / oldW, sy = h / oldH;
@@ -184,6 +194,7 @@ self.onmessage = (e) => {
 			ctx = canvas.getContext('2d');
 			w = d.width; h = d.height; dpr = Math.min(d.dpr || 1, 2);
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			buildStyles();
 			size(0, 0);
@@ -200,6 +211,10 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			if (canvas) buildCalm();
 			break;
 		case 'mousemove':
 			if (mouse.x > -9000) mouse.energy = Math.min(1, mouse.energy + Math.hypot(d.x - mouse.x, d.y - mouse.y) / 80);

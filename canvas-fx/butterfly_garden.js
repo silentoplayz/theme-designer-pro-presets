@@ -15,7 +15,7 @@ const ATTRACT       = 1;     // how strongly a moving cursor draws butterflies (
 const MOTION        = 1;     // overall speed (0.2-2)
 const REDUCED_SPEED = 0.25;  // speed kept when the viewer asks to reduce motion (0-1)
 const CENTER_CALM   = 0.75;  // how much the garden fades and keeps clear of the chat column (0-1)
-const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH    = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const FOLLOW_THEME  = true;  // take the colors from the theme's palette
 const COLOR_A       = '#ff7fb0';  // first wing color when not following the theme
 const COLOR_B       = '#9b8cff';  // second wing color
@@ -24,7 +24,7 @@ const STEM_COLOR    = '#5f8f62';  // flower stem color
 /* ──────────────────────────────────────────── */
 
 const U = 44, MAX_SPARK = 220, NV = 3;
-let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, time = 0, reduced = false, dark = true;
+let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, time = 0, reduced = false, dark = true, column = null;
 let calmLut = new Float32Array(1), hexes = [COLOR_A, COLOR_B, COLOR_C, STEM_COLOR], stemStyle = STEM_COLOR;
 const wings = [], stars = [], blooms = [];
 let body = null, mote = null;
@@ -143,21 +143,36 @@ function applyTheme(t) {
 	if (ctx) buildSprites();
 }
 
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+
+// Fade per 4 px across the screen, rebuilt on resize and layout
+function buildCalm() {
+	calmLut = new Float32Array((w >> 2) + 2);
+	const cx = colX(), half = colHalf();
+	for (let i = 0; i < calmLut.length; i++) {
+		const t = Math.min(1, Math.max(0, (Math.abs(i * 4 - cx) / half - 0.55) / 0.7));
+		calmLut[i] = 1 - CENTER_CALM * (1 - t * t * (3 - 2 * t));
+	}
+}
+
 function calm(x) {
 	const i = x >> 2;
 	return calmLut[i < 0 ? 0 : i >= calmLut.length ? calmLut.length - 1 : i];
 }
-function sideX(right, reach) { return right ? w - Math.random() * w * reach : Math.random() * w * reach; }
+// A spot on one side of the chat column, at most reach of the screen wide
+function sideX(right, reach) {
+	const edge = colX() + (right ? 1 : -1) * colHalf() * 0.55;
+	const z = Math.max(40, Math.min(w * reach, right ? w - edge : edge));
+	return right ? w - Math.random() * z : Math.random() * z;
+}
 
 function size() {
 	canvas.width = Math.max(1, Math.round(w * dpr));
 	canvas.height = Math.max(1, Math.round(h * dpr));
 	ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-	calmLut = new Float32Array((w >> 2) + 2);
-	for (let i = 0; i < calmLut.length; i++) {
-		const t = Math.min(1, Math.max(0, (Math.abs(i * 4 - w / 2) / BAND_WIDTH - 0.55) / 0.7));
-		calmLut[i] = 1 - CENTER_CALM * (1 - t * t * (3 - 2 * t));
-	}
+	buildCalm();
 	for (let i = 0; i < NB; i++) {
 		fside[i] = i % 2; fx[i] = sideX(fside[i], 0.3); fy[i] = h * (0.1 + Math.random() * 0.7);
 		fvx[i] = fvy[i] = 0; fwa[i] = Math.random() * 6.283; fph[i] = Math.random() * 6.283;
@@ -241,7 +256,7 @@ function frame(now) {
 		const sp = Math.hypot(fvx[i], fvy[i]);
 		if (sp > maxV) { fvx[i] *= maxV / sp; fvy[i] *= maxV / sp; }
 		fx[i] += fvx[i] * dt; fy[i] += fvy[i] * dt;
-		if (Math.abs(fx[i] - w / 2) < w * 0.1 && mouse.energy < 0.05) fside[i] = fx[i] > w / 2 ? 1 : 0;
+		if (Math.abs(fx[i] - colX()) < w * 0.1 && mouse.energy < 0.05) fside[i] = fx[i] > colX() ? 1 : 0;
 
 		ftimer[i] -= dt;
 		if (SPARKLES > 0 && ftimer[i] <= 0 && scount < MAX_SPARK) {
@@ -276,6 +291,7 @@ self.onmessage = (e) => {
 			ctx = canvas.getContext('2d');
 			w = d.width; h = d.height; dpr = Math.min(d.dpr || 1, 2);
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			buildSprites();
 			size();
@@ -290,6 +306,12 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			if (!canvas) break;
+			buildCalm();
+			for (let i = 0; i < NB; i++) fside[i] = fx[i] > colX() ? 1 : 0;
 			break;
 		case 'mousemove':
 			if (mouse.x > -9000) mouse.energy = Math.min(1, mouse.energy + Math.hypot(d.x - mouse.x, d.y - mouse.y) / 80);

@@ -13,7 +13,7 @@ const SPORES        = 60;     // spores in the air at full growth (0-150)
 const MOTION        = 1;      // speed of sway and spores; 0 holds still (0-2)
 const CURSOR_PULL   = 1;      // how strongly spores drift toward the cursor (0-3)
 const CENTER_CALM   = 0.7;    // how much the farm shrinks and fades behind the chat column (0-1)
-const BAND_WIDTH    = 520;    // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH    = 520;    // half-width of the calm band when the page has no chat column, in px (300-900)
 const SHOW_BADGE    = true;   // show the token count in the bottom-right corner
 const FOLLOW_THEME  = true;   // take the colors from the theme's palette
 const COLOR_GLOW    = '#3fe0c0'; // first glowing cap color when not following the theme
@@ -38,7 +38,7 @@ const sX = F(MAXS), sY = F(MAXS), sVX = F(MAXS), sVY = F(MAXS), sLife = F(MAXS),
 let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, reduced = false, dark = true;
 let mCount = 0, tCount = 0, nCl = 0, groundY = 0, seed = 1, time = 0, emitAcc = 0;
 let ratio = 0, target = 0, tokens = 0, shown = -1, badgeText = '', live = false;
-let bedPath = null, bedFill = null;
+let bedPath = null, bedFill = null, column = null;
 const mouse = { x: -10000, y: -10000, amount: 0 };
 const col = { glow: [], cap: [], hi: [], shade: [], spore: [], bed: [0, 0, 0] };
 
@@ -47,8 +47,11 @@ function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) *
 function css(c, a) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + (a === undefined ? 1 : a) + ')'; }
 function rand() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
 function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
 // 1 over the chat column, falling smoothly to 0 beyond the calm band
-function band(x) { const t = clamp01((Math.abs(x - w / 2) / BAND_WIDTH - 0.55) / 0.7); return 1 - t * t * (3 - 2 * t); }
+function band(x) { const t = clamp01((Math.abs(x - colX()) / colHalf() - 0.55) / 0.7); return 1 - t * t * (3 - 2 * t); }
 function glowMode(on) { ctx.globalCompositeOperation = on && dark ? 'lighter' : 'source-over'; }
 
 function sprite(c) {
@@ -100,7 +103,7 @@ function buildBed() {
 	const a = dark ? 0.22 : 0.16;
 	bedFill = ctx.createLinearGradient(0, 0, w, 0);
 	bedFill.addColorStop(0, css(col.bed, a));
-	bedFill.addColorStop(0.5, css(col.bed, a * (1 - CENTER_CALM * 0.6)));
+	bedFill.addColorStop(Math.min(0.95, Math.max(0.05, colX() / w)), css(col.bed, a * (1 - CENTER_CALM * 0.6)));
 	bedFill.addColorStop(1, css(col.bed, a));
 }
 
@@ -108,13 +111,14 @@ function build() {
 	seed = 42;
 	groundY = h - Math.max(14, Math.min(30, h * 0.032));
 	const topLimit = h * (1 - GROW_HEIGHT), k = Math.max(0.7, Math.min(1.2, h / 900));
-	const right = w * 0.97 - (SHOW_BADGE ? 170 : 0), mid = w * 0.5, half = Math.min(mid - w * 0.03, right - mid);
+	const right = w * 0.97 - (SHOW_BADGE ? 170 : 0), mid = Math.min(colX(), right), half = Math.max(0, right - mid);
 	nCl = Math.min(24, CLUSTERS);
 	mCount = tCount = 0;
 	for (let i = 0; i < nCl; i++) {
-		// Even spacing with jitter, pushed toward the outer thirds
-		const s = ((i + 0.2 + rand() * 0.6) / nCl) * 2 - 1;
-		const x = mid + Math.sign(s) * Math.pow(Math.abs(s), 0.75) * (s < 0 ? mid - w * 0.03 : half);
+		// Even spacing with jitter, pushed out to either side of the chat column, each side's share by its room
+		const left = Math.max(0, mid - w * 0.03), share = left / Math.max(1, left + half), u = (i + 0.2 + rand() * 0.6) / nCl;
+		const s = u < share ? -(1 - u / share) : (u - share) / Math.max(0.001, 1 - share);
+		const x = mid + Math.sign(s) * Math.pow(Math.abs(s), 0.75) * (s < 0 ? left : half);
 		const b = band(x), scale = 1 - 0.5 * CENTER_CALM * b;
 		cX[i] = x;
 		cY[i] = groundY + 1 + rand() * 6;
@@ -273,9 +277,10 @@ function frame(now) {
 	mouse.amount = Math.max(0, mouse.amount - dt * 0.6);
 	ctx.clearRect(0, 0, w, h);
 
-	// Fog and the farm's ambient glow, low and in the outer thirds
+	// Fog and the farm's ambient glow, low and to either side of the chat column
+	const cx = colX();
 	for (let k = 0; k < 2; k++) {
-		const fx = w * (k ? 0.82 : 0.18) + Math.sin(time * 0.05 + k * 2) * 40, fw = w * 0.42;
+		const fx = (k ? w - (w - cx) * 0.36 : cx * 0.36) + Math.sin(time * 0.05 + k * 2) * 40, fw = w * 0.42;
 		ctx.globalAlpha = (dark ? 0.12 : 0.08) + ratio * 0.06;
 		ctx.drawImage(col.glow[3], fx - fw / 2, groundY - 70, fw, 120);
 		if (ratio > 0.3) {
@@ -344,6 +349,7 @@ self.onmessage = (e) => {
 			h = d.height;
 			dpr = Math.min(d.dpr || 1, 2);
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			if (PREVIEW_RATIO > 0) { ratio = target = PREVIEW_RATIO; tokens = (PREVIEW_RATIO * MAX_TOKENS) / GROWTH_SPEED; }
 			applyTheme(d.theme);
 			size();
@@ -360,6 +366,10 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			if (canvas) build();
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

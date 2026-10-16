@@ -15,7 +15,7 @@ const CURSOR_REACH  = 150;   // how near the cursor must pass a pad to send a pu
 const MOTION        = 1;     // overall speed (0.2-2)
 const REDUCED_SPEED = 0.3;   // share of the speed kept when the viewer asks to reduce motion (0-1)
 const CENTER_CALM   = 0.85;  // how much traces fade behind the chat column (0-1)
-const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH    = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const FOLLOW_THEME  = true;  // take the colors from the theme's palette
 const TRACE_COLOR   = '#00b4a0';  // finished trace color when not following the theme
 const NODE_COLOR    = '#00dcb4';  // pad and growing trace color
@@ -29,7 +29,7 @@ const FREE = 0, GROWING = 1, DONE = 2, FADING = 3;
 
 let canvas, ctx;
 let w = 0, h = 0, dpr = 1;
-let last = 0, reduced = false, dark = true, spawnWait = 0, pulseWait = 0;
+let last = 0, reduced = false, dark = true, spawnWait = 0, pulseWait = 0, column = null;
 const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
 const col = { trace: TRACE_COLOR, node: NODE_COLOR, tip: TIP_COLOR, pulse: PULSE_COLOR };
 let tipSprite = null, pulseSprite = null;
@@ -72,8 +72,12 @@ function applyTheme(t) {
 	pulseSprite = sprite(col.pulse, 12);
 }
 
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+
 function band(x) {
-	const b = Math.abs(x - w / 2) / BAND_WIDTH;
+	const b = Math.abs(x - colX()) / colHalf();
 	const s = Math.min(1, Math.max(0, (b - 0.55) / 0.7));
 	return 1 - CENTER_CALM * (1 - s * s * (3 - 2 * s));
 }
@@ -82,9 +86,9 @@ const snap = (v) => Math.round(v / GRID) * GRID;
 
 // Lays a new trace inside one side's region, turning 90 degrees at each joint and never doubling onto itself
 function lay(i) {
-	const inner = BAND_WIDTH * 0.5;
+	const inner = colHalf() * 0.5, cx = colX();
 	const left = Math.random() < 0.5;
-	let x0 = left ? GRID : w / 2 + inner, x1 = left ? w / 2 - inner : w - GRID;
+	let x0 = left ? GRID : cx + inner, x1 = left ? cx - inner : w - GRID;
 	if (x1 - x0 < GRID * 4) { x0 = GRID; x1 = w - GRID; }
 	let x = snap(x0 + Math.random() * (x1 - x0)), y = snap(GRID + Math.random() * (h - GRID * 2));
 	let dir = Math.floor(Math.random() * 4);
@@ -126,6 +130,17 @@ function seed() {
 		ts[i] = DONE;
 		tseg[i] = tn[i] - 1;
 		tlife[i] *= Math.random();
+	}
+}
+
+// After the chat column moves, traces that now cross it retire and regrow beside it
+function clearColumn() {
+	const a = colX() - colHalf() * 0.5, b = colX() + colHalf() * 0.5;
+	for (let i = 0; i < MAX_TRACES; i++) {
+		if (ts[i] !== DONE && ts[i] !== GROWING) continue;
+		for (let k = 0, o = i * MAX_PTS; k < tn[i]; k++) {
+			if (tx[o + k] > a && tx[o + k] < b) { ts[i] = FADING; break; }
+		}
 	}
 }
 
@@ -276,6 +291,7 @@ self.onmessage = (e) => {
 			canvas = d.canvas;
 			ctx = canvas.getContext('2d');
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			resize(d.width, d.height, d.dpr);
 			requestAnimationFrame(frame);
@@ -288,6 +304,10 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			if (canvas) clearColumn();
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

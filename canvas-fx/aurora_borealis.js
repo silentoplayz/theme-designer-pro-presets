@@ -12,7 +12,7 @@ const TOP           = 0.1;   // height of the first ribbon, as a share of the sc
 const SPREAD        = 0.07;  // vertical gap between ribbons, as a share of the screen (0.02-0.15)
 const RAYS          = 1;     // brightness of the light rays rising from each ribbon; 0 turns them off (0-2)
 const CENTER_CALM   = 0.7;   // how much the aurora thins behind the chat column (0-1)
-const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH    = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const CURSOR_PUSH   = 1;     // how far the ribbons bow away from the cursor (0-3)
 const PUSH_RADIUS   = 220;   // reach of the cursor's push, in px (80-400)
 const FOLLOW_THEME  = true;  // take the colors from the theme's palette
@@ -30,7 +30,7 @@ const SOFT = 1 / 6; // the haze renders at a sixth of the screen and is scaled u
 
 let canvas, ctx, haze, hctx;
 let w = 0, h = 0, dpr = 1;
-let last = 0, time = 0, reduced = false, dark = true;
+let last = 0, time = 0, reduced = false, dark = true, column = null;
 const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
 
 // Per-ribbon traits, rolled once so a resize rescales instead of re-rolling
@@ -66,10 +66,14 @@ function rgba(c, a) {
 	return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a.toFixed(3) + ')';
 }
 
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+
 // Alpha across the screen: fades at the sides and thins behind the chat column
 function shade(x) {
 	const edge = Math.min(1, x / 90, (w - x) / 90);
-	const d = Math.abs(x - w * 0.5) / BAND_WIDTH;
+	const d = Math.abs(x - colX()) / colHalf();
 	const s = Math.min(1, Math.max(0, (d - 0.55) / 0.7));
 	const band = 1 - s * s * (3 - 2 * s);
 	return Math.max(0, edge) * (1 - CENTER_CALM * band);
@@ -103,7 +107,7 @@ function roll() {
 	}
 }
 
-// Rebuilt on theme change and resize only: one horizontal gradient and one ray sprite per ribbon
+// Rebuilt on theme change, resize and layout only: one horizontal gradient and one ray sprite per ribbon
 function build() {
 	if (!ctx || !w) return;
 	for (let i = 0; i < count; i++) {
@@ -252,6 +256,7 @@ self.onmessage = (e) => {
 			w = d.width;
 			h = d.height;
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			roll();
 			size();
@@ -268,6 +273,10 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			build();
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

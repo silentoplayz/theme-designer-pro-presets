@@ -13,7 +13,7 @@ const RIGHTWARD     = 0.7;   // share of lanes flowing left to right (0-1)
 const BRIGHTNESS    = 1;     // strength of the packets (0.2-1.5)
 const LANE_LINES    = 0.5;   // strength of the faint lane lines (0-1)
 const CENTER_CALM   = 0.8;   // how much the traffic dims behind the chat column (0-1)
-const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH    = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const VORTEX        = 1;     // how strongly packets swirl around the cursor (0-3)
 const VORTEX_RADIUS = 180;   // reach of the swirl, in px (60-400)
 const FOLLOW_THEME  = true;  // take the colors from the theme's palette
@@ -30,7 +30,7 @@ const MAX_LANES = 256;
 
 let canvas, ctx;
 let w = 0, h = 0, dpr = 1, laneCount = 1;
-let last = 0, reduced = false, dark = true, spawnAcc = 0, count = 0;
+let last = 0, reduced = false, dark = true, spawnAcc = 0, count = 0, column = null;
 const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
 
 // Packet pool
@@ -55,8 +55,12 @@ function rgba(c, a) {
 	return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a.toFixed(3) + ')';
 }
 
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+
 function calm(x) {
-	const d = Math.abs(x - w * 0.5) / BAND_WIDTH;
+	const d = Math.abs(x - colX()) / colHalf();
 	const s = Math.min(1, Math.max(0, (d - 0.55) / 0.7));
 	return 1 - CENTER_CALM * (1 - s * s * (3 - 2 * s));
 }
@@ -71,7 +75,7 @@ function applyTheme(t) {
 	build();
 }
 
-// Packet sprites (a bright head, a fading tail, a soft halo) and the lane-line gradient
+// Packet sprites (a bright head, a fading tail, a soft halo) and the lane-line gradient, rebuilt on theme, resize and layout
 function build() {
 	if (!ctx || !w) return;
 	for (let k = 0; k < TONES; k++) {
@@ -217,6 +221,7 @@ self.onmessage = (e) => {
 			canvas = d.canvas;
 			ctx = canvas.getContext('2d');
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			if (d.theme) applyTheme(d.theme);
 			size(d.width, d.height, d.dpr);
 			requestAnimationFrame(frame);
@@ -229,6 +234,10 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			build();
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

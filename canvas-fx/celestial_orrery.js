@@ -16,7 +16,7 @@ const CURSOR_BOOST  = 1.5;   // how much planets near the cursor speed up; fades
 const PULSE         = 0.8;   // strength of the pulse wave a tap sends out from the star (0-2)
 const GEARS         = true;  // gear teeth on two of the rings
 const CENTER_CALM   = 0.8;   // how much the background stars thin behind the chat column (0-1)
-const BAND_WIDTH    = 520;   // half-width of the calm band, in px (300-900)
+const BAND_WIDTH    = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const FOLLOW_THEME  = true;  // take ring, star and gem colors from the theme
 const BRASS_COLOR   = '#c9a45c';  // rings and gears when not following the theme
 const STAR_COLOR    = '#ffd890';  // central star
@@ -27,13 +27,13 @@ const GEMS = ['#e0475b', '#4a7fe0', '#3fbf7f', '#f0a93a', '#a46cf0', '#3fc7c0', 
 const DASH = [5, 7], NO_DASH = [];
 const F = (n) => new Float32Array(n);
 
-let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, reduced = false, dark = true, theme = null;
+let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, reduced = false, dark = true, theme = null, column = null;
 let ox = 0, oy = 0, R = 200, fade = 1, time = 0;
 let ringCache, coreSprite, coronaSprite, gemSprite = [], glowSprite = [], trailStyle = [], gearStyle = '', threadStyle = '', pulseStyle = '', starStyle = '', moonStyle = '';
 const orbit = F(MAX_P), angle = F(MAX_P), speed = F(MAX_P), size = F(MAX_P), px = F(MAX_P), py = F(MAX_P), moonA = F(MAX_P);
 const trail = F(MAX_P * MAX_TRAIL * 2), trailHead = new Uint8Array(MAX_P), trailFill = new Uint8Array(MAX_P);
 let trailClock = 0;
-const sx = F(MAX_STARS), sy = F(MAX_STARS), sa = F(MAX_STARS), sph = F(MAX_STARS);
+const sx = F(MAX_STARS), sy = F(MAX_STARS), sa = F(MAX_STARS), sb = F(MAX_STARS), sph = F(MAX_STARS);
 let stars = 0;
 const pr = F(MAX_PULSES), pstr = F(MAX_PULSES);
 let pulseHead = 0;
@@ -42,8 +42,12 @@ const mouse = { x: -10000, y: -10000, amount: 0 };
 function hex(c) { const n = parseInt(c.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
 function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
 function rgba(c, a) { return 'rgba(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ',' + a.toFixed(3) + ')'; }
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+
 function band(x) {
-	const t = Math.min(1, Math.max(0, (Math.abs(x - w / 2) / BAND_WIDTH - 0.55) / 0.7));
+	const t = Math.min(1, Math.max(0, (Math.abs(x - colX()) / colHalf() - 0.55) / 0.7));
 	return 1 - t * t * (3 - 2 * t);
 }
 
@@ -56,7 +60,7 @@ function radial(size, stops) {
 	return c;
 }
 
-// Colors and sprites, rebuilt on theme change and resize
+// Colors and sprites, rebuilt on theme change, resize and layout
 function build() {
 	const c = FOLLOW_THEME && theme && theme.colors ? theme.colors : null;
 	const brass = c ? mix(hex(c.muted), hex(BRASS_COLOR), 0.3) : hex(BRASS_COLOR);
@@ -105,10 +109,15 @@ function build() {
 	g.beginPath(); g.arc(ox, oy, R + 14, 0, TAU); g.stroke();
 }
 
-// Places the orrery so its outer ring stays clear of the chat column
+// Room between a star at x and the chat column's edge
+function room(x) { const cx = colX(), e = colHalf() - 36; return x >= cx ? x - (cx + e) : (cx - e) - x; }
+
+// Places the orrery so its outer ring stays clear of the chat column, on the far side when its own side is cramped
 function place() {
 	ox = w * ORRERY_X; oy = h * ORRERY_Y;
-	const clear = ox >= w / 2 ? ox - (w / 2 + 484) : (w / 2 - 484) - ox;
+	let clear = room(ox);
+	const flip = room(w * (1 - ORRERY_X));
+	if (clear - 16 < ORRERY_SIZE * Math.min(w, h) * 0.3 && flip > clear) { ox = w * (1 - ORRERY_X); clear = flip; }
 	R = Math.max(70, Math.min(ORRERY_SIZE * Math.min(w, h) * 0.5, clear - 16));
 	fade = clear - 16 >= 70 ? 1 : 0.6;
 	const n = Math.min(MAX_P, PLANETS);
@@ -122,6 +131,9 @@ function place() {
 	}
 }
 
+// Background stars thin behind the chat column, recomputed on resize and layout
+function thinStars() { for (let i = 0; i < stars; i++) sa[i] = sb[i] * (1 - CENTER_CALM * band(sx[i])); }
+
 function resize() {
 	canvas.width = Math.max(1, Math.round(w * dpr));
 	canvas.height = Math.max(1, Math.round(h * dpr));
@@ -130,9 +142,10 @@ function resize() {
 	stars = Math.min(MAX_STARS, Math.round(STAR_FIELD * Math.max(0.5, w * h / (1440 * 900))));
 	for (let i = 0; i < stars; i++) {
 		sx[i] = Math.random() * w; sy[i] = Math.random() * h;
-		sa[i] = (0.15 + Math.random() * 0.35) * (1 - CENTER_CALM * band(sx[i]));
+		sb[i] = 0.15 + Math.random() * 0.35;
 		sph[i] = Math.random() * TAU;
 	}
+	thinStars();
 	pstr.fill(0);
 	build();
 }
@@ -284,6 +297,7 @@ self.onmessage = (e) => {
 			ctx = canvas.getContext('2d');
 			w = d.width; h = d.height; dpr = Math.min(d.dpr || 1, 2);
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			theme = d.theme || null;
 			dark = !theme || theme.dark !== false;
 			resize();
@@ -300,6 +314,13 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			if (!canvas) break;
+			place();
+			thinStars();
+			build();
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

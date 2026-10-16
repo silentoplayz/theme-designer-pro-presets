@@ -16,7 +16,7 @@ const WATER_TINT    = 1;     // strength of the light glow from the surface (0-2
 const CAUSTICS      = 1;     // strength of the caustic light on the sand (0-2)
 const FLOOR_HEIGHT  = 0.15;  // height of the sandy floor, as a share of the screen (0.05-0.3)
 const CENTER_CALM   = 0.75;  // how much the scene fades behind the chat column (0-1)
-const BAND_WIDTH    = 520;   // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH    = 520;   // half-width of the calm band when the page has no chat column, in px (300-900)
 const FOLLOW_THEME  = true;  // take the colors from the theme's palette
 const WATER_COLOR   = '#3c96c8';  // surface glow and light shafts when not following the theme
 const JELLY_A       = '#5ee0f0';  // first jellyfish color
@@ -31,7 +31,7 @@ const SEGS = 12, TW = 160, TH = 80, RINGS = 4;
 
 let canvas, ctx;
 let w = 0, h = 0, dpr = 1, floorY = 0;
-let last = 0, T = 0, reduced = false, dark = true, theme = null, nextPulse = PULSE_EVERY * 0.5;
+let last = 0, T = 0, reduced = false, dark = true, theme = null, nextPulse = PULSE_EVERY * 0.5, column = null;
 const mouse = { x: -10000, y: -10000, amount: 0, target: 0 };
 
 // Pools
@@ -51,8 +51,15 @@ let causticField = null;
 function hexToRgb(hex) { const n = parseInt(String(hex).slice(1, 7), 16) || 0; return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
 function mix(a, b, t) { return [0, 1, 2].map((k) => Math.round(a[k] + (b[k] - a[k]) * t)); }
 function rgba(c, a) { return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + Math.max(0, Math.min(1, a)).toFixed(3) + ')'; }
-function side() { return Math.random() < 0.5 ? Math.random() * 0.3 : 0.7 + Math.random() * 0.3; } // outer thirds
-function band(x) { const d = Math.abs(x - w * 0.5) / BAND_WIDTH, s = Math.min(1, Math.max(0, (d - 0.5) / 0.8)); return 1 - s * s * (3 - 2 * s); }
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+
+// Room beside the chat column on one side, at most reach of the screen wide
+function room(right, reach) { const e = colX() + (right ? 1 : -1) * colHalf() * 0.5; return Math.max(40, Math.min(w * reach, right ? w - e : e)); }
+// A spot in the outer thirds, or nearer the edge when the chat column leaves less room
+function side() { return Math.random() < 0.5 ? Math.random() * room(false, 0.3) : w - Math.random() * room(true, 0.3); }
+function band(x) { const d = Math.abs(x - colX()) / colHalf(), s = Math.min(1, Math.max(0, (d - 0.5) / 0.8)); return 1 - s * s * (3 - 2 * s); }
 
 function palette() {
 	const c = FOLLOW_THEME && theme && theme.colors ? theme.colors : null;
@@ -93,6 +100,22 @@ function buildField() {
 	}
 }
 
+// The calm band's mask, rebuilt on resize, theme and layout
+function buildMask() {
+	calmMask = ctx.createLinearGradient(0, 0, w, 0);
+	for (let s = 0; s <= 40; s++) calmMask.addColorStop(s / 40, 'rgba(0,0,0,' + (CENTER_CALM * band((s / 40) * w)).toFixed(3) + ')');
+}
+
+// Light shafts and kelp stand beside the chat column, placed again when it moves
+function placeSides() {
+	const L = room(false, 0.31), R = room(true, 0.31);
+	for (let i = 0; i < NR; i++) rx[i] = side();
+	for (let i = 0; i < NK; i++) {
+		const f = (i + 0.5) / NK;
+		kx[i] = (f < 0.5 ? f * 2 * L : w - (1 - f) * 2 * R) + (Math.random() - 0.5) * 30;
+	}
+}
+
 function build() {
 	if (!ctx || !w) return;
 	const p = palette();
@@ -103,8 +126,7 @@ function build() {
 	tint.addColorStop(1, rgba(p.water, 0));
 	rayGrad = ctx.createLinearGradient(0, 0, 0, floorY);
 	rayGrad.addColorStop(0, rgba(p.ray, 0.5)); rayGrad.addColorStop(0.5, rgba(p.ray, 0.16)); rayGrad.addColorStop(1, rgba(p.ray, 0));
-	calmMask = ctx.createLinearGradient(0, 0, w, 0);
-	for (let s = 0; s <= 40; s++) calmMask.addColorStop(s / 40, 'rgba(0,0,0,' + (CENTER_CALM * band((s / 40) * w)).toFixed(3) + ')');
+	buildMask();
 	ringStyle = rgba(p.water, dark ? 0.6 : 0.5);
 	glows = [glowSprite(p.jelly[0]), glowSprite(p.jelly[1])];
 	C.bell = p.jelly.map((c) => rgba(c, dark ? 0.45 : 0.4));
@@ -135,7 +157,7 @@ function build() {
 function spawnJelly(i, anywhere) {
 	jdepth[i] = Math.random();
 	jsz[i] = 12 + (1 - jdepth[i]) * 16 + Math.random() * 8;
-	jx[i] = side() * w;
+	jx[i] = side();
 	jy[i] = anywhere ? h * (0.08 + Math.random() * 0.6) : floorY + jsz[i] * 3;
 	jvx[i] = 0;
 	jrise[i] = 1.5 + Math.random() * 3.5;
@@ -147,10 +169,9 @@ function spawnJelly(i, anywhere) {
 function seed() {
 	for (let i = 0; i < NJ; i++) spawnJelly(i, true);
 	for (let i = 0; i < NP; i++) { ppx[i] = Math.random() * w; ppy[i] = Math.random() * h; pps[i] = 0.05 + Math.random() * 0.15; ppd[i] = Math.random() * TAU; ppa[i] = 0.15 + Math.random() * 0.35; }
-	for (let i = 0; i < NR; i++) { rx[i] = side() * w; rw[i] = 30 + Math.random() * 70; rph[i] = Math.random() * TAU; ra[i] = 0.04 + Math.random() * 0.05; }
+	for (let i = 0; i < NR; i++) { rw[i] = 30 + Math.random() * 70; rph[i] = Math.random() * TAU; ra[i] = 0.04 + Math.random() * 0.05; }
+	placeSides();
 	for (let i = 0; i < NK; i++) {
-		const f = (i + 0.5) / NK;
-		kx[i] = (f < 0.5 ? f * 0.62 : 0.38 + f * 0.62) * w + (Math.random() - 0.5) * 30;
 		kh[i] = 0.18 + Math.random() * 0.22;
 		kw[i] = 2 + Math.random() * 2.5;
 		kph[i] = Math.random() * TAU;
@@ -275,7 +296,7 @@ function frame(now) {
 	// Sonar rings: rare and distant, or from a tap
 	if (PULSE_EVERY > 0 && !reduced && pace > 0) {
 		nextPulse -= dt;
-		if (nextPulse <= 0) { ring(side() * w, h * (0.3 + Math.random() * 0.3)); nextPulse = PULSE_EVERY * (0.6 + Math.random() * 0.8); }
+		if (nextPulse <= 0) { ring(side(), h * (0.3 + Math.random() * 0.3)); nextPulse = PULSE_EVERY * (0.6 + Math.random() * 0.8); }
 	}
 	ctx.strokeStyle = ringStyle;
 	ctx.lineWidth = 1.5;
@@ -349,6 +370,7 @@ self.onmessage = (e) => {
 			canvas = d.canvas;
 			ctx = canvas.getContext('2d');
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			theme = d.theme || null;
 			dark = !theme || theme.dark !== false;
 			size(d.width, d.height, d.dpr);
@@ -364,6 +386,12 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
+			if (!ctx || !w) break;
+			placeSides();
+			buildMask();
 			break;
 		case 'mousemove':
 			mouse.x = d.x;

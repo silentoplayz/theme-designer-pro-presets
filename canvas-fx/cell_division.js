@@ -14,7 +14,7 @@ const CURSOR_PUSH  = 1;      // how strongly cells shy from a moving cursor (0-3
 const MEMBRANE     = 1.6;    // membrane line width, in px (0.5-4)
 const GLOW         = 1;      // strength of the cytoplasm glow (0-2)
 const CENTER_CALM  = 0.8;    // how strongly cells avoid and fade over the chat column (0-1)
-const BAND_WIDTH   = 520;    // half-width of the calm band around the chat column, in px (300-900)
+const BAND_WIDTH   = 520;    // half-width of the calm band when the page has no chat column, in px (300-900)
 const FOLLOW_THEME = true;   // take the colors from the theme's palette
 const COLOR_A      = '#64c8b4'; // first lineage color when not following the theme
 const COLOR_B      = '#5aa0dc'; // second lineage color
@@ -26,14 +26,18 @@ const F = (n) => new Float32Array(n);
 const x = F(MAX), y = F(MAX), vx = F(MAX), vy = F(MAX), age = F(MAX), cyc = F(MAX), ang = F(MAX), ph = F(MAX);
 const div = F(MAX), die = F(MAX), born = F(MAX), alive = new Uint8Array(MAX), hue = new Uint8Array(MAX);
 
-let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, reduced = false, dark = true, clock = 0;
+let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, reduced = false, dark = true, clock = 0, column = null;
 const mouse = { x: -10000, y: -10000, amount: 0 };
 const col = { line: [], nuc: [], glow: [], plate: '' };
 
 function rgbOf(hex) { const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
 function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
 function css(c, a) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + (a === undefined ? 1 : a) + ')'; }
-function band(px) { const t = Math.min(1, Math.max(0, (Math.abs(px - w / 2) / BAND_WIDTH - 0.55) / 0.7)); return 1 - t * t * (3 - 2 * t); }
+// The chat column's center and the calm band's half-width
+function colX() { return column ? column.x : w * 0.5; }
+function colHalf() { return column ? column.width * 0.5 + 56 : BAND_WIDTH; }
+
+function band(px) { const t = Math.min(1, Math.max(0, (Math.abs(px - colX()) / colHalf() - 0.55) / 0.7)); return 1 - t * t * (3 - 2 * t); }
 
 // A soft cytoplasm disc with a brighter rim, drawn once per color
 function sprite(c) {
@@ -92,7 +96,10 @@ function add(px, py, a, c) {
 function seed() {
 	alive.fill(0);
 	for (let k = 0; k < Math.min(START_CELLS, CELL_COUNT, MAX); k++) {
-		const side = k % 2, px = side ? w - (0.04 + Math.random() * 0.26) * w : (0.04 + Math.random() * 0.26) * w;
+		// Outer thirds, or the room beside the chat column when it is narrower
+		const side = k % 2, edge = colX() + (side ? 1 : -1) * colHalf() * 0.55;
+		const reach = Math.max(0.08 * w, Math.min(0.3 * w, side ? w - edge : edge));
+		const px = side ? w - (0.04 * w + Math.random() * (reach - 0.04 * w)) : 0.04 * w + Math.random() * (reach - 0.04 * w);
 		add(px, h * (0.1 + Math.random() * 0.8), Math.random() * CYCLE, k % 3);
 	}
 }
@@ -126,7 +133,7 @@ function update(dt) {
 		vx[i] += (Math.random() - 0.5) * DRIFT * 40 * dt;
 		vy[i] += (Math.random() - 0.5) * DRIFT * 40 * dt;
 		const b = band(x[i]);
-		if (b > 0) vx[i] += (x[i] < w / 2 ? -1 : 1) * b * CENTER_CALM * 30 * dt;
+		if (b > 0) vx[i] += (x[i] < colX() ? -1 : 1) * b * CENTER_CALM * 30 * dt;
 		const dx = x[i] - mouse.x, dy = y[i] - mouse.y, d2 = dx * dx + dy * dy;
 		if (push > 0 && d2 < 32400 && d2 > 1) {
 			const d = Math.sqrt(d2), f = (1 - d / 180) * push * 160 * dt;
@@ -266,6 +273,7 @@ self.onmessage = (e) => {
 			h = d.height;
 			dpr = Math.min(d.dpr || 1, 2);
 			reduced = !!d.reducedMotion;
+			column = d.column || null;
 			applyTheme(d.theme);
 			size();
 			seed();
@@ -282,6 +290,9 @@ self.onmessage = (e) => {
 			break;
 		case 'motion':
 			reduced = !!d.reducedMotion;
+			break;
+		case 'layout':
+			column = d.column || null;
 			break;
 		case 'mousemove':
 			mouse.x = d.x;
