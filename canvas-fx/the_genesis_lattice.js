@@ -1,255 +1,257 @@
 /**
  * Title: The Genesis Lattice
- * Description: An emergent cellular automaton rendered as a breathing, 3D interconnected fabric.
+ * Description: Conway's Game of Life drawn as a breathing 3D mesh of glowing nodes and bonds in the theme's accent colors, dense at the screen's edges and faint over the chat column; the cursor sows new life and tilts the mesh.
  */
 
-const CONFIG = {
-    cellSize: 22,               // Scale of the grid
-    tickRate: 6,                // How many frames between logic updates (lower = faster evolution)
-    lerpSpeed: 0.12,            // How smoothly cells fade in and out
-    aliveColor:[0, 255, 180],  // RGB: Cyan/Mint
-    deadColor: [70, 0, 150],    // RGB: Deep Indigo/Purple
-    waveAmplitude: 15,          // Height of the 3D breathing effect
-    waveSpeed: 0.02,            // Speed of the breathing
-    density: 0.15               // Initial random life density
-};
+/* ────────── CONFIGURABLE VARIABLES ────────── */
+const CELL_SIZE    = 22;     // spacing of the lattice, in px (12-48)
+const TICK         = 0.12;   // seconds between generations (0.04-1)
+const FADE         = 7;      // how quickly nodes fade in and out (1-20)
+const DENSITY      = 0.3;    // share of cells alive at the start, at the edges (0.05-0.5)
+const WAVE         = 15;     // height of the breathing wave, in px (0-40)
+const WAVE_SPEED   = 1.2;    // speed of the breathing wave (0-4)
+const PARALLAX     = 1;      // how far the mesh tilts toward the cursor (0-3)
+const NODE_SIZE    = 0.32;   // node radius as a share of the spacing (0.1-0.5)
+const FABRIC       = 1;      // strength of the faint mesh of empty cells (0-2)
+const RESEED_EVERY = 5;      // seconds between fresh colonies in the outer thirds; 0 turns them off (0-120)
+const CENTER_CALM  = 0.8;    // how much the mesh thins and fades over the chat column (0-1)
+const BAND_WIDTH   = 520;    // half-width of the calm band around the chat column, in px (300-900)
+const FOLLOW_THEME = true;   // take the colors from the theme's palette
+const COLOR_ALIVE  = '#00ffb4'; // color of a living node when not following the theme
+const COLOR_DYING  = '#7a3cf0'; // color a node fades through as it dies
+/* ──────────────────────────────────────────── */
 
-let canvas, ctx, width, height;
-let cols, rows, totalCells;
-let grid = [];
-let nextGrid = [];
-let visuals = [];
-let drawPoints =[];
+const K = 5, TAU = Math.PI * 2;
+let cols = 0, rows = 0, total = 0, ox = 0, oy = 0;
+let grid = new Uint8Array(0), next = new Uint8Array(0), vis = new Float32Array(0), calmOf = new Float32Array(0);
+let dist = new Float32Array(0), ptX = new Float32Array(0), ptY = new Float32Array(0);
+let canvas, ctx, mask = null, w = 0, h = 0, dpr = 1, last = 0, reduced = false, dark = true, time = 0, acc = 0, reseed = 0;
+const mouse = { x: -10000, y: -10000, amount: 0, px: 0, py: 0 };
+const col = { node: [], bond: [], fabric: '' };
 
-let time = 0;
-let targetMouse = { x: -1000, y: -1000, active: false };
-let currentMouse = { x: 0, y: 0 };
-let ticks = 0;
+function rgbOf(hex) { const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
+function css(c) { return 'rgb(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ')'; }
+function band(x) { const t = Math.min(1, Math.max(0, (Math.abs(x - w / 2) / BAND_WIDTH - 0.55) / 0.7)); return 1 - t * t * (3 - 2 * t); }
+
+// K color steps from dying to alive, for nodes and for the bonds between them
+function applyTheme(t) {
+	if (t) dark = t.dark !== false;
+	const th = FOLLOW_THEME && t && t.colors ? t.colors : null;
+	let alive = rgbOf(th ? th.accent : COLOR_ALIVE), dying = rgbOf(th ? th.accent2 : COLOR_DYING);
+	const muted = rgbOf(th ? th.muted : dark ? '#7a7890' : '#6b7480');
+	if (!th && !dark) { alive = mix(alive, [20, 30, 40], 0.45); dying = mix(dying, [20, 30, 40], 0.3); }
+	for (let k = 0; k < K; k++) {
+		const c = mix(dying, alive, k / (K - 1));
+		col.node[k] = css(c);
+		col.bond[k] = css(mix(c, muted, 0.35));
+	}
+	col.fabric = css(mix(muted, alive, 0.3));
+}
+
+function size() {
+	canvas.width = Math.max(1, Math.round(w * dpr));
+	canvas.height = Math.max(1, Math.round(h * dpr));
+	ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+	// The lattice covers the screen plus at most one cell past each edge; life wraps around it
+	cols = Math.ceil(w / CELL_SIZE) + 2;
+	rows = Math.ceil(h / CELL_SIZE) + 2;
+	total = cols * rows;
+	ox = (w - (cols - 1) * CELL_SIZE) / 2;
+	oy = (h - (rows - 1) * CELL_SIZE) / 2;
+	grid = new Uint8Array(total);
+	next = new Uint8Array(total);
+	vis = new Float32Array(total);
+	calmOf = new Float32Array(total);
+	dist = new Float32Array(total);
+	ptX = new Float32Array(total);
+	ptY = new Float32Array(total);
+	mask = ctx.createLinearGradient(0, 0, w, 0);
+	for (let i = 0; i <= 24; i++) mask.addColorStop(i / 24, 'rgba(0,0,0,' + (CENTER_CALM * band((w * i) / 24)).toFixed(3) + ')');
+	for (let y = 0; y < rows; y++) {
+		for (let x = 0; x < cols; x++) {
+			const i = y * cols + x, bx = ox + x * CELL_SIZE, by = oy + y * CELL_SIZE;
+			calmOf[i] = 1 - CENTER_CALM * band(bx);
+			dist[i] = Math.hypot(bx - w / 2, by - h / 2) * 0.008;
+			grid[i] = vis[i] = Math.random() < DENSITY * (0.25 + 0.75 * calmOf[i]) ? 1 : 0;
+		}
+	}
+}
+
+function burst(cx, cy, r, p) {
+	for (let dy = -r; dy <= r; dy++) {
+		for (let dx = -r; dx <= r; dx++) {
+			if (Math.random() >= p) continue;
+			grid[((cy + dy + rows) % rows) * cols + ((cx + dx + cols) % cols)] = 1;
+		}
+	}
+}
+
+function outerBurst() {
+	const e = Math.floor(Math.random() * cols * 0.28);
+	burst(Math.random() < 0.5 ? e + 2 : cols - 3 - e, Math.floor(Math.random() * rows), 6, 0.4);
+}
+
+// One generation: birth on 3, survival on 2 or 3; the column thins a little each step
+function step() {
+	let pop = 0;
+	for (let y = 0; y < rows; y++) {
+		const up = (y ? y - 1 : rows - 1) * cols, mid = y * cols, dn = (y < rows - 1 ? y + 1 : 0) * cols;
+		for (let x = 0; x < cols; x++) {
+			const l = x ? x - 1 : cols - 1, r = x < cols - 1 ? x + 1 : 0;
+			const n = grid[up + l] + grid[up + x] + grid[up + r] + grid[mid + l] + grid[mid + r] + grid[dn + l] + grid[dn + x] + grid[dn + r];
+			const i = mid + x;
+			let v = n === 3 || (n === 2 && grid[i]) ? 1 : 0;
+			if (v && Math.random() < (1 - calmOf[i]) * 0.08) v = 0;
+			next[i] = v;
+			pop += v;
+		}
+	}
+	const t = grid;
+	grid = next;
+	next = t;
+	if (pop < total * 0.05) outerBurst();
+}
+
+// The cell under a screen point, undoing the tilt and the wave
+function cellAt(sx, sy) {
+	let gx = Math.round((sx - ox) / CELL_SIZE), gy = Math.round((sy - oy) / CELL_SIZE);
+	if (gx < 0 || gy < 0 || gx >= cols || gy >= rows) return -1;
+	const i = gy * cols + gx;
+	gx = Math.round((sx - (ptX[i] - (ox + gx * CELL_SIZE)) - ox) / CELL_SIZE);
+	gy = Math.round((sy - (ptY[i] - (oy + gy * CELL_SIZE)) - oy) / CELL_SIZE);
+	return gx < 0 || gy < 0 || gx >= cols || gy >= rows ? -1 : gy * cols + gx;
+}
+
+function frame(now) {
+	requestAnimationFrame(frame);
+	const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
+	last = now;
+	const sdt = dt * (reduced ? 0.2 : 1);
+	time = (time + sdt * WAVE_SPEED) % (TAU * 100);
+	mouse.amount = Math.max(0, mouse.amount - dt * 0.5);
+	// The tilt follows a moving cursor and settles back to level once it rests
+	const tx = mouse.amount > 0 ? mouse.x - w / 2 : 0, ty = mouse.amount > 0 ? mouse.y - h / 2 : 0, ease = Math.min(1, dt * (mouse.amount > 0 ? 3 : 0.8));
+	mouse.px += (tx - mouse.px) * ease;
+	mouse.py += (ty - mouse.py) * ease;
+
+	acc += sdt;
+	if (acc >= TICK) {
+		acc = Math.min(acc - TICK, TICK);
+		if (mouse.amount > 0.5 && !reduced) {
+			const c = cellAt(mouse.x, mouse.y);
+			if (c >= 0) { grid[c] = 1; grid[(c + 1) % total] = Math.random() < 0.5 ? 1 : 0; grid[(c + cols) % total] = Math.random() < 0.5 ? 1 : 0; }
+		}
+		step();
+	}
+	if (RESEED_EVERY > 0 && (reseed += sdt) >= RESEED_EVERY) { reseed = 0; outerBurst(); }
+
+	const f = 1 - Math.exp(-FADE * dt * (reduced ? 0.5 : 1)), par = 0.08 * PARALLAX;
+	for (let y = 0; y < rows; y++) {
+		const tiltX = mouse.px * par * ((y - rows / 2) / rows);
+		for (let x = 0; x < cols; x++) {
+			const i = y * cols + x;
+			vis[i] += (grid[i] - vis[i]) * f;
+			ptX[i] = ox + x * CELL_SIZE + tiltX;
+			ptY[i] = oy + y * CELL_SIZE + Math.sin(dist[i] - time) * WAVE + mouse.py * par * ((x - cols / 2) / cols);
+		}
+	}
+
+	ctx.clearRect(0, 0, w, h);
+	const la = dark ? 1 : 0.75;
+	// The empty lattice as a faint breathing fabric, erased over the column before life is drawn
+	if (FABRIC > 0) {
+		ctx.beginPath();
+		for (let y = 0; y < rows; y++) {
+			ctx.moveTo(ptX[y * cols], ptY[y * cols]);
+			for (let x = 1; x < cols; x++) ctx.lineTo(ptX[y * cols + x], ptY[y * cols + x]);
+		}
+		for (let x = 0; x < cols; x++) {
+			ctx.moveTo(ptX[x], ptY[x]);
+			for (let y = 1; y < rows; y++) ctx.lineTo(ptX[y * cols + x], ptY[y * cols + x]);
+		}
+		ctx.strokeStyle = col.fabric;
+		ctx.lineWidth = 1;
+		ctx.globalAlpha = Math.min(1, FABRIC * (dark ? 0.09 : 0.08));
+		ctx.stroke();
+		ctx.globalCompositeOperation = 'destination-out';
+		ctx.globalAlpha = 1;
+		ctx.fillStyle = mask;
+		ctx.fillRect(0, 0, w, h);
+		ctx.globalCompositeOperation = 'source-over';
+	}
+	// Bonds, one path per color step: right, down and diagonal neighbors that are both alive
+	ctx.lineWidth = 1;
+	for (let k = 0; k < K; k++) {
+		ctx.beginPath();
+		for (let y = 0; y < rows - 1; y++) {
+			for (let x = 0; x < cols - 1; x++) {
+				const i = y * cols + x, v = vis[i] * calmOf[i];
+				if (vis[i] < 0.05 || Math.min(K - 1, (v * K) | 0) !== k) continue;
+				const r = i + 1, b = i + cols, d = b + 1;
+				if (vis[r] > 0.05) { ctx.moveTo(ptX[i], ptY[i]); ctx.lineTo(ptX[r], ptY[r]); }
+				if (vis[b] > 0.05) { ctx.moveTo(ptX[i], ptY[i]); ctx.lineTo(ptX[b], ptY[b]); }
+				if (vis[d] > 0.05) { ctx.moveTo(ptX[i], ptY[i]); ctx.lineTo(ptX[d], ptY[d]); }
+			}
+		}
+		ctx.strokeStyle = col.bond[k];
+		ctx.globalAlpha = ((k + 0.5) / K) * 0.32 * la;
+		ctx.stroke();
+	}
+	// Nodes on top, one path per color step
+	const nr = CELL_SIZE * NODE_SIZE;
+	for (let k = 0; k < K; k++) {
+		ctx.beginPath();
+		for (let i = 0; i < total; i++) {
+			const v = vis[i];
+			if (v < 0.05 || Math.min(K - 1, (v * calmOf[i] * K) | 0) !== k) continue;
+			const r = Math.max(0.6, v * nr * (0.55 + 0.45 * calmOf[i]));
+			ctx.moveTo(ptX[i] + r, ptY[i]);
+			ctx.arc(ptX[i], ptY[i], r, 0, TAU);
+		}
+		ctx.fillStyle = col.node[k];
+		ctx.globalAlpha = (0.15 + 0.75 * ((k + 0.5) / K)) * la;
+		ctx.fill();
+	}
+	ctx.globalAlpha = 1;
+}
 
 self.onmessage = (e) => {
-    switch (e.data.type) {
-        case 'init':
-            canvas = e.data.canvas;
-            ctx = canvas.getContext('2d');
-            resize(e.data.width, e.data.height);
-            // Default center mouse
-            targetMouse.x = width / 2; targetMouse.y = height / 2;
-            currentMouse.x = width / 2; currentMouse.y = height / 2;
-            startAnimation();
-            break;
-        case 'resize': resize(e.data.width, e.data.height); break;
-        case 'mousemove': 
-            targetMouse.x = e.data.x; targetMouse.y = e.data.y; 
-            targetMouse.active = true;
-            break;
-    }
+	const d = e.data;
+	switch (d.type) {
+		case 'init':
+			canvas = d.canvas;
+			ctx = canvas.getContext('2d');
+			w = d.width;
+			h = d.height;
+			dpr = Math.min(d.dpr || 1, 2);
+			reduced = !!d.reducedMotion;
+			applyTheme(d.theme);
+			size();
+			requestAnimationFrame(frame);
+			break;
+		case 'resize':
+			w = d.width;
+			h = d.height;
+			dpr = Math.min(d.dpr || 1, 2);
+			if (canvas) size();
+			break;
+		case 'theme':
+			applyTheme(d);
+			break;
+		case 'motion':
+			reduced = !!d.reducedMotion;
+			break;
+		case 'mousemove':
+			mouse.x = d.x;
+			mouse.y = d.y;
+			mouse.amount = 1;
+			break;
+		case 'mousedown': {
+			// A tap sows a small colony where it lands
+			const c = cellAt(d.x, d.y);
+			if (c >= 0) burst(c % cols, (c / cols) | 0, 3, 0.45);
+			break;
+		}
+	}
 };
-
-function resize(w, h) {
-    width = w; height = h;
-    if (canvas) { canvas.width = width; canvas.height = height; }
-    
-    // Add extra columns/rows to bleed off the edges of the screen
-    cols = Math.floor(width / CONFIG.cellSize) + 4;
-    rows = Math.floor(height / CONFIG.cellSize) + 4;
-    totalCells = cols * rows;
-    
-    initGrid();
-}
-
-function initGrid() {
-    grid = new Uint8Array(totalCells);
-    nextGrid = new Uint8Array(totalCells);
-    visuals = new Float32Array(totalCells);
-    drawPoints = new Array(totalCells);
-
-    // Seed initial random life
-    for (let i = 0; i < totalCells; i++) {
-        let isAlive = Math.random() < CONFIG.density ? 1 : 0;
-        grid[i] = isAlive;
-        visuals[i] = isAlive; // Start visuals matched so it doesn't all fade in at once
-    }
-}
-
-function seedBurst(centerX, centerY, radius, probability) {
-    for (let dy = -radius; dy <= radius; dy++) {
-        for (let dx = -radius; dx <= radius; dx++) {
-            if (Math.random() < probability) {
-                let nx = (centerX + dx + cols) % cols;
-                let ny = (centerY + dy + rows) % rows;
-                grid[ny * cols + nx] = 1;
-            }
-        }
-    }
-}
-
-function updateLogic() {
-    let population = 0;
-
-    for (let y = 0; y < rows; y++) {
-        for (let x = 0; x < cols; x++) {
-            let idx = y * cols + x;
-            let alive = grid[idx];
-            let neighbors = 0;
-
-            // Count 8 surrounding neighbors with screen wrapping
-            for (let dy = -1; dy <= 1; dy++) {
-                for (let dx = -1; dx <= 1; dx++) {
-                    if (dx === 0 && dy === 0) continue;
-                    let nx = (x + dx + cols) % cols;
-                    let ny = (y + dy + rows) % rows;
-                    neighbors += grid[ny * cols + nx];
-                }
-            }
-
-            // Conway's Rules: Birth on 3, Survive on 2 or 3
-            if (alive && (neighbors === 2 || neighbors === 3)) {
-                nextGrid[idx] = 1;
-                population++;
-            } else if (!alive && neighbors === 3) {
-                nextGrid[idx] = 1;
-                population++;
-            } else {
-                nextGrid[idx] = 0;
-            }
-        }
-    }
-
-    // Swap buffers efficiently
-    let temp = grid;
-    grid = nextGrid;
-    nextGrid = temp;
-
-    // Failsafe: If the ecosystem dies out, seed a new colony
-    if (population < totalCells * 0.02) {
-        seedBurst(Math.floor(Math.random() * cols), Math.floor(Math.random() * rows), 6, 0.4);
-    }
-}
-
-function startAnimation() {
-    function render() {
-        if (!ctx) return;
-        ctx.clearRect(0, 0, width, height); // Native transparency safe
-
-        time += CONFIG.waveSpeed;
-        ticks++;
-
-        // Smooth mouse for parallax
-        if (targetMouse.active) {
-            currentMouse.x += (targetMouse.x - currentMouse.x) * 0.08;
-            currentMouse.y += (targetMouse.y - currentMouse.y) * 0.08;
-        }
-
-        // 1. UPDATE LOGIC ENGINE
-        if (ticks % CONFIG.tickRate === 0) {
-            updateLogic();
-        }
-
-        // Interactive Mouse Seeding
-        if (targetMouse.active) {
-            let offsetX = (width - cols * CONFIG.cellSize) / 2;
-            let offsetY = (height - rows * CONFIG.cellSize) / 2;
-            let gridX = Math.floor((targetMouse.x - offsetX) / CONFIG.cellSize);
-            let gridY = Math.floor((targetMouse.y - offsetY) / CONFIG.cellSize);
-            
-            if (gridX >= 0 && gridX < cols && gridY >= 0 && gridY < rows) {
-                if (Math.random() > 0.5) grid[gridY * cols + gridX] = 1; // Inject life
-            }
-        }
-
-        let cx = width / 2;
-        let cy = height / 2;
-
-        // 2. PRE-COMPUTE 3D DISPLACEMENT POINTS & SMOOTH VISUALS
-        for (let y = 0; y < rows; y++) {
-            for (let x = 0; x < cols; x++) {
-                let idx = y * cols + x;
-                
-                // Lerp the visual scale towards the actual logic state
-                visuals[idx] += (grid[idx] - visuals[idx]) * CONFIG.lerpSpeed;
-                
-                // Base 2D position (Centered)
-                let px = x * CONFIG.cellSize + (width - cols * CONFIG.cellSize) / 2;
-                let py = y * CONFIG.cellSize + (height - rows * CONFIG.cellSize) / 2;
-
-                // 3D Radial Sine Wave Displacement
-                let dist = Math.sqrt(Math.pow(px - cx, 2) + Math.pow(py - cy, 2));
-                let waveZ = Math.sin(dist * 0.008 - time) * CONFIG.waveAmplitude;
-
-                // Mouse Parallax Perspective Shift
-                let pXOffset = (currentMouse.x - cx) * 0.08 * ((y - rows/2) / rows);
-                let pYOffset = (currentMouse.y - cy) * 0.08 * ((x - cols/2) / cols);
-
-                drawPoints[idx] = { 
-                    x: px + pXOffset, 
-                    y: py + waveZ + pYOffset,
-                    v: visuals[idx] 
-                };
-            }
-        }
-
-        ctx.lineWidth = 1.2;
-
-        // 3. DRAW STRUCTURAL BONDS (Underneath)
-        for (let y = 0; y < rows - 1; y++) {
-            for (let x = 0; x < cols - 1; x++) {
-                let idx = y * cols + x;
-                let p1 = drawPoints[idx];
-
-                if (p1.v > 0.05) {
-                    let rIdx = y * cols + (x + 1);       // Right neighbor
-                    let bIdx = (y + 1) * cols + x;       // Bottom neighbor
-                    let drIdx = (y + 1) * cols + (x + 1); // Bottom-Right Diagonal neighbor
-                    
-                    let pR = drawPoints[rIdx];
-                    let pB = drawPoints[bIdx];
-                    let pDR = drawPoints[drIdx];
-
-                    ctx.beginPath();
-                    let drawn = false;
-
-                    if (pR.v > 0.05) { ctx.moveTo(p1.x, p1.y); ctx.lineTo(pR.x, pR.y); drawn = true; }
-                    if (pB.v > 0.05) { ctx.moveTo(p1.x, p1.y); ctx.lineTo(pB.x, pB.y); drawn = true; }
-                    // Add diagonal structural bonds for a "webbed" look
-                    if (pDR.v > 0.05) { ctx.moveTo(p1.x, p1.y); ctx.lineTo(pDR.x, pDR.y); drawn = true; }
-
-                    if (drawn) {
-                        ctx.strokeStyle = `rgba(${CONFIG.aliveColor.join(',')}, ${p1.v * 0.3})`;
-                        ctx.stroke();
-                    }
-                }
-            }
-        }
-
-        // 4. DRAW LIVING NODES (On top)
-        for (let i = 0; i < totalCells; i++) {
-            let p = drawPoints[i];
-            if (p.v > 0.05) {
-                // Color interpolation: Alive = Cyan, Dying = Purple
-                let r = Math.floor(CONFIG.deadColor[0] + (CONFIG.aliveColor[0] - CONFIG.deadColor[0]) * p.v);
-                let g = Math.floor(CONFIG.deadColor[1] + (CONFIG.aliveColor[1] - CONFIG.deadColor[1]) * p.v);
-                let b = Math.floor(CONFIG.deadColor[2] + (CONFIG.aliveColor[2] - CONFIG.deadColor[2]) * p.v);
-
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.v * (CONFIG.cellSize * 0.35), 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${p.v * 0.9})`;
-                ctx.fill();
-            }
-        }
-
-        requestAnimationFrame(render);
-    }
-    requestAnimationFrame(render);
-}
-
-// Reset mouse tracking if user leaves canvas area
-let mouseTimeout;
-self.addEventListener('message', (e) => {
-    if (e.data.type === 'mousemove') {
-        clearTimeout(mouseTimeout);
-        mouseTimeout = setTimeout(() => { targetMouse.active = false; }, 2000);
-    }
-});
-
-// Heartbeat — prevents host from terminating idle workers
-setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);

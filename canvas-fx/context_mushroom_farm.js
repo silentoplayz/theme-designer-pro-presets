@@ -1,509 +1,386 @@
 /**
  * Title: Context Mushroom Farm
- * Description: A bioluminescent mushroom grow room that sprouts and fills as your
- *   chat conversation grows. Uses the 'context' message type to track token usage.
- *   Stages: mycelium threads → tiny pins → growing caps → full clusters →
- *   bioluminescent glow → spore release at capacity. Move your mouse to stir
- *   floating spores. Includes ambient fog, moisture particles, and glowing fungi.
- *
- *   Context-aware: requires the Theme Designer Pro context data channel.
+ * Description: A grow bed along the bottom of the screen where mycelium spreads, pins rise and glowing caps open as the chat's context fills, with spores that drift toward the cursor and a token badge in the corner.
  */
 
-/* ---------- CONFIGURABLE VARIABLES ---------- */
-const MAX_TOKENS         = 128000;   // your model's context limit
-const GROWTH_SPEED       = 1;        // multiplier for testing (set to 10–50 for fast preview)
-const MUSHROOM_CLUSTERS  = 12;       // number of mushroom clusters
-const SPORE_COUNT        = 60;       // ambient spore particles
-const FOG_LAYERS         = 3;        // fog layers (more = thicker atmosphere)
-const BIOLUM_HUE         = 165;      // bioluminescent hue (165 = cyan-teal)
-const BIOLUM_HUE_ALT     = 280;      // alt glow hue (280 = purple)
-const MOISTURE_COUNT     = 40;       // tiny moisture droplets
-/* --------------------------------------------- */
+/* ────────── CONFIGURABLE VARIABLES ────────── */
+const MAX_TOKENS    = 128000; // your model's context limit, in tokens (4000-2000000)
+const GROWTH_SPEED  = 1;      // multiplies the fill, for previewing growth (1-50)
+const PREVIEW_RATIO = 0;      // fill shown until the first chat context arrives (0-1)
+const CLUSTERS      = 12;     // mushroom clusters along the bed (4-24)
+const GROW_HEIGHT   = 0.18;   // share of the screen's height the farm may fill (0.1-0.25)
+const SPORES        = 60;     // spores in the air at full growth (0-150)
+const MOTION        = 1;      // speed of sway and spores; 0 holds still (0-2)
+const CURSOR_PULL   = 1;      // how strongly spores drift toward the cursor (0-3)
+const CENTER_CALM   = 0.7;    // how much the farm shrinks and fades behind the chat column (0-1)
+const BAND_WIDTH    = 520;    // half-width of the calm band around the chat column, in px (300-900)
+const SHOW_BADGE    = true;   // show the token count in the bottom-right corner
+const FOLLOW_THEME  = true;   // take the colors from the theme's palette
+const COLOR_GLOW    = '#3fe0c0'; // first glowing cap color when not following the theme
+const COLOR_GLOW_2  = '#b06cf0'; // second glowing cap color
+const COLOR_GLOW_3  = '#6fa8ff'; // third glowing cap color
+const COLOR_CAP     = '#b07a52'; // plain cap color
+const COLOR_STEM    = '#d8cfbf'; // stem and mycelium color
+/* ──────────────────────────────────────────── */
 
-let canvas, ctx, w, h;
-let mouse = { x: -9999, y: -9999 };
-let contextRatio = 0;
-let targetRatio = 0;
-let estimatedTokens = 0;
-let time = 0;
-let clusters = [];
-let spores = [];
-let moisture = [];
+// Stages by context fill: 0 a seeded bed with resting mycelium and glowing pins;
+// 0-0.25 mycelium spreads; 0.05-1 stems rise cluster by cluster; 0.3-0.8 caps open;
+// 0.5-1 caps glow; 0.55-1 spores fill the air; 0.9-1 caps droop, the context is nearly full.
 
-setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);
+const MAXM = 120, MAXT = 240, MAXS = 200;
+const F = (n) => new Float32Array(n);
+const mX = F(MAXM), mY = F(MAXM), mH = F(MAXM), mW = F(MAXM), mR = F(MAXM), mLean = F(MAXM), mPh = F(MAXM), mDelay = F(MAXM), mA = F(MAXM);
+const mCl = new Uint8Array(MAXM), mCol = new Uint8Array(MAXM), mRound = new Uint8Array(MAXM), mPin = new Uint8Array(MAXM);
+const cX = F(24), cY = F(24), cStart = F(24), cA = F(24);
+const tCl = new Uint8Array(MAXT), tDX = F(MAXT), tDY = F(MAXT), tPh = F(MAXT);
+const sX = F(MAXS), sY = F(MAXS), sVX = F(MAXS), sVY = F(MAXS), sLife = F(MAXS), sMax = F(MAXS), sSize = F(MAXS), sCol = new Uint8Array(MAXS);
 
-// Seeded random for consistent mushroom placement
-function seededRandom(seed) {
-	let s = seed;
-	return function() {
-		s = (s * 16807 + 0) % 2147483647;
-		return (s - 1) / 2147483646;
-	};
+let canvas, ctx, w = 0, h = 0, dpr = 1, last = 0, reduced = false, dark = true;
+let mCount = 0, tCount = 0, nCl = 0, groundY = 0, seed = 1, time = 0, emitAcc = 0;
+let ratio = 0, target = 0, tokens = 0, shown = -1, badgeText = '', live = false;
+let bedPath = null, bedFill = null;
+const mouse = { x: -10000, y: -10000, amount: 0 };
+const col = { glow: [], cap: [], hi: [], shade: [], spore: [], bed: [0, 0, 0] };
+
+function rgbOf(hex) { const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
+function css(c, a) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + (a === undefined ? 1 : a) + ')'; }
+function rand() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+// 1 over the chat column, falling smoothly to 0 beyond the calm band
+function band(x) { const t = clamp01((Math.abs(x - w / 2) / BAND_WIDTH - 0.55) / 0.7); return 1 - t * t * (3 - 2 * t); }
+function glowMode(on) { ctx.globalCompositeOperation = on && dark ? 'lighter' : 'source-over'; }
+
+function sprite(c) {
+	const s = new OffscreenCanvas(64, 64), g = s.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+	gr.addColorStop(0, css(c, 1));
+	gr.addColorStop(0.3, css(c, 0.4));
+	gr.addColorStop(1, css(c, 0));
+	g.fillStyle = gr;
+	g.fillRect(0, 0, 64, 64);
+	return s;
 }
 
-function initClusters() {
-	clusters = [];
-	const rng = seededRandom(42);
-	const groundY = h * 0.82;
+function applyTheme(t) {
+	if (t) dark = t.dark !== false;
+	const th = FOLLOW_THEME && t && t.colors ? t.colors : null;
+	const bg = rgbOf(th ? th.background : dark ? '#16141f' : '#f4f6f9');
+	const text = rgbOf(th ? th.text : dark ? '#ece8f2' : '#1c222b');
+	const muted = rgbOf(th ? th.muted : dark ? '#8a8494' : '#6b7480');
+	let g = th ? [th.accent, th.accent2, th.accent3].map(rgbOf) : [COLOR_GLOW, COLOR_GLOW_2, COLOR_GLOW_3].map(rgbOf);
+	if (!th && !dark) g = g.map((c) => mix(c, text, 0.35));
+	const caps = [g[0], g[1], g[2], th ? mix(muted, g[1], 0.3) : rgbOf(COLOR_CAP)];
+	for (let i = 0; i < 4; i++) {
+		const c = caps[i];
+		col.cap[i] = css(dark ? mix(c, bg, 0.2) : c);
+		col.hi[i] = css(mix(c, dark ? text : bg, 0.5));
+		col.shade[i] = css(mix(c, dark ? bg : text, dark ? 0.6 : 0.4));
+		col.glow[i] = sprite(i < 3 ? (dark ? mix(c, text, 0.15) : c) : muted);
+		if (i < 3) col.spore[i] = sprite(dark ? mix(c, text, 0.35) : c);
+	}
+	const stem = th ? muted : rgbOf(COLOR_STEM);
+	col.stem = css(th ? mix(stem, text, dark ? 0.55 : 0.25) : dark ? stem : mix(stem, text, 0.55));
+	col.spot = css(dark ? text : bg);
+	col.bed = muted;
+	col.panel = css(rgbOf(th ? th.surface : dark ? '#22202f' : '#e9edf2'), dark ? 0.78 : 0.85);
+	col.text = css(text);
+	col.label = css(muted);
+	col.track = css(muted, 0.25);
+	col.bar = css(g[0]);
+	col.warn = dark ? '#facc15' : '#b45309';
+	col.alert = dark ? '#f87171' : '#dc2626';
+	if (ctx && groundY) buildBed();
+}
 
-	for (let i = 0; i < MUSHROOM_CLUSTERS; i++) {
-		const clusterX = w * 0.08 + rng() * w * 0.84;
-		const mushroomCount = 2 + Math.floor(rng() * 4);
-		const isBiolum = rng() > 0.5;
-		const hue = isBiolum ? (rng() > 0.5 ? BIOLUM_HUE : BIOLUM_HUE_ALT) : 30;
-		const growStart = rng() * 0.3; // stagger growth start
-		const mushrooms = [];
+function buildBed() {
+	bedPath = new Path2D();
+	bedPath.moveTo(0, h);
+	for (let x = 0; x <= w + 40; x += 40) bedPath.lineTo(x, groundY - 4 + Math.sin(x * 0.013) * 3 + Math.sin(x * 0.041) * 1.5);
+	bedPath.lineTo(w, h);
+	const a = dark ? 0.22 : 0.16;
+	bedFill = ctx.createLinearGradient(0, 0, w, 0);
+	bedFill.addColorStop(0, css(col.bed, a));
+	bedFill.addColorStop(0.5, css(col.bed, a * (1 - CENTER_CALM * 0.6)));
+	bedFill.addColorStop(1, css(col.bed, a));
+}
 
-		for (let j = 0; j < mushroomCount; j++) {
-			mushrooms.push({
-				offsetX: (rng() - 0.5) * 60,
-				maxHeight: 25 + rng() * 80,
-				stemWidth: 3 + rng() * 6,
-				capRadius: 10 + rng() * 25,
-				capStyle: rng() > 0.6 ? 'round' : 'flat',
-				lean: (rng() - 0.5) * 0.3,
-				hueShift: (rng() - 0.5) * 20,
-				phase: rng() * Math.PI * 2,
-				growDelay: rng() * 0.15
-			});
+function build() {
+	seed = 42;
+	groundY = h - Math.max(14, Math.min(30, h * 0.032));
+	const topLimit = h * (1 - GROW_HEIGHT), k = Math.max(0.7, Math.min(1.2, h / 900));
+	const right = w * 0.97 - (SHOW_BADGE ? 170 : 0), mid = w * 0.5, half = Math.min(mid - w * 0.03, right - mid);
+	nCl = Math.min(24, CLUSTERS);
+	mCount = tCount = 0;
+	for (let i = 0; i < nCl; i++) {
+		// Even spacing with jitter, pushed toward the outer thirds
+		const s = ((i + 0.2 + rand() * 0.6) / nCl) * 2 - 1;
+		const x = mid + Math.sign(s) * Math.pow(Math.abs(s), 0.75) * (s < 0 ? mid - w * 0.03 : half);
+		const b = band(x), scale = 1 - 0.5 * CENTER_CALM * b;
+		cX[i] = x;
+		cY[i] = groundY + 1 + rand() * 6;
+		cStart[i] = rand() * 0.3;
+		cA[i] = 1 - CENTER_CALM * b;
+		const c = rand() > 0.35 ? Math.floor(rand() * 3) : 3, n = 2 + Math.floor(rand() * 4);
+		for (let j = 0; j < n && mCount < MAXM; j++, mCount++) {
+			const r = (8 + rand() * 15) * scale * k;
+			mX[mCount] = x + (rand() - 0.5) * 56 * scale;
+			mY[mCount] = cY[i] + (rand() - 0.5) * 4;
+			mR[mCount] = r;
+			mH[mCount] = Math.max(8, groundY - topLimit - r * 0.7) * (0.3 + rand() * 0.7) * scale;
+			mW[mCount] = (2.5 + rand() * 4.5) * scale * k;
+			mRound[mCount] = rand() > 0.45 ? 1 : 0;
+			mLean[mCount] = (rand() - 0.5) * 0.3;
+			mPh[mCount] = rand() * 6.283;
+			mDelay[mCount] = j === 0 ? 0 : rand() * 0.25;
+			mA[mCount] = cA[i];
+			mCl[mCount] = i;
+			mCol[mCount] = c;
+			mPin[mCount] = j < 3 ? 3 - j : 0;
 		}
+		const nt = 5 + Math.floor(rand() * 6);
+		for (let j = 0; j < nt && tCount < MAXT; j++, tCount++) {
+			const an = -0.25 + rand() * 3.64, l = (18 + rand() * 40) * scale;
+			tCl[tCount] = i;
+			tDX[tCount] = Math.cos(an) * l;
+			tDY[tCount] = Math.sin(an) * l * 0.3;
+			tPh[tCount] = rand() * 6.283;
+		}
+	}
+	sLife.fill(0);
+	buildBed();
+}
 
-		clusters.push({
-			x: clusterX,
-			y: groundY + (rng() - 0.5) * 10,
-			mushrooms,
-			isBiolum,
-			hue,
-			growStart,
-			myceliumSeeds: Array.from({ length: 5 + Math.floor(rng() * 6) }, () => ({
-				angle: rng() * Math.PI * 2,
-				length: 15 + rng() * 40,
-				branches: Math.floor(rng() * 3),
-				phase: rng() * Math.PI
-			}))
-		});
+function size() {
+	canvas.width = Math.max(1, Math.round(w * dpr));
+	canvas.height = Math.max(1, Math.round(h * dpr));
+	ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+	build();
+}
+
+// Eased growth of one mushroom; the first three of each cluster rest as pins at zero
+function growth(m) {
+	const c = mCl[m], g = clamp01((clamp01((ratio - cStart[c]) / (1 - cStart[c])) - mDelay[m]) / (1 - mDelay[m]));
+	return Math.max(mPin[m] * 0.06, 1 - (1 - g) * (1 - g));
+}
+
+function spawn(m, burst) {
+	const g = growth(m);
+	if (g <= 0) return;
+	for (let i = 0; i < MAXS; i++) {
+		if (sLife[i] > 0) continue;
+		sX[i] = mX[m] + mLean[m] * mH[m] * g + (Math.random() - 0.5) * mR[m];
+		sY[i] = mY[m] - mH[m] * g;
+		sVX[i] = (Math.random() - 0.5) * (burst ? 40 : 8);
+		sVY[i] = -(12 + Math.random() * 18) * (burst ? 1.8 : 1);
+		sMax[i] = sLife[i] = 6 + Math.random() * 7;
+		sSize[i] = 3 + Math.random() * 5;
+		sCol[i] = mCol[m] < 3 ? mCol[m] : Math.floor(Math.random() * 3);
+		return;
 	}
 }
 
-function initSpores() {
-	spores = [];
-	for (let i = 0; i < SPORE_COUNT; i++) {
-		spores.push({
-			x: Math.random() * w,
-			y: Math.random() * h * 0.85,
-			vx: 0,
-			vy: -0.1 - Math.random() * 0.3,
-			size: 1 + Math.random() * 2.5,
-			alpha: 0.2 + Math.random() * 0.5,
-			hue: Math.random() > 0.5 ? BIOLUM_HUE : BIOLUM_HUE_ALT,
-			drift: Math.random() * Math.PI * 2
-		});
+function drawMushroom(m, sway, droop) {
+	const g = growth(m), x = mX[m], y = mY[m], sh = mH[m] * g, c = mCol[m], a = mA[m] * (dark ? 0.9 : 0.8);
+	const lean = mLean[m] * sh + Math.sin(time * 0.8 + mPh[m]) * 1.5 * sway * g, tx = x + lean, ty = y - sh, sw = mW[m] * (0.5 + g * 0.5);
+	const pulse = 0.75 + 0.25 * Math.sin(time * 1.3 + mPh[m]);
+	ctx.globalAlpha = a;
+	ctx.fillStyle = col.stem;
+	ctx.beginPath();
+	ctx.moveTo(x - sw / 2, y);
+	ctx.quadraticCurveTo(x - sw / 3 + lean * 0.3, y - sh * 0.5, tx - sw / 3, ty);
+	ctx.lineTo(tx + sw / 3, ty);
+	ctx.quadraticCurveTo(x + sw / 3 + lean * 0.3, y - sh * 0.5, x + sw / 2, y);
+	ctx.fill();
+	// A pin is a small glowing button; a cap opens, then lights up from g = 0.5
+	const open = clamp01((g - 0.3) / 0.5), pin = open <= 0, r = pin ? 1.8 + mR[m] * g : mR[m] * (0.3 + 0.7 * open);
+	const tilt = (mLean[m] + (lean > 0 ? 0.25 : -0.25) * droop) * 0.9, cy = ty + r * 0.15 * droop;
+	const k = c < 3 ? Math.max(0.85 * (1 - open * 2.5), (g - 0.5) * 2) : 0;
+	if (k > 0) {
+		const near = Math.max(0, 1 - Math.hypot(mouse.x - tx, mouse.y - cy) / 160) * mouse.amount, R = r * (pin ? 5 : 3.2);
+		glowMode(true);
+		ctx.globalAlpha = a * k * pulse * (1 + near * 0.8) * (dark ? 0.46 : 0.22);
+		ctx.drawImage(col.glow[c], tx - R, cy - R, R * 2, R * 2);
+		glowMode(false);
+		ctx.globalAlpha = a;
+	}
+	ctx.fillStyle = col.cap[c];
+	if (pin) {
+		ctx.beginPath();
+		ctx.ellipse(tx, ty, r, r * 0.8, 0, 0, 6.283);
+		ctx.fill();
+		return;
+	}
+	const fy = mRound[m] ? 0.62 : 0.36, fx = mRound[m] ? 1 : 1.12;
+	ctx.beginPath();
+	ctx.ellipse(tx, cy, r * fx, r * fy, tilt, Math.PI, 6.283);
+	ctx.fill();
+	ctx.fillStyle = col.shade[c];
+	ctx.beginPath();
+	ctx.ellipse(tx, cy, r * fx * 0.96, r * 0.16, tilt, 0, Math.PI);
+	ctx.fill();
+	ctx.globalAlpha = a * 0.55;
+	ctx.fillStyle = col.hi[c];
+	ctx.beginPath();
+	ctx.ellipse(tx - r * 0.25, cy - r * fy * 0.55, r * 0.42, r * fy * 0.3, tilt - 0.2, 0, 6.283);
+	ctx.fill();
+	if (c === 3 && open > 0.6) {
+		ctx.globalAlpha = mA[m] * (open - 0.6) * 1.6;
+		ctx.fillStyle = col.spot;
+		ctx.beginPath();
+		for (let s = 0; s < 4; s++) {
+			const an = mPh[m] + s * 2.1, d = (0.2 + 0.12 * s) * r;
+			const px = tx + Math.cos(an) * d, py = cy - r * fy * (0.25 + 0.35 * Math.abs(Math.sin(an)));
+			ctx.moveTo(px + 1.6, py);
+			ctx.arc(px, py, 1.6, 0, 6.283);
+		}
+		ctx.fill();
 	}
 }
 
-function initMoisture() {
-	moisture = [];
-	for (let i = 0; i < MOISTURE_COUNT; i++) {
-		moisture.push({
-			x: Math.random() * w,
-			y: Math.random() * h,
-			speed: 0.2 + Math.random() * 0.5,
-			size: 0.5 + Math.random() * 1,
-			alpha: 0.1 + Math.random() * 0.2
-		});
+function drawBadge() {
+	const t = Math.round(tokens / 100);
+	if (t !== shown) {
+		shown = t;
+		badgeText = (tokens >= 1000 ? (tokens / 1000).toFixed(1) + 'k' : String(Math.round(tokens))) + ' / ' + Math.round(MAX_TOKENS / 1000) + 'k';
 	}
+	const bw = 172, x = w - bw - 14, y = h - 52;
+	ctx.globalAlpha = 1;
+	ctx.fillStyle = col.panel;
+	ctx.beginPath();
+	ctx.roundRect(x, y, bw, 38, 8);
+	ctx.fill();
+	ctx.font = '11px ui-sans-serif, system-ui, sans-serif';
+	ctx.textAlign = 'left';
+	ctx.fillStyle = col.label;
+	ctx.fillText('Context', x + 12, y + 17);
+	ctx.font = '11px ui-monospace, monospace';
+	ctx.textAlign = 'right';
+	ctx.fillStyle = col.text;
+	ctx.fillText(badgeText, x + bw - 12, y + 17);
+	ctx.fillStyle = col.track;
+	ctx.fillRect(x + 12, y + 25, bw - 24, 4);
+	ctx.fillStyle = ratio > 0.9 ? col.alert : ratio > 0.7 ? col.warn : col.bar;
+	ctx.fillRect(x + 12, y + 25, (bw - 24) * clamp01(ratio), 4);
+}
+
+function frame(now) {
+	requestAnimationFrame(frame);
+	const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
+	last = now;
+	const speed = MOTION * (reduced ? 0.15 : 1), mdt = dt * speed;
+	time = (time + mdt) % 6283;
+	ratio += (target - ratio) * Math.min(1, dt * (target < ratio ? 1.2 : 0.5));
+	mouse.amount = Math.max(0, mouse.amount - dt * 0.6);
+	ctx.clearRect(0, 0, w, h);
+
+	// Fog and the farm's ambient glow, low and in the outer thirds
+	for (let k = 0; k < 2; k++) {
+		const fx = w * (k ? 0.82 : 0.18) + Math.sin(time * 0.05 + k * 2) * 40, fw = w * 0.42;
+		ctx.globalAlpha = (dark ? 0.12 : 0.08) + ratio * 0.06;
+		ctx.drawImage(col.glow[3], fx - fw / 2, groundY - 70, fw, 120);
+		if (ratio > 0.3) {
+			glowMode(true);
+			ctx.globalAlpha = (ratio - 0.3) * (dark ? 0.16 : 0.08);
+			ctx.drawImage(col.glow[k], fx - fw / 2, groundY - 110, fw, 180);
+			glowMode(false);
+		}
+	}
+
+	// The bed and the mycelium threading through it
+	ctx.globalAlpha = 1;
+	ctx.fillStyle = bedFill;
+	ctx.fill(bedPath);
+	ctx.strokeStyle = col.stem;
+	const myc = Math.max(0.3, Math.min(1, ratio * 4));
+	ctx.lineWidth = 0.8;
+	for (let c = 0; c < nCl; c++) {
+		ctx.globalAlpha = cA[c] * (dark ? 0.28 : 0.22) * (0.6 + 0.4 * myc);
+		ctx.beginPath();
+		for (let i = 0; i < tCount; i++) {
+			if (tCl[i] !== c) continue;
+			const dx = tDX[i] * myc, dy = tDY[i] * myc;
+			ctx.moveTo(cX[c], cY[c]);
+			ctx.quadraticCurveTo(cX[c] + dx * 0.5, cY[c] + dy * 0.2 + 4, cX[c] + dx + Math.sin(time * 0.6 + tPh[i]) * 2, cY[c] + dy + 3);
+		}
+		ctx.stroke();
+	}
+
+	const droop = clamp01((ratio - 0.9) / 0.1);
+	for (let i = 0; i < mCount; i++) drawMushroom(i, speed, droop);
+
+	// Spores rise from the caps and drift toward a moving cursor
+	if (speed > 0 && mCount) {
+		emitAcc += dt * SPORES * (0.08 + 0.92 * clamp01((ratio - 0.55) / 0.45)) / 9;
+		while (emitAcc >= 1) { emitAcc -= 1; spawn(Math.floor(Math.random() * mCount), false); }
+	}
+	glowMode(true);
+	const pull = reduced ? 0 : CURSOR_PULL * mouse.amount * 60, damp = Math.exp(-mdt * 0.8);
+	for (let i = 0; i < MAXS; i++) {
+		if (sLife[i] <= 0) continue;
+		sLife[i] -= mdt;
+		const dx = mouse.x - sX[i], dy = mouse.y - sY[i], d2 = dx * dx + dy * dy;
+		if (pull > 0 && d2 < 40000 && d2 > 1) { const d = Math.sqrt(d2); sVX[i] += (dx / d) * pull * mdt; sVY[i] += (dy / d) * pull * mdt; }
+		sVX[i] *= damp;
+		sVY[i] = -14 + (sVY[i] + 14) * damp;
+		sX[i] += (sVX[i] + Math.sin(time * 0.9 + i) * 6) * mdt;
+		sY[i] += sVY[i] * mdt;
+		const s = sSize[i];
+		ctx.globalAlpha = Math.sin(Math.PI * sLife[i] / sMax[i]) * (dark ? 0.75 : 0.5) * (1 - CENTER_CALM * band(sX[i]));
+		ctx.drawImage(col.spore[sCol[i]], sX[i] - s, sY[i] - s, s * 2, s * 2);
+	}
+	glowMode(false);
+
+	if (SHOW_BADGE && (tokens > 0 || live)) drawBadge();
+	ctx.globalAlpha = 1;
 }
 
 self.onmessage = (e) => {
-	switch (e.data.type) {
+	const d = e.data;
+	switch (d.type) {
 		case 'init':
-			canvas = e.data.canvas;
+			canvas = d.canvas;
 			ctx = canvas.getContext('2d');
-			w = e.data.width;
-			h = e.data.height;
-			canvas.width = w;
-			canvas.height = h;
-			initClusters();
-			initSpores();
-			initMoisture();
-			startAnimation();
+			w = d.width;
+			h = d.height;
+			dpr = Math.min(d.dpr || 1, 2);
+			reduced = !!d.reducedMotion;
+			if (PREVIEW_RATIO > 0) { ratio = target = PREVIEW_RATIO; tokens = (PREVIEW_RATIO * MAX_TOKENS) / GROWTH_SPEED; }
+			applyTheme(d.theme);
+			size();
+			requestAnimationFrame(frame);
 			break;
 		case 'resize':
-			w = e.data.width;
-			h = e.data.height;
-			canvas.width = w;
-			canvas.height = h;
-			initClusters();
-			initSpores();
-			initMoisture();
+			w = d.width;
+			h = d.height;
+			dpr = Math.min(d.dpr || 1, 2);
+			if (canvas) size();
+			break;
+		case 'theme':
+			applyTheme(d);
+			break;
+		case 'motion':
+			reduced = !!d.reducedMotion;
 			break;
 		case 'mousemove':
-			mouse.x = e.data.x;
-			mouse.y = e.data.y;
+			mouse.x = d.x;
+			mouse.y = d.y;
+			mouse.amount = 1;
 			break;
-		case 'context':
-			// Prefer exact API token count, fall back to DOM-based estimate
-			if (e.data.exactTokens !== undefined) {
-				estimatedTokens = e.data.exactTokens;
-			} else if (e.data.estimatedTokens !== undefined) {
-				estimatedTokens = e.data.estimatedTokens;
-			}
-			targetRatio = Math.min(1, (estimatedTokens / MAX_TOKENS) * GROWTH_SPEED);
+		case 'mousedown': {
+			// A tap shakes a gentle puff of spores from the nearest cluster
+			if (reduced || !mCount) break;
+			let best = 0;
+			for (let i = 1; i < mCount; i++) if (Math.abs(mX[i] - d.x) < Math.abs(mX[best] - d.x)) best = i;
+			for (let k = 0; k < 5 + ratio * 10; k++) spawn(best, true);
 			break;
+		}
+		case 'context': {
+			// Exact tokens when the engine has them, else the estimate; a new chat empties the farm
+			live = true;
+			if (d.messages === 0) { tokens = target = 0; break; }
+			const t = typeof d.exactTokens === 'number' ? d.exactTokens : d.estimatedTokens;
+			if (typeof t === 'number') { tokens = t; target = Math.min(1, (t / MAX_TOKENS) * GROWTH_SPEED); }
+			break;
+		}
 	}
 };
-
-function drawSubstrate(groundY) {
-	// Dark substrate base
-	const gGrad = ctx.createLinearGradient(0, groundY - 15, 0, h);
-	gGrad.addColorStop(0, '#1a1510');
-	gGrad.addColorStop(0.15, '#12100c');
-	gGrad.addColorStop(1, '#080604');
-	ctx.fillStyle = gGrad;
-	ctx.fillRect(0, groundY - 5, w, h - groundY + 5);
-
-	// Straw/substrate texture
-	const rng = seededRandom(99);
-	ctx.strokeStyle = 'rgba(80, 65, 40, 0.15)';
-	ctx.lineWidth = 1;
-	for (let i = 0; i < 30; i++) {
-		const sx = rng() * w;
-		const sy = groundY + rng() * (h - groundY) * 0.5;
-		const len = 8 + rng() * 20;
-		const angle = (rng() - 0.5) * 0.8;
-		ctx.beginPath();
-		ctx.moveTo(sx, sy);
-		ctx.lineTo(sx + Math.cos(angle) * len, sy + Math.sin(angle) * len);
-		ctx.stroke();
-	}
-}
-
-function drawMycelium(cluster, progress) {
-	if (progress <= 0) return;
-	const p = Math.min(1, progress * 3); // mycelium grows fast
-
-	ctx.strokeStyle = `rgba(220, 215, 200, ${p * 0.25})`;
-	ctx.lineWidth = 0.8;
-
-	for (const m of cluster.myceliumSeeds) {
-		const len = m.length * p;
-		const wobble = Math.sin(time * 0.01 + m.phase) * 3;
-
-		ctx.beginPath();
-		ctx.moveTo(cluster.x, cluster.y);
-		const ex = cluster.x + Math.cos(m.angle) * len + wobble;
-		const ey = cluster.y + Math.sin(m.angle) * len * 0.4 + Math.abs(Math.sin(m.angle)) * 5;
-		ctx.quadraticCurveTo(
-			cluster.x + Math.cos(m.angle) * len * 0.5 + wobble * 0.5,
-			cluster.y + Math.sin(m.angle) * len * 0.2 + 5,
-			ex, ey
-		);
-		ctx.stroke();
-
-		// Branches
-		if (p > 0.5 && m.branches > 0) {
-			const bp = (p - 0.5) * 2;
-			for (let b = 0; b < m.branches; b++) {
-				const bStart = 0.4 + b * 0.2;
-				const bx = cluster.x + Math.cos(m.angle) * len * bStart;
-				const by = cluster.y + Math.sin(m.angle) * len * 0.4 * bStart;
-				const bAngle = m.angle + (b % 2 === 0 ? 0.5 : -0.5);
-				const bLen = len * 0.3 * bp;
-				ctx.beginPath();
-				ctx.moveTo(bx, by);
-				ctx.lineTo(bx + Math.cos(bAngle) * bLen, by + Math.sin(bAngle) * bLen * 0.4);
-				ctx.stroke();
-			}
-		}
-	}
-}
-
-function drawMushroom(x, baseY, mush, growthP, isBiolum, baseHue) {
-	if (growthP <= 0) return;
-
-	const hue = baseHue + mush.hueShift;
-	const stemH = mush.maxHeight * growthP;
-	const lean = mush.lean * stemH + Math.sin(time * 0.012 + mush.phase) * 2;
-	const topX = x + lean;
-	const topY = baseY - stemH;
-	const sw = mush.stemWidth * (0.5 + growthP * 0.5);
-	const capR = mush.capRadius * Math.min(1, growthP * 1.2);
-
-	// Stem
-	ctx.beginPath();
-	ctx.moveTo(x - sw / 2, baseY);
-	ctx.quadraticCurveTo(x - sw / 3 + lean * 0.3, baseY - stemH * 0.5, topX - sw / 3, topY + capR * 0.3);
-	ctx.lineTo(topX + sw / 3, topY + capR * 0.3);
-	ctx.quadraticCurveTo(x + sw / 3 + lean * 0.3, baseY - stemH * 0.5, x + sw / 2, baseY);
-	ctx.closePath();
-
-	const stemGrad = ctx.createLinearGradient(x, baseY, topX, topY);
-	stemGrad.addColorStop(0, isBiolum ? `hsla(${hue}, 20%, 25%, 0.9)` : 'rgba(200, 190, 170, 0.9)');
-	stemGrad.addColorStop(1, isBiolum ? `hsla(${hue}, 30%, 35%, 0.9)` : 'rgba(220, 210, 190, 0.9)');
-	ctx.fillStyle = stemGrad;
-	ctx.fill();
-
-	// Cap
-	if (growthP > 0.3) {
-		const capP = Math.min(1, (growthP - 0.3) / 0.5);
-		const cr = capR * capP;
-
-		if (mush.capStyle === 'round') {
-			// Rounded dome cap
-			ctx.beginPath();
-			ctx.ellipse(topX, topY + cr * 0.15, cr, cr * 0.65, 0, 0, Math.PI * 2);
-
-			const capGrad = ctx.createRadialGradient(topX - cr * 0.2, topY - cr * 0.1, cr * 0.1, topX, topY, cr);
-			if (isBiolum) {
-				capGrad.addColorStop(0, `hsla(${hue}, 70%, 55%, 0.95)`);
-				capGrad.addColorStop(0.7, `hsla(${hue}, 60%, 35%, 0.9)`);
-				capGrad.addColorStop(1, `hsla(${hue}, 50%, 20%, 0.85)`);
-			} else {
-				capGrad.addColorStop(0, `hsl(${hue}, 50%, 55%)`);
-				capGrad.addColorStop(0.7, `hsl(${hue}, 45%, 35%)`);
-				capGrad.addColorStop(1, `hsl(${hue}, 40%, 20%)`);
-			}
-			ctx.fillStyle = capGrad;
-			ctx.fill();
-		} else {
-			// Flat/parasol cap
-			ctx.beginPath();
-			ctx.ellipse(topX, topY + cr * 0.1, cr * 1.1, cr * 0.35, 0, 0, Math.PI);
-
-			const capGrad = ctx.createLinearGradient(topX - cr, topY, topX + cr, topY + cr * 0.3);
-			if (isBiolum) {
-				capGrad.addColorStop(0, `hsla(${hue}, 65%, 50%, 0.9)`);
-				capGrad.addColorStop(1, `hsla(${hue}, 55%, 25%, 0.85)`);
-			} else {
-				capGrad.addColorStop(0, `hsl(${hue}, 45%, 50%)`);
-				capGrad.addColorStop(1, `hsl(${hue}, 40%, 25%)`);
-			}
-			ctx.fillStyle = capGrad;
-			ctx.fill();
-		}
-
-		// Gills (underside lines)
-		if (capP > 0.5) {
-			const gillP = (capP - 0.5) * 2;
-			ctx.strokeStyle = isBiolum
-				? `hsla(${hue}, 50%, 60%, ${gillP * 0.3})`
-				: `rgba(180, 170, 150, ${gillP * 0.2})`;
-			ctx.lineWidth = 0.5;
-			const gillCount = 6;
-			for (let g = 0; g < gillCount; g++) {
-				const gx = topX - cr * 0.7 + (g / (gillCount - 1)) * cr * 1.4;
-				ctx.beginPath();
-				ctx.moveTo(gx, topY + cr * 0.15);
-				ctx.lineTo(gx, topY + cr * 0.4);
-				ctx.stroke();
-			}
-		}
-
-		// Bioluminescent glow
-		if (isBiolum && growthP > 0.5) {
-			const glowP = (growthP - 0.5) * 2;
-			const pulse = 0.6 + 0.4 * Math.sin(time * 0.02 + mush.phase);
-			const glowR = cr * 2.5 * glowP;
-			const glowGrad = ctx.createRadialGradient(topX, topY, 0, topX, topY, glowR);
-			glowGrad.addColorStop(0, `hsla(${hue}, 80%, 60%, ${glowP * pulse * 0.2})`);
-			glowGrad.addColorStop(0.5, `hsla(${hue}, 70%, 40%, ${glowP * pulse * 0.08})`);
-			glowGrad.addColorStop(1, `hsla(${hue}, 60%, 30%, 0)`);
-			ctx.fillStyle = glowGrad;
-			ctx.beginPath();
-			ctx.arc(topX, topY, glowR, 0, Math.PI * 2);
-			ctx.fill();
-		}
-
-		// Spots on cap (for non-biolum mushrooms)
-		if (!isBiolum && capP > 0.7) {
-			const spotP = (capP - 0.7) / 0.3;
-			ctx.fillStyle = `rgba(255, 250, 230, ${spotP * 0.5})`;
-			const spotRng = seededRandom(Math.floor(x * 100 + mush.maxHeight));
-			const spotCount = 3 + Math.floor(spotRng() * 4);
-			for (let s = 0; s < spotCount; s++) {
-				const sa = spotRng() * Math.PI * 2;
-				const sd = spotRng() * cr * 0.6;
-				const sr = 1.5 + spotRng() * 2.5;
-				ctx.beginPath();
-				ctx.arc(topX + Math.cos(sa) * sd, topY + Math.sin(sa) * sd * 0.5, sr * spotP, 0, Math.PI * 2);
-				ctx.fill();
-			}
-		}
-	}
-}
-
-function drawFog(groundY) {
-	for (let layer = 0; layer < FOG_LAYERS; layer++) {
-		const fogY = groundY - 30 - layer * 40;
-		const drift = Math.sin(time * 0.003 + layer * 2) * 50;
-		const fogGrad = ctx.createRadialGradient(
-			w / 2 + drift, fogY, 0,
-			w / 2 + drift, fogY, w * 0.6
-		);
-		const alpha = 0.03 + contextRatio * 0.03;
-		fogGrad.addColorStop(0, `rgba(150, 160, 140, ${alpha})`);
-		fogGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-		ctx.fillStyle = fogGrad;
-		ctx.fillRect(0, 0, w, h);
-	}
-}
-
-function updateSpores() {
-	const sporeAlpha = contextRatio > 0.6 ? (contextRatio - 0.6) / 0.4 : 0;
-	if (sporeAlpha <= 0) return;
-
-	for (const s of spores) {
-		// Drift
-		s.x += Math.sin(time * 0.01 + s.drift) * 0.3 + s.vx;
-		s.y += s.vy;
-		s.drift += 0.005;
-
-		// Mouse interaction — spores drift toward cursor
-		const dx = mouse.x - s.x;
-		const dy = mouse.y - s.y;
-		const d2 = dx * dx + dy * dy;
-		if (d2 < 20000 && d2 > 1) {
-			const dist = Math.sqrt(d2);
-			s.vx += (dx / dist) * 0.05;
-			s.vy += (dy / dist) * 0.05;
-		}
-		s.vx *= 0.97;
-		s.vy *= 0.97;
-		s.vy -= 0.005; // gentle upward float
-
-		// Wrap
-		if (s.y < -10) { s.y = h * 0.8; s.x = Math.random() * w; }
-		if (s.x < -10) s.x = w + 10;
-		if (s.x > w + 10) s.x = -10;
-
-		// Draw
-		const pulse = 0.5 + 0.5 * Math.sin(time * 0.03 + s.drift);
-		const a = s.alpha * sporeAlpha * pulse;
-		ctx.fillStyle = `hsla(${s.hue}, 80%, 70%, ${a})`;
-		ctx.beginPath();
-		ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-		ctx.fill();
-
-		// Spore glow
-		if (a > 0.2) {
-			const sg = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.size * 4);
-			sg.addColorStop(0, `hsla(${s.hue}, 80%, 70%, ${a * 0.3})`);
-			sg.addColorStop(1, `hsla(${s.hue}, 80%, 70%, 0)`);
-			ctx.fillStyle = sg;
-			ctx.beginPath();
-			ctx.arc(s.x, s.y, s.size * 4, 0, Math.PI * 2);
-			ctx.fill();
-		}
-	}
-}
-
-function updateMoisture() {
-	ctx.fillStyle = 'rgba(180, 200, 220, 0.08)';
-	for (const m of moisture) {
-		m.y += m.speed;
-		if (m.y > h) { m.y = -5; m.x = Math.random() * w; }
-		ctx.beginPath();
-		ctx.arc(m.x, m.y, m.size, 0, Math.PI * 2);
-		ctx.fill();
-	}
-}
-
-function startAnimation() {
-	function render() {
-		if (!ctx) return;
-		time++;
-
-		// Smooth context interpolation
-		contextRatio += (targetRatio - contextRatio) * 0.008;
-
-		// --- Background ---
-		const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
-		bgGrad.addColorStop(0, '#050508');
-		bgGrad.addColorStop(0.5, '#0a0a10');
-		bgGrad.addColorStop(0.8, '#0f0d0a');
-		bgGrad.addColorStop(1, '#080604');
-		ctx.fillStyle = bgGrad;
-		ctx.fillRect(0, 0, w, h);
-
-		// Ambient bioluminescent glow from all mushrooms
-		if (contextRatio > 0.3) {
-			const ambP = (contextRatio - 0.3) / 0.7;
-			const ambGrad = ctx.createRadialGradient(w * 0.5, h * 0.7, 0, w * 0.5, h * 0.7, h * 0.8);
-			ambGrad.addColorStop(0, `hsla(${BIOLUM_HUE}, 60%, 40%, ${ambP * 0.04})`);
-			ambGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-			ctx.fillStyle = ambGrad;
-			ctx.fillRect(0, 0, w, h);
-		}
-
-		// Warning pulse when nearly full
-		if (contextRatio > 0.88) {
-			const wP = (contextRatio - 0.88) / 0.12;
-			const pulse = 0.5 + 0.5 * Math.sin(time * 0.04);
-			ctx.fillStyle = `rgba(255, 40, 20, ${wP * pulse * 0.06})`;
-			ctx.fillRect(0, 0, w, h);
-		}
-
-		const groundY = h * 0.82;
-
-		// Moisture particles (background)
-		updateMoisture();
-
-		// --- Substrate ---
-		drawSubstrate(groundY);
-
-		// --- Mushroom clusters ---
-		// Sort by Y so lower clusters draw on top (depth)
-		const sorted = [...clusters].sort((a, b) => a.y - b.y);
-
-		for (const cluster of sorted) {
-			const clusterP = Math.max(0, (contextRatio - cluster.growStart) / (1 - cluster.growStart));
-
-			// Mycelium (always draws first)
-			if (clusterP > 0) {
-				drawMycelium(cluster, clusterP);
-			}
-
-			// Individual mushrooms
-			for (const mush of cluster.mushrooms) {
-				const mushP = Math.max(0, (clusterP - mush.growDelay) / (1 - mush.growDelay));
-				if (mushP > 0) {
-					drawMushroom(
-						cluster.x + mush.offsetX,
-						cluster.y,
-						mush,
-						Math.min(1, mushP),
-						cluster.isBiolum,
-						cluster.hue
-					);
-				}
-			}
-		}
-
-		// Fog (on top of mushrooms)
-		drawFog(groundY);
-
-		// Spores (on top of everything)
-		updateSpores();
-
-		// --- Token counter (subtle) ---
-		if (estimatedTokens > 0) {
-			ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-			ctx.fillRect(w - 175, h - 38, 168, 30);
-			ctx.fillStyle = contextRatio > 0.85 ? '#ef4444' : contextRatio > 0.6 ? '#facc15' : `hsl(${BIOLUM_HUE}, 70%, 60%)`;
-			ctx.font = '11px monospace';
-			ctx.textAlign = 'right';
-			ctx.fillText(`~${(estimatedTokens / 1000).toFixed(1)}k / ${(MAX_TOKENS / 1000).toFixed(0)}k tokens`, w - 14, h - 19);
-			ctx.textAlign = 'left';
-
-			// Mini progress bar
-			ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-			ctx.fillRect(w - 168, h - 14, 155, 4);
-			const barColor = contextRatio > 0.85 ? '#ef4444' : contextRatio > 0.6 ? '#facc15' : `hsl(${BIOLUM_HUE}, 70%, 50%)`;
-			ctx.fillStyle = barColor;
-			ctx.fillRect(w - 168, h - 14, 155 * Math.min(1, contextRatio), 4);
-		}
-
-		requestAnimationFrame(render);
-	}
-	requestAnimationFrame(render);
-}

@@ -1,600 +1,368 @@
 /**
  * Title: Diagnostic HUD
- * Description: Full-featured debug/diagnostic Canvas FX overlay. Reports the
- *   health of all 10 message channels, live FPS + frame timing, canvas info,
- *   execution mode, input tracking, context data from DOM observer and fetch
- *   interceptor, environment capabilities, and a scrolling event log.
- *   Green = working, Amber = stale, Red = not received.
+ * Description: A small developer panel docked in a corner that shows every runtime message channel with its count and age, frame timing, canvas size and pixel ratio, theme, reduced motion, context data and a short event log.
  */
 
-// ═══════════════════════════════════════════════════════════
-// ██  CONFIGURATION — Tweak these values to customize!   ██
-// ═══════════════════════════════════════════════════════════
-const CONFIG = {
-  // -- Appearance --
-  bgColor: 'rgba(8, 12, 20, 0.82)',       // Panel background
-  borderColor: 'rgba(0, 255, 136, 0.25)',  // Panel border color
-  fontFamily: 'monospace',                 // Font family
-  fontSize: 11,                            // Base font size (px)
-  lineHeight: 17,                          // Line height (px)
-  padding: 18,                             // Panel padding (px)
-  panelRadius: 10,                         // Panel corner radius (px)
-  panelMaxWidth: 520,                      // Max panel width (px)
+/* ────────── CONFIGURABLE VARIABLES ────────── */
+const CORNER        = 1;     // where the panel docks: 0 top-left, 1 top-right, 2 bottom-left, 3 bottom-right (0-3)
+const PANEL_WIDTH   = 230;   // widest the panel gets, in px; it narrows to stay clear of the chat column (180-320)
+const MARGIN        = 12;    // gap between the panel and the screen's edge, in px (0-48)
+const BAND_WIDTH    = 470;   // half-width of the chat column the panel stays clear of, in px (300-900)
+const FONT_SIZE     = 10;    // text size, in px (9-13)
+const LOG_ROWS      = 5;     // event log lines; fewer show when the screen is short (0-10)
+const REFRESH_HZ    = 4;     // how often the text updates per second (1-30)
+const STALE_SECONDS = 60;    // seconds before an on-demand channel shows as stale (5-300)
+const PANEL_OPACITY = 0.86;  // panel background opacity (0.3-1)
+const MOTION        = 1;     // speed of the arrival pulses and tap ripples; 0 turns them off (0-2)
+const CENTER_CALM   = 0.7;   // how much the cursor marker and tap ripple fade over the chat column (0-1)
+const CURSOR_MARKER = true;  // draw a small crosshair with coordinates at the cursor
+const FOLLOW_THEME  = true;  // take the colors from the theme's palette
+const COLOR_OK      = '#00e68a'; // received recently, when not following the theme
+const COLOR_WARN    = '#ffaa00'; // stale
+const COLOR_ERROR   = '#ff4d5e'; // never received
+const COLOR_HEADER  = '#00ccee'; // section headers
+/* ──────────────────────────────────────────── */
 
-  // -- Colors --
-  colorOk: '#00ff88',                      // Status OK (green)
-  colorWarn: '#ffaa00',                    // Status stale/warning (amber)
-  colorError: '#ff4455',                   // Status not received (red)
-  colorLabel: 'rgba(255,255,255,0.45)',    // Label text color
-  colorValue: '#e8e8e8',                   // Value text color
-  colorHeader: '#00ddff',                  // Section header color
-  colorDim: 'rgba(255,255,255,0.18)',      // Separator/dim text
-  colorAccent: '#8866ff',                  // Accent (context)
+// Channels in the runtime's protocol, and how fast each goes stale:
+// 0 once (init never goes stale), 1 continuous (5 s), 2 on demand (STALE_SECONDS)
+const CH = ['init', 'resize', 'theme', 'motion', 'mousemove', 'mousedown', 'mouseup', 'click', 'touchstart', 'touchmove', 'touchend', 'context'];
+const KIND = [0, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2];
+const count = new Float64Array(CH.length), lastAt = new Float64Array(CH.length), pulse = new Float32Array(CH.length);
+const frames = new Float32Array(120), fpsHist = new Float32Array(48);
+const log = [];
+for (let i = 0; i < 10; i++) log.push({ t: '', type: '', detail: '', at: 0 });
+const isWorker = typeof WorkerGlobalScope !== 'undefined';
+const FONT = FONT_SIZE + 'px ui-monospace, SFMono-Regular, Menlo, monospace', BOLD = '600 ' + FONT;
+const LH = Math.round(FONT_SIZE * 1.45);
 
-  // -- Event Log --
-  maxLogEntries: 8,                        // Max visible log entries
-  logStaleMs: 5000,                        // Time before "stale" (ms)
+let canvas, ctx, panel, pctx, w = 0, h = 0, dpr = 1, last = 0, start = 0, reduced = false, dark = true, themeMode = 'none', themeHue = 0;
+let fi = 0, fpsCount = 0, fpsAt = 0, fps = 0, hi = 0, evCount = 0, evRate = 0, logHead = 0, logLen = 0, paintedAt = -1e9;
+let px = 0, py = 0, pw = 0, ph = 0, compact = false, rows = 0, dotX = 0, dotY = 0;
+let ctxDom = null, ctxApi = null;
+const mouse = { x: -10000, y: -10000, at: -1e9 };
+const tap = { x: 0, y: 0, age: 9 };
+const c = {};
 
-  // -- Performance --
-  fpsHistorySize: 60,                      // FPS graph bar count
-};
-// ═══════════════════════════════════════════════════════════
+function rgbOf(hex) { const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function css(v, a) { return 'rgba(' + v[0] + ',' + v[1] + ',' + v[2] + ',' + a + ')'; }
+function band(x) { const t = Math.min(1, Math.max(0, (Math.abs(x - w / 2) / 520 - 0.55) / 0.7)); return 1 - t * t * (3 - 2 * t); }
 
-let canvas, ctx, W, H;
-let frameCount = 0;
-let fps = 0;
-let fpsHistory = [];
-let lastFpsTime = performance.now();
-let lastFrameTime = performance.now();
-let frameTimes = [];
-let mouse = { x: -1, y: -1 };
-let startTime = performance.now();
-let totalEventsReceived = 0;
-let eventsPerSec = 0;
-let eventCountWindow = [];
-
-// Track all 10 message types — categorized by expected firing behavior:
-//   'oneshot'    — fires once (init). Green forever once received.
-//   'continuous' — fires constantly while active (mousemove, touchmove). Stale after 5s.
-//   'ondemand'   — fires on user action or system event. Stale after 60s.
-const MESSAGE_TYPES = [
-  'init', 'resize', 'mousemove', 'click',
-  'mousedown', 'mouseup', 'touchstart', 'touchmove', 'touchend', 'context'
-];
-const EVENT_CATEGORY = {
-  init: 'oneshot',
-  resize: 'ondemand',
-  mousemove: 'continuous',
-  click: 'ondemand',
-  mousedown: 'ondemand',
-  mouseup: 'ondemand',
-  touchstart: 'ondemand',
-  touchmove: 'continuous',
-  touchend: 'ondemand',
-  context: 'ondemand',
-};
-
-const stats = {};
-MESSAGE_TYPES.forEach(t => {
-  stats[t] = { count: 0, lastTime: 0 };
-});
-
-// Context data
-let ctxDOM = { messages: null, chars: null, estimatedTokens: null, lastTime: 0 };
-let ctxAPI = { exactTokens: null, promptTokens: null, completionTokens: null, source: 'socket', lastTime: 0 };
-
-// Scrolling event log
-const eventLog = [];
-
-function logEvent(type, detail) {
-  const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
-  eventLog.unshift({ time: elapsed, type, detail, timestamp: performance.now() });
-  if (eventLog.length > CONFIG.maxLogEntries + 2) eventLog.length = CONFIG.maxLogEntries;
+function applyTheme(t) {
+	if (t) {
+		dark = t.dark !== false;
+		const m = t.mode || '?', tone = dark ? 'dark' : 'light';
+		themeMode = m === tone ? m : m + ' (' + tone + ')';
+		themeHue = t.hue || 0;
+	}
+	const th = FOLLOW_THEME && t && t.colors ? t.colors : null;
+	c.panel = css(rgbOf(th ? th.surface : dark ? '#080c14' : '#f2f4f7'), PANEL_OPACITY);
+	c.border = css(rgbOf(th ? th.muted : dark ? '#3a4a5a' : '#9aa4b0'), 0.35);
+	c.label = th ? th.muted : dark ? '#8894a4' : '#5b6572';
+	c.value = th ? th.text : dark ? '#e8e8e8' : '#1c222b';
+	c.dim = css(rgbOf(c.label), 0.45);
+	c.header = th ? th.accent : dark ? COLOR_HEADER : '#0b7fa0';
+	c.cursor = th ? th.accent3 : c.header;
+	c.ok = th ? (dark ? '#4ade80' : '#15803d') : dark ? COLOR_OK : '#0f8a52';
+	c.warn = th ? (dark ? '#fbbf24' : '#b45309') : dark ? COLOR_WARN : '#b46a00';
+	c.error = th ? (dark ? '#f87171' : '#dc2626') : dark ? COLOR_ERROR : '#d02a3a';
+	paintedAt = -1e9;
 }
 
-// Execution mode detection
-const isWorker = typeof WorkerGlobalScope !== 'undefined';
+// Dock in the chosen corner, inside the space beside the chat column
+function layout() {
+	const gap = w / 2 - BAND_WIDTH - MARGIN;
+	// Too little room for the panel: a slim strip of status dots in the edge's gap instead
+	compact = gap < 160;
+	const edge = compact ? 4 : MARGIN;
+	pw = compact ? Math.min(28, w / 2 - BAND_WIDTH - 8) : Math.min(PANEL_WIDTH, gap);
+	if (pw < 14) pw = 0;
+	const fixed = 72 + LH * (11 + CH.length);
+	rows = compact ? 0 : Math.max(0, Math.min(LOG_ROWS, Math.floor((h - MARGIN * 2 - fixed - LH - 8) / LH)));
+	ph = compact ? 30 + CH.length * 18 : Math.min(h - MARGIN * 2, fixed + (rows ? LH * (rows + 1) + 8 : 0));
+	px = CORNER % 2 ? w - edge - pw : edge;
+	py = CORNER > 1 ? h - edge - ph : edge;
+	panel = new OffscreenCanvas(Math.max(1, Math.ceil(pw * dpr)), Math.max(1, Math.ceil(ph * dpr)));
+	pctx = panel.getContext('2d');
+	pctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+	paintedAt = -1e9;
+}
 
-// Capability checks
-const caps = {
-  offscreenCanvas: typeof OffscreenCanvas !== 'undefined',
-  requestAnimationFrame: typeof requestAnimationFrame === 'function',
-  performanceNow: typeof performance !== 'undefined' && typeof performance.now === 'function',
-};
+function size() {
+	canvas.width = Math.max(1, Math.round(w * dpr));
+	canvas.height = Math.max(1, Math.round(h * dpr));
+	ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+	layout();
+}
 
-// Heartbeat
-setInterval(() => { self.postMessage({ type: 'heartbeat' }); }, 1000);
+function status(i, now) {
+	if (!count[i]) return c.error;
+	const stale = KIND[i] === 0 ? Infinity : KIND[i] === 1 ? 5000 : STALE_SECONDS * 1000;
+	return now - lastAt[i] > stale ? c.warn : c.ok;
+}
+
+function age(ms) { return ms < 1000 ? (ms | 0) + 'ms' : ms < 60000 ? (ms / 1000).toFixed(1) + 's' : ms < 3600000 ? (ms / 60000).toFixed(1) + 'm' : (ms / 3600000).toFixed(1) + 'h'; }
+
+function addLog(type, detail, now) {
+	const e = log[logHead];
+	e.t = ((now - start) / 1000).toFixed(1);
+	e.type = type;
+	e.detail = detail;
+	e.at = now;
+	logHead = (logHead + 1) % log.length;
+	logLen = Math.min(log.length, logLen + 1);
+}
+
+function row(g, y, label, value, color) {
+	g.textAlign = 'left';
+	g.fillStyle = c.label;
+	g.fillText(label, 12, y);
+	g.textAlign = 'right';
+	g.fillStyle = color || c.value;
+	g.fillText(value, pw - 12, y);
+}
+
+function header(g, y, text) {
+	g.strokeStyle = c.border;
+	g.beginPath();
+	g.moveTo(12, y - LH + 3);
+	g.lineTo(pw - 12, y - LH + 3);
+	g.stroke();
+	g.font = BOLD;
+	g.textAlign = 'left';
+	g.fillStyle = c.header;
+	g.fillText(text, 12, y + 2);
+	g.font = FONT;
+}
+
+// The text layer, repainted REFRESH_HZ times a second into its own canvas
+function paint(now) {
+	const g = pctx;
+	g.clearRect(0, 0, pw, ph);
+	g.fillStyle = c.panel;
+	g.strokeStyle = c.border;
+	g.lineWidth = 1;
+	g.beginPath();
+	g.roundRect(0.5, 0.5, pw - 1, ph - 1, compact ? 9 : 8);
+	g.fill();
+	g.stroke();
+	g.font = FONT;
+	g.textBaseline = 'alphabetic';
+	if (compact) {
+		g.textAlign = 'center';
+		g.fillStyle = fps >= 50 ? c.ok : fps >= 30 ? c.warn : c.error;
+		g.fillText(String(fps), pw / 2, 17);
+		dotX = px + pw / 2;
+		dotY = py + 30;
+		return;
+	}
+	let avg = 0, max = 0;
+	for (let i = 0; i < frames.length; i++) { avg += frames[i]; if (frames[i] > max) max = frames[i]; }
+	avg /= frames.length;
+	let y = 16 + 4;
+	g.font = BOLD;
+	g.textAlign = 'left';
+	g.fillStyle = c.value;
+	g.fillText('Canvas FX HUD', 12, y);
+	g.textAlign = 'right';
+	g.fillStyle = fps >= 50 ? c.ok : fps >= 30 ? c.warn : c.error;
+	g.fillText(fps + ' fps', pw - 12, y);
+	g.font = FONT;
+	y += LH;
+	row(g, y, 'frame avg/max', avg.toFixed(1) + ' / ' + max.toFixed(0) + ' ms', max < 34 ? c.value : c.warn);
+	// FPS history, one bar a second, the newest on the right
+	const gx = 12, gw = pw - 24, gy = y + 6, gh = 20, bw = gw / fpsHist.length;
+	g.fillStyle = c.dim;
+	g.fillRect(gx, gy + gh * (1 - 60 / 72), gw, 1);
+	for (let i = 0; i < fpsHist.length; i++) {
+		const v = fpsHist[(hi + i) % fpsHist.length];
+		if (!v) continue;
+		g.fillStyle = v >= 50 ? c.ok : v >= 30 ? c.warn : c.error;
+		g.globalAlpha = 0.55;
+		const bh = (Math.min(v, 72) / 72) * gh;
+		g.fillRect(gx + i * bw, gy + gh - bh, Math.max(1, bw - 1), bh);
+	}
+	g.globalAlpha = 1;
+	y += 26 + LH;
+	header(g, y, 'runtime');
+	y += LH;
+	row(g, y, 'mode', isWorker ? 'worker' : 'main thread', isWorker ? c.value : c.warn);
+	y += LH;
+	row(g, y, 'canvas', w + '×' + h + ' @' + dpr + 'x');
+	y += LH;
+	row(g, y, 'theme', themeMode + (themeMode === 'none' ? '' : ' · ' + Math.round(themeHue) + '°'));
+	y += LH;
+	row(g, y, 'reduced motion', reduced ? 'on' : 'off', reduced ? c.warn : c.value);
+	y += LH + 8;
+	header(g, y, 'channels');
+	g.textAlign = 'right';
+	g.fillStyle = c.dim;
+	g.fillText('count   last', pw - 12, y + 2);
+	dotX = px + 16;
+	dotY = py + y + LH - FONT_SIZE * 0.35;
+	for (let i = 0; i < CH.length; i++) {
+		y += LH;
+		g.textAlign = 'left';
+		g.fillStyle = count[i] ? c.value : c.label;
+		g.fillText(CH[i], 26, y);
+		g.textAlign = 'right';
+		g.fillStyle = c.value;
+		g.fillText(String(count[i]), pw - 62, y);
+		g.fillStyle = c.label;
+		g.fillText(count[i] ? age(now - lastAt[i]) : '—', pw - 12, y);
+	}
+	y += LH + 8;
+	header(g, y, 'input & context');
+	y += LH;
+	row(g, y, 'cursor · events/s', (mouse.x > -10000 ? (mouse.x | 0) + ',' + (mouse.y | 0) : '—') + ' · ' + evRate);
+	y += LH;
+	row(g, y, 'messages · chars', ctxDom ? ctxDom.messages + ' · ' + ctxDom.chars : '—');
+	y += LH;
+	row(g, y, 'est · exact tokens', (ctxDom ? '~' + ctxDom.estimatedTokens : '—') + ' · ' + (ctxApi ? ctxApi.exactTokens : '—'), ctxApi ? c.ok : c.value);
+	if (!rows) return;
+	y += LH + 8;
+	header(g, y, 'log');
+	for (let k = 0; k < rows; k++) {
+		y += LH;
+		if (k >= logLen) {
+			if (!k) { g.textAlign = 'left'; g.fillStyle = c.dim; g.fillText('waiting for events…', 12, y); }
+			break;
+		}
+		const e = log[(logHead - 1 - k + log.length) % log.length];
+		g.globalAlpha = Math.max(0.35, 1 - (now - e.at) / 15000);
+		g.textAlign = 'left';
+		g.fillStyle = c.label;
+		g.fillText(e.t, 12, y);
+		g.fillStyle = c.header;
+		g.fillText(e.type, 52, y);
+		g.fillStyle = c.value;
+		g.fillText(e.detail, 124, y);
+		g.globalAlpha = 1;
+	}
+}
+
+function frame(now) {
+	requestAnimationFrame(frame);
+	const dtMs = last ? now - last : 16.7;
+	const dt = Math.min(dtMs / 1000, 0.1);
+	last = now;
+	frames[fi] = dtMs;
+	fi = (fi + 1) % frames.length;
+	fpsCount++;
+	if (now - fpsAt >= 1000) {
+		fps = fpsCount;
+		fpsHist[hi] = fps;
+		hi = (hi + 1) % fpsHist.length;
+		evRate = evCount;
+		fpsCount = evCount = 0;
+		fpsAt = now;
+	}
+	if (now - paintedAt >= 1000 / REFRESH_HZ) { paintedAt = now; if (pw) paint(now); }
+	ctx.clearRect(0, 0, w, h);
+	if (!pw) return;
+	ctx.globalAlpha = 1;
+	ctx.drawImage(panel, px, py, pw, ph);
+
+	// Live status dots, each with a ring that pulses when its message arrives
+	const step = compact ? 18 : LH, anim = reduced ? 0 : MOTION;
+	for (let i = 0; i < CH.length; i++) {
+		const y = dotY + i * step;
+		ctx.fillStyle = ctx.strokeStyle = status(i, now);
+		ctx.beginPath();
+		ctx.arc(dotX, y, 3, 0, 6.283);
+		ctx.fill();
+		if (pulse[i] > 0.01 && anim > 0) {
+			pulse[i] = Math.max(0, pulse[i] - dt * 2 * anim);
+			ctx.globalAlpha = pulse[i];
+			ctx.lineWidth = 1;
+			ctx.beginPath();
+			ctx.arc(dotX, y, 3 + (1 - pulse[i]) * 5, 0, 6.283);
+			ctx.stroke();
+			ctx.globalAlpha = 1;
+		}
+	}
+
+	// Cursor marker and tap ripple, fading once the cursor rests
+	if (CURSOR_MARKER) {
+		const a = Math.max(0, 1 - (now - mouse.at) / 1500) * (1 - CENTER_CALM * band(mouse.x));
+		if (a > 0.01) {
+			ctx.globalAlpha = a * (dark ? 0.6 : 0.5);
+			ctx.strokeStyle = ctx.fillStyle = c.cursor;
+			ctx.lineWidth = 1;
+			ctx.beginPath();
+			ctx.moveTo(mouse.x - 12, mouse.y); ctx.lineTo(mouse.x - 4, mouse.y);
+			ctx.moveTo(mouse.x + 4, mouse.y); ctx.lineTo(mouse.x + 12, mouse.y);
+			ctx.moveTo(mouse.x, mouse.y - 12); ctx.lineTo(mouse.x, mouse.y - 4);
+			ctx.moveTo(mouse.x, mouse.y + 4); ctx.lineTo(mouse.x, mouse.y + 12);
+			ctx.stroke();
+		}
+		if (tap.age < 1 && anim > 0) {
+			tap.age += dt * 1.6 * anim;
+			ctx.globalAlpha = (1 - tap.age) * 0.6 * (1 - CENTER_CALM * band(tap.x));
+			ctx.strokeStyle = c.cursor;
+			ctx.beginPath();
+			ctx.arc(tap.x, tap.y, 4 + tap.age * 22, 0, 6.283);
+			ctx.stroke();
+		}
+		ctx.globalAlpha = 1;
+	}
+}
 
 self.onmessage = (e) => {
-  const { type } = e.data;
-  const now = performance.now();
-  totalEventsReceived++;
-  eventCountWindow.push(now);
-
-  if (stats[type] !== undefined) {
-    stats[type].count++;
-    stats[type].lastTime = now;
-  }
-
-  switch (type) {
-    case 'init':
-      canvas = e.data.canvas;
-      ctx = canvas.getContext('2d');
-      W = e.data.width;
-      H = e.data.height;
-      canvas.width = W;
-      canvas.height = H;
-      startTime = now;
-      logEvent('init', `canvas ${W}×${H}`);
-      startAnimation();
-      break;
-
-    case 'resize':
-      W = e.data.width;
-      H = e.data.height;
-      canvas.width = W;
-      canvas.height = H;
-      logEvent('resize', `→ ${W}×${H}`);
-      break;
-
-    case 'mousemove':
-      mouse.x = e.data.x;
-      mouse.y = e.data.y;
-      break;
-
-    case 'click':
-      logEvent('click', `(${e.data.x|0}, ${e.data.y|0})`);
-      break;
-
-    case 'mousedown':
-      logEvent('mousedown', `(${e.data.x|0}, ${e.data.y|0})`);
-      break;
-
-    case 'mouseup':
-      logEvent('mouseup', `(${e.data.x|0}, ${e.data.y|0})`);
-      break;
-
-    case 'touchstart': {
-      const n = e.data.touches?.length || 0;
-      logEvent('touchstart', `${n} point${n !== 1 ? 's' : ''}`);
-      break;
-    }
-
-    case 'touchmove':
-      break;
-
-    case 'touchend': {
-      const n = e.data.touches?.length || 0;
-      logEvent('touchend', `${n} point${n !== 1 ? 's' : ''}`);
-      break;
-    }
-
-    case 'context':
-      if (e.data.exactTokens !== undefined) {
-        ctxAPI.exactTokens = e.data.exactTokens;
-        ctxAPI.promptTokens = e.data.promptTokens;
-        ctxAPI.completionTokens = e.data.completionTokens;
-        ctxAPI.source = e.data.source;
-        ctxAPI.lastTime = now;
-        logEvent('context', `API: ${e.data.exactTokens} total tok`);
-      } else {
-        ctxDOM.messages = e.data.messages;
-        ctxDOM.chars = e.data.chars;
-        ctxDOM.estimatedTokens = e.data.estimatedTokens;
-        ctxDOM.lastTime = now;
-        logEvent('context', `DOM: ~${e.data.estimatedTokens} tok, ${e.data.messages} msg`);
-      }
-      break;
-  }
+	const d = e.data, now = performance.now(), i = CH.indexOf(d.type);
+	evCount++;
+	if (i >= 0) { count[i]++; lastAt[i] = now; pulse[i] = 1; }
+	switch (d.type) {
+		case 'init':
+			canvas = d.canvas;
+			ctx = canvas.getContext('2d');
+			w = d.width;
+			h = d.height;
+			dpr = Math.min(d.dpr || 1, 2);
+			reduced = !!d.reducedMotion;
+			start = fpsAt = now;
+			applyTheme(d.theme);
+			size();
+			addLog('init', w + '×' + h + ' @' + dpr + 'x' + (reduced ? ' rm' : ''), now);
+			requestAnimationFrame(frame);
+			break;
+		case 'resize':
+			w = d.width;
+			h = d.height;
+			dpr = Math.min(d.dpr || 1, 2);
+			if (canvas) size();
+			addLog('resize', w + '×' + h + ' @' + (d.dpr || 1) + 'x', now);
+			break;
+		case 'theme':
+			applyTheme(d);
+			addLog('theme', themeMode, now);
+			break;
+		case 'motion':
+			reduced = !!d.reducedMotion;
+			addLog('motion', reduced ? 'reduced' : 'full', now);
+			break;
+		case 'mousemove':
+			mouse.x = d.x;
+			mouse.y = d.y;
+			mouse.at = now;
+			break;
+		case 'mousedown':
+			tap.x = d.x;
+			tap.y = d.y;
+			tap.age = 0;
+			addLog('mousedown', (d.x | 0) + ',' + (d.y | 0), now);
+			break;
+		case 'mouseup':
+		case 'click':
+			addLog(d.type, (d.x | 0) + ',' + (d.y | 0), now);
+			break;
+		case 'touchstart':
+		case 'touchend':
+			addLog(d.type, (d.touches ? d.touches.length : 0) + ' pts', now);
+			break;
+		case 'context':
+			if (typeof d.exactTokens === 'number') ctxApi = { exactTokens: d.exactTokens };
+			if (typeof d.estimatedTokens === 'number') ctxDom = { messages: d.messages, chars: d.chars, estimatedTokens: d.estimatedTokens };
+			addLog('context', typeof d.exactTokens === 'number' ? d.exactTokens + ' tok' : '~' + d.estimatedTokens + ' tok', now);
+			break;
+	}
 };
-
-function startAnimation() {
-  function render() {
-    if (!ctx) return;
-    const now = performance.now();
-    const dt = now - lastFrameTime;
-    lastFrameTime = now;
-
-    // Frame time tracking
-    frameTimes.push(dt);
-    if (frameTimes.length > 120) frameTimes.shift();
-    const avgFrame = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
-    const maxFrame = Math.max(...frameTimes.slice(-60));
-
-    // FPS
-    frameCount++;
-    if (now - lastFpsTime >= 1000) {
-      fps = frameCount;
-      frameCount = 0;
-      lastFpsTime = now;
-      fpsHistory.push(fps);
-      if (fpsHistory.length > CONFIG.fpsHistorySize) fpsHistory.shift();
-    }
-
-    // Events/sec
-    eventCountWindow = eventCountWindow.filter(t => now - t < 1000);
-    eventsPerSec = eventCountWindow.length;
-
-    ctx.clearRect(0, 0, W, H);
-
-    const uptime = ((now - startTime) / 1000);
-    const p = CONFIG.padding;
-    const lh = CONFIG.lineHeight;
-    const fs = CONFIG.fontSize;
-    const colW = CONFIG.panelMaxWidth;
-
-    // ── Subtle animated background ──
-    drawBackground(ctx, now);
-
-    // ═══ Calculate panel dimensions ═══
-    let lineCount = 0;
-    lineCount += 2;  // Title + separator
-    lineCount += 1;  // "SYSTEM" header
-    lineCount += 5;  // system rows
-    lineCount += 1;  // FPS graph
-    lineCount += 3;  // graph height in lines
-    lineCount += 2;  // separator + "CHANNELS" header
-    lineCount += MESSAGE_TYPES.length;
-    lineCount += 2;  // separator + "INPUT" header
-    lineCount += 2;  // mouse + total events
-    lineCount += 2;  // separator + "CONTEXT" header
-    lineCount += 5;  // context rows
-    lineCount += 2;  // separator + "LOG" header
-    lineCount += Math.max(1, Math.min(eventLog.length, CONFIG.maxLogEntries));
-    lineCount += 1;  // bottom padding
-
-    const panelW = Math.min(colW, W - 40);
-    const panelH = lineCount * lh + p * 2;
-    const panelX = (W - panelW) / 2;
-    const panelY = Math.max(20, (H - panelH) / 2);
-
-    // ── Panel bg ──
-    ctx.save();
-    ctx.fillStyle = CONFIG.bgColor;
-    roundedRect(ctx, panelX, panelY, panelW, panelH, CONFIG.panelRadius);
-    ctx.fill();
-    // Border glow
-    ctx.shadowColor = CONFIG.colorOk;
-    ctx.shadowBlur = 12;
-    ctx.strokeStyle = CONFIG.borderColor;
-    ctx.lineWidth = 1;
-    roundedRect(ctx, panelX, panelY, panelW, panelH, CONFIG.panelRadius);
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.restore();
-
-    // ── Content rendering ──
-    const lx = panelX + p;           // Left text x
-    const rx = panelX + panelW - p;  // Right text x
-    const cx = panelX + panelW / 2;  // Center x
-    let y = panelY + p;
-
-    // ── TITLE ──
-    ctx.font = `bold ${fs + 3}px ${CONFIG.fontFamily}`;
-    ctx.fillStyle = CONFIG.colorHeader;
-    ctx.textAlign = 'center';
-    ctx.fillText('◈  CANVAS FX — DIAGNOSTIC HUD  ◈', cx, y + fs + 2);
-    y += lh;
-    sep(y); y += lh;
-
-    // ── SYSTEM ──
-    sectionHeader('SYSTEM', y); y += lh;
-    kv(y, 'UPTIME', formatUptime(uptime)); y += lh;
-    kv(y, 'FPS', `${fps}`, fpsColor(fps)); y += lh;
-    kv(y, 'FRAME AVG', `${avgFrame.toFixed(1)}ms`, avgFrame < 18 ? CONFIG.colorOk : avgFrame < 33 ? CONFIG.colorWarn : CONFIG.colorError); y += lh;
-    kv(y, 'FRAME MAX', `${maxFrame.toFixed(1)}ms`, maxFrame < 20 ? CONFIG.colorOk : maxFrame < 50 ? CONFIG.colorWarn : CONFIG.colorError); y += lh;
-    kv(y, 'EXEC MODE', isWorker ? 'Worker (OffscreenCanvas)' : 'Main Thread (Fallback)', isWorker ? CONFIG.colorOk : CONFIG.colorWarn); y += lh;
-
-    // ── FPS Graph ──
-    const graphH = lh * 3;
-    const graphY = y + 2;
-    const graphW = panelW - p * 2;
-    drawFpsGraph(ctx, lx, graphY, graphW, graphH, fpsHistory);
-    y += graphH + lh;
-
-    // ── CHANNELS ──
-    sep(y); y += lh;
-    sectionHeader('MESSAGE CHANNELS', y);
-    // Right-aligned column headers
-    ctx.textAlign = 'right';
-    ctx.fillStyle = CONFIG.colorDim;
-    ctx.font = `${fs - 2}px ${CONFIG.fontFamily}`;
-    ctx.fillText('COUNT      LAST', rx, y);
-    y += lh;
-
-    for (const t of MESSAGE_TYPES) {
-      const s = stats[t];
-      const statusColor = getStatusColor(s, now, t);
-      const icon = getStatusIcon(s, now, t);
-      const age = s.lastTime ? fmtAge(now - s.lastTime) : '  never';
-
-      ctx.font = `${fs}px ${CONFIG.fontFamily}`;
-      ctx.textAlign = 'left';
-      ctx.fillStyle = statusColor;
-      ctx.fillText(`${icon}  ${t}`, lx, y);
-
-      ctx.textAlign = 'right';
-      ctx.fillStyle = CONFIG.colorValue;
-      ctx.fillText(`${pad(s.count, 6)}   ${age.padStart(7)}`, rx, y);
-      y += lh;
-    }
-
-    // ── INPUT ──
-    sep(y); y += lh;
-    sectionHeader('INPUT & THROUGHPUT', y); y += lh;
-    kv(y, 'MOUSE', mouse.x >= 0 ? `(${mouse.x|0}, ${mouse.y|0})` : 'No data', mouse.x >= 0 ? CONFIG.colorValue : CONFIG.colorDim); y += lh;
-    kv(y, 'EVENTS/SEC', `${eventsPerSec}`, eventsPerSec > 0 ? CONFIG.colorValue : CONFIG.colorDim);
-    // Right side: total events
-    ctx.textAlign = 'right';
-    ctx.fillStyle = CONFIG.colorDim;
-    ctx.font = `${fs - 1}px ${CONFIG.fontFamily}`;
-    ctx.fillText(`total: ${totalEventsReceived}`, rx, y);
-    y += lh;
-
-    // ── CONTEXT ──
-    sep(y); y += lh;
-    sectionHeader('CONTEXT DATA', y); y += lh;
-
-    // DOM Observer
-    ctx.font = `bold ${fs - 1}px ${CONFIG.fontFamily}`;
-    ctx.textAlign = 'left';
-    ctx.fillStyle = 'rgba(255,255,255,0.35)';
-    ctx.fillText('DOM Observer', lx, y);
-    ctx.textAlign = 'right';
-    const domAge = ctxDOM.lastTime ? fmtAge(now - ctxDOM.lastTime) + ' ago' : 'never';
-    ctx.fillStyle = ctxDOM.lastTime ? CONFIG.colorDim : CONFIG.colorError;
-    ctx.fillText(domAge, rx, y);
-    y += lh;
-
-    kv(y, '  MESSAGES', ctxDOM.messages != null ? `${ctxDOM.messages}` : '—', ctxDOM.messages != null ? CONFIG.colorValue : CONFIG.colorDim); y += lh;
-    kv(y, '  CHARS / EST TOKENS', ctxDOM.chars != null ? `${ctxDOM.chars.toLocaleString()} / ~${ctxDOM.estimatedTokens}` : '—', ctxDOM.estimatedTokens != null ? CONFIG.colorValue : CONFIG.colorDim); y += lh;
-
-    // Socket Interceptor
-    ctx.font = `bold ${fs - 1}px ${CONFIG.fontFamily}`;
-    ctx.textAlign = 'left';
-    ctx.fillStyle = 'rgba(255,255,255,0.35)';
-    ctx.fillText('Socket Interceptor', lx, y);
-    ctx.textAlign = 'right';
-    const apiAge = ctxAPI.lastTime ? fmtAge(now - ctxAPI.lastTime) + ' ago' : 'never';
-    ctx.fillStyle = ctxAPI.lastTime ? CONFIG.colorDim : CONFIG.colorDim;
-    ctx.fillText(apiAge, rx, y);
-    y += lh;
-
-    kv(y, '  EXACT TOKENS', ctxAPI.exactTokens != null ? `${ctxAPI.exactTokens} (P:${ctxAPI.promptTokens} C:${ctxAPI.completionTokens})` : '—', ctxAPI.exactTokens != null ? CONFIG.colorOk : CONFIG.colorDim); y += lh;
-
-    // ── EVENT LOG ──
-    sep(y); y += lh;
-    sectionHeader('EVENT LOG', y); y += lh;
-
-    if (eventLog.length === 0) {
-      ctx.font = `${fs - 1}px ${CONFIG.fontFamily}`;
-      ctx.fillStyle = CONFIG.colorDim;
-      ctx.textAlign = 'center';
-      ctx.fillText('Waiting for events…', cx, y);
-      y += lh;
-    } else {
-      for (let i = 0; i < Math.min(eventLog.length, CONFIG.maxLogEntries); i++) {
-        const entry = eventLog[i];
-        const age = (now - entry.timestamp) / 1000;
-        const alpha = Math.max(0.25, 1 - age / 12);
-
-        ctx.globalAlpha = alpha;
-        ctx.font = `${fs - 1}px ${CONFIG.fontFamily}`;
-        ctx.textAlign = 'left';
-        ctx.fillStyle = CONFIG.colorDim;
-        ctx.fillText(`${entry.time}s`, lx, y);
-        ctx.fillStyle = getTypeColor(entry.type);
-        ctx.fillText(entry.type, lx + 58, y);
-        ctx.fillStyle = CONFIG.colorValue;
-        ctx.font = `${fs - 1}px ${CONFIG.fontFamily}`;
-        ctx.fillText(entry.detail, lx + 148, y);
-        ctx.globalAlpha = 1;
-        y += lh;
-      }
-    }
-
-    // ── Mouse crosshair ──
-    if (mouse.x >= 0 && mouse.y >= 0) {
-      ctx.save();
-      ctx.strokeStyle = 'rgba(0, 255, 136, 0.15)';
-      ctx.lineWidth = 0.5;
-      ctx.setLineDash([6, 6]);
-      ctx.beginPath();
-      ctx.moveTo(mouse.x, 0); ctx.lineTo(mouse.x, H);
-      ctx.moveTo(0, mouse.y); ctx.lineTo(W, mouse.y);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle = CONFIG.colorOk;
-      ctx.globalAlpha = 0.6;
-      ctx.beginPath();
-      ctx.arc(mouse.x, mouse.y, 3, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    requestAnimationFrame(render);
-  }
-
-  // ── Scoped helpers (use closure over ctx, lx, rx, etc.) ──
-  const lx = () => panelX_ref + CONFIG.padding;
-  const rx = () => panelX_ref + panelW_ref - CONFIG.padding;
-  let panelX_ref, panelW_ref;
-
-  function kv(y, label, value, valueColor) {
-    ctx.font = `${CONFIG.fontSize}px ${CONFIG.fontFamily}`;
-    ctx.textAlign = 'left';
-    ctx.fillStyle = CONFIG.colorLabel;
-    const _lx = (W - Math.min(CONFIG.panelMaxWidth, W - 40)) / 2 + CONFIG.padding;
-    const _rx = _lx + Math.min(CONFIG.panelMaxWidth, W - 40) - CONFIG.padding * 2;
-    ctx.fillText(label, _lx, y);
-    ctx.textAlign = 'right';
-    ctx.fillStyle = valueColor || CONFIG.colorValue;
-    ctx.fillText(value, _rx, y);
-  }
-
-  function sectionHeader(text, y) {
-    const _cx = W / 2;
-    ctx.font = `bold ${CONFIG.fontSize}px ${CONFIG.fontFamily}`;
-    ctx.fillStyle = CONFIG.colorHeader;
-    ctx.textAlign = 'center';
-    ctx.fillText(`── ${text} ──`, _cx, y);
-  }
-
-  function sep(y) {
-    const pw = Math.min(CONFIG.panelMaxWidth, W - 40);
-    const px = (W - pw) / 2;
-    ctx.strokeStyle = CONFIG.colorDim;
-    ctx.lineWidth = 0.5;
-    ctx.beginPath();
-    ctx.moveTo(px + CONFIG.padding, y + 5);
-    ctx.lineTo(px + pw - CONFIG.padding, y + 5);
-    ctx.stroke();
-  }
-
-  requestAnimationFrame(render);
-}
-
-// ═══ Drawing Helpers ═══
-
-function drawBackground(ctx, now) {
-  ctx.save();
-  ctx.globalAlpha = 0.04;
-  ctx.strokeStyle = CONFIG.colorOk;
-  ctx.lineWidth = 0.5;
-  const gs = 50;
-  const offset = (now * 0.008) % gs;
-  ctx.beginPath();
-  for (let x = -gs + offset; x < W + gs; x += gs) {
-    ctx.moveTo(x, 0); ctx.lineTo(x, H);
-  }
-  for (let y = -gs + offset; y < H + gs; y += gs) {
-    ctx.moveTo(0, y); ctx.lineTo(W, y);
-  }
-  ctx.stroke();
-  ctx.restore();
-
-  // Scan line
-  const scanY = (now * 0.04) % H;
-  const g = ctx.createLinearGradient(0, scanY - 40, 0, scanY + 40);
-  g.addColorStop(0, 'rgba(0,255,136,0)');
-  g.addColorStop(0.5, 'rgba(0,255,136,0.03)');
-  g.addColorStop(1, 'rgba(0,255,136,0)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, scanY - 40, W, 80);
-}
-
-function drawFpsGraph(ctx, x, y, w, h, history) {
-  if (history.length === 0) return;
-  const barW = Math.max(2, (w / CONFIG.fpsHistorySize) - 1);
-  const maxFps = 72;
-
-  ctx.save();
-  // Graph background
-  ctx.fillStyle = 'rgba(0,0,0,0.3)';
-  roundedRect(ctx, x, y, w, h, 4);
-  ctx.fill();
-
-  // 60fps target line
-  const target60Y = y + h - (60 / maxFps) * h;
-  ctx.strokeStyle = 'rgba(0,255,136,0.15)';
-  ctx.lineWidth = 0.5;
-  ctx.setLineDash([3, 3]);
-  ctx.beginPath();
-  ctx.moveTo(x, target60Y);
-  ctx.lineTo(x + w, target60Y);
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  ctx.fillStyle = 'rgba(0,255,136,0.12)';
-  ctx.font = `${CONFIG.fontSize - 3}px ${CONFIG.fontFamily}`;
-  ctx.textAlign = 'left';
-  ctx.fillText('60', x + 2, target60Y - 2);
-
-  // Bars
-  for (let i = 0; i < history.length; i++) {
-    const val = Math.min(history[i], maxFps);
-    const barH = (val / maxFps) * h;
-    const bx = x + w - (history.length - i) * (barW + 1);
-    const by = y + h - barH;
-
-    if (val >= 55) ctx.fillStyle = 'rgba(0,255,136,0.5)';
-    else if (val >= 30) ctx.fillStyle = 'rgba(255,170,0,0.5)';
-    else ctx.fillStyle = 'rgba(255,68,85,0.5)';
-
-    ctx.fillRect(bx, by, barW, barH);
-  }
-
-  // Label
-  ctx.textAlign = 'right';
-  ctx.fillStyle = CONFIG.colorDim;
-  ctx.font = `${CONFIG.fontSize - 2}px ${CONFIG.fontFamily}`;
-  ctx.fillText('FPS HISTORY (60s)', x + w - 2, y + CONFIG.fontSize - 2);
-  ctx.restore();
-}
-
-function getStaleMs(type) {
-  const cat = EVENT_CATEGORY[type];
-  if (cat === 'oneshot') return Infinity;   // Never stale once received
-  if (cat === 'continuous') return 5000;    // Stale after 5s of no input
-  return 60000;                             // On-demand: stale after 60s
-}
-
-function getStatusColor(stat, now, type) {
-  if (stat.count === 0) return CONFIG.colorError;
-  if (now - stat.lastTime > getStaleMs(type)) return CONFIG.colorWarn;
-  return CONFIG.colorOk;
-}
-
-function getStatusIcon(stat, now, type) {
-  if (stat.count === 0) return '✗';
-  if (now - stat.lastTime > getStaleMs(type)) return '◌';
-  return '✓';
-}
-
-function getTypeColor(type) {
-  const colors = {
-    init: '#00ddff', resize: '#00ddff',
-    mousemove: '#88ff88', click: '#ff8844',
-    mousedown: '#ff6666', mouseup: '#66ff66',
-    touchstart: '#ffaa00', touchmove: '#ffcc44', touchend: '#ff8800',
-    context: '#cc88ff',
-  };
-  return colors[type] || CONFIG.colorValue;
-}
-
-function fpsColor(v) {
-  if (v >= 55) return CONFIG.colorOk;
-  if (v >= 30) return CONFIG.colorWarn;
-  return CONFIG.colorError;
-}
-
-function fmtAge(ms) {
-  if (ms < 1000) return `${ms|0}ms`;
-  if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
-  return `${(ms / 60000).toFixed(1)}m`;
-}
-
-function formatUptime(sec) {
-  if (sec < 60) return `${sec.toFixed(1)}s`;
-  const m = Math.floor(sec / 60);
-  const s = (sec % 60).toFixed(0);
-  if (m < 60) return `${m}m ${s}s`;
-  const h = Math.floor(m / 60);
-  return `${h}h ${m % 60}m ${s}s`;
-}
-
-function pad(n, w) { return String(n).padStart(w); }
-
-function roundedRect(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
-}
