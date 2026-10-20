@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.15.0
+version: 1.16.6
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -22,7 +22,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.15.0"
+VERSION = "1.16.6"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -2412,30 +2412,51 @@ class Event:
     # but Open WebUI fires event() from multiple concurrent contexts during startup.
     _index_lock_path = None  # Set lazily on first use
 
-    @classmethod
-    def _get_index_lock(cls):
-        """Return a context manager that acquires an exclusive file lock."""
-        import fcntl
+    @staticmethod
+    def _file_lock(path: Path):
+        """Lock one file across processes on Windows and Unix."""
         from contextlib import contextmanager
 
         @contextmanager
-        def _flock():
-            if cls._index_lock_path is None:
-                try:
-                    from open_webui.env import DATA_DIR
-                    cls._index_lock_path = Path(DATA_DIR) / "theme" / ".index.lock"
-                except ImportError:
-                    cls._index_lock_path = Path("/tmp/.owui_index.lock")
-                cls._index_lock_path.parent.mkdir(parents=True, exist_ok=True)
-            fd = open(cls._index_lock_path, "w")
-            try:
-                fcntl.flock(fd, fcntl.LOCK_EX)
-                yield
-            finally:
-                fcntl.flock(fd, fcntl.LOCK_UN)
-                fd.close()
+        def locked():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with open(path, "a+b") as fd:
+                if os.name == "nt":
+                    import msvcrt
 
-        return _flock()
+                    # msvcrt locks a byte range, so ensure byte zero exists.
+                    fd.seek(0, os.SEEK_END)
+                    if fd.tell() == 0:
+                        fd.write(b"\0")
+                        fd.flush()
+                    fd.seek(0)
+                    msvcrt.locking(fd.fileno(), msvcrt.LK_LOCK, 1)
+                    try:
+                        yield
+                    finally:
+                        fd.seek(0)
+                        msvcrt.locking(fd.fileno(), msvcrt.LK_UNLCK, 1)
+                else:
+                    import fcntl
+
+                    fcntl.flock(fd, fcntl.LOCK_EX)
+                    try:
+                        yield
+                    finally:
+                        fcntl.flock(fd, fcntl.LOCK_UN)
+
+        return locked()
+
+    @classmethod
+    def _get_index_lock(cls):
+        """Return a context manager that acquires an exclusive file lock."""
+        if cls._index_lock_path is None:
+            try:
+                from open_webui.env import DATA_DIR
+                cls._index_lock_path = Path(DATA_DIR) / "theme" / ".index.lock"
+            except ImportError:
+                cls._index_lock_path = Path("/tmp/.owui_index.lock")
+        return cls._file_lock(cls._index_lock_path)
 
     @staticmethod
     def _atomic_write(path, content):
@@ -3503,11 +3524,10 @@ class Event:
 
         _save_lock alone only covered one worker: with several workers or
         containers on one DATA_DIR, two saves could still leave one's CSS
-        beside the other's state. The flock on a file under theme/ covers
+        beside the other's state. The file lock under theme/ covers
         every process; the thread lock keeps one process's threads from
-        sharing a single flock.
+        sharing a single file lock.
         """
-        import fcntl
         from contextlib import contextmanager
 
         @contextmanager
@@ -3519,16 +3539,8 @@ class Event:
                     path = Path(DATA_DIR) / "theme" / ".save.lock"
                 except ImportError:
                     path = Path("/app/backend/data/theme/.save.lock")
-                path.parent.mkdir(parents=True, exist_ok=True)
-                fd = open(path, "w")
-                try:
-                    fcntl.flock(fd, fcntl.LOCK_EX)
+                with cls._file_lock(path):
                     yield
-                finally:
-                    try:
-                        fcntl.flock(fd, fcntl.LOCK_UN)
-                    finally:
-                        fd.close()
 
         return _txn()
     _PERSONAL_CACHE_MAX = 512
