@@ -355,6 +355,34 @@ test('Enable Auth Page Theming off keeps the sign-in page on Open WebUI\'s look'
   }
 });
 
+test('Overlay Transparency glazes the Settings window but not a shared chat\'s messages', async ({ admin }) => {
+  await saveTheme(admin, markerTheme('instance'));
+  await setValves(admin, { overlay_transparency: 'translucent' });
+  try {
+    const now = Math.floor(Date.now() / 1000);
+    const message = { id: 'm1', parentId: null, childrenIds: [], role: 'user', content: 'A shared message', timestamp: now };
+    const made = await api('POST', '/api/v1/chats/new', { chat: { title: 'Shared', history: { messages: { m1: message }, currentId: 'm1' }, messages: [message] } }, admin);
+    const shared = await api('POST', `/api/v1/chats/${made.json.id}/share`, undefined, admin);
+    if (!shared.json || !shared.json.share_id) throw new Error('Could not share a chat: ' + shared.status);
+    // A shared chat sits outside .app, in SvelteKit's page wrapper, which isn't an overlay
+    const page = await openPage({ token: admin });
+    await page.goto(`${BASE}/s/${shared.json.share_id}`);
+    await loaderReady(page);
+    await page.waitForSelector('.chat-user .rounded-3xl', { timeout: WAIT_MS });
+    await new Promise((r) => setTimeout(r, 1000));
+    const bubble = await page.evaluate(() => getComputedStyle(document.querySelector('.chat-user .rounded-3xl')).backdropFilter);
+    if (bubble !== 'none') throw new Error('the shared chat\'s message is glazed: ' + bubble);
+    const app = await openPage({ token: admin });
+    await app.goto(BASE + '/');
+    await loaderReady(app);
+    await openSettings(app);
+    await waitFor('a glazed Settings window', () => app.evaluate(() =>
+      Array.from(document.querySelectorAll('body *')).some((e) => !e.closest('.app') && getComputedStyle(e).backdropFilter !== 'none') || 'none glazed'));
+  } finally {
+    await setValves(admin, {});
+  }
+});
+
 test('a Canvas FX animation runs on app pages and not where it\'s hidden', async ({ admin }) => {
   const theme = markerTheme('instance', {
     canvasEnabled: true,

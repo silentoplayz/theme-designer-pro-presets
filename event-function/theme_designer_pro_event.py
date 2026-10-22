@@ -18720,8 +18720,9 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         """
         blur = 'blur(20px) saturate(1.3)'
 
-        # Selector fragment: portal wrappers (direct children of body that aren't part of the app/theme system)
-        pex = ':not(.app):not(#theme-designer-container):not([id^="owui-"]):not(#svelte):not(script):not(style)'
+        # Selector fragment: portal wrappers (direct children of body that aren't part of the app/theme system).
+        # SvelteKit's page wrapper is a body > div too; pages outside .app, such as a shared chat, sit in it.
+        pex = ':not(.app):not(#theme-designer-container):not([id^="owui-"]):not(#svelte):not([style*="display: contents"]):not(script):not(style)'
         # Selector fragment: background-bearing elements inside portals (exclude interactive widgets + app internals)
         iex = ':not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *)'
 
