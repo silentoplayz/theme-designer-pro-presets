@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.16.6-blue)
+![Version](https://img.shields.io/badge/version-1.16.7-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -508,6 +508,12 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
 
 ---
+
+## 📝 What's New in 1.16.7
+
+A fix release. Nothing to change on your side: paste it in and save.
+
+**A shared chat keeps its own look with Overlay Transparency on.** The valve's frosted glass, meant for menus and dialogs, also reached every element of a chat opened from a share link, because that page sits outside the main app. Your message bubbles there turned into dark glass, colors from other plugins such as Texting Bubbles included, and the page behind them was blurred. The glass now stays on menus and dialogs, and a shared chat looks the way your theme shows chats everywhere else.
 
 ## 📝 What's New in 1.16.6
 
