@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.16.7-blue)
+![Version](https://img.shields.io/badge/version-1.17.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -125,9 +125,9 @@ You can also import individual presets by pasting any file's GitHub URL directly
 The [Launcher Tool](../launcher/) is a lightweight companion that brings the designer into an Open WebUI chat:
 
 - _"Open Theme Designer Pro"_ opens the designer inside the chat. Users get their own personal theme, which needs **Allow Personal Themes** on; admins get the instance theme, or their own when they ask for it.
-- _"Give me a warm copper theme"_ has the chat model pick the colors, as the Tool's AI Color Consultant did, and opens the designer with them applied. It changes the user's own personal theme. An admin who asks for it _"for everyone"_ changes the instance theme instead.
+- _"Make my chat a koi pond"_ or _"a warm copper theme"_ builds a whole theme (a palette and accent, an animated Canvas FX background from the presets catalog, frosted glass panels, or a gradient when it's still) and shows it as a card with a live preview. **Apply** puts it on the user's own personal theme and adds it to their gallery; **Undo** puts back what they had. An admin who asks for it _"for everyone"_ changes the instance theme instead.
 
-Everyone who uses it needs **Settings > Interface > iframe Sandbox Allow Same Origin** turned on, or the chat shows a note naming the setting instead of the designer. The [Launcher's README](../launcher/README.md) covers installing it, that setting, and why a link can't change anyone's theme.
+Everyone who uses it needs **Settings > Interface > iframe Sandbox Allow Same Origin** turned on to apply a theme or open the designer in a chat. Without it, the card still previews the theme and names the setting. The [Launcher's README](../launcher/README.md) covers installing it, that setting, and why a link can't change anyone's theme.
 
 ---
 
@@ -371,7 +371,7 @@ All routes are registered under the configurable `designer_url` base (default: `
 |---|---|---|---|
 | GET | `{designer_url}` | Admin | Serves the Theme Designer Pro HTML page |
 | GET | `{designer_url}?scope=me` | Signed in | Serves the designer on the signed-in user's personal theme (403 while personal themes are off: a short page for a browser, JSON otherwise) |
-| GET | `{designer_url}?apply=…` | As above | Opens the designer with a theme from a chat applied. Only a token the Launcher Tool signed for the same user, within five minutes, is applied; anything else is ignored |
+| GET | `{designer_url}?apply=…` | As above | Opens the designer for a theme from a chat. A Launcher 2.0 token carries the theme's SHA-256: the designer waits for the chat's card to send the theme and applies it only if it has that hash, for the same user, within 30 days. An older token carries colors and applies them on load within five minutes. Anything else is ignored |
 | POST | `{designer_url}` | Admin | Saves CSS + state + library, broadcasts SSE update |
 | POST | `{designer_url}/consult` | Admin, or signed in with personal themes on | The AI Consultant: `{"description": "..."}` in, `{"hue", "chroma", "lightness", "gradient", "name", "model"}` out. One request every few seconds per user |
 | POST | `{designer_url}/me` | Signed in | Saves the user's personal theme or library; `{"reset": true}` removes the theme and keeps the library |
@@ -508,6 +508,10 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
 
 ---
+
+## 📝 What's New in 1.17.0
+
+**Whole themes from a chat, applied from a card.** With the Theme Designer Pro Launcher 2.0, asking a chat for a theme no longer opens this designer in the chat. The Launcher builds a whole theme, with a palette, an accent, an animated Canvas FX background from the presets catalog, frosted glass panels or a gradient, and shows it as a card with a live preview. **Apply** opens the designer out of sight, which applies and saves the theme the way an import would and adds it to the Theme Gallery; **Undo** puts back the theme from before. The designer applies a theme from a chat only when it has the SHA-256 the Launcher signed for that person. Links from older Launchers still work as before.
 
 ## 📝 What's New in 1.16.7
 

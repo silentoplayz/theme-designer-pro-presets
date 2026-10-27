@@ -22,7 +22,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.16.7"
+VERSION = "1.17.0"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -4619,6 +4619,10 @@ class Event:
     # designer applies them on load. Unsigned values in the URL are ignored, so
     # a link alone can never restyle anyone's theme.
     APPLY_TOKEN_PREFIX = "tdp-apply.v1."
+    # A whole theme the Launcher built: the token carries the theme file's
+    # SHA-256, and the chat's theme card sends the file itself to the
+    # designer, which applies it only when it hashes to that value.
+    THEME_TOKEN_PREFIX = "tdp-apply.v2."
 
     @staticmethod
     def _apply_token_key() -> bytes | None:
@@ -4637,15 +4641,19 @@ class Event:
         import time as _time
 
         key = cls._apply_token_key()
-        if not token or not key or not str(token).startswith(cls.APPLY_TOKEN_PREFIX):
+        prefix = next(
+            (p for p in (cls.APPLY_TOKEN_PREFIX, cls.THEME_TOKEN_PREFIX) if str(token or "").startswith(p)),
+            None,
+        )
+        if not token or not key or not prefix:
             return None
         # A real token is ASCII; anything else in the link raised and turned
         # the designer page into a server error
         if not str(token).isascii():
             return None
-        body, _, sig = str(token)[len(cls.APPLY_TOKEN_PREFIX):].partition(".")
+        body, _, sig = str(token)[len(prefix):].partition(".")
         expected = base64.urlsafe_b64encode(
-            hmac.new(key, (cls.APPLY_TOKEN_PREFIX + body).encode("ascii"), hashlib.sha256).digest()
+            hmac.new(key, (prefix + body).encode("ascii"), hashlib.sha256).digest()
         ).decode("ascii").rstrip("=")
         if not sig or not hmac.compare_digest(sig, expected):
             return None
@@ -4659,6 +4667,12 @@ class Event:
             return None
         if (data.get("s") == "me") != personal:
             return None
+        mode = data.get("m") if data.get("m") in ("dark", "oled", "light", "her") else "all"
+        if prefix == cls.THEME_TOKEN_PREFIX:
+            sha = data.get("h")
+            if not isinstance(sha, str) or not re.fullmatch(r"[0-9a-f]{64}", sha):
+                return None
+            return {"kind": "theme", "sha": sha, "mode": mode}
         theme = cls._parse_consult(_json.dumps({
             "hue": data.get("h"), "chroma": data.get("c"), "lightness": data.get("l"),
             "gradient": bool(data.get("g")), "name": data.get("n") or "",
@@ -6442,11 +6456,12 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                 <details class="doc-accordion">
                     <summary>6. Theming From a Chat: the Launcher Tool <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
-                        <p>The <b>Theme Designer Pro Launcher</b> is a companion Tool that brings this designer into a chat. Ask it to open the designer, or describe a theme, such as &ldquo;a forest green theme, like moss after rain&rdquo;. The chat model picks the colors and opens the designer in the chat with them applied, ready to fine-tune.</p>
+                        <p>The <b>Theme Designer Pro Launcher</b> is a companion Tool for theming from a chat. Describe a theme, such as &ldquo;make my chat a koi pond&rdquo; or &ldquo;a forest green theme, like moss after rain&rdquo;, and the Launcher builds a whole theme: a palette and accent in the colors asked for, an animated Canvas FX background picked from the presets catalog, frosted glass panels, or a gradient when it&rsquo;s still. The chat shows it as a card with a live preview. <b>Apply</b> puts it on and adds it to the Theme Gallery, and <b>Undo</b> puts back the theme from before. Ask it to open the designer and it opens this designer in the chat instead.</p>
                         <ul>
                             <li><b>Whose Theme Changes:</b> The person&rsquo;s own personal theme, which needs <b>Allow Personal Themes</b> on. An admin who asks for a theme &ldquo;for everyone&rdquo; changes the instance theme instead.</li>
-                            <li><b>Why a Link Can&rsquo;t Change a Theme:</b> The designer never applies colors that are simply written into its address. The Launcher signs them with Open WebUI&rsquo;s <code>WEBUI_SECRET_KEY</code> for the one person who asked, and the designer applies them only for that person, within five minutes, and only where they were meant to land. The chat&rsquo;s <b>Pop out</b> link opens the designer without applying anything.</li>
-                            <li><b>The Setting It Needs:</b> Everyone who uses it needs <b>Settings &gt; Interface &gt; iframe Sandbox Allow Same Origin</b> on, or the chat shows a note naming that setting instead of the designer. With it on, HTML that tools and models show in chats runs with the page&rsquo;s access, so turn it on only on an instance whose tools you trust.</li>
+                            <li><b>What Apply Does:</b> The card opens this designer out of sight with a link the Launcher signed, hands it the theme, and the designer applies and saves it the way an import would, then closes. Open pages follow live.</li>
+                            <li><b>Why a Link Can&rsquo;t Change a Theme:</b> The designer never applies a theme that is simply written into its address or sent to it. The Launcher signs the theme&rsquo;s SHA-256 with Open WebUI&rsquo;s <code>WEBUI_SECRET_KEY</code> for the one person who asked, and the designer applies only a theme with that hash, only for that person, within 30 days, and only where it was meant to land. The theme&rsquo;s Canvas FX script comes from the catalog the server fetched, never from the chat model, so Apply asks no second question about it. Links from Launchers before 2.0 carry colors alone and apply for five minutes.</li>
+                            <li><b>The Setting It Needs:</b> Everyone who uses it needs <b>Settings &gt; Interface &gt; iframe Sandbox Allow Same Origin</b> on to apply a theme or open the designer in a chat. Without it, the card still previews the theme and names the setting. With it on, HTML that tools and models show in chats runs with the page&rsquo;s access, so turn it on only on an instance whose tools you trust.</li>
                             <li><b>Getting It:</b> Install it from its page on the Open WebUI community platform, or from the <code>launcher/</code> folder of the <a href="https://github.com/silentoplayz/theme-designer-pro-presets" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">presets repository</a>, whose README covers its valves.</li>
                         </ul>
                     </div>
@@ -7688,7 +7703,7 @@ ProxyPassReverse / http://127.0.0.1:8080/</code></pre>
                             <li><b>Live push stopped working after re-saving the function.</b> This should not happen — SSE connections are persisted on <code>app.state</code> and survive function hot-reloads. If you do experience this, verify the SSE endpoint is accessible at <code>{ROUTE_BASE}/events</code>. The server sends a heartbeat every 15 seconds — if the connection is truly dead, the EventSource will auto-reconnect after 3 seconds.</li>
                             <li><b>Draft mode keeps the live theme to itself.</b> Theme CSS and state use <code>sessionStorage</code> (tab-scoped), <code>syncToServer()</code> is gated off, and mode changes (Dark/Light/System/etc.) apply only to the designer page&rsquo;s <code>&lt;html&gt;</code> element, so other tabs and the admin&rsquo;s live session aren&rsquo;t affected. Gallery and preset changes still sync to the server library.</li>
                             <li><b>The AI Consultant says &ldquo;The model could not answer&rdquo;.</b> The model is asked as the signed-in person, so a user needs access to the model in the <b>AI Consultant Model</b> valve, or to the task model, just as they do for chat titles. &ldquo;No model to ask&rdquo; means the valve names a model that isn&rsquo;t available, or the valve is empty and no task model is set. &ldquo;Wait a few seconds between requests&rdquo; appears for requests less than 3 seconds apart. &ldquo;Access denied&rdquo; means a non-admin tried it while <b>Allow Personal Themes</b> is off.</li>
-                            <li><b>The Launcher Tool shows a note instead of the designer in a chat.</b> Everyone who uses it needs <b>Settings &gt; Interface &gt; iframe Sandbox Allow Same Origin</b> on in their own settings. Without it, the chat&rsquo;s frame has no origin of its own, so the designer gets no sign-in. With it on, HTML that tools and models show in chats runs with the page&rsquo;s access, so turn it on only on an instance whose tools you trust. If the frame says personal themes are turned off, the admin needs to turn on <b>Allow Personal Themes</b>.</li>
+                            <li><b>The Launcher Tool&rsquo;s card can&rsquo;t apply, or a note shows instead of the designer.</b> Everyone who uses it needs <b>Settings &gt; Interface &gt; iframe Sandbox Allow Same Origin</b> on in their own settings. Without it, the chat&rsquo;s frame has no origin of its own, so the designer gets no sign-in. With it on, HTML that tools and models show in chats runs with the page&rsquo;s access, so turn it on only on an instance whose tools you trust. If the frame says personal themes are turned off, the admin needs to turn on <b>Allow Personal Themes</b>.</li>
                             <li><b>Turning the function off does nothing on a recent Open WebUI.</b> Since v0.12.0, Open WebUI names each function&rsquo;s module <code>function_&lt;id&gt;_&lt;32 hex characters&gt;</code>. Versions of Theme Designer Pro before 1.9.1 read their ID from that name, so they never recognized their own disable event; update to the current version.</li>
                             <li><b>Designer URL valve set to a path without /api/v1/.</b> The designer auto-corrects URLs that don't start with <code>/api/v1/</code> to prevent the SPA catch-all from intercepting the route. A warning is logged when auto-correction occurs. Check your Open WebUI logs for <code>[Theme Pro]</code> messages.</li>
                         </ul>
@@ -18251,10 +18266,153 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     setupVariableGridDelegation();
     setupAccentGridDelegation();
     commitChange({ clearRef: false, snapshots: true }); // Seed undo history with initial state
+    // A whole theme the Theme Designer Pro Launcher tool built in a chat. Its
+    // signed link names the theme file's SHA-256; the chat's theme card opens
+    // this designer out of sight and sends the file, and only a file with
+    // that hash is applied. The card ran on the user's
+    // click, so its Canvas FX script needs no second question here.
+    function chatTheme(spec) {
+        const cfg = window.__THEME_PRO_CONFIG__ || {};
+        const peer = window.parent !== window ? window.parent : null;
+        if (!peer) return;
+        const send = msg => { try { peer.postMessage(Object.assign({ tdpChatTheme: spec.sha }, msg), '*'); } catch (x) {} };
+        const beforeKey = 'owui_tdp_chat_before_' + spec.sha;
+        let busy = false;
+
+        // crypto.subtle only exists on HTTPS and localhost; plain HTTP on a
+        // LAN address still has to check the hash
+        async function sha256(text) {
+            const bytes = new TextEncoder().encode(text);
+            if (window.crypto && crypto.subtle) {
+                const d = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+                return Array.from(d, b => b.toString(16).padStart(2, '0')).join('');
+            }
+            const K = [0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+            const H = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+            const len = bytes.length, total = ((len + 9 + 63) >> 6) << 6, m = new Uint8Array(total);
+            m.set(bytes); m[len] = 0x80;
+            const view = new DataView(m.buffer);
+            view.setUint32(total - 8, Math.floor(len / 0x20000000)); view.setUint32(total - 4, (len << 3) >>> 0);
+            const w = new Uint32Array(64), rot = (x, n) => (x >>> n) | (x << (32 - n));
+            for (let o = 0; o < total; o += 64) {
+                for (let i = 0; i < 16; i++) w[i] = view.getUint32(o + i * 4);
+                for (let i = 16; i < 64; i++) {
+                    const s0 = rot(w[i - 15], 7) ^ rot(w[i - 15], 18) ^ (w[i - 15] >>> 3), s1 = rot(w[i - 2], 17) ^ rot(w[i - 2], 19) ^ (w[i - 2] >>> 10);
+                    w[i] = (w[i - 16] + s0 + w[i - 7] + s1) >>> 0;
+                }
+                let [a, b, c, d, e, f, g, h] = H;
+                for (let i = 0; i < 64; i++) {
+                    const t1 = (h + (rot(e, 6) ^ rot(e, 11) ^ rot(e, 25)) + ((e & f) ^ (~e & g)) + K[i] + w[i]) >>> 0;
+                    const t2 = ((rot(a, 2) ^ rot(a, 13) ^ rot(a, 22)) + ((a & b) ^ (a & c) ^ (b & c))) >>> 0;
+                    h = g; g = f; f = e; e = (d + t1) >>> 0; d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+                }
+                [a, b, c, d, e, f, g, h].forEach((v, i) => { H[i] = (H[i] + v) >>> 0; });
+            }
+            return H.map(v => v.toString(16).padStart(8, '0')).join('');
+        }
+
+        // Straight to the server, Draft or not, and only answered once it is
+        // saved: the card closes this page as soon as it hears back
+        async function save(body) {
+            const r = await fetch('{ROUTE_BASE}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(Object.assign({ origin: TAB_ORIGIN }, body))
+            });
+            if (!r.ok) {
+                const d = await r.json().catch(() => null);
+                throw new Error((d && d.error) || ('The theme could not be saved (HTTP ' + r.status + ').'));
+            }
+        }
+        async function saveTheme() {
+            _userActed = true;
+            window.__TDP_HOLD_SAVES__ = false;
+            const sections = generateThemeSections();
+            await save({ css: assembleThemeCss(sections), state: Storage.getRaw('theme') || '{}', sections });
+            if (cfg.scope === 'me') window.dispatchEvent(new Event('tdp-personal-saving'));
+            // The gallery saves half a second after a change; wait for it too
+            await new Promise(resolve => setTimeout(resolve, 700));
+            await _libQueue;
+        }
+
+        async function apply(text) {
+            if (await sha256(text) !== spec.sha) throw new Error('This theme does not match the one the chat signed.');
+            const data = JSON.parse(text);
+            if (!data || !data.dark || !data.light) throw new Error('The chat sent something that is not a theme.');
+            const theme = {
+                name: String(data.name || 'Chat theme'), description: String(data.description || ''),
+                author: String(data.author || ''), version: String(data.version || '1.0.0'), targetVersion: String(data.targetVersion || ''),
+                repositoryUrl: '', updateUrl: '',
+                dark: data.dark, light: data.light, oled: data.oled || null, her: data.her || null
+            };
+            ensureAllModes(theme);
+            MODES.forEach(m => { theme[m] = normalizeModeData(theme[m]); });
+            // What Undo puts back: this theme, or for a user still on the
+            // instance theme, the instance theme
+            try {
+                sessionStorage.setItem(beforeKey, JSON.stringify({
+                    ownTheme: cfg.scope !== 'me' || !!cfg.personalHasTheme,
+                    state: structuredClone({ themeData, activeThemeRef, activeCanvasRef, activeCssRef, activeGradientRef })
+                }));
+            } catch (x) {}
+            const snapshots = getSnapshots();
+            const known = isThemeDuplicate(theme, snapshots);
+            if (!known) {
+                snapshots.unshift(structuredClone(theme));
+                saveSnapshots(snapshots);
+                shiftThemeRefs(1);
+            }
+            const modes = spec.mode && spec.mode !== 'all' ? [spec.mode] : MODES.slice();
+            modes.forEach(m => {
+                themeData[m] = structuredClone(theme[m]);
+                activeThemeRef[m] = known ? null : { type: 'snapshot', id: 0 };
+                activeCanvasRef[m] = null; activeCssRef[m] = null; activeGradientRef[m] = null;
+            });
+            shouldInject = true;
+            commitChange({ clearRef: false, snapshots: true });
+            await saveTheme();
+            return theme.name;
+        }
+
+        async function undo() {
+            let before = null;
+            try { before = JSON.parse(sessionStorage.getItem(beforeKey) || 'null'); } catch (x) {}
+            if (!before) throw new Error('This tab no longer has the theme from before. Pick it from your gallery in the designer instead.');
+            if (!before.ownTheme) {
+                await save({ reset: true });
+            } else {
+                restoreHistoryState(before.state);
+                shouldInject = true;
+                commitChange({ clearRef: false });
+                await saveTheme();
+            }
+            try { sessionStorage.removeItem(beforeKey); } catch (x) {}
+        }
+
+        window.addEventListener('message', async e => {
+            const msg = e.data;
+            if (e.source !== peer || !msg || msg.tdpChatTheme !== spec.sha || busy) return;
+            busy = true;
+            try {
+                if (msg.action === 'apply') send({ status: 'applied', name: await apply(String(msg.theme || '')) });
+                else if (msg.action === 'undo') { await undo(); send({ status: 'undone' }); }
+            } catch (err) {
+                send({ status: 'error', message: (err && err.message) || String(err) });
+            } finally {
+                busy = false;
+            }
+        });
+        let canUndo = false;
+        try { canUndo = !!sessionStorage.getItem(beforeKey); } catch (x) {}
+        send({ status: 'ready', canUndo });
+    }
+
     // A theme the chat asked for through the Theme Designer Pro Launcher tool,
     // applied once the designer has loaded the theme it starts from.
     const _applyOnLoad = (window.__THEME_PRO_CONFIG__ || {}).applyOnLoad;
-    if (_applyOnLoad) {
+    if (_applyOnLoad && _applyOnLoad.kind === 'theme') {
+        chatTheme(_applyOnLoad);
+    } else if (_applyOnLoad) {
         // Once per link: the address keeps ?apply=, so a reload (another
         // designer's save reloads this one) or a re-rendered chat frame
         // applied it again over everything changed since
