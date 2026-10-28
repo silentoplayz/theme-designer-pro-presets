@@ -567,6 +567,53 @@
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/four_seasons_desynced.json"
     },
     {
+      "name": "Gemstone Glow",
+      "file": "gemstone_glow.json",
+      "description": "A Gemini inspired theme that adds a beautiful gemstone glow to the chat input window.",
+      "author": "fubarpie",
+      "version": "1.0.0",
+      "dateAdded": "2026-10-28T02:50:39Z",
+      "modes": {
+        "dark": {
+          "h": 250,
+          "c": 0,
+          "l": 20,
+          "hasCSS": true,
+          "hasFX": false,
+          "hasGradient": false,
+          "hasOverrides": false
+        },
+        "light": {
+          "h": 250,
+          "c": 0,
+          "l": 20,
+          "hasCSS": true,
+          "hasFX": false,
+          "hasGradient": false,
+          "hasOverrides": false
+        },
+        "oled": {
+          "h": 250,
+          "c": 0,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": false,
+          "hasGradient": false,
+          "hasOverrides": false
+        },
+        "her": {
+          "h": 250,
+          "c": 0,
+          "l": 20,
+          "hasCSS": true,
+          "hasFX": false,
+          "hasGradient": false,
+          "hasOverrides": false
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/gemstone_glow.json"
+    },
+    {
       "name": "Iridescent Liquid Glass",
       "file": "iridescent_liquid_glass.json",
       "description": "Veins of thin-film glass fold slowly at the screen's edges in teal, violet and rose, thinning behind the chat under clear frosted surfaces. Rose-violet glass at night, true black on OLED, pearl in Light and a rosier pearl in Her.",

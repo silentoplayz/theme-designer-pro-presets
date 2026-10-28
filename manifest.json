@@ -1,6 +1,6 @@
 {
   "manifestVersion": "1.0",
-  "generated": "2026-10-16T15:34:03.402Z",
+  "generated": "2026-10-28T03:31:24.613Z",
   "manifestUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/manifest.json",
   "themes": {
     "aether_nebula_flow": {
@@ -98,6 +98,14 @@
       "description": "One season in each mode: a summer night with fireflies over the grass in Dark, falling autumn leaves on warm parchment in Light, snow on a winter night in OLED, and butterflies in a spring garden in Her. Each mode has its own palette and accent.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/four_seasons_desynced.json",
       "file": "themes/four_seasons_desynced.json"
+    },
+    "gemstone_glow": {
+      "name": "Gemstone Glow",
+      "version": "1.0.0",
+      "author": "fubarpie",
+      "description": "A Gemini inspired theme that adds a beautiful gemstone glow to the chat input window.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/gemstone_glow.json",
+      "file": "themes/gemstone_glow.json"
     },
     "iridescent_liquid_glass": {
       "name": "Iridescent Liquid Glass",
