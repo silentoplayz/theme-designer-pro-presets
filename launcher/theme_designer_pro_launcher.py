@@ -3,15 +3,16 @@ title: Theme Designer Pro Launcher
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 2.0.0
+version: 2.1.0
 license: MIT
 required_open_webui_version: 0.10.0
-description: Builds a theme someone describes in a chat (palette, accent, gradient, an
-  animated Canvas FX background and frosted glass panels) and shows it as a card with a
-  live preview, Apply and Undo. Also opens the designer inside a chat when asked. Users
-  get their own personal theme when the event function's Allow Personal Themes valve is
-  on; admins can also change the instance theme. Requires the Theme Designer Pro event
-  function v1.17.0 or later.
+description: Builds a theme someone describes in a chat (palette, accents, gradient,
+  frosted glass, custom CSS, and an animated Canvas FX background from the catalog or
+  newly written by the chat model) and shows it as a card with a live preview, Apply and
+  Undo. Also opens the designer inside a chat when asked. Users get their own personal
+  theme when the event function's Allow Personal Themes valve is on; admins can also
+  change the instance theme. Requires the Theme Designer Pro event function v1.17.0 or
+  later, and v1.18.0 for animations the chat model writes.
 """
 
 import asyncio
@@ -32,6 +33,12 @@ THEME_TOKEN_PREFIX = "tdp-apply.v2."
 # A card's Apply button works for this long after the chat built the theme.
 THEME_TOKEN_SECONDS = 30 * 24 * 3600
 MODES = ("all", "dark", "oled", "light", "her")
+
+# A script the chat model wrote starts with this line, and Theme Designer Pro
+# 1.18.0 and later run such a script isolated: no cookies, no requests, no page
+ISOLATED_MARK = "/* tdp:isolated */"
+ANIMATION_MAX_BYTES = 40 * 1024
+CSS_MAX_BYTES = 16 * 1024
 
 # The Canvas FX catalog, fetched once an hour at most
 _catalog = {"at": 0.0, "url": "", "presets": []}
@@ -122,12 +129,74 @@ def _words(text: str) -> set:
     return {w[:-1] if len(w) > 4 and w.endswith("s") else w for w in words}
 
 
-def _mode_data(h, c, l, accent="", gradient=None, canvas="", css="") -> dict:
+def _strip_js_comments(code: str) -> str:
+    return re.sub(r"(^|\s)//.*$", r"\1", re.sub(r"/\*[\s\S]*?\*/", "", code), flags=re.M)
+
+
+def _check_animation(code: str) -> str:
+    """What keeps a script the chat model wrote from running well, or "".
+
+    The house standard's hard rules (scripts/validate.js), plus the isolated
+    runtime's: no requests of any kind."""
+    if len(code.encode("utf-8")) > ANIMATION_MAX_BYTES:
+        return f"it is over {ANIMATION_MAX_BYTES // 1024} KB; keep it between 4 and 20 KB"
+    body = _strip_js_comments(code)
+    if "onmessage" not in body:
+        return "it has no self.onmessage handler"
+    for case in ("init", "resize"):
+        if not re.search(r"['\"]%s['\"]" % case, body):
+            return f"it has no '{case}' case in its self.onmessage switch"
+    for pattern, what in (
+        (r"(^|[^.\w$])document\b", "`document`"),
+        (r"(^|[^.\w$])window\s*[.\[]", "`window`"),
+        (r"(^|[^.\w$])(localStorage|sessionStorage|indexedDB)\b", "browser storage"),
+        (r"(^|[^.\w$])alert\s*\(", "`alert`"),
+        (r"\b(fetch|importScripts|XMLHttpRequest|WebSocket|EventSource|navigator\.sendBeacon)\b|\bimport\s*\(", "network requests"),
+    ):
+        if re.search(pattern, body):
+            return f"it uses {what}, which an animation can't: it runs in an isolated worker that can only draw"
+    if re.search(r"getContext\(\s*['\"]webgl2?['\"]", body) and "webglcontextlost" not in body:
+        return "it uses WebGL without handling webglcontextlost"
+    if not re.search(r"Title:\s*\S", code):
+        return "it has no header comment with a Title: line"
+    return ""
+
+
+def _check_css(css: str) -> str:
+    """What a stylesheet the chat model wrote may not do, or ""."""
+    if len(css.encode("utf-8")) > CSS_MAX_BYTES:
+        return f"it is over {CSS_MAX_BYTES // 1024} KB"
+    lowered = css.lower()
+    if "@import" in lowered:
+        return "it uses @import; everything has to be in the stylesheet itself"
+    if re.search(r"url\(\s*(?!['\"]?data:)", lowered):
+        return "it loads a url(); only data: URLs are allowed, so a theme never fetches anything"
+    if re.search(r"expression\s*\(|javascript:|-moz-binding|behavior\s*:", lowered):
+        return "it uses script in CSS"
+    if "</style" in lowered or "<script" in lowered:
+        return "it contains HTML tags"
+    return ""
+
+
+def _gradient_from(colors: str):
+    """Stops spread evenly from a comma-separated list of #rrggbb colors, or None."""
+    hexes = [c for c in (_hex(x) for x in str(colors or "").split(",")) if c][:8]
+    if len(hexes) < 2:
+        return None
+    return {"stops": [{"color": c, "position": round(i * 100 / (len(hexes) - 1))} for i, c in enumerate(hexes)]}
+
+
+def _title(script: str) -> str:
+    found = re.search(r"Title:\s*(.+)", script)
+    return re.sub(r"\s*\(.*?\)", "", found.group(1).strip())[:48] if found else "Custom animation"
+
+
+def _mode_data(h, c, l, accent="", gradient=None, canvas="", css="", accent2="", accent3="") -> dict:
     """One mode with every field the theme format lists, defaults included."""
     g = gradient or {}
     return {
         "h": h, "c": c, "l": l, "paletteEnabled": True,
-        "accent": accent, "accent2": "", "accent3": "",
+        "accent": accent, "accent2": accent2, "accent3": accent3,
         "overrides": {}, "locks": {}, "manualOverrides": "", "manualOverridesEnabled": False,
         "customCSS": css, "customCssEnabled": bool(css), "autoScope": True,
         "canvasScript": canvas, "canvasEnabled": bool(canvas),
@@ -150,6 +219,14 @@ class Tools:
         background_animations: bool = Field(
             default=True,
             description="Let a theme from a chat have an animated Canvas FX background from the catalog below. Off, themes are palette, gradient and glass only.",
+        )
+        model_written_animations: bool = Field(
+            default=True,
+            description="Let the chat model write a new animation when nothing in the catalog fits. It runs isolated, with no access to the account, the page or the network, and needs Theme Designer Pro 1.18.0. Off, animations come from the catalog only.",
+        )
+        model_written_css: bool = Field(
+            default=True,
+            description="Let the chat model add its own CSS to a theme. It can't load anything: no @import, and url() only for data: URLs.",
         )
         canvas_catalog_url: str = Field(
             default="https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/canvas-fx-all.json",
@@ -273,15 +350,22 @@ class Tools:
         description: str = "",
         accent: str = "",
         background: str = "",
+        animation_code: str = "",
         glass: bool = True,
+        custom_css: str = "",
         gradient: bool = True,
+        gradient_colors: str = "",
+        accent2: str = "",
+        accent3: str = "",
         mode: str = "all",
         everyone: bool = False,
         __user__: dict = {},
     ) -> tuple:
         """
         Build a whole Open WebUI theme the user describes and show it in the chat as a card with a live
-        preview and an Apply button. Nothing changes until the user presses Apply on the card.
+        preview and an Apply button. Nothing changes until the user presses Apply on the card. When the
+        theme-designer-pro skill is available, read it first: it covers palettes, glass, custom CSS and
+        writing a new animation.
 
         When to use: The user asks for a theme or describes one: colors, a mood, a place, an aesthetic.
         Trigger phrases: "give me a blue theme", "make my chat a koi pond", "a cozy autumn theme",
@@ -296,12 +380,22 @@ class Tools:
           is made to match.
         - description: One sentence for the card about how the theme looks.
         - accent: Optional "#rrggbb" for links, focus rings and highlights; empty picks one from the hue.
-        - background: An animated background, described in a few words of the user's own idea, such as
-          "koi pond", "deep ocean with jellyfish", "falling leaves", "rain and lightning", "aurora",
+        - background: An animated background from Theme Designer Pro's catalog, described in a few words, such
+          as "koi pond", "deep ocean with jellyfish", "falling leaves", "rain and lightning", "aurora",
           "starry constellations", "matrix rain", "snow", "fireflies", "embers", "synthwave sun", "lava lamp".
-          The closest animation from Theme Designer Pro's catalog is used. Empty for a still background.
+          The closest one is used. Empty for a still background.
+        - animation_code: A complete new Canvas FX script you wrote, for a background the catalog doesn't have.
+          Used instead of `background`. Follow the theme-designer-pro skill's Canvas FX reference: a header
+          with Title and Description, a self.onmessage switch with 'init', 'resize' and 'theme' cases, colors
+          from the theme, transparent canvas, calm behind the chat column. No document, window, storage or
+          network: it runs isolated and can only draw.
         - glass: Frosted, see-through panels so the background shows through (default True).
-        - gradient: A gradient background in the theme's hue when there is no animated background (default True).
+        - custom_css: Extra CSS for the theme, after the glass. Use Open WebUI's own element ids and the theme's
+          variables (--color-gray-50 to --color-gray-950, --tdp-accent). No @import; url() only for data: URLs.
+        - gradient: A gradient background when there is no animated background (default True).
+        - gradient_colors: Optional comma-separated "#rrggbb" colors (2-8) for the gradient, dark to light or
+          as they should run; empty makes one from the hue.
+        - accent2, accent3: Optional "#rrggbb" second and third accents (animations use all three).
         - mode: Which mode(s) to build for. "all" (default), "dark", "oled", "light" or "her".
         - everyone: For admins only. True builds it for the instance theme every user sees, and only when the
           admin clearly asks for that (e.g. "for everyone"). Default False: the user's own theme.
@@ -313,42 +407,65 @@ class Tools:
         h = max(0, min(360, int(hue)))
         c = max(0, min(60, int(chroma)))
         l = max(5, min(30, int(lightness)))
-        accent = _hex(accent)
+        accent, accent2, accent3 = _hex(accent), _hex(accent2), _hex(accent3)
+
+        # The chat model's own animation and CSS: checked here, so a problem goes
+        # back to it to fix before anything reaches the user
+        written = str(animation_code or "").strip()
+        extra_css = str(custom_css or "").strip()
+        if written and not self.valves.model_written_animations:
+            return "Not built: an admin turned off animations the chat model writes. Use `background` to pick one from the catalog instead."
+        if written:
+            problem = _check_animation(written)
+            if problem:
+                return f"Not built: the animation_code can't run because {problem}. Fix it and call create_theme again."
+        if extra_css and not self.valves.model_written_css:
+            return "Not built: an admin turned off CSS the chat model writes. Leave custom_css empty."
+        if extra_css:
+            problem = _check_css(extra_css)
+            if problem:
+                return f"Not built: the custom_css can't be used because {problem}. Fix it and call create_theme again."
 
         animation, catalog = (None, [])
-        if background.strip() and self.valves.background_animations:
+        if written:
+            animation = (_title(written), "", ISOLATED_MARK + "\n" + written)
+        elif background.strip() and self.valves.background_animations:
             animation, catalog = await self._animation(background)
         script = animation[2] if animation else ""
         dark_gradient = None
         light_gradient = None
-        if gradient and not script:
+        if gradient and not script and _gradient_from(gradient_colors):
+            dark_gradient = _gradient_from(gradient_colors)
+        if gradient and not script and not dark_gradient:
             dark_gradient = {"stops": [
                 {"color": _hsl_hex(h, 15, 4), "position": 0},
                 {"color": _hsl_hex(h, 25, 12), "position": 33},
                 {"color": _hsl_hex(h, 20, 7), "position": 66},
                 {"color": _hsl_hex(h, 15, 4), "position": 100},
             ]}
+        if gradient and not script:
             light_gradient = {"stops": [
                 {"color": _hsl_hex(h, 35, 97), "position": 0},
                 {"color": _hsl_hex(h + 15, 45, 91), "position": 40},
                 {"color": _hsl_hex(h, 40, 95), "position": 75},
                 {"color": _hsl_hex(h, 35, 97), "position": 100},
             ]}
-        dark_css = GLASS_DARK + GLASS_RULES if glass else ""
-        light_css = GLASS_LIGHT + GLASS_RULES if glass else ""
+        dark_css = ((GLASS_DARK + GLASS_RULES) if glass else "") + (extra_css + "\n" if extra_css else "")
+        light_css = ((GLASS_LIGHT + GLASS_RULES) if glass else "") + (extra_css + "\n" if extra_css else "")
+        la, la2, la3 = _light_accent(accent), _light_accent(accent2), _light_accent(accent3)
         light_c = round(c * 0.6)
         theme = {
             "name": name,
             "description": description or "Made in a chat with the Theme Designer Pro Launcher.",
             "author": "",
             "version": "1.0.0",
-            "targetVersion": "1.17.0",
+            "targetVersion": "1.18.0" if written else "1.17.0",
             "repositoryUrl": "",
             "updateUrl": "",
-            "dark": _mode_data(h, c, l, accent, dark_gradient, script, dark_css),
-            "oled": _mode_data(h, c, 0, accent, dark_gradient, script, dark_css),
-            "light": _mode_data(h, light_c, 20, _light_accent(accent), light_gradient, script, light_css),
-            "her": _mode_data(h, light_c, 20, _light_accent(accent), light_gradient, script, light_css),
+            "dark": _mode_data(h, c, l, accent, dark_gradient, script, dark_css, accent2, accent3),
+            "oled": _mode_data(h, c, 0, accent, dark_gradient, script, dark_css, accent2, accent3),
+            "light": _mode_data(h, light_c, 20, la, light_gradient, script, light_css, la2, la3),
+            "her": _mode_data(h, light_c, 20, la, light_gradient, script, light_css, la2, la3),
         }
         text = json.dumps(theme, separators=(",", ":"), ensure_ascii=False)
         sha = hashlib.sha256(text.encode("utf-8")).hexdigest()
@@ -356,7 +473,7 @@ class Tools:
 
         parts = []
         if animation:
-            parts.append(re.sub(r"\s*\(.*?\)", "", animation[0]))
+            parts.append(re.sub(r"\s*\(.*?\)", "", animation[0]) + (" (new)" if written else ""))
         elif gradient:
             parts.append("gradient")
         if glass:
@@ -366,6 +483,7 @@ class Tools:
             "description": theme["description"],
             "subtitle": " · ".join(["Your theme" if personal else "Instance theme"] + parts),
             "mode": mode,
+            "written": bool(written),
             "sha": sha,
             "applyUrl": self._designer_url(personal, token) if token else "",
             "designerUrl": self._designer_url(personal),
@@ -373,7 +491,9 @@ class Tools:
         }
 
         built = f'Built "{name}"'
-        if animation:
+        if written:
+            built += f', with your new animation "{animation[0]}"'
+        elif animation:
             built += f', with the "{animation[0]}" animated background'
         elif background.strip() and not self.valves.background_animations:
             built += ", without an animated background (an admin turned them off)"
@@ -546,10 +666,12 @@ button:focus-visible { outline: 2px solid var(--muted); outline-offset: 2px; }
 .tdp-note { margin-top: 8px; font-size: 12px; color: var(--muted); }
 .tdp-note.error { color: #e5484d; }
 .tdp-desc { margin: 10px 2px 0; font-size: 12px; color: var(--muted); }
+.tdp-hint { margin: 8px 2px 0; font-size: 11.5px; color: var(--muted); }
+.tdp-source { margin-top: 8px; max-height: 280px; overflow: auto; padding: 10px 12px; border-radius: 10px; background: var(--chip); font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre; tab-size: 4; }
 /* The preview: a small Open WebUI page in the theme */
 .tdp-stage { position: absolute; inset: 0; overflow: hidden; background: var(--color-gray-900); }
 .tdp-stage.light-mode { background: var(--color-gray-50); }
-.tdp-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tdp-stage canvas, .tdp-stage iframe { position: absolute; inset: 0; width: 100%; height: 100%; }
 .tdp-mock { position: absolute; inset: 0; transform-origin: 0 0; width: 720px; height: 405px; display: flex; color: var(--color-gray-100); font-size: 12px; pointer-events: none; }
 .tdp-stage.light-mode .tdp-mock { color: var(--color-gray-900); }
 .tdp-mock #sidebar { width: 150px; padding: 14px 10px; background: var(--color-gray-950); display: flex; flex-direction: column; gap: 6px; }
@@ -585,6 +707,7 @@ button:focus-visible { outline: 2px solid var(--muted); outline-offset: 2px; }
         <button id="apply" type="button">Apply theme</button>
         <button id="preview" type="button" aria-expanded="false">Preview</button>
         <button id="undo" type="button" class="tdp-link" hidden>Undo</button>
+        <button id="code" type="button" class="tdp-link" aria-expanded="false" hidden>View code</button>
       </div>
     </div>
   </div>
@@ -595,6 +718,8 @@ button:focus-visible { outline: 2px solid var(--muted); outline-offset: 2px; }
     </div>
   </div>
   <p class="tdp-desc" id="desc" hidden></p>
+  <p class="tdp-hint" id="hint" hidden>The model wrote this animation. It runs isolated: it can draw, but it can’t reach your account, this page or the network.</p>
+  <pre class="tdp-source" id="source" hidden></pre>
   <p class="tdp-note" id="note" role="status" hidden></p>
 </div>
 <script id="tdp-data" type="application/json">__DATA__</script>
@@ -681,6 +806,61 @@ button:focus-visible { outline: 2px solid var(--muted); outline-offset: 2px; }
   stage.appendChild(mock);
   $('thumb').appendChild(stage);
 
+  // Every animation previews isolated, the way Theme Designer Pro 1.18.0 runs one
+  // a chat model wrote: in a sandboxed frame with no origin and a policy that
+  // allows no requests, which makes its own canvas and worker, so it can draw and
+  // nothing else. The frame takes the canvas's place in the stage.
+  function isolatedWorker(source, canvas) {
+    var relay = function () {
+      var w = null, queue = [];
+      function deliver(d) {
+        var transfer = [];
+        if (d && d.type === 'init' && !d.canvas) {
+          var c = document.createElement('canvas');
+          c.width = d.width || innerWidth; c.height = d.height || innerHeight;
+          c.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block';
+          document.body.appendChild(c);
+          d.canvas = c.transferControlToOffscreen(); transfer = [d.canvas];
+        }
+        w.postMessage(d, transfer);
+      }
+      addEventListener('message', function (e) {
+        if (e.source !== parent || !e.data) return;
+        var m = e.data;
+        if (typeof m.boot === 'string') {
+          try { w = new Worker(URL.createObjectURL(new Blob([m.boot], { type: 'application/javascript' }))); }
+          catch (err) { parent.postMessage({ tdpIsolatedError: String(err && err.message || err) }, '*'); return; }
+          w.onerror = function (ev) { ev.preventDefault(); parent.postMessage({ tdpIsolatedError: String(ev.message || 'The script failed') }, '*'); };
+          queue.forEach(function (q) { deliver(q.data); }); queue = [];
+        } else if ('data' in m) { if (w) deliver(m.data); else queue.push(m); }
+      });
+      parent.postMessage({ tdpIsolatedReady: true }, '*');
+    };
+    var q = "'", frame = document.createElement('iframe');
+    frame.setAttribute('sandbox', 'allow-scripts'); frame.setAttribute('aria-hidden', 'true'); frame.tabIndex = -1;
+    frame.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent;color-scheme:normal;pointer-events:none';
+    frame.srcdoc = '<meta http-equiv="Content-Security-Policy" content="default-src ' + q + 'none' + q + '; script-src ' + q + 'unsafe-inline' + q +
+      ' blob:; worker-src blob:; style-src ' + q + 'unsafe-inline' + q + '"><style>html,body{margin:0;background:transparent;overflow:hidden}</style>' +
+      '<scr' + 'ipt>(' + relay.toString() + ')();</scr' + 'ipt>';
+    var ready = false, pending = [], lastInit = null, lastTheme = null, proxy = { onerror: null };
+    function send(m) { try { frame.contentWindow.postMessage(m, '*'); } catch (e) {} }
+    addEventListener('message', function (e) {
+      if (e.source !== frame.contentWindow || !e.data) return;
+      if (e.data.tdpIsolatedReady) {
+        // Again when the frame reloads, as it does when the stage moves: start over where it was
+        var replay = ready ? [lastInit, lastTheme].filter(Boolean) : pending;
+        ready = true; send({ boot: source }); replay.forEach(send); pending = [];
+      } else if (typeof e.data.tdpIsolatedError === 'string' && proxy.onerror) proxy.onerror(e.data.tdpIsolatedError);
+    });
+    proxy.postMessage = function (data) {
+      var m = { data: data };
+      if (data && data.type === 'init') lastInit = m; else if (data && data.type === 'theme') lastTheme = m;
+      if (data && data.type === 'resize' && lastInit) { lastInit.data.width = data.width; lastInit.data.height = data.height; }
+      if (ready) send(m); else pending.push(m);
+    };
+    canvas.replaceWith(frame);
+    return proxy;
+  }
   var worker = null, workerFailed = false;
   function paint(key) {
     var m = T[key], vars = varsFor(key), dark = key === 'dark' || key === 'oled';
@@ -703,13 +883,10 @@ button:focus-visible { outline: 2px solid var(--muted); outline-offset: 2px; }
     if (!T.dark.canvasEnabled || worker || workerFailed) return;
     if (!canvas.transferControlToOffscreen || !stage.clientWidth) return;
     try {
-      var url = URL.createObjectURL(new Blob([T.dark.canvasScript], { type: 'application/javascript' }));
-      worker = new Worker(url);
-      worker.onerror = function () { workerFailed = true; };
-      canvas.width = stage.clientWidth; canvas.height = stage.clientHeight;
-      var off = canvas.transferControlToOffscreen();
-      worker.postMessage({ type: 'init', canvas: off, width: stage.clientWidth, height: stage.clientHeight,
-        env: { authToken: '', baseUrl: '', locale: navigator.language, timezone: '' }, theme: canvasTheme(shown === 'light' ? 'light' : 'dark', vars) }, [off]);
+      worker = isolatedWorker(T.dark.canvasScript, canvas);
+      worker.onerror = function (message) { workerFailed = true; say('The animation stopped with an error: ' + message, true); };
+      worker.postMessage({ type: 'init', width: stage.clientWidth, height: stage.clientHeight, dpr: devicePixelRatio || 1,
+        env: { authToken: '', baseUrl: '', locale: navigator.language, timezone: '' }, theme: canvasTheme(shown === 'light' ? 'light' : 'dark', vars) });
     } catch (e) { workerFailed = true; worker = null; }
   }
   new ResizeObserver(function () { fit(); startCanvas(); }).observe(stage);
@@ -736,6 +913,17 @@ button:focus-visible { outline: 2px solid var(--muted); outline-offset: 2px; }
     requestAnimationFrame(fit);
   }
   previewBtn.addEventListener('click', togglePreview);
+  if (D.written) {
+    $('hint').hidden = false;
+    var codeBtn = $('code'); codeBtn.hidden = false;
+    $('source').textContent = T.dark.canvasScript.replace(/^\/\* tdp:isolated \*\/\n/, '');
+    codeBtn.addEventListener('click', function () {
+      var open = $('source').hidden;
+      $('source').hidden = !open;
+      codeBtn.setAttribute('aria-expanded', String(open));
+      codeBtn.textContent = open ? 'Hide code' : 'View code';
+    });
+  }
   $('thumb').addEventListener('click', togglePreview);
   $('thumb').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePreview(); } });
   document.querySelectorAll('.tdp-modes button').forEach(function (b) {
@@ -751,6 +939,11 @@ button:focus-visible { outline: 2px solid var(--muted); outline-offset: 2px; }
     applyBtn.innerHTML = applied ? icon + 'Applied' : 'Apply theme';
     undoBtn.hidden = !applied;
   }
+  function older(version, than) {
+    var a = String(version || '0').split('.').map(Number), b = than.split('.').map(Number);
+    for (var i = 0; i < 3; i++) { if ((a[i] || 0) !== b[i]) return (a[i] || 0) < b[i]; }
+    return false;
+  }
   function designer(action) {
     return new Promise(function (resolve, reject) {
       var frame = document.createElement('iframe');
@@ -765,7 +958,14 @@ button:focus-visible { outline: 2px solid var(--muted); outline-offset: 2px; }
       function onMessage(e) {
         var m = e.data;
         if (e.source !== frame.contentWindow || !m || m.tdpChatTheme !== D.sha) return;
-        if (m.status === 'ready') frame.contentWindow.postMessage({ tdpChatTheme: D.sha, action: action, theme: D.theme }, '*');
+        if (m.status === 'ready') {
+          // 1.17.0 would run an animation the model wrote without isolating it
+          if (D.written && action === 'apply' && older(m.version, '1.18.0')) {
+            finish(new Error('Update Theme Designer Pro to 1.18.0 or later to apply an animation the model wrote. This Open WebUI has ' + (m.version ? 'version ' + m.version : 'an older version') + '.'));
+            return;
+          }
+          frame.contentWindow.postMessage({ tdpChatTheme: D.sha, action: action, theme: D.theme }, '*');
+        }
         else if (m.status === 'error') finish(new Error(m.message || 'The designer could not apply it.'));
         else finish(null, m);
       }

@@ -88,6 +88,7 @@ https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/b
 | Folder | What it is |
 |---|---|
 | [`event-function/`](event-function/) | **Theme Designer Pro**, the event function. The maintained version: the instance theme, personal themes, the designer in Settings, and live updates to every open page. Themes are served through Open WebUI's shared `/static/loader.js` and `/static/custom.css`, so it works alongside other plugins and never writes to the frontend build. |
+| [`skills/`](skills/) | **Open WebUI skills**: `theme-designer-pro` teaches a chat model to design a whole theme with the Launcher, and to write a new Canvas FX animation when the catalog has nothing that fits. Import it from **Workspace > Skills** (Open WebUI v0.12.0 or later). |
 | [`launcher/`](launcher/) | **Theme Designer Pro Launcher**, a companion Tool. It turns a description such as _"make my chat a koi pond"_ into a whole theme, with an animated background from this repository's catalog, and shows it in the chat as a card with a live preview and **Apply**. It also opens the designer inside a chat when asked. It needs the event function, and **iframe Sandbox Allow Same Origin** turned on in each user's **Settings > Interface**. |
 | [`tools/`](tools/) | **Theme Designer Pro Tool**, the original chat-based version, which kept themes in one browser. **Legacy:** it gets no more updates, and the event function covers what it did. |
 

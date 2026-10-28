@@ -19,7 +19,13 @@ def chunk(model, delta, finish=None):
 
 def plan(messages, tools):
     last_user = max((i for i, m in enumerate(messages) if m.get("role") == "user"), default=-1)
-    if any(m.get("role") == "tool" for m in messages[last_user + 1:]):
+    results = [m for m in messages[last_user + 1:] if m.get("role") == "tool"]
+    if results:
+        # A refusal goes back to the user word for word, so the tests can read it
+        text = results[-1].get("content") or ""
+        text = text if isinstance(text, str) else json.dumps(text)
+        if "Not built:" in text:
+            return None, text[text.index("Not built:"):].split('"')[0]
         return None, "Here\u2019s Honu Lagoon: a turquoise palette with koi gliding under lily pads, and the panels turn to frosted glass so the pond shows through. Press Apply on the card to put it on."
     text = messages[last_user].get("content") if last_user >= 0 else ""
     if isinstance(text, list):

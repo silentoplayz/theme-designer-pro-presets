@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.17.0
+version: 1.18.0
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -22,7 +22,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.17.0"
+VERSION = "1.18.0"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -1373,6 +1373,91 @@ class Event:
                 return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
             }
 
+            // A Canvas FX script a chat model wrote: the Theme Designer Pro Launcher
+            // marks its first line. It runs in a sandboxed frame with no origin (so
+            // no cookies or storage) and a policy that allows no requests, so it can
+            // draw and nothing else. The frame is the background layer: it makes its
+            // own canvas and worker, since Chrome can't hand a canvas to a frame
+            // without an origin, and the page passes the usual messages through.
+            const ISOLATED_MARK = '/* tdp:isolated */';
+            function _isolatedWorker(source, canvas) {
+                const relay = function () {
+                    var worker = null, queue = [];
+                    function deliver(d, transfer) {
+                        if (d && d.type === 'init' && !d.canvas) {
+                            var c = document.createElement('canvas');
+                            c.width = d.width || innerWidth; c.height = d.height || innerHeight;
+                            c.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block';
+                            document.body.appendChild(c);
+                            d.canvas = c.transferControlToOffscreen();
+                            transfer = [d.canvas];
+                        }
+                        worker.postMessage(d, transfer || []);
+                    }
+                    addEventListener('message', function (e) {
+                        if (e.source !== parent || !e.data) return;
+                        var m = e.data;
+                        if (typeof m.boot === 'string') {
+                            try {
+                                worker = new Worker(URL.createObjectURL(new Blob([m.boot], { type: 'application/javascript' })));
+                            } catch (err) {
+                                parent.postMessage({ tdpIsolatedError: String(err && err.message || err) }, '*');
+                                return;
+                            }
+                            worker.onerror = function (ev) { ev.preventDefault(); parent.postMessage({ tdpIsolatedError: String(ev.message || 'The script failed') }, '*'); };
+                            queue.forEach(function (q) { deliver(q.data, q.transfer); });
+                            queue = [];
+                        } else if ('data' in m) {
+                            if (worker) deliver(m.data, m.transfer); else queue.push(m);
+                        }
+                    });
+                    parent.postMessage({ tdpIsolatedReady: true }, '*');
+                };
+                const q = "'";
+                const frame = document.createElement('iframe');
+                frame.setAttribute('sandbox', 'allow-scripts');
+                frame.setAttribute('aria-hidden', 'true');
+                frame.tabIndex = -1;
+                frame.id = canvas.id;
+                // A color-scheme that differs from the frame's document makes it opaque
+                frame.style.cssText = canvas.style.cssText + ';border:0;background:transparent;color-scheme:normal';
+                // Built from pieces: this script is also inlined in index.html
+                frame.srcdoc = '<meta http-equiv="Content-Security-Policy" content="default-src ' + q + 'none' + q +
+                    '; script-src ' + q + 'unsafe-inline' + q + ' blob:; worker-src blob:; style-src ' + q + 'unsafe-inline' + q + '">' +
+                    '<style>html,body{margin:0;background:transparent;overflow:hidden}</style>' +
+                    '<scr' + 'ipt>(' + relay.toString() + ')();</scr' + 'ipt>';
+                const proxy = { onerror: null };
+                let ready = false, pending = [], lastInit = null, lastTheme = null;
+                const send = function (m) { try { frame.contentWindow.postMessage(m, '*'); } catch (x) {} };
+                const onMessage = function (e) {
+                    if (e.source !== frame.contentWindow || !e.data) return;
+                    if (e.data.tdpIsolatedReady) {
+                        // Again after a reload of the frame: start the script over where it was
+                        const replay = ready ? [lastInit, lastTheme].filter(Boolean) : pending;
+                        ready = true;
+                        send({ boot: source });
+                        replay.forEach(send);
+                        pending = [];
+                    } else if (typeof e.data.tdpIsolatedError === 'string' && proxy.onerror) {
+                        proxy.onerror({ message: e.data.tdpIsolatedError, preventDefault: function () {} });
+                    }
+                };
+                window.addEventListener('message', onMessage);
+                proxy.postMessage = function (data) {
+                    const m = { data: data };
+                    if (data && data.type === 'init') lastInit = m;
+                    else if (data && data.type === 'theme') lastTheme = m;
+                    if (ready) send(m); else pending.push(m);
+                };
+                proxy.terminate = function () {
+                    window.removeEventListener('message', onMessage);
+                    // Removing the frame ends its worker
+                    frame.remove();
+                };
+                canvas.replaceWith(frame);
+                return proxy;
+            }
+
             function initCanvas(forceFallback) {
                 // Bumped only where a canvas is torn down or started below: a
                 // call that changes nothing must not make a starting canvas's
@@ -1483,7 +1568,8 @@ class Event:
                         // "// NO DOM access (no document, ...)", which sent every
                         // script that kept it to the main thread.
                         const _scriptNeedsDOM = /\\bdocument\\b/.test(config.canvasScript.replace(/\\/\\*[\\s\\S]*?\\*\\//g, '').replace(/(^|\\s)\\/\\/.*$/gm, '$1'));
-                        const useWorker = !forceFallback && !_scriptNeedsDOM && !!canvas.transferControlToOffscreen;
+                        const _isolated = config.canvasScript.startsWith(ISOLATED_MARK);
+                        const useWorker = !forceFallback && (_isolated || !_scriptNeedsDOM) && !!canvas.transferControlToOffscreen;
                         let _canvasSend = null;
                         let _initTheme = null;
                         try { _initTheme = canvasTheme(mode, config); } catch(x) {}
@@ -1513,7 +1599,7 @@ class Event:
                             ].join(' ');
                             const blob = new Blob([_framePause, config.canvasScript], { type: 'application/javascript' });
                             const objectURL = URL.createObjectURL(blob);
-                            const worker = new Worker(objectURL);
+                            const worker = _isolated ? _isolatedWorker(_framePause + config.canvasScript, canvas) : new Worker(objectURL);
                             let workerFailed = false;
                             // The page gets no frames while hidden, and also while its window is
                             // covered, which Firefox still reports as visible. Timers keep running
@@ -1546,13 +1632,15 @@ class Event:
                                     window.owuiCanvasCleanups.forEach(function(fn) { try { fn(); } catch(x) {} });
                                     window.owuiCanvasCleanups = [];
                                 }
-                                initCanvas(true); // force fallback
+                                // A script from a chat never runs on the page itself
+                                if (!_isolated) initCanvas(true); // force fallback
                             };
 
-                            const offscreen = canvas.transferControlToOffscreen();
+                            // An isolated script's frame makes its own canvas
+                            const offscreen = _isolated ? null : canvas.transferControlToOffscreen();
                             
                             const _env = {
-                                authToken: __CANVAS_API_ACCESS__ ? ((document.cookie.match(/(?:^|;\\s*)token=([^;]+)/) || [])[1] || localStorage.getItem('token') || '') : '',
+                                authToken: __CANVAS_API_ACCESS__ && !_isolated ? ((document.cookie.match(/(?:^|;\\s*)token=([^;]+)/) || [])[1] || localStorage.getItem('token') || '') : '',
                                 baseUrl: window.location.origin,
                                 locale: navigator.language || 'en-US',
                                 timezone: (function() { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(e) { return ''; } })()
@@ -1663,6 +1751,11 @@ class Event:
                             });
 
                             _canvasSend = function(data) { try { worker.postMessage(data); } catch(x) {} };
+                        } else if (_isolated) {
+                            // Without OffscreenCanvas a script from a chat doesn't run at all
+                            canvas.remove();
+                            bg.remove();
+                            lastCanvasScript = null;
                         } else {
                             // FALLBACK MODE (Main Thread Fake Worker)
                             const scriptEl = document.createElement('script');
@@ -6460,6 +6553,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         <ul>
                             <li><b>Whose Theme Changes:</b> The person&rsquo;s own personal theme, which needs <b>Allow Personal Themes</b> on. An admin who asks for a theme &ldquo;for everyone&rdquo; changes the instance theme instead.</li>
                             <li><b>What Apply Does:</b> The card opens this designer out of sight with a link the Launcher signed, hands it the theme, and the designer applies and saves it the way an import would, then closes. Open pages follow live.</li>
+                            <li><b>Animations a Chat Model Writes:</b> When the catalog has nothing that fits, the chat model can write a new Canvas FX animation (Launcher 2.1.0 or later, best with the <b>theme-designer-pro</b> skill from the presets repository). The Launcher checks it and marks its first line <code>/* tdp:isolated */</code>, and Theme Designer Pro runs a marked script isolated: in a sandboxed frame with no origin and a policy that allows no requests, so it can draw but gets no cookies, storage, page or network, and never runs on the page itself. The card shows it as &ldquo;(new)&rdquo; with <b>View code</b>.</li>
                             <li><b>Why a Link Can&rsquo;t Change a Theme:</b> The designer never applies a theme that is simply written into its address or sent to it. The Launcher signs the theme&rsquo;s SHA-256 with Open WebUI&rsquo;s <code>WEBUI_SECRET_KEY</code> for the one person who asked, and the designer applies only a theme with that hash, only for that person, within 30 days, and only where it was meant to land. The theme&rsquo;s Canvas FX script comes from the catalog the server fetched, never from the chat model, so Apply asks no second question about it. Links from Launchers before 2.0 carry colors alone and apply for five minutes.</li>
                             <li><b>The Setting It Needs:</b> Everyone who uses it needs <b>Settings &gt; Interface &gt; iframe Sandbox Allow Same Origin</b> on to apply a theme or open the designer in a chat. Without it, the card still previews the theme and names the setting. With it on, HTML that tools and models show in chats runs with the page&rsquo;s access, so turn it on only on an instance whose tools you trust.</li>
                             <li><b>Getting It:</b> Install it from its page on the Open WebUI community platform, or from the <code>launcher/</code> folder of the <a href="https://github.com/silentoplayz/theme-designer-pro-presets" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">presets repository</a>, whose README covers its valves.</li>
@@ -18324,7 +18418,14 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 throw new Error((d && d.error) || ('The theme could not be saved (HTTP ' + r.status + ').'));
             }
         }
+        // This page's own saves (the one it makes as it loads, and the one a change
+        // queues) would otherwise land after the card's and put back what it replaced
+        async function quiet() {
+            clearTimeout(_syncTimer);
+            await _syncQueue;
+        }
         async function saveTheme() {
+            await quiet();
             _userActed = true;
             window.__TDP_HOLD_SAVES__ = false;
             const sections = generateThemeSections();
@@ -18379,7 +18480,11 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             try { before = JSON.parse(sessionStorage.getItem(beforeKey) || 'null'); } catch (x) {}
             if (!before) throw new Error('This tab no longer has the theme from before. Pick it from your gallery in the designer instead.');
             if (!before.ownTheme) {
+                await quiet();
                 await save({ reset: true });
+                // Back on the instance theme: hold saves until something changes again
+                window.__TDP_START_STATE__ = Storage.getRaw('theme') || '{}';
+                window.__TDP_HOLD_SAVES__ = true;
             } else {
                 restoreHistoryState(before.state);
                 shouldInject = true;
@@ -18404,7 +18509,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         });
         let canUndo = false;
         try { canUndo = !!sessionStorage.getItem(beforeKey); } catch (x) {}
-        send({ status: 'ready', canUndo });
+        // The card checks the version: a script from a chat needs 1.18.0's isolated runtime
+        send({ status: 'ready', canUndo, version: '{VERSION}' });
     }
 
     // A theme the chat asked for through the Theme Designer Pro Launcher tool,

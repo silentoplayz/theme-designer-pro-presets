@@ -77,6 +77,7 @@ async function setUp() {
     await ctx.addInitScript(t => { try { localStorage.token = t; localStorage.theme = 'dark'; } catch (e) {} }, token);
     const page = await ctx.newPage();
     page.errors = []; page.on('pageerror', e => page.errors.push(e.message));
+    if (process.env.DEBUG_CONSOLE) { page.on('console', m => console.log('  console', m.type(), m.text().slice(0, 200))); page.on('crash', () => console.log('  CRASH')); }
     page.on('dialog', d => d.accept());
     await page.goto(base + '/?model=theme-bot-tools'); await page.locator('#chat-input').waitFor();
     const okay = page.getByRole('button', {name: "Okay, Let's Go!"}); if (await okay.isVisible().catch(() => false)) await okay.click();
@@ -129,7 +130,7 @@ async function setUp() {
     await page.waitForTimeout(800);
     const after = (await frameEl.boundingBox()).height;
     assert(after > before + 200, `frame ${before} -> ${after}`);
-    assert(await card.locator('#big canvas').count() === 1, 'the animation moved into the preview');
+    assert(await card.locator('#big .tdp-stage iframe[sandbox="allow-scripts"]').count() === 1, 'the isolated animation moved into the preview');
     await card.getByRole('button', {name: 'Light', exact: true}).click();
     assert(await card.locator('.tdp-stage.light-mode').count() === 1);
     await card.getByRole('button', {name: 'Dark', exact: true}).click();
@@ -269,6 +270,159 @@ async function setUp() {
     await card.getByRole('button', {name: 'Preview', exact: true}).click();
     await page.waitForTimeout(1200);
     await page.screenshot({path: out + '/phone.png'});
+    await page.context().close();
+  });
+
+  // ── Animations the chat model writes ──
+
+  // The colors at points of a screenshot, read in the page
+  async function pixels(page, png, points) {
+    return page.evaluate(async ({b64, points}) => {
+      const img = new Image(); img.src = 'data:image/png;base64,' + b64; await img.decode();
+      const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+      const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+      return points.map(([px, py]) => [...x.getImageData(px, py, 1, 1).data].slice(0, 3));
+    }, {b64: png.toString('base64'), points});
+  }
+  const red = ([r, g, b]) => r > 150 && g < 80 && b < 80;
+  // What an attacker would write: every way out spelled so the Launcher's check misses it.
+  // Green if anything reached the server, red if nothing did.
+  const probe = `/**
+ * Title: Probe
+ * Description: Fills the canvas green when it reached the server, red when it could not.
+ */
+const BASE = '${base}';
+let ctx = null, w = 1, h = 1, reached = null;
+const tries = [
+	() => self['fe' + 'tch'](BASE + '/health').then(r => { if (r.ok) reached = true; }),
+	() => self['fe' + 'tch'](BASE + '/api/v1/auths/', { credentials: 'include' }).then(r => { if (r.ok) reached = true; }),
+	() => new Promise(res => { const X = self['XMLHttp' + 'Request']; const q = new X(); q.onload = () => { if (q.status === 200) reached = true; res(); }; q.onerror = res; q.open('GET', BASE + '/health'); q.send(); }),
+	() => (0, self['ev' + 'al'])('imp' + 'ort(BASE + "/static/loader.js")').then(() => { reached = true; }),
+];
+Promise.allSettled(tries.map(t => { try { return t(); } catch (e) { return Promise.reject(e); } })).then(() => { if (reached === null) reached = false; draw(); });
+function draw() {
+	if (!ctx) return;
+	ctx.fillStyle = reached === true ? '#00ff00' : reached === false ? '#ff0000' : '#808080';
+	ctx.fillRect(0, 0, w, h);
+}
+self.onmessage = (e) => {
+	const d = e.data;
+	switch (d.type) {
+		case 'init': ctx = d.canvas.getContext('2d'); w = d.canvas.width = d.width; h = d.canvas.height = d.height; draw(); break;
+		case 'resize': w = ctx.canvas.width = d.width; h = ctx.canvas.height = d.height; draw(); break;
+		case 'theme': break;
+	}
+};`;
+
+  await test('an animation the model wrote previews and applies isolated, and reaches nothing', async () => {
+    const page = await pageFor(auth.user);
+    await ask(page, 'THEME ' + JSON.stringify({name: 'Probe Theme', hue: 0, chroma: 10, lightness: 12, animation_code: probe, glass: false}));
+    const card = await cardFrame(page);
+    assert.equal(await card.locator('#sub').textContent(), 'Your theme · Probe (new)');
+    assert(await card.locator('#hint').isVisible());
+    await card.getByRole('button', {name: 'View code'}).click();
+    const shown = await card.locator('#source').textContent();
+    assert(shown.startsWith('/**') && !shown.includes('tdp:isolated'), shown.slice(0, 60));
+    await card.getByRole('button', {name: 'Hide code'}).click();
+    await page.waitForTimeout(3000);
+    const thumb = await card.locator('#thumb').boundingBox();
+    const [inCard] = await pixels(page, await page.screenshot(), [[Math.round(thumb.x + thumb.width * 0.93), Math.round(thumb.y + thumb.height * 0.5)]]);
+    assert(red(inCard), 'card preview ' + inCard);
+    await card.getByRole('button', {name: 'Apply theme'}).click();
+    await card.getByRole('button', {name: 'Applied'}).waitFor({timeout: 45000});
+    const state = await personalState(auth.user);
+    assert(state.dark.canvasScript.startsWith('/* tdp:isolated */'));
+    await page.waitForFunction(() => document.querySelector('iframe[sandbox="allow-scripts"]') && document.getElementById('owui-theme-canvas-bg'), null, {timeout: 15000});
+    assert.equal(await page.locator('#owui-canvas-script-runner').count(), 0, 'never on the page itself');
+    await page.waitForTimeout(3000);
+    const vp = page.viewportSize();
+    const [onPage] = await pixels(page, await page.screenshot(), [[vp.width - 30, Math.round(vp.height / 2)]]);
+    assert(red(onPage), 'page ' + onPage);
+    // After a reload too, the way every later page load starts it
+    await page.reload(); await page.locator('#chat-input').waitFor(); await page.waitForTimeout(3500);
+    const [afterReload] = await pixels(page, await page.screenshot(), [[vp.width - 30, Math.round(vp.height / 2)]]);
+    assert(red(afterReload), 'after reload ' + afterReload);
+    assert.deepEqual(page.errors, []);
+    await page.context().close();
+  });
+
+  await test('a script or stylesheet that breaks the rules goes back to the model, not to the user', async () => {
+    const page = await pageFor(auth.user);
+    await ask(page, 'THEME ' + JSON.stringify({name: 'Bad', hue: 0, chroma: 10, animation_code: probe.replace("ctx = d.canvas.getContext('2d');", "ctx = d.canvas.getContext('2d'); document.title = 'x';")}));
+    // Open WebUI renders the backticks as code, so match the words around them
+    await page.getByText(/Not built: the animation_code can.t run because it uses\s*document/).waitFor({timeout: 30000});
+    await ask(page, 'THEME ' + JSON.stringify({name: 'Bad CSS', hue: 0, chroma: 10, custom_css: '#sidebar { background: url(https://example.com/x.png); }'}));
+    await page.getByText(/Not built: the custom_css can.t be used because it loads a url\(\)/).waitFor({timeout: 30000});
+    let cards = 0;
+    for (const f of page.frames()) cards += await f.locator('#card').count().catch(() => 0);
+    assert.equal(cards, 0);
+    await page.context().close();
+  });
+
+  await test('Apply refuses an animation the model wrote on a Theme Designer Pro older than 1.18.0', async () => {
+    if (!process.env.OLD_FUNCTION_FILE) { console.log('  (skipped: set OLD_FUNCTION_FILE to a 1.17.0 copy of the function)'); return; }
+    const current = (await api('GET', '/api/v1/functions/id/theme_designer_pro', auth.admin)).json;
+    const old = fs.readFileSync(process.env.OLD_FUNCTION_FILE, 'utf8');
+    await api('POST', '/api/v1/functions/id/theme_designer_pro/update', auth.admin, {id: 'theme_designer_pro', name: current.name, content: old, meta: current.meta});
+    try {
+      const before = JSON.stringify(await personalState(auth.user));
+      const page = await pageFor(auth.user);
+      await ask(page, 'THEME ' + JSON.stringify({name: 'Old Probe', hue: 0, chroma: 10, animation_code: probe}));
+      const card = await cardFrame(page);
+      await card.getByRole('button', {name: 'Apply theme'}).click();
+      await card.locator('#note', {hasText: 'Update Theme Designer Pro to 1.18.0'}).waitFor({timeout: 45000});
+      assert.equal(JSON.stringify(await personalState(auth.user)), before);
+      await page.context().close();
+    } finally {
+      await api('POST', '/api/v1/functions/id/theme_designer_pro/update', auth.admin, {id: 'theme_designer_pro', name: current.name, content: current.content, meta: current.meta});
+    }
+  });
+
+  // ── The skill ──
+
+  const SKILL_DIR = path.join(ROOT, 'skills', 'theme-designer-pro');
+  const skillFiles = (function walk(dir) {
+    return fs.readdirSync(dir).flatMap(f => fs.statSync(path.join(dir, f)).isDirectory() ? walk(path.join(dir, f)) : [path.join(dir, f)]);
+  })(SKILL_DIR).map(f => path.relative(SKILL_DIR, f).split(path.sep).join('/')).sort();
+
+  await test('the theme-designer-pro skill imports into Open WebUI with all its files', async () => {
+    const version = (await (await fetch(base + '/api/version')).json()).version;
+    if (/^0\.11\./.test(version)) { console.log('  (skipped: skills with files need Open WebUI 0.12)'); return; }
+    // As the Workspace's folder import sends it
+    const form = () => {
+      const f = new FormData();
+      for (const rel of skillFiles) f.append('files', new Blob([fs.readFileSync(path.join(SKILL_DIR, rel))]), 'theme-designer-pro/' + rel);
+      return f;
+    };
+    const headers = {Authorization: 'Bearer ' + auth.admin};
+    const preview = await (await fetch(base + '/api/v1/skills/import/preview', {method: 'POST', headers, body: form()})).json();
+    assert.equal(preview.length, 1, JSON.stringify(preview).slice(0, 300));
+    assert.equal(preview[0].name, 'theme-designer-pro');
+    assert.deepEqual(preview[0].files.map(f => f.path).sort(), skillFiles);
+    const body = form(); body.append('decisions', JSON.stringify([{action: preview[0].id_taken ? 'replace' : 'create', expected_version_id: preview[0].expected_version_id}]));
+    const saved = await (await fetch(base + '/api/v1/skills/import', {method: 'POST', headers, body})).json();
+    assert.equal(saved[0].status, 'saved', JSON.stringify(saved));
+    const listed = await api('GET', `/api/v1/skills/id/${saved[0].id}/files`, auth.admin);
+    const paths = (listed.json.files || listed.json).map(f => f.path).sort();
+    assert.deepEqual(paths, skillFiles);
+    const template = await api('GET', `/api/v1/skills/id/${saved[0].id}/files/content?path=templates/animation.js&version_id=${encodeURIComponent(listed.json.version_id)}`, auth.admin);
+    assert(template.text.includes('Title: Drifting Motes'), template.text.slice(0, 120));
+  });
+
+  await test('the skill\'s animation template builds, previews and applies isolated', async () => {
+    const template = fs.readFileSync(path.join(SKILL_DIR, 'templates', 'animation.js'), 'utf8');
+    const page = await pageFor(auth.user);
+    await ask(page, 'THEME ' + JSON.stringify({name: 'Template Motes', hue: 265, chroma: 22, lightness: 11, animation_code: template}));
+    const card = await cardFrame(page);
+    assert.equal(await card.locator('#sub').textContent(), 'Your theme · Drifting Motes (new) · glass');
+    await page.waitForTimeout(2000);
+    assert.equal(await card.locator('#note').isVisible(), false, 'no error on the card');
+    await card.getByRole('button', {name: 'Apply theme'}).click();
+    await card.getByRole('button', {name: 'Applied'}).waitFor({timeout: 45000});
+    await page.waitForFunction(() => document.querySelector('iframe#owui-theme-canvas-bg[sandbox="allow-scripts"]'), null, {timeout: 15000});
+    await page.waitForTimeout(3000);
+    await page.screenshot({path: out + '/template-applied.png'});
+    assert.deepEqual(page.errors, []);
     await page.context().close();
   });
 

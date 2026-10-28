@@ -13,6 +13,11 @@ They cover:
 - asking to open the designer still opening it in the chat
 - the card without **iframe Sandbox Allow Same Origin**: it previews and names the setting, and **Apply** stays off
 - the card on a phone-sized screen
+- an animation the model wrote, previewed in the card and applied to the page, running isolated: a probe script that reaches for the server every way an attacker would (requests spelled to slip past the Launcher's check, `eval`, `import()`) paints red when nothing got through, and the test reads the color in the card, on the page and after a reload
+- a script or stylesheet that breaks the rules going back to the model as "Not built", with no card
+- **Apply** refusing an animation the model wrote on a Theme Designer Pro older than 1.18.0 (set `OLD_FUNCTION_FILE` to a 1.17.0 copy of the function, for example `git show 090ac8b:event-function/theme_designer_pro_event.py > /tmp/tdp-1.17.0.py`; skipped without it)
+- the [theme-designer-pro skill](../../skills/theme-designer-pro/) importing into Open WebUI with every file, as the Workspace's folder import sends it (skipped before Open WebUI 0.12)
+- the skill's animation template building, previewing and applying isolated
 
 ## Locally
 

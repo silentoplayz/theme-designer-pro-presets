@@ -111,6 +111,55 @@ function validateSchema(data, schemaKey, file) {
   return true;
 }
 
+// ── Skills ──
+// Open WebUI skills in skills/<name>/, imported straight from this repository.
+// The frontmatter follows Open WebUI's skill-authoring rules, examples stay
+// copies of the catalog scripts they name, and templates meet the house standard.
+
+function validateSkills() {
+  const dir = path.join(ROOT, 'skills');
+  if (!fs.existsSync(dir)) return;
+  const skills = fs.readdirSync(dir).filter(d => fs.statSync(path.join(dir, d)).isDirectory());
+  console.log(`\n🧠 Skills: ${skills.length}`);
+
+  for (const name of skills) {
+    const root = path.join(dir, name), label = `skills/${name}`;
+    const before = errors;
+    const md = path.join(root, 'SKILL.md');
+    if (!fs.existsSync(md)) { fail(label, 'has no SKILL.md'); continue; }
+    const fm = /^---\r?\n([\s\S]*?)\r?\n---/.exec(fs.readFileSync(md, 'utf8'));
+    const field = (k) => (fm && new RegExp('^' + k + ':\\s*(.+)$', 'm').exec(fm[1]) || [])[1];
+    const skillName = field('name'), description = field('description');
+    if (!skillName || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(skillName) || skillName.length > 64) {
+      fail(label, 'needs a lowercase-hyphenated name of at most 64 characters');
+    } else if (skillName !== name) {
+      fail(label, `its folder should be named after the skill: ${skillName}`);
+    }
+    if (!description || description.length > 1024 || !description.trim().endsWith('.')) {
+      fail(label, 'needs a one-line description of at most 1024 characters ending with a period');
+    }
+    const walk = (d) => fs.readdirSync(d).flatMap(f => {
+      const full = path.join(d, f), st = fs.lstatSync(full);
+      return st.isSymbolicLink() ? [{ full, link: true }] : st.isDirectory() ? walk(full) : [{ full }];
+    });
+    for (const file of walk(root)) {
+      const rel = path.relative(ROOT, file.full);
+      // Open WebUI refuses a skill with a link in it
+      if (file.link) { fail(rel, 'is a symbolic link; Open WebUI won\'t import it'); continue; }
+      if (rel.includes(`${path.sep}examples${path.sep}`)) {
+        const source = path.join(ROOT, 'canvas-fx', path.basename(file.full));
+        if (fs.existsSync(source) && fs.readFileSync(source, 'utf8') !== fs.readFileSync(file.full, 'utf8')) {
+          fail(rel, `differs from canvas-fx/${path.basename(file.full)}; copy it again`);
+        }
+      }
+      if (rel.includes(`${path.sep}templates${path.sep}`) && file.full.endsWith('.js')) {
+        checkCanvasScript(rel, fs.readFileSync(file.full, 'utf8'));
+      }
+    }
+    if (errors === before) pass(label);
+  }
+}
+
 // ── Canvas FX Validation ──
 // The house standard is in canvas-fx/README.md. Failures break it outright;
 // warnings are worth a look.
@@ -127,14 +176,17 @@ function validateCanvasFx() {
   const files = fs.readdirSync(dir).filter(f => f.endsWith('.js'));
   console.log(`\n🎨 Canvas FX: ${files.length} scripts`);
 
-  for (const f of files) {
-    const content = fs.readFileSync(path.join(dir, f), 'utf8');
+  for (const f of files) checkCanvasScript(f, fs.readFileSync(path.join(dir, f), 'utf8'));
+}
+
+// One script against the house standard
+function checkCanvasScript(f, content) {
     const code = stripJsComments(content);
     const before = errors;
 
     if (!code.includes('onmessage')) {
       fail(f, 'missing self.onmessage handler');
-      continue;
+      return;
     }
     if (!/['"]init['"]/.test(code)) {
       fail(f, 'missing an init case (it receives the canvas)');
@@ -179,7 +231,6 @@ function validateCanvasFx() {
     }
 
     if (errors === before) pass(f);
-  }
 }
 
 // ── CSS checks shared by CSS presets and theme custom CSS ──
@@ -472,6 +523,7 @@ function validateManifest() {
 // ── Run ──
 console.log('Validating presets...');
 validateCanvasFx();
+validateSkills();
 validateCssPresets();
 validateThemes();
 validateGradients();
