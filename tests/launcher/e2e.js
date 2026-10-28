@@ -291,6 +291,10 @@ async function setUp() {
  * Title: Probe
  * Description: Fills the canvas green when it reached the server, red when it could not.
  */
+const RED = '#ff0000';   // nothing got through (0-1)
+const GREEN = '#00ff00'; // something reached the server (0-1)
+const GRAY = '#808080';  // still trying (0-1)
+const TRIES = 4;         // ways out it tries (1-4)
 const BASE = '${base}';
 let ctx = null, w = 1, h = 1, reached = null;
 const tries = [
@@ -302,7 +306,7 @@ const tries = [
 Promise.allSettled(tries.map(t => { try { return t(); } catch (e) { return Promise.reject(e); } })).then(() => { if (reached === null) reached = false; draw(); });
 function draw() {
 	if (!ctx) return;
-	ctx.fillStyle = reached === true ? '#00ff00' : reached === false ? '#ff0000' : '#808080';
+	ctx.fillStyle = reached === true ? GREEN : reached === false ? RED : GRAY;
 	ctx.fillRect(0, 0, w, h);
 }
 self.onmessage = (e) => {
@@ -350,7 +354,11 @@ self.onmessage = (e) => {
     const page = await pageFor(auth.user);
     await ask(page, 'THEME ' + JSON.stringify({name: 'Bad', hue: 0, chroma: 10, animation_code: probe.replace("ctx = d.canvas.getContext('2d');", "ctx = d.canvas.getContext('2d'); document.title = 'x';")}));
     // Open WebUI renders the backticks as code, so match the words around them
-    await page.getByText(/Not built: the animation_code can.t run because it uses\s*document/).waitFor({timeout: 30000});
+    await page.getByText(/Not built: the animation_code can.t be used because it uses\s*document/).waitFor({timeout: 30000});
+    // The script a real model wrote in a chat (Launcher 2.1.0 let it through, and it threw on the card)
+    const qwen = "// Title: Neon Rain Storm\n// Description: Heavy rain with neon glow and lightning\n\nself.onmessage = (e) => {\n  const t = e.data;\n  switch (t.type) {\n    case 'init':\n    case 'resize':\n    case 'theme':\n      if (t.type === 'init') {\n        self.onmessage = (e) => {\n          const d = e.data;\n          switch (d.type) {\n            case 'init':\n            case 'resize':\n              const c = d.canvas; const ctx = c.getContext('2d'); ctx.fillRect(0, 0, c.width, c.height);\n          }\n        };\n      }\n  }\n};";
+    await ask(page, 'THEME ' + JSON.stringify({name: 'Neon Rain Storm', hue: 280, chroma: 30, animation_code: qwen}));
+    await page.getByText(/Not built: the animation_code can.t be used because it doesn.t open with the header block.*templates\/animation\.js/).waitFor({timeout: 30000});
     await ask(page, 'THEME ' + JSON.stringify({name: 'Bad CSS', hue: 0, chroma: 10, custom_css: '#sidebar { background: url(https://example.com/x.png); }'}));
     await page.getByText(/Not built: the custom_css can.t be used because it loads a url\(\)/).waitFor({timeout: 30000});
     let cards = 0;

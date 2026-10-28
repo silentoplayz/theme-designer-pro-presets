@@ -33,7 +33,7 @@ Most come from this repository's [catalog](../canvas-fx/) of Canvas FX scripts: 
 
 When nothing fits, the chat model can write a new animation. That's code that runs in the browser of everyone who sees the theme, so it's held to strict rules:
 
-- **The Launcher checks it first.** A script that uses the page, browser storage or the network, or breaks the [house standard](../canvas-fx/README.md)'s hard rules, never reaches you: the Launcher sends the problem back to the model to fix.
+- **The Launcher checks it first.** A script that uses the page, browser storage or the network, breaks the [house standard](../canvas-fx/README.md)'s hard rules, or leaves the template's shape (a header block, at least four settings, one message handler) never reaches you: the Launcher sends the problem back to the model to fix.
 - **It runs isolated.** Theme Designer Pro 1.18.0 and later run it in a sandboxed frame with no origin and a policy that allows no requests. It can draw, but it can't reach your account, the page or the network. It never falls back to running on the page itself. The card's preview runs every animation the same way.
 - **You see it before it runs on your page.** The card marks it "(new)" and has **View code**, and nothing changes until you press **Apply**. On an older Theme Designer Pro, **Apply** refuses it and asks you to update.
 
@@ -101,6 +101,10 @@ A theme from a chat changes nothing until you press **Apply** on its card. **App
 - **The model answers in words but no card shows.** The Launcher isn't on for this chat, or the model didn't call it. Turn the Tool on from the message box, or try **Native** function calling in the model's **Advanced Params**.
 
 ---
+
+## 📝 What's New in 2.1.1
+
+- **An animation the model writes has to keep the template's shape.** A real model wrote one that put a second message handler inside its first, so it never drew and threw an error on the card. The Launcher now also refuses a script without the `/** Title / Description */` header block, with fewer than four settings above its first function, that sets its message handler more than once, or that never gets a drawing context, and tells the model to start from the skill's `templates/animation.js`. Every animation a model writes now has settings the designer shows as sliders.
 
 ## 📝 What's New in 2.1.0
 

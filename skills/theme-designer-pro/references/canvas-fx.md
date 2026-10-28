@@ -50,7 +50,8 @@ const COLOR_A      = '#7aa2ff';  // first color when not following the theme
 /* ──────────────────────────────────────────── */
 ```
 
-- The `Title:` line names the animation on the card. The Launcher refuses a script without one.
+- The `Title:` line names the animation on the card.
+- The Launcher refuses a script that doesn't open with this header block, has fewer than four settings above its first function, sets its message handler more than once, or never calls `getContext`. Starting from `templates/animation.js` avoids all four.
 - The designer turns each constant between the banners into a slider, switch or color picker, with the range from its comment, so the user can tune it later.
 - Tabs for indentation, 4 to 14 KB, never over 20 KB. The Launcher refuses anything over 40 KB.
 

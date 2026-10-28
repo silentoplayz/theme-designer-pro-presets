@@ -3,7 +3,7 @@ title: Theme Designer Pro Launcher
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 2.1.0
+version: 2.1.1
 license: MIT
 required_open_webui_version: 0.10.0
 description: Builds a theme someone describes in a chat (palette, accents, gradient,
@@ -133,16 +133,33 @@ def _strip_js_comments(code: str) -> str:
     return re.sub(r"(^|\s)//.*$", r"\1", re.sub(r"/\*[\s\S]*?\*/", "", code), flags=re.M)
 
 
+# A setting the designer turns into a slider, switch or color picker: a top-level
+# UPPER_CASE constant with a literal value, above the first function
+SETTING_LINE = re.compile(r"""^(?:const|let|var)\s+[A-Z][A-Z0-9_]*\s*=\s*(?:-?\d*\.?\d+(?:e-?\d+)?|true|false|['"]#[0-9a-fA-F]{3,8}['"])\s*;""")
+FROM_TEMPLATE = " Start from the theme-designer-pro skill's templates/animation.js (read it with read_skill_file) and change what it draws."
+
+
 def _check_animation(code: str) -> str:
+    problem = _animation_problem(code)
+    return problem + "." + FROM_TEMPLATE if problem else ""
+
+
+def _animation_problem(code: str) -> str:
     """What keeps a script the chat model wrote from running well, or "".
 
-    The house standard's hard rules (scripts/validate.js), plus the isolated
+    The house standard's hard rules (scripts/validate.js) and the template's
+    shape, which gives every animation its settings, plus the isolated
     runtime's: no requests of any kind."""
     if len(code.encode("utf-8")) > ANIMATION_MAX_BYTES:
         return f"it is over {ANIMATION_MAX_BYTES // 1024} KB; keep it between 4 and 20 KB"
+    if not re.match(r"\s*/\*\*[\s\S]*?Title:\s*\S[\s\S]*?Description:\s*\S[\s\S]*?\*/", code):
+        return "it doesn't open with the header block: /** with a Title: line and a Description: line */"
     body = _strip_js_comments(code)
     if "onmessage" not in body:
         return "it has no self.onmessage handler"
+    handlers = len(re.findall(r"onmessage\s*=(?!=)", body)) + len(re.findall(r"addEventListener\(\s*['\"]message['\"]", body))
+    if handlers > 1:
+        return "it sets its message handler more than once; handle every message in one self.onmessage switch"
     for case in ("init", "resize"):
         if not re.search(r"['\"]%s['\"]" % case, body):
             return f"it has no '{case}' case in its self.onmessage switch"
@@ -155,10 +172,20 @@ def _check_animation(code: str) -> str:
     ):
         if re.search(pattern, body):
             return f"it uses {what}, which an animation can't: it runs in an isolated worker that can only draw"
+    if "getContext(" not in body:
+        return "it never gets a drawing context from the canvas the 'init' message carries"
     if re.search(r"getContext\(\s*['\"]webgl2?['\"]", body) and "webglcontextlost" not in body:
         return "it uses WebGL without handling webglcontextlost"
-    if not re.search(r"Title:\s*\S", code):
-        return "it has no header comment with a Title: line"
+    settings = 0
+    for line in code.split("\n"):
+        if re.match(r"\s*(?:function|class|async\s+function|self\.onmessage|onmessage)\b", line):
+            break
+        settings += bool(SETTING_LINE.match(line))
+    if settings < 4:
+        return (
+            f"it has {settings} settings; it needs at least 4 top-level constants such as "
+            "`const SPEED = 1; // speed (0-3)` above its first function, which the designer turns into sliders"
+        )
     return ""
 
 
@@ -418,7 +445,7 @@ class Tools:
         if written:
             problem = _check_animation(written)
             if problem:
-                return f"Not built: the animation_code can't run because {problem}. Fix it and call create_theme again."
+                return f"Not built: the animation_code can't be used because {problem} Then call create_theme again."
         if extra_css and not self.valves.model_written_css:
             return "Not built: an admin turned off CSS the chat model writes. Leave custom_css empty."
         if extra_css:

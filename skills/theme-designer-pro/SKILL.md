@@ -81,6 +81,7 @@ Writing a new animation:
 ## Pitfalls
 
 - **"Not built: … it uses `document`"** (or `window`, storage, `fetch` and the like): the animation runs in an isolated worker. Draw with the canvas you're given; remove the rest.
+- **"Not built: … header block", "… settings", "… handler more than once":** the script didn't keep the template's shape. Copy `templates/animation.js` and change only what it draws: keep its header, its settings above the first function, and its one `self.onmessage` switch. Never assign `self.onmessage` inside a case.
 - **A backdrop hides the theme.** Filling the canvas with a color covers the palette and the glass. Clear it instead.
 - **Busy behind the chat.** Without the calm band the animation fights the text people read. Keep `band(x)` on every alpha.
 - **Hard-coded colors.** Read `theme.colors`; the user's accents and Light mode depend on it.
