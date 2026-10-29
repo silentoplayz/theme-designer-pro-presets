@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.18.0-blue)
+![Version](https://img.shields.io/badge/version-1.19.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -509,11 +509,15 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 
 ---
 
+## 📝 What's New in 1.19.0
+
+A fix release. Nothing to change on your side: paste it in and save.
+
+**Animations stay bright in widescreen mode.** Since 1.15.0 every gallery animation keeps the chat column calm, and the column was measured from the message input. Widescreen mode stretches the input across the whole window, so the whole background dimmed to the column's level. The column now counts as no wider than Open WebUI's usual 58rem, so in widescreen mode the margins show at full strength again.
+
 ## 📝 What's New in 1.18.0
 
 **Animations a chat model writes run isolated.** The Theme Designer Pro Launcher 2.1.0 lets a chat model write a new Canvas FX animation when the catalog has nothing that fits. The Launcher marks such a script with `/* tdp:isolated */` on its first line, and this version runs a marked script in a sandboxed frame with no origin and a Content Security Policy that allows no requests: it can draw, but it gets no cookies, no storage, no page and no network, and it never falls back to running on the page itself. The frame takes the background canvas's place and passes the usual messages through, so the script sees the same protocol as any other. Every other script runs exactly as before. The designer also tells the Launcher's card its version, so the card won't apply such a script to an older Theme Designer Pro.
-
-**Animations stay bright in widescreen mode.** Since 1.15.0 every gallery animation keeps the chat column calm, and the column was measured from the message input. Widescreen mode stretches the input across the whole window, so the whole background dimmed to the column's level. The column now counts as no wider than Open WebUI's usual 58rem, so in widescreen mode the margins show at full strength again.
 
 ## 📝 What's New in 1.17.0
 
