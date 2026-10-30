@@ -214,6 +214,7 @@ Valves are configured in the Admin Panel under **Functions → Theme Designer Pr
 | Valve | Type | Default | Description |
 |---|---|---|---|
 | **Enable Canvas FX** | `bool` | `true` | Allow Canvas FX (JavaScript background animations). When disabled, the Canvas FX tab is hidden and running animations are suppressed — canvas data is stripped from the saved state and a canvas-stripped update is broadcast. |
+| **Calm Chat Column** | `bool` | `false` | Let animations fade behind the chat, each by its own Center Calm setting. When disabled, every script's Center Calm counts as 0 as it loads, so animations show at full strength across the whole page. Applies on each page's next load. |
 | **Enable Custom CSS** | `bool` | `true` | Allow the Style Overrides (custom CSS) editor. When disabled, the Style Overrides tab is hidden in the designer UI. |
 | **Enable Gradient Builder** | `bool` | `true` | Allow the Gradient Background builder. When disabled, the Gradient tab is hidden in the designer UI. |
 | **Enable AI Consultant** | `bool` | `true` | Show the **AI** button in the designer, which turns a description into a theme's colors and gradient. Admins can always use it; users can when personal themes are on. Each request is one call to the model in **AI Consultant Model**, or the task model. |

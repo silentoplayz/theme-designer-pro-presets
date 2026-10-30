@@ -432,6 +432,10 @@ class Event:
             default=True,
             description="Allow Canvas FX (JavaScript background animations). When disabled, the Canvas FX tab is hidden and running animations are suppressed.",
         )
+        calm_chat_column: bool = Field(
+            default=False,
+            description="Let animations fade behind the chat, each by its own Center Calm setting. When disabled, every script's Center Calm counts as 0, so animations show at full strength across the whole page. Takes effect on the next page load.",
+        )
         enable_custom_css: bool = Field(
             default=True,
             description="Allow the Style Overrides (custom CSS) editor. When disabled, the Style Overrides tab is hidden.",
@@ -1580,6 +1584,9 @@ class Event:
                         // script that kept it to the main thread.
                         const _scriptNeedsDOM = /\\bdocument\\b/.test(config.canvasScript.replace(/\\/\\*[\\s\\S]*?\\*\\//g, '').replace(/(^|\\s)\\/\\/.*$/gm, '$1'));
                         const _isolated = config.canvasScript.startsWith(ISOLATED_MARK);
+                        // With the Calm Chat Column valve off, the script's Center Calm
+                        // setting counts as 0, so nothing fades behind the chat
+                        const _script = __CALM_CHAT_COLUMN__ ? config.canvasScript : config.canvasScript.replace(/^(\\s*const\\s+CENTER_CALM\\s*=\\s*)[0-9.]+/m, function (m, head) { return head + '0'; });
                         const useWorker = !forceFallback && (_isolated || !_scriptNeedsDOM) && !!canvas.transferControlToOffscreen;
                         let _canvasSend = null;
                         let _initTheme = null;
@@ -1608,9 +1615,9 @@ class Event:
                                 '});',
                                 '})();'
                             ].join(' ');
-                            const blob = new Blob([_framePause, config.canvasScript], { type: 'application/javascript' });
+                            const blob = new Blob([_framePause, _script], { type: 'application/javascript' });
                             const objectURL = URL.createObjectURL(blob);
-                            const worker = _isolated ? _isolatedWorker(_framePause + config.canvasScript, canvas) : new Worker(objectURL);
+                            const worker = _isolated ? _isolatedWorker(_framePause + _script, canvas) : new Worker(objectURL);
                             let workerFailed = false;
                             // The page gets no frames while hidden, and also while its window is
                             // covered, which Firefox still reports as visible. Timers keep running
@@ -1919,7 +1926,7 @@ class Event:
     
                                     (function() {
                                         let onmessage = null;
-                                        ${config.canvasScript}
+                                        ${_script}
                                         const _own = onmessage || _fbHandler;
                                         const finalHandler = !_fbListeners.length ? _own : function (ev) {
                                             if (_own) _own(ev);
@@ -3159,6 +3166,7 @@ class Event:
             self.valves.allow_personal_themes,
             self.valves.show_in_admin_panel,
             self.valves.enable_canvas_fx,
+            self.valves.calm_chat_column,
         )
         cached = Event._loader_fragment_cache
         if cached and cached[0] == cache_key:
@@ -3178,6 +3186,9 @@ class Event:
         ).replace(
             "__CANVAS_FX__",
             "true" if self.valves.enable_canvas_fx else "false",
+        ).replace(
+            "__CALM_CHAT_COLUMN__",
+            "true" if self.valves.calm_chat_column else "false",
         )
 
         # State inlined as a JS string literal, minus the canvas scripts. Was a
@@ -6484,6 +6495,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                                 </thead>
                                 <tbody>
                                     <tr><td><b>Enable Canvas FX</b></td><td>On</td><td>Off: hides the Canvas FX tab, stops running animations, and serves every theme without its Canvas FX. The scripts stay saved.</td></tr>
+                                    <tr><td><b>Calm Chat Column</b></td><td>Off</td><td>On: each animation fades behind the chat by its own Center Calm setting. Off: every script&rsquo;s Center Calm counts as 0, so animations show at full strength across the whole page. The scripts themselves are unchanged.</td></tr>
                                     <tr><td><b>Enable Custom CSS</b></td><td>On</td><td>Off: hides the Style Overrides tab. Custom CSS that&rsquo;s already saved keeps being served.</td></tr>
                                     <tr><td><b>Enable Gradient Builder</b></td><td>On</td><td>Off: hides the Gradient tab. Gradients that are already saved keep being served.</td></tr>
                                     <tr><td><b>Enable AI Consultant</b></td><td>On</td><td>Shows the <b>AI</b> button in the designer (see Section 5).</td></tr>
@@ -18590,6 +18602,9 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         ).replace(
             "__CANVAS_FX__",
             "true" if self.valves.enable_canvas_fx else "false",
+        ).replace(
+            "__CALM_CHAT_COLUMN__",
+            "true" if self.valves.calm_chat_column else "false",
         )
 
         valve_config = {
