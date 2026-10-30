@@ -1,6 +1,6 @@
 {
   "manifestVersion": "1.0",
-  "generated": "2026-10-28T03:31:24.613Z",
+  "generated": "2026-10-30T00:40:53.558Z",
   "manifestUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/manifest.json",
   "themes": {
     "aether_nebula_flow": {
@@ -34,6 +34,14 @@
       "description": "A 1960s flight console in warm gray and cream with signal orange for focus and links, and a brass orrery turning in the lower corner. Light and Her are cream and warm beige panels with dark lettering.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/apollo_analogue_futurism.json",
       "file": "themes/apollo_analogue_futurism.json"
+    },
+    "ascii_big_fish": {
+      "name": "ASCII Big Fish Eat Little Fish",
+      "version": "1.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "A port of Aenvo's ASCII Big Fish Eat Little Fish: the original's character-cell fish, sharks, schools, corals and light beams, quiet behind the chat, with a Playable setting that lets your cursor steer a fish that eats, grows and can be eaten. The original's teal-to-navy water in Dark, true black on OLED, a pale lagoon in Light and sea glass in Her. MIT licensed, copyright 2026 drewdi.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/ascii_big_fish.json",
+      "file": "themes/ascii_big_fish.json"
     },
     "astral_projection": {
       "name": "Astral Projection",
