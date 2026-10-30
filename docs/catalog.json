@@ -1611,6 +1611,14 @@
       "followsTheme": true
     },
     {
+      "name": "ASCII Big Fish Eat Little Fish",
+      "file": "ascii_big_fish.js",
+      "description": "A port of Aenvo's ASCII Big Fish Eat Little Fish aquarium, with its real fish, sharks, schools, scenery and renderer, over the theme's background: curious fish turn toward the cursor, a tap splashes the water, and with Playable on your cursor steers a fish that eats, grows and can be eaten.",
+      "dateAdded": "2026-10-29T20:39:47-04:00",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/ascii_big_fish.js",
+      "followsTheme": true
+    },
+    {
       "name": "Aurora Borealis",
       "file": "aurora_borealis.js",
       "description": "Soft aurora ribbons with rising light rays in your theme's colors sway across the top of the screen, thin behind the chat and bow away from the cursor.",
