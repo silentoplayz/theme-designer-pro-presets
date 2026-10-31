@@ -1,6 +1,6 @@
 {
   "manifestVersion": "1.0",
-  "generated": "2026-10-30T00:40:53.558Z",
+  "generated": "2026-10-31T22:08:17.103Z",
   "manifestUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/manifest.json",
   "themes": {
     "aether_nebula_flow": {
@@ -42,6 +42,14 @@
       "description": "A port of Aenvo's ASCII Big Fish Eat Little Fish: the original's character-cell fish, sharks, schools, corals and light beams, quiet behind the chat, with a Playable setting that lets your cursor steer a fish that eats, grows and can be eaten. The original's teal-to-navy water in Dark, true black on OLED, a pale lagoon in Light and sea glass in Her. MIT licensed, copyright 2026 drewdi.",
       "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/ascii_big_fish.json",
       "file": "themes/ascii_big_fish.json"
+    },
+    "ascii_hallows_eve": {
+      "name": "ASCII Hallow's Eve",
+      "version": "1.0.0",
+      "author": "silentoplayz (G30)",
+      "description": "A Halloween night drawn in characters: a huge harvest moon over a haunted house on a hill, a dead tree, a foggy graveyard and a row of flickering jack-o'-lanterns, with bats looping round the moon, a spider on its thread, ghosts rising from the graves and a witch crossing the moon; bats scatter from the cursor, pumpkins glow as it nears, the spider drops toward it, red eyes watch from the tower, and a tap brings lightning and a ghost. Drawn with the character renderer from Mix4o445's ASCII Wallpapers for Antigravity (MIT, copyright 2026 Mix4o445), with Open WebUI recoloured to match the scene in every mode, as the original recolours its app.",
+      "updateUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/ascii_hallows_eve.json",
+      "file": "themes/ascii_hallows_eve.json"
     },
     "astral_projection": {
       "name": "Astral Projection",

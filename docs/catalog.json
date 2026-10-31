@@ -238,6 +238,53 @@
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/ascii_big_fish.json"
     },
     {
+      "name": "ASCII Hallow's Eve",
+      "file": "ascii_hallows_eve.json",
+      "description": "A Halloween night drawn in characters: a huge harvest moon over a haunted house on a hill, a dead tree, a foggy graveyard and a row of flickering jack-o'-lanterns, with bats looping round the moon, a spider on its thread, ghosts rising from the graves and a witch crossing the moon; bats scatter from the cursor, pumpkins glow as it nears, the spider drops toward it, red eyes watch from the tower, and a tap brings lightning and a ghost. Drawn with the character renderer from Mix4o445's ASCII Wallpapers for Antigravity (MIT, copyright 2026 Mix4o445), with Open WebUI recoloured to match the scene in every mode, as the original recolours its app.",
+      "author": "silentoplayz (G30)",
+      "version": "1.0.0",
+      "dateAdded": "2026-10-31T18:07:49-04:00",
+      "modes": {
+        "dark": {
+          "h": 266,
+          "c": 37,
+          "l": 15,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": false
+        },
+        "light": {
+          "h": 266,
+          "c": 37,
+          "l": 20,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": false
+        },
+        "oled": {
+          "h": 266,
+          "c": 37,
+          "l": 0,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": false
+        },
+        "her": {
+          "h": 266,
+          "c": 37,
+          "l": 20,
+          "hasCSS": true,
+          "hasFX": true,
+          "hasGradient": false,
+          "hasOverrides": false
+        }
+      },
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/themes/ascii_hallows_eve.json"
+    },
+    {
       "name": "Astral Projection",
       "file": "astral_projection.json",
       "description": "Faint violet-blue constellations drift in the outer thirds of the screen behind frosted glass panels. Light and Her keep the same star chart, drawn in deep blue and lilac ink on pale paper.",
@@ -1663,6 +1710,14 @@
       "description": "A port of Aenvo's ASCII Big Fish Eat Little Fish aquarium, with its real fish, sharks, schools, scenery and renderer, over the theme's background: curious fish turn toward the cursor, a tap splashes the water, and with Playable on your cursor steers a fish that eats, grows and can be eaten.",
       "dateAdded": "2026-10-29T20:39:47-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/ascii_big_fish.js",
+      "followsTheme": true
+    },
+    {
+      "name": "ASCII Hallow's Eve",
+      "file": "ascii_hallows_eve.js",
+      "description": "A Halloween night drawn in characters: a huge harvest moon over a haunted house on a hill, a dead tree, a foggy graveyard and a row of flickering jack-o'-lanterns, with bats looping round the moon, a spider on its thread, ghosts rising from the graves and a witch crossing the moon; bats scatter from the cursor, pumpkins glow as it nears, the spider drops toward it, red eyes watch from the tower, and a tap brings lightning and a ghost.",
+      "dateAdded": "2026-10-31T18:07:49-04:00",
+      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/canvas-fx/ascii_hallows_eve.js",
       "followsTheme": true
     },
     {
