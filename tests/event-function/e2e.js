@@ -827,6 +827,60 @@ test('a personal theme hides the background image of a folder it names', async (
   await removePersonalTheme(user);
 });
 
+// How much of Open WebUI's background image, and the dimming layer over it, shows
+async function expectChatBackgroundShare(page, share, label) {
+  await waitFor(label, () => page.evaluate((want) => {
+    const image = [...document.querySelectorAll('div.pointer-events-none.absolute.bg-cover')]
+      .find((el) => (el.getAttribute('style') || '').includes('background-image'));
+    if (!image) return 'no background image on the page';
+    const seen = [image, image.nextElementSibling].map((el) => getComputedStyle(el).opacity);
+    return seen.every((o) => o === want) ? true : 'opacity ' + seen.join(' and ');
+  }, share));
+}
+
+// A model with no background image, so the Chat Background Image is the one shown
+const PLAIN_MODEL = 'tdp_plain_pipe';
+async function modelWithoutBackground(admin) {
+  if ((await api('GET', `/api/v1/functions/id/${PLAIN_MODEL}`, undefined, admin)).status === 200) return;
+  const made = await api('POST', '/api/v1/functions/create',
+    { id: PLAIN_MODEL, name: 'Plain model', content: PIPE, meta: { description: 'End-to-end tests' } }, admin);
+  if (made.status !== 200) throw new Error('Could not add the model: ' + JSON.stringify(made.json));
+  await api('POST', `/api/v1/functions/id/${PLAIN_MODEL}/toggle`, undefined, admin);
+}
+
+test('a theme fades the Chat Background Image', async ({ admin }) => {
+  await modelWithoutBackground(admin);
+  // Set the way Settings > Interface sets it, and put back afterwards
+  const before = (await api('GET', '/api/v1/users/user/settings', undefined, admin)).json || {};
+  const had = (before.ui && before.ui.backgroundImageUrl) || null;
+  const image = 'data:image/png;base64,' + PNG_1PX;
+  const set = await api('POST', '/api/v1/users/user/settings/update',
+    { ...before, ui: { ...(before.ui || {}), backgroundImageUrl: image } }, admin);
+  if (set.status !== 200) throw new Error('Could not set the Chat Background Image: ' + set.status);
+  try {
+    await removePersonalTheme(admin);
+    await saveTheme(admin, markerTheme('instance'));
+    const page = await openPage({ token: admin });
+    await page.goto(BASE + '/?models=' + PLAIN_MODEL);
+    await loaderReady(page);
+    await expectChatBackground(page, true, 'the Chat Background Image before the theme fades it');
+    // A page already open follows the save
+    await saveTheme(admin, hidingBackgrounds(markerTheme('instance'), { chat: 0 }));
+    await expectChatBackground(page, false, 'the Chat Background Image at 0% on an open page');
+    await saveTheme(admin, hidingBackgrounds(markerTheme('instance'), { chat: 40 }));
+    const fresh = await openPage({ token: admin });
+    await fresh.goto(BASE + '/?models=' + PLAIN_MODEL);
+    await loaderReady(fresh);
+    await expectChatBackgroundShare(fresh, '0.4', 'the Chat Background Image at 40% after a page load');
+    if (fresh.errors.length) throw new Error('page errors: ' + fresh.errors.join(' | '));
+  } finally {
+    // A null field is what clears it: settings updates patch the Interface fields
+    await api('POST', '/api/v1/users/user/settings/update',
+      { ...before, ui: { ...(before.ui || {}), backgroundImageUrl: had } }, admin);
+    await saveTheme(admin, markerTheme('instance'));
+  }
+});
+
 // ── The theme format (schemas/theme-format.md) ──
 // A theme file goes through the Studio and the designer, and each must read
 // it the way the other wrote it.

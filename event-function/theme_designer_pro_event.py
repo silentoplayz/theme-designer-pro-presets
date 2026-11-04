@@ -1992,14 +1992,17 @@ class Event:
                 }
             }
             
-            // Open WebUI lays a model's or folder's own background image over
-            // the chat, so over this theme's background, with a dimming layer
-            // on top. The theme in use can hide them: a model's image by its
-            // address, an uploaded file's, and a folder's on that folder's
-            // page, the only place Open WebUI shows one. A model's address is
-            // looked up once a page and kept in this browser, so after a
-            // reload the image is hidden before it shows.
+            // Open WebUI lays a model's, a folder's or the person's own Chat
+            // Background Image over the chat, so over this theme's background,
+            // with a dimming layer on top. The theme in use sets how much of
+            // each shows, from 0 (hidden) to 100 (as Open WebUI shows it): a
+            // model's image found by its address, a folder's on that folder's
+            // page, the only place Open WebUI shows one, and the Chat
+            // Background Image by the end of its address in this person's
+            // settings. Those addresses are looked up once a page and kept in
+            // this browser, so after a reload the image fades before it shows.
             var MODEL_BG_KEY = 'owui_tdp_model_bg';
+            var CHAT_BG_KEY = 'owui_tdp_chat_bg';
             var CHAT_BG = 'div.pointer-events-none.absolute.bg-cover';
             var _modelBgLookups = Object.create(null);
             function modelBgUrls() {
@@ -2022,29 +2025,79 @@ class Event:
                     })
                     .catch(function() {});
             }
+            var _chatBgLookedUp = false;
+            function lookUpChatBg() {
+                if (_chatBgLookedUp) return;
+                _chatBgLookedUp = true;
+                var init = {};
+                try { init.headers = { Authorization: 'Bearer ' + (localStorage.getItem('token') || '') }; } catch(x) {}
+                fetch('/api/v1/users/user/settings', init)
+                    .then(function(r) { return r.ok ? r.json() : null; })
+                    .then(function(settings) {
+                        var url = settings && settings.ui && settings.ui.backgroundImageUrl;
+                        // An uploaded image is a long data address; its last
+                        // characters are enough to find it on the page
+                        var tail = typeof url === 'string' ? url.slice(-64) : '';
+                        var had = '';
+                        try { had = localStorage.getItem(CHAT_BG_KEY) || ''; } catch(x) {}
+                        if (had === tail) return;
+                        try { if (tail) localStorage.setItem(CHAT_BG_KEY, tail); else localStorage.removeItem(CHAT_BG_KEY); } catch(x) {}
+                        syncHiddenBackgrounds();
+                    })
+                    .catch(function() {});
+            }
+            // How much of a background shows, 0 to 100. Themes saved before
+            // the sliders listed the hidden ones, which read as 0.
+            function bgShare(v) {
+                if (v === null || v === undefined || v === '') return 100;
+                var n = Number(v);
+                return isFinite(n) ? Math.max(0, Math.min(100, Math.round(n))) : 100;
+            }
+            function bgShares(list) {
+                var out = {};
+                if (Array.isArray(list)) {
+                    list.forEach(function(id) { if (typeof id === 'string' && id) out[id] = 0; });
+                } else if (list && typeof list === 'object') {
+                    Object.keys(list).forEach(function(id) { if (id) out[id] = bgShare(list[id]); });
+                }
+                return out;
+            }
             function syncHiddenBackgrounds() {
                 var hidden = _disabled || window.__THEME_DESIGNER__ ? null : getParsedState()._hiddenBackgrounds;
-                var rules = [];
+                var shares = {};
+                function fade(selector, share) {
+                    if (share < 100) shares[selector] = selector in shares ? Math.min(shares[selector], share) : share;
+                }
+                // Only an address that can't break out of the selector
+                var SAFE = /^[\\w:\\/.?=&%+-]{1,512}$/;
                 if (hidden && typeof hidden === 'object') {
                     var path = window.location.pathname.split('/');
-                    var folders = Array.isArray(hidden.folders) ? hidden.folders : [];
-                    if (path[1] === 'folders' && path[2] && folders.indexOf(decodeURIComponent(path[2])) !== -1) {
-                        rules.push(CHAT_BG + '[style*="background-image"]');
-                    }
+                    var folders = bgShares(hidden.folders);
+                    var folder = path[1] === 'folders' && path[2] ? decodeURIComponent(path[2]) : '';
+                    if (folder && folders.hasOwnProperty(folder)) fade(CHAT_BG + '[style*="background-image"]', folders[folder]);
                     var urls = modelBgUrls();
-                    (Array.isArray(hidden.models) ? hidden.models : []).forEach(function(id) {
-                        if (typeof id !== 'string' || !id) return;
+                    var models = bgShares(hidden.models);
+                    Object.keys(models).forEach(function(id) {
+                        if (models[id] >= 100) return;
                         lookUpModelBg(id);
-                        // Only an address that can't break out of the selector
-                        if (typeof urls[id] === 'string' && /^[\\w:\\/.?=&%-]{1,512}$/.test(urls[id])) {
-                            rules.push(CHAT_BG + '[style*="' + urls[id] + '"]');
-                        }
+                        if (typeof urls[id] === 'string' && SAFE.test(urls[id])) fade(CHAT_BG + '[style*="' + urls[id] + '"]', models[id]);
                     });
+                    var chat = bgShare(hidden.chat);
+                    if (chat < 100) {
+                        lookUpChatBg();
+                        var tail = '';
+                        try { tail = localStorage.getItem(CHAT_BG_KEY) || ''; } catch(x) {}
+                        if (SAFE.test(tail)) fade(CHAT_BG + '[style*="' + tail + '"]', chat);
+                    }
                 }
                 var style = document.getElementById('owui-tdp-hidden-bg');
-                if (!rules.length) { if (style) style.remove(); return; }
-                var css = rules.concat(rules.map(function(r) { return r + ' + div.pointer-events-none'; })).join(',\\n') +
-                    ' { display: none !important; }';
+                var selectors = Object.keys(shares);
+                if (!selectors.length) { if (style) style.remove(); return; }
+                // The image and the dimming layer over it fade together
+                var css = selectors.map(function(s) {
+                    return s + ', ' + s + ' + div.pointer-events-none { ' +
+                        (shares[s] ? 'opacity: ' + shares[s] / 100 + ' !important;' : 'display: none !important;') + ' }';
+                }).join('\\n');
                 if (!style) {
                     style = document.createElement('style');
                     style.id = 'owui-tdp-hidden-bg';
@@ -5974,10 +6027,17 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         .empty-state-lg { padding: 40px 20px; border-radius: 20px; }
         .hidden-bg-note { font-size: 0.7rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px; }
         .hidden-bg-list { display: flex; flex-direction: column; gap: 8px; }
-        .hidden-bg-row { display: flex; align-items: center; gap: 10px; font-size: 0.75rem; color: var(--text-main); cursor: pointer; }
+        .hidden-bg-row { display: flex; align-items: center; gap: 10px; font-size: 0.75rem; color: var(--text-main); }
         .hidden-bg-thumb { width: 44px; height: 26px; flex-shrink: 0; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-deep) center / cover no-repeat; }
         .hidden-bg-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .hidden-bg-kind { margin-left: auto; font-size: 0.62rem; color: var(--text-muted); white-space: nowrap; }
+        #hidden-bg-list input.hidden-bg-slider { width: 160px; flex-shrink: 0; }
+        .hidden-bg-val { width: 2.6rem; flex-shrink: 0; text-align: right; font-size: 0.7rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+        @media (max-width: 480px) {
+            .hidden-bg-row { flex-wrap: wrap; row-gap: 6px; }
+            .hidden-bg-name { flex: 1 1 0; }
+            #hidden-bg-list input.hidden-bg-slider { width: auto; flex: 1 1 calc(100% - 3.6rem); }
+        }
         .flex-center { display: flex; align-items: center; gap: 12px; }
         .flex-center-gap6 { display: flex; gap: 6px; align-items: center; flex-shrink: 0; flex-wrap: nowrap; }
         .flex-center-gap8 { display: flex; gap: 8px; align-items: center; }
@@ -6079,6 +6139,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         <div class="tab" data-tab="custom" role="tab" tabindex="-1" aria-selected="false">✏️ Style Overrides</div>
         <div class="tab" data-tab="canvas" role="tab" tabindex="-1" aria-selected="false">✨ Canvas FX</div>
         <div class="tab" data-tab="bg" role="tab" tabindex="-1" aria-selected="false">🌈 Gradient</div>
+        <div class="tab" data-tab="backgrounds" role="tab" tabindex="-1" aria-selected="false">🖼️ Backgrounds</div>
         <div class="tab" data-tab="code" role="tab" tabindex="-1" aria-selected="false">📋 CSS Output</div>
     </div>
 
@@ -6376,16 +6437,18 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                 </div>
             </div>
 
-            <div class="section-title" style="margin-top: 28px;">
+            <div style="margin-top: 24px;">
+                <div id="gallery-toolbar-gradient"></div>
+            </div>
+        </div>
+
+        <div id="tab-backgrounds" class="tab-content" role="tabpanel" style="display:none;">
+            <div class="section-title">
                 <div>Open WebUI Backgrounds</div>
             </div>
             <div class="control-group">
                 <div class="hidden-bg-note" id="hidden-bg-note"></div>
-                <div class="hidden-bg-list" id="hidden-bg-list" role="group" aria-label="Background images to hide"></div>
-            </div>
-
-            <div style="margin-top: 24px;">
-                <div id="gallery-toolbar-gradient"></div>
+                <div class="hidden-bg-list" id="hidden-bg-list" role="group" aria-label="How much of each background image shows"></div>
             </div>
         </div>
 
@@ -7492,13 +7555,13 @@ self.onmessage = function(e) {
                         </details>
 
                         <details class="doc-sub-accordion">
-                            <summary>Model and Folder Backgrounds <i data-icon="chevron"></i></summary>
+                            <summary>Open WebUI Backgrounds <i data-icon="chevron"></i></summary>
                             <div class="doc-sub-inner">
-                        <p>In Open WebUI, a model or a folder can have a background image of its own, set in the model&rsquo;s editor or the folder&rsquo;s <b>Edit Folder</b> dialog. Open WebUI lays it over the chat with a dimming layer, so it covers this theme&rsquo;s gradient or Canvas FX.</p>
+                        <p>In Open WebUI, each person can set a <b>Chat Background Image</b> in <b>Settings &rarr; Interface</b>, and a model or a folder can have a background image of its own, set in the model&rsquo;s editor or the folder&rsquo;s <b>Edit Folder</b> dialog. Open WebUI lays the image over the chat with a dimming layer, so it covers this theme&rsquo;s gradient or Canvas FX.</p>
 
-                        <p><b>Open WebUI Backgrounds</b>, at the bottom of the Gradient tab, lists every model with a background image, and in a personal theme every folder of yours with one. Tick one to hide its image and dimming layer while the theme is in use, so the theme&rsquo;s own background shows in its chats. A folder&rsquo;s image shows only on that folder&rsquo;s page, where a new chat in the folder starts, so that is where it is hidden.</p>
+                        <p>The <b>Backgrounds</b> tab lists the Chat Background Image, every model with a background image, and in a personal theme every folder of yours with one. Each slider sets how much of that image and its dimming layer shows while the theme is in use: at 100% as Open WebUI shows it, at 0% not at all, so the theme&rsquo;s own background shows in its chats. In between, the theme shows through the image. A folder&rsquo;s image shows only on that folder&rsquo;s page, where a new chat in the folder starts, so that is where it fades.</p>
 
-                        <p>The list belongs to the live theme, not to a gallery theme: applying another theme leaves it as it is, and exported theme files don&rsquo;t carry it. The instance theme can hide models&rsquo; images for everyone using it. Folders belong to each person, so only a personal theme can hide theirs.</p>
+                        <p>The list belongs to the live theme, not to a gallery theme: applying another theme leaves it as it is, and exported theme files don&rsquo;t carry it. The instance theme sets models&rsquo; images, and each person&rsquo;s own Chat Background Image, for everyone using it. Folders belong to each person, so only a personal theme sets theirs. A Chat Background Image changed in Settings fades from the next page load.</p>
                             </div>
                         </details>
 
@@ -8931,13 +8994,24 @@ location.reload();</code></pre>
 
     const accentsMatch = (m1, m2) => ACCENT_FIELDS.every(({ key }) => _accentHex(m1[key]) === _accentHex(m2[key]));
 
+    // How much of each Open WebUI background shows, 0 to 100, for the ones
+    // set below 100. Themes saved before the sliders listed the hidden ones,
+    // which read as 0.
     function readHiddenBackgrounds(v) {
-        const out = { models: [], folders: [] };
+        const share = (n) => Math.max(0, Math.min(100, Math.round(Number(n))));
+        const out = { models: {}, folders: {}, chat: 100 };
         if (!v || typeof v !== 'object') return out;
-        Object.keys(out).forEach(k => {
-            if (Array.isArray(v[k])) out[k] = [...new Set(v[k].filter(id => typeof id === 'string' && id && id.length <= 256))].slice(0, 500);
+        ['models', 'folders'].forEach(k => {
+            const entries = Array.isArray(v[k]) ? v[k].map(id => [id, 0])
+                : v[k] && typeof v[k] === 'object' ? Object.entries(v[k]) : [];
+            entries.filter(([id, n]) => typeof id === 'string' && id && id.length <= 256 && Number.isFinite(Number(n)) && share(n) < 100)
+                .slice(0, 500).forEach(([id, n]) => { out[k][id] = share(n); });
         });
+        if (v.chat !== null && v.chat !== undefined && Number.isFinite(Number(v.chat))) out.chat = share(v.chat);
         return out;
+    }
+    function hasHiddenBackgrounds(h) {
+        return Object.keys(h.models).length > 0 || Object.keys(h.folders).length > 0 || h.chat < 100;
     }
 
     // Gallery entries come from storage, the server, imports, community themes
@@ -9739,7 +9813,7 @@ self.onmessage = (e) => {
     let activeCanvasRef = saved._activeCanvasRef || createNullModeMap();
     let activeCssRef = saved._activeCssRef || createNullModeMap();
     let activeGradientRef = saved._activeGradientRef || createNullModeMap();
-    // Models and folders whose own background image is hidden while this theme
+    // How much of Open WebUI's own background images shows while this theme
     // is in use (the bootloader's syncHiddenBackgrounds). A setting of the live
     // theme, not of a gallery theme: applying one leaves it as it is.
     let hiddenBackgrounds = readHiddenBackgrounds(saved._hiddenBackgrounds);
@@ -11816,6 +11890,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             /* Translucent panels so background effects bleed through */
             #tab-lch .control-group,
             #tab-bg .control-group,
+            #tab-backgrounds .control-group,
             #tab-lch .var-item {
                 background: rgba(0, 0, 0, 0.45) !important;
                 backdrop-filter: blur(16px) !important;
@@ -11823,6 +11898,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             }
             body#tool-body.light-mode #tab-lch .control-group,
             body#tool-body.light-mode #tab-bg .control-group,
+            body#tool-body.light-mode #tab-backgrounds .control-group,
             body#tool-body.light-mode #tab-lch .var-item {
                 background: rgba(255, 255, 255, 0.55) !important;
             }
@@ -11926,7 +12002,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                         _activeCanvasRef: activeCanvasRef,
                         _activeCssRef: activeCssRef,
                         _activeGradientRef: activeGradientRef,
-                        ...(hiddenBackgrounds.models.length || hiddenBackgrounds.folders.length ? { _hiddenBackgrounds: hiddenBackgrounds } : {})
+                        ...(hasHiddenBackgrounds(hiddenBackgrounds) ? { _hiddenBackgrounds: hiddenBackgrounds } : {})
                     });
                     Storage.setRaw('theme', stateStr);
                     // Hand the state we just serialized straight to the sync —
@@ -16035,19 +16111,20 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
     };
 
     // --- Open WebUI's own backgrounds ---
-    // A model or folder with a background image of its own covers this theme's
-    // background in its chats. Each one ticked here has its image hidden while
-    // this theme is in use. Folders belong to each person, so only a personal
-    // theme lists them.
+    // A person's Chat Background Image, or a model's or folder's own
+    // background image, covers this theme's background in its chats. Each
+    // slider sets how much of one shows while this theme is in use. Folders
+    // belong to each person, so only a personal theme lists them.
     (function hiddenBackgroundsList() {
         const list = $('hidden-bg-list');
         const note = $('hidden-bg-note');
         if (!list || !note) return;
         const personal = (window.__THEME_PRO_CONFIG__ || {}).scope === 'me';
         note.textContent = personal
-            ? 'Models and folders can have a background image of their own, which covers this theme in their chats. Tick one to hide its image while you use this theme. It applies in every mode.'
-            : 'Models can have a background image of their own, which covers this theme in their chats. Tick one to hide its image for everyone using the instance theme. It applies in every mode. Folders belong to each person, so each hides theirs in their own theme.';
+            ? 'Your Chat Background Image, and models and folders with a background image of their own, cover this theme in their chats. Each slider sets how much of one shows while you use this theme: at 100% as Open WebUI shows it, at 0% not at all. It applies in every mode.'
+            : "Each person's Chat Background Image, and models with a background image of their own, cover this theme in their chats. Each slider sets how much of one shows for everyone using the instance theme: at 100% as Open WebUI shows it, at 0% not at all. It applies in every mode. Folders belong to each person, so each sets theirs in their own theme.";
         let found = null;
+        let chatImage = null;
 
         function getJson(url) {
             const headers = { Accept: 'application/json' };
@@ -16058,6 +16135,10 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
 
         async function load() {
             const items = [];
+            try {
+                const settings = await getJson('/api/v1/users/user/settings');
+                chatImage = (settings && settings.ui && settings.ui.backgroundImageUrl) || null;
+            } catch (e) {}
             try {
                 const res = await getJson('/api/models');
                 (Array.isArray(res) ? res : res.data || []).forEach(m => {
@@ -16086,15 +16167,20 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             render();
         }
 
+        function shareOf(item) {
+            if (item.kind === 'chat') return hiddenBackgrounds.chat;
+            const shares = hiddenBackgrounds[item.kind];
+            return Object.prototype.hasOwnProperty.call(shares, item.id) ? shares[item.id] : 100;
+        }
+
+        function kindLabel(item) {
+            if (item.kind === 'chat') return personal ? (item.image ? 'Interface setting' : 'Interface setting, none set') : "Each person's own";
+            return (item.kind === 'models' ? 'Model' : 'Folder') + (item.image ? '' : ', no image now');
+        }
+
         function row(item) {
-            const label = document.createElement('label');
-            label.className = 'hidden-bg-row';
-            const cb = document.createElement('input');
-            cb.type = 'checkbox';
-            cb.className = 'cb-input';
-            cb.dataset.hideKind = item.kind;
-            cb.dataset.hideId = item.id;
-            cb.checked = hiddenBackgrounds[item.kind].includes(item.id);
+            const el = document.createElement('div');
+            el.className = 'hidden-bg-row';
             const thumb = document.createElement('span');
             thumb.className = 'hidden-bg-thumb';
             if (item.image) thumb.style.backgroundImage = `url("${String(item.image).replace(/["\\]/g, '\\$&')}")`;
@@ -16103,36 +16189,56 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             name.textContent = item.name;
             const kind = document.createElement('span');
             kind.className = 'hidden-bg-kind';
-            kind.textContent = (item.kind === 'models' ? 'Model' : 'Folder') + (item.image ? '' : ', no image now');
-            label.append(cb, thumb, name, kind);
-            return label;
+            kind.textContent = kindLabel(item);
+            const share = shareOf(item);
+            const slider = document.createElement('input');
+            slider.type = 'range';
+            slider.min = '0';
+            slider.max = '100';
+            slider.step = '5';
+            slider.value = String(share);
+            slider.className = 'hidden-bg-slider';
+            slider.dataset.bgKind = item.kind;
+            slider.dataset.bgId = item.id;
+            slider.setAttribute('aria-label', `How much of ${item.name} shows`);
+            const value = document.createElement('span');
+            value.className = 'hidden-bg-val';
+            value.textContent = `${share}%`;
+            el.append(thumb, name, kind, slider, value);
+            return el;
         }
 
         function render() {
             list.textContent = '';
             if (!found) {
-                list.innerHTML = '<div class="hidden-bg-note">Looking for models and folders with a background image…</div>';
+                list.innerHTML = '<div class="hidden-bg-note">Looking for background images…</div>';
                 return;
             }
             const items = found.slice().sort((a, b) => a.kind.localeCompare(b.kind) || a.name.localeCompare(b.name));
-            // A ticked one whose image is gone stays listed, so it can be unticked
-            ['models', 'folders'].forEach(kind => hiddenBackgrounds[kind].forEach(id => {
+            // A faded one whose image is gone stays listed, so it can be set back
+            ['models', 'folders'].forEach(kind => Object.keys(hiddenBackgrounds[kind]).forEach(id => {
                 if (!items.some(i => i.kind === kind && i.id === id)) items.push({ kind, id, name: id, image: null });
             }));
-            if (!items.length) {
-                list.innerHTML = `<div class="hidden-bg-note">${personal ? 'None of your models or folders has a background image.' : 'No model has a background image.'}</div>`;
-                return;
-            }
+            list.appendChild(row({ kind: 'chat', id: 'chat', name: 'Chat Background Image', image: chatImage }));
             items.forEach(item => list.appendChild(row(item)));
         }
 
+        list.addEventListener('input', (e) => {
+            const slider = e.target.closest('input[data-bg-kind]');
+            if (slider) slider.nextElementSibling.textContent = `${slider.value}%`;
+        });
         list.addEventListener('change', (e) => {
-            const cb = e.target.closest('input[data-hide-kind]');
-            if (!cb) return;
-            const kind = cb.dataset.hideKind;
-            const ids = new Set(hiddenBackgrounds[kind]);
-            if (cb.checked) ids.add(cb.dataset.hideId); else ids.delete(cb.dataset.hideId);
-            hiddenBackgrounds = { ...hiddenBackgrounds, [kind]: [...ids] };
+            const slider = e.target.closest('input[data-bg-kind]');
+            if (!slider) return;
+            const kind = slider.dataset.bgKind;
+            const share = Number(slider.value);
+            if (kind === 'chat') {
+                hiddenBackgrounds = { ...hiddenBackgrounds, chat: share };
+            } else {
+                const shares = { ...hiddenBackgrounds[kind] };
+                if (share >= 100) delete shares[slider.dataset.bgId]; else shares[slider.dataset.bgId] = share;
+                hiddenBackgrounds = { ...hiddenBackgrounds, [kind]: shares };
+            }
             commitChange({ clearRef: false, push: false });
         });
 

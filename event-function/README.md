@@ -600,7 +600,7 @@ A fix release from an audit of the whole function. Nothing to change on your sid
 
 **Faster everywhere.** Every Open WebUI page with a theme repainted it on every frame for as long as it stayed open: each repaint touched the page's classes, and Theme Designer Pro took that for a mode switch and repainted again. An idle page now does no theme work at all, and a mode switch or a move to another page takes well under a millisecond instead of tens. A change in the designer reaches your other open pages in about a tenth of a second instead of up to two: pages fetch the new theme as soon as they hear of it, spread out only when many are connected, and a page in a background tab waits until it's shown. A single change in the designer saves at once, and a dragged slider still saves when you stop. A slider step in the designer does a third of the work, and a page load makes 5 requests to Theme Designer Pro instead of 9.
 
-**Hide a model's or folder's own background.** In Open WebUI a model or a folder can have a background image of its own, which covers the theme's gradient or Canvas FX in its chats. **Open WebUI Backgrounds**, at the bottom of the Gradient tab, lists the models with one, and in a personal theme your folders with one. Tick one and its image and dimming layer stay hidden while the theme is in use. The list belongs to the live theme: applying a gallery theme keeps it, and exported theme files don't carry it.
+**Fade Open WebUI's own backgrounds.** In Open WebUI each person can set a Chat Background Image in **Settings > Interface**, and a model or a folder can have a background image of its own. Any of them covers the theme's gradient or Canvas FX in its chats. The **Backgrounds** tab lists the Chat Background Image, the models with one, and in a personal theme your folders with one. Each slider sets how much of that image and its dimming layer shows while the theme is in use, from 100% (as Open WebUI shows it) down to 0% (hidden). In the instance theme, the Chat Background Image slider applies to each person's own image. The list belongs to the live theme: applying a gallery theme keeps it, and exported theme files don't carry it.
 
 **The designer no longer fills the browser's storage.** The designer kept a copy of every gallery (themes, Canvas FX scripts, CSS snippets and gradients) in the browser's storage, and a personal designer kept a second set. With scripts in them they filled the 5 MB a site gets, which Open WebUI shares, and every change after that showed "Browser storage full". The galleries now come with the designer page and stay in memory, and the old copies are removed once the server has them.
 
@@ -1095,13 +1095,14 @@ graph TD
     subgraph DesignerUI ["Theme Designer UI: Standalone Page"]
         ServeHTML -.->|"Loads in browser"| UILoad["Initialize Designer App"]:::frontend
         UILoad --> FetchState["Fetch /state.json + /theme.css"]:::frontend
-        FetchState --> Tabs{"6 UI Tabs"}:::frontend
+        FetchState --> Tabs{"7 UI Tabs"}:::frontend
 
         Tabs --> TabThemes["Themes"]:::frontend
         Tabs --> TabLCH["Core Palette"]:::frontend
         Tabs --> TabCSS["Style Overrides"]:::frontend
         Tabs --> TabCanvas["Canvas FX"]:::frontend
         Tabs --> TabBG["Gradient"]:::frontend
+        Tabs --> TabBackgrounds["Backgrounds"]:::frontend
         Tabs --> TabCode["CSS Output"]:::frontend
 
         DocsBtn["📖 Docs Button"]:::frontend --> DocsModal["Documentation Modal (22 sections)"]:::frontend
@@ -1111,6 +1112,7 @@ graph TD
         TabCSS --> CommitChange
         TabCanvas --> CommitChange
         TabBG --> CommitChange
+        TabBackgrounds --> CommitChange
 
         CommitChange --> GenerateCSS["generateCoreCSS()"]:::frontend
         GenerateCSS --> SyncToServer["syncToServer() — POST /theme-designer"]:::frontend
