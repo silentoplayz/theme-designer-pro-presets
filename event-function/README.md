@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.19.0-blue)
+![Version](https://img.shields.io/badge/version-1.20.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -509,6 +509,16 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
 
 ---
+
+## 📝 What's New in 1.20.0
+
+Paste it in and save. Animations now show at full strength across the whole page, unless you turn on the new **Calm Chat Column** valve.
+
+**Open WebUI's own backgrounds get a tab of their own, with sliders.** Open WebUI lays a person's Chat Background Image, or a model's or folder's own background image, over the chat with a dimming layer, which covers the theme. The new **Backgrounds** tab lists all of them, and each now has a slider instead of a tick: at 100% the image and its dimming layer show as Open WebUI shows them, at 0% they're hidden, and in between the theme shows through. The **Chat Background Image** row is new. In the instance theme it applies to each person's own image, and in a personal theme to yours. Ticks saved by earlier versions read as 0%. The section used to sit at the bottom of the Gradient tab, so turning off **Enable Gradient Builder** hid it as well. It now stays.
+
+**No more dim band down the middle.** Since 1.15.0 every gallery animation has faded behind the chat column by its own Center Calm setting, which left a dim band down the middle of every theme. The new **Calm Chat Column** valve is off by default. While it's off, every script loads with Center Calm at 0, so animations show at full strength across the page. Turn it on to bring back each script's own setting from the next page load.
+
+**Bright margins in a narrow window.** When the chat column had no room beside it, as in a 1080 px window with widescreen mode on, the calm band still covered the whole scene. With **Calm Chat Column** on, the column now narrows so that a strip at each edge stays bright. Wide windows are unchanged.
 
 ## 📝 What's New in 1.19.0
 
