@@ -1,6 +1,6 @@
 # ⚡ Theme Designer Pro (Event Function)
 
-> Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
+> Instance-wide theme designer for Open WebUI: an admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, optional personal themes for every user, and real-time theme enforcement across all users.
 
 ![Version](https://img.shields.io/badge/version-1.20.4-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
@@ -10,22 +10,22 @@
 ---
 
 > [!IMPORTANT]
-> **Event Function vs. Tool — Which should you use?**
+> **Event Function vs. Tool: which should you use?**
 >
 > Theme Designer Pro is available in two forms that target different audiences:
 >
 > | | **Event Function** (this file) | **Tool** (legacy) |
 > |---|---|---|
-> | **Instance theme** | Yes — the admin's theme for every user | No |
-> | **Personal themes** | Yes — each user's own theme, saved with their account, once the admin turns on **Allow Personal Themes** | Per browser only, in `localStorage` |
-> | **Where you design** | A **Themes** tab in Settings, the designer URL, or a chat through the Launcher Tool | Inside a chat, as a tool call |
-> | **SSE live push** | Yes — every open page updates in real time | No |
-> | **Draft mode** | Yes — preview before publishing | No |
-> | **Community Themes browser** | Yes — curated themes with one-click install | No |
-> | **Sidebar / overlay transparency** | Yes — admin-controlled visual style valves | No |
-> | **Multi-worker support** | Yes — automatic Redis pub/sub for multi-worker SSE | No |
-> | **AI-driven theming** | Yes — the **AI** button in the designer, or describing a theme in a chat with the Launcher Tool | Yes (`apply_theme()` tool method) |
-> | **Development status** | Actively developed | Legacy — no longer updated |
+> | **Instance theme** | Yes: the admin's theme for every user | No |
+> | **Personal themes** | Yes: each user's own theme, saved with their account, once the admin turns on **Allow Personal Themes** | Per browser only, in `localStorage` |
+> | **Where you design** | A **Themes** tab in Settings, a **Themes** page in the Admin Panel, the designer URL, or a chat through the Launcher Tool | Inside a chat, as a tool call |
+> | **SSE live push** | Yes: every open page updates in real time | No |
+> | **Draft mode** | Yes: preview the instance theme before publishing | No |
+> | **Community Themes browser** | Yes: curated themes with one-click install | No |
+> | **Sidebar / overlay transparency** | Yes: admin-controlled visual style valves, and per-theme **Surfaces** | No |
+> | **Multi-worker support** | Yes: automatic Redis pub/sub for multi-worker SSE | No |
+> | **AI-driven theming** | Yes: the **AI** button in the designer, or describing a theme in a chat with the Launcher Tool | Yes (`apply_theme()` tool method) |
+> | **Development status** | Actively developed | Legacy, no longer updated |
 >
 > **Use this Event Function.** Since 1.10.0 it covers the Tool's personal themes too: an admin turns on **Allow Personal Themes**, and every user gets a **Themes** tab in their own Settings. A personal theme follows the user to every browser, instead of living in one. The [Tool variant](../tools/) is legacy and gets no more updates. Users moving from it can start their personal theme from the one the Tool left in their browser.
 >
@@ -33,61 +33,65 @@
 
 ---
 
-Theme Designer Pro (Event Function) is a professional-grade theming engine for Open WebUI. It registers an admin page at a configurable URL (default: `/api/v1/theme-designer`), which admins can also open from a **Themes** tab in Open WebUI's Settings, persists themes server-side, and pushes changes to all connected clients in real-time via Server-Sent Events. Powered by the modern OKLCH color space, it generates perceptually uniform color palettes across Dark, OLED, Light, and Her modes simultaneously.
+Theme Designer Pro (Event Function) is a professional-grade theming engine for Open WebUI. It registers an admin page at a configurable URL (default: `/api/v1/theme-designer`), which admins can also open from a **Themes** tab in Open WebUI's Settings, persists themes server-side, and pushes changes to all connected clients in real time via Server-Sent Events. Powered by the modern OKLCH color space, it generates perceptually uniform color palettes across Dark, OLED, Light, and Her modes simultaneously.
 
-Unlike the [Tool variant](../tools/) which runs inside an AI chat iframe, this variant runs as a native ASGI route — no iframe sandbox flags needed, no "Same Origin" configuration required.
+Unlike the [Tool variant](../tools/) which runs inside an AI chat iframe, this variant runs as a native ASGI route: no iframe sandbox flags needed, no "Same Origin" configuration required.
 
 ---
 
 ## ✨ Key Features
 
-- ⚡ **Server-Side Persistence:** Themes are saved to `DATA_DIR/theme/` on the server and served through Open WebUI's shared static assets (`/static/loader.js` + `/static/custom.css`) — every user sees the same theme instantly, across all browsers and devices. Nothing is written to the frontend build.
-- 📡 **Real-Time SSE Push:** When you save a theme, all connected Open WebUI clients receive the update in real-time via Server-Sent Events. No page refresh required. Multi-worker deployments are supported via automatic Redis pub/sub broadcasting.
-- 📝 **Draft Mode:** Preview theme changes locally in your browser before publishing to all users. Draft mode isolates changes in `sessionStorage` — other users see nothing until you publish. The designer communicates with the bootloader via a `owui-theme-updated` CustomEvent for live preview without touching `localStorage`. Click **Publish** to push to all users, or discard to revert.
-- 🌈 **OKLCH Color Engine:** Harness Tailwind v4's OKLCH color spaces. Adjust Hue, Chroma, and Lightness to generate mathematically perfect, accessible tonal ramps. Hit **✦ Randomize** to generate random base colors instantly, or **◎ Extract** to upload/paste an image and calculate dominant colors using hue-histogram analysis. Locked variables are protected from both. _(Pro-Tip: Double-click any slider label to instantly reset it to its default value)._
-- 🖥️☀️🌌🌙❤️ **Multi-Mode Design Engine:** Switch between System, Dark, OLED, Light, and the elusive Her mode design views using the segmented toggle. A unified OKLCH foundation ensures your colors look mathematically perfect across all environments. _(Note: The 'Her' tab dynamically reveals itself by syncing with your Open WebUI administrator's `enable_easter_eggs` configuration via the `/api/config` endpoint)._
-- 🌓 **True OS Integration & System Mode:** The System mode acts as a proxy, automatically swapping between your Light and Dark designs based on Operating System preference. The engine generates CSS utilizing native `@media (prefers-color-scheme)` blocks, guaranteeing custom styles, variables, and Canvas FX seamlessly adapt even if browser class management is delayed.
-- 🔄 **Selective Cross-Mode Synchronization:** Instantly duplicate your setup from one mode to another using the "Sync" button. A powerful selective sync modal allows you to copy exactly what you need — OKLCH Palette, Variable Overrides, Custom CSS, Canvas FX, Gradient Background, or Auth Visibility — to any combination of target modes simultaneously. Colored delta badges show which settings differ between modes.
+- ⚡ **Server-Side Persistence:** Themes are saved to `DATA_DIR/theme/` on the server and served through Open WebUI's shared static assets (`/static/loader.js` + `/static/custom.css`). Every user without a personal theme sees the instance theme from the first paint, across all browsers and devices. Nothing is written to the frontend build.
+- 📡 **Real-Time SSE Push:** When you save a theme, all connected Open WebUI clients receive the update in real time via Server-Sent Events. No page refresh required. Multi-worker deployments are supported via automatic Redis pub/sub broadcasting when `REDIS_URL` is set.
+- 📝 **Draft Mode:** Preview instance theme changes in your browser tab before publishing to all users. Draft mode keeps the theme CSS and state in `sessionStorage`, which only that tab can read, so other users see nothing until you publish. The designer talks to the bootloader through an `owui-theme-updated` CustomEvent for the live preview. Click **Publish** (or switch back to **Live**) to push to everyone the theme reaches; closing the tab without publishing discards the draft. The personal designer has no Draft mode, because only its owner sees the result.
+- 🌈 **OKLCH Color Engine:** Harness Tailwind v4's OKLCH color spaces. Adjust Hue, Chroma, and Lightness to generate mathematically perfect, accessible tonal ramps. Hit **✦ Randomize** to generate random base colors instantly, or **◎ Extract** to upload or paste an image and take its dominant color from a saturation-weighted hue histogram. Locked variables are protected from both. _(Pro-Tip: Double-click the label of the Hue, Chroma, Lightness, Gradient Direction, Color Intensity or Animation Speed slider to reset it to its default value.)_
+- 🖥️☀️🌌🌙❤️ **Multi-Mode Design Engine:** Switch between System, Dark, OLED, Light, and the elusive Her mode design views using the segmented toggle. A unified OKLCH foundation ensures your colors look mathematically perfect across all environments. _(Note: When the page loads, the designer reads Open WebUI's `enable_easter_eggs` setting from `/api/config` and shows the Her tab if it's on, or if Open WebUI is already in Her mode.)_
+- 🌓 **True OS Integration & System Mode:** The System mode acts as a proxy, automatically swapping between your Light and Dark designs based on Operating System preference. The engine generates CSS with native `@media (prefers-color-scheme)` blocks, so custom styles, variables, and Canvas FX adapt even if browser class management is delayed.
+- 🔄 **Selective Cross-Mode Synchronization:** Duplicate your setup from one mode to another using the **Sync** button in the footer. The Selective Sync modal lets you copy exactly what you need (OKLCH Palette, Variable Overrides, Custom CSS Snippet, Canvas FX Script, Gradient Background, Surfaces, or Auth Page Visibility) to any combination of target modes at once. Colored delta badges show which settings differ between modes.
 - 🔄 **Live Cross-UI Detection:** If you change the Open WebUI theme natively (via OS settings or keyboard shortcuts) while the designer is open, the designer instantly switches its internal tab to match your live environment.
-- 🔑 **Auth Page Theming:** Selectively opt-in your custom theme components (Foundation Colors, Custom CSS, Canvas FX, and Gradient Background) to display on the Open WebUI Login and Signup screens. Each component has an independent "Show on Auth Pages" toggle, and an "Only on Auth Pages" toggle beside it keeps that component off the rest of Open WebUI.
-- 🎇 **Canvas FX Animations (Web Worker Powered):** Inject interactive JavaScript animations directly into the background of Open WebUI. Animations run on a Background Web Worker via `OffscreenCanvas` for zero-lag performance, with an automatic main-thread fallback for browsers that don't support `OffscreenCanvas`. The structural transparency layer makes native UI panels see-through so animations show behind the interface. Drag & drop `.js` files anywhere on the UI to import animations instantly.
-- 🎨 **Theme-Aware Animations:** Canvas FX scripts can draw in the theme's own colors. The engine sends the active mode's palette (background, surface, text and three accents in the theme's hue, as hex and as 0 to 1 floats for WebGL) with `init` and again whenever it changes, so a script that uses it recolors live as you edit the palette or switch modes. It's opt-in: scripts that ignore it keep their own colors.
-- 🔊 **Context-Aware Animations:** Canvas FX scripts can react to conversation data in real-time. A DOM observer scans chat messages for DOM-based token estimation (at most every 2 seconds, during streaming too), while a Socket.IO WebSocket interceptor extracts exact token counts from `chat:completion` responses — both feed a `context` message to the animation for data-driven visual effects. External scripts can also dispatch custom context data via the `owui-canvas-context` CustomEvent API.
-- 🎭 **Community Themes Browser:** Browse and install curated community themes directly from the Themes tab. The community themes grid fetches from the [preset gallery manifest](https://github.com/silentoplayz/theme-designer-pro-presets) and supports one-click install, install-all, and search. Controlled by the `enable_community_themes` valve.
+- 🔑 **Auth Page Theming:** Selectively opt in your custom theme components (Foundation Colors, Custom CSS, Canvas FX, and Gradient Background) to display on the Open WebUI Login and Signup screens. Each component has an independent "Show on Auth Pages" toggle, and an "Only on Auth Pages" toggle beside it keeps that component off the rest of Open WebUI. The **Backgrounds** tab can also give the sign-in page a picture of its own.
+- 🎇 **Canvas FX Animations (Web Worker Powered):** Inject interactive JavaScript animations directly into the background of Open WebUI. Animations run on a Background Web Worker via `OffscreenCanvas`, so they don't block the page. A script that uses `document`, or a browser without `OffscreenCanvas`, runs on the main thread instead. A script whose first characters are `/* tdp:isolated */` always runs in a sandboxed frame with no cookies, storage, page or network access. The structural transparency layer makes native UI panels see-through so animations show behind the interface. Drag & drop `.js` files anywhere on the designer to import animations instantly.
+- 🎨 **Theme-Aware Animations:** Canvas FX scripts can draw in the theme's own colors. The engine sends the active mode's palette (background, surface, text, muted and three accents in the theme's hue, as hex and as 0 to 1 floats for WebGL) with `init` and again whenever it changes, so a script that uses it recolors live as you edit the palette or switch modes. It's opt-in: scripts that ignore it keep their own colors.
+- 🔊 **Context-Aware Animations:** Canvas FX scripts can react to conversation data in real time. A DOM observer scans chat messages for DOM-based token estimation (at most every 2 seconds, during streaming too), while a Socket.IO WebSocket interceptor extracts exact token counts from `chat:completion` responses. Both feed a `context` message to the animation for data-driven visual effects. External scripts can also dispatch custom context data via the `owui-canvas-context` CustomEvent API.
+- 🎭 **Community Themes Browser:** Browse and install curated community themes directly from the Themes tab. The grid reads the [presets repository](https://github.com/silentoplayz/theme-designer-pro-presets)'s `docs/catalog.json` and supports one-click install, install-all, and search. With **Enable Theme Update Checks** on, it also reads `manifest.json` to offer updates. The **Enable Community Themes** valve hides the grid and skips its catalog fetch.
 - 🪟 **Sidebar & Overlay Transparency:** Admin-configurable transparency for the sidebar and overlay UI (settings modals, dropdowns). Choose between opaque (solid), translucent (frosted glass with backdrop-blur), or transparent modes via the `sidebar_transparency` and `overlay_transparency` valves. A theme can set its own per layer in the **Surfaces** tab, which wins over the valves for that mode.
+- 🪟 **Surfaces Tab:** Set, per mode, how see-through each layer over the background is, with an **Opacity** slider (0% clear to 100% solid) and a **Blur** slider (up to 40px) per row: **Sidebar**, **Message input**, **Side panel**, **Cards and panels**, **Buttons**, **Menus and tooltips**, **Dialogs**, **Behind dialogs** (how much the page behind a dialog darkens and blurs) and **Top fade** (opacity only; 0% hides it). With the tab's switch off, a mode follows the transparency valves. Surfaces export with the theme and sync between modes.
+- 🖼️ **Backgrounds Tab:** Fade Open WebUI's own background images into the theme: the **Chat Background Image** from Settings > Interface, every model with a background image, and in a personal theme every folder of yours with one. **Dimming** sets how much of Open WebUI's dimming layer covers them, and a switch decides whether the Canvas FX animation draws over them. **Sign-in page** (instance theme only) and **Other pages** (Workspace, Notes, the admin pages and the other pages without a chat) take an uploaded PNG, JPEG, GIF or WebP of up to 5 MB, or an `https://` address, and Other pages can also show each viewer's own Chat Background Image.
+- 🤖 **AI Consultant:** The **AI** header button turns a few words, such as "warm copper", into a palette and, when it suits, a matching gradient. A model on your instance answers: the one in the **AI Consultant Model** valve, or the task model.
+- 👤 **Personal Themes:** With **Allow Personal Themes** on, every user, admins included, gets a **Themes** tab in the *Personal* section of Settings for a theme only they see. It's saved with their account, so it follows them to every browser, and their saves update only their own open pages.
 - 👩‍💻 **IDE-Grade Custom CSS Editor:** Write raw CSS directly within the tool. The editor features Tab trapping (2-space indent), smart auto-indentation, auto-closing pairs (brackets, quotes, parentheses), and a synced line number gutter. Save your favorite tweaks to your own Custom CSS Preset Gallery, which starts empty. Includes a smart parser that safely extracts and hoists `@keyframes`!
-- 🛡️ **Auto-Scoped CSS Injection:** Write Custom CSS without fear of breaking other modes. The Auto-Scope toggle automatically wraps your code in the correct CSS selectors (e.g., `.dark` or `[data-theme='light']`) to ensure tweaks only apply when they should. User CSS is automatically sanitized to prevent spoofing of internal `OWUI_*` marker comments used for auth-page stripping.
-- 🎯 **Variable Overrides & Manual CSS Variables:** Hand-pick and override color variables with a native color picker — each swatch features an `Aa` contrast preview badge. Click directly on any variable name to instantly copy its CSS declaration (e.g., `--color-gray-800: #1a1a2e;`). The Manual Variable Overrides code editor lets you write raw CSS custom property declarations injected _after_ the generated palette for maximum priority.
+- 🛡️ **Auto-Scoped CSS Injection:** Write Custom CSS without fear of breaking other modes. The Auto-Scope toggle wraps your code in the mode's selector (for example `html.dark` or `html[data-theme="her"]`) as a native CSS nesting block, so tweaks only apply when they should. User CSS is automatically sanitized to prevent spoofing of internal `OWUI_*` marker comments used for auth-page stripping.
+- 🎯 **Variable Overrides & Manual CSS Variables:** Hand-pick and override color variables with a native color picker. Each swatch features an `Aa` contrast preview badge. Click directly on any variable name to instantly copy its CSS declaration (e.g., `--color-gray-800: #1a1a2e;`). The Manual Variable Overrides code editor lets you write raw CSS custom property declarations injected _after_ the generated palette for maximum priority.
 - 🔒 **Smart Locking / Pinning:** Lock specific color variables using the 🔒 icon (or bulk "Lock All" / "Unlock All" buttons). Locked colors are pinned and protected from sliders, randomization, or image extraction.
-- 📋 **Smart Clipboard Parsing & Image Extraction:** Upload an image or press `Ctrl+V` to paste one from your clipboard to calculate dominant colors. The tool also features a Smart JSON paste listener — paste a Theme Designer JSON configuration, and the tool will parse and prompt you to apply it (with a security warning if untrusted Canvas FX scripts are detected).
-- 🎨 **Gradient Background Builder:** Design rich CSS gradient backgrounds using the dedicated Gradient tab. Choose between linear, radial, and mesh gradient types, add and position color stops visually, control direction and intensity, and enable smooth gradient animation with configurable speed. Ships with 12 built-in gradient presets — Midnight, Emerald, Amethyst, Sapphire, Aurora (animated), Sunset, Ocean, Neon, Nebula (mesh), Lagoon (mesh), Ember (mesh), and Arctic (mesh). Save, import, and export custom gradient presets. The gradient layer applies the same structural transparency rules as Canvas FX.
+- 📋 **Smart Clipboard Parsing & Image Extraction:** Upload an image or press `Ctrl+V` to paste one from your clipboard to calculate dominant colors. The tool also features a Smart JSON paste listener: paste a Theme Designer JSON configuration, and the tool will parse and prompt you to apply it (with a security warning if untrusted Canvas FX scripts are detected).
+- 🎨 **Gradient Background Builder:** Design rich CSS gradient backgrounds using the dedicated Gradient tab. Choose between linear, radial, and mesh gradient types, add and position color stops visually, control direction and intensity, and enable smooth gradient animation with configurable speed. Ships with 12 built-in gradient presets: Midnight, Emerald, Amethyst, Sapphire, Aurora (animated), Sunset, Ocean, Neon, Nebula (mesh), Lagoon (mesh), Ember (mesh), and Arctic (mesh). Save, import, and export custom gradient presets. The gradient layer applies the same structural transparency rules as Canvas FX.
 
-- 📋 **Theme Metadata & Versioning:** Attach rich metadata when saving — Name, Description, Author, Theme Version, Target WebUI Version, Repository URL, and Theme Update URL. Metadata is embedded in exported `.json` files and preserved through imports.
-- 🔄 **OTA Theme Update Checking:** Themes with a Theme Update URL can be checked for updates against a remote JSON endpoint. Use the per-snapshot ⟳ button or the global "Updates" header button to check all themes at once. Shows a detailed update modal with version comparison.
+- 📋 **Theme Metadata & Versioning:** Attach rich metadata when saving: Name, Description, Author, Theme Version, Target WebUI Version, Repository URL, and Theme Update URL. Metadata is embedded in exported `.json` files and preserved through imports.
+- 🔄 **OTA Theme Update Checking:** Themes with a Theme Update URL can be checked for updates against a remote JSON endpoint. Use the per-snapshot ⟳ button or the global "Updates" header button to check all themes at once. Shows a detailed update modal with version comparison. The **Enable Theme Update Checks** valve turns all of these requests off.
 - 🌐 **Community Theme Import via URL:** Import themes directly from the web. The Import button opens a dual-mode dialog where you can paste a URL to a remote `theme.json` file, or use the classic file picker. Theme Designer Pro auto-converts `github.com` URLs to raw content.
-- 📦 **JSON Viewer:** Inspect your current theme state at any time. The JSON Viewer modal displays your full configuration in a read-only, formatted code block with Copy, Collapse, and validity badge indicators.
+- 📦 **JSON Viewer:** Inspect your current theme state at any time. The JSON Viewer modal displays your full configuration in a read-only, formatted code block with Copy and Collapse buttons.
 - 📚 **Theme Library & Snapshots:** Save multiple "Snapshots" of your designs. Each snapshot captures your entire configuration (all modes, overrides, locks, manual variables, custom CSS, Canvas FX, and gradient background). Manage your library with inline Save, Import, Export, and Search buttons.
-- 🔍 **Library Search, Filter & Sort:** Find saved themes using search, filter by feature tags (Custom CSS, Canvas FX, Overrides, Linked/URL themes), and sort alphabetically or by creation order. The same search and filter functionality is available in the CSS Snippet and Canvas Script galleries. Rich tooltips show name, version, author, description, and feature tags.
-- 📦 **Mass Import, Export & Wipe Portability:** Download your entire snapshot library (or individual items) as smart backups. Mass-import via file picker, or drag & drop `.json`, `.js`, and `.css` files directly anywhere onto the designer window — files are automatically routed to the correct gallery (themes, canvas scripts, CSS snippets, or gradient presets). Each gallery has a "Trash" icon to wipe specific collections. Individual CSS files can also be imported and exported.
-- ⏪ **Undo & Redo History:** Step backward and forward through changes using the built-in Undo/Redo footer buttons or `Ctrl+Z` / `Ctrl+Y` / `Ctrl+Shift+Z` keyboard shortcuts. Press `Escape` to close any open modal, or `Enter` to confirm the primary action.
+- 🔍 **Library Search, Filter & Sort:** Find saved themes using search, filter by feature tags (Custom CSS, Canvas FX, Overrides, Linked/URL themes), and sort alphabetically or by creation order. The CSS Snippet and Canvas Script galleries have search and filters too. Rich tooltips show name, version, author, description, and feature tags.
+- 📦 **Mass Import, Export & Wipe Portability:** Download your entire snapshot library (or individual items) as smart backups. Mass-import via file picker, or drag & drop `.json`, `.js`, and `.css` files directly anywhere onto the designer window: files are automatically routed to the correct gallery (themes, canvas scripts, CSS snippets, or gradient presets). Each gallery has a "Trash" icon to wipe specific collections. Individual CSS files can also be imported and exported.
+- ⏪ **Undo & Redo History:** Step backward and forward through changes using the built-in Undo/Redo footer buttons or the `Ctrl+Z` / `Ctrl+Y` keyboard shortcuts, with `Ctrl+Shift+Z` also redoing (`Cmd` on macOS; not while typing in a field). Press `Escape` to close any open modal, or `Enter` to confirm the primary action.
 - 📋 **CSS Export:** The header's **CSS** button shows the theme's CSS for every mode, with a Minify toggle, Copy to Clipboard, and Download as a `.css` file. It's the way to use a theme without the function, for example as Open WebUI's `custom.css`.
 - 👁️‍🗨️ **Self-Adapting UI & Contrast Protection:** The designer interface dynamically themes _itself_ based on the colors you pick. Built-in contrast protection shifts text and border colors to remain legible with ultra-washed-out palettes.
 - 🪄 **Native Open WebUI Aesthetic:** Meticulously designed to feel like a native part of Open WebUI, complete with custom-built, dependency-free tooltips and styled code blocks.
 - 📱 **Fully Responsive:** The designer adapts to mobile screens with three responsive breakpoints (≤768px tablets, ≤480px phones, ≤390px iPhone SE) including icon-only mode for narrow header buttons.
 - 💾 **Session Persistence:** The designer remembers which tab you were on via `sessionStorage`, so refreshing the page returns you to exactly where you left off.
 - ⏪ **Legacy Data Migration:** Automatically detects legacy data structures and gracefully migrates saved snapshots and active themes to the latest format without data loss.
-- 🔌 **Function Lifecycle Integration:** Toggling the function OFF in the admin panel triggers a clean `function.disable_started` lifecycle event that withdraws the theme CSS from the shared `custom.css`, broadcasts `theme-disable` to all connected clients, and clears `localStorage` — no page refresh needed. The loader fragment stays published in an inactive state so its SSE connection survives. Toggling back ON triggers `function.enable_started`, which republishes and broadcasts the theme to all clients immediately. Requires Open WebUI v0.11.0 or newer (pre-toggle lifecycle events).
-- ☢️ **Safe Nuclear & Factory Resets:** "Reset Mode" and "Global Reset" buttons safely clear all custom styling and restore Open WebUI to its original look. Confirmation dialogs offer pre-wipe backups. Factory Reset under the Documentation tab's Danger Zone permanently wipes all data.
+- 🔌 **Function Lifecycle Integration:** Toggling the function OFF in the admin panel triggers a clean `function.disable_started` lifecycle event that withdraws the theme CSS from the shared `custom.css`, broadcasts `theme-disable` to all connected clients, and clears the theme's `localStorage` cache, with no page refresh needed. The loader fragment stays published in an inactive state so its SSE connection survives. Toggling back ON triggers `function.enable_started`, which republishes and broadcasts the theme to all clients immediately. Requires Open WebUI v0.11.0 or newer (pre-toggle lifecycle events).
+- ☢️ **Safe Nuclear & Factory Resets:** "Reset Mode" and "Global Reset" buttons safely clear all custom styling and restore Open WebUI to its original look. Confirmation dialogs offer pre-wipe backups. Factory Reset, in the Danger Zone at the end of the **📖 Docs** page, permanently wipes all data.
 
 ---
 
 ## 🎭 Preset Gallery
 
-Browse and live-preview every community preset in the **[preset gallery](https://silentoplayz.github.io/theme-designer-pro-presets/gallery/)**, or design a theme in your browser in the **[Studio](https://silentoplayz.github.io/theme-designer-pro-presets/studio/)** and drop the file it downloads on the designer. The presets themselves live in **[this repository](https://github.com/silentoplayz/theme-designer-pro-presets)**.
+Browse and live-preview every community preset in the **[preset gallery](https://silentoplayz.github.io/theme-designer-pro-presets/gallery/)**, or design a theme in your browser in the **[Studio](https://silentoplayz.github.io/theme-designer-pro-presets/studio/)** and drop the file it downloads on the designer. Their **Install on my Open WebUI** button opens your designer with the import ready, and nothing installs until you confirm it there. The presets themselves live in **[this repository](https://github.com/silentoplayz/theme-designer-pro-presets)**: Canvas FX scripts, themes and gradients.
 
 ### Quick Import
 
-**Import everything at once** — paste this URL into any Import modal and click **Load URL**:
+**Import everything at once:** paste this URL into any Import modal and click **Load URL**:
 
 ```
 https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/everything.json
@@ -100,8 +104,10 @@ Or import individual categories:
 | All Canvas FX | `https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/canvas-fx-all.json` |
 | All Themes | `https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/themes-all.json` |
 | All Gradients | `https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/gradients-all.json` |
+| Still Gradients | `https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/gradients-still.json` |
+| Animated Gradients | `https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/gradients-animated.json` |
 
-You can also import individual presets by pasting any file's GitHub URL directly — Theme Designer Pro auto-converts `github.com` URLs to raw content.
+You can also import individual presets by pasting any file's GitHub URL directly: Theme Designer Pro auto-converts `github.com` URLs to raw content.
 
 ---
 
@@ -109,15 +115,15 @@ You can also import individual presets by pasting any file's GitHub URL directly
 
 1. Open your Open WebUI **Admin Panel**
 2. Go to **Functions**
-3. Click **Create New Function**
-4. Set the Type to **Event** (not Tool, not Filter)
-5. Copy the contents of [`theme_designer_pro_event.py`](theme_designer_pro_event.py) and paste it in
-6. Save — the designer is now available at `/api/v1/theme-designer`
+3. Click **Create**
+4. Give the function a name, ID and description. The starter selector next to them doesn't matter: Open WebUI reads the type (Event) from the code you paste
+5. Replace the starter code with the contents of [`theme_designer_pro_event.py`](theme_designer_pro_event.py)
+6. Save, then turn the function on in the **Functions** list (new functions start off). The designer is then available at `/api/v1/theme-designer`
 
-> **No sandbox flags required.** Unlike the Tool variant, this event function serves a native page via ASGI routes — no iframe, no "Same Origin" configuration needed.
+> **No sandbox flags required.** Unlike the Tool variant, this event function serves a native page via ASGI routes: no iframe, no "Same Origin" configuration needed.
 
 > [!WARNING]
-> **Running behind nginx or another reverse proxy?** You **must** add `proxy_buffering off;` to your nginx location block (or the equivalent for your proxy). Without this, SSE live push events can be held back, and other users and devices see a theme change only after they reload. This is the **#1 deployment issue**. See the in-app documentation (📖 Docs → Section 21: Reverse Proxy Configuration) for nginx, Caddy, Apache, and Traefik examples.
+> **Running behind nginx or another reverse proxy?** The live-push stream sends `X-Accel-Buffering: no` and `Content-Encoding: identity`, so stock nginx streams it even with `proxy_buffering` on. Add `proxy_buffering off;` (or your proxy's equivalent) when your proxy or CDN ignores that header, or when nginx has `proxy_ignore_headers` set to drop it. Without streaming, other users and devices see a theme change only after they reload. nginx also needs `client_max_body_size` raised from its 1 MB default: picture uploads go up to 5 MB and theme saves up to 64 MB, so `client_max_body_size 64M;` covers both. See the in-app documentation (📖 Docs → Section 21: Reverse Proxy Configuration) for nginx, Caddy, Apache, and Traefik examples.
 
 ### Optional: Launcher Companion Tool
 
@@ -132,7 +138,7 @@ Everyone who uses it needs **Settings > Interface > iframe Sandbox Allow Same Or
 
 ## 🛠️ Usage Instructions
 
-1. **Open the Designer:** In Open WebUI, open **Settings** and choose **Themes** in the Admin section, after **Interface**. You can also go straight to the designer URL (default: `/api/v1/theme-designer`), which shows it full screen.
+1. **Open the Designer:** In Open WebUI, open **Settings** and choose **Themes** in the Admin section, after **Interface**. You can also go straight to the designer URL (default: `/api/v1/theme-designer`), which shows it full screen, or turn on **Show In Admin Panel** for a **Themes** page in the Admin Panel's top bar.
    - **Personal themes:** with **Allow Personal Themes** on, every user, admins included, also gets a **Themes** tab in the *Personal* section of Settings, after **Interface**. It opens the same designer on their own theme, which only they see. Until they change something, they see the instance theme; their first change saves their personal theme. **Use instance theme** removes it again and keeps their saved themes.
 2. **Design your Theme:**
    - Use the **Segmented Toggle** to switch between System, Dark, OLED, Light, and Her mode design views
@@ -142,11 +148,13 @@ Everyone who uses it needs **Settings > Interface > iframe Sandbox Allow Same Or
    - Switch to the **Style Overrides** tab to write raw CSS tweaks
    - Switch to the **Canvas FX** tab to inject interactive JavaScript background animations
    - Switch to the **Gradient** tab to design gradient backgrounds using the visual builder
+   - Switch to the **Surfaces** tab to set the opacity and blur of the sidebar, message input, side panel, cards, buttons, menus, dialogs, the page behind dialogs, and the top fade, per mode
+   - Switch to the **Backgrounds** tab to fade Open WebUI's background images into the theme, set their **Dimming**, and give the sign-in page and the other pages a picture
    - Use the **AI** header button to describe a theme in words, such as "warm copper"; a model on your instance picks its palette and, when it suits, a matching gradient, for every mode or only the one you're editing
    - Use the **JSON** header button to inspect or copy your full theme state
    - Use the **Updates** header button to check all your themes for available updates
-3. **Draft vs. Live:** Toggle the **Draft** button in the header to preview changes locally before publishing. While in Draft mode, only your browser sees the changes. Click **Publish** to push to all users.
-4. **All changes auto-save.** Every change is debounced (250ms) and automatically persisted server-side via `syncToServer()`, then broadcast to all connected clients. In Draft mode, `syncToServer()` is gated off — changes are previewed locally only.
+3. **Draft vs. Live:** Click the **Live / Draft** switch in the footer to preview changes before publishing. While in Draft mode, only that browser tab sees the changes. Click **Publish** to push them to everyone the theme reaches. The personal designer has no Draft mode.
+4. **All changes auto-save.** `syncToServer()` saves each change on the server and broadcasts it to all connected clients. A change after a quiet spell goes out after 40 ms; changes in quick succession, such as a slider being dragged, wait for a 250 ms pause and go as one save. In Draft mode, `syncToServer()` is gated off and changes stay in the tab. A personal theme is saved only once the user changes something.
 
 **Pro-Tip for Custom CSS:** Not sure what to target? Press `F12` (or right-click > Inspect) to open your browser's Developer Tools. Use the element picker to find the exact class names used by Open WebUI (e.g., `.chat-bubble` or `#sidebar`).
 
@@ -156,7 +164,7 @@ Everyone who uses it needs **Settings > Interface > iframe Sandbox Allow Same Or
 
 You can change the global font family for your entire Open WebUI instance by pasting a CSS rule into the **Style Overrides** tab.
 
-Set the font on the document root and the form controls, then let it **inherit** down — form elements (`input`, `textarea`, `button`, `select`) are listed explicitly because they don't inherit `font-family` by default. Avoid painting the font onto the universal selector `*`: it clobbers icon fonts and code/math spans.
+Set the font on the document root and the form controls, then let it **inherit** down. Form elements (`input`, `textarea`, `button`, `select`) are listed explicitly because they don't inherit `font-family` by default. Avoid painting the font onto the universal selector `*`: it clobbers icon fonts and code/math spans.
 
 **1. The "Native OS" Vibe** (Uses San Francisco on Mac, Segoe on Windows)
 
@@ -212,80 +220,86 @@ Valves are configured in the Admin Panel under **Functions → Theme Designer Pr
 
 | Valve | Type | Default | Description |
 |---|---|---|---|
-| **Enable Canvas FX** | `bool` | `true` | Allow Canvas FX (JavaScript background animations). When disabled, the Canvas FX tab is hidden and running animations are suppressed — canvas data is stripped from the saved state and a canvas-stripped update is broadcast. |
-| **Calm Chat Column** | `bool` | `false` | Let animations fade behind the chat, each by its own Center Calm setting. When disabled, every script's Center Calm counts as 0 as it loads, so animations show at full strength across the whole page. Applies on each page's next load. |
-| **Enable Custom CSS** | `bool` | `true` | Allow the Style Overrides (custom CSS) editor. When disabled, the Style Overrides tab is hidden in the designer UI. |
-| **Enable Gradient Builder** | `bool` | `true` | Allow the Gradient Background builder. When disabled, the Gradient tab is hidden in the designer UI. |
+| **Enable Canvas FX** | `bool` | `true` | Allow Canvas FX (JavaScript background animations). When disabled, the Canvas FX tab is hidden, running animations stop, and every theme is served without its Canvas FX. The scripts stay saved, so turning the valve back on restores them. |
+| **Calm Chat Column** | `bool` | `false` | Let animations fade behind the chat, each by its own Center Calm setting. When disabled, every script's Center Calm counts as 0 as it loads, so animations show at full strength across the whole page. The valve works by rewriting a script's `const CENTER_CALM = <number>` line to 0, as the bundled presets write it; a script that keeps its calm amount anywhere else isn't affected. Applies on each page's next load. |
+| **Enable Custom CSS** | `bool` | `true` | Allow the Style Overrides (custom CSS) editor. When disabled, the Style Overrides tab is hidden in the designer UI. Custom CSS that's already saved keeps being served. |
+| **Enable Gradient Builder** | `bool` | `true` | Allow the Gradient Background builder. When disabled, the Gradient tab is hidden in the designer UI. Gradients that are already saved keep being served. |
 | **Enable AI Consultant** | `bool` | `true` | Show the **AI** button in the designer, which turns a description into a theme's colors and gradient. Admins can always use it; users can when personal themes are on. Each request is one call to the model in **AI Consultant Model**, or the task model. |
 | **Enable Theme Update Checks** | `bool` | `true` | Let the designer check installed themes for newer versions: the **Updates** button, each theme's own update check, and the **Update** badges in Community Themes. When disabled, the designer makes none of these requests to GitHub or to a theme's update URL. The Community Themes browser is a separate valve. |
-| **Enable Community Themes** | `bool` | `true` | Show the Community Themes browser in the Themes tab. When disabled, the community themes grid is hidden and no manifest is fetched. |
+| **Enable Community Themes** | `bool` | `true` | Show the Community Themes browser in the Themes tab. When disabled, the whole Community Themes section, with its search, sort and buttons, is hidden and its catalog isn't fetched. |
 
 #### 🖌️ UX Policy
 
 | Valve | Type | Default | Description |
 |---|---|---|---|
-| **Enable Auth Page Theming** | `bool` | `true` | Allow theming the login/signup pages. When disabled, all "Show on Auth Pages" and "Only on Auth Pages" toggles are hidden and forced off, on the server too. |
-| **Draft Mode Default** | `bool` | `false` | Open the designer in Draft mode by default. When enabled, the designer starts in Draft mode on every fresh page load, preventing accidental live changes. |
-| **Allow Personal Themes** | `bool` | `false` | Let every user design a personal theme from a **Themes** tab in their own Settings. A personal theme replaces the instance theme for that user only and follows them to every browser. The other valves still apply to it: Canvas FX, Custom CSS, the gradient builder, community themes, URL import and the transparency styles. Off: everyone sees the instance theme. |
+| **Enable Auth Page Theming** | `bool` | `true` | Allow theming the login/signup pages. When disabled, all "Show on Auth Pages" and "Only on Auth Pages" toggles are hidden and forced off, on the server too, and the **Backgrounds** tab's sign-in page picture is hidden with them. |
+| **Draft Mode Default** | `bool` | `false` | Open the instance designer in Draft mode. When enabled, it opens in Draft on every load, reloads included, even after you publish. Off, a reload keeps the tab in Draft only while it holds a draft. |
+| **Allow Personal Themes** | `bool` | `false` | Let every user design a personal theme from a **Themes** tab in their own Settings. A personal theme replaces the instance theme for that user only and follows them to every browser. The other valves still apply to it: Canvas FX, Custom CSS, the gradient builder, community themes, URL import and the transparency styles. Off: everyone sees the instance theme, and personal themes are kept. |
 | **Show In Admin Settings** | `bool` | `true` | Add a **Themes** tab to the Admin section of Open WebUI's Settings, after **Interface**, that opens the designer inside Settings. The designer stays available at its own URL either way. |
 | **Show In Admin Panel** | `bool` | `false` | Add a **Themes** page to the Admin Panel's top bar, between **Functions** and **Settings**, that opens the instance designer there. **Settings** opens its dialog over it, and any other page of the bar closes it. The designer stays available at its own URL, and in Settings, either way. |
-| **Auto Sync** | `bool` | `false` | Skip the Selective Sync modal when loading presets or syncing. When enabled, a "Sync All" toggle appears in the designer footer — turn it on to propagate changes to all modes, or leave it off to apply only to the active mode. |
+| **Auto Sync** | `bool` | `false` | Skip the Selective Sync modal when syncing, and the Apply Library Theme dialog when applying a gallery theme. When enabled, a "Sync All" toggle appears in the designer footer: turn it on to propagate changes to all modes, or leave it off to apply only to the active mode. |
 
 #### 🎨 Visual Style
 
 | Valve | Type | Default | Description |
 |---|---|---|---|
-| **Sidebar Transparency** | `Literal` | `"opaque"` | Controls sidebar background style. `"opaque"` (default) — solid background for best readability. `"translucent"` — frosted glass effect (backdrop-blur) that lets backgrounds show through. `"transparent"` — fully see-through sidebar with no blur (automatically uses translucent on mobile for readability). Open WebUI's fades at the top and bottom of the sidebar show only while it's `"opaque"`, with or without Canvas FX. |
-| **Overlay Transparency** | `Literal` | `"opaque"` | Controls overlay UI (settings modal, dropdowns, integration menus) background style. `"opaque"` (default) — solid background for best readability. `"translucent"` — frosted glass effect (backdrop-blur) that lets backgrounds show through. The fade at the top of chats shows only while it's `"opaque"`, with or without Canvas FX. |
+| **Sidebar Transparency** | `Literal` | `"opaque"` | Controls sidebar background style. `"opaque"` (default): solid background for best readability. `"translucent"`: frosted glass effect (backdrop-blur) that lets backgrounds show through. `"transparent"`: fully see-through sidebar with no blur (automatically uses translucent on mobile for readability). Open WebUI's fades at the top and bottom of the sidebar show only while it's `"opaque"`, with or without Canvas FX. A mode with its **Surfaces** tab on uses its own values instead. |
+| **Overlay Transparency** | `Literal` | `"opaque"` | Controls overlay UI (settings modal, dropdowns, integration menus) background style. `"opaque"` (default): solid background for best readability. `"translucent"`: frosted glass effect (backdrop-blur) that lets backgrounds show through. The fade at the top of chats shows only while it's `"opaque"`, with or without Canvas FX. A mode with its **Surfaces** tab on uses its own values instead. |
 
 #### 🔒 Security
 
 | Valve | Type | Default | Description |
 |---|---|---|---|
-| **Enable Canvas API Access** | `bool` | `false` | ⚠️ Gives every Canvas FX script **each viewer's own auth token**, not just yours. Canvas FX scripts run on every user's page, so a script can call the API as whoever is viewing. Scripts referencing `document` run on the main thread, outside a Worker's isolation, and an installed theme can replace its script later via its update URL — enabling this trusts every theme author on an ongoing basis. Only enable if you wrote or audited every installed script. When disabled (default), `env.authToken` is an empty string and everything else works. |
-| **Enable URL Import** | `bool` | `true` | Allow importing themes, CSS snippets, and canvas scripts from remote URLs. When disabled, all URL import buttons are hidden. |
-| **Allowed Import Domains** | `str` | `""` | Comma-separated allowlist of domains for URL imports (e.g., `raw.githubusercontent.com, openwebui.com`). Empty = allow all. It also covers theme update checks and Community Themes, whether or not Enable URL Import is on. |
+| **Enable Canvas API Access** | `bool` | `false` | ⚠️ Gives every Canvas FX script **each viewer's own auth token**, not just yours. Canvas FX scripts run on every user's page, so a script can call the API as whoever is viewing. Scripts referencing `document` run on the main thread, outside a Worker's isolation, and an installed theme can replace its script later via its update URL, so enabling this trusts every theme author on an ongoing basis. Only enable if you wrote or fully reviewed every installed script. When disabled (default), `env.authToken` is an empty string and everything else works. A script marked `/* tdp:isolated */` gets an empty token either way. |
+| **Enable URL Import** | `bool` | `true` | Allow importing themes, CSS snippets, and canvas scripts from remote URLs. When disabled, all URL import buttons are hidden. It's a convenience switch in the browser, not a security boundary. |
+| **Allowed Import Domains** | `str` | `""` | Comma-separated allowlist of domains for URL imports (e.g., `raw.githubusercontent.com, openwebui.com`), each one with its subdomains. Empty = allow all. It also covers theme update checks and Community Themes, whether or not Enable URL Import is on. The browser enforces it as a guardrail, not a security control. |
 
 #### 🛠️ Advanced
 
 | Valve | Type | Default | Description |
 |---|---|---|---|
-| **AI Consultant Model** | `str` | `""` | The model the AI Consultant asks, by its ID. Empty: the task model set under **Admin Settings > Interface**, local first, then external. Open WebUI asks it as the signed-in person, so for users to use the AI button, they need access to this model, as they do for a task model. |
-| **Designer URL** | `str` | `/api/v1/theme-designer` | URL path where the designer and all its sub-routes are served. Must start with `/api/v1/` — paths outside this prefix are auto-corrected to prevent the SPA catch-all from intercepting the route (a warning is logged). Changing this value triggers a route re-registration; the loader fragment picks up the new URL on its next compose. Pages that were already open keep fetching the theme and hearing live updates at the old URL until the next restart; the designer, saves and the library move to the new one. |
+| **AI Consultant Model** | `str` | `""` | The model the AI Consultant asks, by its ID. Empty: the task model set under **Admin Settings > Interface**, local first, then external. An ID that isn't a model on this instance makes the AI Consultant answer with an error instead of falling back. Open WebUI asks the model as the signed-in person, so for users to use the AI button, they need access to this model, as they do for a task model. |
+| **Designer URL** | `str` | `/api/v1/theme-designer` | URL path where the designer and all its sub-routes are served. Must start with `/api/v1/`: paths outside this prefix are auto-corrected to prevent the SPA catch-all from intercepting the route (a warning is logged), and characters other than letters, digits, `/`, `_`, `.` and `-` are removed. Changing this value re-registers the routes, and open pages are told to move their live connection to the new URL. Pages that were already open can keep fetching the theme and hearing live updates at the old URL until the next restart; the designer, saves and the library move to the new one. |
 
-> **Note:** Most valves default to their most permissive values. **Allow Personal Themes**, **Show In Admin Panel** and **Enable Canvas API Access** start off, and **Draft Mode Default** and **Auto Sync** start off too. Admins only need to change a valve to restrict a feature or turn one of those on.
+> **Note:** Most valves default to their most permissive values. **Allow Personal Themes**, **Show In Admin Panel** and **Enable Canvas API Access** start off, and **Calm Chat Column**, **Draft Mode Default** and **Auto Sync** start off too. Admins only need to change a valve to restrict a feature or turn one of those on.
 
 > [!IMPORTANT]
-> Most valve changes take effect on the **next `event()` call** (i.e., any chat message or function event). Saving valve values alone doesn't trigger re-injection — it happens the next time the event function runs. The exception is the function **ON/OFF toggle** in the admin panel, which triggers `function.disable_started`/`function.enable_started` lifecycle events that take effect immediately (on Open WebUI v0.11.0 or newer).
+> Valves take effect when you save them. Open WebUI runs the function on the save (`function.valves_updated`, sent by Open WebUI v0.10.0 and newer), and other workers pick the change up over Redis. Changes to **Enable Canvas FX**, **Sidebar Transparency**, **Overlay Transparency** and **Designer URL** are pushed to open pages right away; other valve changes apply on each page's next load. An open designer reads the valves when its page loads, so reload it to see a change there. The function **ON/OFF toggle** triggers the `function.disable_started`/`function.enable_started` lifecycle events, which also take effect immediately (on Open WebUI v0.11.0 or newer).
 
 ---
 
 ## 📖 In-App Documentation
 
-The designer includes **22 comprehensive documentation sections** accessible via the **📖 Docs** button in the header. These cover:
+The designer includes **28 documentation sections**, opened with the **📖 Docs** button in the header. These cover:
 
 1. Getting Started & Architecture
-2. OKLCH Foundation & Modes
-3. System Theme & OS Integration
-4. Draft Mode & Publishing
-5. Variable Overrides & Locks
-6. Custom CSS & Auto-Scoping
-7. Canvas FX Animations (incl. Worker Protocol & API contract)
-8. Advanced Tools & Image Extraction
-9. Libraries & Data Management
-10. Theme Updates (OTA)
-11. Reference: Available Variables
-12. Gradient Backgrounds (incl. preset table)
-13. Structural Transparency & Layer Stack
-14. Keyboard Shortcuts & Editor Tips
-15. Compliance & Legal Disclaimer
-16. Community Presets (with import URLs)
-17. Reverse Proxy Configuration
-17b. Multi-Worker Deployments
-18. Troubleshooting & FAQ
-19. Uninstallation & Complete Removal
-20. Portability & Backups
-21. Danger Zone (Factory Reset)
+2. Valves
+3. The Themes Tab in Settings and the Admin Panel
+4. Personal Themes
+5. AI Consultant
+6. Theming From a Chat: the Launcher Tool
+7. OKLCH Foundation & Modes
+8. System Theme & OS Integration
+9. Draft Mode & Publishing
+10. Variable Overrides & Locks
+11. Custom CSS & Auto-Scoping
+12. Canvas FX Animations (incl. Worker Protocol & API contract)
+13. Advanced Tools & Image Extraction
+14. Libraries & Data Management
+15. Theme Updates
+16. Reference: Available Variables
+17. Gradient Backgrounds (incl. preset table and Open WebUI Backgrounds)
+18. Structural Transparency & Layer Stack (incl. Surfaces)
+19. Keyboard Shortcuts & Editor Tips
+20. Community Presets (with import URLs)
+21. Reverse Proxy Configuration
+22. Multi-Worker Deployments
+23. Sharing `loader.js` and `custom.css` With Other Plugins
+24. Troubleshooting & FAQ
+25. Uninstallation & Complete Removal
+26. Portability & Backups
+27. Compliance & Legal Disclaimer
+28. Danger Zone (Factory Reset)
 
 ---
 
@@ -296,44 +310,48 @@ Theme Designer Pro persists themes on the server and pushes changes to every con
 > **Changed in 1.7.0.** Earlier versions wrote a bootloader and a `<style>` block directly into the frontend's `index.html`, under a cross-process file lock. That is gone. See [Shared Static Assets](#-shared-static-assets-170) below.
 
 1. **Event-Driven Publishing:**
-   The `event()` entry point runs on every Open WebUI event (chat messages, system events) and re-points two *fragments* at the current function instance: one for `/static/loader.js`, one for `/static/custom.css`. Publishing is idempotent and costs two dict writes, so it runs unconditionally — which is also what makes a hot reload converge. Nothing touches the filesystem.
+   The `event()` entry point runs on every Open WebUI event (chat messages, system events, valve saves) and re-points two *fragments* at the current function instance: one for `/static/loader.js`, one for `/static/custom.css`. Loading the function's code (at startup, or when you save it) publishes them too. Publishing is idempotent and costs two dict writes, so it runs unconditionally, which is also what makes a hot reload converge. Publishing touches no files.
 
 2. **The Bootloader (composed into `/static/loader.js`):**
-   A self-contained JavaScript block (~900 lines) that runs on every page load. It handles:
-   - **Theme state loading:** Reads config from `localStorage` + the state inlined into the loader fragment, then fetches `/theme.css` and `/state.json` from the server. Both are applied **atomically** — CSS and state never land separately, so the page can never render one theme's colors against another's canvas. Uses a monotonic version counter to prevent stale fetch responses from overwriting fresher SSE data.
-   - **SSE client:** Connects to the `/events` endpoint to receive real-time `theme-update` and `theme-disable` messages. When an update arrives, it applies the new CSS/state immediately — no page refresh needed. Uses native `EventSource` auto-reconnect with a 3-second retry interval. Includes iOS PWA resilience — re-opens the connection when the app returns to foreground after WebKit silently kills it.
-   - **Socket interceptor:** Wraps the `WebSocket` constructor to attach a `message` listener on each new instance, intercepting Socket.IO v4 frames containing `chat:completion` usage data. Walks the payload recursively (up to 4 levels deep) to find `usage` objects with token counts. Dispatches `owui-canvas-context` CustomEvents with `{ exactTokens, promptTokens, completionTokens, source: 'socket' }` — zero coupling with the context observer.
-   - **Context observer:** `MutationObserver` on `#messages-container` that scans `.chat-user` and `.chat-assistant` elements for DOM-based token estimation (at most every 2 seconds, during streaming too). Navigation-aware — re-attaches when the active chat changes. Sends zero-state when navigating away from chat.
-   - **Canvas FX engine:** Dual-mode execution — `OffscreenCanvas` in a Web Worker when supported, automatic main-thread fallback when not. Handles 10 message types (init, resize, mousemove, click, mousedown, mouseup, touchstart, touchmove, touchend, context); click/mousedown/mouseup listeners use the capture phase so they fire even when UI elements stop propagation. Mousemove and touchmove are rAF-coalesced for efficient cross-thread messaging. Includes iframe mouse-event bridge for the Launcher Tool.
+   A self-contained JavaScript block (about 2,000 lines) that runs on every page load. It handles:
+   - **Theme state loading:** Reads config from `localStorage` + the state inlined into the loader fragment, then fetches `/theme.css` and `/state.json` from the server (and, with personal themes on, the signed-in user's `/me/theme.css` and `/me/state.json`). Both are applied **atomically**: CSS and state never land separately, so the page can never render one theme's colors against another's canvas. Uses a monotonic version counter to prevent stale fetch responses from overwriting fresher SSE data.
+   - **SSE client:** Connects to the `/events` endpoint to receive real-time `theme-update` and `theme-disable` messages. When an update arrives, it applies the new CSS/state immediately, with no page refresh needed. Uses native `EventSource` auto-reconnect with a 3-second retry interval. Includes iOS PWA resilience: it re-opens the connection when the app returns to foreground after WebKit silently kills it. With personal themes on, a signed-in page claims its stream at `/events/bind`, so its owner's personal saves reach it.
+   - **Socket interceptor:** Wraps the `WebSocket` constructor to attach a `message` listener on each new instance, intercepting Socket.IO v4 frames containing `chat:completion` usage data. Walks the payload recursively (up to 4 levels deep) to find `usage` objects with token counts. Dispatches `owui-canvas-context` CustomEvents with `{ exactTokens, promptTokens, completionTokens, source: 'socket' }`, with zero coupling to the context observer.
+   - **Context observer:** `MutationObserver` on `#messages-container` that counts the elements whose `id` starts with `message-` and the text in `.chat-user` and `.chat-assistant` elements for DOM-based token estimation (at most every 2 seconds, during streaming too). Navigation-aware: it re-attaches when the active chat changes, and sends zero-state when navigating away from chat.
+   - **Canvas FX engine:** Runs a script as an `OffscreenCanvas` in a Web Worker when the browser supports it and the script doesn't use `document`, on the main thread when not, and in a sandboxed frame when its first characters are `/* tdp:isolated */`. Sends 13 message types (init, resize, mousemove, click, mousedown, mouseup, touchstart, touchmove, touchend, context, theme, motion, layout); click/mousedown/mouseup listeners use the capture phase so they fire even when UI elements stop propagation. Mousemove and touchmove are rAF-coalesced for efficient cross-thread messaging. Includes iframe mouse-event bridge for the Launcher Tool and the designer shown inside Settings.
    - **Theme enforcement:** `enforceTheme()` injects/updates CSS `<style>` blocks, `refresh()` re-applies theme and re-initializes canvas. A `MutationObserver` on `<html>` attributes + `popstate`, `storage`, and `prefers-color-scheme` listeners ensure the theme survives SPA navigations.
 
 3. **Server-Side Persistence & FOUC Prevention:**
    Themes are saved in `DATA_DIR/theme/`:
-   - `open_theme_designer.css` — the generated CSS served at `{designer_url}/theme.css`
-   - `open_theme_designer.json` — the full theme state served at `{designer_url}/state.json`
-   - `open_theme_designer_sections.json` — the structured CSS sections (`vars` / `structural` / `gradient` / `custom`) that consumers assemble selectively (auth-page stripping, flash-free inline subset)
-   - `open_theme_designer_library.json` — the preset library
+   - `open_theme_designer.css`: the generated CSS served at `{designer_url}/theme.css`
+   - `open_theme_designer.json`: the full theme state served at `{designer_url}/state.json`
+   - `open_theme_designer_sections.json`: the structured CSS sections (`vars` / `structural` / `gradient` / `custom`) that consumers assemble selectively (auth-page stripping, flash-free inline subset)
+   - `open_theme_designer_library.json`: the preset library
+   - `auth_background` and `page_background`: the uploaded sign-in page and Other pages pictures, when there are any
+   - `.save.lock`: held during a save so two workers never write at once
+   - `.index.lock`: taken by the check, once per start, that removes `index.html` blocks left by 1.6.2 or earlier
+   - `users/<user id>/`: one folder per personal theme or library, with the same file names and its own `page_background`
 
    Delivery is cached on file mtime plus the valves that affect post-processing, so the steady-state cost of serving either composed asset is a `stat()`.
 
-   **FOUC prevention:** `/static/custom.css` carries a safe subset of the theme (palette variables + custom CSS, with structural and gradient rules deferred so the page doesn't flash through to the background before the canvas starts). Open WebUI already loads that file as a render-blocking stylesheet, so the subset applies before first paint. The bootloader then fetches the full CSS and applies the deferred rules. Canvas FX scripts are deliberately **not** inlined — they are the bulk of the state, and the composed asset is rebuilt and hashed on every request, so they arrive with the `/state.json` fetch a moment later. As a **Watchtower recovery** fallback the bootloader writes theme data through to `localStorage`, so a client can re-apply the last known theme before the server files are refetched.
+   **FOUC prevention:** `/static/custom.css` carries a safe subset of the theme (palette variables + custom CSS, plus the overlay glass rules when Overlay Transparency is `translucent`, with structural and gradient rules deferred so the page doesn't flash through to the background before the canvas starts). Open WebUI already loads that file as a render-blocking stylesheet, so the subset applies before first paint. The bootloader then fetches the full CSS and applies the deferred rules. Canvas FX scripts are deliberately **not** inlined: they are the bulk of the state, and the composed asset is rebuilt and hashed on every request, so they arrive with the `/state.json` fetch a moment later. As a **Watchtower recovery** fallback the bootloader writes theme data through to `localStorage`, so a client can re-apply the last known theme before the server files are refetched.
 
 4. **SSE Push Architecture:**
-   When the designer saves a theme, the POST handler writes CSS + state to disk and calls `_broadcast_update()`, which pushes a lightweight version token (with ETags) to all connected SSE clients (`_sse_clients`); each client then refetches `/theme.css` and `/state.json`, with ETag revalidation so unchanged files cost a cheap 304. SSE clients are stored on `app.state` to survive function hot-reloads. The `theme-disable` event type is broadcast when the admin toggles the function OFF. In multi-worker deployments, `_redis_publish()` broadcasts to the `<REDIS_KEY_PREFIX>:theme_pro_sse` Redis pub/sub channel (for example `open-webui:theme_pro_sse`), ensuring all workers relay updates to their local SSE clients. With `REDIS_SENTINEL_HOSTS` set it connects through Sentinel, the way Open WebUI does, and the subscriber pings Redis when idle and reconnects if Redis goes quiet for 90 seconds.
+   When the designer saves a theme, the POST handler writes CSS + state to disk and calls `_broadcast_update()`, which pushes a lightweight version token (with ETags) to all connected SSE clients (`_sse_clients`); each client then refetches `/theme.css` and `/state.json`, with ETag revalidation so unchanged files cost a cheap 304. A personal theme's save goes only to its owner's pages. SSE clients are stored on `app.state` to survive function hot-reloads. The `theme-disable` event type is broadcast when the admin toggles the function OFF. In multi-worker deployments, `_redis_publish()` broadcasts to the `<REDIS_KEY_PREFIX>:theme_pro_sse` Redis pub/sub channel (for example `open-webui:theme_pro_sse`), ensuring all workers relay updates to their local SSE clients. With `REDIS_SENTINEL_HOSTS` set it connects through Sentinel, the way Open WebUI does, and the subscriber pings Redis when idle and reconnects if Redis goes quiet for 90 seconds. Code saves and the on/off toggle reach the other workers on a second channel, `<REDIS_KEY_PREFIX>:live-reload:function_<function id>` (for example `open-webui:live-reload:function_theme_designer_pro`), over Open WebUI's own Redis connection.
 
-   **Valve convergence (multi-worker):** Open WebUI reloads a function's valves only on the worker that served the change, so peers hold stale valves until their own next event. The changing worker detects that *any* valve differs from its last snapshot and publishes an internal `valvesync` control message on the same Redis channel. Peers intercept it before it reaches a browser, re-read their valves via `Functions.get_function_valves_by_id`, re-prime their delivery caches, and nudge their local clients — re-registering routes if `designer_url` moved. The control message is framed as an SSE comment, so a peer on an older build that forwards raw channel traffic delivers a harmless keep-alive. The whole path is fail-safe: a peer that cannot read or validate the stored valves keeps what it has and converges on its own next event, exactly as before this mechanism existed.
+   **Valve convergence (multi-worker):** Open WebUI reloads a function's valves only on the worker that served the change, so peers hold stale valves until their own next event. The changing worker detects that *any* valve differs from its last snapshot and publishes an internal `valvesync` control message on the same Redis channel. Peers intercept it before it reaches a browser, re-read their valves via `Functions.get_function_valves_by_id`, re-prime their delivery caches, and nudge their local clients, re-registering routes if `designer_url` moved. The control message is framed as an SSE comment, so a peer on an older build that forwards raw channel traffic delivers a harmless keep-alive. The whole path is fail-safe: a peer that cannot read or validate the stored valves keeps what it has and converges on its own next event, exactly as before this mechanism existed.
 
 5. **Structural Transparency (CSS):**
-   The generated CSS makes UI containers transparent so Canvas FX and gradient backgrounds show through. Transparency is scoped to `.app`, `#theme-designer-container` (the designer page root), and `#auth-page` using `:where()` selectors for zero specificity. Portaled UI (dropdown menus, modals, submenus) lives outside `.app` on `document.body` — never made transparent — so no override rules are needed.
+   The generated CSS makes UI containers transparent so Canvas FX and gradient backgrounds show through. Transparency is scoped to `.app`, `#theme-designer-container` (the designer page root), and `#auth-page`, with the broad rule wrapped in `:where()` for zero specificity. Portaled UI (dropdown menus, modals, submenus) lives outside `.app` on `document.body`, so the structural layer never makes it transparent and no override rules are needed. The **Overlay Transparency** valve and the **Surfaces** tab style those layers on their own.
 
 6. **Selective Auth Page Stripping:**
-   The bootloader assembles auth-page CSS from the structured sections delivered inside `state.json` (under the `_cssSections` key), honoring each feature’s independent "Show on Auth Pages" toggle (colors, custom CSS, canvas, gradient). For themes saved by older versions without sections, it falls back to slicing the flat CSS by `/*[OWUI_*]*/` marker comments.
+   The bootloader assembles auth-page CSS from the structured sections delivered inside `state.json` (under the `_cssSections` key), honoring each feature's independent "Show on Auth Pages" toggle (colors, custom CSS, canvas, gradient). For themes saved by older versions without sections, it falls back to slicing the flat CSS by `/*[OWUI_*]*/` marker comments.
 
 7. **Function Lifecycle Integration:**
-   When the admin toggles the function OFF, Open WebUI dispatches `function.disable_started` synchronously, before the toggle is committed. Theme Designer Pro sets a flag both fragment producers read at compose time, so the very next request serves a `custom.css` without its block and a `loader.js` with `__THEME_ACTIVE__=false` — keeping SSE alive for the disable broadcast — and broadcasts `theme-disable` to all connected clients. When toggled back ON, `function.enable_started` republishes and broadcasts the saved theme to all clients immediately. These pre-toggle lifecycle events exist in Open WebUI v0.11.0 and newer; on older builds the toggle simply takes effect without live cleanup/re-injection.
+   When the admin toggles the function OFF, Open WebUI dispatches `function.disable_started` synchronously, before the toggle is committed. Theme Designer Pro sets a flag both fragment producers read at compose time, so the very next request serves a `custom.css` without its block and a `loader.js` with `__THEME_ACTIVE__=false` (which keeps SSE alive for the disable broadcast), and broadcasts `theme-disable` to all connected clients. When toggled back ON, `function.enable_started` republishes and broadcasts the saved theme to all clients immediately. These pre-toggle lifecycle events exist in Open WebUI v0.11.0 and newer; on older builds the toggle simply takes effect without live cleanup/re-injection.
 
 8. **Hot Reload Behavior:**
-   When the event function is re-saved in the admin panel, the next `event()` call republishes both fragments, leaving the registry holding the *new* instance's producers. Route registration inserts ASGI routes *before* the SPA catch-all to ensure they take priority.
+   When the event function is re-saved in the admin panel, Open WebUI loads the new code, and loading it republishes both fragments and re-registers the routes, leaving the registry holding the *new* instance's producers. With Redis, the other workers load the new code too. Route registration inserts ASGI routes *before* the SPA catch-all to ensure they take priority.
 
 ---
 
@@ -346,26 +364,26 @@ Open WebUI ships two intentionally-empty files that it loads on **every** page a
 | `/static/loader.js` | `<script defer>` | The only hook that runs before the SvelteKit bundle hydrates |
 | `/static/custom.css` | `<link rel="stylesheet">` | Render-blocking, so it applies before first paint |
 
-Neither can have a single owner — any plugin wanting to reach the page pre-paint needs one of them. Theme Designer Pro therefore uses a **shared registry**, designed with [@Classic298](https://github.com/Classic298), that every participating plugin can publish into:
+Neither can have a single owner: any plugin wanting to reach the page pre-paint needs one of them. Theme Designer Pro therefore uses a **shared registry**, designed with [@Classic298](https://github.com/Classic298), that every participating plugin can publish into:
 
 - Each plugin registers a *fragment* on `app.state`; a route composes all registered fragments into the response **per request**.
 - Load order is irrelevant. A plugin that loads later needs no cooperation from one that loaded earlier, and a re-exec'd plugin replaces its own entry.
 - Any content **you** have hand-written into those two files is preserved and served first; only the block between a plugin's own markers is ever replaced.
 - Composition order is `(order, key)`. Theme Designer Pro registers at `order=100` so its custom CSS keeps the last word in the cascade, matching the documented CSS output order.
-- A fragment whose producer raises is skipped and logged — one broken plugin cannot blank a page-wide asset.
-- Producers run synchronously on the request path, so everything Theme Designer Pro publishes is memoised; the steady-state cost is a `stat()`.
+- A fragment whose producer raises is skipped and logged: one broken plugin cannot blank a page-wide asset.
+- Producers run synchronously on the request path, so everything Theme Designer Pro publishes is memoized; the steady-state cost is a `stat()`.
 
 The registry block is kept **byte-identical** across participating plugins, and carries an implementation version so a newer copy evicts an older one and the fleet converges on one implementation rather than whichever plugin booted first.
 
 **What this replaced.** Up to 1.6.2 this function read-modify-wrote the frontend's `index.html` under a cross-process `fcntl` lock to inject its bootloader and a `<style>` block. That is gone entirely, along with the class of bugs that came with writing to a file the application also owns (duplicate block accumulation, stale embedded CSS that no save could refresh, and the need for write access to the frontend build). It also means themes now track the latest save on every page load rather than only after the next `event()`.
 
-**Scope.** The two assets reach the SPA — the chat UI and the auth pages. The designer page is its own document and does not load them; it manages its own styling directly.
+**Scope.** The two assets reach the SPA: the chat UI and the auth pages. The designer page is its own document and does not load them; it manages its own styling directly.
 
 ---
 
 ## 🔌 API Routes
 
-All routes are registered under the configurable `designer_url` base (default: `/api/v1/theme-designer`).
+All routes are registered under the configurable `designer_url` base (default: `/api/v1/theme-designer`). "Signed in" means any signed-in account except a pending one.
 
 | Method | Path | Auth | Description |
 |---|---|---|---|
@@ -373,19 +391,31 @@ All routes are registered under the configurable `designer_url` base (default: `
 | GET | `{designer_url}?scope=me` | Signed in | Serves the designer on the signed-in user's personal theme (403 while personal themes are off: a short page for a browser, JSON otherwise) |
 | GET | `{designer_url}?apply=…` | As above | Opens the designer for a theme from a chat. A Launcher 2.0 token carries the theme's SHA-256: the designer waits for the chat's card to send the theme and applies it only if it has that hash, for the same user, within 30 days. An older token carries colors and applies them on load within five minutes. Anything else is ignored |
 | POST | `{designer_url}` | Admin | Saves CSS + state + library, broadcasts SSE update |
-| POST | `{designer_url}/consult` | Admin, or signed in with personal themes on | The AI Consultant: `{"description": "..."}` in, `{"hue", "chroma", "lightness", "gradient", "name", "model"}` out. One request every few seconds per user |
-| POST | `{designer_url}/me` | Signed in | Saves the user's personal theme or library; `{"reset": true}` removes the theme and keeps the library |
+| POST | `{designer_url}/consult` | Admin, or signed in with personal themes on | The AI Consultant: `{"description": "..."}` in, `{"hue", "chroma", "lightness", "gradient", "name", "model"}` out. One request every 3 seconds per user; 403 while **Enable AI Consultant** is off |
+| POST | `{designer_url}/me` | Signed in | Saves the user's personal theme or library; `{"reset": true}` removes the theme and keeps the library (403 while personal themes are off) |
 | GET | `{designer_url}/theme.css` | Public | Serves generated theme CSS (empty if inactive or missing) |
 | GET | `{designer_url}/state.json` | Public | Serves saved theme state JSON (`{}` if inactive or missing) |
 | GET | `{designer_url}/me/theme.css` | Signed in | The user's personal theme CSS (empty when they have none, or personal themes are off) |
-| GET | `{designer_url}/me/state.json` | Signed in | The user's personal theme state (`{}` when they have none) |
-| GET | `{designer_url}/me/library.json` | Signed in | The user's own preset library |
+| GET | `{designer_url}/me/state.json` | Signed in | The user's personal theme state (`{}` when they have none, or personal themes are off) |
+| GET | `{designer_url}/me/library.json` | Signed in | The user's own preset library (`{}` when personal themes are off) |
 | GET | `{designer_url}/events` | Public | SSE endpoint for real-time push updates; a signed-in page also hears about its own personal theme |
+| POST | `{designer_url}/events/bind` | Signed in | Ties one open `/events` stream to the signed-in user, by the stream id its first message names, so their personal saves reach it (403 while personal themes are off) |
 | GET | `{designer_url}/library.json` | Admin | Serves the preset library (themes, canvas, CSS, gradients) |
+| GET | `{designer_url}/auth-background` | Public | The sign-in page picture (404 when there is none) |
+| POST, DELETE | `{designer_url}/auth-background` | Admin | Uploads (PNG, JPEG, GIF or WebP, up to 5 MB) or removes the sign-in page picture |
+| GET | `{designer_url}/page-background` | Signed in | The instance theme's Other pages picture (404 when there is none) |
+| POST, DELETE | `{designer_url}/page-background` | Admin | Uploads (PNG, JPEG, GIF or WebP, up to 5 MB) or removes the instance theme's Other pages picture |
+| GET, POST, DELETE | `{designer_url}/me/page-background` | Signed in | The user's own Other pages picture, read, uploaded or removed (403 while personal themes are off) |
+
+Saves (`POST {designer_url}`, `/me` and `/consult`) need `Content-Type: application/json`, or they answer 415, and a body over 64 MB answers 413.
 
 Personal themes are stored per account in `DATA_DIR/theme/users/<user id>/`, with the same file names as the instance theme. When an account is deleted, its folder is removed.
 
-> **Graceful degradation:** Missing CSS or state files return an empty `200` (`""` or `{}`), never a 500. Corrupted JSON is served as-is — the client handles parse errors.
+> **While the function is off:** the designer page, the saves (including `/me`), `/consult`, `library.json`, `auth-background`, `page-background` and `me/page-background` answer 503 "Theme Designer Pro is currently disabled". `theme.css` answers an empty 200, `state.json` answers `{}`, and the `/me` read routes answer empty. `/events` and `/events/bind` keep working, so open pages hear the theme come back.
+
+> **After a Designer URL change:** the old base keeps its read-only routes (`theme.css`, `state.json`, `events`, `events/bind`, `me/theme.css`, `me/state.json` and reading `auth-background`) until Open WebUI restarts, so pages opened before the change keep working.
+
+> **Graceful degradation:** Missing CSS or state files return an empty `200` (`""` or `{}`), never a 500. Corrupted JSON is served as-is, and the client handles parse errors.
 
 ---
 
@@ -397,8 +427,8 @@ All Canvas FX scripts must follow this Web Worker contract:
 // Receive messages from the host
 self.onmessage = (e) => {
   switch (e.data.type) {
-    case 'init':       // { canvas: OffscreenCanvas, width, height, env, theme }
-    case 'resize':     // { width, height }
+    case 'init':       // { canvas: OffscreenCanvas, width, height, dpr, reducedMotion, column, env, theme }
+    case 'resize':     // { width, height, dpr }
     case 'mousemove':  // { x, y }
     case 'click':      // { x, y }
     case 'mousedown':  // { x, y }
@@ -408,6 +438,8 @@ self.onmessage = (e) => {
     case 'touchend':   // { touches: [{x, y}, ...] }
     case 'context':    // { messages, chars, estimatedTokens } or { exactTokens, promptTokens, completionTokens, source }
     case 'theme':      // { mode, dark, hue, chroma, colors, rgb, ramp } (optional to handle)
+    case 'motion':     // { reducedMotion }
+    case 'layout':     // { column }
   }
 };
 
@@ -419,14 +451,23 @@ self.onmessage = (e) => {
 
 > **Theme palette:** `init` carries `theme`, the active mode's palette, and a `theme` message brings a new one whenever it changes while the script runs (a mode switch that keeps the same script, a theme update, or a palette edit in the designer). `colors` holds `background`, `surface`, `text`, `muted`, `accent`, `accent2` and `accent3` as `'#rrggbb'`, `rgb` holds the same as `[r, g, b]` from 0 to 1, `ramp` is the `--color-gray-*` ramp, and `dark` is false on Light and Her. A script that follows it should keep its own colors as defaults, offer a `followTheme` setting, recolor without restarting, and avoid additive blending when `dark` is false. The **📖 Docs** page's **Theme-Aware Animations** section has the full pattern.
 
+> **Taps and clicks:** answer a click or tap with `mousedown` alone, not `click`. A tap also sends a synthetic `mousedown`, and the browser can send its own, so a script that answers both acts twice.
+
+> **No heartbeat:** a script never needs to post anything back to the page. The engine ignores a heartbeat, and the presets repository's validator fails a script that sends one.
+
+> **Context:** `context` arrives in two shapes. `{ messages, chars, estimatedTokens }` is the engine's estimate from the page, sent after `init`, on a chat switch, and at most every 2 seconds while the chat changes. `{ exactTokens, promptTokens, completionTokens, source }` carries exact counts from the server after a reply.
+
+> **Calm Chat Column:** while that valve is off (the default), the engine rewrites a script's `const CENTER_CALM = <number>` line to 0 before running it.
+
 ### Dual Execution Modes
 
 | Mode | Condition | Canvas Type |
 |---|---|---|
 | **Worker** | Browser supports `OffscreenCanvas` + script doesn't reference `document` (comments don't count) | `OffscreenCanvas` transferred via `postMessage` |
-| **Fallback** | No `OffscreenCanvas` support, or script throws in Worker | Standard `<canvas>` DOM element; synthetic `self` object with `onmessage` and `addEventListener('message', …)` |
+| **Fallback** | No `OffscreenCanvas` support, the script references `document`, or the script throws in the Worker | Standard `<canvas>` DOM element; synthetic `self` object with `onmessage` and `addEventListener('message', …)` |
+| **Isolated** | The script's first characters are `/* tdp:isolated */` | A sandboxed frame with no origin and a policy that allows no requests, which makes its own `OffscreenCanvas` and Worker. `env.authToken` is always empty. It needs `OffscreenCanvas`, and without it the script doesn't run |
 
-The fallback is automatic — Worker errors are caught, the Worker is terminated, and the script is re-run on the main thread.
+The fallback is automatic: Worker errors are caught, the Worker is terminated, and the script is re-run on the main thread. An isolated script never moves to the main thread; a Worker error stops it instead.
 
 ---
 
@@ -436,35 +477,35 @@ The fallback is automatic — Worker errors are caught, the Worker is terminated
   - _Reason:_ Fragments live in process memory, so a fresh container serves the stock (empty) `loader.js` and `custom.css` until the function publishes again. Open WebUI dispatches `system.startup.completed` during boot, which republishes automatically; if you catch a page load inside that window, reload it.
 
 - **Valve changes aren't taking effect.**
-  - _Reason:_ Saving valves in the admin panel doesn't trigger `event()` directly. Send any chat message or wait for the next system event — the function detects the valve change on the next `event()` invocation.
+  - _Reason:_ Valves apply when you save them, but open pages pick up most of them on their next load, and an open designer reads them when it loads. Reload the page. Only **Enable Canvas FX**, **Sidebar Transparency**, **Overlay Transparency** and **Designer URL** reach open pages at once. With several workers and no Redis, the other workers catch up on their own next event.
 
 - **The designer page returns a 404.**
-  - _Fix:_ The event function registers its routes dynamically. If the function hasn't processed an event yet since the last restart, the route may not exist. Send a chat message to trigger `event()`, which registers routes on first invocation.
+  - _Fix:_ The event function registers its routes when it loads on a worker: at startup, when you turn it on, and when you save it. A 404 means it hasn't loaded on this worker since the last restart, for example because it was off at startup. Turn it on, or send a chat message to trigger `event()`.
   - _Also check:_ Ensure the `designer_url` valve matches the URL you're navigating to.
 
 - **My theme doesn't apply to other users.**
-  - _Fix:_ Most commonly caused by **reverse proxy buffering** — see in-app Docs → Section 21. Also ensure the admin has synced the theme via the designer (not Draft mode). The bootloader serves the theme to all users on page load from `{designer_url}/theme.css`. If the theme files are missing from `DATA_DIR/theme/`, the bootloader has nothing to serve. Verify the endpoint works by navigating directly to `{designer_url}/theme.css` in your browser — it should return CSS content.
+  - _Fix:_ If other pages update only after a reload, check your reverse proxy: see in-app Docs → Section 21. Also ensure the admin has published the theme from the designer (not left it in Draft mode). The bootloader serves the theme to all users on page load from `{designer_url}/theme.css`. If the theme files are missing from `DATA_DIR/theme/`, the bootloader has nothing to serve. Verify the endpoint works by navigating directly to `{designer_url}/theme.css` in your browser: it should return CSS content. A user with a personal theme sees theirs instead of the instance theme.
 
 - **Canvas FX animations are lagging.**
-  - _Fix:_ Heavy animations can drain resources. Ensure your browser supports `OffscreenCanvas` (indicated by the green "Background Worker" badge in the UI). If it says "Main Thread (Fallback)", keep animations simple.
+  - _Fix:_ Heavy animations can drain resources. Ensure your browser supports `OffscreenCanvas` (indicated by the green "Background Worker" badge in the UI). If it says "Main Thread (Fallback)" or "Main Thread (DOM Access)", keep animations simple. The badge is a prediction, so a script that only fails at run time moves to the main thread without the badge changing.
 
 - **Leftover blocks in `index.html` after upgrading from 1.6.2 or earlier.**
-  - _Reason:_ Older versions wrote directly into `index.html`, and that file survives an upgrade. Version 1.7.0 removes those blocks once, automatically, on its first event, and logs that it did. Nothing writes to `index.html` any more.
+  - _Reason:_ Older versions wrote directly into `index.html`, and that file survives an upgrade. Since 1.7.0 the function removes those blocks automatically, on its first event after each start, and logs that it did. Nothing else writes to `index.html`.
 
 - **A theme I deleted keeps being served.**
-  - _Reason:_ Deleting the function without disabling it first leaves its fragment in memory — Open WebUI dispatches `function.deleted` after the row is gone, so the plugin never receives it. Disable, then delete. A container restart also clears it.
+  - _Reason:_ Deleting the function without disabling it first leaves its fragment in memory: Open WebUI dispatches `function.deleted` after the row is gone, so the plugin never receives it. Disable, then delete. A container restart also clears it.
 
 - **Theme works but not on the auth/login page.**
   - _Check:_ Ensure the "Show on Auth Pages" toggles are enabled for each feature you want on auth pages (Colors, CSS, Canvas, Gradient). Also verify the `enable_auth_page_theming` valve is `true`.
 
 - **Theme reverts after disabling the function.**
-  - _Reason:_ Toggling the function OFF triggers the `function.disable_started` lifecycle event, which broadcasts a `theme-disable` SSE event to strip the theme from all clients and withdraws the CSS fragment from `custom.css`. When re-enabled, the `function.enable_started` event republishes everything automatically. On Open WebUI older than v0.11.0 these lifecycle events don't exist, so the theme instead _persists_ after disabling — follow the Uninstallation steps below for complete removal.
+  - _Reason:_ Toggling the function OFF triggers the `function.disable_started` lifecycle event, which broadcasts a `theme-disable` SSE event to strip the theme from all clients and withdraws the CSS fragment from `custom.css`. When re-enabled, the `function.enable_started` event republishes everything automatically. On Open WebUI older than v0.11.0 these lifecycle events don't exist, so the theme instead _persists_ after disabling: follow the Uninstallation steps below for complete removal.
 
 - **SSE connection keeps reconnecting.**
-  - _Reason:_ SSE connections are long-lived. Some reverse proxies (Nginx, Cloudflare) terminate idle connections. Configure your proxy to allow long-lived connections on the `/events` endpoint, or increase proxy timeout settings.
+  - _Reason:_ SSE connections are long-lived. The server sends a keep-alive comment every 15 seconds, so an idle timeout longer than 15 seconds keeps the stream open. A proxy or CDN that limits a connection's total lifetime still ends it, and the page reconnects 3 seconds later. Raise that limit on the `/events` endpoint. Each worker also holds at most 8,192 streams; past that, a page waits 60 seconds before it retries.
 
 - **Multi-worker deployment: themes only update on some users.**
-  - _Fix:_ Set `REDIS_URL` in your environment (which Open WebUI already uses for WebSocket relay). Theme Designer Pro automatically uses Redis pub/sub to broadcast SSE events across all workers. No additional configuration needed.
+  - _Fix:_ Set `REDIS_URL` in your environment (which Open WebUI already uses for WebSocket relay). Theme Designer Pro automatically uses Redis pub/sub to broadcast SSE events across all workers, through Sentinel when `REDIS_SENTINEL_HOSTS` is set. No additional configuration needed. Without Redis, other workers' pages update on their next load.
 
 - **The log says `REDIS_URL must start with redis://, rediss:// or unix://`.**
   - _Reason:_ The value isn't a Redis URL, most often because it's wrapped in quotes. In a Docker Compose `environment:` list, quotes become part of the value, so `- REDIS_URL="redis://redis:6379/0"` passes `"redis://redis:6379/0"`, quotes included. Open WebUI itself quietly runs without Redis on that value, and a quoted `WEBSOCKET_MANAGER="redis"` turns off its Redis WebSocket relay the same way.
@@ -483,18 +524,18 @@ The fallback is automatic — Worker errors are caught, the Worker is terminated
 
 ## 🗑️ Uninstallation & Complete Removal
 
-Disabling the function withdraws its theme immediately, but your saved themes and preset library stay on the server. Follow these steps for complete removal:
+Disabling the function withdraws its theme immediately, but your saved themes, preset library, uploaded pictures and personal themes stay on the server. Follow these steps for complete removal:
 
 **Step 1: Factory Reset (Purge All Data)**
 
-The easiest way to wipe all saved data is to open Theme Designer Pro, click the **📖 Docs** button in the header, and click the red **Factory Reset (Wipe All Data)** button under the Danger Zone section (Section 21). This permanently deletes all themes, snapshots, and configuration.
+The easiest way to wipe all saved data is to open Theme Designer Pro, click the **📖 Docs** button in the header, and click the red **Factory Reset (Wipe All Data)** button under the Danger Zone section (Section 28). This permanently deletes the instance theme, snapshots, and presets on the server, and this browser's copies of them. Uploaded pictures and each user's personal theme stay until Step 2.
 
 **Step 2: Remove Server Files**
 
-Delete the theme data files from your container:
+Delete the whole theme data folder from your container. It holds the instance theme and library, the uploaded pictures, the lock files, and `users/` with every personal theme:
 
 ```bash
-docker exec <container_name> rm -f /app/backend/data/theme/open_theme_designer.*
+docker exec <container_name> rm -rf /app/backend/data/theme
 ```
 
 **Step 3: Disable the Function (before deleting it)**
@@ -503,9 +544,9 @@ Toggle the function **OFF** in the Admin Panel first. That withdraws its fragmen
 
 **Step 4: Remove the Function**
 
-Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build — 1.7.0 never writes there.
+Delete the function from the Admin Panel under **Functions**. Nothing is left on disk in the frontend build: 1.7.0 and later never write there.
 
-> Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
+> Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. Since 1.7.0 the function cleans that up automatically, on its first event after each start; to check by hand, look for `<!-- OWUI Theme Pro Bootloader -->` in `/app/build/index.html`. It should be gone.
 
 ---
 
@@ -1042,12 +1083,12 @@ Consequences worth knowing:
 
 **Theme Designer Pro is a tool provided for educational and customization purposes. By using this tool, you acknowledge and agree to the following:**
 
-- **Compliance Responsibility:** As of Open WebUI v0.6.6+, the software license strictly prohibits altering, removing, obscuring, or replacing any "Open WebUI" branding (including the name, logo, or distinguishing visual identifiers) in deployments with **more than 50 active users** in a 30-day period without an Enterprise License.
+- **Compliance Responsibility:** Since Open WebUI v0.6.6, its license prohibits altering, removing, obscuring, or replacing any "Open WebUI" branding (including the name, logo, or other visual, textual or symbolic identifiers) in any deployment, with three exceptions: a deployment with **50 or fewer end users** (people with direct access to the application) in any rolling 30-day period, specific prior written permission from the copyright holder, or an enterprise license that permits the change.
 - **Administrative Burden:** The responsibility to ensure compliance rests **entirely** with the server administrator. While modifying color palettes is permitted, you must ensure that the Style Overrides tab is not used to hide, obscure, or alter the Open WebUI logo and branding in violation of the license.
 - **Liability Waiver:** The author of Theme Designer Pro (@g30) shall not be held liable for any material breach of license, legal action, or service termination resulting from use or misuse of this tool.
-- **Safe Harbor:** If your deployment is for personal use, internal team use (with permission), or for an organization of 50 or fewer active users, you are generally exempt from strict branding restrictions.
+- **Safe Harbor:** If your deployment never has more than 50 end users in a rolling 30-day period, or you have the copyright holder's written permission or an enterprise license, the branding clause doesn't restrict you. Every other deployment must keep the branding.
 
-This tool is provided "as is" without warranty of any kind. By using Theme Designer Pro, you acknowledge that serving instance-wide CSS and JavaScript may have implications. Use only on trusted instances.
+This tool is provided "as is" without warranty of any kind. By using Theme Designer Pro, you acknowledge that serving instance-wide CSS and JavaScript may have security implications. Use only on trusted instances.
 
 _For more information, see the official [Open WebUI License Guide](https://github.com/open-webui/docs/blob/main/docs/license.mdx)._
 
@@ -1055,9 +1096,9 @@ _For more information, see the official [Open WebUI License Guide](https://githu
 
 ## ⚠️ Canvas FX Performance Disclaimer
 
-Canvas FX allows you to inject custom JavaScript animations directly into the background of Open WebUI. Animations execute on a dedicated **Background Web Worker (`OffscreenCanvas`)** by default, ensuring your chat interface remains smooth without blocking the main browser thread.
+Canvas FX allows you to inject custom JavaScript animations directly into the background of Open WebUI. Animations execute on a dedicated **Background Web Worker (`OffscreenCanvas`)** by default, so your chat interface stays smooth without blocking the main browser thread.
 
-_(Note: If your browser doesn't support `OffscreenCanvas`, the engine seamlessly falls back to main-thread execution)._
+_(Note: If your browser doesn't support `OffscreenCanvas`, or a script uses `document`, the engine runs the script on the main thread instead. A script marked `/* tdp:isolated */` doesn't run at all without `OffscreenCanvas`.)_
 
 Even with Web Workers, highly intensive animations (massive particle counts, heavy mathematical calculations) can consume significant CPU/GPU resources and drain battery life. Use this feature responsibly, test your scripts, and keep animations lightweight!
 
@@ -1084,26 +1125,25 @@ graph TD
     %% --- PYTHON BACKEND ---
     subgraph Backend ["Python Backend: Event Function"]
         EventFn(["async event()"]):::endpoint --> CheckLifecycle{"Lifecycle event?"}:::backend
-        CheckLifecycle -->|"function.disable_started"| DisableCleanup["Strip theme + broadcast disable"]:::backend
-        CheckLifecycle -->|"function.enable_started"| EnableReinject["Reset _injected flag"]:::backend
-        CheckLifecycle -->|"Other"| CheckInjected{"_injected?"}:::backend
+        CheckLifecycle -->|"function.disable_started"| DisableCleanup["Mark inactive + broadcast theme-disable"]:::backend
+        CheckLifecycle -->|"function.enable_started"| EnableReinject["Clear _published flag"]:::backend
+        CheckLifecycle -->|"Other"| CheckRoutes{"Routes registered at this URL?"}:::backend
+        EnableReinject --> CheckRoutes
 
-        CheckInjected -->|"No"| InjectPipeline["Full Injection Pipeline"]:::backend
-        CheckInjected -->|"Yes"| CheckValves{"Valve changes?"}:::backend
+        CheckRoutes -->|"No"| RegisterRoute["_register_route()"]:::helper
+        CheckRoutes -->|"Yes"| Publish["_publish_fragments()"]:::helper
+        RegisterRoute --> Publish
 
-        CheckValves -->|"canvas_fx changed"| ToggleCanvas["Re-inject stripped state"]:::backend
-        CheckValves -->|"sidebar/overlay changed"| ToggleTransparency["Re-inject CSS + broadcast"]:::backend
-        CheckValves -->|"designer_url changed"| ReRegister["Re-register routes"]:::backend
-
-        InjectPipeline --> RegisterRoute["_register_route()"]:::helper
         RegisterRoute --> FindSPA{"Find SPA catch-all"}:::backend
-        FindSPA --> InsertRoutes["Insert 6 ASGI routes"]:::backend
+        FindSPA --> InsertRoutes["Insert ASGI routes before it"]:::backend
 
-        InjectPipeline --> Publish["_publish_fragments()"]:::helper
         Publish --> RegLoader["register loader.js fragment"]:::helper
         Publish --> RegCss["register custom.css fragment"]:::helper
         RegLoader --> Compose["Composed per request"]:::backend
         RegCss --> Compose
+
+        Publish --> CheckBroadcast{"First publish, re-enabled, or Canvas FX / sidebar / overlay valve changed?"}:::backend
+        CheckBroadcast -->|"Yes"| Broadcast
 
         InsertRoutes --> RoutePage(["GET /theme-designer"]):::endpoint
         InsertRoutes --> RouteSave(["POST /theme-designer"]):::endpoint
@@ -1111,8 +1151,10 @@ graph TD
         InsertRoutes --> RouteState(["GET /state.json"]):::endpoint
         InsertRoutes --> RouteSSE(["GET /events"]):::endpoint
         InsertRoutes --> RouteLib(["GET /library.json"]):::endpoint
+        InsertRoutes --> RouteMe(["/me, /consult, /events/bind"]):::endpoint
+        InsertRoutes --> RoutePics(["/auth-background, /page-background"]):::endpoint
 
-        RoutePage --> RequireAdmin["_require_admin()"]:::helper
+        RoutePage --> RequireAdmin["Admin check (signed-in user for ?scope=me)"]:::helper
         RequireAdmin --> BuildHTML["_build_html()"]:::helper
         BuildHTML --> ServeHTML(("HTMLResponse")):::frontend
 
@@ -1138,8 +1180,8 @@ graph TD
 
         BootInit --> LoadState["Load state from server + localStorage"]:::bootloader
         BootInit --> SSEConnect["Connect to /events SSE"]:::bootloader
-        BootInit --> SocketIntercept["Socket Interceptor — WebSocket token extraction"]:::bootloader
-        BootInit --> ContextObs["Context Observer — MutationObserver"]:::bootloader
+        BootInit --> SocketIntercept["Socket Interceptor: WebSocket token extraction"]:::bootloader
+        BootInit --> ContextObs["Context Observer: MutationObserver"]:::bootloader
 
         SSEConnect -->|"theme-update"| Refresh["refresh()"]:::bootloader
         SSEConnect -->|"theme-disable"| StripTheme["Strip all theme CSS"]:::bootloader
@@ -1161,7 +1203,7 @@ graph TD
         StorageEvent --> Refresh
 
         Enforce --> DOMUpdate(("Apply CSS to DOM")):::frontend
-        CanvasInit --> CanvasRender(("Worker / Fallback Canvas")):::frontend
+        CanvasInit --> CanvasRender(("Worker / Fallback / Isolated Canvas")):::frontend
     end
 
     %% --- SERVER STORAGE ---
@@ -1171,32 +1213,36 @@ graph TD
         RouteCSS --> CSSFile
         RouteState --> StateFile
         RouteLib --> LibFile[("open_theme_designer_library.json")]:::storage
+        RouteMe --> UserFiles[("users/(user id)/")]:::storage
+        RoutePics --> PicFiles[("auth_background, page_background")]:::storage
     end
 
     %% --- DESIGNER UI ---
     subgraph DesignerUI ["Theme Designer UI: Standalone Page"]
         ServeHTML -.->|"Loads in browser"| UILoad["Initialize Designer App"]:::frontend
         UILoad --> FetchState["Fetch /state.json + /theme.css"]:::frontend
-        FetchState --> Tabs{"6 UI Tabs"}:::frontend
+        FetchState --> Tabs{"7 UI Tabs"}:::frontend
 
         Tabs --> TabThemes["Themes"]:::frontend
         Tabs --> TabLCH["Core Palette"]:::frontend
         Tabs --> TabCSS["Style Overrides"]:::frontend
         Tabs --> TabCanvas["Canvas FX"]:::frontend
         Tabs --> TabBG["Gradient"]:::frontend
+        Tabs --> TabSurfaces["Surfaces"]:::frontend
         Tabs --> TabBackgrounds["Backgrounds"]:::frontend
 
-        DocsBtn["📖 Docs Button"]:::frontend --> DocsModal["Documentation Modal (22 sections)"]:::frontend
+        DocsBtn["📖 Docs Button"]:::frontend --> DocsModal["Documentation Modal (28 sections)"]:::frontend
 
         TabThemes --> CommitChange["commitChange()"]:::frontend
         TabLCH --> CommitChange
         TabCSS --> CommitChange
         TabCanvas --> CommitChange
         TabBG --> CommitChange
+        TabSurfaces --> CommitChange
         TabBackgrounds --> CommitChange
 
         CommitChange --> GenerateCSS["generateCoreCSS()"]:::frontend
-        GenerateCSS --> SyncToServer["syncToServer() — POST /theme-designer"]:::frontend
+        GenerateCSS --> SyncToServer["syncToServer(): POST /theme-designer"]:::frontend
         SyncToServer --> RouteSave
     end
 ```
@@ -1205,17 +1251,17 @@ graph TD
 
 ## ⚠️ Important Notes & System Requirements
 
-- **Required Open WebUI Version:** `0.11.0` or higher — 1.7.0 relies on the pre-toggle lifecycle events and on `/static/loader.js` + `/static/custom.css` being loaded by the frontend.
-- **Admin access required** — the designer page and save endpoint enforce admin authentication.
-- **Server write access** — only `DATA_DIR/theme/` is needed, for the persistence files. As of 1.7.0 the function never writes to the frontend build, so a read-only frontend is fine. (One exception: on first run after upgrading from 1.6.2 or earlier it tries once to remove that version's leftover `index.html` blocks, and logs a warning and continues if it can't.)
-- **No sandbox flags needed** — unlike the Tool variant, no "Same Origin" iframe configuration is required.
-- **No additional Python dependencies** — uses only what Open WebUI provides (`pydantic`, `starlette`).
-- **Multi-worker deployments** — SSE broadcasting works across workers automatically when `REDIS_URL` is set (which Open WebUI already uses for WebSocket relay). No additional configuration needed.
+- **Required Open WebUI Version:** v0.11.0 or higher. 1.7.0 and later rely on the pre-toggle lifecycle events and on `/static/loader.js` + `/static/custom.css` being loaded by the frontend.
+- **Admin access required for the instance theme:** the instance designer page and its save endpoint enforce admin authentication. With **Allow Personal Themes** on, any signed-in user except a pending account can open and save their own personal theme.
+- **Server write access:** only `DATA_DIR/theme/` is needed, for the persistence files, the uploaded pictures and `users/`. As of 1.7.0 the function never writes to the frontend build, so a read-only frontend is fine. (One exception: on its first event after each start it tries to remove the leftover `index.html` blocks of 1.6.2 or earlier, and logs a warning and continues if it can't.)
+- **No sandbox flags needed:** unlike the Tool variant, no "Same Origin" iframe configuration is required.
+- **No additional Python dependencies:** uses only what Open WebUI provides (`pydantic`, `starlette`, and `redis` for multi-worker push).
+- **Multi-worker deployments:** SSE broadcasting works across workers automatically when `REDIS_URL` is set (which Open WebUI already uses for WebSocket relay). No additional configuration needed.
 
 ---
 
 ## License
 
-[MIT](../LICENSE) — © [@G30](https://openwebui.com/u/g30)
+[MIT](../LICENSE) © [@G30](https://openwebui.com/u/g30)
 
 **Support:** If you love this tool, consider supporting [Open WebUI](https://github.com/open-webui) or [buying me a coffee](https://buymeacoffee.com/iamg30).

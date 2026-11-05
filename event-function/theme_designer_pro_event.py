@@ -6822,27 +6822,28 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                     <div class="doc-inner">
                         <p>Theme Designer Pro is an <b>Event Function</b> that themes your whole Open WebUI instance: color palettes, gradients, animated Canvas FX backgrounds and custom CSS. Admins design the instance theme every user sees, from the <b>Themes</b> tab in the Admin section of Settings or at <code>{ROUTE_BASE}</code> directly. With the <b>Allow Personal Themes</b> valve on, every user can also design a personal theme of their own (see Section 4). Themes are saved on the server and reach every open page live.</p>
                         <ul>
-                            <li><b>Who Can Open It:</b> Only administrators can open the instance designer and save the instance theme. With <b>Allow Personal Themes</b> on, every signed-in user can open the same designer on their own theme, at <code>{ROUTE_BASE}?scope=me</code> or from their <b>Themes</b> tab in Settings.</li>
-                            <li><b>How the Theme Reaches Pages:</b> Theme Designer Pro never writes to Open WebUI&rsquo;s files. It publishes a script into <code>/static/loader.js</code> and a safe subset of the theme CSS into <code>/static/custom.css</code> through a shared registry, composed fresh on every request (see Section 23). That subset holds the palette and your custom CSS, so they paint before Open WebUI draws its interface, with no flash. The state JSON, without Canvas FX scripts, is inlined into the loader too. On each load, the bootloader fetches <code>{ROUTE_BASE}/theme.css</code> and <code>{ROUTE_BASE}/state.json</code> for the full theme. The background animation starts when <code>state.json</code> arrives. <code>localStorage</code> keeps the last theme seen, applied before that fetch completes and kept as an offline fallback. A personal theme keeps its own copy, tagged with the account it belongs to.</li>
-                            <li><b>Theme Files:</b> The instance theme is saved in <code>DATA_DIR/theme/</code> as <code>open_theme_designer.css</code>, <code>open_theme_designer.json</code>, <code>open_theme_designer_sections.json</code> (structured CSS sections) and <code>open_theme_designer_library.json</code>. Personal themes use the same names in <code>DATA_DIR/theme/users/&lt;user id&gt;/</code>.</li>
-                            <li><b>Live Push via SSE:</b> Theme changes are broadcast to <b>all connected users in real time</b> using Server-Sent Events. Each save pushes a short version token to every open tab, and each page refetches the CSS and state after a random delay of up to 2 seconds, or skips it when its ETags show it already has that version. The channel at <code>{ROUTE_BASE}/events</code> reconnects 3 seconds after a drop and survives function hot-reloads. A personal theme save reaches only that user&rsquo;s own pages, on every device they&rsquo;re signed in on: each page claims its connection with its own sign-in token, so it works even when Open WebUI&rsquo;s sign-in cookie is missing. With several workers, Redis carries the updates between them (see Section 22). Each worker accepts up to 8,192 connections; a page over that limit retries a minute later and still gets the theme on every load.</li>
+                            <li><b>Who Can Open It:</b> Only administrators can open the instance designer and save the instance theme. With <b>Allow Personal Themes</b> on, every signed-in user except a pending account can open the same designer on their own theme, at <code>{ROUTE_BASE}?scope=me</code> or from their <b>Themes</b> tab in Settings.</li>
+                            <li><b>How the Theme Reaches Pages:</b> Theme Designer Pro never writes to Open WebUI&rsquo;s files. It publishes a script into <code>/static/loader.js</code> and a safe subset of the theme CSS into <code>/static/custom.css</code> through a shared registry, composed fresh on every request (see Section 23). That subset holds the palette and your custom CSS, so they paint before Open WebUI draws its interface, with no flash. The state JSON, without Canvas FX scripts, is inlined into the loader too. On each load, the bootloader fetches <code>{ROUTE_BASE}/theme.css</code> and <code>{ROUTE_BASE}/state.json</code> for the full theme. <code>localStorage</code> keeps the last theme seen, applied before that fetch completes and kept as an offline fallback, so on a browser that has seen the theme before, the background animation starts at once; on a first visit it starts when <code>state.json</code> arrives. A personal theme keeps its own copy, tagged with the account it belongs to.</li>
+                            <li><b>Theme Files:</b> The instance theme is saved in <code>DATA_DIR/theme/</code> as <code>open_theme_designer.css</code>, <code>open_theme_designer.json</code>, <code>open_theme_designer_sections.json</code> (structured CSS sections) and <code>open_theme_designer_library.json</code>. Personal themes use the same names in <code>DATA_DIR/theme/users/&lt;user id&gt;/</code>. Uploaded pictures are saved beside them as <code>auth_background</code> (the sign-in page picture) and <code>page_background</code> (the Other pages picture), and a personal theme keeps its own <code>page_background</code> in its folder. Saves hold <code>DATA_DIR/theme/.save.lock</code> so two workers never write at once.</li>
+                            <li><b>Live Push via SSE:</b> Theme changes are broadcast to <b>all connected users in real time</b> using Server-Sent Events. Each save pushes a short version token to every open tab, and each page refetches the CSS and state after a random delay of up to 2 seconds, or skips it when its ETags show it already has that version. The channel at <code>{ROUTE_BASE}/events</code> reconnects 3 seconds after a dropped connection, waits longer after an HTTP error such as a proxy&rsquo;s 502 (doubling each time, up to a minute), and survives function hot-reloads. A personal theme save reaches only that user&rsquo;s own pages, on every device they&rsquo;re signed in on: each page claims its connection with its own sign-in token, so it works even when Open WebUI&rsquo;s sign-in cookie is missing. With several workers, Redis carries the updates between them (see Section 22). Each worker accepts up to 8,192 connections; a page over that limit retries a minute later and still gets the theme on every load.</li>
                             <li><b>Several Designers at Once:</b> Each open designer holds the theme and the gallery in memory. When one saves a change, every other designer showing the same theme reloads, in another tab or window, in Settings, in the Admin Panel or at <code>{ROUTE_BASE}</code>, so none of them can later save an older copy over it. A designer doesn&rsquo;t reload while it&rsquo;s saving or has a dialog open, and waits for that first. It reloads at most once every 5 seconds, so a change made in several saves, as a Global Reset can be, ends in one more reload once that time is up. In Draft mode, it shows a message instead and keeps your draft. The save a designer makes on its own as it opens changes nothing for the others: an identical one is skipped, and any other is marked so they don&rsquo;t reload for it.</li>
                             <li><b>SSE Heartbeat:</b> The server sends a keep-alive heartbeat every 15 seconds to detect stale connections. If a client disconnects (closes the tab, loses network), the server-side queue is automatically cleaned up.</li>
                             <li><b>SSE Hot-Reload Persistence:</b> SSE connections survive function re-saves (hot-reloads). The client list is stored on the ASGI app's state object, which persists across module reloads, so re-saving the function code in the admin panel does <b>not</b> break live push to existing tabs.</li>
                             <li><b>Turning the Function Off and On:</b> Turning the function off fires <code>function.disable_started</code>. Theme Designer Pro then broadcasts a <code>theme-disable</code> event that strips the theme from every open page. It also withdraws its CSS from <code>/static/custom.css</code> and removes the <b>Themes</b> tabs from open Settings dialogs. The loader stays published but inactive, so its live connection survives. Turning it back on fires <code>function.enable_started</code>, which republishes the CSS, reactivates the loader, and broadcasts the theme to every page. Requires Open WebUI v0.11.0 or newer.</li>
                             <li><b>Server Sync:</b> Changes save to the server automatically by POST to <code>{ROUTE_BASE}</code> (or <code>{ROUTE_BASE}/me</code> for a personal theme): a single change at once, and while you drag a slider, 250 ms after you stop. The server saves the CSS, sections and state files and broadcasts a version token; the next request for <code>/static/loader.js</code> or <code>/static/custom.css</code> already includes the save. Open pages fetch the new theme within a moment of the broadcast, spread over up to two seconds when many are connected so they don&rsquo;t all ask at once. A page in a background tab fetches it when it&rsquo;s shown again. While the function is off, edits and library changes wait in the browser, with a message saying so, and go through once it&rsquo;s back on.</li>
                             <li><b>Draft Mode:</b> Switch between <b>Live</b> and <b>Draft</b> with the switch in the footer. In Draft mode, changes stay on the designer page; they aren&rsquo;t saved to the server or pushed to other users until you click <b>Publish</b> or switch back to Live. See Section 9.</li>
-                            <li><b>Hot Reload:</b> The function hot-reloads when updated in the admin panel; no server restart is needed.</li>
+                            <li><b>Hot Reload:</b> The function hot-reloads when updated in the admin panel; no server restart is needed. The theme&rsquo;s CSS is built in the designer page, so CSS changes a new version brings reach Open WebUI pages once an admin opens the instance designer in Live mode, which saves the theme as it opens. A personal theme is rebuilt when its owner opens their own designer.</li>
                             <li><b>Auto-Save:</b> Your active theme configuration is saved automatically after every change. Use the <b>Save (+)</b> button only to create named snapshots in your theme gallery.</li>
                             <li><b>Core Palette:</b> The OKLCH color palette is enabled by default for all modes. Use the <b>Enabled</b> toggle in the Core Palette section to disable palette generation for a specific mode if you prefer to manage colors entirely through manual overrides.</li>
                             <li><b>Auth Pages:</b> You can selectively toggle theme components (Colors, Custom CSS, Canvas FX, and Gradient Background) for the Login/Signup screens using the individual <b>Show on Auth Pages</b> checkboxes. By default, all four components are visible on auth pages. Beside each one, <b>Only on Auth Pages</b> keeps that component off the rest of Open WebUI, so it shows on the Login/Signup screens alone: a gradient or an animation for the sign-in page that stays out of your chats, for example. It needs <b>Show on Auth Pages</b>. The <b>Enable Auth Page Theming</b> valve hides every one of these checkboxes and turns them off. A personal theme never reaches the auth pages, which always show the instance theme, so the designer in a user&rsquo;s own Settings hides these checkboxes.</li>
-                            <li><b>Layer Order:</b> The generated CSS applies in this order: <i>OKLCH Palette &rarr; Manual Variable Overrides &rarr; Structural Rules &rarr; Gradient Background &rarr; Custom CSS &rarr; valve rules</i> (overlay glass and the mobile sidebar fix, when those valves are on). Each layer can override the one before it.</li>
+                            <li><b>Layer Order:</b> The generated CSS applies in this order: <i>OKLCH Palette &rarr; Manual Variable Overrides &rarr; Structural Rules (with the Surfaces rules when that tab is on) &rarr; Gradient Background &rarr; Custom CSS &rarr; valve rules</i> (overlay glass, the hidden sidebar fades and the mobile sidebar fix, when those valves are on). Each layer can override the one before it.</li>
                             <li><b>Session Persistence:</b> The designer uses <code>sessionStorage</code> to remember which tab you were working in, and restores it when you come back.</li>
                             <li><b>Legacy Data Migration:</b> Upgrading from an older version? The designer detects legacy data structures and migrates your saved snapshots and active themes to the latest format without data loss.</li>
                             <li><b>Following Open WebUI&rsquo;s Mode:</b> If you change Open WebUI&rsquo;s theme in another tab, or in Settings around the embedded designer, the designer switches its mode tab to match. A change of your system&rsquo;s light or dark setting re-renders the System view.</li>
                             <li><b>Self-Adapting UI &amp; Contrast Protection:</b> The designer interface themes <i>itself</i> with the colors you pick. Built-in contrast protection shifts text and border colors to stay legible if you create very washed-out palettes.</li>
                             <li><b>Fully Responsive:</b> The designer adapts to phone screens, so you can tweak your theme on the go.</li>
-                            <li><b>Canvas FX Security:</b> Canvas FX scripts are JavaScript. An instance theme&rsquo;s script runs in every user&rsquo;s browser, and only administrators can set it. A personal theme&rsquo;s script runs only in its owner&rsquo;s browser. <b>Never paste untrusted scripts</b>; always review Canvas FX code before enabling it, especially scripts from third parties.</li>
+                            <li><b>Canvas FX Security:</b> Canvas FX scripts are JavaScript. An instance theme&rsquo;s script runs in every user&rsquo;s browser, and only administrators can set it. A personal theme&rsquo;s script runs only in its owner&rsquo;s browser. <b>Never paste untrusted scripts</b>; always review Canvas FX code before enabling it, especially scripts from third parties. A script whose very first characters are <code>/* tdp:isolated */</code> runs isolated: in a sandboxed frame with a policy that allows no requests, so it can draw but gets no cookies, storage, page or network, never runs on the page itself, and gets an empty <code>env.authToken</code> even with <b>Enable Canvas Api Access</b> on. Adding that line is a way to run a script you haven&rsquo;t fully read. It needs a browser with OffscreenCanvas, and without one the script doesn&rsquo;t run at all.</li>
+                            <li><b>Routes:</b> Everything is served under <code>{ROUTE_BASE}</code>. <code>/theme.css</code>, <code>/state.json</code>, <code>/events</code> and reading <code>/auth-background</code> need no sign-in, because the sign-in page uses them. The designer page, saving the instance theme, <code>/library.json</code>, and changing <code>/auth-background</code> or <code>/page-background</code> are for admins. Any signed-in user except a pending account can use <code>?scope=me</code>, <code>/me</code> and its <code>/me/theme.css</code>, <code>/me/state.json</code>, <code>/me/library.json</code> and <code>/me/page-background</code>, plus <code>/consult</code>, <code>/events/bind</code> and reading <code>/page-background</code>. A route takes the sign-in token as <code>Authorization: Bearer</code> or the <code>token</code> cookie, and a save needs <code>Content-Type: application/json</code>.</li>
                             <li><b>Valves:</b> Admins turn features on and off and set policies in the function&rsquo;s valves; Section 2 lists them all.</li>
                         </ul>
                     </div>
@@ -6851,7 +6852,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                 <details class="doc-accordion">
                     <summary>2. Valves <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
-                        <p>Valves are set in <b>Admin Panel &gt; Functions &gt; Theme Designer Pro &gt; ⚙️</b>. They take effect as soon as you save them: Open WebUI runs the function on save, and other workers pick the change up over Redis. Changes to <b>Enable Canvas FX</b>, <b>Sidebar Transparency</b> and <b>Overlay Transparency</b> are pushed to open pages right away. Other valve changes apply on each page&rsquo;s next load. The designer reads the valves when its page loads, so reload an open designer to see a change there.</p>
+                        <p>Valves are set in <b>Admin Panel &gt; Functions &gt; Theme Designer Pro &gt; ⚙️</b>. They take effect as soon as you save them: Open WebUI runs the function on save, and other workers pick the change up over Redis. Changes to <b>Enable Canvas FX</b>, <b>Sidebar Transparency</b>, <b>Overlay Transparency</b> and <b>Designer Url</b> are pushed to open pages right away. Other valve changes apply on each page&rsquo;s next load. The designer reads the valves when its page loads, so reload an open designer to see a change there.</p>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
                                 <thead>
@@ -6859,25 +6860,25 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                                 </thead>
                                 <tbody>
                                     <tr><td><b>Enable Canvas FX</b></td><td>On</td><td>Off: hides the Canvas FX tab, stops running animations, and serves every theme without its Canvas FX. The scripts stay saved.</td></tr>
-                                    <tr><td><b>Calm Chat Column</b></td><td>Off</td><td>On: each animation fades behind the chat by its own Center Calm setting. Off: every script&rsquo;s Center Calm counts as 0, so animations show at full strength across the whole page. The scripts themselves are unchanged.</td></tr>
+                                    <tr><td><b>Calm Chat Column</b></td><td>Off</td><td>On: each animation fades behind the chat by its own Center Calm setting. Off: every script&rsquo;s Center Calm counts as 0, so animations show at full strength across the whole page. The scripts themselves are unchanged. The valve reaches a script through a line of the form <code>const CENTER_CALM = &lt;number&gt;;</code>, as the bundled presets write it; a script that keeps its calm amount anywhere else, such as in a <code>CONFIG</code> object, isn&rsquo;t affected.</td></tr>
                                     <tr><td><b>Enable Custom CSS</b></td><td>On</td><td>Off: hides the Style Overrides tab. Custom CSS that&rsquo;s already saved keeps being served.</td></tr>
                                     <tr><td><b>Enable Gradient Builder</b></td><td>On</td><td>Off: hides the Gradient tab. Gradients that are already saved keep being served.</td></tr>
                                     <tr><td><b>Enable AI Consultant</b></td><td>On</td><td>Shows the <b>AI</b> button in the designer (see Section 5).</td></tr>
                                     <tr><td><b>Enable Theme Update Checks</b></td><td>On</td><td>Off: hides the <b>Updates</b> button and each theme&rsquo;s update check, and the designer makes no update requests (see Section 15).</td></tr>
                                     <tr><td><b>Enable Community Themes</b></td><td>On</td><td>Off: hides the Community Themes browser and skips its catalog fetch (see Section 20).</td></tr>
-                                    <tr><td><b>Enable Auth Page Theming</b></td><td>On</td><td>Off: hides every <b>Show on Auth Pages</b> and <b>Only on Auth Pages</b> checkbox and turns them off, so login pages keep Open WebUI&rsquo;s own look.</td></tr>
-                                    <tr><td><b>Draft Mode Default</b></td><td>Off</td><td>On: the instance designer opens in Draft mode on every fresh page load (see Section 9).</td></tr>
+                                    <tr><td><b>Enable Auth Page Theming</b></td><td>On</td><td>Off: hides every <b>Show on Auth Pages</b> and <b>Only on Auth Pages</b> checkbox and turns them off, so login pages keep Open WebUI&rsquo;s own look. Opening the designer while it&rsquo;s off saves those checkboxes as off, so turning the valve back on leaves them off until you tick them again.</td></tr>
+                                    <tr><td><b>Draft Mode Default</b></td><td>Off</td><td>On: the instance designer opens in Draft mode on every load, reloads included, even after you publish (see Section 9).</td></tr>
                                     <tr><td><b>Show In Admin Settings</b></td><td>On</td><td>Adds a <b>Themes</b> tab to the Admin section of Settings (see Section 3).</td></tr>
                                     <tr><td><b>Show In Admin Panel</b></td><td>Off</td><td>Adds a <b>Themes</b> page to the Admin Panel&rsquo;s top bar, between <b>Functions</b> and <b>Settings</b> (see Section 3).</td></tr>
                                     <tr><td><b>Allow Personal Themes</b></td><td>Off</td><td>On: every user gets a <b>Themes</b> tab in their own Settings for a personal theme (see Section 4). Off again: everyone is back on the instance theme, and personal themes are kept.</td></tr>
-                                    <tr><td><b>Auto Sync</b></td><td>Off</td><td>On: skips the Selective Sync dialog and adds a <b>Sync All</b> switch to the footer.</td></tr>
+                                    <tr><td><b>Auto Sync</b></td><td>Off</td><td>On: <b>Sync</b> copies every part of the current mode to all the other modes without asking, and a gallery theme applies without the Apply Library Theme dialog. A <b>Sync All</b> switch in the footer then decides whether loading a theme or preset changes all four modes or only the current one.</td></tr>
                                     <tr><td><b>Sidebar Transparency</b></td><td><code>opaque</code></td><td>The chat sidebar&rsquo;s background: <code>opaque</code>, <code>translucent</code> (frosted glass) or <code>transparent</code> (turned into <code>translucent</code> on phones). Open WebUI&rsquo;s fades at the top and bottom of the sidebar, above the user menu, show only while it&rsquo;s <code>opaque</code>, with or without Canvas FX.</td></tr>
                                     <tr><td><b>Overlay Transparency</b></td><td><code>opaque</code></td><td>Settings, menus and dialogs: <code>opaque</code> or <code>translucent</code> (frosted glass). The fade at the top of chats, under the chat title, shows only while it&rsquo;s <code>opaque</code>, with or without Canvas FX.</td></tr>
                                     <tr><td><b>Enable Canvas Api Access</b></td><td>Off</td><td>On: gives every Canvas FX script the viewing user&rsquo;s Open WebUI token, so it can call the API as them. Leave it off unless you wrote or fully reviewed every script.</td></tr>
-                                    <tr><td><b>Enable Url Import</b></td><td>On</td><td>Shows the <b>Load from URL</b> import controls. A convenience switch in the browser, not a security boundary.</td></tr>
-                                    <tr><td><b>Allowed Import Domains</b></td><td>Empty</td><td>Comma-separated domains that URL imports, update checks and Community Themes may fetch from. Empty allows any. Enforced in the browser as a guardrail, not a security boundary.</td></tr>
-                                    <tr><td><b>Designer Url</b></td><td><code>/api/v1/theme-designer</code></td><td>Where the designer is served. A path that doesn&rsquo;t start with <code>/api/v1/</code> is corrected to one that does, and characters other than letters, digits, <code>/</code>, <code>_</code>, <code>.</code> and <code>-</code> are removed.</td></tr>
-                                    <tr><td><b>Ai Consultant Model</b></td><td>Empty</td><td>The model the AI Consultant asks, by its ID. Empty: the task model under <b>Admin Settings &gt; Interface</b> (see Section 5).</td></tr>
+                                    <tr><td><b>Enable Url Import</b></td><td>On</td><td>Shows the URL field and <b>Load URL</b> button in the import dialogs. A convenience switch in the browser, not a security boundary.</td></tr>
+                                    <tr><td><b>Allowed Import Domains</b></td><td>Empty</td><td>Comma-separated domains that URL imports, update checks and Community Themes may fetch from, each one with its subdomains. Empty allows any. Enforced in the browser as a guardrail, not a security boundary.</td></tr>
+                                    <tr><td><b>Designer Url</b></td><td><code>/api/v1/theme-designer</code></td><td>Where the designer is served. A path that doesn&rsquo;t start with <code>/api/v1/</code> is corrected to one that does, and characters other than letters, digits, <code>/</code>, <code>_</code>, <code>.</code> and <code>-</code> are removed. After a change, the old address keeps serving the theme to pages that were already open, until Open WebUI restarts; the designer, saves and the library move to the new address at once.</td></tr>
+                                    <tr><td><b>Ai Consultant Model</b></td><td>Empty</td><td>The model the AI Consultant asks, by its ID. Empty: the task model under <b>Admin Settings &gt; Interface</b> (see Section 5). An ID that isn&rsquo;t a model on this instance makes the AI Consultant answer with an error instead of falling back.</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -6889,7 +6890,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                     <div class="doc-inner">
                         <p>Admins can open the designer without leaving Open WebUI: Settings has a <b>Themes</b> tab in its Admin section, right after <b>Interface</b>. It shows the same designer in a frame that fills the panel, and the <b>Show In Admin Settings</b> valve turns it off. The designer stays available at <code>{ROUTE_BASE}</code> either way.</p>
                         <ul>
-                            <li><b>Styled Like Open WebUI:</b> In Settings, the designer&rsquo;s header row takes Open WebUI&rsquo;s look: the page title is left to the tab, and the mode and header buttons are smaller and borderless. Everything below the header looks as it does at the designer&rsquo;s own URL.</li>
+                            <li><b>Styled Like Open WebUI:</b> In Settings, the designer&rsquo;s header row takes Open WebUI&rsquo;s look: the page title is left to the tab, and the mode and header buttons are smaller and borderless. Everything below the header looks as it does at the designer&rsquo;s own URL. The Admin Panel&rsquo;s <b>Themes</b> page uses the same header.</li>
                             <li><b>Live Around You:</b> Edits save live as usual, so Settings restyles around the designer while you work. Switching to another Settings tab and back keeps the designer where you left it.</li>
                             <li><b>Searchable:</b> The Settings search box finds the tab by words such as &ldquo;theme&rdquo;, &ldquo;designer&rdquo;, &ldquo;palette&rdquo; or &ldquo;canvas&rdquo;. While the search holds words that don&rsquo;t match, the tab is hidden like any other.</li>
                             <li><b>Frosted Glass:</b> With <b>Overlay Transparency</b> set to <code>translucent</code>, the designer&rsquo;s page turns clear, so Settings&rsquo; frosted glass shows behind it. It stays solid while you edit a mode whose light or dark look differs from Open WebUI&rsquo;s, so its text stays readable.</li>
@@ -6912,7 +6913,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                             <li><b>Within Your Valves:</b> Canvas FX, Custom CSS, the Gradient Builder, Community Themes, URL import and the transparency styles apply as they do for the instance theme.</li>
                             <li><b>Saves Wait for a Real Change:</b> A personal theme starts from the instance theme and is saved only once the user changes something. Opening the tab, or switching it between modes, leaves them on the instance theme and its later updates.</li>
                             <li><b>Use Instance Theme:</b> This button removes the personal theme and keeps the user&rsquo;s saved themes and presets. The personal designer has no Draft mode and no Global Reset.</li>
-                            <li><b>Moving From the Legacy Tool:</b> The old Theme Designer Pro Tool kept a theme in each browser. The first time a page loads with this function, that theme is set aside, and when the user opens their personal <b>Themes</b> tab, the designer offers to start their personal theme from it. <b>Start from it</b> also saves it to their gallery as &ldquo;From the Theme Designer Pro Tool&rdquo;, so <b>Use instance theme</b> can&rsquo;t lose it, and the offer doesn&rsquo;t come back in that browser.</li>
+                            <li><b>Moving From the Legacy Tool:</b> The old Theme Designer Pro Tool kept a theme in each browser. The first time a page loads with this function, that theme is set aside, and when the user opens their personal <b>Themes</b> tab, the designer offers to start their personal theme from it. <b>Start from it</b> also saves it to their gallery as &ldquo;From the Theme Designer Pro Tool&rdquo;, so <b>Use instance theme</b> can&rsquo;t lose it. The offer shows only while the user has no personal theme, and after <b>Start from it</b> or <b>Not now</b> it doesn&rsquo;t come back in that browser.</li>
                             <li><b>Deleted Accounts:</b> When an account is deleted, from the Users page or by SCIM, its personal theme and library are removed, as long as the function is on.</li>
                             <li><b>Turning the Valve Off</b> puts everyone back on the instance theme and keeps their personal themes in case you turn it on again.</li>
                         </ul>
@@ -6924,8 +6925,8 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                     <div class="doc-inner">
                         <p>The <b>AI</b> button in the header turns a few words into a theme. Describe what you want, such as &ldquo;warm copper&rdquo; or &ldquo;calm ocean at night&rdquo;, and a model on your instance picks the hue, chroma and lightness, plus a matching gradient when the description suits one. You then fine-tune the result with the sliders.</p>
                         <ul>
-                            <li><b>What It Changes:</b> Only the palette, and the gradient when the Gradient Builder is on. Custom CSS, Canvas FX and locked colors stay as they are. Apply it to every mode, or tick <b>Only the &hellip; mode</b> for the one you&rsquo;re editing.</li>
-                            <li><b>Which Model:</b> The one in the <b>AI Consultant Model</b> valve, or, when that&rsquo;s empty, the task model under <b>Admin Settings &gt; Interface</b>, local first, then external. The request runs your instance&rsquo;s pipeline filters like any other.</li>
+                            <li><b>What It Changes:</b> Only the palette, and the gradient when the Gradient Builder is on. It turns the palette on for each mode it changes, and OLED keeps lightness 0. Custom CSS, Canvas FX and locked colors stay as they are. Apply it to every mode, or tick <b>Only the &hellip; mode</b> for the one you&rsquo;re editing.</li>
+                            <li><b>Which Model:</b> The one in the <b>Ai Consultant Model</b> valve, or, when that&rsquo;s empty, the task model under <b>Admin Settings &gt; Interface</b>, local first, then external. The request runs your instance&rsquo;s pipeline filters like any other.</li>
                             <li><b>Who Can Use It:</b> Admins can always use it, and users can when <b>Allow Personal Themes</b> is on, on their own theme. Open WebUI asks the model as the signed-in person, so users need access to that model, as they do for chat titles. Each person can send one request every 3 seconds.</li>
                             <li><b>A Gradient That Won&rsquo;t Show:</b> If the mode&rsquo;s Custom CSS Snippet sets its own background gradient, the AI&rsquo;s gradient is saved but hidden behind it, and the confirmation says so (see Section 17).</li>
                             <li><b>Turning It Off:</b> The <b>Enable AI Consultant</b> valve removes the button.</li>
@@ -6941,7 +6942,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                             <li><b>Whose Theme Changes:</b> The person&rsquo;s own personal theme, which needs <b>Allow Personal Themes</b> on. An admin who asks for a theme &ldquo;for everyone&rdquo; changes the instance theme instead.</li>
                             <li><b>What Apply Does:</b> The card opens this designer out of sight with a link the Launcher signed, hands it the theme, and the designer applies and saves it the way an import would, then closes. Open pages follow live.</li>
                             <li><b>Animations a Chat Model Writes:</b> When the catalog has nothing that fits, the chat model can write a new Canvas FX animation (Launcher 2.1.0 or later, best with the <b>theme-designer-pro</b> skill from the presets repository). The Launcher checks it and marks its first line <code>/* tdp:isolated */</code>, and Theme Designer Pro runs a marked script isolated: in a sandboxed frame with no origin and a policy that allows no requests, so it can draw but gets no cookies, storage, page or network, and never runs on the page itself. The card shows it as &ldquo;(new)&rdquo; with <b>View code</b>.</li>
-                            <li><b>Why a Link Can&rsquo;t Change a Theme:</b> The designer never applies a theme that is simply written into its address or sent to it. The Launcher signs the theme&rsquo;s SHA-256 with Open WebUI&rsquo;s <code>WEBUI_SECRET_KEY</code> for the one person who asked, and the designer applies only a theme with that hash, only for that person, within 30 days, and only where it was meant to land. The theme&rsquo;s Canvas FX script comes from the catalog the server fetched, never from the chat model, so Apply asks no second question about it. Links from Launchers before 2.0 carry colors alone and apply for five minutes.</li>
+                            <li><b>Why a Link Can&rsquo;t Change a Theme:</b> The designer never applies a theme that is simply written into its address or sent to it. The Launcher signs the theme&rsquo;s SHA-256 with Open WebUI&rsquo;s <code>WEBUI_SECRET_KEY</code> for the one person who asked, and the designer applies only a theme with that hash, only for that person, within 30 days, and only where it was meant to land. The theme&rsquo;s Canvas FX script comes from the catalog the server fetched or, when the chat model wrote it, runs isolated as described above, so Apply asks no second question about it. Links from Launchers before 2.0 carry colors alone and apply for five minutes.</li>
                             <li><b>The Setting It Needs:</b> Everyone who uses it needs <b>Settings &gt; Interface &gt; iframe Sandbox Allow Same Origin</b> on to apply a theme or open the designer in a chat. Without it, the card still previews the theme and names the setting. With it on, HTML that tools and models show in chats runs with the page&rsquo;s access, so turn it on only on an instance whose tools you trust.</li>
                             <li><b>Getting It:</b> Install it from its page on the Open WebUI community platform, or from the <code>launcher/</code> folder of the <a href="https://github.com/silentoplayz/theme-designer-pro-presets" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">presets repository</a>, whose README covers its valves.</li>
                         </ul>
@@ -6954,11 +6955,11 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         <p>Unlike standard hex-based themes, this designer uses the <b>OKLCH</b> color space to generate perceptually uniform palettes. This means the visual "weight" of colors remains identical as you shift hues.</p>
                         <ul>
                             <li><b>Global Modes:</b> Easily switch between <b>Dark</b>, <b>OLED</b> (pure black), <b>Light</b>, <b>Her</b>, and <b>System</b> modes using the segmented toggle. Settings, variables, and CSS are managed entirely separately for each mode. System mode proxies to your OS preference (see Section 8). In Live mode, picking a mode tab also switches Open WebUI itself, in your other tabs and in Settings around the embedded designer; in Draft mode it switches only the designer. <i>Note: when the page loads, the designer reads Open WebUI&rsquo;s <code>enable_easter_eggs</code> setting from <code>/api/config</code> and shows the Her tab if it&rsquo;s on, or if Open WebUI is already in Her mode.</i></li>
-                            <li><b>Hue / Chroma / Lightness:</b> Control the base angle, intensity, and brightness. <i>(Pro-Tip: Double-click any slider label to reset it to default).</i></li>
-                            <li><b>Accent Colors:</b> Under the sliders, three swatches show the mode&rsquo;s accents. Each starts on <b>Auto</b>: the palette&rsquo;s hue, lighter on dark modes and deeper on light ones, with the second and third 40&deg; to either side, so they follow the sliders. Pick a color to set one for this mode, for a theme whose look is two colors the hue can&rsquo;t give, and click &#10226; to set it back to automatic (double-click the row&rsquo;s label for all three). Canvas FX scripts that follow the theme draw in them, and theme CSS reads them as <code>var(--tdp-accent)</code>, <code>var(--tdp-accent-2)</code> and <code>var(--tdp-accent-3)</code>; click an accent&rsquo;s name to copy its variable. Sync copies them with the palette.</li>
+                            <li><b>Hue / Chroma / Lightness:</b> Control the base angle, intensity, and brightness. Double-click a slider&rsquo;s label to reset it to its default.</li>
+                            <li><b>Accent Colors:</b> Under the sliders, three swatches show the mode&rsquo;s accents. Each starts on <b>Auto</b>: the palette&rsquo;s hue, lighter on dark modes and deeper on light ones, with the second and third 40&deg; to either side, so they follow the sliders. At Chroma 0, the default, the automatic accents are gray. Pick a color to set one for this mode, for a theme whose look is two colors the hue can&rsquo;t give, and click &#10226; to set it back to automatic (double-click the row&rsquo;s label for all three). Canvas FX scripts that follow the theme draw in them, and theme CSS reads them as <code>var(--tdp-accent)</code>, <code>var(--tdp-accent-2)</code> and <code>var(--tdp-accent-3)</code>; click an accent&rsquo;s name to copy its variable. Sync copies them with the palette.</li>
                             <li><b>Tonal Ramp:</b> Below the sliders, the OKLCH Tonal Ramp visualizes the generated 12-step color scale. Click any block in the ramp to copy its hex value to your clipboard.</li>
 
-                            <li><b>Sync:</b> Click the <b>Sync</b> button in the footer to selectively copy palette, overrides, CSS, Canvas FX, Gradient Background, or auth settings from the current mode to one or more target modes. Colored badges appear next to each option indicating whether the source and target are already <span style="color:#10b981;">in sync</span> or have <span style="color:#f59e0b;">differences</span>. The <b>Auto Sync</b> valve skips this dialog and adds a <b>Sync All</b> switch to the footer instead.</li>
+                            <li><b>Sync:</b> Click the <b>Sync</b> button in the footer to selectively copy palette, overrides, CSS, Canvas FX, Gradient Background, Surfaces, or auth settings from the current mode to one or more target modes. Colored badges appear next to each option indicating whether the source and target are already <span style="color:#10b981;">in sync</span> or have <span style="color:#f59e0b;">differences</span>, and each option&rsquo;s &#9662; opens what differs. Syncing into OLED sets its lightness to 0. When the source and target modes both came from the same gallery theme, Sync copies that theme&rsquo;s own data for the target mode. The <b>Auto Sync</b> valve skips this dialog and adds a <b>Sync All</b> switch to the footer instead.</li>
                         </ul>
                     </div>
                 </details>
@@ -6981,20 +6982,20 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         <p>Draft Mode lets you preview and iterate on theme changes without pushing them live to users. It's designed for safe experimentation.</p>
                         <h4>How It Works</h4>
                         <ul>
-                            <li><b>Toggle:</b> Click the <b>Live / Draft</b> switch in the footer to enter Draft mode. A pulsing amber dot appears next to Draft, and the header badge changes to <b>DRAFT ACTIVE</b>.</li>
-                            <li><b>Starting in Draft:</b> The <b>Draft Mode Default</b> valve opens the instance designer in Draft mode on every fresh page load; a draft already saved in the tab takes precedence. The personal designer has no Draft mode, because only its owner sees the result.</li>
-                            <li><b>Local-Only:</b> In Draft mode, theme CSS and state are <b>not</b> synced to the server or pushed to other users via SSE. However, library data (snapshots, presets) continues to sync to the server normally — only the CSS and state are sent as empty stubs, preventing draft theme content from leaking. The designer page <i>is</i> your preview surface.</li>
-                            <li><b>Draft Isolation:</b> In Draft mode, the <code>syncToServer()</code> function is gated off — theme CSS and state are written to <code>sessionStorage</code> (tab-scoped) but never pushed to the server or broadcast via SSE. The <code>syncLibrary()</code> function still runs to keep presets in sync, but sends empty CSS/state and sets <code>suppress_broadcast: true</code>. Since other tabs read theme data from the server (via the composed loader fragment or SSE), and <code>sessionStorage</code> is invisible to other tabs, draft changes remain fully isolated to the designer tab.</li>
+                            <li><b>Toggle:</b> Click the <b>Live / Draft</b> switch in the footer to enter Draft mode. A pulsing amber dot appears next to Draft, and the header badge changes from <b>Theme Active</b> to <b>Draft Active</b> (it reads <b>Theme Inactive</b> while the function is off; hover it to see who changes reach).</li>
+                            <li><b>Starting in Draft:</b> The <b>Draft Mode Default</b> valve opens the instance designer in Draft mode on every load, reloads included, even after you publish. Without the valve, a reload keeps the tab in Draft while it holds a draft. The personal designer has no Draft mode, because only its owner sees the result.</li>
+                            <li><b>Local-Only:</b> In Draft mode, theme CSS and state are <b>not</b> synced to the server or pushed to other users via SSE. Library changes (snapshots and presets) still save to the server at once, without the draft&rsquo;s CSS or state. The designer page <i>is</i> your preview surface.</li>
+                            <li><b>Draft Isolation:</b> In Draft mode, theme CSS and state are written to <code>sessionStorage</code>, which only this tab can read, and never sent to the server. Other pages read the theme from the server, so the draft&rsquo;s look stays in this tab. A library change made in Draft does reach the server, and other open designers reload to pick it up.</li>
                         </ul>
                         <h4>Publishing</h4>
                         <ul>
                             <li><b>Publish Button:</b> Click the <b>Publish</b> button that appears in Draft mode to push all pending changes to the server and broadcast them via SSE to everyone the theme reaches: all users, or with <b>Allow Personal Themes</b> on, everyone who isn&rsquo;t using a theme of their own. The toast says who it reached. While the function is off, publishing fails with the server&rsquo;s error message; turn the function back on first.</li>
-                            <li><b>Toggle Back:</b> Switching the toggle from Draft back to Live is equivalent to clicking Publish — it triggers the same sync and broadcast.</li>
-                            <li><b>Discard:</b> If you close the tab without publishing, your draft changes are lost — they are stored in <code>sessionStorage</code>, which is tab-scoped and destroyed when the tab closes. Within the same tab session, draft changes survive page refreshes. The last-published server-side theme remains active for everyone else.</li>
+                            <li><b>Toggle Back:</b> Switching the toggle from Draft back to Live is equivalent to clicking Publish: it triggers the same sync and broadcast.</li>
+                            <li><b>Discard:</b> If you close the tab without publishing, your draft changes are lost, because they are stored in <code>sessionStorage</code>, which is tab-scoped and destroyed when the tab closes. Within the same tab session, draft changes survive page refreshes. The last-published server-side theme remains active for everyone else.</li>
                         </ul>
                         <h4>What Draft Mode Does NOT Do</h4>
                         <ul>
-                            <li>It does <b>not</b> apply draft changes to regular OWUI pages — even for the admin. The designer page is the only preview surface.</li>
+                            <li>It does <b>not</b> apply draft changes to regular Open WebUI pages, even for the admin. The designer page is the only preview surface.</li>
                             <li>It does <b>not</b> persist draft state across browser sessions or tab closures. Closing the tab or browser discards the draft. However, refreshing the page within the same tab session preserves your working state via <code>sessionStorage</code>.</li>
                         </ul>
                     </div>
@@ -7006,7 +7007,8 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         <p>While the OKLCH engine dynamically calculates a 12-step ramp, you can manually override any individual step in the <b>Individual Variable Overrides</b> section below the tonal ramp.</p>
                         <h4>Color Picker Overrides</h4>
                         <ul>
-                            <li><b>Locking Variables:</b> Clicking the lock (🔒) icon pins a variable. Locked variables are protected and will NOT be overwritten if you change the OKLCH sliders, randomize the theme, or extract a palette from an image. Use the bulk <b>Lock All</b> / <b>Unlock All</b> buttons to quickly pin or release the entire variable set at once.</li>
+                            <li><b>Locking Variables:</b> Clicking the lock (🔒) icon pins a variable. Locked variables are protected and will NOT be overwritten if you change the OKLCH sliders, randomize the theme, or extract a palette from an image. Use the bulk <b>Lock All</b> / <b>Unlock All</b> buttons to quickly pin or release the entire variable set at once. Picking a color in a swatch sets that variable and locks it. Moving a palette slider clears every unlocked override.</li>
+                            <li><b>Resetting:</b> Each variable&rsquo;s &#10226; unlocks it and puts back its palette color. <b>&#10226; Reset All</b> clears every unlocked override in the mode and puts Hue, Chroma and Lightness back to 250, 0 and 20 (0 in OLED); when every variable is locked, it asks first and offers <b>Unlock &amp; Reset</b>.</li>
                             <li><b>Click-to-Copy:</b> Click any step label (e.g., <i>900</i>) to copy its CSS declaration (<code>--color-gray-900: #hex;</code>) to your clipboard.</li>
                             <li><b>Contrast Preview:</b> Each color swatch features an <b>Aa</b> contrast preview badge for at-a-glance legibility assessment. The badge text color automatically adjusts based on the swatch's lightness to remain readable.</li>
                         </ul>
@@ -7014,7 +7016,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         <p>Directly under the tonal ramp, the <b>Accessibility Contrast</b> panel scores the four text-on-background pairs Open WebUI actually renders for the current mode: main and muted text on the page background, main text on panels, and main text on the sidebar. Each row shows a foreground-on-background swatch, the <a href="https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html" target="_blank" rel="noopener">WCAG 2.1</a> contrast ratio, the steps compared (for example, <i>50 on 900</i>), and a rating badge: <b>AAA</b> (&ge;7:1), <b>AA</b> (&ge;4.5:1), <b>AA large</b> (&ge;3:1, valid for large or bold text only), <b>Fail</b>, or <b>Unknown</b> for a color that only resolves in the live page, such as <code>var(--&hellip;)</code>. A summary reports how many of the measured pairs clear AA. It recomputes live as you move a slider, edit an override, or switch modes.</p>
                         <ul>
                             <li><b>Measured on the solid background.</b> With a Canvas FX or gradient background active, the visible backdrop is an animation that has no single contrast value; the report scores against the solid palette color, which is the fallback every user still sees.</li>
-                            <li><b>Washed-out palettes.</b> If a palette is bright enough that the built-in contrast protection engages, the panel notes it — protection shifts text color at runtime, so the rendered result can be more legible than the raw palette scores.</li>
+                            <li><b>Washed-out palettes.</b> If a palette is bright enough that the built-in contrast protection engages, the panel notes it. That protection keeps the designer page itself legible; Open WebUI pages get the palette exactly as scored.</li>
                             <li><b>What ships is what&rsquo;s measured.</b> Manual Variable Overrides are applied before scoring, with a note saying how many values came from them, and a mode whose palette is disabled is scored on its defaults, with a note.</li>
                         </ul>
                         <h4>Manual Variable Overrides</h4>
@@ -7022,7 +7024,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         <ul>
                             <li><b>Purpose:</b> Define raw CSS variable declarations (e.g., <code>--color-gray-900: #1a1a2e;</code>) that are injected <i>after</i> the generated palette, giving them final override priority.</li>
                             <li><b>Mode-Specific:</b> Overrides are saved independently per mode (Dark, OLED, Light, Her). Switching modes loads that mode's specific overrides.</li>
-                            <li><b>Enabled Toggle:</b> Use the checkbox to quickly enable or disable manual overrides without losing your code.</li>
+                            <li><b>Enabled Toggle:</b> Use the checkbox to quickly enable or disable manual overrides without losing your code. <b>Clear</b> empties the editor and <b>Copy</b> copies its text.</li>
                             <li><b>Syntax:</b> Write one variable per line using standard <code>--variable-name: value;</code> syntax. Comments (<code>/* */</code> and <code>//</code>) are automatically skipped, and so are lines that don&rsquo;t start with <code>--</code> or that contain <code>{</code> or <code>}</code>. The designer appends <code>!important</code> for you.</li>
                             <li><b>System Mode:</b> Manual overrides include automatic <code>@media (prefers-color-scheme)</code> support, ensuring they work correctly when the user's OS theme preference is set to System.</li>
                         </ul>
@@ -7032,20 +7034,20 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                 <details class="doc-accordion">
                     <summary>11. Custom CSS & Auto-Scoping <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
-                        <p>Write raw CSS overrides using a robust code editor with auto-indentation and auto-closing pairs (brackets, parentheses, and quotes). Your CSS is saved <i>per-mode</i>. Use the <b>Preset Gallery</b> to save, rename, and manage reusable snippets.</p>
+                        <p>Write raw CSS overrides in a code editor with auto-indentation and auto-closing pairs (brackets, parentheses, and quotes). Your CSS is saved <i>per-mode</i>. Use the <b>Preset Gallery</b> to save, rename, and manage reusable snippets.</p>
                         <ul>
                             <li><b>Enabled Toggle:</b> Each mode&rsquo;s custom CSS has an <b>Enabled</b> checkbox, off by default. Typing in the editor doesn&rsquo;t turn it on; loading or saving a snippet does. The <b>Enable Custom CSS</b> valve hides this tab, but CSS that&rsquo;s already saved keeps being served.</li>
-                            <li><b>Auto-Scope:</b> When enabled, your CSS is wrapped in the mode&rsquo;s selector as a native CSS nesting block, and <code>:root</code> becomes <code>&amp;</code>. <code>@keyframes</code> blocks are extracted and placed outside the wrapper. This prevents your Dark mode CSS from accidentally ruining your Light mode styling.</li>
+                            <li><b>Auto-Scope:</b> When enabled, your CSS is wrapped in the mode&rsquo;s selector as a native CSS nesting block, and <code>:root</code> and a bare <code>html</code> become <code>&amp;</code>. <code>@keyframes</code> blocks are extracted and placed outside the wrapper. This prevents your Dark mode CSS from accidentally ruining your Light mode styling.</li>
                             <li><b>Raw Mode:</b> Disable Auto-Scope if you prefer to write global rules or your own target selectors. In this mode, <code>:root</code> references become <code>:is(&lt;mode selector&gt;)</code>.</li>
                             <li><b>System Mode:</b> Dark and Light custom CSS is also emitted inside <code>@media (prefers-color-scheme)</code> blocks for people on System.</li>
-                            <li><b>Accent Colors:</b> Use <code>var(--tdp-accent)</code>, <code>var(--tdp-accent-2)</code> and <code>var(--tdp-accent-3)</code> for highlights instead of hex values. Every mode defines them, with the colors set under <b>Accent Colors</b> in the Design Studio or the ones generated from the palette, so one rule follows each mode and every later palette change.</li>
-                            <li><b>Show on Auth Pages:</b> Toggle whether your custom CSS applies on Login/Signup screens. Enabled by default. The <b>Enable Auth Page Theming</b> valve hides it and turns it off.</li>
+                            <li><b>Accent Colors:</b> Use <code>var(--tdp-accent)</code>, <code>var(--tdp-accent-2)</code> and <code>var(--tdp-accent-3)</code> for highlights instead of hex values. Every mode defines them, with the colors set under <b>Accent Colors</b> in the Core Palette tab or the ones generated from the palette, so one rule follows each mode and every later palette change.</li>
+                            <li><b>Show on Auth Pages:</b> Toggle whether your custom CSS applies on Login/Signup screens. Enabled by default. <b>Only on Auth Pages</b> beside it keeps the CSS off the rest of Open WebUI. The <b>Enable Auth Page Theming</b> valve hides both and turns them off.</li>
                             <li><b>Personal Themes:</b> Custom CSS in a personal theme affects only its owner.</li>
-                            <li><b>Import/Export:</b> Drag and drop native <code>.css</code> files directly into the UI, or export your snippets for easy sharing.</li>
-                            <li><b>Editor Features:</b> The code editor traps the <b>Tab</b> key to insert 2-space indents, includes a synced <b>line number gutter</b>, and auto-closes matching brackets and quotes as you type.</li>
+                            <li><b>Import/Export:</b> Drop <code>.css</code> files (up to 16 MB each) onto the designer to add them to the Preset Gallery as snippets, then load one to use it. Export your snippets to share them.</li>
+                            <li><b>Editor Features:</b> The code editor traps the <b>Tab</b> key to insert 2-space indents, includes a synced <b>line number gutter</b>, and auto-closes matching brackets and quotes as you type. The editor&rsquo;s <b>Save</b> button adds the CSS to the Preset Gallery, <b>Clear</b> empties it and <b>Copy</b> copies it.</li>
                         </ul>
                         <h4>Changing Fonts</h4>
-                        <p>You can change the global font family for your entire Open WebUI instance by pasting a CSS rule into the editor. Set the font on the document root and the form controls, then let it <b>inherit</b> down &mdash; form elements (<code>input</code>, <code>textarea</code>, <code>button</code>, <code>select</code>) are listed explicitly because they don't inherit <code>font-family</code> by default. Avoid painting the font onto the universal selector <code>*</code>: it clobbers icon fonts and code/math spans. Here are a few quick examples:</p>
+                        <p>You can change the global font family for your entire Open WebUI instance by pasting a CSS rule into the editor. Set the font on the document root and the form controls, then let it <b>inherit</b> down. Form elements (<code>input</code>, <code>textarea</code>, <code>button</code>, <code>select</code>) are listed too: browsers don&rsquo;t pass the font to them, and while Open WebUI&rsquo;s base styles do, listing them keeps the rule working if that changes. Avoid painting the font onto the universal selector <code>*</code>: it clobbers icon fonts and code/math spans. Here are a few quick examples:</p>
                         <p style="font-size:0.7rem; font-weight:700; margin-top:10px; margin-bottom:4px; opacity:0.9;">Native OS (San Francisco / Segoe UI)</p>
                         <div style="position: relative;">
                         <pre class="doc-pre-sm" id="font-example-native"><code>html, body, input, textarea, button, select {
@@ -7071,14 +7073,14 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         </div>
 
                         <details class="doc-sub-accordion">
-                            <summary>Writing Robust Style Overrides <i data-icon="chevron"></i></summary>
+                            <summary>Writing Style Overrides That Last <i data-icon="chevron"></i></summary>
                             <div class="doc-sub-inner">
-                                <p>A one-liner like <code>* { border-radius: 2.5px !important; font-family: monospace !important; }</code> <i>works</i>, but the universal selector plus <code>!important</code> is a blunt hammer. It's fine for a throwaway experiment and the wrong foundation for a reusable preset. Four rules of thumb keep overrides robust:</p>
+                                <p>A one-liner like <code>* { border-radius: 2.5px !important; font-family: monospace !important; }</code> <i>works</i>, but the universal selector plus <code>!important</code> is a blunt hammer. It's fine for a throwaway experiment and the wrong foundation for a reusable preset. Four rules of thumb keep overrides working across Open WebUI updates and other themes:</p>
                                 <ul>
-                                    <li><b>Scope to <code>.app</code>, not <code>*</code>.</b> Open WebUI's whole visible UI lives inside <code>.app</code> (the designer page uses <code>#theme-designer-container</code>). Dropdowns, submenus, modals, and tooltips are <b>portaled onto <code>document.body</code>, outside <code>.app</code></b>. Scoping to <code>.app</code> gives you specificity <code>(0,1,0)</code> for free &mdash; enough to beat a bare Tailwind utility &mdash; while leaving those portaled menus with their native, readable styling.</li>
-                                    <li><b>Let fonts inherit; don't paint them on <code>*</code>.</b> Set <code>font-family</code> on <code>html, body</code> (plus the form controls, which don't inherit it) and it cascades everywhere. Putting it on <code>*</code> also overrides icon fonts and code/math spans.</li>
-                                    <li><b>Target the utility, not every node.</b> To round corners, hit the elements that already carry a radius utility and skip the fully-round ones &mdash; otherwise you flatten circular avatars, pill toggles, and status dots into rounded squares.</li>
-                                    <li><b>Reserve <code>!important</code> for when a utility genuinely out-specifies you.</b> Your Style Overrides snippet is injected <b>last</b> in the cascade (after the palette, structural, and gradient layers), so against the designer's own CSS you rarely need it at all.</li>
+                                    <li><b>Scope to <code>.app</code>, not <code>*</code>.</b> Open WebUI's signed-in interface lives inside <code>.app</code> (the designer page uses <code>#theme-designer-container</code>). The sign-in page (<code>#auth-page</code>) and shared chats are outside it, and so are dropdowns, submenus, modals and tooltips, which are <b>portaled onto <code>document.body</code></b>. Your CSS already beats Tailwind&rsquo;s utility classes, because Open WebUI puts them in a cascade layer and your CSS isn&rsquo;t in one; scoping to <code>.app</code> adds specificity against Open WebUI&rsquo;s other rules and leaves those portaled menus with their native, readable styling.</li>
+                                    <li><b>Let fonts inherit; don't paint them on <code>*</code>.</b> Set <code>font-family</code> on <code>html, body</code> (plus the form controls) and it cascades everywhere. Putting it on <code>*</code> also overrides icon fonts and code/math spans.</li>
+                                    <li><b>Target the utility, not every node.</b> To round corners, hit the elements that already carry a radius utility and skip the fully round ones; otherwise you flatten circular avatars, pill toggles, and status dots into rounded squares.</li>
+                                    <li><b>Reserve <code>!important</code> for the properties that need it.</b> Your Style Overrides snippet comes after the palette, structural and gradient layers, but those layers mark their own declarations <code>!important</code>, so overriding a color, background or gradient they set needs <code>!important</code> too. For anything they don&rsquo;t set, such as corner radius or spacing, you rarely need it.</li>
                                 </ul>
                                 <p style="font-size:0.7rem; font-weight:700; margin-top:10px; margin-bottom:4px; opacity:0.9;">Blunt (breaks avatars &amp; toggles)</p>
                                 <div style="position: relative;">
@@ -7087,7 +7089,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
 }</code></pre>
                                     <button class="owui-code-btn" style="position: absolute; top: 6px; right: 6px; font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('so-radius-blunt').textContent).then(()=>showToast('Copied to clipboard'))">Copy</button>
                                 </div>
-                                <p style="font-size:0.7rem; font-weight:700; margin-bottom:4px; opacity:0.9;">Robust (corners tighten, circles survive)</p>
+                                <p style="font-size:0.7rem; font-weight:700; margin-bottom:4px; opacity:0.9;">Targeted (corners tighten, circles survive)</p>
                                 <div style="position: relative;">
                                 <pre class="doc-pre-sm" id="so-radius-robust"><code>.app :where([class*="rounded-"]:not([class*="rounded-full"])) {
   border-radius: 2.5px;
@@ -7098,7 +7100,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
 }</code></pre>
                                     <button class="owui-code-btn" style="position: absolute; top: 6px; right: 6px; font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('so-radius-robust').textContent).then(()=>showToast('Copied to clipboard'))">Copy</button>
                                 </div>
-                                <p style="margin-top: 12px; font-size: 0.7rem; color: var(--text-muted); line-height: 1.5;"><b>Note:</b> there is no <code>#app</code> element in Open WebUI &mdash; it's <code>.app</code> (a class). Selectors targeting <code>#app</code> silently do nothing. See <b>Section 18: Structural Transparency</b> for the full container/portal layout.</p>
+                                <p style="margin-top: 12px; font-size: 0.7rem; color: var(--text-muted); line-height: 1.5;"><b>Note:</b> there is no <code>#app</code> element in Open WebUI; it's <code>.app</code> (a class). Selectors targeting <code>#app</code> silently do nothing. See <b>Section 18: Structural Transparency</b> for the full container/portal layout.</p>
                             </div>
                         </details>
                     </div>
@@ -7109,10 +7111,10 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                     <div class="doc-inner">
                         <p>Inject interactive JavaScript animations directly into the background of Open WebUI. The designer automatically applies a <i>Structural Layer</i> that makes native UI components transparent so the animation shines through.</p>
                         <ul>
-                            <li><b>Background Worker Execution:</b> By default, scripts run in a true background Web Worker utilizing <code>OffscreenCanvas</code> (if supported by your browser) to ensure high-performance rendering without blocking the UI thread. Both <b>Canvas 2D</b> and <b>WebGL/WebGL2</b> contexts are supported &mdash; call <code>canvas.getContext('2d')</code> for standard drawing or <code>canvas.getContext('webgl2')</code> for GPU-accelerated shader rendering (see <i>WebGL Rendering</i> below). A script that uses the word <code>document</code> in its code, outside comments, is sent straight to the main thread. The status badge in the designer shows the <i>predicted</i> execution mode, from the browser&rsquo;s capabilities and that text check: <b style="color:#10b981">Background Worker</b> (OffscreenCanvas), <b style="color:#60a5fa">Main Thread (DOM Access)</b> (the script contains <code>document</code>), or <b style="color:#f59e0b">Main Thread (Fallback)</b> (the browser lacks <code>OffscreenCanvas</code>). If the Worker reports an uncaught error, the engine also moves the script to the main thread; the badge doesn&rsquo;t change in that case, because it shows the prediction, not the live path. Next to it, a <b>WebGL</b> badge appears when the script asks for a WebGL context, and a <b>Context</b> badge when it handles <code>context</code> messages.</li>
+                            <li><b>Background Worker Execution:</b> By default, scripts run in a true background Web Worker using <code>OffscreenCanvas</code> (if supported by your browser) to ensure high-performance rendering without blocking the UI thread. Both <b>Canvas 2D</b> and <b>WebGL/WebGL2</b> contexts are supported: call <code>canvas.getContext('2d')</code> for standard drawing or <code>canvas.getContext('webgl2')</code> for GPU-accelerated shader rendering (see <i>WebGL Rendering</i> below). A script that uses the word <code>document</code> in its code, outside comments, is sent straight to the main thread. The status badge in the designer shows the <i>predicted</i> execution mode, from the browser&rsquo;s capabilities and that text check: <b style="color:#10b981">Background Worker</b> (OffscreenCanvas), <b style="color:#60a5fa">Main Thread (DOM Access)</b> (the script contains <code>document</code>), or <b style="color:#f59e0b">Main Thread (Fallback)</b> (the browser lacks <code>OffscreenCanvas</code>). If the Worker reports an uncaught error, the engine also moves the script to the main thread; the badge doesn&rsquo;t change in that case, because it shows the prediction, not the live path. A script whose first characters are <code>/* tdp:isolated */</code> is the exception to all of this: it always runs in a sandboxed frame (see Section 1, Canvas FX Security), even when it says <code>document</code>, and a Worker error stops it instead of moving it. Next to the status badge, a <b>WebGL</b> badge appears when the script asks for a WebGL context, a <b>Context</b> badge when it handles <code>context</code> messages, and a <b>Follows Theme</b> badge when it handles <code>theme</code> messages.</li>
                             <li><b>Event Handling:</b> Thirteen message types are sent to your script via <code>self.onmessage</code>: <code>init</code>, <code>resize</code>, <code>mousemove</code>, <code>click</code>, <code>mousedown</code>, <code>mouseup</code>, <code>touchstart</code>, <code>touchmove</code>, <code>touchend</code>, <code>context</code>, <code>theme</code>, <code>motion</code> and <code>layout</code>. Touch events also generate synthetic mouse equivalents for cross-device compatibility.</li>
-                            <li><b>Show on Auth Pages:</b> Toggle whether canvas animations appear on Login/Signup screens. Enabled by default. When the <b>Enable Auth Page Theming</b> valve is off, this checkbox is hidden and off in every mode.</li>
-                            <li><b>Animation Settings:</b> Under the editor, the script&rsquo;s own settings appear as sliders, switches and color pickers, read from its <code>CONFIG</code> object or the constants at its top. A change rewrites that one value in the script, as if you had typed it, so the animation restarts with it. <b>Reset to the script&rsquo;s values</b> puts back the script as it was before your first change, and <b>Undo</b> works too. A range written in the setting&rsquo;s comment, such as <code>(0.5-3)</code>, sets the slider&rsquo;s range.</li>
+                            <li><b>Show on Auth Pages:</b> Toggle whether canvas animations appear on Login/Signup screens. Enabled by default. <b>Only on Auth Pages</b> beside it keeps the animation off the rest of Open WebUI. When the <b>Enable Auth Page Theming</b> valve is off, both are hidden and off in every mode, and a personal theme&rsquo;s designer hides them too.</li>
+                            <li><b>Animation Settings:</b> Under the editor, the script&rsquo;s own settings appear as sliders, switches and color pickers, read from its <code>CONFIG</code> (or <code>CFG</code>) object or the constants at its top. A constant counts when its name is in capitals, it sits on a line of its own above the first <code>function</code>, <code>class</code> or <code>onmessage</code> line, and its value is a number, <code>true</code>/<code>false</code>, or a quoted <code>'#rgb'</code> or <code>'#rrggbb'</code> color. A comment line such as <code>// &#9472;&#9472; Colors &#9472;&#9472;</code> becomes a heading over the settings below it. A change rewrites that one value in the script, as if you had typed it, so the animation restarts with it. <b>Reset to the script&rsquo;s values</b> puts back the script as it was before your first change, as long as you haven&rsquo;t changed the script another way since, and <b>Undo</b> works too. A range written in the setting&rsquo;s comment, such as <code>(0.5-3)</code>, sets the slider&rsquo;s range. While the <b>Calm Chat Column</b> valve is off, Open WebUI pages run every script with <code>CENTER_CALM</code> at 0, whatever its slider says.</li>
                             <li><b>Preset Gallery:</b> Save, rename, overwrite with the editor&rsquo;s script, delete, and export individual animations, and import native <code>.js</code> animation files by dragging them into the designer. The gallery has search, a sort, and a type filter (All, WebGL, Context, Follows Theme, DOM Access).</li>
                             <li><b>The Enable Canvas FX valve:</b> turning it off hides this tab, stops animations that are running, and serves every theme with its Canvas FX left out. The scripts stay saved, so turning the valve back on restores them.</li>
                             <li><b>Personal themes:</b> with <b>Allow Personal Themes</b> on, users can add Canvas FX to their own theme. It runs only in their own browser, and the <b>Enable Canvas FX</b> valve covers it too.</li>
@@ -7137,7 +7139,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                                 <tr style="border-bottom: 1px solid var(--border);">
                                     <td><code>init</code></td>
                                     <td><code>{ canvas, width, height, dpr, reducedMotion, column, env, theme }</code></td>
-                                    <td>Fired once on startup. <code>theme</code> is the active mode's palette, the same object a <code>theme</code> message carries (see <b>Theme-Aware Animations</b>). <code>canvas</code> is an <code>OffscreenCanvas</code> transferred via <code>postMessage</code>. Call <code>canvas.getContext('2d')</code> for 2D drawing, or <code>canvas.getContext('webgl2')</code> (with <code>'webgl'</code> fallback) for GPU-accelerated shader rendering. <code>width</code> and <code>height</code> are the initial viewport dimensions, in CSS pixels. <code>dpr</code> is the screen&rsquo;s device pixel ratio, which a worker can&rsquo;t read for itself: size the canvas at <code>width * dpr</code> for sharp lines, within a pixel budget, since the canvas element is stretched to the viewport either way. <code>reducedMotion</code> is true when the viewer has asked their system to reduce motion; slow the animation down, drop flashes and sudden movement, or hold it still. <code>column</code> is where the chat column sits, as <code>{ x, width, left, right }</code> in CSS pixels: its center and width, and the left and right edges of the chat area around it, which leave out the sidebar. <code>width</code> is never more than Open WebUI&rsquo;s usual 58rem, even when widescreen mode stretches the chat across the window, and in a window too narrow for margins it narrows further, until a band of <code>width / 2 + 56</code> fading out by 1.2 times that ends a strip short of each edge of the chat area, so the margins beside it stay lively. It is <code>null</code> on a page without a chat. With the sidebar open the column sits right of the screen&rsquo;s center, so keep your calm band on it, and put focal points in the margins between <code>left</code> and the column or the column and <code>right</code>, where the sidebar won&rsquo;t cover them. <code>env</code> provides runtime context: <code>{ authToken, baseUrl, locale, timezone }</code>. <b>authToken is the token of whichever user is viewing the page</b>, and is an empty string unless an admin has enabled the Canvas API Access valve &mdash; a script given it can call the Open WebUI API as that user.</td>
+                                    <td>Fired once on startup. <code>theme</code> is the active mode's palette, the same object a <code>theme</code> message carries (see <b>Theme-Aware Animations</b>). <code>canvas</code> is an <code>OffscreenCanvas</code> transferred via <code>postMessage</code>. Call <code>canvas.getContext('2d')</code> for 2D drawing, or <code>canvas.getContext('webgl2')</code> (with <code>'webgl'</code> fallback) for GPU-accelerated shader rendering. <code>width</code> and <code>height</code> are the initial viewport dimensions, in CSS pixels. <code>dpr</code> is the screen&rsquo;s device pixel ratio, which a worker can&rsquo;t read for itself: size the canvas at <code>width * dpr</code> for sharp lines, within a pixel budget, since the canvas element is stretched to the viewport either way. <code>reducedMotion</code> is true when the viewer has asked their system to reduce motion; slow the animation down, drop flashes and sudden movement, or hold it still. <code>column</code> is where the chat column sits, as <code>{ x, width, left, right }</code> in CSS pixels: its center and width, and the left and right edges of the chat area around it, which leave out the sidebar. <code>width</code> is never more than Open WebUI&rsquo;s usual 58rem, even when widescreen mode stretches the chat across the window, and in a window too narrow for margins it narrows further, down to 320 px at the least, until a band of <code>width / 2 + 56</code> fading out by 1.2 times that ends a strip short of each edge of the chat area (56 px or 8% of the chat area&rsquo;s width, whichever is larger), so the margins beside it stay lively. It is <code>null</code> on a page without a chat. With the sidebar open the column sits right of the screen&rsquo;s center, so keep your calm band on it, and put focal points in the margins between <code>left</code> and the column or the column and <code>right</code>, where the sidebar won&rsquo;t cover them. <code>env</code> provides runtime context: <code>{ authToken, baseUrl, locale, timezone }</code>. <b>authToken is the token of whichever user is viewing the page</b>, and is an empty string unless an admin has enabled the <b>Enable Canvas Api Access</b> valve, or always for an isolated script. A script given it can call the Open WebUI API as that user. <code>theme</code> can be <code>null</code> if the palette couldn&rsquo;t be built, so check it before reading its colors.</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid var(--border);">
                                     <td><code>resize</code></td>
@@ -7152,12 +7154,12 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                                 <tr style="border-bottom: 1px solid var(--border);">
                                     <td><code>click</code></td>
                                     <td><code>{ x, y }</code></td>
-                                    <td>Fired on mouse click. Use this for simple tap interactions (pop bubbles, plant seeds, trigger effects).</td>
+                                    <td>Fired on a click, after its <code>mousedown</code> and <code>mouseup</code>. To answer a click or tap, use <code>mousedown</code> alone, so one tap acts once.</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid var(--border);">
                                     <td><code>mousedown</code></td>
                                     <td><code>{ x, y }</code></td>
-                                    <td>Fired when a mouse button is pressed. Also fired synthetically on <code>touchstart</code> (first finger). Use with <code>mouseup</code> for drag interactions.</td>
+                                    <td>Fired when a mouse button is pressed. Also fired synthetically on <code>touchstart</code> (first finger), and the browser can send its own after a tap, so one tap can arrive as two. Use with <code>mouseup</code> for drag interactions.</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid var(--border);">
                                     <td><code>mouseup</code></td>
@@ -7181,8 +7183,8 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                                 </tr>
                                 <tr>
                                     <td><code>context</code></td>
-                                    <td><code>{ messages, chars, estimatedTokens }</code></td>
-                                    <td>Fired at most every 2 seconds while the chat changes, during a streaming reply too. <code>messages</code> counts the elements in the chat whose id starts with <code>message-</code> (an open edit or feedback box counts too), <code>chars</code> is the total character count of the user and assistant messages, and <code>estimatedTokens</code> is <code>chars / 4</code>, rounded up. Enables context-aware animations that grow or change as the conversation progresses. External scripts can also dispatch custom data via <code>window.dispatchEvent(new CustomEvent('owui-canvas-context', { detail: { ... } }))</code>.</td>
+                                    <td><code>{ messages, chars, estimatedTokens }</code> or <code>{ exactTokens, promptTokens, completionTokens, source }</code></td>
+                                    <td>The first shape is the engine&rsquo;s estimate from the page: sent right after <code>init</code> and when you switch chats, then at most every 2 seconds while the chat changes, during a streaming reply too, and only when a count changed. The second shape carries exact counts from the server after a reply (see <b>Context-Aware Animations</b>). <code>messages</code> counts the elements in the chat whose id starts with <code>message-</code> (an open edit or feedback box counts too), <code>chars</code> is the total character count of the user and assistant messages, and <code>estimatedTokens</code> is <code>chars / 4</code>, rounded up. Enables context-aware animations that grow or change as the conversation progresses. External scripts can also dispatch custom data via <code>window.dispatchEvent(new CustomEvent('owui-canvas-context', { detail: { ... } }))</code>.</td>
                                 </tr>
                                 <tr style="border-top: 1px solid var(--border);">
                                     <td><code>theme</code></td>
@@ -7203,20 +7205,21 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         </table>
 
                         <p class="doc-subheading">Messages Back to the Page</p>
-                        <p>The runtime doesn&rsquo;t listen to anything your script posts back with <code>self.postMessage()</code>. A <code>heartbeat</code> message, which many bundled presets still send, does nothing and is optional; a script needs no keepalive to keep running.</p>
+                        <p>The runtime doesn&rsquo;t listen to anything your script posts back with <code>self.postMessage()</code>. A script needs no heartbeat or keepalive to keep running, and the house validator fails a script that sends one.</p>
 
                         <p class="doc-subheading">Animation Loop</p>
-                        <p><code>requestAnimationFrame()</code> is available inside Web Workers that hold an <code>OffscreenCanvas</code>. Use it for your render loop. Avoid using <code>setInterval</code> for rendering &mdash; <code>requestAnimationFrame</code> syncs to the display refresh rate, and whenever the page stops getting frames, because its tab is hidden or its window is covered, the runtime holds its callbacks until frames come back. Firefox doesn&rsquo;t pause a worker&rsquo;s frames on its own, and a page that keeps drawing unseen can fill the GPU&rsquo;s memory. A <code>setInterval</code> loop keeps drawing all the same.</p>
+                        <p><code>requestAnimationFrame()</code> is available inside Web Workers that hold an <code>OffscreenCanvas</code>. Use it for your render loop. Avoid using <code>setInterval</code> for rendering: <code>requestAnimationFrame</code> syncs to the display refresh rate, and whenever the page stops getting frames, because its tab is hidden or its window is covered, the runtime holds its callbacks until frames come back. Firefox doesn&rsquo;t pause a worker&rsquo;s frames on its own, and a page that keeps drawing unseen can fill the GPU&rsquo;s memory. A <code>setInterval</code> loop keeps drawing all the same.</p>
 
                         <p class="doc-subheading">Lifecycle &amp; Cleanup</p>
-                        <p>The runtime terminates the worker and revokes its Blob URL when the script or its enabled state changes: switching to a mode with a different script, turning Canvas FX off, or opening a login page where <b>Show on Auth Pages</b> is off. Switching between modes that use the same script keeps the running worker. Your script doesn&rsquo;t need to clean up after itself; termination is immediate.</p>
+                        <p>The runtime terminates the worker and revokes its Blob URL when the script or its enabled state changes: switching to a mode with a different script, turning Canvas FX off, or opening a login page where <b>Show on Auth Pages</b> is off; entering Open WebUI while <b>Only on Auth Pages</b> is on; or removing the theme. Switching between modes that use the same script keeps the running worker. In a Worker, termination is immediate, so your script doesn&rsquo;t need to clean up after itself. On the main thread nothing is terminated: only the engine&rsquo;s own listeners and the script&rsquo;s bare timer and frame calls are cleared, so a script that adds its own listeners or elements there must remove them itself.</p>
 
                         <p class="doc-subheading">Main Thread Fallback</p>
                         <p>Your script runs on the main thread in three cases: (1) the browser doesn&rsquo;t support <code>OffscreenCanvas</code>, (2) the script uses the word <code>document</code> outside comments, or (3) the Worker reports an uncaught error. This is <b>not a sandbox</b>: the script runs inside a function on the page itself, with full access to <code>window</code>, <code>document</code>, cookies and <code>localStorage</code>. In this mode:</p>
                         <ul>
                             <li>The <code>canvas</code> in the <code>init</code> message is a standard <code>&lt;canvas&gt;</code> DOM element (not an <code>OffscreenCanvas</code>).</li>
                             <li>A synthetic <code>self</code> object is provided with <code>onmessage</code>, <code>addEventListener('message', fn)</code> and a no-op <code>postMessage</code>. A bare <code>onmessage = fn</code> assignment works too.</li>
-                            <li><code>requestAnimationFrame</code>, <code>setInterval</code> and <code>setTimeout</code> calls are tracked and cleared on teardown.</li>
+                            <li><code>requestAnimationFrame</code>, <code>setInterval</code> and <code>setTimeout</code> calls are tracked and cleared on teardown. Call them as bare functions: <code>self.requestAnimationFrame</code> doesn&rsquo;t exist on the main thread.</li>
+                            <li>Assign your handler as <code>self.onmessage = &hellip;</code> or <code>onmessage = &hellip;</code>. Declaring it with <code>let</code>, <code>var</code> or <code>function onmessage</code> collides with the engine&rsquo;s own and throws.</li>
                             <li>Your script code should work identically in both modes as long as you use the <code>self.onmessage</code> pattern and don&rsquo;t rely on Worker-specific APIs beyond what&rsquo;s listed here.</li>
                         </ul>
 
@@ -7253,11 +7256,12 @@ function size() {
   for (let i = 0; i &lt; COUNT; i++) { xs[i] = Math.random() * w; ys[i] = Math.random() * h; }
 }
 
-// 1 at the screen's edges, down to 1 - CENTER_CALM over the chat column
+// 1 - CENTER_CALM over the chat column, easing back to 1 by 1.25 times its
+// half-width, the same band as the reference script nebula_webgl.js
 function calm(x) {
   const cx = column ? column.x : w / 2, half = column ? column.width / 2 + 56 : 520;
-  const d = Math.min(1, Math.abs(x - cx) / half);
-  return 1 - CENTER_CALM * (1 - d * d);
+  const d = Math.min(1, Math.max(0, (Math.abs(x - cx) / half - 0.55) / 0.7));
+  return 1 - CENTER_CALM * (1 - d * d * (3 - 2 * d));
 }
 
 function frame(now) {
@@ -7319,7 +7323,7 @@ self.onmessage = (e) =&gt; {
                         <details class="doc-sub-accordion">
                             <summary>Context-Aware Animations <i data-icon="chevron"></i></summary>
                             <div class="doc-sub-inner">
-                        <p>The Canvas FX engine includes a built-in <b>context data channel</b> that lets your animation react to the live state of the chat conversation. This enables a powerful category of themes &mdash; visuals that <b>grow, fill, or evolve</b> as the user&rsquo;s context window fills up, providing an ambient visual indicator of how much context remains.</p>
+                        <p>The Canvas FX engine includes a built-in <b>context data channel</b> that lets your animation react to the live state of the chat conversation. This enables a powerful category of themes: visuals that <b>grow, fill, or evolve</b> as the user&rsquo;s context window fills up, providing an ambient visual indicator of how much context remains.</p>
 
                         <p class="doc-subheading">How It Works</p>
                         <p>The engine provides <b>two complementary data sources</b> for context tracking, both delivered as <code>context</code> messages to your script:</p>
@@ -7337,33 +7341,37 @@ self.onmessage = (e) =&gt; {
                         </ul>
 
                         <p style="margin: 12px 0 4px; font-weight: 600; font-size: 0.72rem; color: var(--text-main);">2. Socket Interceptor (exact, after each response)</p>
-                        <p>The engine intercepts WebSocket messages from Open WebUI&rsquo;s Socket.IO connection. When a <code>chat:completion</code> event includes <code>usage</code> data (requires the <b>Usage</b> capability enabled on the model), the exact token counts are forwarded:</p>
+                        <p>The engine intercepts WebSocket messages from Open WebUI&rsquo;s Socket.IO connection. When a Socket.IO event carries <code>usage</code> data, the exact token counts are forwarded. For streamed replies from OpenAI-compatible connections, Open WebUI asks for that data only when the model&rsquo;s <b>Usage</b> capability is on; Ollama replies report it either way. The engine doesn&rsquo;t check which chat the event belongs to.</p>
                         <div style="position: relative;">
                         <pre class="doc-pre" id="doc-socket-interceptor-payload"><code>{ type: 'context', exactTokens: 137, promptTokens: 48, completionTokens: 89, source: 'socket' }</code></pre>
                             <button class="owui-code-btn" style="position: absolute; top: 6px; right: 6px; font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('doc-socket-interceptor-payload').textContent).then(()=>showToast('Copied to clipboard'))">Copy</button>
                         </div>
                         <ul>
-                            <li><code>exactTokens</code> &mdash; <code>usage.total_tokens</code>, or the prompt + completion sum when <code>total_tokens</code> is absent</li>
-                            <li><code>promptTokens</code> / <code>completionTokens</code> &mdash; exact breakdown (supports OpenAI-style <code>prompt_tokens</code>/<code>completion_tokens</code> and Anthropic-style <code>input_tokens</code>/<code>output_tokens</code> field names)</li>
-                            <li><code>source</code> &mdash; always <code>'socket'</code> to distinguish from DOM estimates</li>
+                            <li><code>exactTokens</code>: <code>usage.total_tokens</code>, or the prompt + completion sum when <code>total_tokens</code> is absent</li>
+                            <li><code>promptTokens</code> / <code>completionTokens</code>: exact breakdown (supports OpenAI-style <code>prompt_tokens</code>/<code>completion_tokens</code> and Anthropic-style <code>input_tokens</code>/<code>output_tokens</code> field names)</li>
+                            <li><code>source</code>: always <code>'socket'</code> to distinguish from DOM estimates</li>
                         </ul>
-                        <p>Your script receives both. The DOM observer sends an estimate at most every 2 seconds, so the character count grows during a streaming reply, while the socket interceptor sends an <b>exact snapshot</b> after each response completes. Prefer <code>exactTokens</code> when available.</p>
+                        <p>Your script receives both. The DOM observer sends an estimate at most every 2 seconds, so the character count grows during a streaming reply, while the socket interceptor sends an <b>exact snapshot</b> after each response completes. Prefer <code>exactTokens</code> when available, and keep it in a variable: the next estimate arrives within 2 seconds and has no <code>exactTokens</code>, so reading both from the same message lets the estimate replace the exact count at once.</p>
 
                         <p>When the chat container leaves the page, for example on a new empty chat, the DOM observer sends <code>{ messages: 0, chars: 0, estimatedTokens: 0 }</code>. Switching between two chats that both have messages simply delivers the new chat&rsquo;s counts. Socket token counts aren&rsquo;t reset when you change chats.</p>
 
                         <p class="doc-subheading">Building a Growth Animation</p>
-                        <p>The core pattern is simple: compute a <b>growth ratio</b> (0&ndash;1) from the estimated tokens vs. your model&rsquo;s context limit, then map that ratio to visual stages in your animation. Here&rsquo;s the recommended approach:</p>
+                        <p>The core pattern is simple: compute a <b>growth ratio</b> (0 to 1) from the estimated tokens vs. your model&rsquo;s context limit, then map that ratio to visual stages in your animation. Here&rsquo;s the recommended approach:</p>
                         <div style="position: relative;">
                         <pre class="doc-pre" id="doc-growth-animation-code"><code>const MAX_TOKENS = 128000;   // adjust to your model's context limit
-const GROWTH_SPEED = 1;      // set to 10–50 for fast testing
-let contextRatio = 0;        // smoothed 0–1 value
+const GROWTH_SPEED = 1;      // set to 10-50 for fast testing
+let contextRatio = 0;        // smoothed 0-1 value
 let targetRatio = 0;         // raw target from context events
+let exactTokens = 0;         // the last exact count from the server
+let estimatedTokens = 0;     // the last estimate from the page
 
 // In your message handler:
 case 'context':
-  // Prefer exact API tokens when available
-  const tokens = e.data.exactTokens ?? e.data.estimatedTokens ?? 0;
-  targetRatio = Math.min(1, (tokens / MAX_TOKENS) * GROWTH_SPEED);
+  if (e.data.messages === 0) { exactTokens = 0; estimatedTokens = 0; }  // an empty chat
+  if (e.data.exactTokens != null) exactTokens = e.data.exactTokens;
+  if (e.data.estimatedTokens != null) estimatedTokens = e.data.estimatedTokens;
+  // Exact counts arrive after each reply; estimates fill in until the first one
+  targetRatio = Math.min(1, ((exactTokens || estimatedTokens) / MAX_TOKENS) * GROWTH_SPEED);
   break;
 
 // In your render loop (smooth interpolation):
@@ -7374,7 +7382,7 @@ if (contextRatio &lt; 0.1) { /* seed / empty state */ }
 else if (contextRatio &lt; 0.4) { /* early growth */ }
 else if (contextRatio &lt; 0.7) { /* mid growth */ }
 else if (contextRatio &lt; 0.9) { /* full growth */ }
-else { /* warning — context nearly full! */ }</code></pre>
+else { /* warning: context nearly full */ }</code></pre>
                             <button class="owui-code-btn" style="position: absolute; top: 6px; right: 6px; font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('doc-growth-animation-code').textContent).then(()=>showToast('Copied to clipboard'))">Copy</button>
                         </div>
 
@@ -7422,7 +7430,7 @@ else { /* warning — context nearly full! */ }</code></pre>
                             <li><b>Smooth interpolation is essential.</b> Context updates arrive in steps, at most every 2 seconds. Without easing (<code>ratio += (target - ratio) * 0.01</code>), the animation will jump abruptly between states.</li>
                             <li><b>Use <code>GROWTH_SPEED</code> for testing.</b> At <code>MAX_TOKENS = 128000</code>, you&rsquo;d need a very long conversation to see full growth. Set <code>GROWTH_SPEED = 50</code> during development so a few messages take you through the entire lifecycle.</li>
                             <li><b>Stagger growth across elements.</b> If your scene has multiple objects (mushroom clusters, wheat stalks), give each a random <code>growStart</code> offset so they don&rsquo;t all appear simultaneously. This creates a much more natural, organic feel.</li>
-                            <li><b>Add a warning state.</b> When <code>contextRatio &gt; 0.85</code>, add a visual cue (color shift, pulsing glow, drooping) so the user knows context is running low &mdash; this is the whole point of the feature.</li>
+                            <li><b>Add a warning state.</b> When <code>contextRatio &gt; 0.85</code>, add a visual cue (color shift, pulsing glow, drooping) so the user knows context is running low. That warning is the point of the feature.</li>
                             <li><b>Include a token counter.</b> A small, subtle overlay showing <code>~3.1k / 128k tokens</code> with a mini progress bar gives precise context alongside the ambient visual metaphor.</li>
                             <li><b>Handle chat switching.</b> A new empty chat sends <code>messages: 0</code>, and another chat with messages sends its own counts. Your animation should ease to the new value, or snap instantly, depending on the metaphor.</li>
                         </ul>
@@ -7436,7 +7444,7 @@ window.dispatchEvent(new CustomEvent('owui-canvas-context', {
     messages: 12,
     chars: 48000,
     estimatedTokens: 12000,
-    // You can include any extra fields — they're forwarded as-is
+    // You can include any extra fields; they're forwarded as-is
     exactTokens: 11847,
     maxContext: 128000
   }
@@ -7450,7 +7458,7 @@ window.dispatchEvent(new CustomEvent('owui-canvas-context', {
                         <details class="doc-sub-accordion">
                             <summary>Theme-Aware Animations <i data-icon="chevron"></i></summary>
                             <div class="doc-sub-inner">
-                        <p>The engine hands your script the active mode&rsquo;s palette, so an animation can draw in the theme&rsquo;s colors instead of its own. Change the hue in the Design Studio and a theme-aware animation recolors as you drag; switch from Dark to Light and it follows. It is opt-in: a script that never reads the palette keeps drawing exactly as it always has.</p>
+                        <p>The engine hands your script the active mode&rsquo;s palette, so an animation can draw in the theme&rsquo;s colors instead of its own. Change the hue in the Core Palette tab and a theme-aware animation recolors as you drag; switch from Dark to Light and it follows. It is opt-in: a script that never reads the palette keeps drawing exactly as it always has.</p>
 
                         <p class="doc-subheading">When It Arrives</p>
                         <ul>
@@ -7477,8 +7485,8 @@ window.dispatchEvent(new CustomEvent('owui-canvas-context', {
                         </div>
                         <ul>
                             <li><code>background</code>: the page color for this mode. <code>surface</code>: one step raised, like the input bar. <code>text</code> and <code>muted</code>: the main and secondary text colors.</li>
-                            <li><code>accent</code>: the palette&rsquo;s hue at a color made for the mode, lighter on dark modes and deeper on light ones, and as colorful as the theme itself. <code>accent2</code> and <code>accent3</code> sit 40&deg; to either side of it. A neutral theme gets gray accents.</li>
-                            <li>A theme can set any of the three for a mode under <b>Accent Colors</b> in the Design Studio, for a look made of colors the hue can&rsquo;t give, such as amber and teal. A set accent arrives in place of the generated one, so a script keeps <code>followTheme</code> on instead of hard-coding the theme&rsquo;s colors. The theme&rsquo;s CSS gets the same three as <code>var(--tdp-accent)</code>, <code>var(--tdp-accent-2)</code> and <code>var(--tdp-accent-3)</code>.</li>
+                            <li><code>accent</code>: the palette&rsquo;s hue at a color made for the mode, lighter on dark modes and deeper on light ones, at four times the palette&rsquo;s chroma, kept between 0.06 and 0.18. <code>accent2</code> and <code>accent3</code> sit 40&deg; to either side of it. A theme at Chroma 0, or a mode with its palette off, gets gray accents.</li>
+                            <li>A theme can set any of the three for a mode under <b>Accent Colors</b> in the Core Palette tab, for a look made of colors the hue can&rsquo;t give, such as amber and teal. A set accent arrives in place of the generated one, so a script keeps <code>followTheme</code> on instead of hard-coding the theme&rsquo;s colors. The theme&rsquo;s CSS gets the same three as <code>var(--tdp-accent)</code>, <code>var(--tdp-accent-2)</code> and <code>var(--tdp-accent-3)</code>.</li>
                             <li>The colors are read from the page, so per-step overrides and the OLED blacks are already in them.</li>
                         </ul>
 
@@ -7514,14 +7522,14 @@ case 'theme':
                             <li><b>Mind light modes.</b> When <code>dark</code> is false the animation sits behind dark text on a light page. Additive blending such as <code>'lighter'</code> disappears there, so draw with <code>'source-over'</code> and keep alphas modest.</li>
                             <li><b>WebGL:</b> pass <code>rgb</code> entries straight to <code>uniform3fv</code>.</li>
                         </ul>
-                        <p>The preset gallery tags these scripts <b>Follows your theme</b>, and the website&rsquo;s Studio shows <code>followTheme</code> as a switch with the rest of a script&rsquo;s settings.</p>
+                        <p>A script that handles <code>theme</code> messages gets a <b>Follows Theme</b> badge in the editor and matches the preset gallery&rsquo;s <b>Follows Theme</b> filter, and the website&rsquo;s Studio shows <code>followTheme</code> as a switch with the rest of a script&rsquo;s settings.</p>
                             </div>
                         </details>
 
                         <details class="doc-sub-accordion">
                             <summary>WebGL Rendering <i data-icon="chevron"></i></summary>
                             <div class="doc-sub-inner">
-                        <p>Canvas FX scripts are not limited to the 2D Canvas API. Since <code>OffscreenCanvas</code> supports <b>WebGL and WebGL2</b> contexts, your scripts can run <b>full GLSL fragment shaders on the GPU</b> &mdash; enabling effects that are impossible or impractical with 2D canvas: raymarching, domain-warped fractal noise, volumetric lighting, metallic reflections, and real-time fluid simulations.</p>
+                        <p>Canvas FX scripts are not limited to the 2D Canvas API. Since <code>OffscreenCanvas</code> supports <b>WebGL and WebGL2</b> contexts, your scripts can run <b>full GLSL fragment shaders on the GPU</b>, for effects that are impossible or impractical with 2D canvas: raymarching, domain-warped fractal noise, volumetric lighting, metallic reflections, and real-time fluid simulations.</p>
 
                         <p class="doc-subheading">Why WebGL?</p>
                         <table class="doc-table-compact">
@@ -7540,8 +7548,8 @@ case 'theme':
                                 </tr>
                                 <tr style="border-bottom: 1px solid var(--border);">
                                     <td><b>Per-pixel math</b></td>
-                                    <td><code>getImageData</code> &mdash; slow</td>
-                                    <td>Fragment shader &mdash; native</td>
+                                    <td><code>getImageData</code> (slow)</td>
+                                    <td>Fragment shader (native)</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid var(--border);">
                                     <td><b>Noise / fractals</b></td>
@@ -7558,84 +7566,138 @@ case 'theme':
 
                         <p class="doc-subheading">Minimal WebGL Template</p>
                         <div style="position: relative;">
-                        <pre class="doc-pre" id="doc-webgl-template-code"><code>var canvas, gl, program;
-var uTime, uRes, uMouse;
-var startTime, w, h;
-var mouseNX = 0.5, mouseNY = 0.5;
+                        <pre class="doc-pre" id="doc-webgl-template-code"><code>/**
+ * Title: My Shader
+ * Description: Soft drifting bands in the theme's accents that stay calm behind the chat.
+ */
 
-var VERT = 'attribute vec2 a;void main(){gl_Position=vec4(a,0,1);}';
+/* ────────── CONFIGURABLE VARIABLES ────────── */
+const INTENSITY = 0.6;     // how strongly it shows (0-1)
+const SPEED = 1;           // overall speed (0-3)
+const CENTER_CALM = 0.7;   // how much it fades behind the chat column (0-1)
+const FOLLOW_THEME = true; // take the colors from the theme's palette
+const RENDER_SCALE = 0.5;  // resolution of the soft bands (0.25-1)
+/* ──────────────────────────────────────────── */
 
-var FRAG = [
+let canvas, gl, prog, uTime, uRes, uCol, uAlpha, uC1, uC2;
+let w = 0, h = 0, t = 0, last = 0, reduced = false, column = null, lost = false;
+let c1 = [0.45, 0.6, 1], c2 = [0.7, 0.45, 0.95], dark = true;
+
+const VERT = 'attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}';
+const FRAG = [
+  '#ifdef GL_FRAGMENT_PRECISION_HIGH',
   'precision highp float;',
+  '#else',
+  'precision mediump float;',
+  '#endif',
   'uniform float u_time;',
   'uniform vec2 u_res;',
-  'uniform vec2 u_mouse;',
+  'uniform vec2 u_col;',   // the chat column's center x and calm half-width, in render pixels
+  'uniform float u_alpha;',
+  'uniform vec3 u_c1;',
+  'uniform vec3 u_c2;',
   'void main(){',
-  '  vec2 uv=gl_FragCoord.xy/u_res;',
-  '  vec3 col=0.5+0.5*cos(u_time+uv.xyx+vec3(0,2,4));',
-  '  gl_FragColor=vec4(col,1.);',
+  '  vec2 uv = gl_FragCoord.xy / u_res;',
+  '  float wave = 0.5 + 0.5 * sin(uv.y * 6.0 + u_time * 0.4 + sin(uv.x * 4.0 + u_time * 0.3));',
+  '  float band = abs(gl_FragCoord.x - u_col.x) / u_col.y;',
+  '  float calm = 1.0 - ' + CENTER_CALM.toFixed(3) + ' * (1.0 - smoothstep(0.55, 1.25, band));',
+  '  float a = u_alpha * calm * smoothstep(0.6, 1.0, wave);',   // only the crests, so the theme shows between them
+  '  gl_FragColor = vec4(mix(u_c1, u_c2, wave) * a, a);',   // premultiplied, so the theme shows through
   '}'
 ].join('\n');
 
-function compile(type, src) {
-  var s = gl.createShader(type);
-  gl.shaderSource(s, src);
-  gl.compileShader(s);
-  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS))
-    throw new Error(gl.getShaderInfoLog(s));
-  return s;
+function shader(type, src) {
+  const sh = gl.createShader(type);
+  gl.shaderSource(sh, src);
+  gl.compileShader(sh);
+  if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) { console.error(gl.getShaderInfoLog(sh)); return null; }
+  return sh;
 }
 
-function initGL() {
-  var vs = compile(gl.VERTEX_SHADER, VERT);
-  var fs = compile(gl.FRAGMENT_SHADER, FRAG);
-  program = gl.createProgram();
-  gl.attachShader(program, vs);
-  gl.attachShader(program, fs);
-  gl.linkProgram(program);
-  gl.useProgram(program);
-  // Fullscreen triangle (covers viewport with one triangle)
-  var buf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER,
-    new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
-  var a = gl.getAttribLocation(program, 'a');
+function setup() {
+  const vs = shader(gl.VERTEX_SHADER, VERT), fs = shader(gl.FRAGMENT_SHADER, FRAG);
+  if (!vs || !fs) return false;
+  prog = gl.createProgram();
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { console.error(gl.getProgramInfoLog(prog)); return false; }
+  gl.useProgram(prog);
+  // One triangle that covers the whole viewport
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  const a = gl.getAttribLocation(prog, 'a');
   gl.enableVertexAttribArray(a);
   gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
-  uTime = gl.getUniformLocation(program, 'u_time');
-  uRes = gl.getUniformLocation(program, 'u_res');
-  uMouse = gl.getUniformLocation(program, 'u_mouse');
-  startTime = performance.now() / 1000;
+  uTime = gl.getUniformLocation(prog, 'u_time');
+  uRes = gl.getUniformLocation(prog, 'u_res');
+  uCol = gl.getUniformLocation(prog, 'u_col');
+  uAlpha = gl.getUniformLocation(prog, 'u_alpha');
+  uC1 = gl.getUniformLocation(prog, 'u_c1');
+  uC2 = gl.getUniformLocation(prog, 'u_c2');
+  return true;
 }
 
-function render() {
-  gl.viewport(0, 0, w, h);
-  gl.uniform1f(uTime, performance.now()/1000 - startTime);
-  gl.uniform2f(uRes, w, h);
-  gl.uniform2f(uMouse, mouseNX, mouseNY);
+function size() {
+  canvas.width = Math.max(1, Math.round(w * RENDER_SCALE));
+  canvas.height = Math.max(1, Math.round(h * RENDER_SCALE));
+}
+
+function applyTheme(d) {
+  if (!d) return;
+  dark = d.dark !== false;
+  if (FOLLOW_THEME &amp;&amp; d.rgb) { c1 = d.rgb.accent; c2 = d.rgb.accent2; }
+}
+
+function frame(now) {
+  requestAnimationFrame(frame);
+  const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
+  last = now;
+  if (lost || !prog) return;
+  // Wrapped at a whole number of the waves' cycles, so the wrap is seamless
+  t = (t + dt * SPEED * (reduced ? 0.2 : 1)) % 628.3185;
+  const cx = column ? column.x : w / 2, half = column ? column.width / 2 + 56 : 520;
+  gl.viewport(0, 0, canvas.width, canvas.height);
+  gl.uniform1f(uTime, t);
+  gl.uniform2f(uRes, canvas.width, canvas.height);
+  gl.uniform2f(uCol, cx * RENDER_SCALE, half * RENDER_SCALE);
+  gl.uniform1f(uAlpha, INTENSITY * (dark ? 0.5 : 0.3));
+  gl.uniform3fv(uC1, c1);
+  gl.uniform3fv(uC2, c2);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
-  requestAnimationFrame(render);
 }
 
-self.onmessage = function(e) {
-  switch (e.data.type) {
-    case 'init':
-      canvas = e.data.canvas;
-      w = e.data.width; h = e.data.height;
-      canvas.width = w; canvas.height = h;
-      gl = canvas.getContext('webgl2')
-        || canvas.getContext('webgl');
-      if (!gl) return; // WebGL unavailable
-      initGL();
-      render();
+self.onmessage = (e) =&gt; {
+  const d = e.data;
+  switch (d.type) {
+    case 'init': {
+      canvas = d.canvas;
+      w = d.width; h = d.height;
+      reduced = !!d.reducedMotion;
+      column = d.column || null;
+      applyTheme(d.theme);
+      const opts = { premultipliedAlpha: true, antialias: false, depth: false, powerPreference: 'low-power' };
+      gl = canvas.getContext('webgl2', opts) || canvas.getContext('webgl', opts);
+      if (!gl) { console.warn('My Shader: WebGL is unavailable'); return; }
+      canvas.addEventListener('webglcontextlost', (ev) =&gt; { ev.preventDefault(); lost = true; });
+      canvas.addEventListener('webglcontextrestored', () =&gt; { lost = !setup(); });
+      size();
+      setup();
+      requestAnimationFrame(frame);
       break;
+    }
     case 'resize':
-      w = e.data.width; h = e.data.height;
-      canvas.width = w; canvas.height = h;
+      w = d.width; h = d.height;
+      if (canvas) size();
       break;
-    case 'mousemove':
-      mouseNX = e.data.x / w;
-      mouseNY = 1.0 - (e.data.y / h); // flip Y for GL
+    case 'theme':
+      applyTheme(d);
+      break;
+    case 'motion':
+      reduced = d.reducedMotion;
+      break;
+    case 'layout':
+      column = d.column || null;
       break;
   }
 };</code></pre>
@@ -7646,16 +7708,16 @@ self.onmessage = function(e) {
                         <ul>
                             <li><b>Context:</b> Call <code>canvas.getContext('webgl2')</code> with a <code>'webgl'</code> fallback instead of <code>'2d'</code>.</li>
                             <li><b>Drawing:</b> All rendering happens in GLSL fragment shaders compiled and linked into a WebGL program. Build shader source as an array of strings joined with <code>'\n'</code>.</li>
-                            <li><b>Geometry:</b> Use the <b>fullscreen triangle trick</b> &mdash; a single triangle with vertices <code>[-1,-1, 3,-1, -1,3]</code> covers the entire viewport without quad seam artifacts.</li>
-                            <li><b>Uniforms:</b> Pass <code>u_time</code> (float), <code>u_res</code> (vec2), and <code>u_mouse</code> (vec2, normalized 0&ndash;1) to the shader. Flip mouse Y for GL coordinates: <code>1.0 - (e.data.y / h)</code>.</li>
-                            <li><b>No DOM:</b> WebGL runs natively in Workers &mdash; no DOM access needed. The same script works in both Worker and fallback modes.</li>
+                            <li><b>Geometry:</b> Use the <b>fullscreen triangle trick</b>: a single triangle with vertices <code>[-1,-1, 3,-1, -1,3]</code> covers the entire viewport without quad seam artifacts.</li>
+                            <li><b>Uniforms:</b> Pass <code>u_time</code> (float), <code>u_res</code> (vec2), and <code>u_mouse</code> (vec2, normalized 0 to 1) to the shader. Flip mouse Y for GL coordinates: <code>1.0 - (e.data.y / h)</code>.</li>
+                            <li><b>No DOM:</b> WebGL runs natively in Workers, with no DOM access needed. The same script works in both Worker and fallback modes.</li>
                             <li><b>Porting from ShaderToy:</b> map <code>iTime</code>&rarr;<code>u_time</code> and <code>iResolution.xy</code>&rarr;<code>u_res</code>, call ShaderToy&rsquo;s <code>mainImage(fragColor, gl_FragCoord.xy)</code> from your own <code>main()</code>, and write the result to <code>gl_FragColor</code>. ShaderToy&rsquo;s <code>iMouse</code> is a pixel-based <code>vec4</code>, while <code>u_mouse</code> here is a normalized <code>vec2</code>, so convert where the shader uses it.</li>
                             <li><b>Other contexts:</b> the engine hands your script the canvas as is, so in a browser that supports WebGPU on <code>OffscreenCanvas</code>, <code>canvas.getContext('webgpu')</code> works too. The <b>WebGL</b> badge doesn&rsquo;t detect WebGPU scripts.</li>
                         </ul>
 
                         <p class="doc-subheading">Shader Techniques Reference</p>
                         <ul>
-                            <li><b>FBM (Fractal Brownian Motion):</b> Layer 5&ndash;6 octaves of noise for organic detail. Use domain warping (feeding one noise result into another) for deep organic flow.</li>
+                            <li><b>FBM (Fractal Brownian Motion):</b> Layer 5 or 6 octaves of noise for organic detail. Use domain warping (feeding one noise result into another) for deep organic flow.</li>
                             <li><b>Iq Color Palette:</b> <code>a + b * cos(6.28 * (c*t + d))</code> generates smooth, curated color gradients from four vec3 parameters.</li>
                             <li><b>Surface Normals:</b> Estimate normals from a heightfield by sampling 3 nearby points, enabling specular highlights, rim lighting, and fake environment reflections.</li>
                             <li><b>Voronoi:</b> Find nearest/second-nearest seed points for crystalline cell patterns. Multiply two offset Voronoi grids to create underwater caustic patterns.</li>
@@ -7670,13 +7732,13 @@ self.onmessage = function(e) {
                 <details class="doc-accordion">
                     <summary>13. Advanced Tools & Image Extraction <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
-                        <p>The footer contains powerful utilities to speed up your workflow.</p>
+                        <p>These utilities sit across the designer: <b>Randomize</b> and <b>Extract</b> under the palette sliders, <b>{ } JSON</b> in the header, Undo, Redo and the resets in the footer, and <b>Factory Reset</b> in the Danger Zone.</p>
                         <ul>
-                            <li><b>Extract from Image:</b> Click the <b>Extract</b> button to upload an image, or <b>paste an image directly from your clipboard (Ctrl+V)</b>. The designer finds the image&rsquo;s <b>dominant color</b>, ignoring near-black, near-white and grey pixels, and applies its hue and chroma to the current mode. It also resets lightness to 20% (0% in OLED) and clears unlocked overrides; locked variables stay as they are. An image that&rsquo;s almost all grey shows an error instead.</li>
+                            <li><b>Extract from Image:</b> Click the <b>Extract</b> button to upload an image, or <b>paste an image directly from your clipboard (Ctrl+V)</b>. The designer finds the image&rsquo;s <b>dominant color</b>, ignoring near-black, near-white and grey pixels, and applies its hue and chroma to the current mode. It also resets lightness to 20% (0% in OLED) and clears unlocked overrides; locked variables stay as they are. An image with no colored pixels at all shows an error instead.</li>
                             <li><b>Randomize:</b> Generates a cohesive random palette. Locked variables will remain unaffected.</li>
-                            <li><b>Undo / Redo:</b> Full history support via the <b>Undo</b> and <b>Redo</b> buttons in the footer, or <b>Ctrl+Z</b> / <b>Ctrl+Y</b> (<b>Cmd</b> on macOS). The shortcuts don&rsquo;t fire while you&rsquo;re typing in a field. The history keeps the last 50 steps of palette changes, overrides, locks, CSS, Canvas, Manual Variable Overrides, and Gradient Background.</li>
-                            <li><b>Reset Mode:</b> Clears only the current active mode — OKLCH sliders, variable overrides, locks, Custom CSS, Canvas FX, Manual Variable Overrides, and Gradient Background are all wiped. A confirmation dialog gives you the option to create a backup snapshot first.</li>
-                            <li><b>Global Reset:</b> Resets all 4 modes to factory defaults &mdash; OKLCH sliders, variable overrides, locks, Custom CSS, Canvas FX, Manual Variable Overrides, and Gradient Background. Saved snapshots and preset libraries are kept. A confirmation dialog gives you the option to create a backup snapshot first.</li>
+                            <li><b>Undo / Redo:</b> Full history support via the <b>Undo</b> and <b>Redo</b> buttons in the footer, or <b>Ctrl+Z</b> / <b>Ctrl+Y</b> (<b>Cmd</b> on macOS). The shortcuts don&rsquo;t fire while you&rsquo;re typing in a field. The history keeps the last 50 steps of everything in the four modes: palette, accent colors, overrides, locks, CSS, Canvas FX, Manual Variable Overrides, Gradient Background and Surfaces.</li>
+                            <li><b>Reset Mode:</b> Puts the current mode back to its defaults: OKLCH sliders, accent colors, variable overrides, locks, Custom CSS, Canvas FX, Manual Variable Overrides, Gradient Background, Surfaces and the auth page checkboxes. It also resets the Backgrounds tab, which every mode shares, and deletes its uploaded pictures. A confirmation dialog gives you the option to create a backup snapshot first.</li>
+                            <li><b>Global Reset:</b> Resets all 4 modes to factory defaults: OKLCH sliders, accent colors, variable overrides, locks, Custom CSS, Canvas FX, Manual Variable Overrides, Gradient Background and Surfaces, plus the Backgrounds tab and its uploaded pictures. Saved snapshots and preset libraries are kept. A confirmation dialog gives you the option to create a backup snapshot first.</li>
                             <li><b>Factory Reset:</b> Permanently removes <b>all</b> data: active theme state, saved snapshot library, CSS presets, Canvas presets, Gradient presets, and saved metadata. Its confirmation downloads a backup first unless you untick <b>Export a backup before wiping</b>. The built-in Tactical Liquid Grid Canvas FX preset comes back on the next load. In a personal <b>Themes</b> tab, it removes your personal theme and your library.</li>
                             <li><b>JSON View:</b> Click the <b>{ } JSON</b> button in the header to view the current theme as formatted JSON in a modal. Includes a <b>Collapse/Expand</b> toggle for minified output and a <b>Copy to Clipboard</b> button. If a snapshot is active, the output includes its metadata (name, version, author, description, etc.).</li>
                             <li><b>Clipboard Import (JSON):</b> Pressing <b>Ctrl+V</b> with theme JSON on your clipboard, while you aren&rsquo;t typing in a field, opens an import dialog. The tool auto-detects the theme structure, checks for duplicates, and warns about embedded Canvas FX scripts for security review before importing. <b>Import Without Applying</b> adds the theme to your gallery without switching to it. Canvas FX and CSS preset backups can be pasted the same way.</li>
@@ -7688,24 +7750,25 @@ self.onmessage = function(e) {
                 <details class="doc-accordion">
                     <summary>14. Libraries & Data Management <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
-                        <p>Theme Designer Pro features isolated libraries for Themes, Custom CSS, Canvas Scripts, and Gradient Presets. Themes save complete snapshots of all 4 modes, including locks, CSS, Canvas scripts, Manual Variable Overrides, and Gradient Background configuration.</p>
+                        <p>Theme Designer Pro features isolated libraries for Themes, Custom CSS, Canvas Scripts, and Gradient Presets. Themes save complete snapshots of all 4 modes, including accent colors, locks, CSS, Canvas scripts, Manual Variable Overrides, Gradient Background, Surfaces and the auth page settings.</p>
                         <h4>Theme Gallery</h4>
                         <ul>
-                            <li><b>Snapshot Coverage:</b> When saving a theme snapshot, all associated data is captured: OKLCH sliders, variable locks &amp; overrides, Manual Variable Overrides, Custom CSS, Canvas FX scripts, and Gradient Background configuration across all 4 modes. The Manual Variable Overrides switch is saved with the text, and a theme saved before 1.11.0, which has no switch, loads its overrides switched on when it has any. Loading a snapshot locks every variable it overrides.</li>
-                            <li><b>Theme Metadata:</b> When saving a snapshot, you can attach rich metadata &mdash; <b>Name</b>, <b>Description</b>, <b>Author</b>, <b>Theme Version</b>, <b>Target WebUI Version</b>, <b>Repository URL</b>, and a <b>Theme Update URL</b>. Metadata is embedded in exported <code>.json</code> files and preserved through imports, enabling a robust community theme sharing ecosystem.</li>
+                            <li><b>Snapshot Coverage:</b> When saving a theme snapshot, all associated data is captured: OKLCH sliders, variable locks &amp; overrides, Manual Variable Overrides, Custom CSS, Canvas FX scripts, Gradient Background, Surfaces, accent colors and the auth page settings, across all 4 modes. The Backgrounds tab belongs to the live theme and isn&rsquo;t saved in a snapshot. The Manual Variable Overrides switch is saved with the text, and a theme saved before 1.11.0, which has no switch, loads its overrides switched on when it has any. Loading a snapshot locks every variable it overrides.</li>
+                            <li><b>Theme Metadata:</b> When saving a snapshot, you can attach metadata: <b>Name</b>, <b>Description</b>, <b>Author</b>, <b>Theme Version</b>, <b>Target WebUI Version</b>, <b>Repository URL</b>, and a <b>Theme Update URL</b>. Metadata is embedded in exported <code>.json</code> files and preserved through imports, so a shared theme keeps its name, author and update address.</li>
                             <li><b>Visual Indicators:</b> Hovering over a theme card displays a rich tooltip showing the name, version, author, description, and color-coded feature tags: <span style="color:#6ee7b7;">Custom CSS</span>, <span style="color:#fdba74;">Canvas FX</span>, <span style="color:#f9a8d4;">Gradient</span>, <span style="color:#c4b5fd;">Overrides</span>, and <span style="color:#67e8f9;">Linked</span> (URL-linked themes).</li>
                             <li><b>Search:</b> Click the 🔍 icon to search themes by name, author, or description. Press Escape to close the search bar.</li>
-                            <li><b>Tag Filter:</b> Click the filter icon to narrow the gallery by feature &mdash; show only themes that contain Custom CSS, Canvas FX, Gradient, Overrides, or those that are Linked to an update URL.</li>
+                            <li><b>Tag Filter:</b> Click the filter icon to narrow the gallery by feature: show only themes that contain Custom CSS, Canvas FX, Gradient, Overrides, or those that are Linked to an update URL.</li>
                             <li><b>Sort:</b> Click the sort icon to cycle through <b>Default</b> (newest first), <b>A&rarr;Z</b>, or <b>Z&rarr;A</b> alphabetical sorting.</li>
                             <li><b>Card Actions:</b> Hovering a theme card shows ✎ edit details, 💾 overwrite with your current settings, × delete, ↓ export, and ⟳ check for an update when the theme has an Update URL and update checks are on.</li>
+                            <li><b>Applying a Theme:</b> Clicking a theme card opens <b>Apply Library Theme</b>, where you pick the modes to change (all ticked at first) and the parts to apply: OKLCH Palette, Variable Overrides, Custom CSS Snippet, Canvas FX Script, Gradient Background, Surfaces and Auth Page Visibility. A mode the theme doesn&rsquo;t have is filled from another: OLED from Dark at lightness 0, Her from Light, and any other from Dark, or Light when there&rsquo;s no Dark. With the <b>Auto Sync</b> valve on, the dialog is skipped and the footer&rsquo;s <b>Sync All</b> switch decides between all four modes and the current one.</li>
                             <li><b>Manual Editor:</b> The save and edit dialogs have a <b>{ } Manual Editor</b> that edits the theme as JSON, with live validation.</li>
                             <li><b>Import from URL:</b> Click the Import button to open a modal where you can paste a direct URL to a theme JSON file (e.g., a GitHub raw link). The tool fetches it, adds it to your library, and applies it right away, which outside Draft mode means live for every user. If the theme runs a Canvas FX script, it asks first, and the theme stays in your gallery if you say no. You can also import local <code>.json</code> files from the same modal, or drop them onto the designer, with the same check.</li>
                             <li><b>Duplicate Detection:</b> When importing themes from a file, a URL or the clipboard, the tool checks for duplicates and skips identical themes already in your gallery.</li>
                         </ul>
                         <h4>Preset Galleries</h4>
                         <ul>
-                            <li><b>Universal Importing:</b> You can click any Import icon, or simply <b>drag and drop</b> <code>.json</code>, <code>.css</code>, or <code>.js</code> files anywhere onto the application. The designer automatically routes the files to their correct galleries.</li>
-                            <li><b>Search, Sort &amp; Filter:</b> The Canvas FX gallery filters by type (All, WebGL, Context, DOM Access) and the Gradient gallery by type (Linear, Radial, Mesh), with the same search and sort as the Theme Gallery.</li>
+                            <li><b>Universal Importing:</b> You can click any Import icon, or simply <b>drag and drop</b> <code>.json</code>, <code>.css</code>, or <code>.js</code> files anywhere onto the application. The designer routes each file to its gallery: a <code>.js</code> file to Canvas FX, a <code>.css</code> file to the CSS snippets, a <code>.json</code> gradient preset to the Gradient gallery, and a <code>.json</code> theme, bundle or backup to where its contents belong.</li>
+                            <li><b>Search, Sort &amp; Filter:</b> The Canvas FX gallery filters by type (All, WebGL, Context, Follows Theme, DOM Access) and the Gradient gallery by type (Linear, Radial, Mesh), with the same search and sort as the Theme Gallery.</li>
                             <li><b>Export & Wipe:</b> Each gallery has a download icon to export that collection as a single JSON backup file, and a trash icon to permanently wipe that gallery's contents.</li>
                             <li><b>Server-Side Sync:</b> All preset libraries (themes, CSS snippets, canvas scripts, gradient presets) are synced to the server half a second after you add, rename, delete, or import presets, as one file. This means your presets survive browser data clears, work across devices, and are included in server backups. The server copy replaces the browser&rsquo;s copy on every load. While the function is turned off, syncs wait and go through once it&rsquo;s back on. The server refuses a library larger than 20 MB.</li>
                             <li><b>Personal Libraries:</b> In a personal <b>Themes</b> tab, the galleries are the user&rsquo;s own, saved in <code>DATA_DIR/theme/users/&lt;user id&gt;/</code> and read from <code>{ROUTE_BASE}/me/library.json</code>. <b>Use instance theme</b> keeps them; deleting the account removes them.</li>
@@ -7790,23 +7853,24 @@ self.onmessage = function(e) {
                 <details class="doc-accordion">
                     <summary>17. Gradient Backgrounds <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
-                        <p>The <b>Gradient</b> tab provides a dedicated visual gradient builder for applying CSS gradient backgrounds to your Open WebUI instance. The builder automatically generates all required CSS — including structural transparency rules, sidebar backdrop blur, and chat overlay blending — so you don't need to write any CSS manually.</p>
+                        <p>The <b>Gradient</b> tab provides a dedicated visual gradient builder for applying CSS gradient backgrounds to your Open WebUI instance. The builder generates all the CSS it needs: the structural transparency rules, the sidebar&rsquo;s backdrop blur, the chat overlay blending, and the colors of Open WebUI&rsquo;s sidebar and top fades, so you don&rsquo;t need to write any CSS yourself. Beside <b>Enabled</b> and <b>Animate</b>, the <b>Show on Auth Pages</b> and <b>Only on Auth Pages</b> checkboxes decide whether the gradient also shows on, or only on, the sign-in page.</p>
 
                         <details class="doc-sub-accordion">
                             <summary>Gradient Builder Controls <i data-icon="chevron"></i></summary>
                             <div class="doc-sub-inner">
                         <ul>
                             <li><b>Gradient Type:</b> Choose between <b>Linear</b> (directional), <b>Radial</b> (center-outward), and <b>Mesh</b> (multi-point radial overlay) gradient modes.</li>
-                            <li><b>Color Stops:</b> Add, remove, and reorder color stops with interactive swatches and position sliders. Each stop has a color picker and a position value (0–100%).</li>
-                            <li><b>Mesh Gradient:</b> An interactive visual editor lets you place, drag, and color up to 16 color points on a 2D pad. Each point has a configurable spread radius. The tool composites multiple overlapping radial-gradient layers against a customizable background color to simulate a mesh gradient effect. Click to add points, drag to reposition, and double-click to remove (a mesh keeps at least 2 points). With a point selected, the arrow keys move it, Delete or Backspace removes it, and Tab or Shift+Tab moves to the next point.</li>
+                            <li><b>Color Stops:</b> Add, remove, and reorder color stops with interactive swatches and position sliders. Each stop has a color picker and a position value (0 to 100%).</li>
+                            <li><b>Mesh Gradient:</b> An interactive visual editor lets you place, drag, and color up to 16 color points on a 2D pad. Each point has a configurable spread radius. The tool composites multiple overlapping radial-gradient layers against a customizable background color to simulate a mesh gradient effect. Click to add points, drag to reposition, and double-click to remove (a mesh keeps at least 2 points). With a point selected, the arrow keys move it, Delete or Backspace removes it, and Tab or Shift+Tab moves to the next or previous point; hold Shift with an arrow key to move 5 steps at a time.</li>
                             <li><b>Radial Options:</b> A center pad sets where a radial gradient starts (arrow keys nudge it, Shift for bigger steps, Home recenters it), with a shape (Ellipse or Circle) and four size options.</li>
-                            <li><b>Quick Actions:</b> <b>Reverse</b> flips the stop order, <b>Distribute</b> spaces the stops evenly, and <b>Transfer Colors</b> copies the current colors to the other gradient types. A linear or radial gradient takes up to 16 stops.</li>
-                            <li><b>Direction (Linear):</b> A slider controls the gradient angle (0°–360°). Double-click the label to reset to the default 135°.</li>
-                            <li><b>Color Intensity:</b> A slider scales the overall vibrancy of the gradient (0–100%). Double-click to reset to 85%.</li>
-                            <li><b>Animate Gradient:</b> Enable a looping CSS animation that slowly shifts the gradient position. An additional speed slider (2&ndash;30 seconds, 8 by default) controls the animation duration.</li>
+                            <li><b>Quick Actions:</b> <b>Reverse</b> flips the stop order, <b>Distribute</b> spaces the stops evenly, and <b>Transfer Colors</b> copies the current colors to the other gradient types. On a mesh, Reverse mirrors the points through the center and Distribute lays them out on an even grid. A linear or radial gradient takes up to 16 stops, and each stop has a duplicate button beside its remove button.</li>
+                            <li><b>Direction (Linear):</b> A slider controls the gradient angle (0° to 360°). Double-click the label to reset to the default 135°.</li>
+                            <li><b>Color Intensity:</b> A slider scales the overall vibrancy of the gradient (0 to 100%). Double-click to reset to 85%.</li>
+                            <li><b>Animate Gradient:</b> Enable a looping CSS animation that slowly shifts the gradient position. An additional speed slider (2 to 30 seconds, 8 by default) controls the animation duration.</li>
                             <li><b>Enabled Toggle:</b> Turn the gradient on/off without losing your stop configuration.</li>
                             <li><b>Show on Auth Pages:</b> Controls whether the gradient appears on Login/Signup screens. Enabled by default. The <b>Enable Auth Page Theming</b> valve hides it and turns it off.</li>
-                            <li><b>Reset / Random:</b> Clear all stops or generate a randomized gradient.</li>
+                            <li><b>Reset / Random:</b> <b>Reset</b> turns the gradient off and returns every gradient setting to its default. <b>Random</b> turns it on with a random type, direction and colors.</li>
+                                    <li><b>Saving Your Own:</b> The <b>+</b> button above the preset gallery saves the current gradient as a preset of your own.</li>
                         </ul>
 
                             </div>
@@ -7825,7 +7889,7 @@ self.onmessage = function(e) {
                         <details class="doc-sub-accordion">
                             <summary>Quick Presets <i data-icon="chevron"></i></summary>
                             <div class="doc-sub-inner">
-                        <p>The builder includes 12 ready-to-use gradient presets. Click any preset to instantly apply its color stops, type, and direction:</p>
+                        <p>The builder includes 12 ready-to-use gradient presets. Clicking a preset turns the gradient on and applies its colors, type and direction, sets the intensity to 85% and the animation speed to 8 seconds, and for a mesh preset, places its own points and base color:</p>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
                                 <thead>
@@ -7884,9 +7948,9 @@ self.onmessage = function(e) {
                         <p>When you enable a <b>Canvas FX animation</b> or a <b>Gradient Background</b>, the designer automatically generates a set of CSS rules called the <i>Structural Layer</i>. This layer makes the native Open WebUI UI panels transparent so the background effect shines through, while intelligently preserving opaque backgrounds on overlay UI elements (dropdown menus, modals, dialogs) for text readability.</p>
 
                         <details class="doc-sub-accordion">
-                            <summary>The 6 Rendering Layers (Back to Front) <i data-icon="chevron"></i></summary>
+                            <summary>The 7 Rendering Layers (Back to Front) <i data-icon="chevron"></i></summary>
                             <div class="doc-sub-inner">
-                        <p>When Canvas FX and/or Gradient Background are active, the final visual output is composed of 6 distinct layers stacked using CSS <code>z-index</code> and <code>position: fixed</code>:</p>
+                        <p>When Canvas FX and/or Gradient Background are active, the final visual output is composed of 7 distinct layers stacked using CSS <code>z-index</code> and <code>position: fixed</code>:</p>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
                                 <thead>
@@ -7897,12 +7961,13 @@ self.onmessage = function(e) {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td><b>1. Body Background</b></td><td>—</td><td>The <code>body</code> element's <code>background-color</code> (your OKLCH palette's base gray) and, if gradient is active, the <code>background-image</code> gradient.</td></tr>
+                                    <tr><td><b>1. Body Background</b></td><td>none</td><td>The <code>body</code> element's <code>background-color</code> (your OKLCH palette's base gray) and, if gradient is active, the <code>background-image</code> gradient.</td></tr>
                                     <tr><td><b>2. Background Color Div</b></td><td>-2</td><td>A full-viewport <code>&lt;div id="owui-theme-bg-color"&gt;</code> inserted behind everything. It&rsquo;s created only while Canvas FX runs, and the structural layer makes it transparent so the canvas shows through.</td></tr>
-                                    <tr><td><b>3. Canvas Element</b></td><td>0</td><td>A full-viewport <code>&lt;canvas id="owui-theme-canvas-bg"&gt;</code> where your Canvas FX animation renders. Has <code>pointer-events: none</code> so it never intercepts clicks.</td></tr>
-                                    <tr><td><b>4. Structural Transparency</b></td><td>&mdash;</td><td>CSS rules that set <code>background-color: transparent</code> on <code>.app</code>, <code>.app&nbsp;&gt;&nbsp;div</code>, <code>main</code>, <code>nav</code>, sticky bars, <code>.message-content</code>, and layout wrappers whose classes begin with <code>bg-gray-</code> or <code>dark:bg-gray-</code> (not hover or other variants). Interactive elements (<code>button</code>, <code>a</code>, <code>input</code>, <code>select</code>, <code>label</code>, <code>span</code>), your own message bubble, rounded controls such as the message input and pill buttons, everything inside the message input, and the login card are excluded, so they keep Open WebUI&rsquo;s own look. The rules use <code>!important</code> and are scoped to the mode&rsquo;s selector plus <code>.app</code>, so overriding one takes <code>!important</code> and at least that specificity. See <i>Overlay UI Protection</i> below for how portaled overlay UI stays opaque.</td></tr>
-                                    <tr><td><b>5. Glass Panels</b></td><td>&mdash;</td><td>A semi-opaque overlay with <code>backdrop-filter: blur()</code> on the <b>sidebar</b>, keeping navigation readable while letting the background show through. The Gradient Builder auto-calculates the RGBA value from the darkest gradient stop (or the mesh background color for Mesh gradients). The sidebar&rsquo;s glass behavior is controlled by the <b>Sidebar Transparency</b> valve: <code>opaque</code> (default) uses a solid background, except that with a gradient active the sidebar takes the darkest gradient color at 75% opacity with a 12px blur, <code>translucent</code> applies a tinted glass effect with <code>backdrop-filter: blur(20px) saturate(1.3)</code>, and <code>transparent</code> removes the background entirely (auto-upgraded to translucent on mobile for readability). Open WebUI&rsquo;s fades at the top and bottom of the sidebar follow the same valve: they stay while it&rsquo;s <code>opaque</code>, in the gradient&rsquo;s sidebar color while a gradient is active, and go away with <code>translucent</code> or <code>transparent</code>, where they would read as solid bands. Both sidebar and overlay transparency valves work independently of Canvas FX and gradient state.</td></tr>
-                                    <tr><td><b>6. Overlay Glass</b></td><td>&mdash;</td><td>Portaled UI elements (settings modal, dropdown menus, user menus, integration menus) that live outside <code>.app</code> on <code>&lt;body&gt;</code>. Controlled by the <b>Overlay Transparency</b> valve: <code>opaque</code> (default) keeps solid backgrounds for readability, <code>translucent</code> applies frosted glass with <code>backdrop-filter: blur(20px) saturate(1.3)</code>. Uses CSS <code>:not(.app *)</code> exclusions to avoid affecting elements inside the main app container.</td></tr>
+                                    <tr><td><b>3. Pictures</b></td><td>-1</td><td>The Backgrounds tab&rsquo;s <b>Other pages</b> picture, on a fixed layer behind the app, and Open WebUI&rsquo;s own background images with their dimming layer, which move under the canvas while <b>Draw the Canvas FX animation over these images</b> is on.</td></tr>
+                                    <tr><td><b>4. Canvas Element</b></td><td>0</td><td>A full-viewport <code>&lt;canvas id="owui-theme-canvas-bg"&gt;</code> where your Canvas FX animation renders. Has <code>pointer-events: none</code> so it never intercepts clicks.</td></tr>
+                                    <tr><td><b>5. Structural Transparency</b></td><td>none</td><td>CSS rules that set <code>background-color: transparent</code> on <code>.app</code>, <code>.app&nbsp;&gt;&nbsp;div</code>, <code>main</code>, <code>nav</code>, sticky bars, the designer&rsquo;s and the sign-in page&rsquo;s containers, wrappers painted with a gradient class (apart from the sidebar fades, the top fade and the chat background&rsquo;s dimming layer), and layout wrappers whose classes begin with <code>bg-gray-</code> or <code>dark:bg-gray-</code> (not hover or other variants). Interactive elements (<code>button</code>, <code>a</code>, <code>input</code>, <code>select</code>, <code>label</code>, <code>span</code>), your own message bubble, rounded controls such as the message input and pill buttons, everything inside the message input, and the login card are excluded, so they keep Open WebUI&rsquo;s own look. The rules use <code>!important</code> and are scoped to the mode&rsquo;s selector plus <code>.app</code>, so overriding one takes <code>!important</code> and at least that specificity. See <i>Overlay UI Protection</i> below for how portaled overlay UI stays opaque.</td></tr>
+                                    <tr><td><b>6. Glass Panels</b></td><td>none</td><td>A semi-opaque overlay with <code>backdrop-filter: blur()</code> on the <b>sidebar</b>, keeping navigation readable while letting the background show through. The Gradient Builder auto-calculates the RGBA value from the darkest gradient stop (or the mesh background color for Mesh gradients). The sidebar&rsquo;s glass behavior is controlled by the <b>Sidebar Transparency</b> valve: <code>opaque</code> (default) uses a solid background, except that with a gradient active the sidebar takes the darkest gradient color at 75% opacity with a 12px blur, <code>translucent</code> applies a tinted glass effect with <code>backdrop-filter: blur(20px) saturate(1.3)</code>, and <code>transparent</code> removes the background entirely (auto-upgraded to translucent on mobile for readability). Open WebUI&rsquo;s fades at the top and bottom of the sidebar follow the same valve: they stay while it&rsquo;s <code>opaque</code>, in the gradient&rsquo;s sidebar color while a gradient is active, and go away with <code>translucent</code> or <code>transparent</code>, where they would read as solid bands. Both sidebar and overlay transparency valves work independently of Canvas FX and gradient state. In a mode with its Surfaces switch on, the Surfaces rows set the sidebar and overlays instead of these valves.</td></tr>
+                                    <tr><td><b>7. Overlay Glass</b></td><td>none</td><td>Portaled UI elements (settings modal, dropdown menus, user menus, integration menus) that live outside <code>.app</code> on <code>&lt;body&gt;</code>. Controlled by the <b>Overlay Transparency</b> valve: <code>opaque</code> (default) keeps solid backgrounds for readability, <code>translucent</code> applies frosted glass with <code>backdrop-filter: blur(20px) saturate(1.3)</code>. Uses CSS <code>:not(.app *)</code> exclusions to avoid affecting elements inside the main app container. <code>translucent</code> also hides the fade at the top of chats.</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -7913,10 +7978,10 @@ self.onmessage = function(e) {
                         <details class="doc-sub-accordion">
                             <summary>Overlay UI Protection <i data-icon="chevron"></i></summary>
                             <div class="doc-sub-inner">
-                        <p>Dropdown menus, modal dialogs, and listbox selectors are <b>portaled</b> outside the <code>.app</code> wrapper &mdash; they are appended directly to <code>&lt;body&gt;</code>. To ensure these remain readable against canvas/gradient backgrounds, the structural layer uses a multi-pronged strategy:</p>
+                        <p>Dropdown menus, modal dialogs, and listbox selectors are <b>portaled</b> outside the <code>.app</code> wrapper: they are appended directly to <code>&lt;body&gt;</code>. To ensure these remain readable against canvas/gradient backgrounds, the structural layer uses a multi-pronged strategy:</p>
                         <ul>
                             <li><b>Low-specificity transparency:</b> The broad <code>bg-gray-</code> transparency rule is wrapped in CSS <code>:where()</code>, so it adds nothing to the specificity beyond the mode selector and <code>.app</code>. Its declarations are <code>!important</code>, though, so only an <code>!important</code> rule of equal or higher specificity overrides them.</li>
-                            <li><b>Element exclusions:</b> Interactive elements like <code>button</code>, <code>a</code>, <code>input</code>, <code>select</code>, <code>label</code>, and <code>span</code> are excluded from transparency entirely via <code>:not()</code> filters, and so is anything with a <code>rounded</code> class, the message input and everything inside it. This protects toggle knobs (<code>bg-white</code> circles), styled buttons, the message input&rsquo;s own tint and other small UI widgets: they hide almost none of the background, so clearing them only changed their look. Dropdown menus, modal dialogs, and listbox selectors &mdash; which are <b>portaled</b> outside the <code>.app</code> wrapper &mdash; are naturally unaffected because the transparency rules only target elements within <code>.app</code>, <code>#theme-designer-container</code>, and <code>#auth-page</code> scope.</li>
+                            <li><b>Element exclusions:</b> Interactive elements like <code>button</code>, <code>a</code>, <code>input</code>, <code>select</code>, <code>label</code>, and <code>span</code> are excluded from transparency entirely via <code>:not()</code> filters, and so is anything with a <code>rounded</code> class, the message input and everything inside it. This protects toggle knobs (<code>bg-white</code> circles), styled buttons, the message input&rsquo;s own tint and other small UI widgets: they hide almost none of the background, so clearing them only changed their look. Dropdown menus, modal dialogs, and listbox selectors, which are <b>portaled</b> outside the <code>.app</code> wrapper, are naturally unaffected because the transparency rules only target elements within <code>.app</code>, <code>#theme-designer-container</code>, and <code>#auth-page</code> scope.</li>
                             <li><b>Sidebar backdrop:</b> Nested <code>[class*="bg-gray-"]</code> elements inside <code>#sidebar</code> become transparent like the rest of the app, but stay readable because the sidebar itself keeps its own background: <code>--color-gray-950</code> in Dark and OLED, <code>--color-gray-50</code> in Light and Her, or the darkest gradient color at 75% opacity with a blur while a gradient is active. The <b>Sidebar Transparency</b> valve controls that backdrop: <code>opaque</code> (the default) keeps it as described, while <code>translucent</code> and <code>transparent</code> swap it for a frosted-glass or fully see-through backdrop so Canvas FX and gradient backgrounds show through.</li>
                             <li><b>Overlay translucency:</b> Portaled overlay elements (settings modal, dropdown menus, user menus) can optionally use a frosted glass effect via the <b>Overlay Transparency</b> valve. When set to <code>translucent</code>, the system appends CSS rules targeting <code>div[class*="bg-gray-"]</code> and <code>div[class*="bg-white"]</code> elements inside portals using <code>color-mix()</code> and <code>backdrop-filter</code>. Elements inside <code>.app</code> and <code>#theme-designer-container</code> are explicitly excluded via <code>:not(.app *)</code> to prevent regressions in the main UI. When the designer is open in the <b>Themes</b> tab of Settings, its own page turns clear too, so the glass shows behind it, as long as the designer&rsquo;s light or dark look matches Open WebUI&rsquo;s. Editing the other mode keeps the page solid so its text stays readable.</li>
                         </ul>
@@ -7933,7 +7998,7 @@ self.onmessage = function(e) {
                             <li><b>Canvas FX</b> is enabled and has a non-empty script, <b>or</b></li>
                             <li><b>Gradient Background</b> is enabled and has at least 2 color stops (or 2 mesh points for Mesh gradients).</li>
                         </ul>
-                        <p>If neither is active, the designer emits simple opaque <code>background-color</code> rules for <code>body</code> and <code>#sidebar</code> only — no transparency is applied, and textareas keep Open WebUI's native styling (recolored by the palette variables) so intentionally-transparent fields are left alone.</p>
+                        <p>If neither is active, the structural rules are just opaque <code>background-color</code> rules for <code>body</code> and <code>#sidebar</code>, and textareas keep Open WebUI's native styling (recolored by the palette variables) so intentionally transparent fields are left alone. The Surfaces tab and an <b>Other pages</b> picture can still make layers see-through without either.</p>
 
                             </div>
                         </details>
@@ -7944,8 +8009,8 @@ self.onmessage = function(e) {
                         <ul>
                             <li><b>Custom CSS setting opaque backgrounds:</b> If your Custom CSS Snippet sets <code>background-color</code> on <code>.app</code>, <code>main</code>, or other layout containers, it can override the structural transparency and block the background effect from showing through. To fix this, set those backgrounds to <code>transparent</code> in your Custom CSS.</li>
                             <li><b>Open WebUI updates:</b> If Open WebUI changes its class names or DOM structure (e.g., renaming <code>.app</code> to something else), the structural layer selectors may stop matching. This can cause panels to revert to opaque backgrounds, hiding the canvas or gradient behind them.</li>
-                            <li><b>Canvas FX + Gradient coexistence:</b> Both features share the same structural layer. When both are active simultaneously, the canvas animation renders on top of the gradient background. The gradient sits on <code>body</code> (layer 1), while the canvas renders at z-index 0 (layer 3). The canvas has a transparent background by default, so the gradient may partially show through depending on what your canvas script draws.</li>
-                            <li><b>Third-party extensions or custom elements:</b> Elements using <code>bg-gray-*</code> classes that are not <code>button</code>, <code>a</code>, <code>input</code>, <code>select</code>, <code>label</code>, or <code>span</code> will be made transparent. If a third-party extension injects custom UI with gray backgrounds, it may become transparent. Use the Style Overrides tab to restore specific elements if needed.</li>
+                            <li><b>Canvas FX + Gradient coexistence:</b> Both features share the same structural layer. When both are active simultaneously, the canvas animation renders on top of the gradient background. The gradient sits on <code>body</code> (layer 1), while the canvas renders at z-index 0 (layer 4). The canvas has a transparent background by default, so the gradient may partially show through depending on what your canvas script draws.</li>
+                            <li><b>Third-party extensions or custom elements:</b> Elements inside <code>.app</code> using <code>bg-gray-*</code> classes will be made transparent, unless they are a <code>button</code>, <code>a</code>, <code>input</code>, <code>select</code>, <code>label</code> or <code>span</code>, have a <code>rounded</code> class, or sit inside the message input or your own message bubble. If a third-party extension injects custom UI with gray backgrounds, it may become transparent. Use the Style Overrides tab to restore specific elements if needed.</li>
                         </ul>
 
                             </div>
@@ -7974,15 +8039,15 @@ self.onmessage = function(e) {
                             <div class="doc-sub-inner">
                         <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85;">Understanding the injection order helps debug cascade conflicts. The final CSS is assembled in this order:</p>
                         <ol style="font-size: 0.72rem; line-height: 1.7; padding-left: 18px;">
-                            <li><b>OKLCH Variable Declarations</b> — <code>--color-gray-*</code> palette ramps and <code>--tdp-accent*</code> accents per mode</li>
-                            <li><b>Manual Variable Overrides</b> — user-defined CSS custom properties (injected after palette for priority)</li>
-                            <li><b>Structural Background Rules</b> — when Canvas FX or a gradient is active, transparency rules on the app containers plus <code>body</code>/<code>#sidebar</code> backdrops; otherwise just opaque <code>body</code>/<code>#sidebar</code> rules</li>
-                            <li><b>Gradient Background CSS</b> — <code>background-image</code>, sidebar blur, and chat overlay rules</li>
-                            <li><b>Custom CSS Snippet</b> &mdash; your raw CSS</li>
-                            <li><b>Valve rules</b> &mdash; the overlay glass and the mobile sidebar fix, appended after Custom CSS when Overlay Transparency or Sidebar Transparency isn&rsquo;t <code>opaque</code></li>
+                            <li><b>OKLCH Variable Declarations</b>: <code>--color-gray-*</code> palette ramps and <code>--tdp-accent*</code> accents per mode</li>
+                            <li><b>Manual Variable Overrides</b>: user-defined CSS custom properties (injected after palette for priority)</li>
+                            <li><b>Structural Background Rules</b>: when Canvas FX or a gradient is active, transparency rules on the app containers plus <code>body</code>/<code>#sidebar</code> backdrops; otherwise just opaque <code>body</code>/<code>#sidebar</code> rules. The Surfaces rules follow them when the mode&rsquo;s Surfaces switch is on.</li>
+                            <li><b>Gradient Background CSS</b>: <code>background-image</code>, sidebar blur, and chat overlay rules</li>
+                            <li><b>Custom CSS Snippet</b>: your raw CSS</li>
+                            <li><b>Valve rules</b>: the Sidebar Transparency valve rewrites the sidebar&rsquo;s own rules in place, then appends a rule hiding the sidebar fades (<code>translucent</code> or <code>transparent</code>) and the mobile fix (<code>transparent</code> only). Overlay Transparency <code>translucent</code> appends the overlay glass and hides the top fade. All of these come after Custom CSS.</li>
                         </ol>
                         <p style="font-size: 0.68rem; color: var(--text-muted); margin-top: 6px;">A later rule wins a tie of equal specificity and importance. Many of the designer&rsquo;s own rules use <code>!important</code>, so a Custom CSS rule needs <code>!important</code> too to override them, as with a gradient <code>background-image</code> over the Gradient Builder&rsquo;s.</p>
-                        <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85; margin-top: 10px;"><b>Structured sections:</b> Internally the CSS is generated as four separate sections — <code>vars</code> (palette + manual overrides), <code>structural</code>, <code>gradient</code>, and <code>custom</code> — and saved to the server both as the flat blob above (served at <code>/theme.css</code> and shown by the header&rsquo;s <b>CSS</b> button) and as a sections JSON file. Consumers assemble only the sections they need: the bootloader picks sections per the "Show on Auth Pages" toggles (delivered inside <code>state.json</code> under the <code>_cssSections</code> key, plus an <code>extra</code> section holding valve-appended rules that are never auth-gated), and the server composes only <code>vars</code> + <code>custom</code> into <code>/static/custom.css</code> as the flash-free safe subset, plus the overlay glass rules when Overlay Transparency is <code>translucent</code>. The <code>/*[OWUI_*]*/</code> marker comments still appear in the flat output and remain the fallback slicing mechanism for themes saved by older versions.</p>
+                        <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85; margin-top: 10px;"><b>Structured sections:</b> Internally the CSS is generated as four separate sections: <code>vars</code> (palette + manual overrides), <code>structural</code>, <code>gradient</code>, and <code>custom</code>. They are saved to the server both as the flat blob above (served at <code>/theme.css</code> and shown by the header&rsquo;s <b>CSS</b> button) and as a sections JSON file. Consumers assemble only the sections they need: the bootloader picks sections per the "Show on Auth Pages" toggles (delivered inside <code>state.json</code> under the <code>_cssSections</code> key, plus an <code>extra</code> section holding valve-appended rules that are never auth-gated), and the server composes only <code>vars</code> + <code>custom</code> into <code>/static/custom.css</code> as the flash-free safe subset, plus the overlay glass rules when Overlay Transparency is <code>translucent</code>. The <code>/*[OWUI_*]*/</code> marker comments still appear in the flat output and remain the fallback slicing mechanism for themes saved by older versions.</p>
                             </div>
                         </details>
                     </div>
@@ -8003,15 +8068,17 @@ self.onmessage = function(e) {
                                 <tbody>
                                     <tr><td><span class="doc-code-inline">Ctrl+Z</span></td><td>Undo last change (<span class="doc-code-inline">Cmd</span> on macOS; not while typing in a field)</td></tr>
                                     <tr><td><span class="doc-code-inline">Ctrl+Y</span> / <span class="doc-code-inline">Ctrl+Shift+Z</span></td><td>Redo last undone change</td></tr>
-                                    <tr><td><span class="doc-code-inline">Ctrl+V</span> (image)</td><td>Extract palette colors from a clipboard image</td></tr>
+                                    <tr><td><span class="doc-code-inline">Ctrl+V</span> (image)</td><td>Extract palette colors from a clipboard image (not while typing in a field)</td></tr>
                                     <tr><td><span class="doc-code-inline">Ctrl+V</span> (JSON)</td><td>Import a theme, or a Canvas FX or CSS preset backup, from clipboard JSON (not while typing in a field)</td></tr>
                                     <tr><td><span class="doc-code-inline">Escape</span></td><td>Close an open dialog or search bar</td></tr>
-                                    <tr><td><span class="doc-code-inline">Enter</span></td><td>Confirm the primary action in a dialog</td></tr>
+                                    <tr><td><span class="doc-code-inline">Enter</span></td><td>Confirm the primary action in a dialog, when the focus isn&rsquo;t in a text field or on a button; in an Import dialog&rsquo;s URL field, Enter loads the URL</td></tr>
                                     <tr><td><span class="doc-code-inline">Backspace</span></td><td>Cancel most confirmation dialogs, when you aren&rsquo;t typing in a field</td></tr>
                                     <tr><td><span class="doc-code-inline">Ctrl+Enter</span></td><td>Create the theme in the AI Consultant form (<span class="doc-code-inline">Cmd+Enter</span> on macOS)</td></tr>
                                     <tr><td><span class="doc-code-inline">Arrow keys</span>, <span class="doc-code-inline">Home</span></td><td>Move the radial gradient&rsquo;s center (Shift for bigger steps); Home recenters it</td></tr>
-                                    <tr><td><span class="doc-code-inline">Arrow keys</span>, <span class="doc-code-inline">Delete</span>, <span class="doc-code-inline">Tab</span></td><td>Move, remove, or switch the selected mesh gradient point</td></tr>
-                                    <tr><td><span class="doc-code-inline">Double-click</span> slider label</td><td>Reset that slider to its default value</td></tr>
+                                    <tr><td><span class="doc-code-inline">Arrow keys</span>, <span class="doc-code-inline">Delete</span>, <span class="doc-code-inline">Tab</span></td><td>With the mesh pad focused: move the selected point (Shift for 5 steps), remove it with Delete or Backspace (a mesh keeps 2 points), or switch points with Tab and Shift+Tab</td></tr>
+                                    <tr><td><span class="doc-code-inline">Double-click</span> slider label</td><td>Reset the Hue, Chroma, Lightness, Gradient Direction, Color Intensity or Animation Speed slider to its default; on the Accent Colors label, set all three accents back to automatic</td></tr>
+                                    <tr><td><span class="doc-code-inline">Double-click</span> on a gradient pad</td><td>On the radial pad, recenter it; on a mesh point, remove it</td></tr>
+                                    <tr><td><span class="doc-code-inline">Escape</span></td><td>Close the Documentation panel</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -8028,9 +8095,9 @@ self.onmessage = function(e) {
                                 <tbody>
                                     <tr><td><span class="doc-code-inline">Tab</span></td><td>Inserts a 2-space indent while tab trap is active (default on). Press <span class="doc-code-inline">Escape</span> to toggle.</td></tr>
                                     <tr><td><span class="doc-code-inline">Enter</span></td><td>Auto-indents the new line to match the previous line's indentation</td></tr>
-                                    <tr><td><span class="doc-code-inline">{</span></td><td>Auto-inserts closing <span class="doc-code-inline">}</span> — also applies to <span class="doc-code-inline">(</span>, <span class="doc-code-inline">[</span>, <span class="doc-code-inline">"</span>, and <span class="doc-code-inline">'</span></td></tr>
-                                    <tr><td><span class="doc-code-inline">Enter</span> after <span class="doc-code-inline">{</span></td><td>Creates an indented block with the closing <span class="doc-code-inline">}</span> on the next line</td></tr>
-                                    <tr><td><span class="doc-code-inline">Escape</span></td><td>Toggles tab trap mode &mdash; when off, Tab moves focus instead of inserting spaces</td></tr>
+                                    <tr><td><span class="doc-code-inline">{</span></td><td>Auto-inserts closing <span class="doc-code-inline">}</span>, and the same for <span class="doc-code-inline">(</span>, <span class="doc-code-inline">[</span>, <span class="doc-code-inline">"</span>, and <span class="doc-code-inline">'</span></td></tr>
+                                    <tr><td><span class="doc-code-inline">Enter</span> after <span class="doc-code-inline">{</span></td><td>Indents the new line by two more spaces; if no <span class="doc-code-inline">}</span> follows the cursor, also adds a closing <span class="doc-code-inline">}</span> on its own line below</td></tr>
+                                    <tr><td><span class="doc-code-inline">Escape</span></td><td>Toggles tab trap mode; when off, Tab moves focus instead of inserting spaces</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -8043,13 +8110,13 @@ self.onmessage = function(e) {
                         <p>Import any preset directly into Theme Designer Pro using the built-in Import button, URL import, or drag-and-drop.</p>
 
                         <div class="doc-subheading">🎭 Built-in Community Themes Browser</div>
-                        <p>The <b>Themes</b> area includes a curated <b>Community Themes</b> grid, fetched from the presets repository&rsquo;s <code>docs/catalog.json</code> on GitHub. Each card shows the theme&rsquo;s preview colors and metadata with a one-click <b>Install</b> button, which adds the theme to your Theme Gallery; installed themes are marked. When <b>Enable Theme Update Checks</b> is on, the grid also reads <code>manifest.json</code> and a card offers an update if the remote version is newer than your installed copy. An <b>Install All</b> button appears when at least one theme isn&rsquo;t installed, alongside <b>Refresh</b>, search (name, description, author) and an A&ndash;Z sort. The <b>Enable Community Themes</b> valve hides the whole browser and skips its catalog fetch. If you set <b>Allowed Import Domains</b>, include <code>raw.githubusercontent.com</code>, or the grid shows &ldquo;Could not load community themes.&rdquo;</p>
+                        <p>The <b>Themes</b> area includes a curated <b>Community Themes</b> grid, fetched from the presets repository&rsquo;s <code>docs/catalog.json</code> on GitHub. Each card shows the theme&rsquo;s preview colors and metadata with a one-click <b>Install</b> button, which adds the theme to your Theme Gallery; installed themes are marked. When <b>Enable Theme Update Checks</b> is on, the grid also reads <code>manifest.json</code> and a card offers an update if the remote version is newer than your installed copy. An <b>Install All</b> button appears when at least one theme isn&rsquo;t installed, alongside <b>Refresh</b>, search (name, description, author) and a sort that cycles A to Z, Z to A and the catalog&rsquo;s order. The <b>Enable Community Themes</b> valve hides the whole browser and skips its catalog fetch. If you set <b>Allowed Import Domains</b>, include <code>raw.githubusercontent.com</code>, or the grid shows &ldquo;Could not load community themes.&rdquo;</p>
 
                         <div class="doc-subheading">🔗 Install Links From the Website</div>
                         <p>Every preset in the <a href="https://silentoplayz.github.io/theme-designer-pro-presets/gallery/" target="_blank" rel="noopener noreferrer">preset gallery</a>, and every theme made in its <a href="https://silentoplayz.github.io/theme-designer-pro-presets/studio/" target="_blank" rel="noopener noreferrer">Studio</a>, has an <b>Install on my Open WebUI</b> button. After a visitor tells the site their Open WebUI address once, the button opens this designer with an address ending in <code>#tdp-import=</code>. A preset opens its own Import dialog with its address filled in, and you choose <b>Load URL</b>, so <b>Enable URL Import</b> and <b>Allowed Import Domains</b> apply as they do to an address typed in by hand. A Studio theme travels inside the link and is offered the way a pasted theme is, with the Canvas FX warning when it has a script. Nothing installs until you confirm, the link leaves the address bar once read, and a preset type whose valve is off is refused.</p>
 
-                        <div class="doc-subheading">🚀 Quick Start — Import Everything at Once</div>
-                        <p>Open the <b>Import</b> modal in the <b>Themes</b> tab, paste this URL, and click <b>Load URL</b>; all animations, CSS, themes, and gradients are imported in one shot. The Import modals in the Style Overrides, Canvas FX and Gradient tabs take only their own type.</p>
+                        <div class="doc-subheading">🚀 Quick Start: Import Everything at Once</div>
+                        <p>Open the <b>Import</b> modal in the <b>Themes</b> tab, paste this URL, and click <b>Load URL</b>; all Canvas FX animations, themes and gradients are imported in one shot. The Import modals in the Style Overrides, Canvas FX and Gradient tabs take only their own type.</p>
                         <div style="position: relative; margin-bottom: 16px;">
                             <code class="doc-pre" style="display: block; margin: 0; font-size: 0.62rem; user-select: all; word-break: break-all; padding-right: 60px;" id="url-bundle-all">https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/everything.json</code>
                             <button class="owui-code-btn" style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('url-bundle-all').textContent).then(()=>showToast('Copied URL'))">Copy</button>
@@ -8083,7 +8150,7 @@ self.onmessage = function(e) {
 
                         <div class="doc-subheading">🔗 Resources</div>
                         <ul>
-                            <li><b>Preset Gallery:</b> Visit <a href="https://silentoplayz.github.io/theme-designer-pro-presets/" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">silentoplayz.github.io/theme-designer-pro-presets</a> to browse, preview, and copy import URLs for curated presets.</li>
+                            <li><b>Preset Gallery:</b> Visit <a href="https://silentoplayz.github.io/theme-designer-pro-presets/gallery/" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">silentoplayz.github.io/theme-designer-pro-presets/gallery</a> to browse, preview, and copy import URLs for curated presets.</li>
                             <li><b>Submit Your Own:</b> Share your creations with the community! Open a <a href="https://github.com/silentoplayz/theme-designer-pro-presets/issues/new?template=theme-submission.yml" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">Theme Submission</a> on GitHub to contribute your theme to the gallery.</li>
                             <li><b>Source Repository:</b> <a href="https://github.com/silentoplayz/theme-designer-pro-presets" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">github.com/silentoplayz/theme-designer-pro-presets</a></li>
                         </ul>
@@ -8093,14 +8160,15 @@ self.onmessage = function(e) {
                 <details class="doc-accordion">
                     <summary>21. Reverse Proxy Configuration <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
-                        <p>If Open WebUI is behind a reverse proxy (nginx, Caddy, Apache, Traefik, etc.), <b>response buffering must be disabled</b> for Theme Designer Pro to work correctly. Without this, SSE live push events are buffered and never delivered to clients, and theme data may not reach other users/devices.</p>
+                        <p>If Open WebUI is behind a reverse proxy (nginx, Caddy, Apache, Traefik, etc.), the live updates at <code>{ROUTE_BASE}/events</code> need to stream through it. The function sends <code>X-Accel-Buffering: no</code> with them, so stock nginx streams them even with buffering on. Turn buffering off anyway if your proxy or CDN ignores that header, or if <code>proxy_ignore_headers</code> removes it: otherwise open pages only see a theme change after a reload. The theme itself, <code>theme.css</code> and <code>state.json</code>, loads fine either way.</p>
+                        <p>Two more settings matter. Picture uploads are up to 5 MB and theme saves up to 64 MB, so raise nginx&rsquo;s <code>client_max_body_size</code> (1 MB by default), for example to <code>64m</code>, or larger saves fail with 413. A proxy that only passes certain paths must pass everything under <code>{ROUTE_BASE}</code> (the designer, saves, <code>/events</code>, <code>/events/bind</code>, <code>/theme.css</code>, <code>/state.json</code>, <code>/library.json</code>, <code>/consult</code>, <code>/me</code> and its routes, <code>/auth-background</code> and <code>/page-background</code>) plus <code>/static/loader.js</code> and <code>/static/custom.css</code>.</p>
 
                         <div class="doc-subheading">⚠️ Why This Matters</div>
                         <p>Theme Designer Pro uses three delivery layers to push themes to every page (the instance theme to everyone without a personal theme, a personal theme to its owner&rsquo;s pages):</p>
                         <ul>
-                            <li><b>Server-Sent Events (SSE)</b> — live push to connected browsers via <code>{ROUTE_BASE}/events</code></li>
-                            <li><b>HTTP fetch</b> — bootloader fetches <code>{ROUTE_BASE}/theme.css</code> and <code>{ROUTE_BASE}/state.json</code> on every page load</li>
-                            <li><b>Static-asset composition</b> — theme CSS served as a render-blocking stylesheet for instant first paint</li>
+                            <li><b>Server-Sent Events (SSE)</b>: live push to connected browsers via <code>{ROUTE_BASE}/events</code></li>
+                            <li><b>HTTP fetch</b>: the bootloader fetches <code>{ROUTE_BASE}/theme.css</code> and <code>{ROUTE_BASE}/state.json</code> on every page load</li>
+                            <li><b>Static-asset composition</b>: theme CSS served as a render-blocking stylesheet for instant first paint</li>
                         </ul>
                         <p>Reverse proxies that <b>buffer responses</b> (the default for nginx) can hold SSE events in memory instead of passing them on. Other users and devices then see a theme change only after they reload the page.</p>
 
@@ -8125,7 +8193,7 @@ self.onmessage = function(e) {
                         <p style="font-size: 0.75rem; opacity: 0.8;">Then run: <code>sudo nginx -t &amp;&amp; sudo systemctl reload nginx</code></p>
 
                         <div class="doc-subheading">Caddy</div>
-                        <p>Caddy disables response buffering by default — no additional configuration needed. If you have explicitly enabled buffering, disable it:</p>
+                        <p>Caddy disables response buffering by default, so it needs no extra configuration. If you have explicitly enabled buffering, disable it:</p>
                         <div style="position: relative;">
                         <pre class="doc-pre" id="doc-caddy-config"><code>your-domain.com {
     reverse_proxy localhost:8080 {
@@ -8150,8 +8218,8 @@ ProxyPassReverse / http://127.0.0.1:8080/</code></pre>
                         <div class="doc-subheading">🔍 Diagnostic Checklist</div>
                         <p>If themes aren't propagating to other users/devices:</p>
                         <ul>
-                            <li><b>Step 1:</b> On the non-working device, navigate directly to <code>https://your-instance{ROUTE_BASE}/theme.css</code> — if it returns CSS content, the server is working and the issue is in the delivery layer (proxy buffering or missing bootloader).</li>
-                            <li><b>Step 2:</b> On the non-working device, open <code>/static/loader.js</code> directly and search for <code>owui-theme-designer-pro:start</code> — if missing, this worker has not published its fragment yet (send a chat message to trigger <code>event()</code>).</li>
+                            <li><b>Step 1:</b> On the non-working device, navigate directly to <code>https://your-instance{ROUTE_BASE}/theme.css</code>. If it returns CSS content, the server is working and the issue is in the delivery layer (proxy buffering or missing bootloader).</li>
+                            <li><b>Step 2:</b> On the non-working device, open <code>/static/loader.js</code> directly and search for <code>owui-theme-designer-pro:start</code>. If it&rsquo;s missing, this worker has not published its fragment yet (send a chat message to trigger <code>event()</code>).</li>
                             <li><b>Step 3:</b> In DevTools &rarr; Network tab, check that the request to <code>{ROUTE_BASE}/events</code> stays open (pending). If it fails or closes right away, your proxy is likely buffering or blocking SSE.</li>
                         </ul>
                     </div>
@@ -8165,7 +8233,7 @@ ProxyPassReverse / http://127.0.0.1:8080/</code></pre>
                             <li><b>Live push is worker-local.</b> SSE client connections are held in process memory. A theme save handled by Worker A will only broadcast to clients connected to Worker A. Clients on Workers B/C/D will not receive live push events.</li>
                             <li><b>Page-load fetch still works.</b> The bootloader fetches <code>{ROUTE_BASE}/theme.css</code> and <code>{ROUTE_BASE}/state.json</code> from disk on every page load, which works correctly across all workers. Themes propagate on the next page load/refresh.</li>
                             <li><b>Redis fixes this.</b> If <code>REDIS_URL</code> is set in your environment (which Open WebUI already uses for WebSocket relay), Theme Designer Pro automatically uses Redis pub/sub to broadcast SSE events across all workers. No additional configuration is needed beyond setting <code>REDIS_URL</code>. The value must be the URL itself. In a Docker Compose <code>environment:</code> list, write <code>- REDIS_URL=redis://redis:6379/0</code> without quotes, because quotes there become part of the value. The mapping form, <code>REDIS_URL: "redis://redis:6379/0"</code>, works too, because YAML removes those quotes. When <code>REDIS_URL</code> doesn&rsquo;t start with <code>redis://</code>, <code>rediss://</code> or <code>unix://</code>, Theme Designer Pro logs one warning saying so and keeps live push within each worker. A quoted <code>WEBSOCKET_MANAGER="redis"</code> turns off Open WebUI&rsquo;s own Redis relay the same way.</li>
-                            <li><b>Channels.</b> Theme updates travel on <code>{REDIS_KEY_PREFIX}:theme_pro_sse</code>, and code and on/off changes on <code>{REDIS_KEY_PREFIX}:live-reload:theme-designer-pro</code>. Redis channels ignore the database number, so two Open WebUI instances on one Redis server need different <code>REDIS_KEY_PREFIX</code> values to stay apart. The live reload uses Open WebUI&rsquo;s own Redis connection, while the theme relay reads <code>REDIS_URL</code> itself.</li>
+                            <li><b>Channels.</b> Theme updates travel on <code>{REDIS_KEY_PREFIX}:theme_pro_sse</code>, and code and on/off changes on <code>{REDIS_KEY_PREFIX}:live-reload:function_&lt;function id&gt;</code>, for example <code>open-webui:live-reload:function_theme_designer_pro</code>. Redis channels ignore the database number, so two Open WebUI instances on one Redis server need different <code>REDIS_KEY_PREFIX</code> values to stay apart. The live reload uses Open WebUI&rsquo;s own Redis connection, while the theme relay reads <code>REDIS_URL</code> itself, or connects through Redis Sentinel when <code>REDIS_SENTINEL_HOSTS</code> is set (<code>REDIS_SENTINEL_PORT</code>, 26379 by default, with the database and credentials from <code>REDIS_URL</code>). Without Redis, a personal theme&rsquo;s live updates can miss a page whose live connection and sign-in claim land on different workers; that page still gets the theme on its next load.</li>
                             <li><b>Turning the function off or on, saving new code, and changing valves reach every worker too.</b> With Redis, each worker hears about the change and loads it within a few seconds. A worker still running a version older than 1.8.2, or one that started while the function was off, catches up the next time it handles any event.</li>
                             <li><b>The composed assets are per worker.</b> Each worker builds its own <code>/static/loader.js</code> and <code>/static/custom.css</code> from what it has loaded, so a worker only serves the theme once it has run this function at least once. Open WebUI publishes <code>system.startup.completed</code> in every worker's lifespan, so in practice all of them publish during boot.</li>
                         </ul>
@@ -8177,13 +8245,13 @@ ProxyPassReverse / http://127.0.0.1:8080/</code></pre>
                     <summary><span>23. Sharing <code>loader.js</code> and <code>custom.css</code> With Other Plugins</span> <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
                         <p>Open WebUI loads exactly two admin-extensible assets on every page: <code>/static/loader.js</code> (the only hook that runs before the SvelteKit bundle hydrates) and <code>/static/custom.css</code> (a render-blocking stylesheet). Any plugin that wants to reach the page before it paints needs one of them, and neither can have a single owner.</p>
-                        <p>Since v1.7.0 Theme Designer Pro no longer writes into <code>index.html</code>. It publishes a fragment into a shared registry on <code>app.state</code>, and a route composes every registered plugin's fragment into the response <b>per request</b>. Consequences worth knowing:</p>
+                        <p>Since version 1.7.0, Theme Designer Pro no longer writes into <code>index.html</code>. It publishes a fragment into a shared registry on <code>app.state</code>, and a route composes every registered plugin's fragment into the response <b>per request</b>. What follows from this:</p>
                         <ul>
                             <li><b>Order does not matter.</b> A plugin that loads after this one needs no cooperation from it, and vice versa. Fragments are composed fresh on every request, not written once at install.</li>
-                            <li><b>Your own edits to those files survive.</b> If you have hand-written content in <code>static/custom.css</code> or <code>static/loader.js</code>, it is served first, followed by each plugin's fragment. Only the block between this plugin's own markers is ever replaced. A symlinked file is ignored rather than served.</li>
+                            <li><b>Your own edits to those files survive.</b> If you have hand-written content in <code>static/custom.css</code> or <code>static/loader.js</code>, it is served first, followed by each plugin's fragment. The file on disk is never changed: when it&rsquo;s served, any block wrapped in a registered plugin&rsquo;s markers is left out and the rest is served as written. A symlinked file is ignored rather than served.</li>
                             <li><b>Cascade position is explicit.</b> Fragments compose in <code>(order, key)</code> order, and this plugin registers at <code>order=100</code> so its custom CSS keeps the last word, as documented in Section 18. A plugin at a lower order composes earlier and loses ties at equal specificity.</li>
                             <li><b>A broken plugin cannot blank the page.</b> If another plugin's fragment raises while composing, it is skipped and logged; every other fragment still ships.</li>
-                            <li><b>Nothing persists on disk.</b> Disabling the function withdraws its CSS immediately. If you <i>delete</i> the function without disabling it first, its fragment keeps serving until the container restarts, because Open WebUI dispatches the deletion event after the row is gone and a deleted function never receives it. Disable, then delete.</li>
+                            <li><b>Nothing persists on disk.</b> Disabling the function withdraws its CSS immediately. If you <i>delete</i> the function without disabling it first, its fragment keeps serving until the container restarts, because Open WebUI dispatches the deletion event after the row is gone and a deleted function never receives it, unless another installed plugin that shares this registry handles the deletion and removes it. Disable, then delete.</li>
                         </ul>
                         <p>Upgrading from 1.6.2 or earlier removes the old <code>index.html</code> blocks automatically on the first event. See Section 25 if you want to verify by hand.</p>
                     </div>
@@ -8195,14 +8263,14 @@ ProxyPassReverse / http://127.0.0.1:8080/</code></pre>
                         <p>Common issues and their solutions.</p>
                         <ul>
                             <li><b>Read-only filesystem.</b> No longer an issue: the bootloader and theme CSS are composed in memory and served from a route, so the function never needs write access to the frontend build directory. The one exception is the one-shot cleanup of a legacy <code>index.html</code> injection left by versions up to 1.6.2, which logs a warning and moves on if the file is not writable.</li>
-                            <li><b>Canvas FX animations are lagging.</b> Heavy mathematically complex animations can drain resources. Ensure your browser supports <code>OffscreenCanvas</code> (indicated by the green <b>Background Worker</b> badge in the designer UI). Note: the badge is a pre-launch prediction (browser capability plus a static scan of the script source) &mdash; a script that only fails at runtime still falls back to the main thread without the badge changing. If your script runs on the main thread, keep animations simple. Even with Web Workers, massive particle counts or heavy calculations can still consume significant CPU/GPU resources.</li>
-                            <li><b>My theme doesn't apply to other users.</b> Most commonly caused by <b>reverse proxy buffering</b> — see Section 21. Also ensure the admin has synced the theme via the designer (not Draft mode). The bootloader serves the theme to all users on page load from <code>{ROUTE_BASE}/theme.css</code>. If the theme files are missing from <code>DATA_DIR/theme/</code>, the bootloader has nothing to serve. Verify the endpoint works by navigating directly to <code>{ROUTE_BASE}/theme.css</code> in your browser; it should return CSS content. A user with a personal theme sees theirs instead of the instance theme: <b>Use instance theme</b> in their <b>Themes</b> tab puts them back, and turning <b>Allow Personal Themes</b> off puts everyone back without deleting anything.</li>
-                            <li><b>Theme changes aren't appearing live on other devices/browsers.</b> This is almost always caused by <b>nginx or another reverse proxy buffering SSE responses</b>. See Section 21 for the fix. The function sends <code>X-Accel-Buffering: no</code>, which nginx honors unless <code>proxy_ignore_headers</code> removes it; <code>proxy_buffering off</code> also covers proxies and CDNs that ignore the header. Quick diagnostic: open DevTools &rarr; Network tab on the non-working device and check that the request to <code>{ROUTE_BASE}/events</code> stays open (pending).</li>
-                            <li><b>Theme reverts after disabling the function.</b> Toggling the function OFF triggers the <code>function.disable_started</code> lifecycle event, which broadcasts a <code>theme-disable</code> SSE event to strip the theme from all clients. The CSS fragment is withdrawn from <code>/static/custom.css</code> at the same time, while the loader fragment stays published in an inactive state so its SSE connection survives. When re-enabled, the <code>function.enable_started</code> event republishes everything automatically. While the function is off, every Theme Designer Pro route answers 503 &ldquo;Theme Designer Pro is currently disabled&rdquo;.</li>
-                            <li><b>Function toggle cleanup details.</b> The <code>theme-disable</code> SSE event removes all 6 injected DOM elements by ID: <code>owui-dev-live-theme</code> (main CSS), <code>owui-server-theme</code> (server-injected CSS), <code>owui-theme-style</code> (legacy), <code>owui-theme-canvas-bg</code> (canvas), <code>owui-theme-bg-color</code> (background div), and <code>owui-canvas-script-runner</code> (canvas script). It also clears the in-memory theme state, the localStorage cache, and this browser&rsquo;s copy of a personal theme, then reloads <code>/static/custom.css</code> so the palette drops out. A Global Reset sends the same event.</li>
-                            <li><b>Live push stopped working after re-saving the function.</b> This should not happen — SSE connections are persisted on <code>app.state</code> and survive function hot-reloads. If you do experience this, verify the SSE endpoint is accessible at <code>{ROUTE_BASE}/events</code>. The server sends a heartbeat every 15 seconds — if the connection is truly dead, the EventSource will auto-reconnect after 3 seconds.</li>
+                            <li><b>Canvas FX animations are lagging.</b> Heavy mathematically complex animations can drain resources. Ensure your browser supports <code>OffscreenCanvas</code> (indicated by the green <b>Background Worker</b> badge in the designer UI). Note: the badge is a pre-launch prediction (browser capability plus a static scan of the script source), so a script that only fails at runtime still falls back to the main thread without the badge changing. If your script runs on the main thread, keep animations simple. Even with Web Workers, massive particle counts or heavy calculations can still consume significant CPU/GPU resources.</li>
+                            <li><b>My theme doesn't apply to other users.</b> Check first that you published it: a Draft never leaves the designer. A proxy that blocks some of the function&rsquo;s paths is the other common cause; see Section 21. The bootloader serves the theme to all users on page load from <code>{ROUTE_BASE}/theme.css</code>. If the theme files are missing from <code>DATA_DIR/theme/</code>, the bootloader has nothing to serve. Verify the endpoint works by navigating directly to <code>{ROUTE_BASE}/theme.css</code> in your browser; it should return CSS content. A user with a personal theme sees theirs instead of the instance theme: <b>Use instance theme</b> in their <b>Themes</b> tab puts them back, and turning <b>Allow Personal Themes</b> off puts everyone back without deleting anything.</li>
+                            <li><b>Theme changes aren't appearing live on other devices/browsers.</b> A reverse proxy that buffers the live updates is the usual cause. See Section 21 for the fix. The function sends <code>X-Accel-Buffering: no</code>, which nginx honors unless <code>proxy_ignore_headers</code> removes it; <code>proxy_buffering off</code> also covers proxies and CDNs that ignore the header. Quick diagnostic: open DevTools &rarr; Network tab on the non-working device and check that the request to <code>{ROUTE_BASE}/events</code> stays open (pending).</li>
+                            <li><b>Theme reverts after disabling the function.</b> Toggling the function OFF triggers the <code>function.disable_started</code> lifecycle event, which broadcasts a <code>theme-disable</code> SSE event to strip the theme from all clients. The CSS fragment is withdrawn from <code>/static/custom.css</code> at the same time, while the loader fragment stays published in an inactive state so its SSE connection survives. When re-enabled, the <code>function.enable_started</code> event republishes everything automatically. While the function is off, the designer, saves, the library, the AI Consultant and picture uploads answer 503 &ldquo;Theme Designer Pro is currently disabled&rdquo;, while <code>theme.css</code> and <code>state.json</code> answer empty and the live connection stays open.</li>
+                            <li><b>Function toggle cleanup details.</b> The <code>theme-disable</code> SSE event removes 7 injected DOM elements by ID: <code>owui-dev-live-theme</code> (main CSS), <code>owui-server-theme</code> (server-injected CSS), <code>owui-theme-style</code> (legacy), <code>owui-theme-canvas-bg</code> (canvas), <code>owui-theme-bg-color</code> (background div), <code>owui-canvas-script-runner</code> (canvas script), and <code>owui-tdp-hidden-bg</code> (the Backgrounds tab&rsquo;s rules). It also clears the in-memory theme state, the localStorage cache, and this browser&rsquo;s copy of a personal theme, then reloads <code>/static/custom.css</code> so the palette drops out. A Global Reset sends the same event marked as a reset, and pages then fetch whatever theme is left (a personal theme, or none) instead of stripping it.</li>
+                            <li><b>Live push stopped working after re-saving the function.</b> This should not happen: SSE connections are kept on <code>app.state</code> and survive function hot-reloads. If you do experience this, check that the SSE endpoint is reachable at <code>{ROUTE_BASE}/events</code>. The server sends a heartbeat every 15 seconds. After a dropped connection, the page reconnects in about 3 seconds; after an HTTP error, such as a proxy&rsquo;s 502, it waits longer each time, up to a minute.</li>
                             <li><b>Draft mode keeps the live theme to itself.</b> Theme CSS and state use <code>sessionStorage</code> (tab-scoped), <code>syncToServer()</code> is gated off, and mode changes (Dark/Light/System/etc.) apply only to the designer page&rsquo;s <code>&lt;html&gt;</code> element, so other tabs and the admin&rsquo;s live session aren&rsquo;t affected. Gallery and preset changes still sync to the server library.</li>
-                            <li><b>The AI Consultant says &ldquo;The model could not answer&rdquo;.</b> The model is asked as the signed-in person, so a user needs access to the model in the <b>AI Consultant Model</b> valve, or to the task model, just as they do for chat titles. &ldquo;No model to ask&rdquo; means the valve names a model that isn&rsquo;t available, or the valve is empty and no task model is set. &ldquo;Wait a few seconds between requests&rdquo; appears for requests less than 3 seconds apart. &ldquo;Access denied&rdquo; means a non-admin tried it while <b>Allow Personal Themes</b> is off.</li>
+                            <li><b>The AI Consultant says &ldquo;The model could not answer&rdquo;.</b> The model is asked as the signed-in person, so a user needs access to the model in the <b>Ai Consultant Model</b> valve, or to the task model, just as they do for chat titles. &ldquo;No model to ask&rdquo; means the valve names a model that isn&rsquo;t available, or the valve is empty and no task model is set. &ldquo;Wait a few seconds between requests&rdquo; appears for requests less than 3 seconds apart. &ldquo;Access denied&rdquo; means a non-admin tried it while <b>Allow Personal Themes</b> is off.</li>
                             <li><b>The Launcher Tool&rsquo;s card can&rsquo;t apply, or a note shows instead of the designer.</b> Everyone who uses it needs <b>Settings &gt; Interface &gt; iframe Sandbox Allow Same Origin</b> on in their own settings. Without it, the chat&rsquo;s frame has no origin of its own, so the designer gets no sign-in. With it on, HTML that tools and models show in chats runs with the page&rsquo;s access, so turn it on only on an instance whose tools you trust. If the frame says personal themes are turned off, the admin needs to turn on <b>Allow Personal Themes</b>.</li>
                             <li><b>Turning the function off does nothing on a recent Open WebUI.</b> Since v0.12.0, Open WebUI names each function&rsquo;s module <code>function_&lt;id&gt;_&lt;32 hex characters&gt;</code>. Versions of Theme Designer Pro before 1.9.1 read their ID from that name, so they never recognized their own disable event; update to the current version.</li>
                             <li><b>Designer URL valve set to a path without /api/v1/.</b> The designer auto-corrects URLs that don't start with <code>/api/v1/</code> to prevent the SPA catch-all from intercepting the route. A warning is logged when auto-correction occurs. Check your Open WebUI logs for <code>[Theme Pro]</code> messages.</li>
@@ -8215,15 +8283,15 @@ ProxyPassReverse / http://127.0.0.1:8080/</code></pre>
                     <div class="doc-inner">
                         <p>Toggling the function OFF in the admin panel automatically withdraws the theme CSS from <code>/static/custom.css</code>, marks the bootloader inactive, and broadcasts a cleanup event to all connected clients. <b>In most cases, no manual removal is needed.</b> However, if the cleanup didn't complete (e.g., the server crashed mid-toggle), follow these steps for a complete manual removal:</p>
                         <h4>Step 1: Purge Browser LocalStorage</h4>
-                        <p>The easiest way is to use the <b>Factory Reset</b> button in the <b>Danger Zone</b> section below. Alternatively, open your Open WebUI instance, press <b>F12</b> to open Developer Tools, go to the <b>Console</b> tab, and paste:</p>
+                        <p>With the function on, the <b>Factory Reset</b> button in the <b>Danger Zone</b> section below wipes the instance theme, the library and this browser&rsquo;s main keys. To remove every key, personal and Launcher ones included, or once the function is off, open your Open WebUI instance, press <b>F12</b> to open Developer Tools, go to the <b>Console</b> tab, and paste:</p>
                         <div style="position: relative;">
                         <pre class="doc-pre" id="purge-localstorage-code"><code>['owui_dev_theme_v1', 'owui_dev_theme_v1_css',
  'owui_theme_snapshots',
  'owui_canvas_presets', 'owui_css_presets', 'owui_gradient_presets',
  'owui_canvas_last_mode', 'owui_canvas_last_script',
  'owui_theme_last_metadata', 'owui_theme_valve_no_canvas',
- // the model background addresses the theme looked up
- 'owui_tdp_model_bg',
+ // the model and chat background addresses the theme looked up
+ 'owui_tdp_model_bg', 'owui_tdp_chat_bg',
  // personal themes, and the legacy Tool's theme kept aside
  'owui_tdp_personal_css', 'owui_tdp_personal_state', 'owui_tdp_personal_uid',
  'owui_tdp_seen', 'owui_tdp_tool_state', 'owui_tdp_tool_css', 'owui_tdp_tool_dismissed',
@@ -8234,8 +8302,8 @@ ProxyPassReverse / http://127.0.0.1:8080/</code></pre>
 ].forEach(k =&gt; {
   localStorage.removeItem(k); console.log('Purged: ' + k);
 });
-sessionStorage.removeItem('owui_theme_draft_mode');
-sessionStorage.removeItem('owui_tdp_me_draft_mode');
+// this tab's drafts, open tab and Launcher bookkeeping
+Object.keys(sessionStorage).filter(k =&gt; k.startsWith('owui_')).forEach(k =&gt; sessionStorage.removeItem(k));
 location.reload();</code></pre>
                             <button class="owui-code-btn" style="position: absolute; top: 8px; right: 8px; font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('purge-localstorage-code').textContent).then(()=>showToast('Copied to clipboard'))">Copy</button>
                         </div>
@@ -8243,23 +8311,25 @@ location.reload();</code></pre>
                         <p>Delete the whole <code>DATA_DIR/theme/</code> folder from the server&rsquo;s data directory. It holds:</p>
                         <ul>
                             <li><code>open_theme_designer.css</code>, <code>open_theme_designer.json</code>, <code>open_theme_designer_sections.json</code> and <code>open_theme_designer_library.json</code>: the instance theme and library</li>
-                            <li><code>users/</code>: one folder per account with a personal theme or library, named by the user&rsquo;s id</li>
-                            <li><code>.index.lock</code>: left by the one-time cleanup of versions up to 1.6.2</li>
+                            <li><code>auth_background</code> and <code>page_background</code>: the uploaded sign-in page and Other pages pictures</li>
+                            <li><code>users/</code>: one folder per account with a personal theme, library or Other pages picture, named by the user&rsquo;s id</li>
+                            <li><code>.save.lock</code>: the lock that keeps two workers from saving at once</li>
+                            <li><code>.index.lock</code>: the lock for the check, run once per start, that removes <code>index.html</code> blocks left by 1.6.2 or earlier</li>
                         </ul>
                         <h4>Step 3: Remove the Server Bootloader</h4>
                         <ul>
                             <li><b>The Docker Way (Simplest):</b> Restart your container. Fragments live in process memory, so a restart clears anything left behind by a function that was deleted before being disabled.</li>
-                            <li><b>Upgrading from 1.6.2 or earlier:</b> Older versions wrote directly into <code>index.html</code>. Version 1.7.0 removes those blocks once, automatically, on its first event. To check by hand, look for <code>&lt;!-- OWUI Theme Pro Bootloader --&gt;</code> in <code>/app/build/index.html</code>; it should be gone.</li>
+                            <li><b>Upgrading from 1.6.2 or earlier:</b> Older versions wrote directly into <code>index.html</code>. Since 1.7.0, a check run once each time Open WebUI starts removes those blocks automatically. To check by hand, look in the frontend build&rsquo;s <code>index.html</code> (<code>/app/build/index.html</code> in Docker) for <code>&lt;!-- OWUI Theme Pro Bootloader --&gt;</code>, <code>&lt;style id="owui-server-theme"&gt;</code> and <code>&lt;script type="application/json" id="owui-theme-state"&gt;</code>; all three should be gone.</li>
                         </ul>
                         <h4>Step 4: Turn Off, Then Remove the Event Function</h4>
-                        <p>In the Open WebUI admin panel, navigate to Functions and turn the Theme Designer Pro event function off first, then delete it. A function deleted while on never receives its own deletion, so its fragment keeps serving until the server restarts.</p>
+                        <p>In the Open WebUI admin panel, navigate to Functions and turn the Theme Designer Pro event function off first, then delete it. A function deleted while on never receives its own deletion, so its fragment keeps serving until the server restarts. If you installed the <b>Theme Designer Pro Launcher</b>, delete it from <b>Workspace &gt; Tools</b> too. The function keeps nothing in Open WebUI&rsquo;s database besides its own row in the function list, which deleting it removes.</p>
                     </div>
                 </details>
 
                 <details class="doc-accordion" open>
                     <summary>26. Portability & Backups <i data-icon="chevron"></i></summary>
                     <div class="doc-inner" style="display:flex; flex-direction:column; align-items:center; gap:16px;">
-                        <p style="margin:0; text-align:center;">Export your theme gallery snapshots, custom CSS presets, canvas animation scripts, and gradient presets to separate portable backup files at once, and restore them anytime with the import features in their tabs. The live theme is included only if you&rsquo;ve saved it as a snapshot, and valves aren&rsquo;t included. In a personal <b>Themes</b> tab, this exports your own library. For a full server backup, copy the <code>DATA_DIR/theme/</code> folder, including <code>users/</code>.</p>
+                        <p style="margin:0; text-align:center;">Export your theme gallery snapshots, custom CSS presets, canvas animation scripts, and gradient presets to separate portable backup files at once, and restore them anytime with the import features in their tabs. The live theme is included only if you&rsquo;ve saved it as a snapshot, and valves aren&rsquo;t included. In a personal <b>Themes</b> tab, this exports your own library. For a full server backup, copy the <code>DATA_DIR/theme/</code> folder, including <code>users/</code>; it&rsquo;s also the only backup of uploaded pictures, which exports don&rsquo;t carry. Each backup file wraps its items in one key: <code>themes</code>, <code>css_presets</code>, <code>canvas_presets</code> or <code>gradient_presets</code>, and the theme format is described in the presets repository&rsquo;s <code>schemas/theme-format.md</code>. An imported file or bundle can be up to 16 MB, and a save to the server up to 64 MB, with the theme&rsquo;s CSS, its state and its sections up to 5 MB each.</p>
                         
                         <button class="btn" id="export-all-backups-btn" style="border:1px solid var(--border); padding:10px 24px; font-weight:600; border-radius:var(--radius-md); display:flex; align-items:center; gap:8px; cursor:pointer; transition:all 0.2s; margin-top: 8px; background:rgba(255, 255, 255, 0.03);">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -8277,10 +8347,10 @@ location.reload();</code></pre>
                     <div class="doc-inner">
                         <p><b>Theme Designer Pro is an event function provided for educational and customization purposes. By using this function, you acknowledge and agree to the following:</b></p>
                         <ul>
-                            <li><b>Compliance Responsibility:</b> As of Open WebUI v0.6.6+, the software license strictly prohibits altering, removing, obscuring, or replacing any "Open WebUI" branding (including the name, logo, or distinguishing visual identifiers) in deployments with <b>more than 50 active users</b> in a 30-day period without an Enterprise License.</li>
+                            <li><b>Compliance Responsibility:</b> As of Open WebUI v0.6.6+, the software license strictly prohibits altering, removing, obscuring, or replacing any "Open WebUI" branding (including the name, logo, or distinguishing visual identifiers) in deployments where <b>more than 50 people have direct access</b> within any rolling 30-day period, unless you have the copyright holder&rsquo;s written permission or an enterprise license.</li>
                             <li><b>Administrative Burden:</b> The responsibility to ensure compliance with the Open WebUI License rests <b>entirely</b> with the server administrator. While modifying color palettes is permitted, you must ensure that your use of the designer (specifically the Style Overrides tab) is not used to hide, obscure, or alter the Open WebUI logo and branding in violation of the license.</li>
                             <li><b>Liability Waiver:</b> The author of Theme Designer Pro (@G30) shall not be held liable for any material breach of license, legal action, or service termination resulting from the use or misuse of this function on a hosted or distributed Open WebUI instance.</li>
-                            <li><b>Safe Harbor:</b> If your deployment is for personal use, internal team use (with permission), or for an organization of 50 or fewer active users, you are generally exempt from these strict branding restrictions.</li>
+                            <li><b>Exceptions:</b> The license allows branding changes in a deployment where 50 or fewer people have direct access in any rolling 30-day period, or with the copyright holder&rsquo;s written permission, or with an enterprise license.</li>
                         </ul>
                         <p style="font-size:0.75rem; margin-top:12px; opacity:0.8;">This function is provided "as is" without warranty of any kind. By using Theme Designer Pro, you acknowledge that serving instance-wide CSS and JavaScript may have security implications. Use only on trusted instances.</p>
                     </div>
@@ -8301,7 +8371,7 @@ location.reload();</code></pre>
         <div class="footer-left">
             <button class="btn btn-danger" id="nuclear-btn" data-tooltip="Reset all modes to default">Global Reset</button>
             <button class="btn btn-danger" id="reset-mode-btn" data-tooltip="Reset only the current mode to default" style="opacity: 0.85;">Reset Mode</button>
-            <button class="btn" id="sync-mode-btn" data-tooltip="Copy settings from one mode to another (e.g., Dark → Light) — choose what to sync">Sync</button>
+            <button class="btn" id="sync-mode-btn" data-tooltip="Copy settings from one mode to another (e.g., Dark → Light) and choose what to sync">Sync</button>
             <label id="sync-all-toggle-wrap" class="sync-all-toggle" style="display:none;" data-tooltip="When enabled, loading presets and syncing applies to all 4 modes automatically">
                 <input type="checkbox" id="sync-all-modes-toggle" class="cb-input">
                 <span style="font-size:0.6rem; font-weight:600; opacity:0.85; white-space:nowrap;">Sync All</span>
@@ -15144,7 +15214,9 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
         for (const [modalId, confirmBtnId, allowBackspace] of modalConfigs) {
             const modal = $(modalId);
             if (modal && modal.style.display === 'flex') {
-                if (e.key === 'Enter' && !isEditingInModal) { 
+                // A control in the dialog that answered Enter itself, such as a
+                // Sync dialog mode pill, has already called preventDefault
+                if (e.key === 'Enter' && !isEditingInModal && !e.defaultPrevented) { 
                     e.preventDefault(); 
                     const btn = $(confirmBtnId);
                     if (btn) btn.click(); 
@@ -15166,13 +15238,15 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
         // Undo/Redo Shortcuts — skip when user is typing in a text field
         const isEditing = activeEl && (activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'INPUT');
         if ((e.ctrlKey || e.metaKey) && !isEditing) {
-            if (e.key === 'z' && !e.shiftKey) {
+            // Shift and Caps Lock make the key 'Z' and 'Y'
+            const key = (e.key || '').toLowerCase();
+            if (key === 'z' && !e.shiftKey) {
                 e.preventDefault();
                 undo();
-            } else if (e.key === 'z' && e.shiftKey) {
+            } else if (key === 'z' && e.shiftKey) {
                 e.preventDefault();
                 redo();
-            } else if (e.key === 'y') {
+            } else if (key === 'y') {
                 e.preventDefault();
                 redo();
             }
@@ -16631,7 +16705,18 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             const jsonFiles = files.filter(f => f.name.endsWith('.json'));
             if (jsFiles.length > 0) await handleCanvasImport(jsFiles);
             if (cssFiles.length > 0) await handleCssImport(cssFiles);
-            if (jsonFiles.length > 0) await handleFilesImport(jsonFiles);
+            // A gradient preset file (one gradient, or a list of them) goes to
+            // the Gradient gallery; themes, bundles and backups go on as before
+            const isGradient = (d) => d && typeof d === 'object' && !Array.isArray(d) && !d.dark && !d.light && typeof d.name === 'string' && (Array.isArray(d.stops) || Array.isArray(d.meshPoints));
+            const gradientFiles = [], otherJson = [];
+            for (const f of jsonFiles) {
+                let data = null;
+                try { data = JSON.parse(await f.text()); } catch (x) {}
+                const gradient = isGradient(data) || (Array.isArray(data) && data.length > 0 && data.every(isGradient));
+                (gradient ? gradientFiles : otherJson).push(f);
+            }
+            if (gradientFiles.length > 0) await handleGradientImport(gradientFiles);
+            if (otherJson.length > 0) await handleFilesImport(otherJson);
         } else {
             showToast("Error: Only .json, .js, or .css files are supported.");
         }
@@ -18623,10 +18708,13 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
         // ── Community Themes section visibility ──
         if (!cfg.enableCommunityThemes) {
             const communitySection = $('community-themes-grid');
-            if (communitySection) communitySection.style.display = 'none';
-            // Also hide the section title above it
-            if (communitySection && communitySection.previousElementSibling && communitySection.previousElementSibling.classList.contains('section-title')) {
-                communitySection.previousElementSibling.style.display = 'none';
+            if (communitySection) {
+                // The grid sits in a scroll wrapper; the title row with its
+                // search, sort, Install All and Refresh buttons is before that
+                const wrap = communitySection.parentElement;
+                const title = wrap && wrap.previousElementSibling;
+                if (title && title.classList.contains('section-title')) title.style.display = 'none';
+                (wrap || communitySection).style.display = 'none';
             }
             // Expand theme gallery to fill the page since community section is gone
             const snapshotScroll = $('snapshot-scroll');
@@ -18863,7 +18951,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
                         case 'css': return modes.some(m => s[m] && s[m].customCSS && s[m].customCssEnabled !== false);
                         case 'canvas': return modes.some(m => s[m] && s[m].canvasEnabled && s[m].canvasScript);
                         case 'overrides': return modes.some(m => s[m] && ((s[m].overrides && Object.keys(s[m].overrides).length > 0) || (s[m].manualOverrides && s[m].manualOverrides.trim())));
-                        case 'gradient': return modes.some(m => s[m] && s[m].gradientEnabled && s[m].gradientStops && s[m].gradientStops.length > 0);
+                        case 'gradient': return modes.some(m => s[m] && s[m].gradientEnabled && (s[m].gradientType === 'mesh' ? (s[m].gradientMeshPoints || []).length >= 2 : (s[m].gradientStops || []).length >= 2));
                         case 'linked': return !!s.updateUrl;
                         default: return true;
                     }
@@ -18924,7 +19012,8 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
                 const hasCSS = modes.some(m => s[m] && s[m].customCSS && s[m].customCssEnabled !== false);
                 const hasCanvas = modes.some(m => s[m] && s[m].canvasEnabled && s[m].canvasScript);
                 const hasOverrides = modes.some(m => s[m] && ((s[m].overrides && Object.keys(s[m].overrides).length > 0) || (s[m].manualOverrides && s[m].manualOverrides.trim())));
-                const hasGradient = modes.some(m => s[m] && s[m].gradientEnabled && s[m].gradientStops && s[m].gradientStops.length > 0);
+                // A gradient that draws: 2 stops, or 2 points for a mesh
+                const hasGradient = modes.some(m => s[m] && s[m].gradientEnabled && (s[m].gradientType === 'mesh' ? (s[m].gradientMeshPoints || []).length >= 2 : (s[m].gradientStops || []).length >= 2));
                 const hasTags = hasCSS || hasCanvas || hasGradient || hasOverrides || s.updateUrl;
                 if (hasTags) {
                     ttHtml += `<div class="tt-tags">`;

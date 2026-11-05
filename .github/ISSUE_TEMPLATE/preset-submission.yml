@@ -1,5 +1,5 @@
 name: Preset Submission
-description: Submit a new Canvas FX, CSS, theme, or gradient preset for the gallery
+description: Submit a new Canvas FX, theme, or gradient preset for the gallery
 labels: ["preset"]
 body:
   - type: dropdown
@@ -33,7 +33,7 @@ body:
     id: file
     attributes:
       label: Preset File
-      description: Paste the preset content or attach the file. Canvas FX = JavaScript, CSS = raw CSS, Themes/Gradients = JSON.
+      description: Paste the preset content or attach the file. Canvas FX = JavaScript, Themes/Gradients = JSON.
       render: text
     validations:
       required: true
