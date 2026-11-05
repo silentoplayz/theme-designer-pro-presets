@@ -489,7 +489,8 @@ class Event:
                 "'opaque' (default) — solid background for best readability. "
                 "'translucent' — frosted glass effect (backdrop-blur) that lets backgrounds show through. "
                 "'transparent' — fully see-through sidebar with no blur "
-                "(automatically uses translucent on mobile for readability)."
+                "(automatically uses translucent on mobile for readability). "
+                "Open WebUI's fades at the top and bottom of the sidebar show only while it's 'opaque'."
             ),
         )
         overlay_transparency: Literal["opaque", "translucent"] = Field(
@@ -497,7 +498,8 @@ class Event:
             description=(
                 "Controls overlay UI (settings modal, dropdowns, integration menus) background style. "
                 "'opaque' (default) — solid background for best readability. "
-                "'translucent' — frosted glass effect (backdrop-blur) that lets backgrounds show through."
+                "'translucent' — frosted glass effect (backdrop-blur) that lets backgrounds show through. "
+                "The fade at the top of chats shows only while it's 'opaque'."
                 "\n\n---\n\n#### 🔒 Security"
             ),
         )
@@ -6613,8 +6615,8 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                                     <tr><td><b>Show In Admin Panel</b></td><td>Off</td><td>Adds a <b>Themes</b> page to the Admin Panel&rsquo;s top bar, between <b>Functions</b> and <b>Settings</b> (see Section 3).</td></tr>
                                     <tr><td><b>Allow Personal Themes</b></td><td>Off</td><td>On: every user gets a <b>Themes</b> tab in their own Settings for a personal theme (see Section 4). Off again: everyone is back on the instance theme, and personal themes are kept.</td></tr>
                                     <tr><td><b>Auto Sync</b></td><td>Off</td><td>On: skips the Selective Sync dialog and adds a <b>Sync All</b> switch to the footer.</td></tr>
-                                    <tr><td><b>Sidebar Transparency</b></td><td><code>opaque</code></td><td>The chat sidebar&rsquo;s background: <code>opaque</code>, <code>translucent</code> (frosted glass) or <code>transparent</code> (turned into <code>translucent</code> on phones).</td></tr>
-                                    <tr><td><b>Overlay Transparency</b></td><td><code>opaque</code></td><td>Settings, menus and dialogs: <code>opaque</code> or <code>translucent</code> (frosted glass).</td></tr>
+                                    <tr><td><b>Sidebar Transparency</b></td><td><code>opaque</code></td><td>The chat sidebar&rsquo;s background: <code>opaque</code>, <code>translucent</code> (frosted glass) or <code>transparent</code> (turned into <code>translucent</code> on phones). Open WebUI&rsquo;s fades at the top and bottom of the sidebar, above the user menu, show only while it&rsquo;s <code>opaque</code>, with or without Canvas FX.</td></tr>
+                                    <tr><td><b>Overlay Transparency</b></td><td><code>opaque</code></td><td>Settings, menus and dialogs: <code>opaque</code> or <code>translucent</code> (frosted glass). The fade at the top of chats, under the chat title, shows only while it&rsquo;s <code>opaque</code>, with or without Canvas FX.</td></tr>
                                     <tr><td><b>Enable Canvas Api Access</b></td><td>Off</td><td>On: gives every Canvas FX script the viewing user&rsquo;s Open WebUI token, so it can call the API as them. Leave it off unless you wrote or fully reviewed every script.</td></tr>
                                     <tr><td><b>Enable Url Import</b></td><td>On</td><td>Shows the <b>Load from URL</b> import controls. A convenience switch in the browser, not a security boundary.</td></tr>
                                     <tr><td><b>Allowed Import Domains</b></td><td>Empty</td><td>Comma-separated domains that URL imports, update checks and Community Themes may fetch from. Empty allows any. Enforced in the browser as a guardrail, not a security boundary.</td></tr>
@@ -7608,7 +7610,7 @@ self.onmessage = function(e) {
 
                         <p><b>Dimming</b>, under it, sets how much of Open WebUI&rsquo;s dimming layer covers every one of these images: at 100% it stays as Open WebUI draws it, lower thins it to brighten the pictures, and at 0% they show clear. It combines with each image&rsquo;s Opacity, so at 50% Opacity and 40% Dimming the image shows at half opacity and its dimming layer at a fifth.</p>
 
-                        <p>The list belongs to the live theme, not to a gallery theme: applying another theme leaves it as it is, and exported theme files don&rsquo;t carry it. The instance theme sets models&rsquo; images, and each person&rsquo;s own Chat Background Image, for everyone using it. Folders belong to each person, so only a personal theme sets theirs. A Chat Background Image changed in Settings fades from the next page load.</p>
+                        <p>The list belongs to the live theme, not to a gallery theme: applying another theme leaves it as it is, and exported theme files don&rsquo;t carry it. <b>Reset Mode</b> and <b>Global Reset</b> put every setting in the tab back to its default, in every mode, since the tab has one set of settings for all of them. The instance theme sets models&rsquo; images, and each person&rsquo;s own Chat Background Image, for everyone using it. Folders belong to each person, so only a personal theme sets theirs. A Chat Background Image changed in Settings fades from the next page load.</p>
                             </div>
                         </details>
 
@@ -7639,7 +7641,7 @@ self.onmessage = function(e) {
                                     <tr><td><b>2. Background Color Div</b></td><td>-2</td><td>A full-viewport <code>&lt;div id="owui-theme-bg-color"&gt;</code> inserted behind everything. It&rsquo;s created only while Canvas FX runs, and the structural layer makes it transparent so the canvas shows through.</td></tr>
                                     <tr><td><b>3. Canvas Element</b></td><td>0</td><td>A full-viewport <code>&lt;canvas id="owui-theme-canvas-bg"&gt;</code> where your Canvas FX animation renders. Has <code>pointer-events: none</code> so it never intercepts clicks.</td></tr>
                                     <tr><td><b>4. Structural Transparency</b></td><td>&mdash;</td><td>CSS rules that set <code>background-color: transparent</code> on <code>.app</code>, <code>.app&nbsp;&gt;&nbsp;div</code>, <code>main</code>, <code>nav</code>, sticky bars, <code>.message-content</code>, and layout wrappers whose classes begin with <code>bg-gray-</code> or <code>dark:bg-gray-</code> (not hover or other variants). Interactive elements (<code>button</code>, <code>a</code>, <code>input</code>, <code>select</code>, <code>label</code>, <code>span</code>), your own message bubble, rounded controls such as the message input and pill buttons, everything inside the message input, and the login card are excluded, so they keep Open WebUI&rsquo;s own look. The rules use <code>!important</code> and are scoped to the mode&rsquo;s selector plus <code>.app</code>, so overriding one takes <code>!important</code> and at least that specificity. See <i>Overlay UI Protection</i> below for how portaled overlay UI stays opaque.</td></tr>
-                                    <tr><td><b>5. Glass Panels</b></td><td>&mdash;</td><td>A semi-opaque overlay with <code>backdrop-filter: blur()</code> on the <b>sidebar</b>, keeping navigation readable while letting the background show through. The Gradient Builder auto-calculates the RGBA value from the darkest gradient stop (or the mesh background color for Mesh gradients). The sidebar&rsquo;s glass behavior is controlled by the <b>Sidebar Transparency</b> valve: <code>opaque</code> (default) uses a solid background, except that with a gradient active the sidebar takes the darkest gradient color at 75% opacity with a 12px blur, <code>translucent</code> applies a tinted glass effect with <code>backdrop-filter: blur(20px) saturate(1.3)</code>, and <code>transparent</code> removes the background entirely (auto-upgraded to translucent on mobile for readability). Both sidebar and overlay transparency valves work independently of Canvas FX and gradient state.</td></tr>
+                                    <tr><td><b>5. Glass Panels</b></td><td>&mdash;</td><td>A semi-opaque overlay with <code>backdrop-filter: blur()</code> on the <b>sidebar</b>, keeping navigation readable while letting the background show through. The Gradient Builder auto-calculates the RGBA value from the darkest gradient stop (or the mesh background color for Mesh gradients). The sidebar&rsquo;s glass behavior is controlled by the <b>Sidebar Transparency</b> valve: <code>opaque</code> (default) uses a solid background, except that with a gradient active the sidebar takes the darkest gradient color at 75% opacity with a 12px blur, <code>translucent</code> applies a tinted glass effect with <code>backdrop-filter: blur(20px) saturate(1.3)</code>, and <code>transparent</code> removes the background entirely (auto-upgraded to translucent on mobile for readability). Open WebUI&rsquo;s fades at the top and bottom of the sidebar follow the same valve: they stay while it&rsquo;s <code>opaque</code>, in the gradient&rsquo;s sidebar color while a gradient is active, and go away with <code>translucent</code> or <code>transparent</code>, where they would read as solid bands. Both sidebar and overlay transparency valves work independently of Canvas FX and gradient state.</td></tr>
                                     <tr><td><b>6. Overlay Glass</b></td><td>&mdash;</td><td>Portaled UI elements (settings modal, dropdown menus, user menus, integration menus) that live outside <code>.app</code> on <code>&lt;body&gt;</code>. Controlled by the <b>Overlay Transparency</b> valve: <code>opaque</code> (default) keeps solid backgrounds for readability, <code>translucent</code> applies frosted glass with <code>backdrop-filter: blur(20px) saturate(1.3)</code>. Uses CSS <code>:not(.app *)</code> exclusions to avoid affecting elements inside the main app container.</td></tr>
                                 </tbody>
                             </table>
@@ -8949,7 +8951,7 @@ location.reload();</code></pre>
             // ── Confirm: Danger with backup checkbox ──
             { t:'c', id:'nuclear-modal', icon:'\u2622\uFE0F', title:'Global Reset?', msg:'This will wipe all active overrides across ALL modes.', msgMb:'20px', confirmId:'confirm-nuclear-btn', confirmLabel:'Wipe', cb:{ id:'nuclear-backup-cb', label:'Create a backup snapshot' } },
             { t:'c', id:'factory-reset-modal', zClass:'z-top', icon:'\u{1F6A8}', title:'Factory Reset?', msg:'This will permanently WIPE all themes, snapshots, and settings. This action is irreversible.', msgMb:'20px', confirmId:'confirm-factory-reset-btn', confirmLabel:'Wipe All', cb:{ id:'factory-backup-cb', label:'Export a backup before wiping', checked:true } },
-            { t:'c', id:'reset-modal', icon:'\u267B\uFE0F', title:'Reset Mode?', msg:'Are you sure you want to reset the <b><span id="reset-target-mode"></span></b> mode? All color overrides, locks, custom CSS, and Canvas FX for this mode will be wiped.', msgMb:'20px', confirmId:'confirm-reset-btn', confirmLabel:'Reset Mode', cb:{ id:'reset-backup-cb', label:'Create a backup snapshot' } },
+            { t:'c', id:'reset-modal', icon:'\u267B\uFE0F', title:'Reset Mode?', msg:'Are you sure you want to reset the <b><span id="reset-target-mode"></span></b> mode? All color overrides, locks, custom CSS, and Canvas FX for this mode will be wiped, and the Backgrounds tab goes back to its defaults in every mode.', msgMb:'20px', confirmId:'confirm-reset-btn', confirmLabel:'Reset Mode', cb:{ id:'reset-backup-cb', label:'Create a backup snapshot' } },
 
             // ── Confirm: Info ──
             { t:'c', id:'reset-all-confirm-modal', variant:'info', icon:'\u{1F512}', title:'Reset Overrides', msg:'Cannot reset because all color variable overrides are currently locked. Would you like to unlock all variables now?', confirmId:'confirm-reset-all-confirm-btn', confirmLabel:'Unlock & Reset' },
@@ -11590,7 +11592,7 @@ self.onmessage = (e) => {
         const sidebarBlur = 'blur(12px)';
         const overlayFrom = hexToRgba(baseColor, 0.7);
         const overlayTo = hexToRgba(baseColor, 0.35);
-        return `\n/*[OWUI_GRADIENT_START]*/\n/* ${comment} */\n${selector} body {\n${bodyBg}\n  background-attachment: fixed !important;\n${animCss}\n}\n${selector} body::before { content: none !important; display: none !important; }\n${selector} #chat-container .bg-linear-to-t:not(.bg-cover + div) {\n  background-image: linear-gradient(to top, ${overlayFrom}, ${overlayTo}) !important;\n}\n${selector} #sidebar { /*[FX]*/\n  background-color: ${sidebarRgba} !important;\n  backdrop-filter: ${sidebarBlur} !important;\n}\n${keyframesCss}/*[OWUI_GRADIENT_END]*/\n`;
+        return `\n/*[OWUI_GRADIENT_START]*/\n/* ${comment} */\n${selector} body {\n${bodyBg}\n  background-attachment: fixed !important;\n${animCss}\n}\n${selector} body::before { content: none !important; display: none !important; }\n${selector} #chat-container .bg-linear-to-t:not(.bg-cover + div) {\n  background-image: linear-gradient(to top, ${overlayFrom}, ${overlayTo}) !important;\n}\n${selector} #sidebar:not(.h-full) { /*[FX]*/\n  background-color: ${sidebarRgba} !important;\n  backdrop-filter: ${sidebarBlur} !important;\n}\n${selector} #sidebar :is(.sidebar-bg-gradient-to-t, .sidebar-bg-gradient-to-b) {\n  --tw-gradient-from: ${sidebarRgba} !important;\n}\n${selector} #navbar-bg-gradient-to-b {\n  --tw-gradient-from: ${hexToRgba(baseColor, 0.9)} !important;\n  --tw-gradient-via: ${hexToRgba(baseColor, 0.5)} !important;\n}\n${keyframesCss}/*[OWUI_GRADIENT_END]*/\n`;
     }
 
     function buildGradientCss(modeData, selector) {
@@ -11754,13 +11756,13 @@ ${selector} .app :where(${gWhere}) { background-color: transparent !important; b
 ${selector} #theme-designer-container :where(${gWhere}) { background-color: transparent !important; background-image: none !important; }
 ${selector} #auth-page :where(${gWhere}):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
 ${selector} .app :where(.message-content) { background-color: transparent !important; }
-${selector} .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"], [class*="bg-linear-to"]:not(.bg-cover + div)) { background-color: transparent !important; background-image: none !important; }
-${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; }
+${selector} .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar}) !important; }
 `;
             } else {
                 return `
 ${selector} body { background-color: var(${bgBody}) !important; }
-${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; }
+${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar}) !important; }
 `;
             }
         };
@@ -12126,6 +12128,9 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         activeCanvasRef[dm] = null;
         activeCssRef[dm] = null;
         activeGradientRef[dm] = null;
+        // The Backgrounds tab has one set of settings for every mode
+        hiddenBackgrounds = readHiddenBackgrounds(null);
+        refreshBackgroundsUi();
         commitChange({ clearRef: false, snapshots: true });
         if (!silent) {
             if (saveBackup) {
@@ -19104,6 +19109,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         exactly once, at the end of the delivered CSS).
         """
         css = cls._rewrite_sidebar_fx(css, mode)
+        css += cls._sidebar_fade_css()
         if mode == "transparent":
             css += cls._sidebar_mobile_css()
         return css
@@ -19130,13 +19136,13 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             # Pattern groups: (1: prefix) (2: var ref) (3: !important;) — closing } matched but not captured
             if mode == 'translucent':
                 css = _re.sub(
-                    r'(#sidebar\s*\{\s*/\*\[FX\]\*/\s*background-color:\s*)(var\(--[^)]+\))(\s*!important\s*;)\s*\}',
+                    r'(#sidebar(?::not\(\.h-full\))?\s*\{\s*/\*\[FX\]\*/\s*background-color:\s*)(var\(--[^)]+\))(\s*!important\s*;)\s*\}',
                     rf'\1color-mix(in srgb, \2 20%, transparent)\3 backdrop-filter: {blur_val} !important; -webkit-backdrop-filter: {blur_val} !important; }}',
                     css,
                 )
             else:
                 css = _re.sub(
-                    r'(#sidebar\s*\{\s*/\*\[FX\]\*/\s*background-color:\s*)var\(--[^)]+\)(\s*!important\s*;)\s*\}',
+                    r'(#sidebar(?::not\(\.h-full\))?\s*\{\s*/\*\[FX\]\*/\s*background-color:\s*)var\(--[^)]+\)(\s*!important\s*;)\s*\}',
                     rf'\1transparent\2 backdrop-filter: {blur_val} !important; -webkit-backdrop-filter: {blur_val} !important; }}',
                     css,
                 )
@@ -19144,13 +19150,13 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             # Replace gradient sidebar (marked with /*[FX]*/): rgba-based bg + existing blur
             if mode == 'translucent':
                 css = _re.sub(
-                    r'(#sidebar\s*\{\s*/\*\[FX\]\*/[^}]*background-color:\s*)rgba\(([^,]+,[^,]+,[^,]+),\s*[\d.]+\)(\s*!important\s*;[^}]*backdrop-filter:\s*)blur\([^)]+\)',
+                    r'(#sidebar(?::not\(\.h-full\))?\s*\{\s*/\*\[FX\]\*/[^}]*background-color:\s*)rgba\(([^,]+,[^,]+,[^,]+),\s*[\d.]+\)(\s*!important\s*;[^}]*backdrop-filter:\s*)blur\([^)]+\)',
                     rf'\1rgba(\2, 0.25)\3{blur_val}',
                     css,
                 )
             else:
                 css = _re.sub(
-                    r'(#sidebar\s*\{\s*/\*\[FX\]\*/[^}]*background-color:\s*)rgba\([^)]+\)(\s*!important\s*;[^}]*backdrop-filter:\s*)blur\([^)]+\)',
+                    r'(#sidebar(?::not\(\.h-full\))?\s*\{\s*/\*\[FX\]\*/[^}]*background-color:\s*)rgba\([^)]+\)(\s*!important\s*;[^}]*backdrop-filter:\s*)blur\([^)]+\)',
                     rf'\1transparent\2{blur_val}',
                     css,
                 )
@@ -19190,6 +19196,20 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                     pos = nl + 1
         out.append(css[pos:])
         return "".join(out)
+
+    @staticmethod
+    def _sidebar_fade_css() -> str:
+        """Hide Open WebUI's fades at the top and bottom of the sidebar.
+
+        They are solid gradients in the sidebar's own color, so over a
+        translucent or transparent sidebar they read as opaque bands.
+        Appended once at the end of the delivered CSS, like the mobile block.
+        """
+        return (
+            "\n/* Sidebar Transparency: no solid fades over a see-through sidebar */\n"
+            "#sidebar .sidebar-bg-gradient-to-t,\n"
+            "#sidebar .sidebar-bg-gradient-to-b { display: none !important; }\n"
+        )
 
     @staticmethod
     def _sidebar_mobile_css() -> str:
@@ -19281,6 +19301,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 media_sels.insert(0, f'  [data-theme="system"] body > div{pex} {wwhite}')
             css += f'@media (prefers-color-scheme: {scheme}) {{\n'
             css += ',\n'.join(media_sels) + ' {\n' + _decl(color_var) + '  }\n}\n'
+        # The fade at the top of a chat goes with the solid overlays
+        css += '\n/* Overlay Transparency: no fade at the top of chats */\n#navbar-bg-gradient-to-b { display: none !important; }\n'
         return css
 
     def _postprocess_css(self, css):
@@ -19306,6 +19328,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         if sidebar_mode != "opaque":
             out["structural"] = self._rewrite_sidebar_fx(out["structural"], sidebar_mode)
             out["gradient"] = self._rewrite_sidebar_fx(out["gradient"], sidebar_mode)
+            extra += self._sidebar_fade_css()
             if sidebar_mode == "transparent":
                 extra += self._sidebar_mobile_css()
         if self.valves.overlay_transparency != "opaque":

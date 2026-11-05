@@ -236,8 +236,8 @@ Valves are configured in the Admin Panel under **Functions → Theme Designer Pr
 
 | Valve | Type | Default | Description |
 |---|---|---|---|
-| **Sidebar Transparency** | `Literal` | `"opaque"` | Controls sidebar background style. `"opaque"` (default) — solid background for best readability. `"translucent"` — frosted glass effect (backdrop-blur) that lets backgrounds show through. `"transparent"` — fully see-through sidebar with no blur (automatically uses translucent on mobile for readability). |
-| **Overlay Transparency** | `Literal` | `"opaque"` | Controls overlay UI (settings modal, dropdowns, integration menus) background style. `"opaque"` (default) — solid background for best readability. `"translucent"` — frosted glass effect (backdrop-blur) that lets backgrounds show through. |
+| **Sidebar Transparency** | `Literal` | `"opaque"` | Controls sidebar background style. `"opaque"` (default) — solid background for best readability. `"translucent"` — frosted glass effect (backdrop-blur) that lets backgrounds show through. `"transparent"` — fully see-through sidebar with no blur (automatically uses translucent on mobile for readability). Open WebUI's fades at the top and bottom of the sidebar show only while it's `"opaque"`, with or without Canvas FX. |
+| **Overlay Transparency** | `Literal` | `"opaque"` | Controls overlay UI (settings modal, dropdowns, integration menus) background style. `"opaque"` (default) — solid background for best readability. `"translucent"` — frosted glass effect (backdrop-blur) that lets backgrounds show through. The fade at the top of chats shows only while it's `"opaque"`, with or without Canvas FX. |
 
 #### 🔒 Security
 
