@@ -881,6 +881,45 @@ test('a theme fades the Chat Background Image', async ({ admin }) => {
   }
 });
 
+test('Canvas FX draws over the Chat Background Image unless the theme turns it off', async ({ admin }) => {
+  await modelWithoutBackground(admin);
+  const before = (await api('GET', '/api/v1/users/user/settings', undefined, admin)).json || {};
+  const had = (before.ui && before.ui.backgroundImageUrl) || null;
+  await api('POST', '/api/v1/users/user/settings/update',
+    { ...before, ui: { ...(before.ui || {}), backgroundImageUrl: 'data:image/png;base64,' + PNG_1PX } }, admin);
+  const layer = (page) => page.evaluate(() => {
+    const image = [...document.querySelectorAll('div.pointer-events-none.absolute.bg-cover')]
+      .find((el) => (el.getAttribute('style') || '').includes('background-image'));
+    if (!image) return 'no background image on the page';
+    return getComputedStyle(image).zIndex + ' and ' + getComputedStyle(image.nextElementSibling).zIndex;
+  });
+  try {
+    await removePersonalTheme(admin);
+    const flags = { canvasEnabled: true, canvasScript: 'self.onmessage = function () {};' };
+    // On by default: a theme that says nothing about it
+    await saveTheme(admin, markerTheme('instance', flags));
+    const page = await openPage({ token: admin });
+    await page.goto(BASE + '/?models=' + PLAIN_MODEL);
+    await loaderReady(page);
+    await waitFor('the canvas', async () => !!(await page.$('#owui-theme-canvas-bg')) || 'missing');
+    await waitFor('the Chat Background Image behind the canvas', async () => (await layer(page)) === '-1 and -1' || await layer(page));
+    // Turned off, the image stays in front of the animation
+    await saveTheme(admin, hidingBackgrounds(markerTheme('instance', flags), { behind: false }));
+    await waitFor('the Chat Background Image in front when turned off', async () => (await layer(page)) === 'auto and 0' || await layer(page));
+    // Without an animation it stays in front, where it can be seen
+    await saveTheme(admin, markerTheme('instance'));
+    const fresh = await openPage({ token: admin });
+    await fresh.goto(BASE + '/?models=' + PLAIN_MODEL);
+    await loaderReady(fresh);
+    await waitFor('the Chat Background Image in front without a canvas', async () => (await layer(fresh)) === 'auto and 0' || await layer(fresh));
+    if (fresh.errors.length) throw new Error('page errors: ' + fresh.errors.join(' | '));
+  } finally {
+    await api('POST', '/api/v1/users/user/settings/update',
+      { ...before, ui: { ...(before.ui || {}), backgroundImageUrl: had } }, admin);
+    await saveTheme(admin, markerTheme('instance'));
+  }
+});
+
 // ── The theme format (schemas/theme-format.md) ──
 // A theme file goes through the Studio and the designer, and each must read
 // it the way the other wrote it.

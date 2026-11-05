@@ -2001,6 +2001,8 @@ class Event:
             // Background Image by the end of its address in this person's
             // settings. Those addresses are looked up once a page and kept in
             // this browser, so after a reload the image fades before it shows.
+            // The theme can also put them all behind the Canvas FX animation
+            // instead of in front of it, while an animation runs.
             var MODEL_BG_KEY = 'owui_tdp_model_bg';
             var CHAT_BG_KEY = 'owui_tdp_chat_bg';
             var CHAT_BG = 'div.pointer-events-none.absolute.bg-cover';
@@ -2063,13 +2065,16 @@ class Event:
                 return out;
             }
             function syncHiddenBackgrounds() {
-                var hidden = _disabled || window.__THEME_DESIGNER__ ? null : getParsedState()._hiddenBackgrounds;
+                var off = _disabled || window.__THEME_DESIGNER__;
+                var hidden = off ? null : getParsedState()._hiddenBackgrounds;
                 var shares = {};
                 function fade(selector, share) {
                     if (share < 100) shares[selector] = selector in shares ? Math.min(shares[selector], share) : share;
                 }
                 // Only an address that can't break out of the selector
                 var SAFE = /^[\\w:\\/.?=&%+-]{1,512}$/;
+                // On unless the theme turned it off
+                var behind = !off && !(hidden && typeof hidden === 'object' && hidden.behind === false);
                 if (hidden && typeof hidden === 'object') {
                     var path = window.location.pathname.split('/');
                     var folders = bgShares(hidden.folders);
@@ -2092,12 +2097,19 @@ class Event:
                 }
                 var style = document.getElementById('owui-tdp-hidden-bg');
                 var selectors = Object.keys(shares);
-                if (!selectors.length) { if (style) style.remove(); return; }
+                if (!selectors.length && !behind) { if (style) style.remove(); return; }
                 // The image and the dimming layer over it fade together
                 var css = selectors.map(function(s) {
                     return s + ', ' + s + ' + div.pointer-events-none { ' +
                         (shares[s] ? 'opacity: ' + shares[s] / 100 + ' !important;' : 'display: none !important;') + ' }';
-                }).join('\\n');
+                });
+                if (behind) {
+                    // Under the canvas, only while an animation runs: without
+                    // one, Open WebUI's own page background would cover them
+                    var b = 'body:has(#owui-theme-canvas-bg) ' + CHAT_BG + '[style*="background-image"]';
+                    css.push(b + ', ' + b + ' + div.pointer-events-none { z-index: -1 !important; }');
+                }
+                css = css.join('\\n');
                 if (!style) {
                     style = document.createElement('style');
                     style.id = 'owui-tdp-hidden-bg';
@@ -6030,13 +6042,19 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         .hidden-bg-row { display: flex; align-items: center; gap: 10px; font-size: 0.75rem; color: var(--text-main); }
         .hidden-bg-thumb { width: 44px; height: 26px; flex-shrink: 0; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-deep) center / cover no-repeat; }
         .hidden-bg-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .hidden-bg-kind { margin-left: auto; font-size: 0.62rem; color: var(--text-muted); white-space: nowrap; }
+        .hidden-bg-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+        .hidden-bg-kind { font-size: 0.62rem; color: var(--text-muted); white-space: nowrap; }
+        .hidden-bg-label { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; }
+        .hidden-bg-head { display: flex; align-items: center; gap: 10px; flex: 1 1 auto; min-width: 0; }
+        .hidden-bg-controls { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
         #hidden-bg-list input.hidden-bg-slider { width: 160px; flex-shrink: 0; }
+        .hidden-bg-behind-all { display: flex; align-items: center; gap: 10px; font-size: 0.75rem; color: var(--text-main); cursor: pointer; margin-bottom: 6px; }
+        .hidden-bg-behind-all.is-off { opacity: 0.5; cursor: default; }
         .hidden-bg-val { width: 2.6rem; flex-shrink: 0; text-align: right; font-size: 0.7rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
         @media (max-width: 480px) {
             .hidden-bg-row { flex-wrap: wrap; row-gap: 6px; }
-            .hidden-bg-name { flex: 1 1 0; }
-            #hidden-bg-list input.hidden-bg-slider { width: auto; flex: 1 1 calc(100% - 3.6rem); }
+            .hidden-bg-head, .hidden-bg-controls { flex-basis: 100%; }
+            #hidden-bg-list input.hidden-bg-slider { width: auto; flex: 1 1 auto; min-width: 0; }
         }
         .flex-center { display: flex; align-items: center; gap: 12px; }
         .flex-center-gap6 { display: flex; gap: 6px; align-items: center; flex-shrink: 0; flex-wrap: nowrap; }
@@ -6448,7 +6466,13 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
             </div>
             <div class="control-group">
                 <div class="hidden-bg-note" id="hidden-bg-note"></div>
-                <div class="hidden-bg-list" id="hidden-bg-list" role="group" aria-label="How much of each background image shows"></div>
+                <label class="hidden-bg-behind-all">
+                    <input type="checkbox" class="cb-input" id="hidden-bg-behind">
+                    <span>Draw the Canvas FX animation over these images</span>
+                </label>
+                <div class="hidden-bg-note" id="hidden-bg-behind-hint">Off: these images cover the animation, more of it the higher their opacity. On: the animation stays on top of them at any opacity.</div>
+                <div class="hidden-bg-note" id="hidden-bg-behind-why" style="display:none;">This mode has no Canvas FX animation, so the images stay in front of the theme here.</div>
+                <div class="hidden-bg-list" id="hidden-bg-list" role="group" aria-label="Opacity of each background image"></div>
             </div>
         </div>
 
@@ -7557,9 +7581,11 @@ self.onmessage = function(e) {
                         <details class="doc-sub-accordion">
                             <summary>Open WebUI Backgrounds <i data-icon="chevron"></i></summary>
                             <div class="doc-sub-inner">
-                        <p>In Open WebUI, each person can set a <b>Chat Background Image</b> in <b>Settings &rarr; Interface</b>, and a model or a folder can have a background image of its own, set in the model&rsquo;s editor or the folder&rsquo;s <b>Edit Folder</b> dialog. Open WebUI lays the image over the chat with a dimming layer, so it covers this theme&rsquo;s gradient or Canvas FX.</p>
+                        <p>In Open WebUI, each person can set a <b>Chat Background Image</b> in <b>Settings &rarr; Interface</b>, and a model or a folder can have a background image of its own, set in the model&rsquo;s editor or the folder&rsquo;s <b>Edit Folder</b> dialog. Open WebUI lays the image over the chat with a dimming layer, so it covers this theme&rsquo;s gradient or Canvas FX. The dimming layer stays while Canvas FX runs, so at 100% the image looks as Open WebUI shows it.</p>
 
-                        <p>The <b>Backgrounds</b> tab lists the Chat Background Image, every model with a background image, and in a personal theme every folder of yours with one. Each slider sets how much of that image and its dimming layer shows while the theme is in use: at 100% as Open WebUI shows it, at 0% not at all, so the theme&rsquo;s own background shows in its chats. In between, the theme shows through the image. A folder&rsquo;s image shows only on that folder&rsquo;s page, where a new chat in the folder starts, so that is where it fades.</p>
+                        <p>The <b>Backgrounds</b> tab lists the Chat Background Image, every model with a background image, and in a personal theme every folder of yours with one. Each row&rsquo;s <b>Opacity</b> slider sets the opacity of that image and its dimming layer while the theme is in use: at 100% it shows as Open WebUI shows it, at 0% it&rsquo;s hidden, so the theme&rsquo;s own background shows in its chats. In between, the theme shows through the image. A folder&rsquo;s image shows only on that folder&rsquo;s page, where a new chat in the folder starts, so that is where it fades.</p>
+
+                        <p><b>Draw the Canvas FX animation over these images</b>, above the list, decides which is on top. It&rsquo;s on by default, so picking a Canvas FX script shows the animation over the pictures straight away. Off, the images sit over the theme&rsquo;s animation and cover more of it the higher their opacity. On, every one of them and its dimming layer moves behind the animation, so the animation stays on top at any opacity. It takes effect only while an animation runs, so it&rsquo;s grayed out in a mode with no Canvas FX. A gradient can&rsquo;t have an image behind it: the gradient is the page&rsquo;s own background, which always sits under everything, so the image stays in front of it either way.</p>
 
                         <p>The list belongs to the live theme, not to a gallery theme: applying another theme leaves it as it is, and exported theme files don&rsquo;t carry it. The instance theme sets models&rsquo; images, and each person&rsquo;s own Chat Background Image, for everyone using it. Folders belong to each person, so only a personal theme sets theirs. A Chat Background Image changed in Settings fades from the next page load.</p>
                             </div>
@@ -8995,12 +9021,13 @@ location.reload();</code></pre>
     const accentsMatch = (m1, m2) => ACCENT_FIELDS.every(({ key }) => _accentHex(m1[key]) === _accentHex(m2[key]));
 
     // How much of each Open WebUI background shows, 0 to 100, for the ones
-    // set below 100. Themes saved before the sliders listed the hidden ones,
-    // which read as 0.
+    // set below 100, and whether they sit behind the Canvas FX animation. Themes
+    // saved before the sliders listed the hidden ones, which read as 0.
     function readHiddenBackgrounds(v) {
         const share = (n) => Math.max(0, Math.min(100, Math.round(Number(n))));
-        const out = { models: {}, folders: {}, chat: 100 };
+        const out = { models: {}, folders: {}, chat: 100, behind: true };
         if (!v || typeof v !== 'object') return out;
+        out.behind = v.behind !== false;
         ['models', 'folders'].forEach(k => {
             const entries = Array.isArray(v[k]) ? v[k].map(id => [id, 0])
                 : v[k] && typeof v[k] === 'object' ? Object.entries(v[k]) : [];
@@ -9011,7 +9038,7 @@ location.reload();</code></pre>
         return out;
     }
     function hasHiddenBackgrounds(h) {
-        return Object.keys(h.models).length > 0 || Object.keys(h.folders).length > 0 || h.chat < 100;
+        return Object.keys(h.models).length > 0 || Object.keys(h.folders).length > 0 || h.chat < 100 || !h.behind;
     }
 
     // Gallery entries come from storage, the server, imports, community themes
@@ -11698,7 +11725,7 @@ ${selector} .app :where(${gWhere}) { background-color: transparent !important; b
 ${selector} #theme-designer-container :where(${gWhere}) { background-color: transparent !important; background-image: none !important; }
 ${selector} #auth-page :where(${gWhere}):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
 ${selector} .app :where(.message-content) { background-color: transparent !important; }
-${selector} .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"], [class*="bg-linear-to"]) { background-color: transparent !important; background-image: none !important; }
+${selector} .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"], [class*="bg-linear-to"]:not(.bg-cover + div)) { background-color: transparent !important; background-image: none !important; }
 ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; }
 `;
             } else {
@@ -16121,8 +16148,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         if (!list || !note) return;
         const personal = (window.__THEME_PRO_CONFIG__ || {}).scope === 'me';
         note.textContent = personal
-            ? 'Your Chat Background Image, and models and folders with a background image of their own, cover this theme in their chats. Each slider sets how much of one shows while you use this theme: at 100% as Open WebUI shows it, at 0% not at all. It applies in every mode.'
-            : "Each person's Chat Background Image, and models with a background image of their own, cover this theme in their chats. Each slider sets how much of one shows for everyone using the instance theme: at 100% as Open WebUI shows it, at 0% not at all. It applies in every mode. Folders belong to each person, so each sets theirs in their own theme.";
+            ? "Your Chat Background Image, and models and folders with a background image of their own, cover this theme in their chats. Each slider sets that image's opacity while you use this theme: at 100% it shows as Open WebUI shows it, at 0% it's hidden. It applies in every mode."
+            : "Each person's Chat Background Image, and models with a background image of their own, cover this theme in their chats. Each slider sets that image's opacity for everyone using the instance theme: at 100% it shows as Open WebUI shows it, at 0% it's hidden. It applies in every mode. Folders belong to each person, so each sets theirs in their own theme.";
         let found = null;
         let chatImage = null;
 
@@ -16200,11 +16227,23 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             slider.className = 'hidden-bg-slider';
             slider.dataset.bgKind = item.kind;
             slider.dataset.bgId = item.id;
-            slider.setAttribute('aria-label', `How much of ${item.name} shows`);
+            slider.setAttribute('aria-label', `Opacity of ${item.name}`);
             const value = document.createElement('span');
             value.className = 'hidden-bg-val';
             value.textContent = `${share}%`;
-            el.append(thumb, name, kind, slider, value);
+            const text = document.createElement('span');
+            text.className = 'hidden-bg-text';
+            text.append(name, kind);
+            const head = document.createElement('div');
+            head.className = 'hidden-bg-head';
+            head.append(thumb, text);
+            const label = document.createElement('span');
+            label.className = 'hidden-bg-label';
+            label.textContent = 'Opacity';
+            const controls = document.createElement('div');
+            controls.className = 'hidden-bg-controls';
+            controls.append(label, slider, value);
+            el.append(head, controls);
             return el;
         }
 
@@ -16215,7 +16254,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                 return;
             }
             const items = found.slice().sort((a, b) => a.kind.localeCompare(b.kind) || a.name.localeCompare(b.name));
-            // A faded one whose image is gone stays listed, so it can be set back
+            // A changed one whose image is gone stays listed, so it can be set back
             ['models', 'folders'].forEach(kind => Object.keys(hiddenBackgrounds[kind]).forEach(id => {
                 if (!items.some(i => i.kind === kind && i.id === id)) items.push({ kind, id, name: id, image: null });
             }));
@@ -16242,8 +16281,33 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             commitChange({ clearRef: false, push: false });
         });
 
+        // One switch for every image: behind the Canvas FX animation, which
+        // only does something in a mode that runs one
+        const behindBox = $('hidden-bg-behind');
+        const behindWhy = $('hidden-bg-behind-why');
+        function syncBehind() {
+            if (!behindBox) return;
+            const mode = themeData[getActiveDataMode()] || {};
+            const runs = (window.__THEME_PRO_CONFIG__ || {}).enableCanvasFx !== false && !!mode.canvasEnabled && !!mode.canvasScript;
+            behindBox.checked = hiddenBackgrounds.behind;
+            behindBox.disabled = !runs;
+            behindBox.closest('label').classList.toggle('is-off', !runs);
+            if (behindWhy) behindWhy.style.display = runs ? 'none' : '';
+            const hint = $('hidden-bg-behind-hint');
+            if (hint) hint.style.display = runs ? '' : 'none';
+        }
+        if (behindBox) {
+            behindBox.addEventListener('change', () => {
+                hiddenBackgrounds = { ...hiddenBackgrounds, behind: behindBox.checked };
+                commitChange({ clearRef: false, push: false });
+            });
+            document.querySelector('.tab[data-tab="backgrounds"]')?.addEventListener('click', syncBehind);
+            document.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', () => setTimeout(syncBehind, 0)));
+        }
+
         render();
         load();
+        syncBehind();
     })();
 
     // --- Theme Update System ---
