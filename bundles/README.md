@@ -6,9 +6,8 @@ Pre-built import-ready JSON files generated from the individual presets in this 
 
 | Bundle | Description |
 |---|---|
-| **`everything.json`** | **All presets combined — animations, CSS, themes, and gradients in one import** |
+| **`everything.json`** | **All presets combined: animations, themes and gradients in one import** |
 | `canvas-fx-all.json` | All Canvas FX scripts |
-| `css-presets-all.json` | All CSS presets |
 | `themes-all.json` | All themes |
 | `gradients-all.json` | All gradient presets |
 | `gradients-still.json` | Static (non-animated) gradients only |

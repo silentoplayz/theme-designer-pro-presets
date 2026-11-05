@@ -23,7 +23,7 @@ Splits Theme Designer Pro bulk export files into individual preset files, ready 
 
 ### Why
 
-Theme Designer Pro exports everything in bulk — a single JSON file containing all your Canvas FX scripts, CSS presets, or themes. This script breaks those bulk files apart into individual files so you can review, rename, and curate them before committing to the gallery.
+Theme Designer Pro exports everything in bulk: a single JSON file containing all your Canvas FX scripts or themes. This script breaks those bulk files apart into individual files so you can review, rename, and curate them before committing to the gallery.
 
 ### Usage
 
@@ -45,7 +45,6 @@ The script scans the given directory for these filename patterns:
 | File Pattern | Extracts To | Format |
 |---|---|---|
 | `owui-canvas-backup-*.json` | `canvas-fx/*.js` | Raw JavaScript (the script source code) |
-| `owui-css-backup-*.json` | `css-presets/*.css` | Raw CSS stylesheets |
 | `owui-themes-backup-*.json` | `themes/*.json` | JSON with full theme config (all modes) |
 
 ### Filename Generation
@@ -79,10 +78,6 @@ node scripts/extract-presets.js ~/exports/theme-designer-pro/
 #
 #   ✓ Tactical Liquid Grid: tactical_liquid_grid.js (2.6 KB)
 #   ✓ The Genesis Lattice: the_genesis_lattice.js (8.9 KB)
-#   ...
-#
-# 🖌️  CSS Presets: owui-css-backup-2026-05-06.json
-#    Found 11 presets
 #   ...
 #
 # 🎭 Themes: owui-themes-backup-2026-05-06.json
@@ -144,7 +139,6 @@ npm run build
 |---|---|---|
 | `everything.json` | All directories | All preset types in one import |
 | `canvas-fx-all.json` | `canvas-fx/*.js` | All Canvas FX animations |
-| `css-presets-all.json` | `css-presets/*.css` | All CSS presets |
 | `gradients-all.json` | `gradients/**/*.json` | All gradients (recursive) |
 | `gradients-still.json` | `gradients/still/**/*.json` | Static gradients only |
 | `gradients-animated.json` | `gradients/animated/**/*.json` | Animated gradients only |
@@ -302,7 +296,6 @@ A single `docs/catalog.json` containing metadata for every preset in the reposit
 |---|---|
 | `themes` | Name, description, author, version, per-mode OKLCH colors, feature flags (CSS, FX, gradient, overrides), import URL |
 | `canvasFx` | Name (from JSDoc `Title:` or filename), description, import URL |
-| `cssPresets` | Name (title-cased filename), import URL |
 | `gradients` | Name, type (linear/radial/mesh), animated flag, color stops, and the angle, intensity, speed, radial and mesh settings the site needs to draw it exactly, import URL |
 | `bundles` | Name, description, import URL |
 

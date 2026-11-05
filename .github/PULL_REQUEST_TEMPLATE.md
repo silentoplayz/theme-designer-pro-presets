@@ -7,7 +7,6 @@
 <!-- Check all that apply -->
 
 - [ ] Canvas FX animation (`canvas-fx/*.js`)
-- [ ] CSS preset (`css-presets/*.css`)
 - [ ] Theme (`themes/*.json`)
 - [ ] Gradient (`gradients/**/*.json`)
 - [ ] Other (scripts, docs, schemas, etc.)
@@ -32,9 +31,9 @@
 - [ ] `version` raised on any change to an existing theme
 - [ ] Tested on desktop and mobile viewports
 
-### CSS Presets
+### Custom CSS in a Theme
 - [ ] Valid CSS that doesn't break core Open WebUI layout
-- [ ] Uses CSS custom properties where appropriate
+- [ ] Leaves the Surfaces layers' background and blur to the Surfaces tab
 
 ### Gradients
 - [ ] Placed in the correct subdirectory (`still`/`animated` + `linear`/`radial`/`mesh`)

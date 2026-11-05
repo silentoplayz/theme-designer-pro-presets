@@ -39,16 +39,17 @@ Every script follows the house standard in [`canvas-fx/README.md`](canvas-fx/REA
 - [ ] **A version bump on every change,** or nobody who installed the theme is offered the update. Updating replaces all four modes, so say what changed in the description or the release notes
 - [ ] Tested on both desktop and mobile viewports
 
-### CSS Presets
+### Custom CSS in Themes
 
-These rules apply to theme custom CSS too. CI checks the first and warns on the others.
+The gallery ships no CSS presets: custom CSS is left to each user. A theme can still carry its own custom CSS, which follows these rules. CI checks the first and warns on the others.
 
 - [ ] **Style the rounded input pill, `#message-input-container`,** never `#chat-input-container`, the square box inside it
+- [ ] **Leave the Surfaces layers' background and blur to the Surfaces tab.** It sets how see-through the sidebar, message input, side panel, menus, tooltips and dialogs are, per theme and per mode. A preset adds what Surfaces can't, such as edges, accents, shapes and fonts
 - [ ] **Recolor through the palette first.** Open WebUI's surfaces read `var(--color-gray-*)`, so most of a look comes from the palette, and CSS adds only what the palette can't. For accent colors, use `var(--tdp-accent)`, `var(--tdp-accent-2)` and `var(--tdp-accent-3)` instead of hex: every mode defines them, with the accents the theme sets in the Design Studio or the ones generated from its palette
 - [ ] **Stable hooks only:** IDs such as `#sidebar`, `#message-input-container`, `#sidebar-chat-item`, classes such as `.chat-user`, `.chat-assistant`, `.markdown-prose`. No Tailwind utility classes as selectors, and none of the stale ones CI warns about
 - [ ] **Keep Open WebUI's shapes:** the input is a pill, bubbles and cards are rounded; don't square them off or box text in
 - [ ] **No blanket `input`, `textarea` or `*` rules,** which restyle every field in Settings and hide focus rings
-- [ ] **`!important` only where a background is otherwise cleared** (Canvas FX and gradients clear most surfaces first)
+- [ ] **No `!important` unless a rule of the designer's own has to be beaten.** Open WebUI's styles sit in a cascade layer, so a preset's rules already win over them
 - [ ] Works in light and dark, with readable contrast in both
 
 ### Gradient Presets
@@ -64,7 +65,6 @@ These rules apply to theme custom CSS too. CI checks the first and warns on the 
 
 ```
 canvas-fx/your_animation.js              # Canvas FX scripts
-css-presets/your_preset.css               # CSS presets (raw CSS)
 themes/your_theme.json                    # Theme presets
 gradients/still/linear/your_gradient.json # Still linear gradient
 gradients/animated/mesh/your_gradient.json # Animated mesh gradient
@@ -76,7 +76,6 @@ Use `lowercase_with_underscores` for all filenames:
 
 ```
 starfield_warp.js
-neon_dreamscape.css
 midnight_ocean.json
 ```
 
@@ -85,7 +84,6 @@ midnight_ocean.json
 | Preset type | Directory | Format |
 |---|---|---|
 | Canvas FX animation | `canvas-fx/` | `.js` |
-| CSS styling preset | `css-presets/` | `.css` |
 | Complete theme | `themes/` | `.json` |
 | Still gradient | `gradients/still/{linear,mesh,radial}/` | `.json` |
 | Animated gradient | `gradients/animated/{linear,mesh,radial}/` | `.json` |

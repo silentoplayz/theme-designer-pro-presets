@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.20.2
+version: 1.20.3
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -22,7 +22,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.20.2"
+VERSION = "1.20.3"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -7670,7 +7670,7 @@ self.onmessage = function(e) {
                             <li><b>Undo / Redo:</b> Full history support via the <b>Undo</b> and <b>Redo</b> buttons in the footer, or <b>Ctrl+Z</b> / <b>Ctrl+Y</b> (<b>Cmd</b> on macOS). The shortcuts don&rsquo;t fire while you&rsquo;re typing in a field. The history keeps the last 50 steps of palette changes, overrides, locks, CSS, Canvas, Manual Variable Overrides, and Gradient Background.</li>
                             <li><b>Reset Mode:</b> Clears only the current active mode — OKLCH sliders, variable overrides, locks, Custom CSS, Canvas FX, Manual Variable Overrides, and Gradient Background are all wiped. A confirmation dialog gives you the option to create a backup snapshot first.</li>
                             <li><b>Global Reset:</b> Resets all 4 modes to factory defaults &mdash; OKLCH sliders, variable overrides, locks, Custom CSS, Canvas FX, Manual Variable Overrides, and Gradient Background. Saved snapshots and preset libraries are kept. A confirmation dialog gives you the option to create a backup snapshot first.</li>
-                            <li><b>Factory Reset:</b> Permanently removes <b>all</b> data: active theme state, saved snapshot library, CSS presets, Canvas presets, Gradient presets, and saved metadata. Its confirmation downloads a backup first unless you untick <b>Export a backup before wiping</b>. The built-in Tactical Liquid Grid Canvas FX preset and Tactical HUD CSS preset come back on the next load. In a personal <b>Themes</b> tab, it removes your personal theme and your library.</li>
+                            <li><b>Factory Reset:</b> Permanently removes <b>all</b> data: active theme state, saved snapshot library, CSS presets, Canvas presets, Gradient presets, and saved metadata. Its confirmation downloads a backup first unless you untick <b>Export a backup before wiping</b>. The built-in Tactical Liquid Grid Canvas FX preset comes back on the next load. In a personal <b>Themes</b> tab, it removes your personal theme and your library.</li>
                             <li><b>JSON View:</b> Click the <b>{ } JSON</b> button in the header to view the current theme as formatted JSON in a modal. Includes a <b>Collapse/Expand</b> toggle for minified output and a <b>Copy to Clipboard</b> button. If a snapshot is active, the output includes its metadata (name, version, author, description, etc.).</li>
                             <li><b>Clipboard Import (JSON):</b> Pressing <b>Ctrl+V</b> with theme JSON on your clipboard, while you aren&rsquo;t typing in a field, opens an import dialog. The tool auto-detects the theme structure, checks for duplicates, and warns about embedded Canvas FX scripts for security review before importing. <b>Import Without Applying</b> adds the theme to your gallery without switching to it. Canvas FX and CSS preset backups can be pasted the same way.</li>
                             <li><b>Modal Shortcuts:</b> <b>Escape</b> closes the designer&rsquo;s dialogs and <b>Enter</b> confirms the primary action. <b>Backspace</b> also cancels most confirmation dialogs when you aren&rsquo;t typing in a field.</li>
@@ -8061,13 +8061,6 @@ self.onmessage = function(e) {
                                 <div style="position: relative; flex: 1;">
                                     <code class="doc-pre" style="display: block; margin: 0; font-size: 0.6rem; user-select: all; word-break: break-all; padding-right: 60px;" id="url-bundle-canvas">https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/canvas-fx-all.json</code>
                                     <button class="owui-code-btn" style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('url-bundle-canvas').textContent).then(()=>showToast('Copied URL'))">Copy</button>
-                                </div>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <span style="font-size: 0.65rem; font-weight: 700; color: var(--text-main); min-width: 100px;">🎨 CSS Presets</span>
-                                <div style="position: relative; flex: 1;">
-                                    <code class="doc-pre" style="display: block; margin: 0; font-size: 0.6rem; user-select: all; word-break: break-all; padding-right: 60px;" id="url-bundle-css">https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/css-presets-all.json</code>
-                                    <button class="owui-code-btn" style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('url-bundle-css').textContent).then(()=>showToast('Copied URL'))">Copy</button>
                                 </div>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
@@ -10090,17 +10083,9 @@ self.onmessage = (e) => {
         syncLibrary();
     }
 
+    // No CSS presets ship with the function: the library holds the user's own
     let CSS_PRESETS = Storage.get('css');
-    if (!CSS_PRESETS || !Array.isArray(CSS_PRESETS) || CSS_PRESETS.length === 0) {
-        CSS_PRESETS =[
-            {
-                name: "Tactical HUD",
-                code: "/* Tactical HUD: a glass sidebar and input with a targeting glow, accent headings and table rules, all from the palette. Pairs with the Tactical Liquid Grid Canvas FX. */\n:root {\n\t--hud-accent: var(--color-gray-800);\n\t--hud-glass: color-mix(in oklab, var(--color-gray-50) 70%, transparent);\n\t--hud-line: color-mix(in oklab, var(--color-gray-600) 25%, transparent);\n\t--hud-glow: color-mix(in oklab, var(--color-gray-600) 40%, transparent);\n\t--hud-wash: color-mix(in oklab, var(--color-gray-500) 10%, transparent);\n\t--hud-fade: color-mix(in oklab, var(--color-gray-50) 80%, transparent);\n}\nhtml.dark {\n\t--hud-accent: var(--color-gray-200);\n\t--hud-glass: color-mix(in oklab, var(--color-gray-950) 75%, transparent);\n\t--hud-line: color-mix(in oklab, var(--color-gray-300) 20%, transparent);\n\t--hud-glow: color-mix(in oklab, var(--color-gray-300) 40%, transparent);\n\t--hud-wash: color-mix(in oklab, var(--color-gray-300) 8%, transparent);\n\t--hud-fade: color-mix(in oklab, var(--color-gray-950) 80%, transparent);\n}\n\n/* Glass panels. */\n#sidebar {\n\tbackground-color: var(--hud-glass) !important;\n\tbackdrop-filter: blur(14px) saturate(1.2);\n\tborder-inline-end: 1px solid var(--hud-line);\n}\n#sidebar-chat-item.selected {\n\tbackground-color: var(--hud-wash);\n\tbox-shadow: inset 2px 0 0 var(--hud-accent);\n}\n#navbar-bg-gradient-to-b {\n\tbackground-image: linear-gradient(to bottom, var(--hud-fade), transparent);\n}\n#message-input-container {\n\tbackground-color: var(--hud-glass) !important;\n\tborder-color: var(--hud-line);\n\tbackdrop-filter: blur(10px);\n\ttransition: border-color 0.3s, box-shadow 0.3s;\n}\n#message-input-container:focus-within {\n\tborder-color: var(--hud-glow);\n\tbox-shadow: 0 0 20px var(--hud-wash), 0 0 0 1px var(--hud-line);\n}\n.chat-user .rounded-3xl {\n\tbackground-color: var(--hud-wash) !important;\n\tbox-shadow: inset 0 0 0 1px var(--hud-line);\n}\n#send-message-button:enabled {\n\tbox-shadow: 0 0 12px var(--hud-glow);\n}\n\n/* Readouts. */\n.markdown-prose {\n\t--tw-prose-headings: var(--hud-accent);\n\t--tw-prose-links: var(--hud-accent);\n\t--tw-prose-hr: var(--hud-line);\n\t--tw-prose-th-borders: var(--hud-line);\n\t--tw-prose-td-borders: var(--hud-wash);\n}\n.markdown-prose th {\n\tbackground-color: var(--hud-wash);\n}\n.markdown-prose .codespan {\n\tcolor: var(--hud-accent);\n\tbox-shadow: inset 0 0 0 1px var(--hud-line);\n}\n::selection {\n\tbackground-color: var(--hud-glow);\n}\nhtml {\n\tscrollbar-color: var(--hud-line) transparent;\n}"
-            }
-        ];
-        Storage.set('css', CSS_PRESETS);
-        syncLibrary();
-    }
+    if (!Array.isArray(CSS_PRESETS)) CSS_PRESETS = [];
 
     let CUSTOM_GRADIENT_PRESETS = Storage.get('gradients', []);
     if (!Array.isArray(CUSTOM_GRADIENT_PRESETS)) CUSTOM_GRADIENT_PRESETS = [];

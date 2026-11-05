@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.20.2-blue)
+![Version](https://img.shields.io/badge/version-1.20.3-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -55,7 +55,7 @@ Unlike the [Tool variant](../tools/) which runs inside an AI chat iframe, this v
 - 🔊 **Context-Aware Animations:** Canvas FX scripts can react to conversation data in real-time. A DOM observer scans chat messages for DOM-based token estimation (at most every 2 seconds, during streaming too), while a Socket.IO WebSocket interceptor extracts exact token counts from `chat:completion` responses — both feed a `context` message to the animation for data-driven visual effects. External scripts can also dispatch custom context data via the `owui-canvas-context` CustomEvent API.
 - 🎭 **Community Themes Browser:** Browse and install curated community themes directly from the Themes tab. The community themes grid fetches from the [preset gallery manifest](https://github.com/silentoplayz/theme-designer-pro-presets) and supports one-click install, install-all, and search. Controlled by the `enable_community_themes` valve.
 - 🪟 **Sidebar & Overlay Transparency:** Admin-configurable transparency for the sidebar and overlay UI (settings modals, dropdowns). Choose between opaque (solid), translucent (frosted glass with backdrop-blur), or transparent modes via the `sidebar_transparency` and `overlay_transparency` valves. A theme can set its own per layer in the **Surfaces** tab, which wins over the valves for that mode.
-- 👩‍💻 **IDE-Grade Custom CSS Editor:** Write raw CSS directly within the tool. The editor features Tab trapping (2-space indent), smart auto-indentation, auto-closing pairs (brackets, quotes, parentheses), and a synced line number gutter. Save your favorite tweaks to the built-in Custom CSS Preset Gallery. A bundled "Tactical HUD" CSS preset — designed to pair with the "Tactical Liquid Grid" Canvas FX animation — ships with every fresh install as a starter example. Includes a smart parser that safely extracts and hoists `@keyframes`!
+- 👩‍💻 **IDE-Grade Custom CSS Editor:** Write raw CSS directly within the tool. The editor features Tab trapping (2-space indent), smart auto-indentation, auto-closing pairs (brackets, quotes, parentheses), and a synced line number gutter. Save your favorite tweaks to your own Custom CSS Preset Gallery, which starts empty. Includes a smart parser that safely extracts and hoists `@keyframes`!
 - 🛡️ **Auto-Scoped CSS Injection:** Write Custom CSS without fear of breaking other modes. The Auto-Scope toggle automatically wraps your code in the correct CSS selectors (e.g., `.dark` or `[data-theme='light']`) to ensure tweaks only apply when they should. User CSS is automatically sanitized to prevent spoofing of internal `OWUI_*` marker comments used for auth-page stripping.
 - 🎯 **Variable Overrides & Manual CSS Variables:** Hand-pick and override color variables with a native color picker — each swatch features an `Aa` contrast preview badge. Click directly on any variable name to instantly copy its CSS declaration (e.g., `--color-gray-800: #1a1a2e;`). The Manual Variable Overrides code editor lets you write raw CSS custom property declarations injected _after_ the generated palette for maximum priority.
 - 🔒 **Smart Locking / Pinning:** Lock specific color variables using the 🔒 icon (or bulk "Lock All" / "Unlock All" buttons). Locked colors are pinned and protected from sliders, randomization, or image extraction.
@@ -98,7 +98,6 @@ Or import individual categories:
 | Bundle | URL |
 |---|---|
 | All Canvas FX | `https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/canvas-fx-all.json` |
-| All CSS Presets | `https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/css-presets-all.json` |
 | All Themes | `https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/themes-all.json` |
 | All Gradients | `https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/gradients-all.json` |
 
@@ -509,6 +508,14 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
 
 ---
+
+## 📝 What's New in 1.20.3
+
+Paste it in and save. Your saved CSS presets stay as they are.
+
+**No CSS presets ship any more.** Custom CSS is left to each user. A new designer's CSS library starts empty, where it used to hold the built-in Tactical HUD preset. The preset gallery no longer carries CSS presets either. The `css-presets/` folder, its `css-presets-all.json` bundle and the gallery's CSS tab are gone, and `everything.json` now holds animations, themes and gradients. Most of what those presets did by hand, tinting and blurring the sidebar, input, menus and dialogs, is now the **Surfaces** tab's job.
+
+**CSS presets are still a feature.** Save your own CSS to the library, import and export `.css` files and CSS backups, and wipe the library, as before. A theme can still carry its own custom CSS.
 
 ## 📝 What's New in 1.20.2
 

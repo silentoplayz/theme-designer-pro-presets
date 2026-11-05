@@ -8,7 +8,6 @@ body:
       label: Preset Type
       options:
         - Canvas FX animation
-        - CSS preset
         - Theme
         - Gradient
     validations:

@@ -14,7 +14,6 @@
  *
  * This will look for:
  *   - owui-canvas-backup-*.json  → extracts to canvas-fx/
- *   - owui-css-backup-*.json     → extracts to css-presets/
  *   - owui-themes-backup-*.json  → extracts to themes/
  *
  * Files are NOT overwritten by default. Use --force to overwrite existing files.
@@ -78,7 +77,6 @@ function writeFile(filePath, content, label) {
 // ── Find export files ──
 const files = fs.readdirSync(resolvedDir);
 const canvasFile = files.find(f => f.match(/owui-canvas-backup.*\.json/i));
-const cssFile = files.find(f => f.match(/owui-css-backup.*\.json/i));
 const themesFile = files.find(f => f.match(/owui-themes-backup.*\.json/i));
 
 let totalExtracted = 0;
@@ -108,32 +106,6 @@ if (canvasFile) {
   }
 } else {
   console.log('\n⏭  No canvas backup file found');
-}
-
-// ── Extract CSS Presets ──
-if (cssFile) {
-  console.log(`\n🖌️  CSS Presets: ${cssFile}`);
-  const data = JSON.parse(fs.readFileSync(path.join(resolvedDir, cssFile), 'utf8'));
-  const presets = data.css_presets || [];
-  console.log(`   Found ${presets.length} presets\n`);
-
-  const usedNames = new Set();
-  for (const preset of presets) {
-    let filename = nameToFilename(preset.name);
-    if (usedNames.has(filename)) {
-      let suffix = 2;
-      while (usedNames.has(`${filename}_${suffix}`)) suffix++;
-      filename = `${filename}_${suffix}`;
-    }
-    usedNames.add(filename);
-
-    // Write raw CSS (matches Theme Designer Pro's .css export format)
-    const outPath = path.join(ROOT, 'css-presets', `${filename}.css`);
-    if (writeFile(outPath, preset.code, preset.name)) totalExtracted++;
-    else totalSkipped++;
-  }
-} else {
-  console.log('\n⏭  No CSS backup file found');
 }
 
 // ── Extract Themes ──
@@ -173,12 +145,6 @@ if (canvasFile) {
   const data = JSON.parse(fs.readFileSync(path.join(resolvedDir, canvasFile), 'utf8'));
   (data.canvas_presets || []).forEach(p => {
     console.log(`  "${p.name}" → canvas-fx/${nameToFilename(p.name)}.js`);
-  });
-}
-if (cssFile) {
-  const data = JSON.parse(fs.readFileSync(path.join(resolvedDir, cssFile), 'utf8'));
-  (data.css_presets || []).forEach(p => {
-    console.log(`  "${p.name}" → css-presets/${nameToFilename(p.name)}.css`);
   });
 }
 if (themesFile) {

@@ -50,35 +50,6 @@ function buildCanvasFxBundle() {
   console.log(`  ✓ canvas-fx-all.json — ${presets.length} animations (${(fs.statSync(outPath).size / 1024).toFixed(0)} KB)`);
 }
 
-// ── CSS Presets Bundle ──
-function buildCssBundle() {
-  const baseDir = path.join(ROOT, 'css-presets');
-  if (!fs.existsSync(baseDir)) return;
-
-  const files = fs.readdirSync(baseDir).filter(f => f.endsWith('.css')).sort();
-  if (files.length === 0) {
-    console.log('  ⏭  No CSS presets found, skipping bundle');
-    return;
-  }
-
-  const presets = files.map(f => {
-    const code = fs.readFileSync(path.join(baseDir, f), 'utf8');
-    const name = f.replace('.css', '').split('_').filter(Boolean).map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
-    return { name, code };
-  });
-
-  const bundle = {
-    css_presets: presets,
-    isCssBackup: true,
-    version: '1.0.0',
-    _meta: { count: presets.length },
-  };
-
-  const outPath = path.join(BUNDLES_DIR, 'css-presets-all.json');
-  fs.writeFileSync(outPath, JSON.stringify(bundle, null, 2));
-  console.log(`  ✓ css-presets-all.json — ${presets.length} presets (${(fs.statSync(outPath).size / 1024).toFixed(0)} KB)`);
-}
-
 // ── Gradients Bundle ──
 // Recursively scans gradients/{still,animated}/{linear,radial,mesh}/
 function collectGradients(dir, category) {
@@ -189,20 +160,6 @@ function buildEverythingBundle() {
     }
   }
 
-  // CSS Presets
-  const cssDir = path.join(ROOT, 'css-presets');
-  if (fs.existsSync(cssDir)) {
-    const files = fs.readdirSync(cssDir).filter(f => f.endsWith('.css')).sort();
-    if (files.length > 0) {
-      bundle.css_presets = files.map(f => ({
-        name: f.replace('.css', '').split('_').filter(Boolean).map(w => w[0].toUpperCase() + w.slice(1)).join(' '),
-        code: fs.readFileSync(path.join(cssDir, f), 'utf8'),
-      }));
-      bundle.isCssBackup = true;
-      parts.push(`${files.length} CSS`);
-    }
-  }
-
   // Gradients
   const gradDir = path.join(ROOT, 'gradients');
   if (fs.existsSync(gradDir)) {
@@ -249,7 +206,6 @@ function buildEverythingBundle() {
 // ── Run ──
 console.log('Building bundles...\n');
 buildCanvasFxBundle();
-buildCssBundle();
 buildGradientBundle();
 buildThemesBundle();
 buildEverythingBundle();

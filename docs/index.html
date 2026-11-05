@@ -7,7 +7,7 @@
     // Gallery links from before v2 pointed here with the category in the hash
     (function () {
       function go() {
-        if (/^#(themes|canvasFx|cssPresets|gradients|bundles)(\?.*)?$/.test(location.hash)) location.replace('gallery/' + location.hash);
+        if (/^#(themes|canvasFx|gradients|bundles)(\?.*)?$/.test(location.hash)) location.replace('gallery/' + location.hash);
       }
       go();
       window.addEventListener('hashchange', go);
@@ -133,7 +133,6 @@
         <a class="stat" href="gallery/#canvasFx"><span class="stat-num" data-count="canvasFx">73</span><span class="stat-label">Canvas FX animations</span></a>
         <a class="stat" href="gallery/#themes"><span class="stat-num" data-count="themes">33</span><span class="stat-label">Complete themes</span></a>
         <a class="stat" href="gallery/#gradients"><span class="stat-num" data-count="gradients">13</span><span class="stat-label">Gradients</span></a>
-        <a class="stat" href="gallery/#cssPresets"><span class="stat-num" data-count="cssPresets">12</span><span class="stat-label">CSS presets</span></a>
         <div class="stat"><span class="stat-num">4</span><span class="stat-label">Modes: Dark, OLED, Light, Her</span></div>
       </div>
     </section>

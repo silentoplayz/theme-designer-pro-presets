@@ -2,7 +2,6 @@
 
 [![Build Bundles](https://github.com/silentoplayz/theme-designer-pro-presets/actions/workflows/build-bundles.yml/badge.svg)](https://github.com/silentoplayz/theme-designer-pro-presets/actions/workflows/build-bundles.yml)
 ![Canvas FX](https://img.shields.io/badge/Canvas_FX-49_animations-blue)
-![CSS Presets](https://img.shields.io/badge/CSS-8_presets-purple)
 ![Themes](https://img.shields.io/badge/Themes-36_themes-green)
 ![Gradients](https://img.shields.io/badge/Gradients-13_presets-orange)
 
@@ -20,7 +19,7 @@ Theme Designer Pro themes your whole [Open WebUI](https://github.com/open-webui/
 |---|---|
 | Theme my Open WebUI | [Install the event function](#-install) |
 | Design a theme without installing anything yet | The [Studio](https://silentoplayz.github.io/theme-designer-pro-presets/studio/), which designs in your browser, tunes an animation's own settings, and downloads a theme file the designer imports |
-| Find a ready-made look | The [preset gallery](https://silentoplayz.github.io/theme-designer-pro-presets/gallery/), with a live preview of every theme, animation, gradient and CSS preset |
+| Find a ready-made look | The [preset gallery](https://silentoplayz.github.io/theme-designer-pro-presets/gallery/), with a live preview of every theme, animation and gradient |
 | Change my theme from a chat | The [Launcher Tool](launcher/README.md) |
 | Share a preset I made | **Submit to the gallery** in the Studio, the [theme submission form](https://github.com/silentoplayz/theme-designer-pro-presets/issues/new?template=theme-submission.yml), or [Contributing](CONTRIBUTING.md) |
 | Ask a question or suggest an idea | [Discussions](https://github.com/silentoplayz/theme-designer-pro-presets/discussions): [Q&A](https://github.com/silentoplayz/theme-designer-pro-presets/discussions/categories/q-a), [Show and tell](https://github.com/silentoplayz/theme-designer-pro-presets/discussions/6) or [Ideas](https://github.com/silentoplayz/theme-designer-pro-presets/discussions/7). Bugs go to [Issues](https://github.com/silentoplayz/theme-designer-pro-presets/issues). |
@@ -54,7 +53,7 @@ You can also drop any `.js`, `.css` or `.json` file from this repository anywher
 
 ### Everything at once
 
-Paste this link into an Import dialog to get every animation, CSS preset, theme and gradient in one go:
+Paste this link into an Import dialog to get every animation, theme and gradient in one go:
 
 ```
 https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/everything.json
@@ -66,7 +65,6 @@ https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/b
 |---|---|
 | **`everything.json`** | **Every preset** |
 | `canvas-fx-all.json` | All Canvas FX scripts |
-| `css-presets-all.json` | All CSS presets |
 | `themes-all.json` | All themes |
 | `gradients-all.json` | All gradients |
 | `gradients-still.json` | Gradients that don't move |
@@ -75,7 +73,6 @@ https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/b
 ### One preset at a time
 
 - **Canvas FX:** Canvas FX tab > Import, with a `.js` file from [`canvas-fx/`](canvas-fx/)
-- **CSS:** Style Overrides tab > Import, with a `.css` file from [`css-presets/`](css-presets/)
 - **Themes:** Theme Library > Import, with a `.json` file from [`themes/`](themes/)
 - **Gradients:** Gradient tab > Import, with a `.json` file from [`gradients/`](gradients/)
 
@@ -99,7 +96,6 @@ https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/b
 | [`themes/`](themes/) | Complete themes as `.json`: a palette and settings for each mode (Dark, OLED, Light and Her), with any Canvas FX, gradient and custom CSS they use. Each has an `updateUrl`, so the designer can check it for updates. |
 | [`canvas-fx/`](canvas-fx/) | Animations as standalone `.js` files. They run behind the interface in a Web Worker on an OffscreenCanvas, and many have a `CONFIG` block of settings you can tune with sliders, in the designer and in the Studio. Those tagged **Follows your theme** draw in the theme's colors (Theme Designer Pro v1.12.0 or later). |
 | [`gradients/`](gradients/) | Gradient presets, sorted by motion (`still/`, `animated/`) and then by type (`linear/`, `radial/`, `mesh/`). |
-| [`css-presets/`](css-presets/) | Styling as plain `.css` files: fonts, colors, spacing, components and effects. |
 | [`bundles/`](bundles/) | The presets combined into single files for one import each. Built by CI; see [`bundles/README.md`](bundles/README.md). |
 
 ### Everything else
@@ -108,7 +104,7 @@ https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/b
 |---|---|
 | [`docs/`](docs/) | The [website](https://silentoplayz.github.io/theme-designer-pro-presets/): the home page, the Studio and the preset gallery. [`docs/README.md`](docs/README.md) says how to run it locally. |
 | [`manifest.json`](manifest.json) | Every theme with its current version and update link, so the designer can check all themes for updates in one request. Built by CI. |
-| [`schemas/`](schemas/) | JSON schemas for themes, Canvas FX, CSS presets, gradients and the manifest. |
+| [`schemas/`](schemas/) | JSON schemas for themes, Canvas FX, gradients, the manifest and the designer's CSS backups. |
 | [`scripts/`](scripts/) | Validation and the build scripts CI runs. |
 | [`.github/`](.github/) | Issue forms (bug report, preset and theme submissions), the pull request template, and the workflows below. |
 
@@ -120,7 +116,7 @@ Three [GitHub Actions workflows](.github/workflows/) validate presets, build the
 
 ### Validate & Build Bundles ([`build-bundles.yml`](.github/workflows/build-bundles.yml))
 
-Runs on pushes to `main` that change a preset or a script: `.js` in `canvas-fx/`, `.css` in `css-presets/`, `.json` in `themes/`, `gradients/` or `schemas/`, or `.js` in `scripts/`. Edits to documentation don't start it.
+Runs on pushes to `main` that change a preset or a script: `.js` in `canvas-fx/`, `.json` in `themes/`, `gradients/` or `schemas/`, or `.js` in `scripts/`. Edits to documentation don't start it.
 
 1. **Validate.** [`scripts/validate.js`](scripts/validate.js) checks every preset:
    - **Canvas FX:** the [house standard](canvas-fx/README.md): `init` and `resize` cases, no DOM access, no heartbeat, WebGL context loss handled, with warnings for no theme support or more than 20 KB

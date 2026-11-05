@@ -226,10 +226,9 @@
     const counts = {
       themes: n('themes'),
       canvasFx: n('canvasFx'),
-      cssPresets: n('cssPresets'),
       gradients: n('gradients'),
     };
-    counts.total = counts.themes + counts.canvasFx + counts.cssPresets + counts.gradients;
+    counts.total = counts.themes + counts.canvasFx + counts.gradients;
     document.querySelectorAll('[data-count]').forEach((el) => {
       const v = counts[el.dataset.count];
       if (v != null) el.textContent = v;

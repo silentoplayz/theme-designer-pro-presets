@@ -465,7 +465,7 @@
   // turns into its own Import prompt; nothing installs without their click.
 
   const INSTALL_KEY = 'tdp-install';
-  const KIND_BY_CATEGORY = { themes: 'theme', canvasFx: 'canvas', cssPresets: 'css', gradients: 'gradient', bundles: 'bundle' };
+  const KIND_BY_CATEGORY = { themes: 'theme', canvasFx: 'canvas', gradients: 'gradient', bundles: 'bundle' };
 
   function installTarget() {
     try {

@@ -10,7 +10,7 @@ The theme format also has a written spec, [`theme-format.md`](theme-format.md): 
 |---|---|
 | `theme.schema.json` | Individual theme preset — per-mode OKLCH colors, overrides, CSS, canvas settings |
 | `canvas-preset.schema.json` | Canvas FX backup bundle (`isCanvasBackup` format) |
-| `css-preset.schema.json` | CSS preset backup bundle (`isCssBackup` format) |
+| `css-preset.schema.json` | The designer's own CSS backup files (`isCssBackup` format); the gallery ships no CSS presets |
 | `gradient-preset.schema.json` | Individual gradient preset — linear, radial, and mesh types |
 | `everything.schema.json` | Combined bundle with all preset types in a single file |
 | `manifest.schema.json` | Centralized theme update manifest for bulk version checking |

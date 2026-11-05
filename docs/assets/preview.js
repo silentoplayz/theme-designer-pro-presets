@@ -1,7 +1,7 @@
 /* ========================================
    Theme Designer Pro website
-   Live preview engine: gradients, Canvas FX,
-   themes, and CSS presets
+   Live preview engine: gradients, Canvas FX
+   and themes
    ======================================== */
 
 (function () {
@@ -1801,7 +1801,6 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
           '<p>Everything, live:</p>' +
           '<ul><li><b>Themes</b>: full palette on this mock UI, per mode</li>' +
           '<li><b>Canvas FX</b>: real Web Worker execution behind the chat</li>' +
-          '<li><b>CSS presets</b>: applied to genuine Open WebUI markup</li>' +
           '<li><b>Gradients</b>: exact designer math, animation included</li></ul>',
           ['How do I submit a preset to this gallery?',
            'Can I preview a preset before importing it?',
@@ -3490,7 +3489,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   }
 
   // Every preview type renders on the same mock chat, so the caveat applies to
-  // all four — not just CSS presets. Appended last so it trails any pills or
+  // all three, not just themes. Appended last so it trails any pills or
   // interaction hints the caller already added.
   function addMockNote() {
     // Open WebUI's UI Scale slider (Interface.svelte: range 1-1.5, step
@@ -3640,29 +3639,6 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     }
   }
 
-  async function previewCss(item) {
-    openOverlay(item.name || titleCaseFile(item.file) || 'CSS Preset');
-    setStatus('Loading CSS…');
-    try {
-      const css = await fetchRaw(item.importUrl, false);
-      setStatus('');
-      let frame = null;
-      const renderMode = (modeKey) => {
-        if (frame) frame.remove();
-        frame = mountMockFrame(
-          stage,
-          buildMockSrcdoc({ modeKey, vars: defaultModeVars(modeKey), customCSS: css, transparent: false, initialChat: currentMockChat, initialCollapsed: currentSidebarCollapsed, initialState: currentMockState })
-        );
-      };
-      controlsEl.appendChild(pillGroup(['dark', 'oled', 'light'], 'dark', renderMode));
-      renderMode('dark');
-      addMockNote();
-      active = { destroy() { if (frame) frame.remove(); } };
-    } catch (err) {
-      setStatus('Could not load this preset: ' + err.message);
-    }
-  }
-
   async function previewTheme(item) {
     openOverlay(item.name || 'Theme');
     setStatus('Loading theme…');
@@ -3726,7 +3702,6 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     switch (category) {
       case 'gradients': return previewGradient(item);
       case 'canvasFx': return previewCanvasFx(item);
-      case 'cssPresets': return previewCss(item);
       case 'themes': return previewTheme(item);
     }
   };

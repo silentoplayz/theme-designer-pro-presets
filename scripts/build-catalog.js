@@ -3,7 +3,7 @@
 /**
  * Build Preset Catalog
  *
- * Scans all preset directories (themes, canvas-fx, css-presets, gradients,
+ * Scans all preset directories (themes, canvas-fx, gradients,
  * bundles) and produces a single docs/catalog.json describing every asset
  * in the repository.
  *
@@ -163,24 +163,6 @@ function buildCanvasFx() {
   return entries;
 }
 
-// ── CSS Presets ──
-
-function buildCssPresets() {
-  const dir = path.join(ROOT, 'css-presets');
-  if (!fs.existsSync(dir)) return [];
-
-  const files = fs.readdirSync(dir).filter(f => f.endsWith('.css')).sort();
-  const entries = files.map(file => ({
-    name: titleCase(file),
-    file,
-    dateAdded: getDateAdded(`css-presets/${file}`),
-    importUrl: `${RAW_BASE}/css-presets/${file}`,
-  }));
-
-  console.log(`  ✓ cssPresets — ${entries.length} entries`);
-  return entries;
-}
-
 // ── Gradients ──
 
 function collectGradientFiles(dir, relDir) {
@@ -245,7 +227,6 @@ function buildBundles() {
   const BUNDLE_NAMES = {
     'everything.json': 'Everything',
     'canvas-fx-all.json': 'All Canvas FX',
-    'css-presets-all.json': 'All CSS Presets',
     'themes-all.json': 'All Themes',
     'gradients-all.json': 'All Gradients',
     'gradients-animated.json': 'Animated Gradients',
@@ -284,7 +265,6 @@ const catalog = {
   rawBase: RAW_BASE,
   themes: buildThemes(),
   canvasFx: buildCanvasFx(),
-  cssPresets: buildCssPresets(),
   gradients: buildGradients(),
   bundles: buildBundles(),
 };

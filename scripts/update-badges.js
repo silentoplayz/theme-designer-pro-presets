@@ -38,12 +38,11 @@ function countRecursive(dir, ext) {
 
 const counts = {
   canvasFx: countFiles(path.join(ROOT, 'canvas-fx'), '.js'),
-  css: countFiles(path.join(ROOT, 'css-presets'), '.css'),
   themes: countFiles(path.join(ROOT, 'themes'), '.json'),
   gradients: countRecursive(path.join(ROOT, 'gradients'), '.json'),
 };
 
-console.log(`Counts: ${counts.canvasFx} Canvas FX, ${counts.css} CSS, ${counts.themes} themes, ${counts.gradients} gradients`);
+console.log(`Counts: ${counts.canvasFx} Canvas FX, ${counts.themes} themes, ${counts.gradients} gradients`);
 
 // ── Badge patterns ──
 
@@ -51,10 +50,6 @@ const badges = [
   {
     pattern: /!\[Canvas FX\]\(https:\/\/img\.shields\.io\/badge\/Canvas_FX-\d+_animations-blue\)/,
     replacement: `![Canvas FX](https://img.shields.io/badge/Canvas_FX-${counts.canvasFx}_animations-blue)`,
-  },
-  {
-    pattern: /!\[CSS Presets\]\(https:\/\/img\.shields\.io\/badge\/CSS-\d+_presets-purple\)/,
-    replacement: `![CSS Presets](https://img.shields.io/badge/CSS-${counts.css}_presets-purple)`,
   },
   {
     pattern: /!\[Themes\]\(https:\/\/img\.shields\.io\/badge\/Themes-\d+_themes-green\)/,

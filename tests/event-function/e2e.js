@@ -613,6 +613,8 @@ test('a change in the designer reaches an open page in well under two seconds', 
 
 test('Wipe CSS Snippets and Wipe Canvas Presets leave the live theme alone', async ({ admin }) => {
   await saveTheme(admin, liveTheme());
+  // No CSS snippets ship with the designer, so the library gets one to wipe
+  await api('POST', ROUTE, { css: '', state: '', library: JSON.stringify({ css_presets: [{ name: 'A snippet', code: '.markdown-prose { letter-spacing: 0.01em; }' }] }) }, admin);
   const page = await openDesigner(admin);
   for (const kind of ['css', 'canvas']) {
     await page.evaluate((k) => document.getElementById('delete-all-' + k + '-btn').click(), kind);

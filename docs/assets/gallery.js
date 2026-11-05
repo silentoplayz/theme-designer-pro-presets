@@ -8,20 +8,18 @@
   const $ = (id) => document.getElementById(id);
   const ICONS = UI.ICONS;
 
-  const CATEGORIES = ['themes', 'canvasFx', 'gradients', 'cssPresets', 'bundles'];
-  const PREVIEWABLE = ['themes', 'canvasFx', 'cssPresets', 'gradients'];
+  const CATEGORIES = ['themes', 'canvasFx', 'gradients', 'bundles'];
+  const PREVIEWABLE = ['themes', 'canvasFx', 'gradients'];
   const KIND = {
     themes: 'Theme',
     canvasFx: 'Canvas FX',
     gradients: 'Gradient',
-    cssPresets: 'CSS preset',
     bundles: 'Bundle',
   };
   const NOUNS = {
     themes: ['theme', 'themes'],
     canvasFx: ['animation', 'animations'],
     gradients: ['gradient', 'gradients'],
-    cssPresets: ['CSS preset', 'CSS presets'],
     bundles: ['bundle', 'bundles'],
   };
   // Which presets the Studio can start from, and how it's told
@@ -100,12 +98,11 @@
     const c = catalog;
     switch (b.file) {
       case 'canvas-fx-all.json': return c.canvasFx.length;
-      case 'css-presets-all.json': return c.cssPresets.length;
       case 'themes-all.json': return c.themes.length;
       case 'gradients-all.json': return c.gradients.length;
       case 'gradients-animated.json': return c.gradients.filter((g) => g.animated).length;
       case 'gradients-still.json': return c.gradients.filter((g) => !g.animated).length;
-      case 'everything.json': return c.themes.length + c.canvasFx.length + c.cssPresets.length + c.gradients.length;
+      case 'everything.json': return c.themes.length + c.canvasFx.length + c.gradients.length;
       default: return null;
     }
   }
@@ -127,15 +124,6 @@
         return UI.fxThumbHTML(item);
       case 'gradients':
         return `<div class="thumb thumb-grad" style="${UI.esc(UI.gradientStyle(item))}"></div>`;
-      case 'cssPresets': {
-        const h1 = UI.hashNum(item.file || '', 3) % 360;
-        return `<div class="thumb thumb-code" style="--h1:${h1}" aria-hidden="true">
-          <span>/* ${UI.esc(UI.displayName(item))} */</span>
-          <span><span class="k">.app</span> {</span>
-          <span>&nbsp;&nbsp;<span class="v">${UI.esc(item.file)}</span></span>
-          <span>}</span>
-        </div>`;
-      }
       case 'bundles': {
         const n = bundleCount(item);
         return `<div class="thumb thumb-bundle" aria-hidden="true"><div class="stack"><i></i><i></i><i>${n != null ? n : ''}</i></div></div>`;

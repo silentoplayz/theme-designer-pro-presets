@@ -1,6 +1,6 @@
 # Theme Designer Pro website
 
-The **[Theme Designer Pro website](https://silentoplayz.github.io/theme-designer-pro-presets/)**: a home page with a live demo and install steps, the **[Studio](https://silentoplayz.github.io/theme-designer-pro-presets/studio/)**, where you design a theme in the browser and download it for the designer, and the **[preset gallery](https://silentoplayz.github.io/theme-designer-pro-presets/gallery/)**, where you can search, filter and **live-preview** every theme, Canvas FX animation, CSS preset and gradient in this repository before importing it. It's plain HTML, CSS and JavaScript, with no build step and no dependencies.
+The **[Theme Designer Pro website](https://silentoplayz.github.io/theme-designer-pro-presets/)**: a home page with a live demo and install steps, the **[Studio](https://silentoplayz.github.io/theme-designer-pro-presets/studio/)**, where you design a theme in the browser and download it for the designer, and the **[preset gallery](https://silentoplayz.github.io/theme-designer-pro-presets/gallery/)**, where you can search, filter and **live-preview** every theme, Canvas FX animation and gradient in this repository before importing it. It's plain HTML, CSS and JavaScript, with no build step and no dependencies.
 
 The [`deploy-pages.yml`](../.github/workflows/deploy-pages.yml) workflow publishes this directory to GitHub Pages on every push that touches `docs/**`.
 
@@ -112,7 +112,7 @@ gallery/#gradients?p=electric_aurora.json     ← opens that preset's details
 
 The previews show how a preset looks **inside Open WebUI** without running the real app:
 
-- **Themes and CSS presets** render on a mock chat whose layout and sizes are copied from the Open WebUI source: sidebar, message bubbles, code blocks and the input bar. Sidebar chats are clickable, and mode pills switch between Dark, OLED, Light and Her. A preset that styles something the mock doesn't have has nothing to paint, so previews are labelled *Approximate*.
+- **Themes** render on a mock chat whose layout and sizes are copied from the Open WebUI source: sidebar, message bubbles, code blocks and the input bar. Sidebar chats are clickable, and mode pills switch between Dark, OLED, Light and Her. A preset that styles something the mock doesn't have has nothing to paint, so previews are labelled *Approximate*.
 - **Canvas FX** run in a real Web Worker on an `OffscreenCanvas`, the same way the designer runs them, with mouse and touch input passed in. There's deliberately **no fallback that runs them on the page itself**, so browsers without `OffscreenCanvas` see a notice instead. In the gallery, a script plays when you hover its card (or tap its play button), one at a time.
 - **Gradients** use the designer's own `buildGradientCss` math: intensity, linear, radial, mesh and animation.
 - Every preview runs in a sandboxed `<iframe>` with no origin of its own, and preset CSS can't break out of its `<style>` tag.

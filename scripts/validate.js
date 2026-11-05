@@ -233,7 +233,7 @@ function checkCanvasScript(f, content) {
     if (errors === before) pass(f);
 }
 
-// ── CSS checks shared by CSS presets and theme custom CSS ──
+// ── CSS checks for theme custom CSS ──
 // Selectors that match nothing, or the wrong thing, on current Open WebUI.
 const DEAD_SELECTORS = [
   [/(^|[^:\w-])\.bg-blue-(500|600)\b/, '.bg-blue-500/600 matches almost nothing in current Open WebUI'],
@@ -269,31 +269,6 @@ function checkCss(label, css) {
     warn(label, 'a * rule with !important reaches every element, focus rings included');
   }
   return errors === before;
-}
-
-// ── CSS Preset Validation ──
-function validateCssPresets() {
-  const dir = path.join(ROOT, 'css-presets');
-  if (!fs.existsSync(dir)) return;
-
-  const files = fs.readdirSync(dir).filter(f => f.endsWith('.css'));
-  console.log(`\n🖌️  CSS Presets: ${files.length} files`);
-
-  for (const f of files) {
-    const content = fs.readFileSync(path.join(dir, f), 'utf8').trim();
-
-    if (content.length === 0) {
-      fail(f, 'empty file');
-      continue;
-    }
-
-    if (!content.includes('{') && !content.includes('@')) {
-      fail(f, 'does not appear to contain valid CSS');
-      continue;
-    }
-
-    if (checkCss(f, content)) pass(f);
-  }
 }
 
 // ── Theme Validation ──
@@ -463,8 +438,6 @@ function validateBundles() {
       validateSchema(data, 'everything', f);
     } else if (f === 'canvas-fx-all.json') {
       validateSchema(data, 'canvas', f);
-    } else if (f === 'css-presets-all.json') {
-      validateSchema(data, 'css', f);
     }
     // Gradient and theme bundles use the same flag-based format;
     // their inner items are validated individually above.
@@ -524,7 +497,6 @@ function validateManifest() {
 console.log('Validating presets...');
 validateCanvasFx();
 validateSkills();
-validateCssPresets();
 validateThemes();
 validateGradients();
 validateBundles();
