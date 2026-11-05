@@ -949,6 +949,49 @@ test('Dimming thins Open WebUI\'s dimming layer, together with each image\'s opa
   }
 });
 
+test('the sign-in page shows the instance theme\'s picture, which only an admin can set', async ({ admin, user }) => {
+  const png = Buffer.from(PNG_1PX, 'base64');
+  const upload = (token, body, type) => fetch(BASE + ROUTE + '/auth-background', {
+    method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': type }, body,
+  });
+  let res = await upload(user, png, 'image/png');
+  if (res.status !== 403) throw new Error('a user could upload the sign-in picture: ' + res.status);
+  res = await upload(admin, Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>'), 'image/png');
+  if (res.status !== 415) throw new Error('a file that isn\'t a picture was taken: ' + res.status);
+  res = await upload(admin, png, 'image/png');
+  if (res.status !== 200) throw new Error('could not upload the sign-in picture: ' + res.status);
+  const { url } = await res.json();
+  const served = await fetch(BASE + url);
+  if (served.status !== 200 || served.headers.get('content-type') !== 'image/png') {
+    throw new Error('the picture isn\'t served to a signed-out visitor: ' + served.status + ' ' + served.headers.get('content-type'));
+  }
+  const backdrop = (page) => page.evaluate(() => {
+    const el = document.querySelector('#auth-page > div.absolute.bg-white');
+    if (!el) return 'no backdrop';
+    const cs = getComputedStyle(el);
+    return (cs.backgroundImage.includes('auth-background') ? 'picture' : 'none') + ' at ' + cs.opacity;
+  });
+  try {
+    await saveTheme(admin, hidingBackgrounds(markerTheme('instance'), { auth: { url, share: 60 } }));
+    const page = await openPage();
+    await page.goto(BASE + '/auth');
+    await loaderReady(page);
+    await waitFor('the picture on the sign-in page', async () => (await backdrop(page)) === 'picture at 0.6' || await backdrop(page));
+    await setValves(admin, { enable_auth_page_theming: false });
+    const off = await openPage();
+    await off.goto(BASE + '/auth');
+    await loaderReady(off);
+    await waitFor('no picture with Enable Auth Page Theming off', async () => (await backdrop(off)) === 'none at 1' || await backdrop(off));
+    if (page.errors.length) throw new Error('page errors: ' + page.errors.join(' | '));
+  } finally {
+    await setValves(admin, {});
+    await saveTheme(admin, markerTheme('instance'));
+    await fetch(BASE + ROUTE + '/auth-background', { method: 'DELETE', headers: { Authorization: 'Bearer ' + admin } });
+  }
+  const gone = await fetch(BASE + url);
+  if (gone.status !== 404) throw new Error('the removed picture is still served: ' + gone.status);
+});
+
 // ── The theme format (schemas/theme-format.md) ──
 // A theme file goes through the Studio and the designer, and each must read
 // it the way the other wrote it.

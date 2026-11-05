@@ -2100,9 +2100,26 @@ class Event:
                         if (SAFE.test(tail)) fade(CHAT_BG + '[style*="' + tail + '"]', chat);
                     }
                 }
+                // The sign-in page's own picture (instance theme only), drawn on
+                // Open WebUI's backdrop there under a wash like the chat's
+                // dimming layer, so the shared Dimming means the same in both
+                var authRules = [];
+                var auth = hidden && typeof hidden === 'object' && hidden.auth && typeof hidden.auth === 'object' ? hidden.auth : null;
+                var authShare = auth ? bgShare(auth.share) : 0;
+                if (auth && authShare > 0 && typeof auth.url === 'string' && /^(https:\\/\\/|\\/)[^\\s"'()\\\\<>]{1,2048}$/.test(auth.url)) {
+                    var back = '#auth-page#auth-page > div.absolute.bg-white';
+                    var d = dimming / 100;
+                    var layer = function(from, to) {
+                        return 'background-color: transparent !important; background-image: linear-gradient(to top, ' + from + ', ' + to + '), url("' + auth.url + '") !important; ' +
+                            'background-size: cover !important; background-position: center !important; opacity: ' + authShare / 100 + ' !important;';
+                    };
+                    authRules.push('html.dark ' + back + ' { ' + layer('color-mix(in oklab, var(--color-gray-900) ' + Math.round(100 * d) + '%, transparent)', 'color-mix(in oklab, var(--color-gray-900) ' + Math.round(90 * d) + '%, transparent)') + ' }');
+                    authRules.push('html:not(.dark) ' + back + ' { ' + layer('rgb(255 255 255 / ' + d + ')', 'rgb(255 255 255 / ' + Math.round(85 * d) / 100 + ')') + ' }');
+                    if (behind) authRules.push('html:has(#owui-theme-canvas-bg) ' + back + ' { z-index: -1 !important; }');
+                }
                 var style = document.getElementById('owui-tdp-hidden-bg');
                 var selectors = Object.keys(shares);
-                if (!selectors.length && !behind && dimming >= 100) { if (style) style.remove(); return; }
+                if (!selectors.length && !behind && dimming >= 100 && !authRules.length) { if (style) style.remove(); return; }
                 var css = [];
                 if (dimming < 100) css.push(CHAT_BG + '[style*="background-image"] + div.pointer-events-none { opacity: ' + dimming / 100 + ' !important; }');
                 // The image and the dimming layer over it fade together; these
@@ -2118,7 +2135,7 @@ class Event:
                     var b = 'body:has(#owui-theme-canvas-bg) ' + CHAT_BG + '[style*="background-image"]';
                     css.push(b + ', ' + b + ' + div.pointer-events-none { z-index: -1 !important; }');
                 }
-                css = css.join('\\n');
+                css = css.concat(authRules).join('\\n');
                 if (!style) {
                     style = document.createElement('style');
                     style.id = 'owui-tdp-hidden-bg';
@@ -3532,6 +3549,42 @@ class Event:
         path.parent.mkdir(parents=True, exist_ok=True)
         Event._atomic_write(path, content)
 
+    AUTH_BG_FILE_NAME = "auth_background"
+    AUTH_BG_MAX_BYTES = 5 * 1024 * 1024
+
+    def _get_auth_bg_path(self) -> Path:
+        """The instance theme's sign-in page picture, next to its CSS."""
+        return self._get_css_path().parent / Event.AUTH_BG_FILE_NAME
+
+    @staticmethod
+    def _image_mime(data: bytes) -> str | None:
+        """The image type from the file's first bytes, whatever it was sent as.
+        No SVG: it can carry script."""
+        if data.startswith(b"\x89PNG\r\n\x1a\n"):
+            return "image/png"
+        if data.startswith(b"\xff\xd8\xff"):
+            return "image/jpeg"
+        if data.startswith((b"GIF87a", b"GIF89a")):
+            return "image/gif"
+        if len(data) >= 12 and data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+            return "image/webp"
+        return None
+
+    @staticmethod
+    def _write_bytes(path: Path, data: bytes) -> None:
+        """Atomically write bytes to path via tempfile + os.replace."""
+        import tempfile as _tmpf
+        path.parent.mkdir(parents=True, exist_ok=True)
+        _fd, _tmp = _tmpf.mkstemp(dir=os.path.dirname(path), suffix='.tmp')
+        try:
+            with os.fdopen(_fd, 'wb') as f:
+                f.write(data)
+            os.replace(_tmp, path)
+        except BaseException:
+            try: os.unlink(_tmp)
+            except OSError: pass
+            raise
+
     def _save_css(self, css: str, user_id: str | None = None) -> None:
         """Write theme CSS to disk atomically."""
         path = self._get_css_path(user_id)
@@ -4104,6 +4157,7 @@ class Event:
                     path + "/me/state.json",
                     path + "/me/library.json",
                     path + "/consult",
+                    path + "/auth-background",
                 }
             )
         app.routes[:] = [
@@ -4554,6 +4608,60 @@ class Event:
 
         library_route = Route(LIBRARY_ROUTE, serve_theme_library, methods=["GET"])
 
+        # -- {base}/auth-background -----------------------------------------
+        # The sign-in page's picture. Anyone can read it, since nobody is
+        # signed in there; only an admin can upload or remove it.
+        async def auth_background(request):
+            import hashlib as _hashlib
+            from starlette.responses import Response
+            if not reload_active(request.app):
+                return JSONResponse({"error": "Theme Designer Pro is currently disabled"}, status_code=503)
+            path = event_instance._get_auth_bg_path()
+            if request.method == "GET":
+                try:
+                    data = await asyncio.to_thread(path.read_bytes)
+                except OSError:
+                    return PlainTextResponse("", status_code=404)
+                mime = Event._image_mime(data)
+                if not mime:
+                    return PlainTextResponse("", status_code=404)
+                etag = '"' + _hashlib.sha256(data).hexdigest()[:16] + '"'
+                headers = {
+                    "ETag": etag,
+                    "Cache-Control": "no-cache",
+                    "X-Content-Type-Options": "nosniff",
+                }
+                if request.headers.get("if-none-match", "").removeprefix("W/") == etag:
+                    return Response(status_code=304, headers=headers)
+                return Response(data, media_type=mime, headers=headers)
+            auth = await Event._require_admin(request)
+            if auth is not True:
+                return auth
+            if request.method == "DELETE":
+                try:
+                    await asyncio.to_thread(path.unlink)
+                except FileNotFoundError:
+                    pass
+                except OSError as e:
+                    return JSONResponse({"error": f"Could not remove the picture: {e}"}, status_code=500)
+                return JSONResponse({"ok": True})
+            buf = bytearray()
+            async for chunk in request.stream():
+                buf += chunk
+                if len(buf) > Event.AUTH_BG_MAX_BYTES:
+                    return JSONResponse({"error": "The picture is over 5 MB"}, status_code=413)
+            data = bytes(buf)
+            if not Event._image_mime(data):
+                return JSONResponse({"error": "Use a PNG, JPEG, GIF or WebP picture"}, status_code=415)
+            try:
+                await asyncio.to_thread(Event._write_bytes, path, data)
+            except OSError as e:
+                return JSONResponse({"error": f"Could not save the picture: {e}"}, status_code=500)
+            version = _hashlib.sha256(data).hexdigest()[:12]
+            return JSONResponse({"url": f"{route_base}/auth-background?v={version}"})
+
+        auth_bg_route = Route(route_base + "/auth-background", auth_background, methods=["GET", "POST", "DELETE"])
+
         # Find the SPA catch-all mount and insert before it
         spa_idx = len(app.routes)
         for i, r in enumerate(app.routes):
@@ -4588,9 +4696,11 @@ class Event:
                 Route(base + "/events/bind", bind_sse, methods=["POST"]),
                 Route(base + "/me/theme.css", serve_personal_css, methods=["GET"]),
                 Route(base + "/me/state.json", serve_personal_state, methods=["GET"]),
+                Route(base + "/auth-background", auth_background, methods=["GET"]),
             ]
         for offset, alias_route in enumerate(alias_routes, start=12):
             app.routes.insert(spa_idx + offset, alias_route)
+        app.routes.insert(spa_idx, auth_bg_route)
         log.info(
             "[Theme Pro] Registered routes at %s (position %d)", route_base, spa_idx
         )
@@ -6062,6 +6172,12 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         .hidden-bg-dimming .hidden-bg-label { font-size: 0.75rem; color: var(--text-main); }
         #hidden-bg-list input.hidden-bg-slider, .hidden-bg-dimming input.hidden-bg-slider { width: 160px; flex-shrink: 0; }
         .hidden-bg-head { display: flex; align-items: center; gap: 10px; flex: 1 1 auto; min-width: 0; }
+        .hidden-bg-row.is-auth { flex-wrap: wrap; row-gap: 8px; padding-top: 10px; border-top: 1px solid var(--border); }
+        .hidden-bg-auth-actions { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-left: 54px; }
+        .hidden-bg-auth-actions .btn { font-size: 0.66rem; padding: 6px 12px; }
+        .hidden-bg-auth-actions .hidden-bg-auth-url { flex: 1 1 200px; width: auto; margin: 0; padding: 6px 10px; font-size: 0.72rem; border-radius: 8px; }
+        .hidden-bg-auth-status { font-size: 0.68rem; color: var(--text-muted); flex-basis: 100%; }
+        .hidden-bg-auth-status:empty { display: none; }
         .hidden-bg-controls { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
         .hidden-bg-behind-all { display: flex; align-items: center; gap: 10px; font-size: 0.75rem; color: var(--text-main); cursor: pointer; margin-bottom: 6px; }
         .hidden-bg-behind-all.is-off { opacity: 0.5; cursor: default; }
@@ -6492,7 +6608,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                     <input type="range" id="hidden-bg-dimming" class="hidden-bg-slider" min="0" max="100" step="5" value="100" aria-label="Dimming over these images">
                     <span class="hidden-bg-val" id="hidden-bg-dimming-val">100%</span>
                 </div>
-                <div class="hidden-bg-note">Open WebUI lays a dimming layer over these images. At 100% it stays as Open WebUI draws it. Lower thins it to brighten them, until at 0% they show clear.</div>
+                <div class="hidden-bg-note">Open WebUI lays a dimming layer over these images, and the sign-in page picture gets the same one. At 100% it stays as Open WebUI draws it. Lower thins it to brighten them, until at 0% they show clear.</div>
                 <div class="hidden-bg-list" id="hidden-bg-list" role="group" aria-label="Opacity of each background image"></div>
             </div>
         </div>
@@ -7609,6 +7725,8 @@ self.onmessage = function(e) {
                         <p><b>Draw the Canvas FX animation over these images</b>, above the list, decides which is on top. It&rsquo;s on by default, so picking a Canvas FX script shows the animation over the pictures straight away. Off, the images sit over the theme&rsquo;s animation and cover more of it the higher their opacity. On, every one of them and its dimming layer moves behind the animation, so the animation stays on top at any opacity. It takes effect only while an animation runs, so it&rsquo;s grayed out in a mode with no Canvas FX. A gradient can&rsquo;t have an image behind it: the gradient is the page&rsquo;s own background, which always sits under everything, so the image stays in front of it either way.</p>
 
                         <p><b>Dimming</b>, under it, sets how much of Open WebUI&rsquo;s dimming layer covers every one of these images: at 100% it stays as Open WebUI draws it, lower thins it to brighten the pictures, and at 0% they show clear. It combines with each image&rsquo;s Opacity, so at 50% Opacity and 40% Dimming the image shows at half opacity and its dimming layer at a fifth.</p>
+
+                        <p><b>Sign-in page</b>, the last row in the instance designer, gives the sign-in page a picture of its own, which Open WebUI doesn&rsquo;t offer. <b>Upload picture</b> stores a PNG, JPEG, GIF or WebP of up to 5 MB with the function, which serves it at <code>{ROUTE_BASE}/auth-background</code> to anyone, since nobody is signed in on that page; only an admin can upload or remove it. <b>Use URL</b> takes an <code>https://</code> address instead. The picture sits under the same dimming layer as Open WebUI&rsquo;s own background images, so <b>Dimming</b> and <b>Draw the Canvas FX animation over these images</b> apply to it too, and its own <b>Opacity</b> slider fades it into the theme. Only the instance theme can set it, and <b>Enable Auth Page Theming</b> off hides it with the rest of the sign-in theming. <b>Remove</b>, <b>Reset Mode</b> and <b>Global Reset</b> delete an uploaded picture.</p>
 
                         <p>The list belongs to the live theme, not to a gallery theme: applying another theme leaves it as it is, and exported theme files don&rsquo;t carry it. <b>Reset Mode</b> and <b>Global Reset</b> put every setting in the tab back to its default, in every mode, since the tab has one set of settings for all of them. The instance theme sets models&rsquo; images, and each person&rsquo;s own Chat Background Image, for everyone using it. Folders belong to each person, so only a personal theme sets theirs. A Chat Background Image changed in Settings fades from the next page load.</p>
                             </div>
@@ -9048,8 +9166,14 @@ location.reload();</code></pre>
     // saved before the sliders listed the hidden ones, which read as 0.
     function readHiddenBackgrounds(v) {
         const share = (n) => Math.max(0, Math.min(100, Math.round(Number(n))));
-        const out = { models: {}, folders: {}, chat: 100, behind: true, dimming: 100 };
+        const out = { models: {}, folders: {}, chat: 100, behind: true, dimming: 100, auth: null };
         if (!v || typeof v !== 'object') return out;
+        // The sign-in page's picture: nobody is signed in there, so only the
+        // instance theme can show one
+        const a = v.auth;
+        if ((window.__THEME_PRO_CONFIG__ || {}).scope !== 'me' && a && typeof a === 'object' && authUrlOk(a.url)) {
+            out.auth = { url: a.url, share: a.share !== null && a.share !== undefined && Number.isFinite(Number(a.share)) ? share(a.share) : 100 };
+        }
         out.behind = v.behind !== false;
         if (v.dimming !== null && v.dimming !== undefined && Number.isFinite(Number(v.dimming))) out.dimming = share(v.dimming);
         ['models', 'folders'].forEach(k => {
@@ -9061,8 +9185,24 @@ location.reload();</code></pre>
         if (v.chat !== null && v.chat !== undefined && Number.isFinite(Number(v.chat))) out.chat = share(v.chat);
         return out;
     }
+    // An uploaded picture's address, or an https:// one
+    function authUrlOk(u) {
+        return typeof u === 'string' && /^(https:\/\/|\/)[^\s"'()\\<>]{1,2048}$/.test(u);
+    }
+    function authToken() {
+        return (localStorage.getItem('token') || '').replace(/^"|"$/g, '');
+    }
+    // A reset forgets the sign-in picture; an uploaded one goes from the
+    // server too. Instance designer only: a personal reset must not touch it.
+    function dropAuthUpload(auth) {
+        if ((window.__THEME_PRO_CONFIG__ || {}).scope === 'me') return;
+        if (!auth || typeof auth.url !== 'string' || !auth.url.startsWith('{ROUTE_BASE}/auth-background')) return;
+        const headers = {};
+        if (authToken()) headers.Authorization = `Bearer ${authToken()}`;
+        fetch('{ROUTE_BASE}/auth-background', { method: 'DELETE', headers }).catch(() => {});
+    }
     function hasHiddenBackgrounds(h) {
-        return Object.keys(h.models).length > 0 || Object.keys(h.folders).length > 0 || h.chat < 100 || !h.behind || h.dimming < 100;
+        return Object.keys(h.models).length > 0 || Object.keys(h.folders).length > 0 || h.chat < 100 || !h.behind || h.dimming < 100 || !!h.auth;
     }
 
     // Gallery entries come from storage, the server, imports, community themes
@@ -12129,6 +12269,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
         activeCssRef[dm] = null;
         activeGradientRef[dm] = null;
         // The Backgrounds tab has one set of settings for every mode
+        dropAuthUpload(hiddenBackgrounds.auth);
         hiddenBackgrounds = readHiddenBackgrounds(null);
         refreshBackgroundsUi();
         commitChange({ clearRef: false, snapshots: true });
@@ -12167,6 +12308,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
         activeCanvasRef = { dark: null, oled: null, light: null, her: null };
         activeCssRef = { dark: null, oled: null, light: null, her: null };
         activeGradientRef = { dark: null, oled: null, light: null, her: null };
+        dropAuthUpload(hiddenBackgrounds.auth);
         hiddenBackgrounds = readHiddenBackgrounds(null);
         refreshBackgroundsUi();
         try {
@@ -16232,11 +16374,13 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
 
         function shareOf(item) {
             if (item.kind === 'chat') return hiddenBackgrounds.chat;
+            if (item.kind === 'auth') return hiddenBackgrounds.auth ? hiddenBackgrounds.auth.share : 100;
             const shares = hiddenBackgrounds[item.kind];
             return Object.prototype.hasOwnProperty.call(shares, item.id) ? shares[item.id] : 100;
         }
 
         function kindLabel(item) {
+            if (item.kind === 'auth') return item.image ? 'Before sign-in' : 'Before sign-in, none set';
             if (item.kind === 'chat') return personal ? (item.image ? 'Interface setting' : 'Interface setting, none set') : "Each person's own";
             return (item.kind === 'models' ? 'Model' : 'Folder') + (item.image ? '' : ', no image now');
         }
@@ -16264,6 +16408,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             slider.dataset.bgKind = item.kind;
             slider.dataset.bgId = item.id;
             slider.setAttribute('aria-label', `Opacity of ${item.name}`);
+            if (item.kind === 'auth' && !item.image) slider.disabled = true;
             const value = document.createElement('span');
             value.className = 'hidden-bg-val';
             value.textContent = `${share}%`;
@@ -16283,6 +16428,30 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             return el;
         }
 
+        function authRow() {
+            const a = hiddenBackgrounds.auth;
+            const el = row({ kind: 'auth', id: 'auth', name: 'Sign-in page', image: a ? a.url : null });
+            el.classList.add('is-auth');
+            const actions = document.createElement('div');
+            actions.className = 'hidden-bg-auth-actions';
+            actions.innerHTML =
+                '<button type="button" class="btn" data-auth="upload">Upload picture</button>' +
+                '<input type="file" accept="image/png,image/jpeg,image/gif,image/webp" data-auth="file" hidden>' +
+                '<input type="text" class="modal-input hidden-bg-auth-url" data-auth="url" placeholder="https://example.com/sign-in.jpg" aria-label="Sign-in picture address">' +
+                '<button type="button" class="btn" data-auth="use">Use URL</button>' +
+                (a ? '<button type="button" class="btn btn-danger" data-auth="remove">Remove</button>' : '') +
+                '<span class="hidden-bg-auth-status" data-auth="status" role="status"></span>';
+            if (a && !a.url.startsWith('{ROUTE_BASE}/auth-background')) actions.querySelector('[data-auth="url"]').value = a.url;
+            el.append(actions);
+            return el;
+        }
+
+        function setAuth(next) {
+            hiddenBackgrounds = { ...hiddenBackgrounds, auth: next };
+            commitChange({ clearRef: false, push: false });
+            render();
+        }
+
         function render() {
             list.textContent = '';
             if (!found) {
@@ -16296,8 +16465,45 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             }));
             list.appendChild(row({ kind: 'chat', id: 'chat', name: 'Chat Background Image', image: chatImage }));
             items.forEach(item => list.appendChild(row(item)));
+            if (!personal) list.appendChild(authRow());
         }
 
+        list.addEventListener('click', async (e) => {
+            const btn = e.target.closest('button[data-auth]');
+            if (!btn) return;
+            const actions = btn.closest('.hidden-bg-auth-actions');
+            const status = actions.querySelector('[data-auth="status"]');
+            const keep = hiddenBackgrounds.auth ? hiddenBackgrounds.auth.share : 100;
+            if (btn.dataset.auth === 'upload') {
+                actions.querySelector('[data-auth="file"]').click();
+            } else if (btn.dataset.auth === 'use') {
+                const url = actions.querySelector('[data-auth="url"]').value.trim();
+                if (!url.startsWith('https://') || !authUrlOk(url)) { status.textContent = 'Use an https:// address with no spaces, quotes or brackets.'; return; }
+                dropAuthUpload(hiddenBackgrounds.auth);
+                setAuth({ url, share: keep });
+            } else if (btn.dataset.auth === 'remove') {
+                dropAuthUpload(hiddenBackgrounds.auth);
+                setAuth(null);
+            }
+        });
+        list.addEventListener('change', async (e) => {
+            const file = e.target.closest('input[data-auth="file"]');
+            if (!file || !file.files || !file.files[0]) return;
+            const status = file.closest('.hidden-bg-auth-actions').querySelector('[data-auth="status"]');
+            const picked = file.files[0];
+            if (picked.size > 5 * 1024 * 1024) { status.textContent = 'The picture is over 5 MB.'; return; }
+            status.textContent = 'Uploading…';
+            const headers = { 'Content-Type': picked.type || 'application/octet-stream' };
+            if (authToken()) headers.Authorization = `Bearer ${authToken()}`;
+            try {
+                const r = await fetch('{ROUTE_BASE}/auth-background', { method: 'POST', headers, body: picked });
+                const j = await r.json().catch(() => ({}));
+                if (!r.ok || !authUrlOk(j.url)) throw new Error(j.error || `HTTP ${r.status}`);
+                setAuth({ url: j.url, share: hiddenBackgrounds.auth ? hiddenBackgrounds.auth.share : 100 });
+            } catch (err) {
+                status.textContent = `Couldn't upload it: ${err.message || err}`;
+            }
+        });
         list.addEventListener('input', (e) => {
             const slider = e.target.closest('input[data-bg-kind]');
             if (slider) slider.nextElementSibling.textContent = `${slider.value}%`;
@@ -16307,6 +16513,10 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             if (!slider) return;
             const kind = slider.dataset.bgKind;
             const share = Number(slider.value);
+            if (kind === 'auth') {
+                if (hiddenBackgrounds.auth) setAuth({ ...hiddenBackgrounds.auth, share });
+                return;
+            }
             if (kind === 'chat') {
                 hiddenBackgrounds = { ...hiddenBackgrounds, chat: share };
             } else {
@@ -19380,6 +19590,9 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
                         data[mode][key] = False
                     for key in ("themeAuthOnly", "customCssAuthOnly", "canvasAuthOnly", "gradientAuthOnly"):
                         data[mode][key] = False
+            hidden = data.get("_hiddenBackgrounds")
+            if isinstance(hidden, dict):
+                hidden.pop("auth", None)
             return _json.dumps(data, separators=(",", ":"))
         except Exception:
             return state_str
