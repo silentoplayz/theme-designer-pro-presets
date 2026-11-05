@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI: an admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, optional personal themes for every user, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.20.4-blue)
+![Version](https://img.shields.io/badge/version-1.20.5-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -549,6 +549,41 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. Since 1.7.0 the function cleans that up automatically, on its first event after each start; to check by hand, look for `<!-- OWUI Theme Pro Bootloader -->` in `/app/build/index.html`. It should be gone.
 
 ---
+
+## 📝 What's New in 1.20.5
+
+Paste it in and save.
+
+**Save keeps its look under Buttons.** The Buttons row in Surfaces turned some black and white action buttons see-through, such as Save at the bottom of a function's editor, because they're drawn with grey classes. The row now tells them apart by their text: white in Light mode, dark in Dark mode. Those buttons keep Open WebUI's fill, while grey buttons like Create still follow the row.
+
+**The designer's Surfaces tab, tab bar and footer are see-through.** The Surfaces tab's panel now takes the same tint as the Core Palette, Gradient and Backgrounds panels: 45% black in Dark, 55% white in Light. The tab bar and the footer's buttons (Use instance theme, Global Reset, Reset Mode, Sync, Sync All) take it too, so the background shows through the whole designer, and the open tab is a lighter pane of the same glass. Publish keeps its accent color.
+
+**Five fixes:**
+
+- **Ctrl+Shift+Z redoes.** It never did, and Caps Lock stopped Ctrl+Z from undoing, because the shortcut only matched a lowercase "z".
+- **Enable Community Themes off hides the whole section.** The title row with its search, sort, Install All and Refresh buttons used to stay on the page.
+- **The Gradient tag and filter include mesh gradients.** A theme whose only gradient was a mesh got no Gradient tag and dropped out of the Gradient filter.
+- **Dropping a gradient preset file works.** A gradient `.json` dropped onto the designer was read as a theme and refused with "No valid themes found". It now goes to the Gradient gallery.
+- **Enter on a Sync dialog mode ticks it.** Pressing Enter on a mode button in the Sync dialog also ran the sync; now it only ticks or unticks that mode.
+
+**The Documentation tab is up to date.** Every section was checked against the code and corrected, including:
+
+- what answers while the function is off;
+- the Redis channel name;
+- what a reverse proxy needs: nginx's 1 MB upload limit and the paths to pass;
+- how far Reset Mode and Global Reset reach;
+- Open WebUI's branding license clause.
+
+New entries cover:
+
+- who can use each route;
+- the Apply Library Theme dialog;
+- the `/* tdp:isolated */` marker that sandboxes any Canvas FX script;
+- how the Calm Chat Column valve reaches a script;
+- where uploaded pictures are stored;
+- import and save size limits.
+
+The Minimal WebGL Template now passes the presets repository's validator, and both script templates fade behind the chat the way the reference animation does.
 
 ## 📝 What's New in 1.20.4
 
