@@ -5317,7 +5317,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
             --lm-bg-hover: rgba(0,0,0,0.15);
             --lm-locked-bg: #eff6ff;
         }
-        body.light-mode .container { background: var(--bg-surface); }
+        body.light-mode .container { background: transparent; }
         body.light-mode .header { background: transparent; }
         body.light-mode .tabs { background: var(--bg-deep); border-color: var(--border); }
         body.light-mode .tab.active { background: var(--bg-surface); box-shadow: 0 4px 12px var(--lm-shadow); color: var(--accent); }
@@ -5493,7 +5493,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
             isolation: isolate;
             width: 100%; 
             max-width: 100%; 
-            background: var(--bg-surface); 
+            background: transparent; 
             display: flex; 
             flex-direction: column; 
             height: 100vh;
@@ -5538,6 +5538,10 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         body.light-mode .mode-btn.system-active { background: color-mix(in srgb, var(--accent) 10%, transparent); }
 
         .control-group { background: var(--bg-deep); border: 1px solid var(--border); padding: 36px; border-radius: var(--radius-md); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        /* The page shows through the designer as it does under Canvas FX, so
+           these panels take the same tint whether an animation runs or not */
+        #tab-lch .control-group, #tab-bg .control-group, #tab-backgrounds .control-group, #tab-lch .var-item { background: rgba(0, 0, 0, 0.45); }
+        body.light-mode #tab-lch .control-group, body.light-mode #tab-bg .control-group, body.light-mode #tab-backgrounds .control-group, body.light-mode #tab-lch .var-item { background: rgba(255, 255, 255, 0.55); }
         .slider-row { display: flex; flex-direction: column; gap: 18px; margin-bottom: 28px; }
         .slider-row label { display: flex; justify-content: space-between; font-size: 1.05rem; color: var(--text-muted); font-weight: 600; cursor: pointer; user-select: none; transition: color 0.2s; }
         .slider-row label:hover { color: var(--text-main); }
@@ -9862,6 +9866,9 @@ self.onmessage = (e) => {
     // is in use (the bootloader's syncHiddenBackgrounds). A setting of the live
     // theme, not of a gallery theme: applying one leaves it as it is.
     let hiddenBackgrounds = readHiddenBackgrounds(saved._hiddenBackgrounds);
+    // Set by the Backgrounds tab: puts its controls back in step after the
+    // settings are replaced (the saved theme loading, a Global Reset)
+    let refreshBackgroundsUi = () => {};
     
     let themeData = {
         dark: saved.dark || createDefaultModeData(),
@@ -12155,6 +12162,8 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
         activeCanvasRef = { dark: null, oled: null, light: null, her: null };
         activeCssRef = { dark: null, oled: null, light: null, her: null };
         activeGradientRef = { dark: null, oled: null, light: null, her: null };
+        hiddenBackgrounds = readHiddenBackgrounds(null);
+        refreshBackgroundsUi();
         try {
             if (!_draftMode) {
                 const targets = [window];
@@ -16340,6 +16349,15 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             });
         }
 
+        refreshBackgroundsUi = () => {
+            if (dimBox) {
+                dimBox.value = String(hiddenBackgrounds.dimming);
+                if (dimVal) dimVal.textContent = `${hiddenBackgrounds.dimming}%`;
+            }
+            syncBehind();
+            render();
+        };
+
         render();
         load();
         syncBehind();
@@ -17720,6 +17738,7 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
                             if (_activeCssRef || fromServer) activeCssRef = _activeCssRef || createNullModeMap();
                             if (_activeGradientRef || fromServer) activeGradientRef = _activeGradientRef || createNullModeMap();
                             if (_hiddenBackgrounds || fromServer) hiddenBackgrounds = readHiddenBackgrounds(_hiddenBackgrounds);
+                            refreshBackgroundsUi();
                             ensureAllModes(themeData);
                             
                             if (!themeData.dark.locks) themeData.dark.locks = {};
