@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.20.1-blue)
+![Version](https://img.shields.io/badge/version-1.20.2-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -509,6 +509,21 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
 
 ---
+
+## 📝 What's New in 1.20.2
+
+Paste it in and save. Nothing changes until a theme sets the new row.
+
+**A picture behind the rest of Open WebUI.** Open WebUI draws its background images only on the home page and in chats. The Backgrounds tab has a new **Other pages** row, under the Chat Background Image, that gives the other pages a picture too: Workspace, Notes, Calendar, Automations, Channels, the admin pages and the rest. The home page, chats, folder pages, the sign-in page and shared chats keep Open WebUI's own background.
+
+- **Use my Chat Background Image** shows the picture you set in Settings > Interface. In the instance designer, the button reads **Use each person's Chat Background Image**, and each person sees their own.
+- **Upload picture** stores a PNG, JPEG, GIF or WebP of up to 5 MB with the function, checked by its content rather than its name. **Use URL** takes an `https://` address instead.
+
+**The instance sets a default, and each person can set their own.** The instance theme's picture shows to everyone signed in, at `<designer URL>/page-background`, and only an admin can change it. With **Allow Personal Themes** on, a personal theme's picture is kept in that user's own folder and shown to them alone, at `<designer URL>/me/page-background`.
+
+**It follows the rest of the tab.** The picture sits under the same dimming layer as Open WebUI's backgrounds, so **Dimming** and **Draw the Canvas FX animation over these images** apply to it, and its own **Opacity** slider fades it into the theme. Those pages' solid panels clear so the picture shows, as they do under Canvas FX. Rounded panels and controls, such as the calendar grid, keep their fill. **Remove**, **Reset Mode** and **Global Reset** delete an uploaded picture.
+
+A Chat Background Image changed in Settings reaches the other pages on the next page load.
 
 ## 📝 What's New in 1.20.1
 

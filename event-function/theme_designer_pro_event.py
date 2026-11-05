@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.20.1
+version: 1.20.2
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -22,7 +22,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.20.1"
+VERSION = "1.20.2"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -2066,6 +2066,38 @@ class Event:
                 }
                 return out;
             }
+            // The picture behind the pages without a chat (Workspace, Notes,
+            // Calendar, Channels, the admin pages), where Open WebUI draws no
+            // background. It can be the person's own Chat Background Image,
+            // looked up once a page: an uploaded one is a long data address,
+            // so it's turned into a short blob address the CSS can carry.
+            var _pageChatBg = null;
+            var _pageChatBgLookedUp = false;
+            function lookUpPageChatBg() {
+                if (_pageChatBgLookedUp) return;
+                _pageChatBgLookedUp = true;
+                var init = {};
+                try { init.headers = { Authorization: 'Bearer ' + (localStorage.getItem('token') || '') }; } catch(x) {}
+                fetch('/api/v1/users/user/settings', init)
+                    .then(function(r) { return r.ok ? r.json() : null; })
+                    .then(function(settings) {
+                        var url = settings && settings.ui && settings.ui.backgroundImageUrl;
+                        if (typeof url !== 'string' || !url) return '';
+                        if (url.indexOf('data:image/') === 0) {
+                            return fetch(url).then(function(r) { return r.blob(); }).then(function(b) { return URL.createObjectURL(b); });
+                        }
+                        return url;
+                    })
+                    .then(function(url) { _pageChatBg = url || ''; syncHiddenBackgrounds(); })
+                    .catch(function() { _pageChatBg = ''; });
+            }
+            // Every page of the app but the chat pages (new chat, a chat, a
+            // folder), the sign-in pages and shared chats. By address alone:
+            // this runs before Open WebUI has drawn the page.
+            function onOtherPage() {
+                var p = window.location.pathname;
+                return p !== '/' && !/^\\/(c|folders|auth|s)(\\/|$)/.test(p);
+            }
             function syncHiddenBackgrounds() {
                 var off = _disabled || window.__THEME_DESIGNER__;
                 var hidden = off ? null : getParsedState()._hiddenBackgrounds;
@@ -2117,9 +2149,40 @@ class Event:
                     authRules.push('html:not(.dark) ' + back + ' { ' + layer('rgb(255 255 255 / ' + d + ')', 'rgb(255 255 255 / ' + Math.round(85 * d) / 100 + ')') + ' }');
                     if (behind) authRules.push('html:has(#owui-theme-canvas-bg) ' + back + ' { z-index: -1 !important; }');
                 }
+                // The picture behind the other pages, on a fixed layer under the
+                // app, with the same wash as the chat's dimming layer. Those
+                // pages' solid panels clear, as they do under Canvas FX.
+                var pageRules = [];
+                var pages = hidden && typeof hidden === 'object' && hidden.pages && typeof hidden.pages === 'object' ? hidden.pages : null;
+                var pageShare = pages ? bgShare(pages.share) : 0;
+                if (pages && pageShare > 0 && onOtherPage()) {
+                    var pageUrl = '';
+                    if (pages.source === 'chat') {
+                        if (_pageChatBg === null) lookUpPageChatBg();
+                        pageUrl = _pageChatBg || '';
+                    } else if (typeof pages.url === 'string') {
+                        pageUrl = pages.url;
+                    }
+                    if (/^(https:\\/\\/|\\/|blob:)[^\\s"'()\\\\<>]{1,2048}$/.test(pageUrl)) {
+                        var pd = dimming / 100;
+                        var pageLayer = function(from, to) {
+                            return 'content: "" !important; position: fixed !important; inset: 0 !important; z-index: -1 !important; pointer-events: none !important; ' +
+                                'background-image: linear-gradient(to top, ' + from + ', ' + to + '), url("' + pageUrl + '") !important; ' +
+                                'background-size: cover !important; background-position: center !important; opacity: ' + pageShare / 100 + ' !important;';
+                        };
+                        pageRules.push('html.dark .app::before { ' + pageLayer('color-mix(in oklab, var(--color-gray-900) ' + Math.round(100 * pd) + '%, transparent)', 'color-mix(in oklab, var(--color-gray-900) ' + Math.round(90 * pd) + '%, transparent)') + ' }');
+                        pageRules.push('html:not(.dark) .app::before { ' + pageLayer('rgb(255 255 255 / ' + pd + ')', 'rgb(255 255 255 / ' + Math.round(85 * pd) / 100 + ')') + ' }');
+                        var gEx = ':not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)';
+                        var gWhere = ['[class^="bg-gray-"]', '[class*=" bg-gray-"]', '[class^="dark:bg-gray-"]', '[class*=" dark:bg-gray-"]'].map(function(t) { return t + gEx; }).join(', ');
+                        pageRules.push('.app, .app > div, .app main { background-color: transparent !important; background-image: none !important; }');
+                        pageRules.push('.app :where(' + gWhere + ') { background-color: transparent !important; background-image: none !important; }');
+                        // In front of the animation when the theme says so
+                        if (!behind) pageRules.push('body:has(#owui-theme-canvas-bg) .app { z-index: 1 !important; }');
+                    }
+                }
                 var style = document.getElementById('owui-tdp-hidden-bg');
                 var selectors = Object.keys(shares);
-                if (!selectors.length && !behind && dimming >= 100 && !authRules.length) { if (style) style.remove(); return; }
+                if (!selectors.length && !behind && dimming >= 100 && !authRules.length && !pageRules.length) { if (style) style.remove(); return; }
                 var css = [];
                 if (dimming < 100) css.push(CHAT_BG + '[style*="background-image"] + div.pointer-events-none { opacity: ' + dimming / 100 + ' !important; }');
                 // The image and the dimming layer over it fade together; these
@@ -2135,7 +2198,7 @@ class Event:
                     var b = 'body:has(#owui-theme-canvas-bg) ' + CHAT_BG + '[style*="background-image"]';
                     css.push(b + ', ' + b + ' + div.pointer-events-none { z-index: -1 !important; }');
                 }
-                css = css.concat(authRules).join('\\n');
+                css = css.concat(authRules, pageRules).join('\\n');
                 if (!style) {
                     style = document.createElement('style');
                     style.id = 'owui-tdp-hidden-bg';
@@ -3556,6 +3619,13 @@ class Event:
         """The instance theme's sign-in page picture, next to its CSS."""
         return self._get_css_path().parent / Event.AUTH_BG_FILE_NAME
 
+    PAGE_BG_FILE_NAME = "page_background"
+
+    def _get_page_bg_path(self, user_id: str | None = None) -> Path:
+        """The picture behind pages without a chat: the instance theme's next
+        to its CSS, a personal theme's in that user's own folder."""
+        return self._get_css_path(user_id).parent / Event.PAGE_BG_FILE_NAME
+
     @staticmethod
     def _image_mime(data: bytes) -> str | None:
         """The image type from the file's first bytes, whatever it was sent as.
@@ -4158,6 +4228,8 @@ class Event:
                     path + "/me/library.json",
                     path + "/consult",
                     path + "/auth-background",
+                    path + "/page-background",
+                    path + "/me/page-background",
                 }
             )
         app.routes[:] = [
@@ -4662,6 +4734,80 @@ class Event:
 
         auth_bg_route = Route(route_base + "/auth-background", auth_background, methods=["GET", "POST", "DELETE"])
 
+        # -- {base}/page-background and {base}/me/page-background -----------
+        # The picture behind pages without a chat. The instance theme's shows
+        # to anyone signed in, and only an admin can upload or remove it; a
+        # personal theme's shows to its owner alone, who uploads it.
+        async def _picture(request, path, url):
+            import hashlib as _hashlib
+            from starlette.responses import Response
+            if request.method == "GET":
+                try:
+                    data = await asyncio.to_thread(path.read_bytes)
+                except OSError:
+                    return PlainTextResponse("", status_code=404)
+                mime = Event._image_mime(data)
+                if not mime:
+                    return PlainTextResponse("", status_code=404)
+                etag = '"' + _hashlib.sha256(data).hexdigest()[:16] + '"'
+                headers = {
+                    "ETag": etag,
+                    "Cache-Control": "private, no-cache",
+                    "X-Content-Type-Options": "nosniff",
+                }
+                if request.headers.get("if-none-match", "").removeprefix("W/") == etag:
+                    return Response(status_code=304, headers=headers)
+                return Response(data, media_type=mime, headers=headers)
+            if request.method == "DELETE":
+                try:
+                    await asyncio.to_thread(path.unlink)
+                except FileNotFoundError:
+                    pass
+                except OSError as e:
+                    return JSONResponse({"error": f"Could not remove the picture: {e}"}, status_code=500)
+                return JSONResponse({"ok": True})
+            buf = bytearray()
+            async for chunk in request.stream():
+                buf += chunk
+                if len(buf) > Event.AUTH_BG_MAX_BYTES:
+                    return JSONResponse({"error": "The picture is over 5 MB"}, status_code=413)
+            data = bytes(buf)
+            if not Event._image_mime(data):
+                return JSONResponse({"error": "Use a PNG, JPEG, GIF or WebP picture"}, status_code=415)
+            try:
+                await asyncio.to_thread(Event._write_bytes, path, data)
+            except OSError as e:
+                return JSONResponse({"error": f"Could not save the picture: {e}"}, status_code=500)
+            return JSONResponse({"url": f"{url}?v={_hashlib.sha256(data).hexdigest()[:12]}"})
+
+        async def page_background(request):
+            if not reload_active(request.app):
+                return JSONResponse({"error": "Theme Designer Pro is currently disabled"}, status_code=503)
+            if request.method == "GET":
+                user = await event_instance._require_user(request)
+                if hasattr(user, "status_code"):
+                    return user
+            else:
+                auth = await Event._require_admin(request)
+                if auth is not True:
+                    return auth
+            return await _picture(request, event_instance._get_page_bg_path(), route_base + "/page-background")
+
+        async def personal_page_background(request):
+            if not reload_active(request.app):
+                return JSONResponse({"error": "Theme Designer Pro is currently disabled"}, status_code=503)
+            if not event_instance.valves.allow_personal_themes:
+                return JSONResponse({"error": "Personal themes are turned off on this instance"}, status_code=403)
+            user = await event_instance._require_user(request)
+            if hasattr(user, "status_code"):
+                return user
+            return await _picture(request, event_instance._get_page_bg_path(user.id), route_base + "/me/page-background")
+
+        page_bg_routes = [
+            Route(route_base + "/page-background", page_background, methods=["GET", "POST", "DELETE"]),
+            Route(route_base + "/me/page-background", personal_page_background, methods=["GET", "POST", "DELETE"]),
+        ]
+
         # Find the SPA catch-all mount and insert before it
         spa_idx = len(app.routes)
         for i, r in enumerate(app.routes):
@@ -4701,6 +4847,8 @@ class Event:
         for offset, alias_route in enumerate(alias_routes, start=12):
             app.routes.insert(spa_idx + offset, alias_route)
         app.routes.insert(spa_idx, auth_bg_route)
+        for page_bg_route in page_bg_routes:
+            app.routes.insert(spa_idx, page_bg_route)
         log.info(
             "[Theme Pro] Registered routes at %s (position %d)", route_base, spa_idx
         )
@@ -7713,6 +7861,8 @@ self.onmessage = function(e) {
 
                         <p><b>Sign-in page</b>, the last row in the instance designer, gives the sign-in page a picture of its own, which Open WebUI doesn&rsquo;t offer. <b>Upload picture</b> stores a PNG, JPEG, GIF or WebP of up to 5 MB with the function, which serves it at <code>{ROUTE_BASE}/auth-background</code> to anyone, since nobody is signed in on that page; only an admin can upload or remove it. <b>Use URL</b> takes an <code>https://</code> address instead. The picture sits under the same dimming layer as Open WebUI&rsquo;s own background images, so <b>Dimming</b> and <b>Draw the Canvas FX animation over these images</b> apply to it too, and its own <b>Opacity</b> slider fades it into the theme. Only the instance theme can set it, and <b>Enable Auth Page Theming</b> off hides it with the rest of the sign-in theming. <b>Remove</b>, <b>Reset Mode</b> and <b>Global Reset</b> delete an uploaded picture.</p>
 
+                        <p><b>Other pages</b> gives the pages without a chat a picture of their own: Workspace, Notes, Calendar, Automations, Channels, the admin pages and the rest, where Open WebUI draws no background. <b>Use my Chat Background Image</b> (in the instance designer, <b>Use each person&rsquo;s Chat Background Image</b>) shows the picture each viewer set in Settings &gt; Interface. <b>Upload picture</b> stores a PNG, JPEG, GIF or WebP of up to 5 MB with the function, and <b>Use URL</b> takes an <code>https://</code> address. The instance theme&rsquo;s upload is served at <code>{ROUTE_BASE}/page-background</code> to anyone signed in, and only an admin can change it; a personal theme&rsquo;s is kept in that user&rsquo;s own folder and served to them alone at <code>{ROUTE_BASE}/me/page-background</code>. The picture sits under the same dimming layer, so <b>Dimming</b> and <b>Draw the Canvas FX animation over these images</b> apply to it, and its <b>Opacity</b> slider fades it into the theme. Those pages&rsquo; solid panels clear so the picture shows, as they do under Canvas FX; rounded panels and controls keep their fill. <b>Remove</b>, <b>Reset Mode</b> and <b>Global Reset</b> delete an uploaded one.</p>
+
                         <p>The list belongs to the live theme, not to a gallery theme: applying another theme leaves it as it is, and exported theme files don&rsquo;t carry it. <b>Reset Mode</b> and <b>Global Reset</b> put every setting in the tab back to its default, in every mode, since the tab has one set of settings for all of them. The instance theme sets models&rsquo; images, and each person&rsquo;s own Chat Background Image, for everyone using it. Folders belong to each person, so only a personal theme sets theirs. A Chat Background Image changed in Settings fades from the next page load.</p>
                             </div>
                         </details>
@@ -9190,8 +9340,16 @@ location.reload();</code></pre>
     // saved before the sliders listed the hidden ones, which read as 0.
     function readHiddenBackgrounds(v) {
         const share = (n) => Math.max(0, Math.min(100, Math.round(Number(n))));
-        const out = { models: {}, folders: {}, chat: 100, behind: true, dimming: 100, auth: null };
+        const out = { models: {}, folders: {}, chat: 100, behind: true, dimming: 100, auth: null, pages: null };
         if (!v || typeof v !== 'object') return out;
+        // The picture behind the pages without a chat: the viewer's own Chat
+        // Background Image, or an uploaded or https:// one
+        const pg = v.pages;
+        if (pg && typeof pg === 'object') {
+            const pgShare = pg.share !== null && pg.share !== undefined && Number.isFinite(Number(pg.share)) ? share(pg.share) : 100;
+            if (pg.source === 'chat') out.pages = { source: 'chat', share: pgShare };
+            else if (pg.source === 'url' && authUrlOk(pg.url)) out.pages = { source: 'url', url: pg.url, share: pgShare };
+        }
         // The sign-in page's picture: nobody is signed in there, so only the
         // instance theme can show one
         const a = v.auth;
@@ -9226,7 +9384,20 @@ location.reload();</code></pre>
         fetch('{ROUTE_BASE}/auth-background', { method: 'DELETE', headers }).catch(() => {});
     }
     function hasHiddenBackgrounds(h) {
-        return Object.keys(h.models).length > 0 || Object.keys(h.folders).length > 0 || h.chat < 100 || !h.behind || h.dimming < 100 || !!h.auth;
+        return Object.keys(h.models).length > 0 || Object.keys(h.folders).length > 0 || h.chat < 100 || !h.behind || h.dimming < 100 || !!h.auth || !!h.pages;
+    }
+    // Where this designer keeps its page picture: the instance theme's, or
+    // the signed-in user's own for a personal theme
+    function pagesUploadUrl() {
+        return (window.__THEME_PRO_CONFIG__ || {}).scope === 'me' ? '{ROUTE_BASE}/me/page-background' : '{ROUTE_BASE}/page-background';
+    }
+    // A reset or a new choice forgets the page picture; an uploaded one goes
+    // from the server too
+    function dropPagesUpload(pages) {
+        if (!pages || pages.source !== 'url' || typeof pages.url !== 'string' || !pages.url.startsWith(pagesUploadUrl() + '?')) return;
+        const headers = {};
+        if (authToken()) headers.Authorization = `Bearer ${authToken()}`;
+        fetch(pagesUploadUrl(), { method: 'DELETE', headers }).catch(() => {});
     }
 
     // Gallery entries come from storage, the server, imports, community themes
@@ -12326,6 +12497,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
         activeGradientRef[dm] = null;
         // The Backgrounds tab has one set of settings for every mode
         dropAuthUpload(hiddenBackgrounds.auth);
+        dropPagesUpload(hiddenBackgrounds.pages);
         hiddenBackgrounds = readHiddenBackgrounds(null);
         refreshBackgroundsUi();
         commitChange({ clearRef: false, snapshots: true });
@@ -12365,6 +12537,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
         activeCssRef = { dark: null, oled: null, light: null, her: null };
         activeGradientRef = { dark: null, oled: null, light: null, her: null };
         dropAuthUpload(hiddenBackgrounds.auth);
+        dropPagesUpload(hiddenBackgrounds.pages);
         hiddenBackgrounds = readHiddenBackgrounds(null);
         refreshBackgroundsUi();
         try {
@@ -16519,12 +16692,20 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
         function shareOf(item) {
             if (item.kind === 'chat') return hiddenBackgrounds.chat;
             if (item.kind === 'auth') return hiddenBackgrounds.auth ? hiddenBackgrounds.auth.share : 100;
+            if (item.kind === 'pages') return hiddenBackgrounds.pages ? hiddenBackgrounds.pages.share : 100;
             const shares = hiddenBackgrounds[item.kind];
             return Object.prototype.hasOwnProperty.call(shares, item.id) ? shares[item.id] : 100;
         }
 
         function kindLabel(item) {
             if (item.kind === 'auth') return item.image ? 'Before sign-in' : 'Before sign-in, none set';
+            if (item.kind === 'pages') {
+                const where = 'Workspace, Notes, Calendar, Channels and the other pages without a chat';
+                const p = hiddenBackgrounds.pages;
+                if (!p) return `${where}, none set`;
+                if (p.source === 'chat') return `${where}, showing ${personal ? 'your' : "each person's own"} Chat Background Image`;
+                return where;
+            }
             if (item.kind === 'chat') return personal ? (item.image ? 'Interface setting' : 'Interface setting, none set') : "Each person's own";
             return (item.kind === 'models' ? 'Model' : 'Folder') + (item.image ? '' : ', no image now');
         }
@@ -16553,6 +16734,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             slider.dataset.bgId = item.id;
             slider.setAttribute('aria-label', `Opacity of ${item.name}`);
             if (item.kind === 'auth' && !item.image) slider.disabled = true;
+            if (item.kind === 'pages' && !hiddenBackgrounds.pages) slider.disabled = true;
             const value = document.createElement('span');
             value.className = 'hidden-bg-val';
             value.textContent = `${share}%`;
@@ -16590,6 +16772,32 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             return el;
         }
 
+        function pagesRow() {
+            const p = hiddenBackgrounds.pages;
+            const image = !p ? null : p.source === 'chat' ? chatImage : p.url;
+            const el = row({ kind: 'pages', id: 'pages', name: 'Other pages', image });
+            el.classList.add('is-auth');
+            const actions = document.createElement('div');
+            actions.className = 'hidden-bg-auth-actions';
+            actions.innerHTML =
+                `<button type="button" class="btn" data-pages="chat">${personal ? 'Use my Chat Background Image' : "Use each person's Chat Background Image"}</button>` +
+                '<button type="button" class="btn" data-pages="upload">Upload picture</button>' +
+                '<input type="file" accept="image/png,image/jpeg,image/gif,image/webp" data-pages="file" hidden>' +
+                '<input type="text" class="modal-input hidden-bg-auth-url" data-pages="url" placeholder="https://example.com/background.jpg" aria-label="Other pages picture address">' +
+                '<button type="button" class="btn" data-pages="use">Use URL</button>' +
+                (p ? '<button type="button" class="btn btn-danger" data-pages="remove">Remove</button>' : '') +
+                '<span class="hidden-bg-auth-status" data-pages="status" role="status"></span>';
+            if (p && p.source === 'url' && !p.url.startsWith(pagesUploadUrl() + '?')) actions.querySelector('[data-pages="url"]').value = p.url;
+            el.append(actions);
+            return el;
+        }
+
+        function setPages(next) {
+            hiddenBackgrounds = { ...hiddenBackgrounds, pages: next };
+            commitChange({ clearRef: false, push: false });
+            render();
+        }
+
         function setAuth(next) {
             hiddenBackgrounds = { ...hiddenBackgrounds, auth: next };
             commitChange({ clearRef: false, push: false });
@@ -16608,6 +16816,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
                 if (!items.some(i => i.kind === kind && i.id === id)) items.push({ kind, id, name: id, image: null });
             }));
             list.appendChild(row({ kind: 'chat', id: 'chat', name: 'Chat Background Image', image: chatImage }));
+            list.appendChild(pagesRow());
             items.forEach(item => list.appendChild(row(item)));
             if (!personal) list.appendChild(authRow());
         }
@@ -16648,6 +16857,45 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
                 status.textContent = `Couldn't upload it: ${err.message || err}`;
             }
         });
+        list.addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-pages]');
+            if (!btn) return;
+            const actions = btn.closest('.hidden-bg-auth-actions');
+            const status = actions.querySelector('[data-pages="status"]');
+            const keep = hiddenBackgrounds.pages ? hiddenBackgrounds.pages.share : 100;
+            if (btn.dataset.pages === 'upload') {
+                actions.querySelector('[data-pages="file"]').click();
+            } else if (btn.dataset.pages === 'chat') {
+                dropPagesUpload(hiddenBackgrounds.pages);
+                setPages({ source: 'chat', share: keep });
+            } else if (btn.dataset.pages === 'use') {
+                const url = actions.querySelector('[data-pages="url"]').value.trim();
+                if (!url.startsWith('https://') || !authUrlOk(url)) { status.textContent = 'Use an https:// address with no spaces, quotes or brackets.'; return; }
+                dropPagesUpload(hiddenBackgrounds.pages);
+                setPages({ source: 'url', url, share: keep });
+            } else if (btn.dataset.pages === 'remove') {
+                dropPagesUpload(hiddenBackgrounds.pages);
+                setPages(null);
+            }
+        });
+        list.addEventListener('change', async (e) => {
+            const file = e.target.closest('input[data-pages="file"]');
+            if (!file || !file.files || !file.files[0]) return;
+            const status = file.closest('.hidden-bg-auth-actions').querySelector('[data-pages="status"]');
+            const picked = file.files[0];
+            if (picked.size > 5 * 1024 * 1024) { status.textContent = 'The picture is over 5 MB.'; return; }
+            status.textContent = 'Uploading…';
+            const headers = { 'Content-Type': picked.type || 'application/octet-stream' };
+            if (authToken()) headers.Authorization = `Bearer ${authToken()}`;
+            try {
+                const r = await fetch(pagesUploadUrl(), { method: 'POST', headers, body: picked });
+                const j = await r.json().catch(() => ({}));
+                if (!r.ok || !authUrlOk(j.url)) throw new Error(j.error || `HTTP ${r.status}`);
+                setPages({ source: 'url', url: j.url, share: hiddenBackgrounds.pages ? hiddenBackgrounds.pages.share : 100 });
+            } catch (err) {
+                status.textContent = `Couldn't upload it: ${err.message || err}`;
+            }
+        });
         list.addEventListener('input', (e) => {
             const slider = e.target.closest('input[data-bg-kind]');
             if (slider) slider.nextElementSibling.textContent = `${slider.value}%`;
@@ -16659,6 +16907,10 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             const share = Number(slider.value);
             if (kind === 'auth') {
                 if (hiddenBackgrounds.auth) setAuth({ ...hiddenBackgrounds.auth, share });
+                return;
+            }
+            if (kind === 'pages') {
+                if (hiddenBackgrounds.pages) setPages({ ...hiddenBackgrounds.pages, share });
                 return;
             }
             if (kind === 'chat') {
