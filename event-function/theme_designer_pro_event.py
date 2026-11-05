@@ -6274,6 +6274,10 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1"/><path d="M16 3h1a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2 2 2 0 0 0-2 2v5a2 2 0 0 1-2 2h-1"/></svg>
                 <span class="btn-label">JSON</span>
             </button>
+            <button class="header-json-btn" id="css-view-btn" data-tooltip="Copy or download the current theme as CSS" aria-haspopup="dialog">
+                <span style="font-size: 13px; line-height: 1;">📋</span>
+                <span class="btn-label">CSS</span>
+            </button>
             <button class="header-json-btn" id="docs-modal-btn" data-tooltip="Open documentation">
                 <span style="font-size: 13px; line-height: 1;">📖</span>
                 <span class="btn-label">Docs</span>
@@ -6289,7 +6293,6 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         <div class="tab" data-tab="canvas" role="tab" tabindex="-1" aria-selected="false">✨ Canvas FX</div>
         <div class="tab" data-tab="bg" role="tab" tabindex="-1" aria-selected="false">🌈 Gradient</div>
         <div class="tab" data-tab="backgrounds" role="tab" tabindex="-1" aria-selected="false">🖼️ Backgrounds</div>
-        <div class="tab" data-tab="code" role="tab" tabindex="-1" aria-selected="false">📋 CSS Output</div>
     </div>
 
     <div class="content-area">
@@ -6630,46 +6633,6 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
             <div id="community-themes-grid" class="preset-grid" style="margin-bottom: 28px;">
                 <div class="empty-state-lg" style="grid-column: 1 / -1;">Loading community themes...</div>
             </div>
-            </div>
-        </div>
-
-        <div id="tab-code" class="tab-content" role="tabpanel" style="display:none; height: 100%;">
-            <div class="code-container" style="gap: 20px;">
-                <div style="display: flex; flex-direction: column; flex: 1;">
-                    <div class="section-title">Tailwind v4 @theme Block</div>
-                    
-                    <div class="owui-code-block" style="min-height: 180px; max-height: 400px;">
-                        <div class="owui-code-header">
-                            <span class="owui-code-lang">
-                                css
-                                <label class="toggle-label-ml" data-tooltip="Compress output for production"><input type="checkbox" id="toggle-minify-tailwind" class="cb-input"> Minify</label>
-                            </span>
-                            <div class="owui-code-actions">
-                                <button class="owui-code-btn" id="download-tailwind-btn" data-tooltip="Download Tailwind CSS Block">Download</button>
-                                <button class="owui-code-btn copy-css-btn" data-target="tailwind-css" data-tooltip="Copy CSS to Clipboard">Copy</button>
-                            </div>
-                        </div>
-                        <textarea id="tailwind-css" spellcheck="false" readonly></textarea>
-                    </div>
-                </div>
-                
-                <div style="display: flex; flex-direction: column; flex: 1;">
-                    <div class="section-title">Raw CSS Output</div>
-                    
-                    <div class="owui-code-block" style="min-height: 250px; max-height: 400px;">
-                        <div class="owui-code-header">
-                            <span class="owui-code-lang">
-                                css
-                                <label class="toggle-label-ml" data-tooltip="Compress output for production"><input type="checkbox" id="toggle-minify-css" class="cb-input"> Minify</label>
-                            </span>
-                            <div class="owui-code-actions">
-                                <button class="owui-code-btn" id="download-css-btn" data-tooltip="Download CSS File">Download</button>
-                                <button class="owui-code-btn copy-css-btn" data-target="raw-css" data-tooltip="Copy CSS to Clipboard">Copy</button>
-                            </div>
-                        </div>
-                        <textarea id="raw-css" spellcheck="false" readonly></textarea>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -7570,11 +7533,11 @@ self.onmessage = function(e) {
                             <li><b>Server-Side Sync:</b> All preset libraries (themes, CSS snippets, canvas scripts, gradient presets) are synced to the server half a second after you add, rename, delete, or import presets, as one file. This means your presets survive browser data clears, work across devices, and are included in server backups. The server copy replaces the browser&rsquo;s copy on every load. While the function is turned off, syncs wait and go through once it&rsquo;s back on. The server refuses a library larger than 20 MB.</li>
                             <li><b>Personal Libraries:</b> In a personal <b>Themes</b> tab, the galleries are the user&rsquo;s own, saved in <code>DATA_DIR/theme/users/&lt;user id&gt;/</code> and read from <code>{ROUTE_BASE}/me/library.json</code>. <b>Use instance theme</b> keeps them; deleting the account removes them.</li>
                         </ul>
-                        <h4>CSS Output Tab</h4>
+                        <h4>CSS Export</h4>
                         <ul>
-                            <li><b>Dual Output:</b> The <b>CSS Output</b> tab provides two separate code views: a <b>Tailwind v4 @theme Block</b> and a <b>Raw CSS Output</b>. Both update live as you make changes.</li>
-                            <li><b>Minify Toggle:</b> Each output has a Minify checkbox to switch between formatted and minified CSS.</li>
-                            <li><b>Download & Copy:</b> Download buttons export each output as a <code>.css</code> file with a smart filename based on the active theme/preset name. Copy buttons send the output to your clipboard.</li>
+                            <li><b>The CSS button:</b> The <b>CSS</b> button in the header shows the CSS the designer generates for every mode, read-only, and updates it live while it&rsquo;s open. It&rsquo;s the way to use a theme without the function, for example as Open WebUI&rsquo;s <code>custom.css</code>.</li>
+                            <li><b>Minify:</b> The Minify checkbox switches between formatted and minified CSS.</li>
+                            <li><b>Download & Copy:</b> <b>Download</b> saves it as a <code>.css</code> file named after the active theme. <b>Copy</b> sends it to your clipboard.</li>
                         </ul>
                     </div>
                 </details>
@@ -7822,7 +7785,7 @@ self.onmessage = function(e) {
                             <li><b>Valve rules</b> &mdash; the overlay glass and the mobile sidebar fix, appended after Custom CSS when Overlay Transparency or Sidebar Transparency isn&rsquo;t <code>opaque</code></li>
                         </ol>
                         <p style="font-size: 0.68rem; color: var(--text-muted); margin-top: 6px;">A later rule wins a tie of equal specificity and importance. Many of the designer&rsquo;s own rules use <code>!important</code>, so a Custom CSS rule needs <code>!important</code> too to override them, as with a gradient <code>background-image</code> over the Gradient Builder&rsquo;s.</p>
-                        <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85; margin-top: 10px;"><b>Structured sections:</b> Internally the CSS is generated as four separate sections — <code>vars</code> (palette + manual overrides), <code>structural</code>, <code>gradient</code>, and <code>custom</code> — and saved to the server both as the flat blob above (served at <code>/theme.css</code> and shown in the Code tab) and as a sections JSON file. Consumers assemble only the sections they need: the bootloader picks sections per the "Show on Auth Pages" toggles (delivered inside <code>state.json</code> under the <code>_cssSections</code> key, plus an <code>extra</code> section holding valve-appended rules that are never auth-gated), and the server composes only <code>vars</code> + <code>custom</code> into <code>/static/custom.css</code> as the flash-free safe subset, plus the overlay glass rules when Overlay Transparency is <code>translucent</code>. The <code>/*[OWUI_*]*/</code> marker comments still appear in the flat output and remain the fallback slicing mechanism for themes saved by older versions.</p>
+                        <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85; margin-top: 10px;"><b>Structured sections:</b> Internally the CSS is generated as four separate sections — <code>vars</code> (palette + manual overrides), <code>structural</code>, <code>gradient</code>, and <code>custom</code> — and saved to the server both as the flat blob above (served at <code>/theme.css</code> and shown by the header&rsquo;s <b>CSS</b> button) and as a sections JSON file. Consumers assemble only the sections they need: the bootloader picks sections per the "Show on Auth Pages" toggles (delivered inside <code>state.json</code> under the <code>_cssSections</code> key, plus an <code>extra</code> section holding valve-appended rules that are never auth-gated), and the server composes only <code>vars</code> + <code>custom</code> into <code>/static/custom.css</code> as the flash-free safe subset, plus the overlay glass rules when Overlay Transparency is <code>translucent</code>. The <code>/*[OWUI_*]*/</code> marker comments still appear in the flat output and remain the fallback slicing mechanism for themes saved by older versions.</p>
                             </div>
                         </details>
                     </div>
@@ -11820,18 +11783,7 @@ self.onmessage = (e) => {
         });
     }
 
-    function generateTailwindCSS() {
-        const dm = getActiveDataMode();
-        const vars = getVariablesMap(themeData[dm]);
-        let code = `/* Tailwind v4 @theme Block (Active Mode: ${activeMode.toUpperCase()}) */\n@theme {\n`;
-        Object.entries(vars).forEach(([k, v]) => {
-            code += `  ${k}: ${v};\n`;
-        });
-        code += `}`;
-        return code;
-    }
-
-    // Assemble the flat CSS blob (Code tab, /theme.css, localStorage cache) from
+    // Assemble the flat CSS blob (the CSS viewer, /theme.css, localStorage cache) from
     // structured sections. Each section string carries its own /*[OWUI_*]*/ markers,
     // so plain concatenation reproduces the legacy flat format byte-for-byte.
     // 'extra' holds server-side valve-appended rules and is empty client-side.
@@ -12006,25 +11958,18 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
         return { vars: varsCss, structural: structuralCss, gradient: gradientCss, custom: customCss };
     }
 
-    let _codeViewStale = true;
+    // The CSS viewer (the header's CSS button) refreshes only while it's open
     function updateCodeView(preGeneratedCss) {
-        const codeTab = document.getElementById('tab-code');
-        if (codeTab && codeTab.style.display === 'none') { _codeViewStale = true; return; }
-        _codeViewStale = false;
+        const viewer = document.getElementById('css-view-modal');
+        if (!viewer || viewer.style.display !== 'flex') return;
         let rawCss = preGeneratedCss || generateCoreCSS();
         if (document.getElementById('toggle-minify-css')?.checked) rawCss = minifyCss(rawCss);
         const rawTextarea = document.getElementById('raw-css');
         if (rawTextarea) { rawTextarea.value = rawCss; updateLineNumbers(rawTextarea); }
-        
-        let twCss = generateTailwindCSS();
-        if (document.getElementById('toggle-minify-tailwind')?.checked) twCss = minifyCss(twCss);
-        const twTextarea = document.getElementById('tailwind-css');
-        if (twTextarea) { twTextarea.value = twCss; updateLineNumbers(twTextarea); }
     }
-    
-    // Minify Toggle Listeners
     document.getElementById('toggle-minify-css')?.addEventListener('change', () => updateCodeView());
-    document.getElementById('toggle-minify-tailwind')?.addEventListener('change', () => updateCodeView());
+    document.getElementById('css-view-btn')?.addEventListener('click', () => { showModal('css-view-modal'); updateCodeView(); });
+    document.getElementById('css-close-btn')?.addEventListener('click', () => hideModal('css-view-modal'));
     
     function forceLocalIframeTheme(sections) {
         const dm = getActiveDataMode();
@@ -12632,7 +12577,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
         updateLineNumbers(editor);
     };
 
-    // Handles remaining read-only textareas (CSS Output, JSON viewers, etc.)
+    // Handles remaining read-only textareas (the CSS and JSON viewers, etc.)
     function initLineNumbers() {
         document.querySelectorAll('.owui-code-block textarea').forEach(textarea => {
             if (textarea._lineGutter) return; // Skip editors already initialized by bindEditor()
@@ -14758,6 +14703,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             ['reset-modal', 'confirm-reset-btn', true],
             ['import-clipboard-modal', 'confirm-clipboard-import-btn', true],
             ['json-view-modal', null, true],
+            ['css-view-modal', null, true],
             ['update-modal', 'update-confirm-btn', true],
             ['update-results-modal', null, true],
             ['export-all-backups-modal', 'confirm-export-all-backups-btn', true],
@@ -14835,9 +14781,6 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             document.getElementById('tab-' + tab.dataset.tab).style.display = 'block';
             sessionStorage.setItem('owui_theme_tool_tab', tab.dataset.tab);
             
-
-            // Flush stale CSS Output if switching to the code tab
-            if (tab.dataset.tab === 'code' && _codeViewStale) updateCodeView();
         });
     });
 
@@ -14871,7 +14814,6 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
     });
 
     const downloadCssBtn = document.getElementById('download-css-btn');
-    const downloadTailwindBtn = document.getElementById('download-tailwind-btn');
 
     function getDownloadName() {
         const dm = getActiveDataMode();
@@ -14893,24 +14835,10 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `owui-${getDownloadName()}-raw.css`;
+            a.download = `owui-${getDownloadName()}.css`;
             a.click();
             URL.revokeObjectURL(url);
-            showToast("Raw CSS downloaded!");
-        });
-    }
-
-    if (downloadTailwindBtn) {
-        downloadTailwindBtn.addEventListener('click', () => {
-            const content = document.getElementById('tailwind-css').value;
-            const blob = new Blob([content], { type: 'text/css' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `owui-${getDownloadName()}-tailwind.css`;
-            a.click();
-            URL.revokeObjectURL(url);
-            showToast("Tailwind CSS Block downloaded!");
+            showToast("CSS downloaded!");
         });
     }
 
@@ -19218,7 +19146,26 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             html += '        </div>\n    </div>'
             return html
 
-        json_modals = '\n\n'.join([
+        # The theme's CSS, read-only, to copy or download
+        css_modal = (
+            '    <div id="css-view-modal" class="modal-overlay z-high" style="padding: 24px;" role="dialog" aria-modal="true" aria-label="Theme CSS">\n'
+            '        <div style="width: 100%; max-width: 600px; max-height: 90%; display: flex; flex-direction: column; gap: 0; animation: containerShow 0.3s cubic-bezier(0.16, 1, 0.3, 1);">\n'
+            '            <div class="owui-code-block" style="flex: 1; display: flex; flex-direction: column; min-height: 0; max-height: 100%;">\n'
+            '                <div class="owui-code-header">\n'
+            '                    <span class="owui-code-lang">css <label class="toggle-label-ml" data-tooltip="Compress output for production"><input type="checkbox" id="toggle-minify-css" class="cb-input"> Minify</label></span>\n'
+            '                    <div class="owui-code-actions">\n'
+            '                        <button class="owui-code-btn" id="download-css-btn" data-tooltip="Download CSS File">Download</button>\n'
+            '                        <button class="owui-code-btn copy-css-btn" data-target="raw-css" data-tooltip="Copy CSS to Clipboard">Copy</button>\n'
+            '                        <button class="owui-code-btn" id="css-close-btn" style="color: var(--text-muted);" data-tooltip="Close CSS">Close</button>\n'
+            '                    </div>\n'
+            '                </div>\n'
+            '                <textarea id="raw-css" readonly spellcheck="false" style="flex: 1; min-height: 400px; cursor: text; user-select: text;"></textarea>\n'
+            '            </div>\n'
+            '        </div>\n'
+            '    </div>'
+        )
+
+        json_modals = '\n\n'.join([css_modal,
             _json_modal('json-view-modal', 'json', 'json-view-textarea', True,
                         'json-valid-badge', 'json-collapse-btn', 'json-close-btn', 'Close JSON Viewer'),
             _json_modal('snapshot-json-edit-modal', 'json \u2014 Manual Snapshot Editor', 'snapshot-json-edit-textarea', False,

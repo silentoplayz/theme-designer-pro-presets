@@ -70,7 +70,7 @@ Unlike the [Tool variant](../tools/) which runs inside an AI chat iframe, this v
 - 🔍 **Library Search, Filter & Sort:** Find saved themes using search, filter by feature tags (Custom CSS, Canvas FX, Overrides, Linked/URL themes), and sort alphabetically or by creation order. The same search and filter functionality is available in the CSS Snippet and Canvas Script galleries. Rich tooltips show name, version, author, description, and feature tags.
 - 📦 **Mass Import, Export & Wipe Portability:** Download your entire snapshot library (or individual items) as smart backups. Mass-import via file picker, or drag & drop `.json`, `.js`, and `.css` files directly anywhere onto the designer window — files are automatically routed to the correct gallery (themes, canvas scripts, CSS snippets, or gradient presets). Each gallery has a "Trash" icon to wipe specific collections. Individual CSS files can also be imported and exported.
 - ⏪ **Undo & Redo History:** Step backward and forward through changes using the built-in Undo/Redo footer buttons or `Ctrl+Z` / `Ctrl+Y` / `Ctrl+Shift+Z` keyboard shortcuts. Press `Escape` to close any open modal, or `Enter` to confirm the primary action.
-- 📋 **CSS / Tailwind v4 Export:** The CSS Output tab provides Raw CSS and Tailwind v4 `@theme` block views, each with Minify toggle, Copy to Clipboard, and Download as `.css` file.
+- 📋 **CSS Export:** The header's **CSS** button shows the theme's CSS for every mode, with a Minify toggle, Copy to Clipboard, and Download as a `.css` file. It's the way to use a theme without the function, for example as Open WebUI's `custom.css`.
 - 👁️‍🗨️ **Self-Adapting UI & Contrast Protection:** The designer interface dynamically themes _itself_ based on the colors you pick. Built-in contrast protection shifts text and border colors to remain legible with ultra-washed-out palettes.
 - 🪄 **Native Open WebUI Aesthetic:** Meticulously designed to feel like a native part of Open WebUI, complete with custom-built, dependency-free tooltips and styled code blocks.
 - 📱 **Fully Responsive:** The designer adapts to mobile screens with three responsive breakpoints (≤768px tablets, ≤480px phones, ≤390px iPhone SE) including icon-only mode for narrow header buttons.
@@ -533,6 +533,8 @@ Paste it in and save, then open the designer once: it saves your theme again wit
 **The valves decide the fades.** The fades at the top and bottom of the sidebar now follow **Sidebar Transparency**, and the fade at the top of a chat, under its title, follows **Overlay Transparency**, instead of all of them vanishing when Canvas FX is on. While a valve is `opaque` its fades stay, in the gradient's own color while a gradient is on. With the valve set to `translucent` or `transparent` they go, since over a see-through surface they read as solid bands.
 
 **The collapsed sidebar stays clear.** The narrow rail Open WebUI shows when the sidebar is collapsed has no background of its own, but it took the full sidebar's color in every theme. It's transparent again, as in Open WebUI without the function.
+
+**CSS export moves to the header.** The **CSS Output** tab is gone: the header's new **CSS** button opens the same read-only CSS, with **Minify**, **Copy** and **Download**, so the tab bar has one tab fewer. The Tailwind v4 `@theme` block it also showed is gone too; the CSS carries the same palette variables.
 
 **The designer looks the same with Canvas FX off.** Its panel was a step lighter than the page around it until Canvas FX was turned on. The panel now always shows the page's color, and the panels in Core Palette, Gradient and Backgrounds always take the tint they get under Canvas FX.
 
@@ -1121,7 +1123,7 @@ graph TD
     subgraph DesignerUI ["Theme Designer UI: Standalone Page"]
         ServeHTML -.->|"Loads in browser"| UILoad["Initialize Designer App"]:::frontend
         UILoad --> FetchState["Fetch /state.json + /theme.css"]:::frontend
-        FetchState --> Tabs{"7 UI Tabs"}:::frontend
+        FetchState --> Tabs{"6 UI Tabs"}:::frontend
 
         Tabs --> TabThemes["Themes"]:::frontend
         Tabs --> TabLCH["Core Palette"]:::frontend
@@ -1129,7 +1131,6 @@ graph TD
         Tabs --> TabCanvas["Canvas FX"]:::frontend
         Tabs --> TabBG["Gradient"]:::frontend
         Tabs --> TabBackgrounds["Backgrounds"]:::frontend
-        Tabs --> TabCode["CSS Output"]:::frontend
 
         DocsBtn["📖 Docs Button"]:::frontend --> DocsModal["Documentation Modal (22 sections)"]:::frontend
 
