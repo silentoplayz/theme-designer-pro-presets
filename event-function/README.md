@@ -534,7 +534,7 @@ Paste it in and save, then open the designer once: it saves your theme again wit
 
 **The collapsed sidebar stays clear.** The narrow rail Open WebUI shows when the sidebar is collapsed has no background of its own, but it took the full sidebar's color in every theme. It's transparent again, as in Open WebUI without the function.
 
-**CSS export moves to the header.** The **CSS Output** tab is gone: the header's new **CSS** button opens the same read-only CSS, with **Minify**, **Copy** and **Download**, so the tab bar has one tab fewer. The Tailwind v4 `@theme` block it also showed is gone too; the CSS carries the same palette variables.
+**CSS export moves to the header.** The **CSS Output** tab is gone: the new **CSS** button in the header, beside **JSON**, opens the same read-only CSS, with **Minify**, **Copy** and **Download**, and keeps it current while it's open, so the tab bar has one tab fewer. **Download** names the file after the active theme, now without a `-raw` suffix. The Tailwind v4 `@theme` block the tab also showed is gone too; the CSS carries the same palette variables.
 
 **The designer looks the same with Canvas FX off.** Its panel was a step lighter than the page around it until Canvas FX was turned on. The panel now always shows the page's color, and the panels in Core Palette, Gradient and Backgrounds always take the tint they get under Canvas FX.
 
