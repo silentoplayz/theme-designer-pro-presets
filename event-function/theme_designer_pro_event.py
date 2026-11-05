@@ -2075,7 +2075,10 @@ class Event:
                 var SAFE = /^[\\w:\\/.?=&%+-]{1,512}$/;
                 // On unless the theme turned it off
                 var behind = !off && !(hidden && typeof hidden === 'object' && hidden.behind === false);
+                // How much of Open WebUI's dimming layer covers the images
+                var dimming = 100;
                 if (hidden && typeof hidden === 'object') {
+                    dimming = bgShare(hidden.dimming);
                     var path = window.location.pathname.split('/');
                     var folders = bgShares(hidden.folders);
                     var folder = path[1] === 'folders' && path[2] ? decodeURIComponent(path[2]) : '';
@@ -2097,11 +2100,15 @@ class Event:
                 }
                 var style = document.getElementById('owui-tdp-hidden-bg');
                 var selectors = Object.keys(shares);
-                if (!selectors.length && !behind) { if (style) style.remove(); return; }
-                // The image and the dimming layer over it fade together
-                var css = selectors.map(function(s) {
-                    return s + ', ' + s + ' + div.pointer-events-none { ' +
-                        (shares[s] ? 'opacity: ' + shares[s] / 100 + ' !important;' : 'display: none !important;') + ' }';
+                if (!selectors.length && !behind && dimming >= 100) { if (style) style.remove(); return; }
+                var css = [];
+                if (dimming < 100) css.push(CHAT_BG + '[style*="background-image"] + div.pointer-events-none { opacity: ' + dimming / 100 + ' !important; }');
+                // The image and the dimming layer over it fade together; these
+                // come after the rule above, so they win for their own image
+                selectors.forEach(function(s) {
+                    if (!shares[s]) { css.push(s + ', ' + s + ' + div.pointer-events-none { display: none !important; }'); return; }
+                    css.push(s + ' { opacity: ' + shares[s] / 100 + ' !important; }');
+                    css.push(s + ' + div.pointer-events-none { opacity: ' + Math.round(shares[s] * dimming / 10) / 1000 + ' !important; }');
                 });
                 if (behind) {
                     // Under the canvas, only while an animation runs: without
@@ -6045,9 +6052,11 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         .hidden-bg-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
         .hidden-bg-kind { font-size: 0.62rem; color: var(--text-muted); white-space: nowrap; }
         .hidden-bg-label { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; }
+        .hidden-bg-dimming { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+        .hidden-bg-dimming .hidden-bg-label { font-size: 0.75rem; color: var(--text-main); }
+        #hidden-bg-list input.hidden-bg-slider, .hidden-bg-dimming input.hidden-bg-slider { width: 160px; flex-shrink: 0; }
         .hidden-bg-head { display: flex; align-items: center; gap: 10px; flex: 1 1 auto; min-width: 0; }
         .hidden-bg-controls { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-        #hidden-bg-list input.hidden-bg-slider { width: 160px; flex-shrink: 0; }
         .hidden-bg-behind-all { display: flex; align-items: center; gap: 10px; font-size: 0.75rem; color: var(--text-main); cursor: pointer; margin-bottom: 6px; }
         .hidden-bg-behind-all.is-off { opacity: 0.5; cursor: default; }
         .hidden-bg-val { width: 2.6rem; flex-shrink: 0; text-align: right; font-size: 0.7rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
@@ -6472,6 +6481,12 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                 </label>
                 <div class="hidden-bg-note" id="hidden-bg-behind-hint">Off: these images cover the animation, more of it the higher their opacity. On: the animation stays on top of them at any opacity.</div>
                 <div class="hidden-bg-note" id="hidden-bg-behind-why" style="display:none;">This mode has no Canvas FX animation, so the images stay in front of the theme here.</div>
+                <div class="hidden-bg-dimming">
+                    <span class="hidden-bg-label">Dimming</span>
+                    <input type="range" id="hidden-bg-dimming" class="hidden-bg-slider" min="0" max="100" step="5" value="100" aria-label="Dimming over these images">
+                    <span class="hidden-bg-val" id="hidden-bg-dimming-val">100%</span>
+                </div>
+                <div class="hidden-bg-note">Open WebUI lays a dimming layer over these images. At 100% it stays as Open WebUI draws it. Lower thins it to brighten them, until at 0% they show clear.</div>
                 <div class="hidden-bg-list" id="hidden-bg-list" role="group" aria-label="Opacity of each background image"></div>
             </div>
         </div>
@@ -7586,6 +7601,8 @@ self.onmessage = function(e) {
                         <p>The <b>Backgrounds</b> tab lists the Chat Background Image, every model with a background image, and in a personal theme every folder of yours with one. Each row&rsquo;s <b>Opacity</b> slider sets the opacity of that image and its dimming layer while the theme is in use: at 100% it shows as Open WebUI shows it, at 0% it&rsquo;s hidden, so the theme&rsquo;s own background shows in its chats. In between, the theme shows through the image. A folder&rsquo;s image shows only on that folder&rsquo;s page, where a new chat in the folder starts, so that is where it fades.</p>
 
                         <p><b>Draw the Canvas FX animation over these images</b>, above the list, decides which is on top. It&rsquo;s on by default, so picking a Canvas FX script shows the animation over the pictures straight away. Off, the images sit over the theme&rsquo;s animation and cover more of it the higher their opacity. On, every one of them and its dimming layer moves behind the animation, so the animation stays on top at any opacity. It takes effect only while an animation runs, so it&rsquo;s grayed out in a mode with no Canvas FX. A gradient can&rsquo;t have an image behind it: the gradient is the page&rsquo;s own background, which always sits under everything, so the image stays in front of it either way.</p>
+
+                        <p><b>Dimming</b>, under it, sets how much of Open WebUI&rsquo;s dimming layer covers every one of these images: at 100% it stays as Open WebUI draws it, lower thins it to brighten the pictures, and at 0% they show clear. It combines with each image&rsquo;s Opacity, so at 50% Opacity and 40% Dimming the image shows at half opacity and its dimming layer at a fifth.</p>
 
                         <p>The list belongs to the live theme, not to a gallery theme: applying another theme leaves it as it is, and exported theme files don&rsquo;t carry it. The instance theme sets models&rsquo; images, and each person&rsquo;s own Chat Background Image, for everyone using it. Folders belong to each person, so only a personal theme sets theirs. A Chat Background Image changed in Settings fades from the next page load.</p>
                             </div>
@@ -9025,9 +9042,10 @@ location.reload();</code></pre>
     // saved before the sliders listed the hidden ones, which read as 0.
     function readHiddenBackgrounds(v) {
         const share = (n) => Math.max(0, Math.min(100, Math.round(Number(n))));
-        const out = { models: {}, folders: {}, chat: 100, behind: true };
+        const out = { models: {}, folders: {}, chat: 100, behind: true, dimming: 100 };
         if (!v || typeof v !== 'object') return out;
         out.behind = v.behind !== false;
+        if (v.dimming !== null && v.dimming !== undefined && Number.isFinite(Number(v.dimming))) out.dimming = share(v.dimming);
         ['models', 'folders'].forEach(k => {
             const entries = Array.isArray(v[k]) ? v[k].map(id => [id, 0])
                 : v[k] && typeof v[k] === 'object' ? Object.entries(v[k]) : [];
@@ -9038,7 +9056,7 @@ location.reload();</code></pre>
         return out;
     }
     function hasHiddenBackgrounds(h) {
-        return Object.keys(h.models).length > 0 || Object.keys(h.folders).length > 0 || h.chat < 100 || !h.behind;
+        return Object.keys(h.models).length > 0 || Object.keys(h.folders).length > 0 || h.chat < 100 || !h.behind || h.dimming < 100;
     }
 
     // Gallery entries come from storage, the server, imports, community themes
@@ -16303,6 +16321,19 @@ ${selector} #sidebar { /*[FX]*/ background-color: var(${bgSidebar}) !important; 
             });
             document.querySelector('.tab[data-tab="backgrounds"]')?.addEventListener('click', syncBehind);
             document.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', () => setTimeout(syncBehind, 0)));
+        }
+
+        // One slider for Open WebUI's dimming layer over every image
+        const dimBox = $('hidden-bg-dimming');
+        const dimVal = $('hidden-bg-dimming-val');
+        if (dimBox) {
+            dimBox.value = String(hiddenBackgrounds.dimming);
+            if (dimVal) dimVal.textContent = `${hiddenBackgrounds.dimming}%`;
+            dimBox.addEventListener('input', () => { if (dimVal) dimVal.textContent = `${dimBox.value}%`; });
+            dimBox.addEventListener('change', () => {
+                hiddenBackgrounds = { ...hiddenBackgrounds, dimming: Number(dimBox.value) };
+                commitChange({ clearRef: false, push: false });
+            });
         }
 
         render();

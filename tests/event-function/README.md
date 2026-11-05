@@ -14,7 +14,7 @@ They cover how a theme reaches each page:
 - the dot in Settings on the **Themes** tab whose theme is in use, and the ring a user without the Admin tab sees for the instance theme
 - the designer opening without errors, with nothing to undo
 - an app page doing no theme work while nothing changes, and a change in the designer reaching an open page in well under two seconds
-- a model's background image hidden by the instance theme, live and after a page load, a folder's by a personal theme on that folder's page, the Chat Background Image hidden and then faded to 40%, and behind a Canvas FX animation by default, only while one runs and unless the theme turns it off
+- a model's background image hidden by the instance theme, live and after a page load, a folder's by a personal theme on that folder's page, the Chat Background Image hidden and then faded to 40%, and behind a Canvas FX animation by default, only while one runs and unless the theme turns it off, and Open WebUI's dimming layer thinned by Dimming together with each image's opacity
 - a theme file keeping every setting through the Studio and the designer: every gallery theme and the [theme format](../../schemas/theme-format.md)'s fixtures go through the Studio's Download button and the designer's import and export, and must come out as the other side wrote them
 
 The themes they save are markers, not palettes: each CSS section sets one custom property on `<html>` (`--tdp-vars`, `--tdp-structural`, `--tdp-gradient`, `--tdp-custom`) to the theme's name, so a test reads exactly which parts of which theme reached a page.
