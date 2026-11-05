@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.20.3-blue)
+![Version](https://img.shields.io/badge/version-1.20.4-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -508,6 +508,16 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
 
 ---
+
+## 📝 What's New in 1.20.4
+
+Paste it in and save. Nothing changes until a theme moves the new rows.
+
+**Cards and panels.** The rounded panels on a page, such as note cards, the calendar, and workspace and admin cards, kept Open WebUI's solid fill over a page background or Canvas FX, because the clearing leaves rounded pieces alone so they stay readable. A new **Cards and panels** row in the Surfaces tab sets how solid they are and how much they blur what shows through. A chat's messages, code blocks included, keep their own look.
+
+**Buttons.** A new **Buttons** row does the same for the grey buttons on a page, such as Create, single or split. Toggle switches keep their fill, since it shows whether they're on, and so do the black and white action buttons such as Save.
+
+Both rows start at 100% with no blur, which keeps Open WebUI's own look, and both travel with the theme like the other Surfaces. Over a bright picture in Light mode, set Cards and panels higher (around 60% or more) so the text stays readable.
 
 ## 📝 What's New in 1.20.3
 

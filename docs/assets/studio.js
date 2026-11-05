@@ -29,6 +29,8 @@
     surfaceSidebarOpacity: 100, surfaceSidebarBlur: 0,
     surfaceComposerOpacity: 5, surfaceComposerBlur: 8,
     surfacePanelOpacity: 100, surfacePanelBlur: 0,
+    surfaceCardsOpacity: 100, surfaceCardsBlur: 0,
+    surfaceButtonsOpacity: 100, surfaceButtonsBlur: 0,
     surfaceMenuOpacity: 100, surfaceMenuBlur: 0,
     surfaceDialogOpacity: 100, surfaceDialogBlur: 0,
     surfaceBackdropOpacity: 60, surfaceBackdropBlur: 0,

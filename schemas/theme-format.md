@@ -95,6 +95,10 @@ How see-through the layers over the background are. Each layer is tinted with th
 | `surfaceComposerBlur` | number, 0 to 40 | 8 | How much the message input blurs what shows through it, in px |
 | `surfacePanelOpacity` | number, 0 to 100 | 100 | How solid the side panel the Tabs button opens is, in percent |
 | `surfacePanelBlur` | number, 0 to 40 | 0 | How much the side panel the Tabs button opens blurs what shows through it, in px |
+| `surfaceCardsOpacity` | number, 0 to 100 | 100 | How solid the rounded panels on a page are (note cards, the calendar, workspace and admin cards), in percent |
+| `surfaceCardsBlur` | number, 0 to 40 | 0 | How much the rounded panels on a page blur what shows through them, in px |
+| `surfaceButtonsOpacity` | number, 0 to 100 | 100 | How solid the grey buttons on a page are, such as Create, in percent |
+| `surfaceButtonsBlur` | number, 0 to 40 | 0 | How much the grey buttons on a page blur what shows through them, in px |
 | `surfaceMenuOpacity` | number, 0 to 100 | 100 | How solid menus, the model picker, tooltips and toasts is, in percent |
 | `surfaceMenuBlur` | number, 0 to 40 | 0 | How much menus, the model picker, tooltips and toasts blurs what shows through it, in px |
 | `surfaceDialogOpacity` | number, 0 to 100 | 100 | How solid dialogs such as Settings is, in percent |

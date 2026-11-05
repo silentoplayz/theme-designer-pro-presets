@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.20.3
+version: 1.20.4
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -22,7 +22,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.20.3"
+VERSION = "1.20.4"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -7952,6 +7952,8 @@ self.onmessage = function(e) {
                             <li><b>Sidebar</b>: the open sidebar; its top and bottom fades show only at 100%</li>
                             <li><b>Message input</b>: <code>#message-input-container</code></li>
                             <li><b>Side panel</b>: <code>#controls-container</code>, the pane the Tabs button opens</li>
+                            <li><b>Cards and panels</b>: the rounded panels on a page, such as note cards, the calendar and workspace and admin cards; at 100% and no blur they keep Open WebUI's own look</li>
+                            <li><b>Buttons</b>: the grey buttons on a page, such as Create, single or split; switches and the black and white action buttons keep their fill</li>
                             <li><b>Menus and tooltips</b>: every dropdown and submenu, the model picker, Model controls, tooltips and toasts</li>
                             <li><b>Dialogs</b> and <b>Behind dialogs</b>: the window itself and the page behind it</li>
                             <li><b>Top fade</b>: the fade at the top of a chat; 0% hides it</li>
@@ -9269,6 +9271,8 @@ location.reload();</code></pre>
         surfaceSidebarOpacity: 100, surfaceSidebarBlur: 0,
         surfaceComposerOpacity: 5, surfaceComposerBlur: 8,
         surfacePanelOpacity: 100, surfacePanelBlur: 0,
+        surfaceCardsOpacity: 100, surfaceCardsBlur: 0,
+        surfaceButtonsOpacity: 100, surfaceButtonsBlur: 0,
         surfaceMenuOpacity: 100, surfaceMenuBlur: 0,
         surfaceDialogOpacity: 100, surfaceDialogBlur: 0,
         surfaceBackdropOpacity: 60, surfaceBackdropBlur: 0,
@@ -9287,6 +9291,8 @@ location.reload();</code></pre>
         { key: 'Sidebar', label: 'Sidebar', hint: 'The open sidebar. The collapsed rail stays clear.', color: ['var(--color-gray-950)', 'var(--color-gray-50)'] },
         { key: 'Composer', label: 'Message input', hint: 'The box you type in.', color: ['var(--color-gray-850)', '#fff'] },
         { key: 'Panel', label: 'Side panel', hint: 'The pane the Tabs button opens beside a chat.', color: ['var(--color-gray-900)', '#fff'] },
+        { key: 'Cards', label: 'Cards and panels', hint: 'The rounded panels on a page: note cards, the calendar, workspace and admin cards.', color: ['var(--color-gray-900)', '#fff'] },
+        { key: 'Buttons', label: 'Buttons', hint: 'The grey buttons on a page, such as Create, single or split. Switches and the black and white action buttons keep their fill.', color: ['var(--color-gray-850)', 'var(--color-gray-50)'] },
         { key: 'Menu', label: 'Menus and tooltips', hint: 'Dropdowns, submenus, the model picker, Model controls, tooltips and toasts.', color: ['var(--color-gray-850)', '#fff'] },
         { key: 'Dialog', label: 'Dialogs', hint: 'Settings and the other windows that open over the page.', color: ['var(--color-gray-900)', '#fff'] },
         { key: 'Backdrop', label: 'Behind dialogs', hint: 'The page behind an open dialog: how much it darkens and blurs.', color: null },
@@ -9553,6 +9559,8 @@ location.reload();</code></pre>
         surfaceSidebarOpacity: [0, 100], surfaceSidebarBlur: [0, 40],
         surfaceComposerOpacity: [0, 100], surfaceComposerBlur: [0, 40],
         surfacePanelOpacity: [0, 100], surfacePanelBlur: [0, 40],
+        surfaceCardsOpacity: [0, 100], surfaceCardsBlur: [0, 40],
+        surfaceButtonsOpacity: [0, 100], surfaceButtonsBlur: [0, 40],
         surfaceMenuOpacity: [0, 100], surfaceMenuBlur: [0, 40],
         surfaceDialogOpacity: [0, 100], surfaceDialogBlur: [0, 40],
         surfaceBackdropOpacity: [0, 100], surfaceBackdropBlur: [0, 40],
@@ -12074,6 +12082,31 @@ self.onmessage = (e) => {
             const panel = decl(fill(color('Panel'), num('surfacePanelOpacity')), num('surfacePanelBlur'));
             css += `${at} #controls-container:not(.contents), ${at} #controls-container.contents > div { ${panel} }\n`;
             css += `${at} :has(> div > #controls-container:not(.contents)), ${at} #controls-container:not(.contents) > div:first-child { background-color: transparent !important; }\n`;
+            // Rounded panels on a page stay solid under the background
+            // clearing; at 100% and no blur they keep Open WebUI's own look.
+            // A chat's messages, the sidebar, the message input and the side
+            // panel have their own layers or stay as they are.
+            const co = num('surfaceCardsOpacity'), cb = num('surfaceCardsBlur');
+            if (co < 100 || cb > 0) {
+                // A group of buttons, such as the split Create button, keeps its look
+                const cex = ':not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(:has(> button:first-child))' +
+                    ':not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *):not(#auth-page *)';
+                const cards = ['bg-white', 'bg-gray-', 'dark:bg-gray-'].map(u => `div[class*="rounded"][class^="${u}"]${cex}, div[class*="rounded"][class*=" ${u}"]${cex}`).join(', ');
+                css += `${at} .app :where(${cards}) { ${decl(fill(color('Cards'), co), cb)} }\n`;
+                // Cards that light up under the pointer still do
+                css += `${at} .app :where(${cards})[class*="hover:bg-"]:hover { background-color: ${fill(color('Cards'), Math.min(100, co + 10))} !important; }\n`;
+            }
+            // Grey buttons and button groups on a page, at 100% and no blur
+            // Open WebUI's own. Switches show on and off by their fill, and
+            // the black and white action buttons carry no grey class.
+            const bo = num('surfaceButtonsOpacity'), bb = num('surfaceButtonsBlur');
+            if (bo < 100 || bb > 0) {
+                const bex = '[class*="rounded"]:not([role="switch"]):not([role="checkbox"])' +
+                    ':not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *):not(#auth-page *)';
+                const btn = ['bg-gray-', 'dark:bg-gray-'].map(u => `button[class^="${u}"]${bex}, button[class*=" ${u}"]${bex}, div:has(> button:first-child)[class^="${u}"]${bex}, div:has(> button:first-child)[class*=" ${u}"]${bex}`).join(', ');
+                css += `${at} .app :where(${btn}) { ${decl(fill(color('Buttons'), bo), bb)} }\n`;
+                css += `${at} .app :where(${btn})[class*="hover:bg-"]:hover { background-color: ${fill(color('Buttons'), Math.min(100, bo + 15))} !important; }\n`;
+            }
             css += `${at} .app-dropdown-menu, ${at} .tippy-box, ${at} [data-sonner-toast], ${at} body > div${pex} :where(${tokens}) { ${decl(fill(color('Menu'), num('surfaceMenuOpacity')), num('surfaceMenuBlur'))} }\n`;
             css += `${at} .modal > div:where([class*="bg-white"], [class*="bg-gray-"]) { ${decl(fill(color('Dialog'), num('surfaceDialogOpacity')), num('surfaceDialogBlur'))} }\n`;
             // Overlay Transparency also tints the pieces inside a dialog; hand
