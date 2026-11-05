@@ -2089,56 +2089,6 @@
       "followsTheme": true
     }
   ],
-  "cssPresets": [
-    {
-      "name": "Astral Glassmorphism",
-      "file": "astral_glassmorphism.css",
-      "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/astral_glassmorphism.css"
-    },
-    {
-      "name": "Font Menu",
-      "file": "font_menu.css",
-      "dateAdded": "2026-09-02T17:09:06-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/font_menu.css"
-    },
-    {
-      "name": "Matrix Colors",
-      "file": "matrix_colors.css",
-      "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/matrix_colors.css"
-    },
-    {
-      "name": "Ocean Waves Companion",
-      "file": "ocean_waves_companion.css",
-      "dateAdded": "2026-09-02T10:47:57-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/ocean_waves_companion.css"
-    },
-    {
-      "name": "Retro Terminal Crt",
-      "file": "retro_terminal_crt.css",
-      "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/retro_terminal_crt.css"
-    },
-    {
-      "name": "Rose Pine",
-      "file": "rose_pine.css",
-      "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/rose_pine.css"
-    },
-    {
-      "name": "Tactical Hud",
-      "file": "tactical_hud.css",
-      "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/tactical_hud.css"
-    },
-    {
-      "name": "Windows Hotdog Stand",
-      "file": "windows_hotdog_stand.css",
-      "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/css-presets/windows_hotdog_stand.css"
-    }
-  ],
   "gradients": [
     {
       "name": "Neon Drift",
@@ -2657,12 +2607,6 @@
       "file": "canvas-fx-all.json",
       "dateAdded": "2026-07-18T00:31:39-04:00",
       "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/canvas-fx-all.json"
-    },
-    {
-      "name": "All CSS Presets",
-      "file": "css-presets-all.json",
-      "dateAdded": "2026-07-18T00:31:39-04:00",
-      "importUrl": "https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/css-presets-all.json"
     },
     {
       "name": "Everything",
