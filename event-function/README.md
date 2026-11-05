@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.20.4-blue)
+![Version](https://img.shields.io/badge/version-1.20.5-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -508,6 +508,14 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
 
 ---
+
+## 📝 What's New in 1.20.5
+
+Paste it in and save.
+
+**Save keeps its look under Buttons.** The Buttons row in Surfaces turned some black and white action buttons see-through, such as Save at the bottom of a function's editor, because they're drawn with grey classes. The row now tells them apart by their text: white in Light mode, dark in Dark mode. Those buttons keep Open WebUI's fill, while grey buttons like Create still follow the row.
+
+**The designer's Surfaces tab, tab bar and footer are see-through.** The Surfaces tab's panel now takes the same tint as the Core Palette, Gradient and Backgrounds panels: 45% black in Dark, 55% white in Light. The tab bar and the footer's buttons (Use instance theme, Global Reset, Reset Mode, Sync, Sync All) take it too, so the background shows through the whole designer, and the open tab is a lighter pane of the same glass. Publish keeps its accent color.
 
 ## 📝 What's New in 1.20.4
 

@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.20.4
+version: 1.20.5
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -22,7 +22,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.20.4"
+VERSION = "1.20.5"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -5800,8 +5800,15 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         .control-group { background: var(--bg-deep); border: 1px solid var(--border); padding: 36px; border-radius: var(--radius-md); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         /* The page shows through the designer as it does under Canvas FX, so
            these panels take the same tint whether an animation runs or not */
-        #tab-lch .control-group, #tab-bg .control-group, #tab-backgrounds .control-group, #tab-lch .var-item { background: rgba(0, 0, 0, 0.45); }
-        body.light-mode #tab-lch .control-group, body.light-mode #tab-bg .control-group, body.light-mode #tab-backgrounds .control-group, body.light-mode #tab-lch .var-item { background: rgba(255, 255, 255, 0.55); }
+        #tab-lch .control-group, #tab-bg .control-group, #tab-backgrounds .control-group, #tab-surfaces .control-group, #tab-lch .var-item { background: rgba(0, 0, 0, 0.45); }
+        body.light-mode #tab-lch .control-group, body.light-mode #tab-bg .control-group, body.light-mode #tab-backgrounds .control-group, body.light-mode #tab-surfaces .control-group, body.light-mode #tab-lch .var-item { background: rgba(255, 255, 255, 0.55); }
+        /* The tab bar and the footer's buttons take the same tint; the open
+           tab is a lighter pane of it */
+        .tabs, .footer .btn:not(.btn-primary), .footer .sync-all-toggle { background: rgba(0, 0, 0, 0.45); }
+        .tab.active { background: rgba(255, 255, 255, 0.1); }
+        body.light-mode .tabs, body.light-mode .footer .btn:not(.btn-primary), body.light-mode .footer .sync-all-toggle { background: rgba(255, 255, 255, 0.55); }
+        body.light-mode .footer .btn:not(.btn-primary):hover { background: rgba(255, 255, 255, 0.75); }
+        body.light-mode .tab.active { background: rgba(255, 255, 255, 0.85); }
         .slider-row { display: flex; flex-direction: column; gap: 18px; margin-bottom: 28px; }
         .slider-row label { display: flex; justify-content: space-between; font-size: 1.05rem; color: var(--text-muted); font-weight: 600; cursor: pointer; user-select: none; transition: color 0.2s; }
         .slider-row label:hover { color: var(--text-main); }
@@ -7953,7 +7960,7 @@ self.onmessage = function(e) {
                             <li><b>Message input</b>: <code>#message-input-container</code></li>
                             <li><b>Side panel</b>: <code>#controls-container</code>, the pane the Tabs button opens</li>
                             <li><b>Cards and panels</b>: the rounded panels on a page, such as note cards, the calendar and workspace and admin cards; at 100% and no blur they keep Open WebUI's own look</li>
-                            <li><b>Buttons</b>: the grey buttons on a page, such as Create, single or split; switches and the black and white action buttons keep their fill</li>
+                            <li><b>Buttons</b>: the grey buttons on a page, such as Create, single or split; switches and the black and white action buttons, such as Save, keep their fill, including the ones drawn with grey classes</li>
                             <li><b>Menus and tooltips</b>: every dropdown and submenu, the model picker, Model controls, tooltips and toasts</li>
                             <li><b>Dialogs</b> and <b>Behind dialogs</b>: the window itself and the page behind it</li>
                             <li><b>Top fade</b>: the fade at the top of a chat; 0% hides it</li>
@@ -12097,11 +12104,13 @@ self.onmessage = (e) => {
                 css += `${at} .app :where(${cards})[class*="hover:bg-"]:hover { background-color: ${fill(color('Cards'), Math.min(100, co + 10))} !important; }\n`;
             }
             // Grey buttons and button groups on a page, at 100% and no blur
-            // Open WebUI's own. Switches show on and off by their fill, and
-            // the black and white action buttons carry no grey class.
+            // Open WebUI's own. Switches show on and off by their fill. Black
+            // and white action buttons (Save, Send) can carry grey classes
+            // too; their text gives them away: white in Light mode, dark in Dark.
             const bo = num('surfaceButtonsOpacity'), bb = num('surfaceButtonsBlur');
             if (bo < 100 || bb > 0) {
                 const bex = '[class*="rounded"]:not([role="switch"]):not([role="checkbox"])' +
+                    ':not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"])' +
                     ':not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *):not(#auth-page *)';
                 const btn = ['bg-gray-', 'dark:bg-gray-'].map(u => `button[class^="${u}"]${bex}, button[class*=" ${u}"]${bex}, div:has(> button:first-child)[class^="${u}"]${bex}, div:has(> button:first-child)[class*=" ${u}"]${bex}`).join(', ');
                 css += `${at} .app :where(${btn}) { ${decl(fill(color('Buttons'), bo), bb)} }\n`;
@@ -12334,6 +12343,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             #tab-lch .control-group,
             #tab-bg .control-group,
             #tab-backgrounds .control-group,
+            #tab-surfaces .control-group,
             #tab-lch .var-item {
                 background: rgba(0, 0, 0, 0.45) !important;
                 backdrop-filter: blur(16px) !important;
@@ -12342,6 +12352,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             body#tool-body.light-mode #tab-lch .control-group,
             body#tool-body.light-mode #tab-bg .control-group,
             body#tool-body.light-mode #tab-backgrounds .control-group,
+            body#tool-body.light-mode #tab-surfaces .control-group,
             body#tool-body.light-mode #tab-lch .var-item {
                 background: rgba(255, 255, 255, 0.55) !important;
             }
