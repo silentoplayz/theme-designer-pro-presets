@@ -25,6 +25,14 @@
     gradientAnimationSpeed: 8, gradientShowAuth: true, themeShowAuth: true,
     customCssShowAuth: true, canvasShowAuth: true,
     themeAuthOnly: false, customCssAuthOnly: false, canvasAuthOnly: false, gradientAuthOnly: false,
+    surfacesEnabled: false,
+    surfaceSidebarOpacity: 100, surfaceSidebarBlur: 0,
+    surfaceComposerOpacity: 5, surfaceComposerBlur: 8,
+    surfacePanelOpacity: 100, surfacePanelBlur: 0,
+    surfaceMenuOpacity: 100, surfaceMenuBlur: 0,
+    surfaceDialogOpacity: 100, surfaceDialogBlur: 0,
+    surfaceBackdropOpacity: 60, surfaceBackdropBlur: 0,
+    surfaceFadeOpacity: 100,
   };
 
   const clone = (o) => JSON.parse(JSON.stringify(o));

@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$comment": "Theme format 1.1. The written spec, with the rules for reading and writing a file, is schemas/theme-format.md. tests/theme-format/check.js keeps this file, the designer and the Studio in step.",
+  "$comment": "Theme format 1.2. The written spec, with the rules for reading and writing a file, is schemas/theme-format.md. tests/theme-format/check.js keeps this file, the designer and the Studio in step.",
   "title": "Theme Preset",
   "description": "A complete Theme Designer Pro theme with per-mode configurations (dark, light, OLED, her)",
   "type": "object",
@@ -272,7 +272,25 @@
           "type": "boolean",
           "default": false,
           "description": "Show the gradient only on auth/login pages, not in the app"
-        }
+        },
+        "surfacesEnabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use this mode's own surface opacity and blur; off follows the instance's Sidebar and Overlay Transparency settings"
+        },
+        "surfaceSidebarOpacity": { "$ref": "#/$defs/percent", "default": 100, "description": "How solid the open sidebar is, in percent" },
+        "surfaceSidebarBlur": { "type": "number", "minimum": 0, "maximum": 40, "default": 0, "description": "How much the open sidebar blurs what shows through it, in px" },
+        "surfaceComposerOpacity": { "$ref": "#/$defs/percent", "default": 5, "description": "How solid the message input is, in percent" },
+        "surfaceComposerBlur": { "type": "number", "minimum": 0, "maximum": 40, "default": 8, "description": "How much the message input blurs what shows through it, in px" },
+        "surfacePanelOpacity": { "$ref": "#/$defs/percent", "default": 100, "description": "How solid the side panel the Tabs button opens is, in percent" },
+        "surfacePanelBlur": { "type": "number", "minimum": 0, "maximum": 40, "default": 0, "description": "How much the side panel the Tabs button opens blurs what shows through it, in px" },
+        "surfaceMenuOpacity": { "$ref": "#/$defs/percent", "default": 100, "description": "How solid menus, the model picker, tooltips and toasts is, in percent" },
+        "surfaceMenuBlur": { "type": "number", "minimum": 0, "maximum": 40, "default": 0, "description": "How much menus, the model picker, tooltips and toasts blurs what shows through it, in px" },
+        "surfaceDialogOpacity": { "$ref": "#/$defs/percent", "default": 100, "description": "How solid dialogs such as Settings is, in percent" },
+        "surfaceDialogBlur": { "type": "number", "minimum": 0, "maximum": 40, "default": 0, "description": "How much dialogs such as Settings blurs what shows through it, in px" },
+        "surfaceBackdropOpacity": { "$ref": "#/$defs/percent", "default": 60, "description": "How dark the page behind an open dialog (tinted black) is, in percent" },
+        "surfaceBackdropBlur": { "type": "number", "minimum": 0, "maximum": 40, "default": 0, "description": "How much the page behind an open dialog (tinted black) blurs what shows through it, in px" },
+        "surfaceFadeOpacity": { "$ref": "#/$defs/percent", "default": 100, "description": "How solid the fade at the top of a chat is, in percent" }
       }
     }
   }

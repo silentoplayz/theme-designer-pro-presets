@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.20.0
+version: 1.20.1
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -22,7 +22,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.20.0"
+VERSION = "1.20.1"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -6169,6 +6169,14 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         .hidden-bg-kind { font-size: 0.62rem; color: var(--text-muted); white-space: nowrap; }
         .hidden-bg-label { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; }
         .hidden-bg-dimming { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+        .surfaces-list { margin-top: 8px; transition: opacity 0.2s; }
+        .surfaces-list.off { opacity: 0.4; }
+        .surface-row { padding: 14px 0; border-top: 1px solid var(--border); }
+        .surface-row-name { font-size: 0.95rem; font-weight: 700; color: var(--text-main); }
+        .surface-sliders .slider-row label { font-size: 0.8rem; }
+        .surface-row-hint { font-size: 0.7rem; color: var(--text-muted); margin: 2px 0 10px; }
+        .surface-sliders { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        @media (max-width: 600px) { .surface-sliders { grid-template-columns: 1fr; gap: 10px; } }
         .hidden-bg-dimming .hidden-bg-label { font-size: 0.75rem; color: var(--text-main); }
         #hidden-bg-list input.hidden-bg-slider, .hidden-bg-dimming input.hidden-bg-slider { width: 160px; flex-shrink: 0; }
         .hidden-bg-head { display: flex; align-items: center; gap: 10px; flex: 1 1 auto; min-width: 0; }
@@ -6292,6 +6300,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         <div class="tab" data-tab="custom" role="tab" tabindex="-1" aria-selected="false">✏️ Style Overrides</div>
         <div class="tab" data-tab="canvas" role="tab" tabindex="-1" aria-selected="false">✨ Canvas FX</div>
         <div class="tab" data-tab="bg" role="tab" tabindex="-1" aria-selected="false">🌈 Gradient</div>
+        <div class="tab" data-tab="surfaces" role="tab" tabindex="-1" aria-selected="false">🪟 Surfaces</div>
         <div class="tab" data-tab="backgrounds" role="tab" tabindex="-1" aria-selected="false">🖼️ Backgrounds</div>
     </div>
 
@@ -6591,6 +6600,19 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
 
             <div style="margin-top: 24px;">
                 <div id="gallery-toolbar-gradient"></div>
+            </div>
+        </div>
+
+        <div id="tab-surfaces" class="tab-content" role="tabpanel" style="display:none;">
+            <div class="section-title section-title-bar">
+                <div>Surfaces</div>
+                <div class="flex-center">
+                    <label class="toggle-label" data-tooltip="Set how see-through this mode's sidebar, message input, menus and dialogs are"><input type="checkbox" id="toggle-surfaces" class="cb-input"> Enabled</label>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="hidden-bg-note" id="surfaces-note"></div>
+                <div class="surfaces-list" id="surfaces-list"></div>
             </div>
         </div>
 
@@ -7769,6 +7791,22 @@ self.onmessage = function(e) {
                             <li><b>Third-party extensions or custom elements:</b> Elements using <code>bg-gray-*</code> classes that are not <code>button</code>, <code>a</code>, <code>input</code>, <code>select</code>, <code>label</code>, or <code>span</code> will be made transparent. If a third-party extension injects custom UI with gray backgrounds, it may become transparent. Use the Style Overrides tab to restore specific elements if needed.</li>
                         </ul>
 
+                            </div>
+                        </details>
+
+                        <details class="doc-sub-accordion">
+                            <summary>Surfaces: Each Layer's Opacity and Blur <i data-icon="chevron"></i></summary>
+                            <div class="doc-sub-inner">
+                        <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85;">The <b>Surfaces</b> tab sets, per mode, how see-through each layer over the background is. <b>Opacity</b> is how much of the color Open WebUI paints that layer covers it, from 0% (clear) to 100% (solid). <b>Blur</b> softens whatever shows through it, up to 40px. For the backdrop behind a dialog, the first slider is how dark it gets.</p>
+                        <ul style="font-size: 0.72rem; line-height: 1.7; padding-left: 18px;">
+                            <li><b>Sidebar</b>: the open sidebar; its top and bottom fades show only at 100%</li>
+                            <li><b>Message input</b>: <code>#message-input-container</code></li>
+                            <li><b>Side panel</b>: <code>#controls-container</code>, the pane the Tabs button opens</li>
+                            <li><b>Menus and tooltips</b>: every dropdown and submenu, the model picker, Model controls, tooltips and toasts</li>
+                            <li><b>Dialogs</b> and <b>Behind dialogs</b>: the window itself and the page behind it</li>
+                            <li><b>Top fade</b>: the fade at the top of a chat; 0% hides it</li>
+                        </ul>
+                        <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85;">With the tab's switch off, a mode follows the <b>Sidebar Transparency</b> and <b>Overlay Transparency</b> valves. On, the mode's own values win over both. Turning it on the first time starts from what those valves draw. Surfaces travel with the theme: they export, sync between modes under their own Sync category, and Reset Mode clears them.</p>
                             </div>
                         </details>
 
@@ -9083,12 +9121,35 @@ location.reload();</code></pre>
         gradientMeshPoints: [], gradientMeshBgColor: '#0a0a12',
         gradientAnimationSpeed: 8, gradientShowAuth: true, themeShowAuth: true,
         customCssShowAuth: true, canvasShowAuth: true,
-        themeAuthOnly: false, customCssAuthOnly: false, canvasAuthOnly: false, gradientAuthOnly: false
+        themeAuthOnly: false, customCssAuthOnly: false, canvasAuthOnly: false, gradientAuthOnly: false,
+        surfacesEnabled: false,
+        surfaceSidebarOpacity: 100, surfaceSidebarBlur: 0,
+        surfaceComposerOpacity: 5, surfaceComposerBlur: 8,
+        surfacePanelOpacity: 100, surfacePanelBlur: 0,
+        surfaceMenuOpacity: 100, surfaceMenuBlur: 0,
+        surfaceDialogOpacity: 100, surfaceDialogBlur: 0,
+        surfaceBackdropOpacity: 60, surfaceBackdropBlur: 0,
+        surfaceFadeOpacity: 100
     };
 
     function createDefaultModeData(overrides = {}) {
         return { ...DEFAULT_MODE_DATA, overrides: {}, locks: {}, gradientStops: [], gradientMeshPoints: [], ...overrides };
     }
+
+    // The Surfaces tab's layers. Each tints its surface with the color Open
+    // WebUI paints it (dark modes first, light second) at the layer's opacity,
+    // and blurs what shows through. The backdrop is the page behind an open
+    // dialog, tinted black; the top fade has opacity only.
+    const SURFACE_LAYERS = [
+        { key: 'Sidebar', label: 'Sidebar', hint: 'The open sidebar. The collapsed rail stays clear.', color: ['var(--color-gray-950)', 'var(--color-gray-50)'] },
+        { key: 'Composer', label: 'Message input', hint: 'The box you type in.', color: ['var(--color-gray-850)', '#fff'] },
+        { key: 'Panel', label: 'Side panel', hint: 'The pane the Tabs button opens beside a chat.', color: ['var(--color-gray-900)', '#fff'] },
+        { key: 'Menu', label: 'Menus and tooltips', hint: 'Dropdowns, submenus, the model picker, Model controls, tooltips and toasts.', color: ['var(--color-gray-850)', '#fff'] },
+        { key: 'Dialog', label: 'Dialogs', hint: 'Settings and the other windows that open over the page.', color: ['var(--color-gray-900)', '#fff'] },
+        { key: 'Backdrop', label: 'Behind dialogs', hint: 'The page behind an open dialog: how much it darkens and blurs.', color: null },
+        { key: 'Fade', label: 'Top fade', hint: 'The fade at the top of a chat, under the title bar.', color: null, noBlur: true }
+    ];
+    const SURFACE_FIELDS = ['surfacesEnabled'].concat(...SURFACE_LAYERS.map(l => l.noBlur ? [`surface${l.key}Opacity`] : [`surface${l.key}Opacity`, `surface${l.key}Blur`]));
 
     // The theme's three accents. A mode field set to '#rrggbb' sets one; ''
     // leaves it generated from the palette's hue, the same color the Canvas
@@ -9324,7 +9385,14 @@ location.reload();</code></pre>
         // Matches the sl-gradient-speed slider (min 2). Zero is not a
         // valid duration here: `animation: 0s` with background-size 300%
         // freezes a 3x-zoomed gradient instead of animating it.
-        gradientAnimationSpeed: [2, 30]
+        gradientAnimationSpeed: [2, 30],
+        surfaceSidebarOpacity: [0, 100], surfaceSidebarBlur: [0, 40],
+        surfaceComposerOpacity: [0, 100], surfaceComposerBlur: [0, 40],
+        surfacePanelOpacity: [0, 100], surfacePanelBlur: [0, 40],
+        surfaceMenuOpacity: [0, 100], surfaceMenuBlur: [0, 40],
+        surfaceDialogOpacity: [0, 100], surfaceDialogBlur: [0, 40],
+        surfaceBackdropOpacity: [0, 100], surfaceBackdropBlur: [0, 40],
+        surfaceFadeOpacity: [0, 100]
     };
 
     function _num(v, lo, hi, dflt) {
@@ -9350,7 +9418,7 @@ location.reload();</code></pre>
         ['paletteEnabled', 'customCssEnabled', 'autoScope', 'canvasEnabled',
          'manualOverridesEnabled', 'gradientEnabled', 'gradientAnimation',
          'gradientShowAuth', 'themeShowAuth', 'customCssShowAuth', 'canvasShowAuth',
-         'themeAuthOnly', 'customCssAuthOnly', 'canvasAuthOnly', 'gradientAuthOnly'
+         'themeAuthOnly', 'customCssAuthOnly', 'canvasAuthOnly', 'gradientAuthOnly', 'surfacesEnabled'
         ].forEach(k => { if (d[k] !== undefined) d[k] = !!d[k]; });
         ['customCSS', 'canvasScript', 'manualOverrides'].forEach(k => {
             if (d[k] !== undefined && typeof d[k] !== 'string') d[k] = def[k];
@@ -10923,6 +10991,7 @@ self.onmessage = (e) => {
         renderCanvasPresets();
         renderCssPresets();
         renderGradientTab();
+        renderSurfacesTab();
         syncAuthOnlyToggles();
     }
 
@@ -11822,6 +11891,45 @@ self.onmessage = (e) => {
             return '';
         };
         
+        // The Surfaces tab. Off: nothing, and the instance's Sidebar and
+        // Overlay Transparency settings apply. On: these rules, which outrank
+        // those settings' rules through the :not() of three IDs no element
+        // has (specificity only, it matches everything).
+        const buildSurfaceCss = (modeData, scope, dark) => {
+            if (!modeData.surfacesEnabled) return '';
+            const at = scope + ':not(#tdp-surface#tdp-surface#tdp-surface)';
+            const num = (k) => _num(modeData[k], 0, k.endsWith('Blur') ? 40 : 100, DEFAULT_MODE_DATA[k]);
+            const fill = (c, o) => o >= 100 ? c : `color-mix(in srgb, ${c} ${o}%, transparent)`;
+            const glass = (b) => b > 0 ? `blur(${b}px) saturate(1.2)` : 'none';
+            const decl = (bg, b) => `background-color: ${bg} !important; backdrop-filter: ${glass(b)} !important; -webkit-backdrop-filter: ${glass(b)} !important;`;
+            const color = (key) => SURFACE_LAYERS.find(l => l.key === key).color[dark ? 0 : 1];
+            const pex = ':not(.app):not(.modal):not(#theme-designer-container):not([id^="owui-"]):not(#svelte):not([style*="display: contents"]):not(script):not(style)';
+            const iex = ':not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *)';
+            const tokens = ['bg-white', 'bg-gray-', 'dark:bg-gray-'].map(u => `div[class^="${u}"]${iex}, div[class*=" ${u}"]${iex}`).join(', ');
+            const so = num('surfaceSidebarOpacity');
+            let css = `/* --- Surfaces --- */\n`;
+            css += `${at} #sidebar:not(.h-full) { ${decl(fill(color('Sidebar'), so), num('surfaceSidebarBlur'))} }\n`;
+            css += `${at} #sidebar .sidebar-bg-gradient-to-t, ${at} #sidebar .sidebar-bg-gradient-to-b { display: ${so >= 100 ? 'block' : 'none'} !important; }\n`;
+            css += `${at} #message-input-container { ${decl(fill(color('Composer'), num('surfaceComposerOpacity')), num('surfaceComposerBlur'))} }\n`;
+            // The side panel sits in a resizable wrapper painted solid, with a
+            // solid tab strip on top; both clear so the panel's own fill shows.
+            // Full width, the container is display: contents and its children
+            // carry the fill instead.
+            const panel = decl(fill(color('Panel'), num('surfacePanelOpacity')), num('surfacePanelBlur'));
+            css += `${at} #controls-container:not(.contents), ${at} #controls-container.contents > div { ${panel} }\n`;
+            css += `${at} :has(> div > #controls-container:not(.contents)), ${at} #controls-container:not(.contents) > div:first-child { background-color: transparent !important; }\n`;
+            css += `${at} .app-dropdown-menu, ${at} .tippy-box, ${at} [data-sonner-toast], ${at} body > div${pex} :where(${tokens}) { ${decl(fill(color('Menu'), num('surfaceMenuOpacity')), num('surfaceMenuBlur'))} }\n`;
+            css += `${at} .modal > div:where([class*="bg-white"], [class*="bg-gray-"]) { ${decl(fill(color('Dialog'), num('surfaceDialogOpacity')), num('surfaceDialogBlur'))} }\n`;
+            // Overlay Transparency also tints the pieces inside a dialog; hand
+            // them back to Open WebUI's own classes, which sit in a cascade layer
+            const inner = ['bg-white', 'bg-gray-', 'dark:bg-gray-'].map(u => `div[class^="${u}"], div[class*=" ${u}"]`).join(', ');
+            css += `${at} .modal > div :where(${inner}) { background-color: revert-layer !important; backdrop-filter: revert-layer !important; -webkit-backdrop-filter: revert-layer !important; }\n`;
+            css += `${at} .modal { ${decl(`rgb(0 0 0 / ${num('surfaceBackdropOpacity')}%)`, num('surfaceBackdropBlur'))} }\n`;
+            const fo = num('surfaceFadeOpacity');
+            css += `${at} #navbar-bg-gradient-to-b { display: ${fo > 0 ? 'block' : 'none'} !important; opacity: ${fo / 100} !important; }\n`;
+            return css;
+        };
+
         const getBgRules = (mode, selector, bgBody, bgSidebar) => {
             // Your own message bubble stays: cleared, its text floats on the canvas.
             // Rounded controls (the message input, pill buttons) and everything
@@ -11946,6 +12054,9 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             structuralCss += `/* --- ${m.name} Background Overrides --- */\n`;
             structuralCss += getBgRules(m.id, m.scope, m.bgBody, m.bgSidebar);
             structuralCss += wrapSystemMedia(m.id, () => getBgRules(m.id, 'html[data-theme="system"]', m.bgBody, m.bgSidebar));
+            const darkMode = m.id === 'dark' || m.id === 'oled';
+            structuralCss += buildSurfaceCss(modeData, m.scope, darkMode);
+            structuralCss += wrapSystemMedia(m.id, () => buildSurfaceCss(modeData, 'html[data-theme="system"]', darkMode));
 
             // Accumulate gradient + custom CSS for output after structural block
             gradientCss += buildGradientCss(modeData, m.scope);
@@ -13809,6 +13920,77 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
 
     // === END GRADIENT BUILDER LOGIC ===
 
+    // === SURFACES TAB ===
+    // One row per layer, built from SURFACE_LAYERS. The values are the mode's
+    // own; with the switch off the theme leaves the layers to the instance's
+    // Sidebar and Overlay Transparency settings.
+    (function buildSurfacesTab() {
+        const list = $('surfaces-list');
+        if (!list) return;
+        list.innerHTML = SURFACE_LAYERS.map(l => {
+            const first = l.key === 'Backdrop' ? 'Darkness' : 'Opacity';
+            const slider = (field, name, max, unit) =>
+                `<div class="slider-row"><label for="sl-${field}">${name} <span class="slider-val" id="val-${field}"></span></label>` +
+                `<input type="range" id="sl-${field}" data-field="${field}" data-unit="${unit}" min="0" max="${max}" value="0"></div>`;
+            return `<div class="surface-row"><div class="surface-row-name">${l.label}</div><div class="surface-row-hint">${l.hint}</div>` +
+                `<div class="surface-sliders">${slider(`surface${l.key}Opacity`, first, 100, '%')}` +
+                (l.noBlur ? '' : slider(`surface${l.key}Blur`, 'Blur', 40, 'px')) + `</div></div>`;
+        }).join('');
+        list.querySelectorAll('input[type="range"]').forEach(slider => {
+            slider.addEventListener('input', () => {
+                const dm = getActiveDataMode();
+                themeData[dm][slider.dataset.field] = parseInt(slider.value);
+                $('val-' + slider.dataset.field).innerText = slider.value + slider.dataset.unit;
+                commitChange({ push: false });
+            });
+            slider.addEventListener('change', () => pushState());
+        });
+    })();
+
+    // Turning Surfaces on for the first time starts from what the instance
+    // settings draw today, so nothing jumps
+    function seedSurfacesFromValves(d) {
+        if (!SURFACE_FIELDS.slice(1).every(k => d[k] === DEFAULT_MODE_DATA[k])) return;
+        const cfg = window.__THEME_PRO_CONFIG__ || {};
+        if (cfg.sidebarTransparency === 'translucent') { d.surfaceSidebarOpacity = 20; d.surfaceSidebarBlur = 20; }
+        else if (cfg.sidebarTransparency === 'transparent') { d.surfaceSidebarOpacity = 0; d.surfaceSidebarBlur = 0; }
+        if (cfg.overlayTransparency === 'translucent') {
+            d.surfaceMenuOpacity = 25; d.surfaceMenuBlur = 20;
+            d.surfaceDialogOpacity = 25; d.surfaceDialogBlur = 20;
+            d.surfaceFadeOpacity = 0;
+        }
+    }
+
+    $('toggle-surfaces')?.addEventListener('change', (e) => {
+        const d = themeData[getActiveDataMode()];
+        if (e.target.checked) seedSurfacesFromValves(d);
+        d.surfacesEnabled = e.target.checked;
+        commitChange();
+    });
+
+    function renderSurfacesTab() {
+        const d = themeData[getActiveDataMode()];
+        if (!d) return;
+        const on = !!d.surfacesEnabled;
+        const toggle = $('toggle-surfaces');
+        if (toggle) toggle.checked = on;
+        $('surfaces-list')?.classList.toggle('off', !on);
+        document.querySelectorAll('#surfaces-list input[type="range"]').forEach(slider => {
+            const k = slider.dataset.field;
+            const v = d[k] ?? DEFAULT_MODE_DATA[k];
+            slider.value = v;
+            slider.disabled = !on;
+            $('val-' + k).innerText = v + slider.dataset.unit;
+        });
+        const note = $('surfaces-note');
+        if (note) {
+            const cfg = window.__THEME_PRO_CONFIG__ || {};
+            note.innerText = on
+                ? "Opacity is how much of Open WebUI's own color covers each layer: 100% is solid, 0% is clear. Blur softens whatever shows through it. These win over the instance's Sidebar and Overlay Transparency settings in this mode."
+                : `Off: this mode follows the instance's Sidebar Transparency (${cfg.sidebarTransparency || 'opaque'}) and Overlay Transparency (${cfg.overlayTransparency || 'opaque'}) settings. Turn it on to set each layer yourself.`;
+        }
+    }
+
     $('reset-mode-btn').onclick = () => {
         const names = { dark: 'Dark', oled: 'OLED', light: 'Light', her: 'Her', system: 'System' };
         const dm = getActiveDataMode();
@@ -13899,7 +14081,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
     }
 
     function updateOptionsHeaderToggleState() {
-        const options = ['palette', 'overrides', 'css', 'canvas', 'gradient', 'auth'];
+        const options = ['palette', 'overrides', 'css', 'canvas', 'gradient', 'surfaces', 'auth'];
         const checkedOptions = options.filter(opt => {
             const cb = $(`sync-opt-${opt}`);
             return cb && cb.checked;
@@ -13910,7 +14092,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
         }
     }
 
-    ['palette', 'overrides', 'css', 'canvas', 'gradient', 'auth'].forEach(opt => {
+    ['palette', 'overrides', 'css', 'canvas', 'gradient', 'surfaces', 'auth'].forEach(opt => {
         const cb = $(`sync-opt-${opt}`);
         if (cb) {
             cb.addEventListener('change', updateOptionsHeaderToggleState);
@@ -13935,7 +14117,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
     $('sync-toggle-options').onclick = () => {
         const toggleBtn = $('sync-toggle-options');
         const shouldSelect = (toggleBtn.innerText === 'Select All');
-        ['palette', 'overrides', 'css', 'canvas', 'gradient', 'auth'].forEach(opt => {
+        ['palette', 'overrides', 'css', 'canvas', 'gradient', 'surfaces', 'auth'].forEach(opt => {
             const cb = $(`sync-opt-${opt}`);
             if (cb) cb.checked = shouldSelect;
         });
@@ -14022,6 +14204,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             css:       $('sync-badge-css'),
             canvas:    $('sync-badge-canvas'),
             gradient:  $('sync-badge-gradient'),
+            surfaces:  $('sync-badge-surfaces'),
             auth:      $('sync-badge-auth')
         };
 
@@ -14030,11 +14213,11 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             return cb && cb.checked && !cb.disabled;
         });
 
-        syncDiffData = { palette: [], overrides: [], css: [], canvas: [], gradient: [], auth: [] };
+        syncDiffData = { palette: [], overrides: [], css: [], canvas: [], gradient: [], surfaces: [], auth: [] };
 
         if (targetModes.length === 0) {
             Object.values(badges).forEach(b => { if (b) b.style.display = 'none'; });
-            ['palette','overrides','css','canvas','gradient','auth'].forEach(k => {
+            ['palette','overrides','css','canvas','gradient','surfaces','auth'].forEach(k => {
                 const chevron = document.querySelector(`.sync-diff-chevron[data-setting="${k}"]`);
                 if (chevron) chevron.style.display = 'none';
                 const panel = $(`sync-diff-${k}`);
@@ -14043,7 +14226,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             return;
         }
 
-        let paletteDiffs = 0, overridesDiffs = 0, cssDiffs = 0, canvasDiffs = 0, gradientDiffs = 0, authDiffs = 0;
+        let paletteDiffs = 0, overridesDiffs = 0, cssDiffs = 0, canvasDiffs = 0, gradientDiffs = 0, surfacesDiffs = 0, authDiffs = 0;
 
         for (const mode of targetModes) {
             const sourceData = getSyncSourceData(mode);
@@ -14100,6 +14283,13 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             });
             if (!gMatch) gradientDiffs++;
 
+            // === Surfaces ===
+            const surfacesOf = (d) => SURFACE_FIELDS.map(k => k === 'surfacesEnabled' ? !!d[k] : (d[k] ?? DEFAULT_MODE_DATA[k]));
+            const incomingSurfaces = surfacesOf(sourceData), currentSurfaces = surfacesOf(targetData);
+            const sMatch = incomingSurfaces.every((v, i) => v === currentSurfaces[i]);
+            syncDiffData.surfaces.push({ mode, match: sMatch, src: currentSurfaces, tgt: incomingSurfaces });
+            if (!sMatch) surfacesDiffs++;
+
             // === Auth ===
             const incomingAuth = [sourceData.themeShowAuth, sourceData.customCssShowAuth, sourceData.canvasShowAuth, sourceData.gradientShowAuth].map(v => v !== false)
                 .concat(AUTH_ONLY_KEYS.map(k => sourceData[k] === true));
@@ -14115,10 +14305,11 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
         setSyncBadge(badges.css, cssDiffs === 0, cssDiffs);
         setSyncBadge(badges.canvas, canvasDiffs === 0, canvasDiffs);
         setSyncBadge(badges.gradient, gradientDiffs === 0, gradientDiffs);
+        setSyncBadge(badges.surfaces, surfacesDiffs === 0, surfacesDiffs);
         setSyncBadge(badges.auth, authDiffs === 0, authDiffs);
 
         // Re-render any currently expanded diff panels
-        ['palette','overrides','css','canvas','gradient','auth'].forEach(k => {
+        ['palette','overrides','css','canvas','gradient','surfaces','auth'].forEach(k => {
             const panel = $(`sync-diff-${k}`);
             if (panel && panel.style.display !== 'none') renderSyncDiffPanel(k);
         });
@@ -14126,7 +14317,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
 
     // === Diff Panel Accordion ===
     function collapseAllSyncDiffs() {
-        ['palette','overrides','css','canvas','gradient','auth'].forEach(k => {
+        ['palette','overrides','css','canvas','gradient','surfaces','auth'].forEach(k => {
             const panel = $(`sync-diff-${k}`);
             if (panel) panel.style.display = 'none';
             const chevron = document.querySelector(`.sync-diff-chevron[data-setting="${k}"]`);
@@ -14193,6 +14384,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             else if (key === 'css') html += _renderCssDiff(entry);
             else if (key === 'canvas') html += _renderCanvasDiff(entry);
             else if (key === 'gradient') html += _renderGradientDiff(entry);
+            else if (key === 'surfaces') html += _renderSurfacesDiff(entry);
             else if (key === 'auth') html += _renderAuthDiff(entry);
 
             html += `</div>`;
@@ -14373,6 +14565,24 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
         return h;
     }
 
+    function _renderSurfacesDiff(entry) {
+        const show = (k, v) => k === 'surfacesEnabled' ? (v ? '✓ ON' : '✗ OFF') : v + (k.endsWith('Blur') ? 'px' : '%');
+        const name = (k) => {
+            if (k === 'surfacesEnabled') return 'Surfaces';
+            const l = SURFACE_LAYERS.find(x => k === `surface${x.key}Opacity` || k === `surface${x.key}Blur`);
+            return `${l.label} ${k.endsWith('Blur') ? 'blur' : (l.key === 'Backdrop' ? 'darkness' : 'opacity')}`;
+        };
+        let h = `<table class="sync-diff-prop-table">`;
+        h += `<thead><tr><td></td><td>Source</td><td></td><td>Target</td><td></td></tr></thead>`;
+        SURFACE_FIELDS.forEach((k, i) => {
+            const sv = entry.src[i], tv = entry.tgt[i];
+            if (sv === tv) return;
+            h += `<tr><td class="prop-key">${name(k)}</td><td>${show(k, sv)}</td><td style="opacity:0.3">→</td><td>${show(k, tv)}</td><td class="prop-diff">⚠</td></tr>`;
+        });
+        h += `</table>`;
+        return h;
+    }
+
     function _renderAuthDiff(entry) {
         const labels = ['Theme on Auth', 'CSS on Auth', 'Canvas on Auth', 'Gradient on Auth',
                         'Theme Only on Auth', 'CSS Only on Auth', 'Canvas Only on Auth', 'Gradient Only on Auth'];
@@ -14438,6 +14648,11 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             copyGradientProps(themeData[mode], sourceData);
             // Update gradient ref — try to match against built-in presets
             activeGradientRef[mode] = opts.gradientRef !== undefined ? opts.gradientRef : null;
+        }
+        if (opts.syncSurfaces) {
+            SURFACE_FIELDS.forEach(k => {
+                themeData[mode][k] = k === 'surfacesEnabled' ? !!sourceData[k] : (sourceData[k] ?? DEFAULT_MODE_DATA[k]);
+            });
         }
         if (opts.syncAuth) copyAuthProps(themeData[mode], sourceData);
     }
@@ -14507,7 +14722,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             container.appendChild(pill);
         });
 
-        ['palette', 'overrides', 'css', 'canvas', 'gradient', 'auth'].forEach(opt => {
+        ['palette', 'overrides', 'css', 'canvas', 'gradient', 'surfaces', 'auth'].forEach(opt => {
             const cb = $(`sync-opt-${opt}`);
             if (cb) cb.checked = true;
         });
@@ -14534,7 +14749,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
                 targetModes.forEach(mode => {
                     applySyncToMode(mode, srcData, {
                         syncPalette: true, syncOverrides: true, syncCss: true,
-                        syncCanvas: true, syncGradient: true, syncAuth: true,
+                        syncCanvas: true, syncGradient: true, syncSurfaces: true, syncAuth: true,
                         adjustL: (m, l) => m === 'oled' ? 0 : l,
                         cssRef: activeCssRef[dm],
                         canvasRef: activeCanvasRef[dm],
@@ -14560,7 +14775,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
                         }
                         applySyncToMode(mode, sourceModeData, {
                             syncPalette: true, syncOverrides: true, syncCss: true,
-                            syncCanvas: true, syncGradient: true, syncAuth: true,
+                            syncCanvas: true, syncGradient: true, syncSurfaces: true, syncAuth: true,
                             rebuildLocks: true,
                         });
                         activeThemeRef[mode] = { type: 'snapshot', id: sourceId };
@@ -14576,7 +14791,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
                     }
                     applySyncToMode(dm, sourceModeData, {
                         syncPalette: true, syncOverrides: true, syncCss: true,
-                        syncCanvas: true, syncGradient: true, syncAuth: true,
+                        syncCanvas: true, syncGradient: true, syncSurfaces: true, syncAuth: true,
                         rebuildLocks: true,
                     });
                     activeThemeRef[dm] = { type: 'snapshot', id: sourceId };
@@ -14601,6 +14816,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
         const syncCss = $('sync-opt-css').checked;
         const syncCanvas = $('sync-opt-canvas').checked;
         const syncGradient = $('sync-opt-gradient')?.checked;
+        const syncSurfaces = $('sync-opt-surfaces')?.checked;
         const syncAuth = $('sync-opt-auth').checked;
 
         const targetModes = MODES.filter(m => {
@@ -14613,7 +14829,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             return;
         }
 
-        if (!syncPalette && !syncOverrides && !syncCss && !syncCanvas && !syncGradient && !syncAuth) {
+        if (!syncPalette && !syncOverrides && !syncCss && !syncCanvas && !syncGradient && !syncSurfaces && !syncAuth) {
             showToast("Nothing selected to sync/apply!");
             return;
         }
@@ -14640,7 +14856,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
                 }
 
                 applySyncToMode(mode, sourceData, {
-                    syncPalette, syncOverrides, syncCss, syncCanvas, syncGradient, syncAuth,
+                    syncPalette, syncOverrides, syncCss, syncCanvas, syncGradient, syncSurfaces, syncAuth,
                     rebuildLocks: usePerModeSource,
                     adjustL: (m, l) => m === 'oled' ? 0 : l,
                     cssRef: usePerModeSource ? undefined : activeCssRef[dm],
@@ -14666,7 +14882,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
                     else { sourceModeData = structuredClone(s.dark || s.light); }
                 }
                 applySyncToMode(mode, sourceModeData, {
-                    syncPalette, syncOverrides, syncCss, syncCanvas, syncGradient, syncAuth,
+                    syncPalette, syncOverrides, syncCss, syncCanvas, syncGradient, syncSurfaces, syncAuth,
                     rebuildLocks: true,
                 });
                 if (syncPalette) activeThemeRef[mode] = { type: 'snapshot', id: syncSourceId };
@@ -19094,6 +19310,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             ('css', 'Custom CSS Snippet', 'All raw styles from Custom CSS tab'),
             ('canvas', 'Canvas FX Script', 'Background animation code &amp; state'),
             ('gradient', 'Gradient Background', 'Color stops, direction, type &amp; animation'),
+            ('surfaces', 'Surfaces', 'Opacity &amp; blur of the sidebar, input, menus &amp; dialogs'),
             ('auth', 'Auth Page Visibility', "'Show on Auth Pages' and 'Only on Auth Pages' toggles for all tabs"),
         ]
         sync_html = '\n\n'.join(

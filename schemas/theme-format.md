@@ -1,4 +1,4 @@
-# Theme format 1.1
+# Theme format 1.2
 
 This page is for anyone who writes a tool that reads or writes Theme Designer Pro themes, and for anyone who changes how the designer or the Studio handles them. It says what a theme file holds, how a reader fills in what a file leaves out, and how the format changes.
 
@@ -82,6 +82,27 @@ The accents, set or generated, reach Canvas FX scripts as `colors.accent`, `acce
 | `gradientAnimation` | boolean | false | Whether the gradient moves |
 | `gradientAnimationSpeed` | number, 2 to 30 | 8 | Seconds for one cycle of the movement |
 
+### Surfaces
+
+How see-through the layers over the background are. Each layer is tinted with the color Open WebUI paints it at the layer's opacity, from 0 (clear) to 100 (solid), and blurs what shows through by its blur in px. The values count only while `surfacesEnabled` is on; then they win over the instance's settings in that mode.
+
+| Field | Type | Default | Meaning |
+|---|---|---|---|
+| `surfacesEnabled` | boolean | false | The mode sets its own surfaces. Off, the instance's Sidebar Transparency and Overlay Transparency settings apply |
+| `surfaceSidebarOpacity` | number, 0 to 100 | 100 | How solid the open sidebar is, in percent |
+| `surfaceSidebarBlur` | number, 0 to 40 | 0 | How much the open sidebar blurs what shows through it, in px |
+| `surfaceComposerOpacity` | number, 0 to 100 | 5 | How solid the message input is, in percent |
+| `surfaceComposerBlur` | number, 0 to 40 | 8 | How much the message input blurs what shows through it, in px |
+| `surfacePanelOpacity` | number, 0 to 100 | 100 | How solid the side panel the Tabs button opens is, in percent |
+| `surfacePanelBlur` | number, 0 to 40 | 0 | How much the side panel the Tabs button opens blurs what shows through it, in px |
+| `surfaceMenuOpacity` | number, 0 to 100 | 100 | How solid menus, the model picker, tooltips and toasts is, in percent |
+| `surfaceMenuBlur` | number, 0 to 40 | 0 | How much menus, the model picker, tooltips and toasts blurs what shows through it, in px |
+| `surfaceDialogOpacity` | number, 0 to 100 | 100 | How solid dialogs such as Settings is, in percent |
+| `surfaceDialogBlur` | number, 0 to 40 | 0 | How much dialogs such as Settings blurs what shows through it, in px |
+| `surfaceBackdropOpacity` | number, 0 to 100 | 60 | How dark the page behind an open dialog (tinted black) is, in percent |
+| `surfaceBackdropBlur` | number, 0 to 40 | 0 | How much the page behind an open dialog (tinted black) blurs what shows through it, in px |
+| `surfaceFadeOpacity` | number, 0 to 100 | 100 | How solid the fade at the top of a chat is, in percent |
+
 ### Sign-in pages
 
 The Show fields decide what a sign-in page shows. The Only fields take a part off the app's pages, so it shows on the sign-in pages alone. The designer lets an Only field be turned on only while its Show field is on, and a personal theme, which never reaches the sign-in pages, ignores the Only fields.
@@ -139,7 +160,7 @@ The Studio opens a gallery theme or a submitted one and downloads a new theme. I
 
 ## Versions
 
-This is version 1.1 of the format. Files don't name the version they follow: 1.0 was the first one written down, and a 1.0 file reads the same under 1.1.
+This is version 1.2 of the format. Files don't name the version they follow: 1.0 was the first one written down, and a 1.0 or 1.1 file reads the same under 1.2.
 
 - **A new field** that leaves older files looking the same, with a default that does what files without it already did, makes a minor version: 1.1, 1.2 and so on. The designer, the Studio, the schema and this page change together in one commit.
 - **Any change that makes an existing file look different**, such as a new meaning for a field or a new default, makes a major version: 2.0. It also needs a field in the file that tells readers which version it follows, added in that same version.
@@ -151,5 +172,6 @@ Two tests keep the copies of the format in step:
 
 ### Changes
 
+- **1.2** (2026-11-05): A mode gained `surfacesEnabled` and the opacity and blur of its surfaces. A file without them leaves the surfaces to the instance's settings, as before.
 - **1.1** (2026-10-16): A mode gained `accent`, `accent2` and `accent3`, each `#rrggbb` to set that accent or `""` to keep the generated one, which is what every file without them gets.
 - **1.0** (2026-10-11): First written version. The schema gained the gradient, palette switch and manual override fields that files already carried, `c` gained its upper limit of 150, and empty links became valid.

@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI — admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.20.0-blue)
+![Version](https://img.shields.io/badge/version-1.20.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -54,7 +54,7 @@ Unlike the [Tool variant](../tools/) which runs inside an AI chat iframe, this v
 - 🎨 **Theme-Aware Animations:** Canvas FX scripts can draw in the theme's own colors. The engine sends the active mode's palette (background, surface, text and three accents in the theme's hue, as hex and as 0 to 1 floats for WebGL) with `init` and again whenever it changes, so a script that uses it recolors live as you edit the palette or switch modes. It's opt-in: scripts that ignore it keep their own colors.
 - 🔊 **Context-Aware Animations:** Canvas FX scripts can react to conversation data in real-time. A DOM observer scans chat messages for DOM-based token estimation (at most every 2 seconds, during streaming too), while a Socket.IO WebSocket interceptor extracts exact token counts from `chat:completion` responses — both feed a `context` message to the animation for data-driven visual effects. External scripts can also dispatch custom context data via the `owui-canvas-context` CustomEvent API.
 - 🎭 **Community Themes Browser:** Browse and install curated community themes directly from the Themes tab. The community themes grid fetches from the [preset gallery manifest](https://github.com/silentoplayz/theme-designer-pro-presets) and supports one-click install, install-all, and search. Controlled by the `enable_community_themes` valve.
-- 🪟 **Sidebar & Overlay Transparency:** Admin-configurable transparency for the sidebar and overlay UI (settings modals, dropdowns). Choose between opaque (solid), translucent (frosted glass with backdrop-blur), or transparent modes via the `sidebar_transparency` and `overlay_transparency` valves.
+- 🪟 **Sidebar & Overlay Transparency:** Admin-configurable transparency for the sidebar and overlay UI (settings modals, dropdowns). Choose between opaque (solid), translucent (frosted glass with backdrop-blur), or transparent modes via the `sidebar_transparency` and `overlay_transparency` valves. A theme can set its own per layer in the **Surfaces** tab, which wins over the valves for that mode.
 - 👩‍💻 **IDE-Grade Custom CSS Editor:** Write raw CSS directly within the tool. The editor features Tab trapping (2-space indent), smart auto-indentation, auto-closing pairs (brackets, quotes, parentheses), and a synced line number gutter. Save your favorite tweaks to the built-in Custom CSS Preset Gallery. A bundled "Tactical HUD" CSS preset — designed to pair with the "Tactical Liquid Grid" Canvas FX animation — ships with every fresh install as a starter example. Includes a smart parser that safely extracts and hoists `@keyframes`!
 - 🛡️ **Auto-Scoped CSS Injection:** Write Custom CSS without fear of breaking other modes. The Auto-Scope toggle automatically wraps your code in the correct CSS selectors (e.g., `.dark` or `[data-theme='light']`) to ensure tweaks only apply when they should. User CSS is automatically sanitized to prevent spoofing of internal `OWUI_*` marker comments used for auth-page stripping.
 - 🎯 **Variable Overrides & Manual CSS Variables:** Hand-pick and override color variables with a native color picker — each swatch features an `Aa` contrast preview badge. Click directly on any variable name to instantly copy its CSS declaration (e.g., `--color-gray-800: #1a1a2e;`). The Manual Variable Overrides code editor lets you write raw CSS custom property declarations injected _after_ the generated palette for maximum priority.
@@ -509,6 +509,28 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. 1.7.0 cleans that up automatically on first run; to verify by hand, check that `<!-- OWUI Theme Pro Bootloader -->` is absent from `/app/build/index.html`.
 
 ---
+
+## 📝 What's New in 1.20.1
+
+Paste it in and save. Nothing changes until a theme turns Surfaces on, so existing themes look as they did.
+
+**Set how see-through each layer is.** A new **Surfaces** tab, between Gradient and Backgrounds, gives each layer over the background an **Opacity** slider (0% clear, 100% solid) and a **Blur** slider (up to 40 px), per mode:
+
+- **Sidebar**: the open sidebar. Its top and bottom fades show only at 100%, and the collapsed rail stays clear.
+- **Message input**: the box you type in.
+- **Side panel**: the pane the **Tabs** button opens beside a chat, in split and full-width layouts.
+- **Menus and tooltips**: every dropdown and submenu, the model picker, **Model controls**, tooltips and toasts.
+- **Dialogs**: Settings and the other windows that open over the page.
+- **Behind dialogs**: how much the page behind an open dialog darkens and blurs.
+- **Top fade**: the fade at the top of a chat, hidden at 0%.
+
+Each layer is tinted with the color Open WebUI paints it, so the sliders follow the theme's palette.
+
+**The valves become the default.** With the tab's switch off, a mode follows the **Sidebar Transparency** and **Overlay Transparency** valves as before. With it on, the mode's own values win over both. The first time you turn it on, the sliders start from what the valves draw, so nothing jumps.
+
+**Surfaces travel with the theme.** They export and import with the theme file, **Sync** copies them between modes under a new **Surfaces** category, and **Reset Mode** clears them. Theme format version 1.2 adds `surfacesEnabled` and an opacity and blur for each layer. Files without them read as before.
+
+**Limit:** on phone widths the Tabs panel opens as a drawer whose solid color uses Open WebUI's own `!important` classes, which the theme's CSS can't override, so it stays solid there.
 
 ## 📝 What's New in 1.20.0
 
