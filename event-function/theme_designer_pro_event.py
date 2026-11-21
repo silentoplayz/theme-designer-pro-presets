@@ -8019,7 +8019,7 @@ self.onmessage = (e) =&gt; {
                         <details class="doc-sub-accordion">
                             <summary>Surfaces: Each Layer's Opacity and Blur <i data-icon="chevron"></i></summary>
                             <div class="doc-sub-inner">
-                        <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85;">The <b>Surfaces</b> tab sets, per mode, how see-through each layer over the background is. <b>Opacity</b> is how much of the color Open WebUI paints that layer covers it, from 0% (clear) to 100% (solid). <b>Blur</b> softens whatever shows through it, up to 40px. For the backdrop behind a dialog, the first slider is how dark it gets.</p>
+                        <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85;">The <b>Surfaces</b> tab sets, per mode, how see-through each layer over the background is. <b>Opacity</b> is how much of the color Open WebUI paints that layer covers it, from 0% (clear) to 100% (solid). <b>Blur</b> softens whatever shows through it, up to 40px. For the backdrop behind a dialog, the first slider is how dark it gets. Double-click a slider&rsquo;s label to reset it to its default.</p>
                         <ul style="font-size: 0.72rem; line-height: 1.7; padding-left: 18px;">
                             <li><b>Sidebar</b>: the open sidebar; its top and bottom fades show only at 100%</li>
                             <li><b>Message input</b>: <code>#message-input-container</code></li>
@@ -8076,7 +8076,7 @@ self.onmessage = (e) =&gt; {
                                     <tr><td><span class="doc-code-inline">Ctrl+Enter</span></td><td>Create the theme in the AI Consultant form (<span class="doc-code-inline">Cmd+Enter</span> on macOS)</td></tr>
                                     <tr><td><span class="doc-code-inline">Arrow keys</span>, <span class="doc-code-inline">Home</span></td><td>Move the radial gradient&rsquo;s center (Shift for bigger steps); Home recenters it</td></tr>
                                     <tr><td><span class="doc-code-inline">Arrow keys</span>, <span class="doc-code-inline">Delete</span>, <span class="doc-code-inline">Tab</span></td><td>With the mesh pad focused: move the selected point (Shift for 5 steps), remove it with Delete or Backspace (a mesh keeps 2 points), or switch points with Tab and Shift+Tab</td></tr>
-                                    <tr><td><span class="doc-code-inline">Double-click</span> slider label</td><td>Reset the Hue, Chroma, Lightness, Gradient Direction, Color Intensity or Animation Speed slider to its default; on the Accent Colors label, set all three accents back to automatic</td></tr>
+                                    <tr><td><span class="doc-code-inline">Double-click</span> slider label</td><td>Reset the Hue, Chroma, Lightness, Gradient Direction, Color Intensity, Animation Speed or a Surfaces slider to its default; on the Accent Colors label, set all three accents back to automatic</td></tr>
                                     <tr><td><span class="doc-code-inline">Double-click</span> on a gradient pad</td><td>On the radial pad, recenter it; on a mesh point, remove it</td></tr>
                                     <tr><td><span class="doc-code-inline">Escape</span></td><td>Close the Documentation panel</td></tr>
                                 </tbody>
@@ -8716,6 +8716,7 @@ location.reload();</code></pre>
                 else if (fn === 'gradient-angle') resetGradientAngle();
                 else if (fn === 'gradient-intensity') resetGradientIntensity();
                 else if (fn === 'gradient-speed') resetGradientSpeed();
+                else if (SURFACE_FIELDS.includes(fn)) resetSurfaceSlider(fn);
             }
         });
     }
@@ -14201,9 +14202,12 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
         if (!list) return;
         list.innerHTML = SURFACE_LAYERS.map(l => {
             const first = l.key === 'Backdrop' ? 'Darkness' : 'Opacity';
+            // No for= on the label, as on Core Palette: a click on it would
+            // focus the slider and scroll it into view between the two
+            // clicks of a double-click. The slider carries its own name.
             const slider = (field, name, max, unit) =>
-                `<div class="slider-row"><label for="sl-${field}">${name} <span class="slider-val" id="val-${field}"></span></label>` +
-                `<input type="range" id="sl-${field}" data-field="${field}" data-unit="${unit}" min="0" max="${max}" value="0"></div>`;
+                `<div class="slider-row"><label data-reset="${field}"><span data-tooltip="Double-click to reset to ${DEFAULT_MODE_DATA[field]}${unit}" style="cursor:pointer">${name}</span> <span class="slider-val" id="val-${field}"></span></label>` +
+                `<input type="range" id="sl-${field}" data-field="${field}" data-unit="${unit}" min="0" max="${max}" value="0" aria-label="${l.label} ${name.toLowerCase()}"></div>`;
             return `<div class="surface-row"><div class="surface-row-name">${l.label}</div><div class="surface-row-hint">${l.hint}</div>` +
                 `<div class="surface-sliders">${slider(`surface${l.key}Opacity`, first, 100, '%')}` +
                 (l.noBlur ? '' : slider(`surface${l.key}Blur`, 'Blur', 40, 'px')) + `</div></div>`;
@@ -14218,6 +14222,16 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             slider.addEventListener('change', () => pushState());
         });
     })();
+
+    // Double-click on a slider's label: back to the default. Does nothing
+    // while the switch is off, the same as dragging.
+    window.resetSurfaceSlider = (field) => {
+        const slider = $('sl-' + field);
+        if (!slider || slider.disabled) return;
+        slider.value = DEFAULT_MODE_DATA[field];
+        slider.dispatchEvent(new Event('input'));
+        slider.dispatchEvent(new Event('change'));
+    };
 
     // Turning Surfaces on for the first time starts from what the instance
     // settings draw today, so nothing jumps
