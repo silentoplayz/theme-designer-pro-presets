@@ -2173,7 +2173,7 @@ class Event:
                         pageRules.push('html.dark .app::before { ' + pageLayer('color-mix(in oklab, var(--color-gray-900) ' + Math.round(100 * pd) + '%, transparent)', 'color-mix(in oklab, var(--color-gray-900) ' + Math.round(90 * pd) + '%, transparent)') + ' }');
                         pageRules.push('html:not(.dark) .app::before { ' + pageLayer('rgb(255 255 255 / ' + pd + ')', 'rgb(255 255 255 / ' + Math.round(85 * pd) / 100 + ')') + ' }');
                         var gEx = ':not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)';
-                        var gWhere = ['[class^="bg-gray-"]', '[class*=" bg-gray-"]', '[class^="dark:bg-gray-"]', '[class*=" dark:bg-gray-"]'].map(function(t) { return t + gEx; }).join(', ');
+                        var gWhere = ['[class^="bg-gray-"]', '[class*=" bg-gray-"]', '[class^="dark:bg-gray-"]', '[class*=" dark:bg-gray-"]', '[class^="bg-base-"]', '[class*=" bg-base-"]', '[class^="dark:bg-base-"]', '[class*=" dark:bg-base-"]'].map(function(t) { return t + gEx; }).join(', ');
                         pageRules.push('.app, .app > div, .app main { background-color: transparent !important; background-image: none !important; }');
                         pageRules.push('.app :where(' + gWhere + ') { background-color: transparent !important; background-image: none !important; }');
                         // In front of the animation when the theme says so
@@ -3136,7 +3136,15 @@ class Event:
     var SRC = '__THEME_ROUTE__?embed=admin';
     var LABEL = 'Themes';
     // The bar's links carry these while they aren't the open page.
-    var DIM = ['text-gray-300', 'dark:text-gray-600', 'hover:text-gray-700', 'dark:hover:text-white'];
+    // Open WebUI's UI greys are text-base-* after 0.13.4 (text-gray-* through 0.13.4);
+    // the bar's own dimmed links say which this instance uses.
+    var DIM_GRAY = ['text-gray-300', 'dark:text-gray-600', 'hover:text-gray-700', 'dark:hover:text-white'];
+    var DIM_BASE = ['text-base-300', 'dark:text-base-600', 'hover:text-base-700', 'dark:hover:text-white'];
+    var DIM = DIM_GRAY;
+    function pickDim(row) {
+        if (row.querySelector('a[class*="text-base-"]')) DIM = DIM_BASE;
+        else if (row.querySelector('a[class*="text-gray-"]')) DIM = DIM_GRAY;
+    }
     var STYLE = [
         '[data-tdp-admin-open]>:not(.tdp-admin-page){display:none!important}',
         '.tdp-admin-page{display:none;position:relative;height:100%;min-height:0;flex-direction:column;padding:0 .625rem .5rem}',
@@ -3158,6 +3166,7 @@ class Event:
     function bar() {
         var settings = document.querySelector('nav a[href="/admin/settings"]');
         if (!settings || !settings.parentElement.querySelector('a[href="/admin/evaluations"]')) return null;
+        pickDim(settings.parentElement);
         return { row: settings.parentElement, settings: settings, host: settings.closest('nav').nextElementSibling };
     }
 
@@ -7965,7 +7974,7 @@ self.onmessage = (e) =&gt; {
                                     <tr><td><b>2. Background Color Div</b></td><td>-2</td><td>A full-viewport <code>&lt;div id="owui-theme-bg-color"&gt;</code> inserted behind everything. It&rsquo;s created only while Canvas FX runs, and the structural layer makes it transparent so the canvas shows through.</td></tr>
                                     <tr><td><b>3. Pictures</b></td><td>-1</td><td>The Backgrounds tab&rsquo;s <b>Other pages</b> picture, on a fixed layer behind the app, and Open WebUI&rsquo;s own background images with their dimming layer, which move under the canvas while <b>Draw the Canvas FX animation over these images</b> is on.</td></tr>
                                     <tr><td><b>4. Canvas Element</b></td><td>0</td><td>A full-viewport <code>&lt;canvas id="owui-theme-canvas-bg"&gt;</code> where your Canvas FX animation renders. Has <code>pointer-events: none</code> so it never intercepts clicks.</td></tr>
-                                    <tr><td><b>5. Structural Transparency</b></td><td>none</td><td>CSS rules that set <code>background-color: transparent</code> on <code>.app</code>, <code>.app&nbsp;&gt;&nbsp;div</code>, <code>main</code>, <code>nav</code>, sticky bars, the designer&rsquo;s and the sign-in page&rsquo;s containers, wrappers painted with a gradient class (apart from the sidebar fades, the top fade and the chat background&rsquo;s dimming layer), and layout wrappers whose classes begin with <code>bg-gray-</code> or <code>dark:bg-gray-</code> (not hover or other variants). Interactive elements (<code>button</code>, <code>a</code>, <code>input</code>, <code>select</code>, <code>label</code>, <code>span</code>), your own message bubble, rounded controls such as the message input and pill buttons, everything inside the message input, and the login card are excluded, so they keep Open WebUI&rsquo;s own look. The rules use <code>!important</code> and are scoped to the mode&rsquo;s selector plus <code>.app</code>, so overriding one takes <code>!important</code> and at least that specificity. See <i>Overlay UI Protection</i> below for how portaled overlay UI stays opaque.</td></tr>
+                                    <tr><td><b>5. Structural Transparency</b></td><td>none</td><td>CSS rules that set <code>background-color: transparent</code> on <code>.app</code>, <code>.app&nbsp;&gt;&nbsp;div</code>, <code>main</code>, <code>nav</code>, sticky bars, the designer&rsquo;s and the sign-in page&rsquo;s containers, wrappers painted with a gradient class (apart from the sidebar fades, the top fade and the chat background&rsquo;s dimming layer), and layout wrappers whose classes begin with <code>bg-gray-</code>, <code>bg-base-</code>, <code>dark:bg-gray-</code> or <code>dark:bg-base-</code> (not hover or other variants). Interactive elements (<code>button</code>, <code>a</code>, <code>input</code>, <code>select</code>, <code>label</code>, <code>span</code>), your own message bubble, rounded controls such as the message input and pill buttons, everything inside the message input, and the login card are excluded, so they keep Open WebUI&rsquo;s own look. The rules use <code>!important</code> and are scoped to the mode&rsquo;s selector plus <code>.app</code>, so overriding one takes <code>!important</code> and at least that specificity. See <i>Overlay UI Protection</i> below for how portaled overlay UI stays opaque.</td></tr>
                                     <tr><td><b>6. Glass Panels</b></td><td>none</td><td>A semi-opaque overlay with <code>backdrop-filter: blur()</code> on the <b>sidebar</b>, keeping navigation readable while letting the background show through. The Gradient Builder auto-calculates the RGBA value from the darkest gradient stop (or the mesh background color for Mesh gradients). The sidebar&rsquo;s glass behavior is controlled by the <b>Sidebar Transparency</b> valve: <code>opaque</code> (default) uses a solid background, except that with a gradient active the sidebar takes the darkest gradient color at 75% opacity with a 12px blur, <code>translucent</code> applies a tinted glass effect with <code>backdrop-filter: blur(20px) saturate(1.3)</code>, and <code>transparent</code> removes the background entirely (auto-upgraded to translucent on mobile for readability). Open WebUI&rsquo;s fades at the top and bottom of the sidebar follow the same valve: they stay while it&rsquo;s <code>opaque</code>, in the gradient&rsquo;s sidebar color while a gradient is active, and go away with <code>translucent</code> or <code>transparent</code>, where they would read as solid bands. Both sidebar and overlay transparency valves work independently of Canvas FX and gradient state. In a mode with its Surfaces switch on, the Surfaces rows set the sidebar and overlays instead of these valves.</td></tr>
                                     <tr><td><b>7. Overlay Glass</b></td><td>none</td><td>Portaled UI elements (settings modal, dropdown menus, user menus, integration menus) that live outside <code>.app</code> on <code>&lt;body&gt;</code>. Controlled by the <b>Overlay Transparency</b> valve: <code>opaque</code> (default) keeps solid backgrounds for readability, <code>translucent</code> applies frosted glass with <code>backdrop-filter: blur(20px) saturate(1.3)</code>. Uses CSS <code>:not(.app *)</code> exclusions to avoid affecting elements inside the main app container. <code>translucent</code> also hides the fade at the top of chats.</td></tr>
                                 </tbody>
@@ -7980,10 +7989,10 @@ self.onmessage = (e) =&gt; {
                             <div class="doc-sub-inner">
                         <p>Dropdown menus, modal dialogs, and listbox selectors are <b>portaled</b> outside the <code>.app</code> wrapper: they are appended directly to <code>&lt;body&gt;</code>. To ensure these remain readable against canvas/gradient backgrounds, the structural layer uses a multi-pronged strategy:</p>
                         <ul>
-                            <li><b>Low-specificity transparency:</b> The broad <code>bg-gray-</code> transparency rule is wrapped in CSS <code>:where()</code>, so it adds nothing to the specificity beyond the mode selector and <code>.app</code>. Its declarations are <code>!important</code>, though, so only an <code>!important</code> rule of equal or higher specificity overrides them.</li>
+                            <li><b>Low-specificity transparency:</b> The broad <code>bg-gray-</code> and <code>bg-base-</code> transparency rule is wrapped in CSS <code>:where()</code>, so it adds nothing to the specificity beyond the mode selector and <code>.app</code>. Its declarations are <code>!important</code>, though, so only an <code>!important</code> rule of equal or higher specificity overrides them.</li>
                             <li><b>Element exclusions:</b> Interactive elements like <code>button</code>, <code>a</code>, <code>input</code>, <code>select</code>, <code>label</code>, and <code>span</code> are excluded from transparency entirely via <code>:not()</code> filters, and so is anything with a <code>rounded</code> class, the message input and everything inside it. This protects toggle knobs (<code>bg-white</code> circles), styled buttons, the message input&rsquo;s own tint and other small UI widgets: they hide almost none of the background, so clearing them only changed their look. Dropdown menus, modal dialogs, and listbox selectors, which are <b>portaled</b> outside the <code>.app</code> wrapper, are naturally unaffected because the transparency rules only target elements within <code>.app</code>, <code>#theme-designer-container</code>, and <code>#auth-page</code> scope.</li>
-                            <li><b>Sidebar backdrop:</b> Nested <code>[class*="bg-gray-"]</code> elements inside <code>#sidebar</code> become transparent like the rest of the app, but stay readable because the sidebar itself keeps its own background: <code>--color-gray-950</code> in Dark and OLED, <code>--color-gray-50</code> in Light and Her, or the darkest gradient color at 75% opacity with a blur while a gradient is active. The <b>Sidebar Transparency</b> valve controls that backdrop: <code>opaque</code> (the default) keeps it as described, while <code>translucent</code> and <code>transparent</code> swap it for a frosted-glass or fully see-through backdrop so Canvas FX and gradient backgrounds show through.</li>
-                            <li><b>Overlay translucency:</b> Portaled overlay elements (settings modal, dropdown menus, user menus) can optionally use a frosted glass effect via the <b>Overlay Transparency</b> valve. When set to <code>translucent</code>, the system appends CSS rules targeting <code>div[class*="bg-gray-"]</code> and <code>div[class*="bg-white"]</code> elements inside portals using <code>color-mix()</code> and <code>backdrop-filter</code>. Elements inside <code>.app</code> and <code>#theme-designer-container</code> are explicitly excluded via <code>:not(.app *)</code> to prevent regressions in the main UI. When the designer is open in the <b>Themes</b> tab of Settings, its own page turns clear too, so the glass shows behind it, as long as the designer&rsquo;s light or dark look matches Open WebUI&rsquo;s. Editing the other mode keeps the page solid so its text stays readable.</li>
+                            <li><b>Sidebar backdrop:</b> Nested <code>bg-gray-*</code> and <code>bg-base-*</code> elements inside <code>#sidebar</code> become transparent like the rest of the app, but stay readable because the sidebar itself keeps its own background: <code>--color-gray-950</code> in Dark and OLED, <code>--color-gray-50</code> in Light and Her, or the darkest gradient color at 75% opacity with a blur while a gradient is active. The <b>Sidebar Transparency</b> valve controls that backdrop: <code>opaque</code> (the default) keeps it as described, while <code>translucent</code> and <code>transparent</code> swap it for a frosted-glass or fully see-through backdrop so Canvas FX and gradient backgrounds show through.</li>
+                            <li><b>Overlay translucency:</b> Portaled overlay elements (settings modal, dropdown menus, user menus) can optionally use a frosted glass effect via the <b>Overlay Transparency</b> valve. When set to <code>translucent</code>, the system appends CSS rules targeting <code>div[class*="bg-gray-"]</code>, <code>div[class*="bg-base-"]</code> and <code>div[class*="bg-white"]</code> elements inside portals using <code>color-mix()</code> and <code>backdrop-filter</code>. Elements inside <code>.app</code> and <code>#theme-designer-container</code> are explicitly excluded via <code>:not(.app *)</code> to prevent regressions in the main UI. When the designer is open in the <b>Themes</b> tab of Settings, its own page turns clear too, so the glass shows behind it, as long as the designer&rsquo;s light or dark look matches Open WebUI&rsquo;s. Editing the other mode keeps the page solid so its text stays readable.</li>
                         </ul>
                         <p style="font-size: 0.7rem; color: var(--text-muted); line-height: 1.5;"><b>Note:</b> The <code>[class*="bg-white"]</code> attribute selector is intentionally <b>not</b> included in the structural transparency rules. Elements with <code>bg-white</code> classes in Open WebUI are almost always interactive widgets (toggle indicators, button styling, card backgrounds), not structural layout wrappers. However, it <b>is</b> included in the overlay translucency rules since overlay panels in light mode use <code>bg-white</code> as their primary background class.</p>
 
@@ -8010,7 +8019,7 @@ self.onmessage = (e) =&gt; {
                             <li><b>Custom CSS setting opaque backgrounds:</b> If your Custom CSS Snippet sets <code>background-color</code> on <code>.app</code>, <code>main</code>, or other layout containers, it can override the structural transparency and block the background effect from showing through. To fix this, set those backgrounds to <code>transparent</code> in your Custom CSS.</li>
                             <li><b>Open WebUI updates:</b> If Open WebUI changes its class names or DOM structure (e.g., renaming <code>.app</code> to something else), the structural layer selectors may stop matching. This can cause panels to revert to opaque backgrounds, hiding the canvas or gradient behind them.</li>
                             <li><b>Canvas FX + Gradient coexistence:</b> Both features share the same structural layer. When both are active simultaneously, the canvas animation renders on top of the gradient background. The gradient sits on <code>body</code> (layer 1), while the canvas renders at z-index 0 (layer 4). The canvas has a transparent background by default, so the gradient may partially show through depending on what your canvas script draws.</li>
-                            <li><b>Third-party extensions or custom elements:</b> Elements inside <code>.app</code> using <code>bg-gray-*</code> classes will be made transparent, unless they are a <code>button</code>, <code>a</code>, <code>input</code>, <code>select</code>, <code>label</code> or <code>span</code>, have a <code>rounded</code> class, or sit inside the message input or your own message bubble. If a third-party extension injects custom UI with gray backgrounds, it may become transparent. Use the Style Overrides tab to restore specific elements if needed.</li>
+                            <li><b>Third-party extensions or custom elements:</b> Elements inside <code>.app</code> using <code>bg-gray-*</code> or <code>bg-base-*</code> classes will be made transparent, unless they are a <code>button</code>, <code>a</code>, <code>input</code>, <code>select</code>, <code>label</code> or <code>span</code>, have a <code>rounded</code> class, or sit inside the message input or your own message bubble. If a third-party extension injects custom UI with gray backgrounds, it may become transparent. Use the Style Overrides tab to restore specific elements if needed.</li>
                         </ul>
 
                             </div>
@@ -12147,7 +12156,7 @@ self.onmessage = (e) => {
             const color = (key) => SURFACE_LAYERS.find(l => l.key === key).color[dark ? 0 : 1];
             const pex = ':not(.app):not(.modal):not(#theme-designer-container):not([id^="owui-"]):not(#svelte):not([style*="display: contents"]):not(script):not(style)';
             const iex = ':not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *)';
-            const tokens = ['bg-white', 'bg-gray-', 'dark:bg-gray-'].map(u => `div[class^="${u}"]${iex}, div[class*=" ${u}"]${iex}`).join(', ');
+            const tokens = ['bg-white', 'bg-gray-', 'dark:bg-gray-', 'bg-base-', 'dark:bg-base-'].map(u => `div[class^="${u}"]${iex}, div[class*=" ${u}"]${iex}`).join(', ');
             const so = num('surfaceSidebarOpacity');
             let css = `/* --- Surfaces --- */\n`;
             css += `${at} #sidebar:not(.h-full) { ${decl(fill(color('Sidebar'), so), num('surfaceSidebarBlur'))} }\n`;
@@ -12169,7 +12178,7 @@ self.onmessage = (e) => {
                 // A group of buttons, such as the split Create button, keeps its look
                 const cex = ':not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(:has(> button:first-child))' +
                     ':not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *):not(#auth-page *)';
-                const cards = ['bg-white', 'bg-gray-', 'dark:bg-gray-'].map(u => `div[class*="rounded"][class^="${u}"]${cex}, div[class*="rounded"][class*=" ${u}"]${cex}`).join(', ');
+                const cards = ['bg-white', 'bg-gray-', 'dark:bg-gray-', 'bg-base-', 'dark:bg-base-'].map(u => `div[class*="rounded"][class^="${u}"]${cex}, div[class*="rounded"][class*=" ${u}"]${cex}`).join(', ');
                 css += `${at} .app :where(${cards}) { ${decl(fill(color('Cards'), co), cb)} }\n`;
                 // Cards that light up under the pointer still do
                 css += `${at} .app :where(${cards})[class*="hover:bg-"]:hover { background-color: ${fill(color('Cards'), Math.min(100, co + 10))} !important; }\n`;
@@ -12181,17 +12190,17 @@ self.onmessage = (e) => {
             const bo = num('surfaceButtonsOpacity'), bb = num('surfaceButtonsBlur');
             if (bo < 100 || bb > 0) {
                 const bex = '[class*="rounded"]:not([role="switch"]):not([role="checkbox"])' +
-                    ':not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"])' +
+                    ':not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"])' +
                     ':not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *):not(#auth-page *)';
-                const btn = ['bg-gray-', 'dark:bg-gray-'].map(u => `button[class^="${u}"]${bex}, button[class*=" ${u}"]${bex}, div:has(> button:first-child)[class^="${u}"]${bex}, div:has(> button:first-child)[class*=" ${u}"]${bex}`).join(', ');
+                const btn = ['bg-gray-', 'dark:bg-gray-', 'bg-base-', 'dark:bg-base-'].map(u => `button[class^="${u}"]${bex}, button[class*=" ${u}"]${bex}, div:has(> button:first-child)[class^="${u}"]${bex}, div:has(> button:first-child)[class*=" ${u}"]${bex}`).join(', ');
                 css += `${at} .app :where(${btn}) { ${decl(fill(color('Buttons'), bo), bb)} }\n`;
                 css += `${at} .app :where(${btn})[class*="hover:bg-"]:hover { background-color: ${fill(color('Buttons'), Math.min(100, bo + 15))} !important; }\n`;
             }
             css += `${at} .app-dropdown-menu, ${at} .tippy-box, ${at} [data-sonner-toast], ${at} body > div${pex} :where(${tokens}) { ${decl(fill(color('Menu'), num('surfaceMenuOpacity')), num('surfaceMenuBlur'))} }\n`;
-            css += `${at} .modal > div:where([class*="bg-white"], [class*="bg-gray-"]) { ${decl(fill(color('Dialog'), num('surfaceDialogOpacity')), num('surfaceDialogBlur'))} }\n`;
+            css += `${at} .modal > div:where([class*="bg-white"], [class*="bg-gray-"], [class*="bg-base-"]) { ${decl(fill(color('Dialog'), num('surfaceDialogOpacity')), num('surfaceDialogBlur'))} }\n`;
             // Overlay Transparency also tints the pieces inside a dialog; hand
             // them back to Open WebUI's own classes, which sit in a cascade layer
-            const inner = ['bg-white', 'bg-gray-', 'dark:bg-gray-'].map(u => `div[class^="${u}"], div[class*=" ${u}"]`).join(', ');
+            const inner = ['bg-white', 'bg-gray-', 'dark:bg-gray-', 'bg-base-', 'dark:bg-base-'].map(u => `div[class^="${u}"], div[class*=" ${u}"]`).join(', ');
             css += `${at} .modal > div :where(${inner}) { background-color: revert-layer !important; backdrop-filter: revert-layer !important; -webkit-backdrop-filter: revert-layer !important; }\n`;
             css += `${at} .modal { ${decl(`rgb(0 0 0 / ${num('surfaceBackdropOpacity')}%)`, num('surfaceBackdropBlur'))} }\n`;
             const fo = num('surfaceFadeOpacity');
@@ -12206,7 +12215,7 @@ self.onmessage = (e) => {
             // none of the canvas, so clearing them only changed their look.
             const gEx = ':not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *)' +
                 ':not([class*="rounded"]):not(#message-input-container *)';
-            const gWhere = ['[class^="bg-gray-"]', '[class*=" bg-gray-"]', '[class^="dark:bg-gray-"]', '[class*=" dark:bg-gray-"]'].map(s => s + gEx).join(', ');
+            const gWhere = ['[class^="bg-gray-"]', '[class*=" bg-gray-"]', '[class^="dark:bg-gray-"]', '[class*=" dark:bg-gray-"]', '[class^="bg-base-"]', '[class*=" bg-base-"]', '[class^="dark:bg-base-"]', '[class*=" dark:bg-base-"]'].map(s => s + gEx).join(', ');
             const config = themeData[mode];
             const hasCanvas = config.canvasEnabled && config.canvasScript && config.canvasScript.trim();
             const hasGradient = config.gradientEnabled && (
@@ -20018,12 +20027,14 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
         # Selector fragment: background-bearing elements inside portals (exclude interactive widgets + app internals)
         iex = ':not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *)'
 
-        def _where(util):
-            toks = [f'div[class^="{util}"]', f'div[class*=" {util}"]',
-                    f'div[class^="dark:{util}"]', f'div[class*=" dark:{util}"]']
+        def _where(*utils):
+            toks = [t for util in utils for t in (
+                f'div[class^="{util}"]', f'div[class*=" {util}"]',
+                f'div[class^="dark:{util}"]', f'div[class*=" dark:{util}"]')]
             return ':where(' + ', '.join(t + iex for t in toks) + ')'
 
-        wgray = _where('bg-gray-')
+        # Open WebUI's UI greys are bg-base-* after 0.13.4 (bg-gray-* through 0.13.4)
+        wgray = _where('bg-gray-', 'bg-base-')
         wwhite = _where('bg-white')
 
         def _decl(color_var):
