@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI: an admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, optional personal themes for every user, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.20.5-blue)
+![Version](https://img.shields.io/badge/version-1.20.6-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.11.0-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -549,6 +549,14 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. Since 1.7.0 the function cleans that up automatically, on its first event after each start; to check by hand, look for `<!-- OWUI Theme Pro Bootloader -->` in `/app/build/index.html`. It should be gone.
 
 ---
+
+## 📝 What's New in 1.20.6
+
+Paste it in and save.
+
+**Ready for Open WebUI's new grey classes.** Open WebUI's `dev` branch renamed the classes it paints its grey backgrounds with from `gray-*` to `base-*`, after 0.13.4. Theme Designer Pro finds those backgrounds by class name, so on a build with the rename, Canvas FX, gradients and the Other pages picture would sit behind solid panels, and the Surfaces rows and Overlay Transparency would change nothing. Every one of those rules now matches both names, so a theme looks the same on 0.13.4 and on the next release. The Themes link in the Admin Panel bar also reads which grey classes the bar uses, so the other links dim and undim correctly on both.
+
+**Double-click a Surfaces slider's label to reset it.** Each Opacity and Blur slider in the Surfaces tab goes back to its default, the same as the Core Palette sliders.
 
 ## 📝 What's New in 1.20.5
 
