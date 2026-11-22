@@ -41,15 +41,17 @@ from open_webui.utils.json_codec import JSONCodec
 # Live reload broadcast
 # ---------------------------------------------------------------------------
 # Each load publishes over Redis; a peer whose cached code differs from the
-# database re-executes it. register(app) is yours and must be idempotent; gate
-# each producer on reload_active(app).
+# database re-executes it. Without Redis the same message goes to a file in
+# DATA_DIR that every worker on it polls. register(app) is yours and must be
+# idempotent; gate each producer on reload_active(app).
 # ===========================================================================
 RELOAD_STATE_ATTR = "_owui_live_reload"  # {key: {active, exec_id, listener, impl}}
 # Bump when the listener changes: a newer copy replaces a running listener.
-RELOAD_IMPL_VERSION = 1
+RELOAD_IMPL_VERSION = 3
 RELOAD_EXEC_ID = uuid.uuid4().hex  # new on every exec of this source
 # Open WebUI runs each function as module "function_<id>_<hex>" (older: "function_<id>").
 RELOAD_FUNCTION_ID = re.sub(r"_[0-9a-f]{32}$", "", __name__.removeprefix("function_"))
+RELOAD_POLL_SECONDS = 2  # How often a worker without Redis reads the file
 
 reload_log = logging.getLogger("owui-live-reload")
 # asyncio only keeps weak references to tasks.
@@ -74,6 +76,20 @@ def reload_channel(key: Optional[str] = None) -> str:
     return f"{REDIS_KEY_PREFIX}:live-reload:{key or ASSET_KEY}"
 
 
+def reload_file(key: Optional[str] = None) -> str:
+    from open_webui.env import DATA_DIR
+
+    return os.path.join(str(DATA_DIR), "cache", "live-reload", f"{key or ASSET_KEY}.json")
+
+
+def reload_write_file(path: str, data: str) -> None:
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    temp = f"{path}.{uuid.uuid4().hex}.tmp"
+    with open(temp, "w", encoding="utf-8") as f:
+        f.write(data)
+    os.replace(temp, path)
+
+
 def reload_mark_loaded(app: Any) -> None:
     register(app)
     state = reload_state(app)
@@ -83,10 +99,13 @@ def reload_mark_loaded(app: Any) -> None:
 
 async def reload_publish(app: Any, active: bool, key: Optional[str] = None) -> None:
     redis = getattr(app.state, "redis", None)
-    if redis is None:
-        return
     try:
-        await redis.publish(reload_channel(key), JSONCodec.dumps({"active": active}))
+        if redis is None:
+            # A new id each time, so the same message twice is still a change
+            message = JSONCodec.dumps({"active": active, "id": uuid.uuid4().hex})
+            await asyncio.to_thread(reload_write_file, reload_file(key), message)
+        else:
+            await redis.publish(reload_channel(key), JSONCodec.dumps({"active": active}))
     except Exception as e:
         reload_log.warning("[%s] publish failed: %s", ASSET_KEY, type(e).__name__)
 
@@ -100,8 +119,6 @@ async def reload_ensure_listener(app: Any) -> None:
             return
         listener.cancel()
     redis = getattr(app.state, "redis", None)
-    if redis is None:
-        return
 
     from types import SimpleNamespace
 
@@ -110,6 +127,34 @@ async def reload_ensure_listener(app: Any) -> None:
         get_function_module_from_cache,
         get_functions_cache,
     )
+
+    async def receive(data) -> None:
+        if not JSONCodec.loads(data)["active"]:
+            state["active"] = False
+            state["disabled"] = True
+            return
+        state["disabled"] = False
+        was_active = state.get("active")
+        # Enable broadcasts arrive before is_active commits; bootstrap trusts this flag.
+        state["active"] = True
+        context = SimpleNamespace(app=app)
+        if not was_active:
+            # Force a fresh exec so its bootstrap registers again.
+            get_functions_cache(context).pop(RELOAD_FUNCTION_ID, None)
+        try:
+            function_module, _, _ = await get_function_module_from_cache(
+                context, RELOAD_FUNCTION_ID
+            )
+            # Peers never see a valves save; re-read them like Open WebUI's dispatch does.
+            if hasattr(function_module, "Valves"):
+                valves = await Functions.get_function_valves_by_id(RELOAD_FUNCTION_ID)
+                function_module.valves = function_module.Valves(**(valves or {}))
+        except Exception as e:
+            reload_log.warning(
+                "[%s] reload from db failed: %s",
+                ASSET_KEY,
+                type(e).__name__,
+            )
 
     async def listen():
         delay = 1
@@ -120,36 +165,8 @@ async def reload_ensure_listener(app: Any) -> None:
                 await pubsub.subscribe(reload_channel())
                 connected_at = asyncio.get_running_loop().time()
                 async for message in pubsub.listen():
-                    if message.get("type") != "message":
-                        continue
-                    if not JSONCodec.loads(message["data"])["active"]:
-                        state["active"] = False
-                        continue
-                    was_active = state.get("active")
-                    # Enable broadcasts arrive before is_active commits; bootstrap trusts this flag.
-                    state["active"] = True
-                    context = SimpleNamespace(app=app)
-                    if not was_active:
-                        # Force a fresh exec so its bootstrap registers again.
-                        get_functions_cache(context).pop(RELOAD_FUNCTION_ID, None)
-                    try:
-                        function_module, _, _ = await get_function_module_from_cache(
-                            context, RELOAD_FUNCTION_ID
-                        )
-                        # Peers never see a valves save; re-read them like Open WebUI's dispatch does.
-                        if hasattr(function_module, "Valves"):
-                            valves = await Functions.get_function_valves_by_id(
-                                RELOAD_FUNCTION_ID
-                            )
-                            function_module.valves = function_module.Valves(
-                                **(valves or {})
-                            )
-                    except Exception as e:
-                        reload_log.warning(
-                            "[%s] reload from db failed: %s",
-                            ASSET_KEY,
-                            type(e).__name__,
-                        )
+                    if message.get("type") == "message":
+                        await receive(message["data"])
             except Exception as e:
                 # Only a link that held for a minute starts a new outage; flaps don't.
                 now = asyncio.get_running_loop().time()
@@ -169,7 +186,38 @@ async def reload_ensure_listener(app: Any) -> None:
             await asyncio.sleep(delay)
             delay = min(delay * 2, 60)
 
-    state["listener"] = asyncio.create_task(listen())
+    async def poll():
+        path = reload_file()
+
+        def read():
+            try:
+                with open(path, encoding="utf-8") as f:
+                    return f.read()
+            except FileNotFoundError:
+                return None
+
+        # What is there now was already seen: this worker loaded the code itself
+        seen = await asyncio.to_thread(read)
+        failing = False
+        while True:
+            await asyncio.sleep(RELOAD_POLL_SECONDS)
+            try:
+                data = await asyncio.to_thread(read)
+                failing = False
+            except Exception as e:
+                if not failing:
+                    reload_log.warning("[%s] poll failed: %s", ASSET_KEY, type(e).__name__)
+                failing = True
+                continue
+            if data is None or data == seen:
+                continue
+            seen = data
+            try:
+                await receive(data)
+            except Exception as e:
+                reload_log.warning("[%s] poll message skipped: %s", ASSET_KEY, type(e).__name__)
+
+    state["listener"] = asyncio.create_task(listen() if redis is not None else poll())
     state["impl"] = RELOAD_IMPL_VERSION
 
 
@@ -214,7 +262,13 @@ async def reload_on_event(
     is_own = subject_id == RELOAD_FUNCTION_ID
     if is_own and event_name == "function.disable_started":
         state["active"] = False
+        state["disabled"] = True
         await reload_publish(app, False)
+        return
+    if is_own and event_name == "function.enable_started":
+        state["disabled"] = False
+    elif state.get("disabled"):
+        # Events read the function list before is_active commits and still arrive.
         return
     if is_own and event_name == "function.valves_updated":
         await reload_publish(app, True)
@@ -6902,7 +6956,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                 <details class="doc-accordion">
                     <summary>2. Valves <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
-                        <p>Valves are set in <b>Admin Panel &gt; Functions &gt; Theme Designer Pro &gt; ⚙️</b>. They take effect as soon as you save them: Open WebUI runs the function on save, and other workers pick the change up over Redis. Changes to <b>Enable Canvas FX</b>, <b>Sidebar Transparency</b> and <b>Overlay Transparency</b> are pushed to open pages right away. Other valve changes apply on each page&rsquo;s next load. The designer reads the valves when its page loads, so reload an open designer to see a change there.</p>
+                        <p>Valves are set in <b>Admin Panel &gt; Functions &gt; Theme Designer Pro &gt; ⚙️</b>. They take effect as soon as you save them: Open WebUI runs the function on save, and other workers pick the change up over Redis, or within 2 seconds from the data folder without it. Changes to <b>Enable Canvas FX</b>, <b>Sidebar Transparency</b> and <b>Overlay Transparency</b> are pushed to open pages right away. Other valve changes apply on each page&rsquo;s next load. The designer reads the valves when its page loads, so reload an open designer to see a change there.</p>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
                                 <thead>
@@ -8293,7 +8347,7 @@ ProxyPassReverse / http://127.0.0.1:8080/</code></pre>
                             <li><b>Redis fixes this.</b> If <code>REDIS_URL</code> is set in your environment (which Open WebUI already uses for WebSocket relay), Theme Designer Pro automatically uses Redis pub/sub to broadcast SSE events across all workers. No additional configuration is needed beyond setting <code>REDIS_URL</code>. The value must be the URL itself. In a Docker Compose <code>environment:</code> list, write <code>- REDIS_URL=redis://redis:6379/0</code> without quotes, because quotes there become part of the value. The mapping form, <code>REDIS_URL: "redis://redis:6379/0"</code>, works too, because YAML removes those quotes. When <code>REDIS_URL</code> doesn&rsquo;t start with <code>redis://</code>, <code>rediss://</code> or <code>unix://</code>, Theme Designer Pro logs one warning saying so and keeps live push within each worker. A quoted <code>WEBSOCKET_MANAGER="redis"</code> turns off Open WebUI&rsquo;s own Redis relay the same way.</li>
                             <li><b>Channels.</b> Theme updates travel on <code>{REDIS_KEY_PREFIX}:theme_pro_sse</code>, and code and on/off changes on <code>{REDIS_KEY_PREFIX}:live-reload:function_&lt;function id&gt;</code>, for example <code>open-webui:live-reload:function_theme_designer_pro</code>. Redis channels ignore the database number, so two Open WebUI instances on one Redis server need different <code>REDIS_KEY_PREFIX</code> values to stay apart. Both use Open WebUI&rsquo;s own Redis connection, so they work wherever Open WebUI&rsquo;s Redis does, Redis Sentinel (<code>REDIS_SENTINEL_HOSTS</code>) and Redis Cluster (<code>REDIS_CLUSTER</code>) included. Without Redis, a personal theme&rsquo;s live updates can miss a page whose live connection and sign-in claim land on different workers; that page still gets the theme on its next load.</li>
                             <li><b>A worker that loses Redis catches up when it reconnects.</b> Redis keeps nothing for a worker that is away, and a connection that dies without notice is only noticed after 90 seconds of silence. When the worker reconnects, it tells its open pages and designers what is saved now. A page whose theme, instance or personal, is current skips the fetch, and the others fetch over the usual two-second spread. A designer reloads only when the theme or its galleries changed while the worker was away, as it does for a save in another tab.</li>
-                            <li><b>Turning the function off or on, saving new code, and changing valves reach every worker too.</b> With Redis, each worker hears about the change and loads it within a few seconds. A worker still running a version older than 1.8.2, or one that started while the function was off, catches up the next time it handles any event.</li>
+                            <li><b>Turning the function off or on, saving new code, and changing valves reach every worker too.</b> With Redis, each worker hears about the change and loads it within a few seconds. Without Redis, the workers that share a data folder pass the change through a small file in <code>DATA_DIR/cache/live-reload/</code>, which each one checks every 2 seconds. A worker still running a version older than 1.8.2, or one that started while the function was off, catches up the next time it handles any event, and so does one still running a version from before this check the first time you update without Redis.</li>
                             <li><b>The composed assets are per worker.</b> Each worker builds its own <code>/static/loader.js</code> and <code>/static/custom.css</code> from what it has loaded, so a worker only serves the theme once it has run this function at least once. Open WebUI publishes <code>system.startup.completed</code> in every worker's lifespan, so in practice all of them publish during boot.</li>
                         </ul>
                         <p><b>TL;DR:</b> Single-worker deployments (the default) work perfectly. Multi-worker deployments get live push across workers automatically if <code>REDIS_URL</code> is set; otherwise, themes propagate on page refresh.</p>

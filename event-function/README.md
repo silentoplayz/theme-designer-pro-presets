@@ -513,7 +513,7 @@ The fallback is automatic: Worker errors are caught, the Worker is terminated, a
   - _Reason:_ SSE connections are long-lived. The server sends a keep-alive comment every 15 seconds, so an idle timeout longer than 15 seconds keeps the stream open. A proxy or CDN that limits a connection's total lifetime still ends it, and the page reconnects 3 seconds later. Raise that limit on the `/events` endpoint. Each worker also holds at most 8,192 streams; past that, a page waits 60 seconds before it retries, and fetches anything it missed each time.
 
 - **Multi-worker deployment: themes only update on some users.**
-  - _Fix:_ Set `REDIS_URL` in your environment (which Open WebUI already uses for WebSocket relay). Theme Designer Pro automatically uses Redis pub/sub to broadcast SSE events across all workers, through Sentinel when `REDIS_SENTINEL_HOSTS` is set. No additional configuration needed. Without Redis, other workers' pages update on their next load.
+  - _Fix:_ Set `REDIS_URL` in your environment (which Open WebUI already uses for WebSocket relay). Theme Designer Pro automatically uses Redis pub/sub to broadcast SSE events across all workers, through Sentinel when `REDIS_SENTINEL_HOSTS` is set. No additional configuration needed. Without Redis, other workers' pages update on their next load, and new function code, valves and turning the function off or on reach every worker on the same data folder within 2 seconds.
 
 - **The log says `REDIS_URL must start with redis://, rediss:// or unix://`.**
   - _Reason:_ The value isn't a Redis URL, most often because it's wrapped in quotes. In a Docker Compose `environment:` list, quotes become part of the value, so `- REDIS_URL="redis://redis:6379/0"` passes `"redis://redis:6379/0"`, quotes included. Open WebUI itself quietly runs without Redis on that value, and a quoted `WEBSOCKET_MANAGER="redis"` turns off its Redis WebSocket relay the same way.
@@ -569,6 +569,12 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 **Theme CSS that reads `var(--color-gray-*)` keeps working:** the palette sets those names to the same steps. New theme CSS can read `var(--color-base-*)`. A Manual Variable Override written as `--color-gray-900` sets `--app-base-900`, and the step labels in the Core Palette copy `--app-base-*`. Saved themes keep their stored names, so nothing needs migrating.
 
 **The Canvas FX palette** reads the base scale from the page, adds `'0'` and `'1000'` to `ramp`, and gives Light the page's `base-0` as `background`.
+
+**Fixes:**
+
+- The dimming over the Other pages and Sign-in page pictures uses the strengths Open WebUI lays over a chat's background image, so the shared **Dimming** looks the same on every page.
+- The Sign-in page picture shows again. Open WebUI changed the color classes of the sign-in page's backdrop after 0.13.4, and the picture was drawn on the old ones.
+- Several workers without Redis pick up new code, valves and turning the function off or on within 2 seconds. The function's live reload now also writes each change to a file in `DATA_DIR/cache/live-reload/`, which every worker on that data folder checks, instead of only telling workers over Redis. Workers still running an older copy catch up on their next event or a restart, once. It also brings the live reload up to the shared protocol's version 2, so a function that is being turned off no longer switches itself back on from an event that was already on its way.
 
 ## 📝 What's New in 1.22.0
 
