@@ -93,8 +93,8 @@ How see-through the layers over the background are. Each layer is tinted with th
 | `surfaceSidebarBlur` | number, 0 to 40 | 0 | How much the open sidebar blurs what shows through it, in px |
 | `surfaceComposerOpacity` | number, 0 to 100 | 5 | How solid the message input is, in percent |
 | `surfaceComposerBlur` | number, 0 to 40 | 8 | How much the message input blurs what shows through it, in px |
-| `surfacePanelOpacity` | number, 0 to 100 | 100 | How solid the side panel the Tabs button opens is, in percent |
-| `surfacePanelBlur` | number, 0 to 40 | 0 | How much the side panel the Tabs button opens blurs what shows through it, in px |
+| `surfacePanelOpacity` | number, 0 to 100 | 100 | How solid the drawer tabs open in on a narrow screen is, in percent |
+| `surfacePanelBlur` | number, 0 to 40 | 0 | How much the drawer tabs open in on a narrow screen blurs what shows through it, in px |
 | `surfaceCardsOpacity` | number, 0 to 100 | 100 | How solid the rounded panels on a page are (note cards, the calendar, workspace and admin cards), in percent |
 | `surfaceCardsBlur` | number, 0 to 40 | 0 | How much the rounded panels on a page blur what shows through them, in px |
 | `surfaceButtonsOpacity` | number, 0 to 100 | 100 | How solid the grey buttons on a page are, such as Create, in percent |
@@ -154,7 +154,7 @@ Each theme in `themes` is read as above, with one addition: in a backup, a Her m
 
 Nothing should write these, but a file in one of these shapes still imports:
 
-- A single palette, `{ "h": …, "c": …, "l": …, "overrides": { … } }`, with no modes. Dark and OLED get the palette and its overrides; Light and Her get the palette alone.
+- A single palette, `{ "h": …, "c": …, "l": …, "overrides": { … } }`, with neither a `dark` nor a `light` mode. `h` is a number or a numeric string. Dark and OLED get the palette and its overrides; Light and Her get the palette alone.
 - A mode with `"oklch": { "hue": …, "chroma": …, "lightness": … }` in place of `h`, `c` and `l`.
 - `locks` as a list of names rather than an object.
 

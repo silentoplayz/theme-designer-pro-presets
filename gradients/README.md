@@ -31,6 +31,7 @@ gradients/
 |---|---|
 | `linear` | Directional gradient defined by angle and color stops |
 | `radial` | Circular/elliptical gradient with configurable center, shape, and size |
+| `conic` | Gradient swept around the center from a starting angle, with color stops |
 | `mesh` | Multi-point gradient with individually positioned color nodes and spread |
 
 See [`schemas/gradient-preset.schema.json`](../schemas/gradient-preset.schema.json) for the full specification.

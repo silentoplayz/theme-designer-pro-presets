@@ -28,7 +28,7 @@ Theme Designer Pro themes your whole [Open WebUI](https://github.com/open-webui/
 
 ## 🚀 Install
 
-Theme Designer Pro is an event function for **Open WebUI v0.11.0 or later**.
+Theme Designer Pro is an event function for **Open WebUI v0.13.4 or later**.
 
 1. **Add the event function.** Get it from [its community page](https://openwebui.com/posts/b44c56ec-1fbd-4b42-9787-2a4facd5f047), or paste [`event-function/theme_designer_pro_event.py`](event-function/theme_designer_pro_event.py) into **Admin Panel > Functions > Create New Function**.
 2. **Turn it on** in the Functions list.
@@ -95,7 +95,7 @@ https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/b
 |---|---|
 | [`themes/`](themes/) | Complete themes as `.json`: a palette and settings for each mode (Dark, OLED, Light and Her), with any Canvas FX, gradient and custom CSS they use. Each has an `updateUrl`, so the designer can check it for updates. |
 | [`canvas-fx/`](canvas-fx/) | Animations as standalone `.js` files. They run behind the interface in a Web Worker on an OffscreenCanvas (or on the page itself when the browser can't), and each has settings at its top that you can tune with sliders, switches and color pickers, in the designer and in the Studio. Every animation here is tagged **Follows your theme** and draws in the theme's colors (Theme Designer Pro v1.12.0 or later). |
-| [`gradients/`](gradients/) | Gradient presets, sorted by motion (`still/`, `animated/`) and then by type (`linear/`, `radial/`, `mesh/`). |
+| [`gradients/`](gradients/) | Gradient presets (linear, radial, conic or mesh), sorted by motion (`still/`, `animated/`) and then by type (`linear/`, `radial/`, `mesh/`). |
 | [`bundles/`](bundles/) | The presets combined into single files for one import each. Built by CI; see [`bundles/README.md`](bundles/README.md). |
 
 ### Everything else
@@ -138,7 +138,7 @@ Runs when someone opens a [theme submission](https://github.com/silentoplayz/the
 
 ### Event Function Tests ([`event-function-tests.yml`](.github/workflows/event-function-tests.yml))
 
-Runs on pushes to `main` and on pull requests that change `event-function/`, `tests/`, the theme schema or spec, or the Studio's code, every Monday, and when started by hand. It checks that the theme format's spec, schema, designer and Studio agree ([`tests/theme-format/check.js`](tests/theme-format/check.js)), then installs the event function on a throwaway Open WebUI, both the `main` image and v0.11.4, and drives real pages in headless Chrome ([`tests/event-function/e2e.js`](tests/event-function/e2e.js)). The weekly run catches a new Open WebUI release that breaks the function even when nothing here changed.
+Runs on pushes to `main` and on pull requests that change `event-function/`, `tests/`, the theme schema or spec, or the Studio's code, every Monday, and when started by hand. It checks that the theme format's spec, schema, designer and Studio agree ([`tests/theme-format/check.js`](tests/theme-format/check.js)), then installs the event function on a throwaway Open WebUI, both the `main` image and v0.13.4, and drives real pages in headless Chrome ([`tests/event-function/e2e.js`](tests/event-function/e2e.js)). The weekly run catches a new Open WebUI release that breaks the function even when nothing here changed.
 
 ### Deploy to GitHub Pages ([`deploy-pages.yml`](.github/workflows/deploy-pages.yml))
 

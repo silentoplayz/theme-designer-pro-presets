@@ -3,7 +3,7 @@ title: Theme Designer Pro Launcher
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 2.1.1
+version: 2.1.2
 license: MIT
 required_open_webui_version: 0.10.0
 description: Builds a theme someone describes in a chat (palette, accents, gradient,
@@ -189,20 +189,104 @@ def _animation_problem(code: str) -> str:
     return ""
 
 
+# An escape is its own token, first: \/* opens no comment and \" no string.
+CSS_TOKEN = re.compile(r"""\\[\s\S]|/\*[\s\S]*?(?:\*/|\Z)|"(?:[^"\\\n]|\\[\s\S])*(?:"|(?=\n)|\Z)|'(?:[^'\\\n]|\\[\s\S])*(?:'|(?=\n)|\Z)""")
+CLOSED_STRING = re.compile(r"""\A(?:"(?:[^"\\\n]|\\[\s\S])*"|'(?:[^'\\\n]|\\[\s\S])*')\Z""")
+CSS_ESCAPE = re.compile(r"\\(?:([0-9a-fA-F]{1,6})[ \t\n]?|(\n)|([\s\S]))")
+# Where an image may sit in image-set(): only a data: string or a gradient
+# (url() is checked on its own). A var() could hold a string the browser fetches.
+IMAGE_CANDIDATE = re.compile(r"""[ \t\n]*(?:["']data:|url\(|[a-z-]*gradient\()""")
+
+
+def _css_as_browser_reads_it(css: str):
+    """The stylesheet with comments gone and escapes decoded, ASCII-lowercased,
+    and whether it leaves a comment or string unclosed.
+
+    Comments go and strings stay, as in the browser's tokenizer. An escaped
+    character is never syntax, so one that isn't a letter, digit, - or _
+    becomes _: it can't open a string or a function the browser wouldn't.
+    Whitespace is CSS's own, [ \\t\\n] once newlines are normalized."""
+    css = re.sub(r"\r\n?|\f", "\n", css)
+    unclosed = False
+
+    def token(m):
+        nonlocal unclosed
+        t = m.group()
+        if t.startswith("/*"):
+            unclosed = unclosed or len(t) < 4 or not t.endswith("*/")
+            return ""
+        if t[0] in "\"'" and not CLOSED_STRING.match(t):
+            unclosed = True
+        return t
+
+    css = CSS_TOKEN.sub(token, css)
+
+    def decode(m):
+        if m.group(2):
+            return ""
+        if m.group(1):
+            n = int(m.group(1), 16)
+            ch = chr(n) if 0 < n < 0x110000 and not 0xD800 <= n < 0xE000 else "_"
+        else:
+            ch = m.group(3)
+        return ch if re.fullmatch(r"[A-Za-z0-9_-]", ch) else "_"
+
+    css = re.sub(r"[A-Z]+", lambda m: m.group().lower(), CSS_ESCAPE.sub(decode, css))
+    return css, unclosed
+
+
+def _image_set_fetches(css: str, start: int) -> bool:
+    """Whether the image-set() whose arguments begin at start names anything
+    but data: strings and gradients."""
+    depth, i, candidate = 0, start, True
+    while i < len(css):
+        if candidate and depth == 0:
+            if not IMAGE_CANDIDATE.match(css, i):
+                return True
+            candidate = False
+        ch = css[i]
+        if ch in "\"'":
+            string = CSS_TOKEN.match(css, i)
+            i = string.end() if string else i + 1
+            continue
+        if ch == "(":
+            depth += 1
+        elif ch == ")":
+            if depth == 0:
+                return False
+            depth -= 1
+        elif ch == "," and depth == 0:
+            candidate = True
+        i += 1
+    return False
+
+
+def _css_fetch_problem(css: str) -> str:
+    read, unclosed = _css_as_browser_reads_it(css)
+    if unclosed:
+        return "it leaves a comment or string unclosed"
+    if "@import" in read:
+        return "it uses @import; everything has to be in the stylesheet itself"
+    # Only a quoted data: URL: an unquoted one followed by anything but ) is a
+    # broken url token, which the browser skips to the next ), comments and
+    # quotes included, so what looks like a comment after it is live CSS
+    if re.search(r"""(?:url|src)[ \t\n]*\((?![ \t\n]*['"]data:)""", read) or any(
+        _image_set_fetches(read, m.end()) for m in re.finditer(r"image(?:-set)?[ \t\n]*\(", read)
+    ):
+        return "it loads a url(), image-set() or src(); only quoted data: URLs such as url(\"data:...\") are allowed, so a theme never fetches anything"
+    if re.search(r"expression[ \t\n]*\(|javascript:|-moz-binding|behavior[ \t\n]*:", read):
+        return "it uses script in CSS"
+    return ""
+
+
 def _check_css(css: str) -> str:
     """What a stylesheet the chat model wrote may not do, or ""."""
     if len(css.encode("utf-8")) > CSS_MAX_BYTES:
         return f"it is over {CSS_MAX_BYTES // 1024} KB"
-    lowered = css.lower()
-    if "@import" in lowered:
-        return "it uses @import; everything has to be in the stylesheet itself"
-    if re.search(r"url\(\s*(?!['\"]?data:)", lowered):
-        return "it loads a url(); only data: URLs are allowed, so a theme never fetches anything"
-    if re.search(r"expression\s*\(|javascript:|-moz-binding|behavior\s*:", lowered):
-        return "it uses script in CSS"
-    if "</style" in lowered or "<script" in lowered:
+    # The HTML parser ends a <style> before CSS comments or escapes mean anything
+    if "</style" in css.lower() or "<script" in css.lower():
         return "it contains HTML tags"
-    return ""
+    return _css_fetch_problem(css)
 
 
 def _gradient_from(colors: str):
@@ -253,7 +337,7 @@ class Tools:
         )
         model_written_css: bool = Field(
             default=True,
-            description="Let the chat model add its own CSS to a theme. It can't load anything: no @import, and url() only for data: URLs.",
+            description="Let the chat model add its own CSS to a theme. It can't load anything: no @import, and url(), image-set() and src() only with quoted data: URLs such as url(\"data:...\").",
         )
         canvas_catalog_url: str = Field(
             default="https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/bundles/canvas-fx-all.json",
@@ -418,7 +502,7 @@ class Tools:
           network: it runs isolated and can only draw.
         - glass: Frosted, see-through panels so the background shows through (default True).
         - custom_css: Extra CSS for the theme, after the glass. Use Open WebUI's own element ids and the theme's
-          variables (--color-gray-50 to --color-gray-950, --tdp-accent). No @import; url() only for data: URLs.
+          variables (--color-gray-50 to --color-gray-950, --tdp-accent). No @import; url(), image-set() and src() only with quoted data: URLs, such as url("data:image/png;base64,..."); close every comment and string.
         - gradient: A gradient background when there is no animated background (default True).
         - gradient_colors: Optional comma-separated "#rrggbb" colors (2-8) for the gradient, dark to light or
           as they should run; empty makes one from the hue.
@@ -895,7 +979,11 @@ button:focus-visible { outline: 2px solid var(--muted); outline-offset: 2px; }
     stage.classList.toggle('light-mode', !dark);
     stage.style.backgroundImage = gradientCss(m);
     // The glass is the theme's own CSS, run against the mock's copies of Open WebUI's elements
-    $('tdp-theme-css').textContent = m.customCssEnabled ? m.customCSS.replace(/:root\s*\{/g, '.tdp-stage {') : '';
+    // Not inside an escape, comment, string or url token, where :root { is
+    // text: rewritten, url("data:root{...") became a URL on this server
+    $('tdp-theme-css').textContent = m.customCssEnabled ? m.customCSS.replace(
+      /(\\[\s\S]|\/\*[\s\S]*?(?:\*\/|$)|"(?:[^"\\\n]|\\[\s\S])*(?:"|(?=\n)|$)|'(?:[^'\\\n]|\\[\s\S])*(?:'|(?=\n)|$)|\b[uU][rR][lL]\((?![ \t\n]*["'])[^)]*\)?)|:root\s*\{/g,
+      (t, kept) => kept || '.tdp-stage {') : '';
     if (worker) worker.postMessage(canvasTheme(key, vars));
     document.querySelectorAll('.tdp-modes button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.mode === (dark ? 'dark' : 'light'))); });
     return vars;

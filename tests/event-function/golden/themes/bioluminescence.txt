@@ -1,0 +1,800 @@
+# themes/bioluminescence.txt - written by golden.py --update, do not edit
+
+#=# designer: imported theme (ensureAllModes, normalizeModeData), against the file
+sha256 f06d427b4280
+dark: added from DEFAULT_MODE_DATA: accent accent2 accent3 gradientType gradientAngle gradientStops gradientIntensity gradientAnimation gradientRadialPosX gradientRadialPosY gradientRadialShape gradientRadialSize gradientMeshPoints gradientMeshBgColor gradientAnimationSpeed themeAuthOnly customCssAuthOnly canvasAuthOnly gradientAuthOnly surfacesEnabled surfaceSidebarOpacity surfaceSidebarBlur surfaceComposerOpacity surfaceComposerBlur surfacePanelOpacity surfacePanelBlur surfaceCardsOpacity surfaceCardsBlur surfaceButtonsOpacity surfaceButtonsBlur surfaceMenuOpacity surfaceMenuBlur surfaceDialogOpacity surfaceDialogBlur surfaceBackdropOpacity surfaceBackdropBlur surfaceFadeOpacity
+light: added from DEFAULT_MODE_DATA: accent accent2 accent3 gradientType gradientAngle gradientStops gradientIntensity gradientAnimation gradientRadialPosX gradientRadialPosY gradientRadialShape gradientRadialSize gradientMeshPoints gradientMeshBgColor gradientAnimationSpeed themeAuthOnly customCssAuthOnly canvasAuthOnly gradientAuthOnly surfacesEnabled surfaceSidebarOpacity surfaceSidebarBlur surfaceComposerOpacity surfaceComposerBlur surfacePanelOpacity surfacePanelBlur surfaceCardsOpacity surfaceCardsBlur surfaceButtonsOpacity surfaceButtonsBlur surfaceMenuOpacity surfaceMenuBlur surfaceDialogOpacity surfaceDialogBlur surfaceBackdropOpacity surfaceBackdropBlur surfaceFadeOpacity
+oled: added from DEFAULT_MODE_DATA: accent accent2 accent3 gradientType gradientAngle gradientStops gradientIntensity gradientAnimation gradientRadialPosX gradientRadialPosY gradientRadialShape gradientRadialSize gradientMeshPoints gradientMeshBgColor gradientAnimationSpeed themeAuthOnly customCssAuthOnly canvasAuthOnly gradientAuthOnly surfacesEnabled surfaceSidebarOpacity surfaceSidebarBlur surfaceComposerOpacity surfaceComposerBlur surfacePanelOpacity surfacePanelBlur surfaceCardsOpacity surfaceCardsBlur surfaceButtonsOpacity surfaceButtonsBlur surfaceMenuOpacity surfaceMenuBlur surfaceDialogOpacity surfaceDialogBlur surfaceBackdropOpacity surfaceBackdropBlur surfaceFadeOpacity
+her: added from DEFAULT_MODE_DATA: accent accent2 accent3 gradientType gradientAngle gradientStops gradientIntensity gradientAnimation gradientRadialPosX gradientRadialPosY gradientRadialShape gradientRadialSize gradientMeshPoints gradientMeshBgColor gradientAnimationSpeed themeAuthOnly customCssAuthOnly canvasAuthOnly gradientAuthOnly surfacesEnabled surfaceSidebarOpacity surfaceSidebarBlur surfaceComposerOpacity surfaceComposerBlur surfacePanelOpacity surfacePanelBlur surfaceCardsOpacity surfaceCardsBlur surfaceButtonsOpacity surfaceButtonsBlur surfaceMenuOpacity surfaceMenuBlur surfaceDialogOpacity surfaceDialogBlur surfaceBackdropOpacity surfaceBackdropBlur surfaceFadeOpacity
+
+#=# designer: normalizeSnapshot
+same as imported
+
+#=# designer: isThemeDuplicate of itself
+true
+
+#=# designer: generateThemeSections vars
+/*[OWUI_VARS_START]*/
+/*[OWUI_PAL_LIGHT_START]*/
+/* --- LIGHT MODE VARIABLES --- */
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) {
+  --color-gray-50: oklch(0.980 0.024 212) !important;
+  --color-gray-100: oklch(0.940 0.024 212) !important;
+  --color-gray-200: oklch(0.920 0.024 212) !important;
+  --color-gray-300: oklch(0.850 0.024 212) !important;
+  --color-gray-400: oklch(0.770 0.024 212) !important;
+  --color-gray-500: oklch(0.690 0.024 212) !important;
+  --color-gray-600: oklch(0.510 0.024 212) !important;
+  --color-gray-700: oklch(0.420 0.024 212) !important;
+  --color-gray-800: oklch(0.320 0.024 212) !important;
+  --color-gray-850: oklch(0.270 0.024 212) !important;
+  --color-gray-900: oklch(0.200 0.024 212) !important;
+  --color-gray-950: oklch(0.160 0.024 212) !important;
+  --tdp-accent: oklch(0.56 0.096 212.0) !important;
+  --tdp-accent-2: oklch(0.56 0.096 252.0) !important;
+  --tdp-accent-3: oklch(0.56 0.096 172.0) !important;
+}
+@media (prefers-color-scheme: light) {
+  html[data-theme="system"], :root[data-theme="system"] {
+    --color-gray-50: oklch(0.980 0.024 212) !important;
+    --color-gray-100: oklch(0.940 0.024 212) !important;
+    --color-gray-200: oklch(0.920 0.024 212) !important;
+    --color-gray-300: oklch(0.850 0.024 212) !important;
+    --color-gray-400: oklch(0.770 0.024 212) !important;
+    --color-gray-500: oklch(0.690 0.024 212) !important;
+    --color-gray-600: oklch(0.510 0.024 212) !important;
+    --color-gray-700: oklch(0.420 0.024 212) !important;
+    --color-gray-800: oklch(0.320 0.024 212) !important;
+    --color-gray-850: oklch(0.270 0.024 212) !important;
+    --color-gray-900: oklch(0.200 0.024 212) !important;
+    --color-gray-950: oklch(0.160 0.024 212) !important;
+    --tdp-accent: oklch(0.56 0.096 212.0) !important;
+    --tdp-accent-2: oklch(0.56 0.096 252.0) !important;
+    --tdp-accent-3: oklch(0.56 0.096 172.0) !important;
+  }
+}
+
+/*[OWUI_PAL_LIGHT_END]*/
+/*[OWUI_PAL_DARK_START]*/
+/* --- DARK MODE VARIABLES --- */
+html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"] {
+  --color-gray-50: oklch(0.930 0.040 228) !important;
+  --color-gray-100: oklch(0.890 0.040 228) !important;
+  --color-gray-200: oklch(0.870 0.040 228) !important;
+  --color-gray-300: oklch(0.800 0.040 228) !important;
+  --color-gray-400: oklch(0.720 0.040 228) !important;
+  --color-gray-500: oklch(0.640 0.040 228) !important;
+  --color-gray-600: oklch(0.460 0.040 228) !important;
+  --color-gray-700: oklch(0.370 0.040 228) !important;
+  --color-gray-800: oklch(0.270 0.040 228) !important;
+  --color-gray-850: oklch(0.220 0.040 228) !important;
+  --color-gray-900: oklch(0.150 0.040 228) !important;
+  --color-gray-950: oklch(0.110 0.040 228) !important;
+  --tdp-accent: oklch(0.74 0.160 228.0) !important;
+  --tdp-accent-2: oklch(0.74 0.160 268.0) !important;
+  --tdp-accent-3: oklch(0.74 0.160 188.0) !important;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"], :root[data-theme="system"] {
+    --color-gray-50: oklch(0.930 0.040 228) !important;
+    --color-gray-100: oklch(0.890 0.040 228) !important;
+    --color-gray-200: oklch(0.870 0.040 228) !important;
+    --color-gray-300: oklch(0.800 0.040 228) !important;
+    --color-gray-400: oklch(0.720 0.040 228) !important;
+    --color-gray-500: oklch(0.640 0.040 228) !important;
+    --color-gray-600: oklch(0.460 0.040 228) !important;
+    --color-gray-700: oklch(0.370 0.040 228) !important;
+    --color-gray-800: oklch(0.270 0.040 228) !important;
+    --color-gray-850: oklch(0.220 0.040 228) !important;
+    --color-gray-900: oklch(0.150 0.040 228) !important;
+    --color-gray-950: oklch(0.110 0.040 228) !important;
+    --tdp-accent: oklch(0.74 0.160 228.0) !important;
+    --tdp-accent-2: oklch(0.74 0.160 268.0) !important;
+    --tdp-accent-3: oklch(0.74 0.160 188.0) !important;
+  }
+}
+
+/*[OWUI_PAL_DARK_END]*/
+/*[OWUI_PAL_OLED_START]*/
+/* --- OLED DARK MODE VARIABLES --- */
+html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"] {
+  --color-gray-50: oklch(0.780 0.040 228) !important;
+  --color-gray-100: oklch(0.740 0.040 228) !important;
+  --color-gray-200: oklch(0.720 0.040 228) !important;
+  --color-gray-300: oklch(0.650 0.040 228) !important;
+  --color-gray-400: oklch(0.570 0.040 228) !important;
+  --color-gray-500: oklch(0.490 0.040 228) !important;
+  --color-gray-600: oklch(0.310 0.040 228) !important;
+  --color-gray-700: oklch(0.220 0.040 228) !important;
+  --color-gray-800: oklch(0.120 0.040 228) !important;
+  --color-gray-850: oklch(0.070 0.040 228) !important;
+  --color-gray-900: oklch(0.000 0.040 228) !important;
+  --color-gray-950: oklch(0.000 0.040 228) !important;
+  --tdp-accent: oklch(0.74 0.160 228.0) !important;
+  --tdp-accent-2: oklch(0.74 0.160 268.0) !important;
+  --tdp-accent-3: oklch(0.74 0.160 188.0) !important;
+}
+
+/*[OWUI_PAL_OLED_END]*/
+/*[OWUI_PAL_HER_START]*/
+/* --- HER MODE VARIABLES --- */
+html.her, html[data-theme="her"] {
+  --color-gray-50: oklch(0.980 0.020 182) !important;
+  --color-gray-100: oklch(0.940 0.020 182) !important;
+  --color-gray-200: oklch(0.920 0.020 182) !important;
+  --color-gray-300: oklch(0.850 0.020 182) !important;
+  --color-gray-400: oklch(0.770 0.020 182) !important;
+  --color-gray-500: oklch(0.690 0.020 182) !important;
+  --color-gray-600: oklch(0.510 0.020 182) !important;
+  --color-gray-700: oklch(0.420 0.020 182) !important;
+  --color-gray-800: oklch(0.320 0.020 182) !important;
+  --color-gray-850: oklch(0.270 0.020 182) !important;
+  --color-gray-900: oklch(0.200 0.020 182) !important;
+  --color-gray-950: oklch(0.160 0.020 182) !important;
+  --tdp-accent: oklch(0.56 0.080 182.0) !important;
+  --tdp-accent-2: oklch(0.56 0.080 222.0) !important;
+  --tdp-accent-3: oklch(0.56 0.080 142.0) !important;
+}
+
+/*[OWUI_PAL_HER_END]*/
+/*[OWUI_VARS_END]*/
+
+
+
+#=# designer: generateThemeSections structural
+@shared dfa3be5e1e15
+
+#=# designer: generateThemeSections gradient
+
+
+#=# designer: generateThemeSections custom
+each mode's customCSS, changed:
+- lines 1-1 (1): ':root {' .. ':root {'
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) {
++ & {
+- lines 40-40 (1): 'html { scrollbar-color: var(--biolum-line) transparent; }' .. 'html { scrollbar-color: var(--biolum-line) transparent; }'
++ & { scrollbar-color: var(--biolum-line) transparent; }
+- lines 43-43 (1): ':root {' .. ':root {'
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ @media (prefers-color-scheme: light) {
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html[data-theme="system"] {
++ & {
+- lines 82-82 (1): 'html { scrollbar-color: var(--biolum-line) transparent; }' .. 'html { scrollbar-color: var(--biolum-line) transparent; }'
++ & { scrollbar-color: var(--biolum-line) transparent; }
+- lines 85-85 (1): ':root {' .. ':root {'
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ 
++ }
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"] {
++ & {
+- lines 124-124 (1): 'html { scrollbar-color: var(--biolum-line) transparent; }' .. 'html { scrollbar-color: var(--biolum-line) transparent; }'
++ & { scrollbar-color: var(--biolum-line) transparent; }
+- lines 127-127 (1): ':root {' .. ':root {'
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ @media (prefers-color-scheme: dark) {
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html[data-theme="system"] {
++ & {
+- lines 166-166 (1): 'html { scrollbar-color: var(--biolum-line) transparent; }' .. 'html { scrollbar-color: var(--biolum-line) transparent; }'
++ & { scrollbar-color: var(--biolum-line) transparent; }
+- lines 169-169 (1): ':root {' .. ':root {'
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ 
++ }
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"] {
++ & {
+- lines 208-208 (1): 'html { scrollbar-color: var(--biolum-line) transparent; }' .. 'html { scrollbar-color: var(--biolum-line) transparent; }'
++ & { scrollbar-color: var(--biolum-line) transparent; }
+- lines 211-211 (1): ':root {' .. ':root {'
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html.her, html[data-theme="her"] {
++ & {
+- lines 250-250 (1): 'html { scrollbar-color: var(--biolum-line) transparent; }' .. 'html { scrollbar-color: var(--biolum-line) transparent; }'
++ & { scrollbar-color: var(--biolum-line) transparent; }
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ 
+
+#=# designer: generateCoreCSS
+= vars + structural + gradient + custom
+
+#=# designer: dark mode
+_shippedVars: 0 overridden, defaults false
+accentVars: {"--tdp-accent": "oklch(0.74 0.160 228.0)", "--tdp-accent-2": "oklch(0.74 0.160 268.0)", "--tdp-accent-3": "oklch(0.74 0.160 188.0)"}
+contrast Main text on background: #cdeefd on #000e18 = 16.03 (aaa true, aa true, aaLarge true)
+contrast Muted text on background: #8baab9 on #000e18 = 7.94 (aaa true, aa true, aaLarge true)
+contrast Main text on elevated surfaces: #cdeefd on #021e29 = 14.13 (aaa true, aa true, aaLarge true)
+contrast Main text on sidebar: #cdeefd on #00060f = 16.69 (aaa true, aa true, aaLarge true)
+detectWashedOut: {"dark": false, "light": false}
+buildGradientCss(.scope): ''
+parseSettings: line 6 at 22 len 1 JELLY_COUNT number 7 0..16 step 1 label "Jelly count" section "" hint "glowing jellyfish (0-16)"
+parseSettings: line 7 at 22 len 2 KELP_STRANDS number 12 0..24 step 1 label "Kelp strands" section "" hint "kelp fronds along the floor (0-24)"
+parseSettings: line 8 at 22 len 3 PLANKTON number 120 0..300 step 1 label "Plankton" section "" hint "tiny drifting particles (0-300)"
+parseSettings: line 9 at 22 len 1 RAY_COUNT number 5 0..10 step 1 label "Ray count" section "" hint "shafts of light from the surface (0-10)"
+parseSettings: line 10 at 22 len 1 CURRENT number 1 0..3 step 1 label "Current" section "" hint "speed of the whole scene; 0 holds it still (0-3)"
+parseSettings: line 11 at 22 len 3 REDUCED_SPEED number 0.2 0..1 step 0.01 label "Reduced speed" section "" hint "share of the speed kept when the viewer asks to reduce motion (0-1)"
+parseSettings: line 12 at 22 len 1 MOUSE_CURRENT number 1 0..3 step 1 label "Mouse current" section "" hint "how strongly the cursor stirs the current and nudges the jellies (0-3)"
+parseSettings: line 13 at 22 len 2 PULSE_EVERY number 45 0..300 step 1 label "Pulse every" section "" hint "average seconds between distant sonar rings; 0 turns them off (0-300)"
+parseSettings: line 14 at 22 len 1 WATER_TINT number 1 0..2 step 1 label "Water tint" section "" hint "strength of the light glow from the surface (0-2)"
+parseSettings: line 15 at 22 len 1 CAUSTICS number 1 0..2 step 1 label "Caustics" section "" hint "strength of the caustic light on the sand (0-2)"
+parseSettings: line 16 at 22 len 4 FLOOR_HEIGHT number 0.15 0.05..0.3 step 0.001 label "Floor height" section "" hint "height of the sandy floor, as a share of the screen (0.05-0.3)"
+parseSettings: line 17 at 22 len 4 CENTER_CALM number 0.75 0..1 step 0.01 label "Center calm" section "" hint "how much the scene fades behind the chat column (0-1)"
+parseSettings: line 18 at 22 len 3 BAND_WIDTH number 520 300..900 step 1 label "Band width" section "" hint "half-width of the calm band when the page has no chat column, in px (300-900)"
+parseSettings: line 19 at 22 len 4 FOLLOW_THEME bool true label "Follow theme" section "" hint "take the colors from the theme's palette"
+parseSettings: line 20 at 22 len 9 WATER_COLOR color "#3c96c8" quote ' label "Water color" section "" hint "surface glow and light shafts when not following the theme"
+parseSettings: line 21 at 22 len 9 JELLY_A color "#5ee0f0" quote ' label "Jelly a" section "" hint "first jellyfish color"
+parseSettings: line 22 at 22 len 9 JELLY_B color "#b27cf0" quote ' label "Jelly b" section "" hint "second jellyfish color"
+parseSettings: line 23 at 22 len 9 KELP_COLOR color "#3a6e28" quote ' label "Kelp color" section "" hint "kelp"
+parseSettings: line 24 at 22 len 9 SAND_COLOR color "#2a2e1e" quote ' label "Sand color" section "" hint "sandy floor"
+
+#=# designer: light mode
+_shippedVars: 0 overridden, defaults false
+accentVars: {"--tdp-accent": "oklch(0.56 0.096 212.0)", "--tdp-accent-2": "oklch(0.56 0.096 252.0)", "--tdp-accent-3": "oklch(0.56 0.096 172.0)"}
+contrast Main text on background: #021013 on #e7fdff = 18.31 (aaa true, aa true, aaLarge true)
+contrast Muted text on background: #576a6e on #e7fdff = 5.39 (aaa false, aa true, aaLarge true)
+contrast Main text on elevated surfaces: #021013 on #daf0f5 = 16.36 (aaa true, aa true, aaLarge true)
+contrast Main text on sidebar: #021013 on #e7fdff = 18.31 (aaa true, aa true, aaLarge true)
+detectWashedOut: {"dark": false, "light": true}
+buildGradientCss(.scope): ''
+parseSettings: line 6 at 22 len 1 JELLY_COUNT number 5 0..16 step 1 label "Jelly count" section "" hint "glowing jellyfish (0-16)"
+parseSettings: line 7 at 22 len 2 KELP_STRANDS number 12 0..24 step 1 label "Kelp strands" section "" hint "kelp fronds along the floor (0-24)"
+parseSettings: line 8 at 22 len 2 PLANKTON number 90 0..300 step 1 label "Plankton" section "" hint "tiny drifting particles (0-300)"
+parseSettings: line 9 at 22 len 1 RAY_COUNT number 5 0..10 step 1 label "Ray count" section "" hint "shafts of light from the surface (0-10)"
+parseSettings: line 10 at 22 len 1 CURRENT number 1 0..3 step 1 label "Current" section "" hint "speed of the whole scene; 0 holds it still (0-3)"
+parseSettings: line 11 at 22 len 3 REDUCED_SPEED number 0.2 0..1 step 0.01 label "Reduced speed" section "" hint "share of the speed kept when the viewer asks to reduce motion (0-1)"
+parseSettings: line 12 at 22 len 1 MOUSE_CURRENT number 1 0..3 step 1 label "Mouse current" section "" hint "how strongly the cursor stirs the current and nudges the jellies (0-3)"
+parseSettings: line 13 at 22 len 2 PULSE_EVERY number 45 0..300 step 1 label "Pulse every" section "" hint "average seconds between distant sonar rings; 0 turns them off (0-300)"
+parseSettings: line 14 at 22 len 3 WATER_TINT number 1.4 0..2 step 0.01 label "Water tint" section "" hint "strength of the light glow from the surface (0-2)"
+parseSettings: line 15 at 22 len 3 CAUSTICS number 1.4 0..2 step 0.01 label "Caustics" section "" hint "strength of the caustic light on the sand (0-2)"
+parseSettings: line 16 at 22 len 4 FLOOR_HEIGHT number 0.15 0.05..0.3 step 0.001 label "Floor height" section "" hint "height of the sandy floor, as a share of the screen (0.05-0.3)"
+parseSettings: line 17 at 22 len 4 CENTER_CALM number 0.75 0..1 step 0.01 label "Center calm" section "" hint "how much the scene fades behind the chat column (0-1)"
+parseSettings: line 18 at 22 len 3 BAND_WIDTH number 520 300..900 step 1 label "Band width" section "" hint "half-width of the calm band when the page has no chat column, in px (300-900)"
+parseSettings: line 19 at 22 len 4 FOLLOW_THEME bool true label "Follow theme" section "" hint "take the colors from the theme's palette"
+parseSettings: line 20 at 22 len 9 WATER_COLOR color "#3c96c8" quote ' label "Water color" section "" hint "surface glow and light shafts when not following the theme"
+parseSettings: line 21 at 22 len 9 JELLY_A color "#5ee0f0" quote ' label "Jelly a" section "" hint "first jellyfish color"
+parseSettings: line 22 at 22 len 9 JELLY_B color "#b27cf0" quote ' label "Jelly b" section "" hint "second jellyfish color"
+parseSettings: line 23 at 22 len 9 KELP_COLOR color "#3a6e28" quote ' label "Kelp color" section "" hint "kelp"
+parseSettings: line 24 at 22 len 9 SAND_COLOR color "#2a2e1e" quote ' label "Sand color" section "" hint "sandy floor"
+
+#=# designer: oled mode
+_shippedVars: 0 overridden, defaults false
+accentVars: {"--tdp-accent": "oklch(0.74 0.160 228.0)", "--tdp-accent-2": "oklch(0.74 0.160 268.0)", "--tdp-accent-3": "oklch(0.74 0.160 188.0)"}
+contrast Main text on background: #9ebdcc on #000000 = 10.60 (aaa true, aa true, aaLarge true)
+contrast Muted text on background: #5f7c8a on #000000 = 4.74 (aaa false, aa true, aaLarge true)
+contrast Main text on elevated surfaces: #9ebdcc on #000107 = 10.53 (aaa true, aa true, aaLarge true)
+contrast Main text on sidebar: #9ebdcc on #000000 = 10.60 (aaa true, aa true, aaLarge true)
+detectWashedOut: {"dark": false, "light": false}
+buildGradientCss(.scope): ''
+parseSettings: same as dark mode
+
+#=# designer: her mode
+_shippedVars: 0 overridden, defaults false
+accentVars: {"--tdp-accent": "oklch(0.56 0.080 182.0)", "--tdp-accent-2": "oklch(0.56 0.080 222.0)", "--tdp-accent-3": "oklch(0.56 0.080 142.0)"}
+contrast Main text on background: #04100e on #ebfdf9 = 18.38 (aaa true, aa true, aaLarge true)
+contrast Muted text on background: #5a6a67 on #ebfdf9 = 5.40 (aaa false, aa true, aaLarge true)
+contrast Main text on elevated surfaces: #04100e on #ddf0ec = 16.35 (aaa true, aa true, aaLarge true)
+contrast Main text on sidebar: #04100e on #ebfdf9 = 18.38 (aaa true, aa true, aaLarge true)
+detectWashedOut: {"dark": false, "light": true}
+buildGradientCss(.scope): ''
+parseSettings: same as light mode
+
+#=# python: _css_balanced
+css True, custom section True
+
+#=# python: _postprocess_sections sidebar=opaque overlay=opaque: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=opaque overlay=opaque: structural
+= designer structural
+
+#=# python: _postprocess_sections sidebar=opaque overlay=opaque: gradient
+= designer gradient
+
+#=# python: _postprocess_sections sidebar=opaque overlay=opaque: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=opaque overlay=opaque: extra
+= designer extra
+
+#=# python: _postprocess_css sidebar=opaque overlay=opaque
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=opaque overlay=opaque
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=opaque overlay=opaque
+vars + custom, changed:
++ @supports (--tdp-instance: 1) {
++ /* structural rules deferred to bootloader */
++ /* gradient rules deferred to bootloader */
++ }
++ 
+
+#=# python: _custom_css_fragment sidebar=opaque overlay=opaque
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections sidebar=opaque overlay=translucent: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=opaque overlay=translucent: structural
+= designer structural
+
+#=# python: _postprocess_sections sidebar=opaque overlay=translucent: gradient
+= designer gradient
+
+#=# python: _postprocess_sections sidebar=opaque overlay=translucent: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=opaque overlay=translucent: extra
+= designer extra
+then appends: _overlay_css()
+
+#=# python: _postprocess_css sidebar=opaque overlay=translucent
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=opaque overlay=translucent
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=opaque overlay=translucent
+= _safe_subset_css sidebar=opaque overlay=opaque
+then appends: _overlay_css()
+
+#=# python: _custom_css_fragment sidebar=opaque overlay=translucent
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections sidebar=translucent overlay=opaque: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=translucent overlay=opaque: structural
+@shared e98ace20c493
+
+#=# python: _postprocess_sections sidebar=translucent overlay=opaque: gradient
+= designer gradient
+
+#=# python: _postprocess_sections sidebar=translucent overlay=opaque: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=translucent overlay=opaque: extra
+= designer extra
+then appends: _sidebar_fade_css()
+
+#=# python: _postprocess_css sidebar=translucent overlay=opaque
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=translucent overlay=opaque
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=translucent overlay=opaque
+= _safe_subset_css sidebar=opaque overlay=opaque
+
+#=# python: _custom_css_fragment sidebar=translucent overlay=opaque
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections sidebar=translucent overlay=translucent: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=translucent overlay=translucent: structural
+= structural of sidebar=translucent overlay=opaque
+
+#=# python: _postprocess_sections sidebar=translucent overlay=translucent: gradient
+= designer gradient
+
+#=# python: _postprocess_sections sidebar=translucent overlay=translucent: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=translucent overlay=translucent: extra
+= designer extra
+then appends: _sidebar_fade_css() + _overlay_css()
+
+#=# python: _postprocess_css sidebar=translucent overlay=translucent
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=translucent overlay=translucent
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=translucent overlay=translucent
+= _safe_subset_css sidebar=opaque overlay=translucent
+
+#=# python: _custom_css_fragment sidebar=translucent overlay=translucent
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections sidebar=transparent overlay=opaque: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=transparent overlay=opaque: structural
+@shared 1bf69008a2ff
+
+#=# python: _postprocess_sections sidebar=transparent overlay=opaque: gradient
+= designer gradient
+
+#=# python: _postprocess_sections sidebar=transparent overlay=opaque: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=transparent overlay=opaque: extra
+= designer extra
+then appends: _sidebar_fade_css() + _sidebar_mobile_css()
+
+#=# python: _postprocess_css sidebar=transparent overlay=opaque
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=transparent overlay=opaque
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=transparent overlay=opaque
+= _safe_subset_css sidebar=opaque overlay=opaque
+
+#=# python: _custom_css_fragment sidebar=transparent overlay=opaque
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections sidebar=transparent overlay=translucent: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=transparent overlay=translucent: structural
+= structural of sidebar=transparent overlay=opaque
+
+#=# python: _postprocess_sections sidebar=transparent overlay=translucent: gradient
+= designer gradient
+
+#=# python: _postprocess_sections sidebar=transparent overlay=translucent: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=transparent overlay=translucent: extra
+= designer extra
+then appends: _sidebar_fade_css() + _sidebar_mobile_css() + _overlay_css()
+
+#=# python: _postprocess_css sidebar=transparent overlay=translucent
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=transparent overlay=translucent
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=transparent overlay=translucent
+= _safe_subset_css sidebar=opaque overlay=translucent
+
+#=# python: _custom_css_fragment sidebar=transparent overlay=translucent
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections canvas_fx=off sidebar=opaque overlay=opaque: structural
+@shared 7715faf20c9f
+
+#=# python: /theme.css canvas_fx=off sidebar=opaque overlay=opaque
+= its _postprocess_sections, joined
+
+#=# python: /state.json changes to the saved state, canvas_fx=on auth_theming=on
+state otherwise unchanged
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=opaque overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json changes to the saved state, canvas_fx=on auth_theming=off
+@shared 63ce8f0e56f6
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=opaque overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json changes to the saved state, canvas_fx=off auth_theming=on
+@shared 1dc6abdaf939
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=opaque overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=opaque overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json changes to the saved state, canvas_fx=off auth_theming=off
+@shared 6f010f913f2d
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=opaque overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=opaque overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=opaque overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=opaque overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=opaque overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=opaque overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=opaque overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=opaque overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=translucent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=translucent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=translucent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=translucent overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=translucent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=translucent overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=translucent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=translucent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=translucent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=translucent overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=translucent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=translucent overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=transparent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=transparent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=transparent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=transparent overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=transparent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=transparent overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=transparent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=transparent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=transparent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=transparent overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=transparent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=transparent overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: _strip_canvas_scripts
+dark.canvasScript: removed
+light.canvasScript: removed
+oled.canvasScript: removed
+her.canvasScript: removed
+
+#=# python: no sections file: _safe_subset_css sidebar=opaque overlay=opaque
+vars + custom, changed:
++ @supports (--tdp-instance: 1) {
++ /* structural rules deferred to bootloader */
++ }
++ 
+
+#=# python: no sections file: _safe_subset_css sidebar=opaque overlay=translucent
+vars + custom, changed:
++ @supports (--tdp-instance: 1) {
++ /* structural rules deferred to bootloader */
++ }
++ 
+then appends: _overlay_css()
+
+#=# python: no sections file: _safe_subset_css sidebar=translucent overlay=opaque
+vars + custom, changed:
++ @supports (--tdp-instance: 1) {
++ /* structural rules deferred to bootloader */
++ }
++ 
+
+#=# python: no sections file: _safe_subset_css sidebar=translucent overlay=translucent
+vars + custom, changed:
++ @supports (--tdp-instance: 1) {
++ /* structural rules deferred to bootloader */
++ }
++ 
+then appends: _overlay_css()
+
+#=# python: no sections file: _safe_subset_css sidebar=transparent overlay=opaque
+vars + custom, changed:
++ @supports (--tdp-instance: 1) {
++ /* structural rules deferred to bootloader */
++ }
++ 
+
+#=# python: no sections file: _safe_subset_css sidebar=transparent overlay=translucent
+vars + custom, changed:
++ @supports (--tdp-instance: 1) {
++ /* structural rules deferred to bootloader */
++ }
++ 
+then appends: _overlay_css()
+
+#=# python: no sections file: /state.json
+= saved state
+
+#=# bootloader: enforceTheme default valves, /auth, dark, sections
+data-theme 'dark', class 'dark'
+= /theme.css
+
+#=# bootloader: enforceTheme default valves, /auth, dark, flat css only
+data-theme 'dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, oled-dark, sections
+data-theme 'oled-dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, oled-dark, flat css only
+data-theme 'oled-dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, light, sections
+data-theme 'light', class 'light'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, light, flat css only
+data-theme 'light', class 'light'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, her, sections
+data-theme 'her', class 'her'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, her, flat css only
+data-theme 'her', class 'her'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, dark, sections
+data-theme 'dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, dark, flat css only
+data-theme 'dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, dark, personal theme
+data-theme 'dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, oled-dark, sections
+data-theme 'oled-dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, oled-dark, flat css only
+data-theme 'oled-dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, oled-dark, personal theme
+data-theme 'oled-dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, light, sections
+data-theme 'light', class 'light'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, light, flat css only
+data-theme 'light', class 'light'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, light, personal theme
+data-theme 'light', class 'light'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, her, sections
+data-theme 'her', class 'her'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, her, flat css only
+data-theme 'her', class 'her'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, her, personal theme
+data-theme 'her', class 'her'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /auth, dark, sections
+data-theme 'dark', class 'dark'
+/theme.css, changed:
+- lines 1-461 (461): '/*[OWUI_VARS_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
+
+#=# bootloader: enforceTheme every valve flipped, /auth, oled-dark, sections
+data-theme 'oled-dark', class 'dark'
+= the page of: every valve flipped, /auth, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /auth, light, sections
+data-theme 'light', class 'light'
+= the page of: every valve flipped, /auth, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /auth, her, sections
+data-theme 'her', class 'her'
+= the page of: every valve flipped, /auth, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /, dark, sections
+data-theme 'dark', class 'dark'
+= /theme.css
+
+#=# bootloader: enforceTheme every valve flipped, /, oled-dark, sections
+data-theme 'oled-dark', class 'dark'
+= the page of: every valve flipped, /, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /, light, sections
+data-theme 'light', class 'light'
+= the page of: every valve flipped, /, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /, her, sections
+data-theme 'her', class 'her'
+= the page of: every valve flipped, /, dark, sections

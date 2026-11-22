@@ -51,7 +51,8 @@ function buildCanvasFxBundle() {
 }
 
 // ── Gradients Bundle ──
-// Recursively scans gradients/{still,animated}/{linear,radial,mesh}/
+// Recursively scans gradients/{still,animated}/<type>/, whichever type folders
+// exist: linear, radial and mesh today, and conic/ once a conic preset is added
 function collectGradients(dir, category) {
   const results = [];
   if (!fs.existsSync(dir)) return results;

@@ -56,7 +56,7 @@ The gallery ships no CSS presets: custom CSS is left to each user. A theme can s
 
 - [ ] Exported as valid JSON from Theme Designer Pro
 - [ ] Includes a descriptive `name` field
-- [ ] Has a valid `type` (`linear`, `radial`, or `mesh`)
+- [ ] Has a valid `type` (`linear`, `radial`, `conic` or `mesh`)
 - [ ] Placed in the correct subdirectory based on motion and type
 
 ---
@@ -85,8 +85,8 @@ midnight_ocean.json
 |---|---|---|
 | Canvas FX animation | `canvas-fx/` | `.js` |
 | Complete theme | `themes/` | `.json` |
-| Still gradient | `gradients/still/{linear,mesh,radial}/` | `.json` |
-| Animated gradient | `gradients/animated/{linear,mesh,radial}/` | `.json` |
+| Still gradient | `gradients/still/{linear,mesh,radial,conic}/` | `.json` |
+| Animated gradient | `gradients/animated/{linear,mesh,radial,conic}/` | `.json` |
 
 ---
 

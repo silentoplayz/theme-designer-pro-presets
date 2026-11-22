@@ -1,0 +1,780 @@
+# shared.txt - long outputs that repeat across themes, by sha256 - written by golden.py --update
+
+#=# 00d6ca200c21
+data-theme 'dark', class 'dark'
+/theme.css, changed:
+- lines 318-318 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
+- lines 350-350 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 383-383 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
+- lines 415-415 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 449-449 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
+- lines 480-480 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
+
+#=# 0692cfd22338
+_safe_subset_css sidebar=translucent overlay=translucent, changed:
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: light) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: dark) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
++ /* gradient rules deferred to bootloader */
++ 
+- lines 444-484 (41): '/* --- Overlay Translucency (valve-injected) --- */' .. ''
+then appends: _overlay_css()
+
+#=# 093d43198eac
+_safe_subset_css sidebar=transparent overlay=opaque, changed:
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: light) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: dark) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
+
+#=# 1154aa9a7cd4
+_safe_subset_css sidebar=opaque overlay=opaque, changed:
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: light) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: dark) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
+
+#=# 17f6e4a78c26
+data-theme 'dark', class 'dark'
+/theme.css, changed:
+- lines 214-214 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
+- lines 239-239 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 265-265 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
+- lines 290-290 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 316-316 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
+
+#=# 194706685e5e
+_safe_subset_css sidebar=opaque overlay=opaque, changed:
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: light) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: dark) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
++ /* gradient rules deferred to bootloader */
++ 
+
+#=# 1bf69008a2ff
+designer structural, changed:
+- lines 15-15 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
++ :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+- lines 29-29 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !i' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !i'
++ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+- lines 45-45 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) ' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) '
++ :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+- lines 59-59 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !'
++ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+- lines 75-75 (1): 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950' .. 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950'
++ html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+- lines 89-89 (1): ':is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var' .. ':is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var'
++ :is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+
+#=# 1dc6abdaf939
+dark.canvasEnabled: true -> false
+dark.canvasScript: removed
+dark.canvasShowAuth: removed
+dark.canvasAuthOnly: removed
+light.canvasEnabled: true -> false
+light.canvasScript: removed
+light.canvasShowAuth: removed
+light.canvasAuthOnly: removed
+oled.canvasEnabled: true -> false
+oled.canvasScript: removed
+oled.canvasShowAuth: removed
+oled.canvasAuthOnly: removed
+her.canvasEnabled: true -> false
+her.canvasScript: removed
+her.canvasShowAuth: removed
+her.canvasAuthOnly: removed
+
+#=# 1ffc41e33316
+data-theme 'dark', class 'dark'
+/theme.css, changed:
+- lines 224-224 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
+- lines 249-249 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 275-275 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
+- lines 300-300 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 326-326 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
+- lines 350-350 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
+
+#=# 23013c1d28c9
+_shippedVars: 12 overridden, defaults false
+getVariablesMap before overrides: {"--color-gray-50": "oklch(0.980 0.037 266)", "--color-gray-100": "oklch(0.940 0.037 266)", "--color-gray-200": "oklch(0.920 0.037 266)", "--color-gray-300": "oklch(0.850 0.037 266)", "--color-gray-400": "oklch(0.770 0.037 266)", "--color-gray-500": "oklch(0.690 0.037 266)", "--color-gray-600": "oklch(0.510 0.037 266)", "--color-gray-700": "oklch(0.420 0.037 266)", "--color-gray-800": "oklch(0.320 0.037 266)", "--color-gray-850": "oklch(0.270 0.037 266)", "--color-gray-900": "oklch(0.200 0.037 266)", "--color-gray-950": "oklch(0.160 0.037 266)"}
+accentVars: {"--tdp-accent": "#ff8a1e", "--tdp-accent-2": "#5a2a7a", "--tdp-accent-3": "#ffb347"}
+contrast Main text on background: #faf5f0 on #10071c = 18.13 (aaa true, aa true, aaLarge true)
+contrast Muted text on background: #b09cbf on #10071c = 7.81 (aaa true, aa true, aaLarge true)
+contrast Main text on elevated surfaces: #faf5f0 on #160b24 = 17.50 (aaa true, aa true, aaLarge true)
+contrast Main text on sidebar: #faf5f0 on #10071c = 18.13 (aaa true, aa true, aaLarge true)
+detectWashedOut: {"dark": false, "light": false}
+buildGradientCss(.scope): ''
+parseSettings: same as dark mode
+
+#=# 25197d95e125
+designer structural, changed:
+- lines 15-15 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
++ :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+- lines 29-29 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !i' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !i'
++ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+- lines 45-45 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) ' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) '
++ :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+- lines 59-59 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !'
++ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+- lines 65-65 (1): 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950' .. 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950'
++ html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+- lines 79-79 (1): ':is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var' .. ':is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var'
++ :is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+
+#=# 342ff9603851
+dark.canvasScript: removed
+dark.canvasShowAuth: removed
+dark.canvasAuthOnly: removed
+light.canvasScript: removed
+light.canvasShowAuth: removed
+light.canvasAuthOnly: removed
+oled.canvasScript: removed
+oled.canvasShowAuth: removed
+oled.canvasAuthOnly: removed
+her.canvasScript: removed
+her.canvasShowAuth: removed
+her.canvasAuthOnly: removed
+
+#=# 41169ebe1fde
+/*[OWUI_STRUCTURAL_START]*/
+/* --- LIGHT MODE Background Overrides --- */
+
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) body { background-color: var(--color-gray-50) !important; }
+/*[OWUI_CLEAR_GRADIENT_START]*/
+
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app, :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #theme-designer-container, :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app > div, :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #theme-designer-container > *, :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #auth-page > div, :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) main { background-color: transparent !important; background-image: none !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_GRADIENT_END]*/
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !important; }
+@media (prefers-color-scheme: light) {
+
+html[data-theme="system"] body { background-color: var(--color-gray-50) !important; }
+/*[OWUI_CLEAR_GRADIENT_START]*/
+
+html[data-theme="system"] .app, html[data-theme="system"] #theme-designer-container, html[data-theme="system"] #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+html[data-theme="system"] .app > div, html[data-theme="system"] #theme-designer-container > *, html[data-theme="system"] #auth-page > div, html[data-theme="system"] main { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_GRADIENT_END]*/
+html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !important; }
+
+}
+/* --- DARK MODE Background Overrides --- */
+
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body { background-color: var(--color-gray-900) !important; }
+/*[OWUI_CLEAR_GRADIENT_START]*/
+
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #theme-designer-container, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app > div, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #theme-designer-container > *, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #auth-page > div, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) main { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_GRADIENT_END]*/
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }
+@media (prefers-color-scheme: dark) {
+
+html[data-theme="system"] body { background-color: var(--color-gray-900) !important; }
+/*[OWUI_CLEAR_GRADIENT_START]*/
+
+html[data-theme="system"] .app, html[data-theme="system"] #theme-designer-container, html[data-theme="system"] #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+html[data-theme="system"] .app > div, html[data-theme="system"] #theme-designer-container > *, html[data-theme="system"] #auth-page > div, html[data-theme="system"] main { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_GRADIENT_END]*/
+html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }
+
+}
+/* --- OLED DARK MODE Background Overrides --- */
+
+html[data-theme="oled-dark"] body { background-color: var(--color-gray-900) !important; }
+html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }
+/* --- HER MODE Background Overrides --- */
+
+:is(html[data-theme="her"], html:where(.her)) body { background-color: var(--color-gray-50) !important; }
+/*[OWUI_CLEAR_GRADIENT_START]*/
+
+:is(html[data-theme="her"], html:where(.her)) .app, :is(html[data-theme="her"], html:where(.her)) #theme-designer-container, :is(html[data-theme="her"], html:where(.her)) #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+:is(html[data-theme="her"], html:where(.her)) .app > div, :is(html[data-theme="her"], html:where(.her)) #theme-designer-container > *, :is(html[data-theme="her"], html:where(.her)) #auth-page > div, :is(html[data-theme="her"], html:where(.her)) main { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="her"], html:where(.her)) .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="her"], html:where(.her)) #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="her"], html:where(.her)) #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="her"], html:where(.her)) .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="her"], html:where(.her)) .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_GRADIENT_END]*/
+:is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !important; }
+/*[OWUI_STRUCTURAL_END]*/
+
+
+#=# 50cc8c97f47d
+dark.canvasScript: removed
+dark.gradientShowAuth: true -> false
+dark.themeShowAuth: true -> false
+dark.customCssShowAuth: true -> false
+dark.canvasShowAuth: true -> false
+light.canvasScript: removed
+light.gradientShowAuth: true -> false
+light.themeShowAuth: true -> false
+light.customCssShowAuth: true -> false
+light.canvasShowAuth: true -> false
+oled.canvasScript: removed
+oled.gradientShowAuth: true -> false
+oled.themeShowAuth: true -> false
+oled.customCssShowAuth: true -> false
+oled.canvasShowAuth: true -> false
+her.canvasScript: removed
+her.gradientShowAuth: true -> false
+her.themeShowAuth: true -> false
+her.customCssShowAuth: true -> false
+her.canvasShowAuth: true -> false
+_hiddenBackgrounds.auth: removed
+
+#=# 5901760923e3
+_shippedVars: 0 overridden, defaults false
+accentVars: {"--tdp-accent": "oklch(0.56 0.000 250.0)", "--tdp-accent-2": "oklch(0.56 0.000 290.0)", "--tdp-accent-3": "oklch(0.56 0.000 210.0)"}
+contrast Main text on background: #0d0d0d on #f8f8f8 = 18.30 (aaa true, aa true, aaLarge true)
+contrast Muted text on background: #666666 on #f8f8f8 = 5.41 (aaa false, aa true, aaLarge true)
+contrast Main text on elevated surfaces: #0d0d0d on #ebebeb = 16.30 (aaa true, aa true, aaLarge true)
+contrast Main text on sidebar: #0d0d0d on #f8f8f8 = 18.30 (aaa true, aa true, aaLarge true)
+detectWashedOut: {"dark": false, "light": true}
+buildGradientCss(.scope): ''
+
+#=# 63ce8f0e56f6
+dark.gradientShowAuth: true -> false
+dark.themeShowAuth: true -> false
+dark.customCssShowAuth: true -> false
+dark.canvasShowAuth: true -> false
+light.gradientShowAuth: true -> false
+light.themeShowAuth: true -> false
+light.customCssShowAuth: true -> false
+light.canvasShowAuth: true -> false
+oled.gradientShowAuth: true -> false
+oled.themeShowAuth: true -> false
+oled.customCssShowAuth: true -> false
+oled.canvasShowAuth: true -> false
+her.gradientShowAuth: true -> false
+her.themeShowAuth: true -> false
+her.customCssShowAuth: true -> false
+her.canvasShowAuth: true -> false
+_hiddenBackgrounds.auth: removed
+
+#=# 6f010f913f2d
+dark.canvasEnabled: true -> false
+dark.canvasScript: removed
+dark.gradientShowAuth: true -> false
+dark.themeShowAuth: true -> false
+dark.customCssShowAuth: true -> false
+dark.canvasShowAuth: true -> false
+light.canvasEnabled: true -> false
+light.canvasScript: removed
+light.gradientShowAuth: true -> false
+light.themeShowAuth: true -> false
+light.customCssShowAuth: true -> false
+light.canvasShowAuth: true -> false
+oled.canvasEnabled: true -> false
+oled.canvasScript: removed
+oled.gradientShowAuth: true -> false
+oled.themeShowAuth: true -> false
+oled.customCssShowAuth: true -> false
+oled.canvasShowAuth: true -> false
+her.canvasEnabled: true -> false
+her.canvasScript: removed
+her.gradientShowAuth: true -> false
+her.themeShowAuth: true -> false
+her.customCssShowAuth: true -> false
+her.canvasShowAuth: true -> false
+_hiddenBackgrounds.auth: removed
+
+#=# 7715faf20c9f
+structural of sidebar=opaque overlay=opaque, changed:
+- lines 5-14 (10): '/*[OWUI_CLEAR_CANVAS_START]*/' .. '/*[OWUI_CLEAR_CANVAS_END]*/'
++ 
+- lines 19-28 (10): '/*[OWUI_CLEAR_CANVAS_START]*/' .. '/*[OWUI_CLEAR_CANVAS_END]*/'
++ 
+- lines 35-44 (10): '/*[OWUI_CLEAR_CANVAS_START]*/' .. '/*[OWUI_CLEAR_CANVAS_END]*/'
++ 
+- lines 49-58 (10): '/*[OWUI_CLEAR_CANVAS_START]*/' .. '/*[OWUI_CLEAR_CANVAS_END]*/'
++ 
+- lines 65-74 (10): '/*[OWUI_CLEAR_CANVAS_START]*/' .. '/*[OWUI_CLEAR_CANVAS_END]*/'
++ 
+- lines 79-88 (10): '/*[OWUI_CLEAR_CANVAS_START]*/' .. '/*[OWUI_CLEAR_CANVAS_END]*/'
++ 
+
+#=# 8227804c28b3
+each mode's customCSS, changed:
+- lines 1-1 (1): ':root {' .. ':root {'
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) {
++ & {
+- lines 42-42 (1): 'html { scrollbar-color: var(--gem-line) transparent; }' .. 'html { scrollbar-color: var(--gem-line) transparent; }'
++ & { scrollbar-color: var(--gem-line) transparent; }
+- lines 45-45 (1): ':root {' .. ':root {'
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ @media (prefers-color-scheme: light) {
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html[data-theme="system"] {
++ & {
+- lines 86-86 (1): 'html { scrollbar-color: var(--gem-line) transparent; }' .. 'html { scrollbar-color: var(--gem-line) transparent; }'
++ & { scrollbar-color: var(--gem-line) transparent; }
+- lines 89-89 (1): ':root {' .. ':root {'
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ 
++ }
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"] {
++ & {
+- lines 130-130 (1): 'html { scrollbar-color: var(--gem-line) transparent; }' .. 'html { scrollbar-color: var(--gem-line) transparent; }'
++ & { scrollbar-color: var(--gem-line) transparent; }
+- lines 133-133 (1): ':root {' .. ':root {'
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ @media (prefers-color-scheme: dark) {
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html[data-theme="system"] {
++ & {
+- lines 174-174 (1): 'html { scrollbar-color: var(--gem-line) transparent; }' .. 'html { scrollbar-color: var(--gem-line) transparent; }'
++ & { scrollbar-color: var(--gem-line) transparent; }
+- lines 177-177 (1): ':root {' .. ':root {'
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ 
++ }
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"] {
++ & {
+- lines 218-218 (1): 'html { scrollbar-color: var(--gem-line) transparent; }' .. 'html { scrollbar-color: var(--gem-line) transparent; }'
++ & { scrollbar-color: var(--gem-line) transparent; }
+- lines 221-221 (1): ':root {' .. ':root {'
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html.her, html[data-theme="her"] {
++ & {
+- lines 262-262 (1): 'html { scrollbar-color: var(--gem-line) transparent; }' .. 'html { scrollbar-color: var(--gem-line) transparent; }'
++ & { scrollbar-color: var(--gem-line) transparent; }
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ 
+
+#=# 8ba416f3c793
+_safe_subset_css sidebar=transparent overlay=opaque, changed:
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: light) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: dark) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
++ /* gradient rules deferred to bootloader */
++ 
+
+#=# 8e4d06c51ee4
+_safe_subset_css sidebar=transparent overlay=translucent, changed:
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: light) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: dark) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
++ /* gradient rules deferred to bootloader */
++ 
+- lines 444-484 (41): '/* --- Overlay Translucency (valve-injected) --- */' .. ''
+then appends: _overlay_css()
+
+#=# 978544a38129
+_shippedVars: 0 overridden, defaults false
+accentVars: {"--tdp-accent": "oklch(0.74 0.000 250.0)", "--tdp-accent-2": "oklch(0.74 0.000 290.0)", "--tdp-accent-3": "oklch(0.74 0.000 210.0)"}
+contrast Main text on background: #b7b7b7 on #000000 = 10.47 (aaa true, aa true, aaLarge true)
+contrast Muted text on background: #777777 on #000000 = 4.69 (aaa false, aa true, aaLarge true)
+contrast Main text on elevated surfaces: #b7b7b7 on #010101 = 10.41 (aaa true, aa true, aaLarge true)
+contrast Main text on sidebar: #b7b7b7 on #000000 = 10.47 (aaa true, aa true, aaLarge true)
+detectWashedOut: {"dark": false, "light": false}
+buildGradientCss(.scope): ''
+
+#=# bc1e368c810c
+_safe_subset_css sidebar=opaque overlay=translucent, changed:
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: light) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: dark) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
++ /* gradient rules deferred to bootloader */
++ 
+- lines 444-484 (41): '/* --- Overlay Translucency (valve-injected) --- */' .. ''
+then appends: _overlay_css()
+
+#=# c4d3b083fcee
+data-theme 'dark', class 'dark'
+/theme.css, changed:
+- lines 209-209 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
+- lines 234-234 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 260-260 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
+
+#=# cc27164d56e4
+_safe_subset_css sidebar=translucent overlay=opaque, changed:
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: light) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: dark) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
+
+#=# cd3f2979a56a
+_safe_subset_css sidebar=translucent overlay=opaque, changed:
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: light) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: dark) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
++ /* gradient rules deferred to bootloader */
++ 
+
+#=# dd0525eea3f1
+/*[OWUI_STRUCTURAL_START]*/
+/* --- LIGHT MODE Background Overrides --- */
+
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) body { background-color: var(--color-gray-50) !important; }
+/*[OWUI_CLEAR_GRADIENT_START]*/
+
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app, :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #theme-designer-container, :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app > div, :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #theme-designer-container > *, :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #auth-page > div, :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) main { background-color: transparent !important; background-image: none !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_GRADIENT_END]*/
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !important; }
+@media (prefers-color-scheme: light) {
+
+html[data-theme="system"] body { background-color: var(--color-gray-50) !important; }
+/*[OWUI_CLEAR_GRADIENT_START]*/
+
+html[data-theme="system"] .app, html[data-theme="system"] #theme-designer-container, html[data-theme="system"] #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+html[data-theme="system"] .app > div, html[data-theme="system"] #theme-designer-container > *, html[data-theme="system"] #auth-page > div, html[data-theme="system"] main { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_GRADIENT_END]*/
+html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !important; }
+
+}
+/* --- DARK MODE Background Overrides --- */
+
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body { background-color: var(--color-gray-900) !important; }
+/*[OWUI_CLEAR_GRADIENT_START]*/
+
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #theme-designer-container, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app > div, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #theme-designer-container > *, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #auth-page > div, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) main { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_GRADIENT_END]*/
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }
+@media (prefers-color-scheme: dark) {
+
+html[data-theme="system"] body { background-color: var(--color-gray-900) !important; }
+/*[OWUI_CLEAR_GRADIENT_START]*/
+
+html[data-theme="system"] .app, html[data-theme="system"] #theme-designer-container, html[data-theme="system"] #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+html[data-theme="system"] .app > div, html[data-theme="system"] #theme-designer-container > *, html[data-theme="system"] #auth-page > div, html[data-theme="system"] main { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_GRADIENT_END]*/
+html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }
+
+}
+/* --- OLED DARK MODE Background Overrides --- */
+
+html[data-theme="oled-dark"] body { background-color: var(--color-gray-900) !important; }
+/*[OWUI_CLEAR_GRADIENT_START]*/
+
+html[data-theme="oled-dark"] .app, html[data-theme="oled-dark"] #theme-designer-container, html[data-theme="oled-dark"] #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+html[data-theme="oled-dark"] .app > div, html[data-theme="oled-dark"] #theme-designer-container > *, html[data-theme="oled-dark"] #auth-page > div, html[data-theme="oled-dark"] main { background-color: transparent !important; background-image: none !important; }
+html[data-theme="oled-dark"] .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="oled-dark"] #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="oled-dark"] #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="oled-dark"] .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="oled-dark"] .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_GRADIENT_END]*/
+html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }
+/* --- HER MODE Background Overrides --- */
+
+:is(html[data-theme="her"], html:where(.her)) body { background-color: var(--color-gray-50) !important; }
+/*[OWUI_CLEAR_GRADIENT_START]*/
+
+:is(html[data-theme="her"], html:where(.her)) .app, :is(html[data-theme="her"], html:where(.her)) #theme-designer-container, :is(html[data-theme="her"], html:where(.her)) #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+:is(html[data-theme="her"], html:where(.her)) .app > div, :is(html[data-theme="her"], html:where(.her)) #theme-designer-container > *, :is(html[data-theme="her"], html:where(.her)) #auth-page > div, :is(html[data-theme="her"], html:where(.her)) main { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="her"], html:where(.her)) .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="her"], html:where(.her)) #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="her"], html:where(.her)) #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="her"], html:where(.her)) .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="her"], html:where(.her)) .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_GRADIENT_END]*/
+:is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !important; }
+/*[OWUI_STRUCTURAL_END]*/
+
+
+#=# dfa3be5e1e15
+/*[OWUI_STRUCTURAL_START]*/
+/* --- LIGHT MODE Background Overrides --- */
+
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) body { background-color: var(--color-gray-50) !important; }
+/*[OWUI_CLEAR_CANVAS_START]*/
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #owui-theme-bg-color { background-color: transparent !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app, :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #theme-designer-container, :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app > div, :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #theme-designer-container > *, :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #auth-page > div, :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) main { background-color: transparent !important; background-image: none !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_CANVAS_END]*/
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !important; }
+@media (prefers-color-scheme: light) {
+
+html[data-theme="system"] body { background-color: var(--color-gray-50) !important; }
+/*[OWUI_CLEAR_CANVAS_START]*/
+html[data-theme="system"] #owui-theme-bg-color { background-color: transparent !important; }
+html[data-theme="system"] .app, html[data-theme="system"] #theme-designer-container, html[data-theme="system"] #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+html[data-theme="system"] .app > div, html[data-theme="system"] #theme-designer-container > *, html[data-theme="system"] #auth-page > div, html[data-theme="system"] main { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_CANVAS_END]*/
+html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !important; }
+
+}
+/* --- DARK MODE Background Overrides --- */
+
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body { background-color: var(--color-gray-900) !important; }
+/*[OWUI_CLEAR_CANVAS_START]*/
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #owui-theme-bg-color { background-color: transparent !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #theme-designer-container, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app > div, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #theme-designer-container > *, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #auth-page > div, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) main { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_CANVAS_END]*/
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }
+@media (prefers-color-scheme: dark) {
+
+html[data-theme="system"] body { background-color: var(--color-gray-900) !important; }
+/*[OWUI_CLEAR_CANVAS_START]*/
+html[data-theme="system"] #owui-theme-bg-color { background-color: transparent !important; }
+html[data-theme="system"] .app, html[data-theme="system"] #theme-designer-container, html[data-theme="system"] #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+html[data-theme="system"] .app > div, html[data-theme="system"] #theme-designer-container > *, html[data-theme="system"] #auth-page > div, html[data-theme="system"] main { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_CANVAS_END]*/
+html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }
+
+}
+/* --- OLED DARK MODE Background Overrides --- */
+
+html[data-theme="oled-dark"] body { background-color: var(--color-gray-900) !important; }
+/*[OWUI_CLEAR_CANVAS_START]*/
+html[data-theme="oled-dark"] #owui-theme-bg-color { background-color: transparent !important; }
+html[data-theme="oled-dark"] .app, html[data-theme="oled-dark"] #theme-designer-container, html[data-theme="oled-dark"] #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+html[data-theme="oled-dark"] .app > div, html[data-theme="oled-dark"] #theme-designer-container > *, html[data-theme="oled-dark"] #auth-page > div, html[data-theme="oled-dark"] main { background-color: transparent !important; background-image: none !important; }
+html[data-theme="oled-dark"] .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="oled-dark"] #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="oled-dark"] #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="oled-dark"] .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="oled-dark"] .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_CANVAS_END]*/
+html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }
+/* --- HER MODE Background Overrides --- */
+
+:is(html[data-theme="her"], html:where(.her)) body { background-color: var(--color-gray-50) !important; }
+/*[OWUI_CLEAR_CANVAS_START]*/
+:is(html[data-theme="her"], html:where(.her)) #owui-theme-bg-color { background-color: transparent !important; }
+:is(html[data-theme="her"], html:where(.her)) .app, :is(html[data-theme="her"], html:where(.her)) #theme-designer-container, :is(html[data-theme="her"], html:where(.her)) #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+:is(html[data-theme="her"], html:where(.her)) .app > div, :is(html[data-theme="her"], html:where(.her)) #theme-designer-container > *, :is(html[data-theme="her"], html:where(.her)) #auth-page > div, :is(html[data-theme="her"], html:where(.her)) main { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="her"], html:where(.her)) .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="her"], html:where(.her)) #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="her"], html:where(.her)) #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="her"], html:where(.her)) .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="her"], html:where(.her)) .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_CANVAS_END]*/
+:is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !important; }
+/*[OWUI_STRUCTURAL_END]*/
+
+
+#=# e2c7f9e1f5c7
+_shippedVars: 0 overridden, defaults false
+accentVars: {"--tdp-accent": "oklch(0.56 0.060 40.0)", "--tdp-accent-2": "oklch(0.56 0.060 80.0)", "--tdp-accent-3": "oklch(0.56 0.060 0.0)"}
+contrast Main text on background: #ece2df on #fff6f2 = 1.19 (aaa false, aa false, aaLarge false)
+contrast Muted text on background: #fff6f2 on #fff6f2 = 1.00 (aaa false, aa false, aaLarge false)
+contrast Main text on elevated surfaces: #ece2df on #fff6f2 = 1.19 (aaa false, aa false, aaLarge false)
+contrast Main text on sidebar: #ece2df on #fff6f2 = 1.19 (aaa false, aa false, aaLarge false)
+detectWashedOut: {"dark": false, "light": true}
+buildGradientCss(.scope): ''
+
+#=# e60b86c291ef
+designer structural, changed:
+- lines 15-15 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
++ :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-50) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
+- lines 29-29 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !i' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !i'
++ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-50) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
+- lines 45-45 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) ' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) '
++ :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-950) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
+- lines 59-59 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !'
++ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-950) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
+- lines 65-65 (1): 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950' .. 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950'
++ html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-950) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
+- lines 79-79 (1): ':is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var' .. ':is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var'
++ :is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-50) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
+
+#=# e98ace20c493
+designer structural, changed:
+- lines 15-15 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
++ :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-50) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
+- lines 29-29 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !i' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !i'
++ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-50) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
+- lines 45-45 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) ' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) '
++ :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-950) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
+- lines 59-59 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !'
++ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-950) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
+- lines 75-75 (1): 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950' .. 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950'
++ html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-950) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
+- lines 89-89 (1): ':is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var' .. ':is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var'
++ :is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-50) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }

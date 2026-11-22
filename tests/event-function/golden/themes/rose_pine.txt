@@ -1,0 +1,935 @@
+# themes/rose_pine.txt - written by golden.py --update, do not edit
+
+#=# designer: imported theme (ensureAllModes, normalizeModeData), against the file
+sha256 9798895c9dfb
+dark: added from DEFAULT_MODE_DATA: accent accent2 accent3 themeAuthOnly customCssAuthOnly canvasAuthOnly gradientAuthOnly surfacesEnabled surfaceSidebarOpacity surfaceSidebarBlur surfaceComposerOpacity surfaceComposerBlur surfacePanelOpacity surfacePanelBlur surfaceCardsOpacity surfaceCardsBlur surfaceButtonsOpacity surfaceButtonsBlur surfaceMenuOpacity surfaceMenuBlur surfaceDialogOpacity surfaceDialogBlur surfaceBackdropOpacity surfaceBackdropBlur surfaceFadeOpacity
+light: added from DEFAULT_MODE_DATA: accent accent2 accent3 themeAuthOnly customCssAuthOnly canvasAuthOnly gradientAuthOnly surfacesEnabled surfaceSidebarOpacity surfaceSidebarBlur surfaceComposerOpacity surfaceComposerBlur surfacePanelOpacity surfacePanelBlur surfaceCardsOpacity surfaceCardsBlur surfaceButtonsOpacity surfaceButtonsBlur surfaceMenuOpacity surfaceMenuBlur surfaceDialogOpacity surfaceDialogBlur surfaceBackdropOpacity surfaceBackdropBlur surfaceFadeOpacity
+oled: added from DEFAULT_MODE_DATA: accent accent2 accent3 gradientType gradientAngle gradientStops gradientIntensity gradientAnimation gradientRadialPosX gradientRadialPosY gradientRadialShape gradientRadialSize gradientMeshPoints gradientMeshBgColor gradientAnimationSpeed themeAuthOnly customCssAuthOnly canvasAuthOnly gradientAuthOnly surfacesEnabled surfaceSidebarOpacity surfaceSidebarBlur surfaceComposerOpacity surfaceComposerBlur surfacePanelOpacity surfacePanelBlur surfaceCardsOpacity surfaceCardsBlur surfaceButtonsOpacity surfaceButtonsBlur surfaceMenuOpacity surfaceMenuBlur surfaceDialogOpacity surfaceDialogBlur surfaceBackdropOpacity surfaceBackdropBlur surfaceFadeOpacity
+her: added from DEFAULT_MODE_DATA: accent accent2 accent3 themeAuthOnly customCssAuthOnly canvasAuthOnly gradientAuthOnly surfacesEnabled surfaceSidebarOpacity surfaceSidebarBlur surfaceComposerOpacity surfaceComposerBlur surfacePanelOpacity surfacePanelBlur surfaceCardsOpacity surfaceCardsBlur surfaceButtonsOpacity surfaceButtonsBlur surfaceMenuOpacity surfaceMenuBlur surfaceDialogOpacity surfaceDialogBlur surfaceBackdropOpacity surfaceBackdropBlur surfaceFadeOpacity
+
+#=# designer: normalizeSnapshot
+same as imported
+
+#=# designer: isThemeDuplicate of itself
+true
+
+#=# designer: generateThemeSections vars
+/*[OWUI_VARS_START]*/
+/*[OWUI_PAL_LIGHT_START]*/
+/* --- LIGHT MODE VARIABLES --- */
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) {
+  --color-gray-50: #f4ede8 !important;
+  --color-gray-100: #f2e9e1 !important;
+  --color-gray-200: #dfdad9 !important;
+  --color-gray-300: #cecacd !important;
+  --color-gray-400: #9893a5 !important;
+  --color-gray-500: #797593 !important;
+  --color-gray-600: #686386 !important;
+  --color-gray-700: #575279 !important;
+  --color-gray-800: #524d72 !important;
+  --color-gray-850: #4e4a6d !important;
+  --color-gray-900: #4b4668 !important;
+  --color-gray-950: #444060 !important;
+  --tdp-accent: oklch(0.56 0.060 40.0) !important;
+  --tdp-accent-2: oklch(0.56 0.060 80.0) !important;
+  --tdp-accent-3: oklch(0.56 0.060 0.0) !important;
+}
+@media (prefers-color-scheme: light) {
+  html[data-theme="system"], :root[data-theme="system"] {
+    --color-gray-50: #f4ede8 !important;
+    --color-gray-100: #f2e9e1 !important;
+    --color-gray-200: #dfdad9 !important;
+    --color-gray-300: #cecacd !important;
+    --color-gray-400: #9893a5 !important;
+    --color-gray-500: #797593 !important;
+    --color-gray-600: #686386 !important;
+    --color-gray-700: #575279 !important;
+    --color-gray-800: #524d72 !important;
+    --color-gray-850: #4e4a6d !important;
+    --color-gray-900: #4b4668 !important;
+    --color-gray-950: #444060 !important;
+    --tdp-accent: oklch(0.56 0.060 40.0) !important;
+    --tdp-accent-2: oklch(0.56 0.060 80.0) !important;
+    --tdp-accent-3: oklch(0.56 0.060 0.0) !important;
+  }
+}
+
+/*[OWUI_PAL_LIGHT_END]*/
+/*[OWUI_PAL_DARK_START]*/
+/* --- DARK MODE VARIABLES --- */
+html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"] {
+  --color-gray-50: oklch(0.980 0.022 290) !important;
+  --color-gray-100: #e0def4 !important;
+  --color-gray-200: #c5c2db !important;
+  --color-gray-300: #aaa7c3 !important;
+  --color-gray-400: #908caa !important;
+  --color-gray-500: #6e6a86 !important;
+  --color-gray-600: #524f67 !important;
+  --color-gray-700: #403d52 !important;
+  --color-gray-800: #26233a !important;
+  --color-gray-850: #1f1d2e !important;
+  --color-gray-900: #191724 !important;
+  --color-gray-950: #15131f !important;
+  --tdp-accent: oklch(0.74 0.088 290.0) !important;
+  --tdp-accent-2: oklch(0.74 0.088 330.0) !important;
+  --tdp-accent-3: oklch(0.74 0.088 250.0) !important;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"], :root[data-theme="system"] {
+    --color-gray-50: oklch(0.980 0.022 290) !important;
+    --color-gray-100: #e0def4 !important;
+    --color-gray-200: #c5c2db !important;
+    --color-gray-300: #aaa7c3 !important;
+    --color-gray-400: #908caa !important;
+    --color-gray-500: #6e6a86 !important;
+    --color-gray-600: #524f67 !important;
+    --color-gray-700: #403d52 !important;
+    --color-gray-800: #26233a !important;
+    --color-gray-850: #1f1d2e !important;
+    --color-gray-900: #191724 !important;
+    --color-gray-950: #15131f !important;
+    --tdp-accent: oklch(0.74 0.088 290.0) !important;
+    --tdp-accent-2: oklch(0.74 0.088 330.0) !important;
+    --tdp-accent-3: oklch(0.74 0.088 250.0) !important;
+  }
+}
+
+/*[OWUI_PAL_DARK_END]*/
+/*[OWUI_PAL_OLED_START]*/
+/* --- OLED DARK MODE VARIABLES --- */
+html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"] {
+  --color-gray-50: oklch(0.780 0.020 285) !important;
+  --color-gray-100: #e0def4 !important;
+  --color-gray-200: #c5c2db !important;
+  --color-gray-300: #aaa7c3 !important;
+  --color-gray-400: #908caa !important;
+  --color-gray-500: #6e6a86 !important;
+  --color-gray-600: #56526e !important;
+  --color-gray-700: #44415a !important;
+  --color-gray-800: #232136 !important;
+  --color-gray-850: #0d0c15 !important;
+  --color-gray-900: #000000 !important;
+  --color-gray-950: #000000 !important;
+  --tdp-accent: oklch(0.74 0.080 285.0) !important;
+  --tdp-accent-2: oklch(0.74 0.080 325.0) !important;
+  --tdp-accent-3: oklch(0.74 0.080 245.0) !important;
+}
+
+/*[OWUI_PAL_OLED_END]*/
+/*[OWUI_PAL_HER_START]*/
+/* --- HER MODE VARIABLES --- */
+html.her, html[data-theme="her"] {
+  --color-gray-50: #f3e5e0 !important;
+  --color-gray-100: #f1e2da !important;
+  --color-gray-200: #dfd4d2 !important;
+  --color-gray-300: #cfc5c7 !important;
+  --color-gray-400: #9d92a2 !important;
+  --color-gray-500: #7e7491 !important;
+  --color-gray-600: #6e6385 !important;
+  --color-gray-700: #5e5479 !important;
+  --color-gray-800: #594f73 !important;
+  --color-gray-850: #554c6e !important;
+  --color-gray-900: #524869 !important;
+  --color-gray-950: #4c4362 !important;
+  --tdp-accent: oklch(0.56 0.072 20.0) !important;
+  --tdp-accent-2: oklch(0.56 0.072 60.0) !important;
+  --tdp-accent-3: oklch(0.56 0.072 340.0) !important;
+}
+
+/*[OWUI_PAL_HER_END]*/
+/*[OWUI_VARS_END]*/
+
+
+
+#=# designer: generateThemeSections structural
+@shared 41169ebe1fde
+
+#=# designer: generateThemeSections gradient
+
+/*[OWUI_GRADIENT_START]*/
+/* System Gradient Background */
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) body {
+  background-image: linear-gradient(160deg, #fffaf3 0%, #faf4ed 55%, #f6eee6 100%) !important;
+  background-attachment: fixed !important;
+
+}
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) body::before { content: none !important; display: none !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #chat-container .bg-linear-to-t:not(.bg-cover + div) {
+  background-image: linear-gradient(to top, rgba(246, 238, 230, 0.7), rgba(246, 238, 230, 0.35)) !important;
+}
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { /*[FX]*/
+  background-color: rgba(246, 238, 230, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+}
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar :is(.sidebar-bg-gradient-to-t, .sidebar-bg-gradient-to-b) {
+  --tw-gradient-from: rgba(246, 238, 230, 0.75) !important;
+}
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #navbar-bg-gradient-to-b {
+  --tw-gradient-from: rgba(246, 238, 230, 0.9) !important;
+  --tw-gradient-via: rgba(246, 238, 230, 0.5) !important;
+}
+/*[OWUI_GRADIENT_END]*/
+@media (prefers-color-scheme: light) {
+
+/*[OWUI_GRADIENT_START]*/
+/* System Gradient Background */
+:root[data-theme="system"] body {
+  background-image: linear-gradient(160deg, #fffaf3 0%, #faf4ed 55%, #f6eee6 100%) !important;
+  background-attachment: fixed !important;
+
+}
+:root[data-theme="system"] body::before { content: none !important; display: none !important; }
+:root[data-theme="system"] #chat-container .bg-linear-to-t:not(.bg-cover + div) {
+  background-image: linear-gradient(to top, rgba(246, 238, 230, 0.7), rgba(246, 238, 230, 0.35)) !important;
+}
+:root[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/
+  background-color: rgba(246, 238, 230, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+}
+:root[data-theme="system"] #sidebar :is(.sidebar-bg-gradient-to-t, .sidebar-bg-gradient-to-b) {
+  --tw-gradient-from: rgba(246, 238, 230, 0.75) !important;
+}
+:root[data-theme="system"] #navbar-bg-gradient-to-b {
+  --tw-gradient-from: rgba(246, 238, 230, 0.9) !important;
+  --tw-gradient-via: rgba(246, 238, 230, 0.5) !important;
+}
+/*[OWUI_GRADIENT_END]*/
+
+}
+
+/*[OWUI_GRADIENT_START]*/
+/* System Gradient Background */
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body {
+  background-image: radial-gradient(ellipse farthest-corner at 100% 100%, #1f1d2e 0%, #191724 65%, #191724 100%) !important;
+  background-attachment: fixed !important;
+
+}
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content: none !important; display: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #chat-container .bg-linear-to-t:not(.bg-cover + div) {
+  background-image: linear-gradient(to top, rgba(25, 23, 36, 0.7), rgba(25, 23, 36, 0.35)) !important;
+}
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/
+  background-color: rgba(25, 23, 36, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+}
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar :is(.sidebar-bg-gradient-to-t, .sidebar-bg-gradient-to-b) {
+  --tw-gradient-from: rgba(25, 23, 36, 0.75) !important;
+}
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #navbar-bg-gradient-to-b {
+  --tw-gradient-from: rgba(25, 23, 36, 0.9) !important;
+  --tw-gradient-via: rgba(25, 23, 36, 0.5) !important;
+}
+/*[OWUI_GRADIENT_END]*/
+@media (prefers-color-scheme: dark) {
+
+/*[OWUI_GRADIENT_START]*/
+/* System Gradient Background */
+:root[data-theme="system"] body {
+  background-image: radial-gradient(ellipse farthest-corner at 100% 100%, #1f1d2e 0%, #191724 65%, #191724 100%) !important;
+  background-attachment: fixed !important;
+
+}
+:root[data-theme="system"] body::before { content: none !important; display: none !important; }
+:root[data-theme="system"] #chat-container .bg-linear-to-t:not(.bg-cover + div) {
+  background-image: linear-gradient(to top, rgba(25, 23, 36, 0.7), rgba(25, 23, 36, 0.35)) !important;
+}
+:root[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/
+  background-color: rgba(25, 23, 36, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+}
+:root[data-theme="system"] #sidebar :is(.sidebar-bg-gradient-to-t, .sidebar-bg-gradient-to-b) {
+  --tw-gradient-from: rgba(25, 23, 36, 0.75) !important;
+}
+:root[data-theme="system"] #navbar-bg-gradient-to-b {
+  --tw-gradient-from: rgba(25, 23, 36, 0.9) !important;
+  --tw-gradient-via: rgba(25, 23, 36, 0.5) !important;
+}
+/*[OWUI_GRADIENT_END]*/
+
+}
+
+/*[OWUI_GRADIENT_START]*/
+/* System Gradient Background */
+:is(html[data-theme="her"], html:where(.her)) body {
+  background-image: linear-gradient(200deg, #faf4ed 0%, #f8ece6 60%, #f4e2dc 100%) !important;
+  background-attachment: fixed !important;
+
+}
+:is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none !important; }
+:is(html[data-theme="her"], html:where(.her)) #chat-container .bg-linear-to-t:not(.bg-cover + div) {
+  background-image: linear-gradient(to top, rgba(244, 226, 220, 0.7), rgba(244, 226, 220, 0.35)) !important;
+}
+:is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/
+  background-color: rgba(244, 226, 220, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+}
+:is(html[data-theme="her"], html:where(.her)) #sidebar :is(.sidebar-bg-gradient-to-t, .sidebar-bg-gradient-to-b) {
+  --tw-gradient-from: rgba(244, 226, 220, 0.75) !important;
+}
+:is(html[data-theme="her"], html:where(.her)) #navbar-bg-gradient-to-b {
+  --tw-gradient-from: rgba(244, 226, 220, 0.9) !important;
+  --tw-gradient-via: rgba(244, 226, 220, 0.5) !important;
+}
+/*[OWUI_GRADIENT_END]*/
+
+
+#=# designer: generateThemeSections custom
+each mode's customCSS, changed:
+- lines 1-1 (1): ':root {' .. ':root {'
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) {
++ & {
+- lines 42-42 (1): 'html { scrollbar-color: var(--rp-line) transparent; }' .. 'html { scrollbar-color: var(--rp-line) transparent; }'
++ & { scrollbar-color: var(--rp-line) transparent; }
+- lines 45-45 (1): ':root {' .. ':root {'
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ @media (prefers-color-scheme: light) {
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html[data-theme="system"] {
++ & {
+- lines 86-86 (1): 'html { scrollbar-color: var(--rp-line) transparent; }' .. 'html { scrollbar-color: var(--rp-line) transparent; }'
++ & { scrollbar-color: var(--rp-line) transparent; }
+- lines 89-89 (1): ':root {' .. ':root {'
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ 
++ }
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"] {
++ & {
+- lines 130-130 (1): 'html { scrollbar-color: var(--rp-line) transparent; }' .. 'html { scrollbar-color: var(--rp-line) transparent; }'
++ & { scrollbar-color: var(--rp-line) transparent; }
+- lines 133-133 (1): ':root {' .. ':root {'
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ @media (prefers-color-scheme: dark) {
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html[data-theme="system"] {
++ & {
+- lines 174-174 (1): 'html { scrollbar-color: var(--rp-line) transparent; }' .. 'html { scrollbar-color: var(--rp-line) transparent; }'
++ & { scrollbar-color: var(--rp-line) transparent; }
+- lines 177-177 (1): ':root {' .. ':root {'
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ 
++ }
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"] {
++ & {
+- lines 218-218 (1): 'html { scrollbar-color: var(--rp-line) transparent; }' .. 'html { scrollbar-color: var(--rp-line) transparent; }'
++ & { scrollbar-color: var(--rp-line) transparent; }
+- lines 221-221 (1): ':root {' .. ':root {'
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html.her, html[data-theme="her"] {
++ & {
+- lines 262-262 (1): 'html { scrollbar-color: var(--rp-line) transparent; }' .. 'html { scrollbar-color: var(--rp-line) transparent; }'
++ & { scrollbar-color: var(--rp-line) transparent; }
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ 
+
+#=# designer: generateCoreCSS
+= vars + structural + gradient + custom
+
+#=# designer: dark mode
+_shippedVars: 0 overridden, defaults false
+accentVars: {"--tdp-accent": "oklch(0.74 0.088 290.0)", "--tdp-accent-2": "oklch(0.74 0.088 330.0)", "--tdp-accent-3": "oklch(0.74 0.088 250.0)"}
+contrast Main text on background: #f8f6ff on #191724 = 16.49 (aaa true, aa true, aaLarge true)
+contrast Muted text on background: #908caa on #191724 = 5.48 (aaa false, aa true, aaLarge true)
+contrast Main text on elevated surfaces: #f8f6ff on #1f1d2e = 15.40 (aaa true, aa true, aaLarge true)
+contrast Main text on sidebar: #f8f6ff on #15131f = 17.14 (aaa true, aa true, aaLarge true)
+detectWashedOut: {"dark": false, "light": false}
+buildGradientCss(.scope): 933 chars, sha256 114a6b1b1737
+
+#=# designer: light mode
+_shippedVars: 0 overridden, defaults false
+accentVars: {"--tdp-accent": "oklch(0.56 0.060 40.0)", "--tdp-accent-2": "oklch(0.56 0.060 80.0)", "--tdp-accent-3": "oklch(0.56 0.060 0.0)"}
+contrast Main text on background: #444060 on #f4ede8 = 8.44 (aaa true, aa true, aaLarge true)
+contrast Muted text on background: #686386 on #f4ede8 = 4.88 (aaa false, aa true, aaLarge true)
+contrast Main text on elevated surfaces: #444060 on #f2e9e1 = 8.16 (aaa true, aa true, aaLarge true)
+contrast Main text on sidebar: #444060 on #f4ede8 = 8.44 (aaa true, aa true, aaLarge true)
+detectWashedOut: {"dark": false, "light": true}
+buildGradientCss(.scope): 921 chars, sha256 c84e4986b4a7
+
+#=# designer: oled mode
+_shippedVars: 0 overridden, defaults false
+accentVars: {"--tdp-accent": "oklch(0.74 0.080 285.0)", "--tdp-accent-2": "oklch(0.74 0.080 325.0)", "--tdp-accent-3": "oklch(0.74 0.080 245.0)"}
+contrast Main text on background: #b6b6c4 on #000000 = 10.48 (aaa true, aa true, aaLarge true)
+contrast Muted text on background: #908caa on #000000 = 6.52 (aaa false, aa true, aaLarge true)
+contrast Main text on elevated surfaces: #b6b6c4 on #0d0c15 = 9.70 (aaa true, aa true, aaLarge true)
+contrast Main text on sidebar: #b6b6c4 on #000000 = 10.48 (aaa true, aa true, aaLarge true)
+detectWashedOut: {"dark": false, "light": false}
+buildGradientCss(.scope): ''
+
+#=# designer: her mode
+_shippedVars: 0 overridden, defaults false
+accentVars: {"--tdp-accent": "oklch(0.56 0.072 20.0)", "--tdp-accent-2": "oklch(0.56 0.072 60.0)", "--tdp-accent-3": "oklch(0.56 0.072 340.0)"}
+contrast Main text on background: #4c4362 on #f3e5e0 = 7.48 (aaa true, aa true, aaLarge true)
+contrast Muted text on background: #6e6385 on #f3e5e0 = 4.51 (aaa false, aa true, aaLarge true)
+contrast Main text on elevated surfaces: #4c4362 on #f1e2da = 7.27 (aaa true, aa true, aaLarge true)
+contrast Main text on sidebar: #4c4362 on #f3e5e0 = 7.48 (aaa true, aa true, aaLarge true)
+detectWashedOut: {"dark": false, "light": true}
+buildGradientCss(.scope): 921 chars, sha256 521281a1bd35
+
+#=# python: _css_balanced
+css True, custom section True
+
+#=# python: _postprocess_sections sidebar=opaque overlay=opaque: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=opaque overlay=opaque: structural
+= designer structural
+
+#=# python: _postprocess_sections sidebar=opaque overlay=opaque: gradient
+= designer gradient
+
+#=# python: _postprocess_sections sidebar=opaque overlay=opaque: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=opaque overlay=opaque: extra
+= designer extra
+
+#=# python: _postprocess_css sidebar=opaque overlay=opaque
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=opaque overlay=opaque
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=opaque overlay=opaque
+vars + custom, changed:
++ @supports (--tdp-instance: 1) {
++ /* structural rules deferred to bootloader */
++ /* gradient rules deferred to bootloader */
++ }
++ 
+
+#=# python: _custom_css_fragment sidebar=opaque overlay=opaque
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections sidebar=opaque overlay=translucent: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=opaque overlay=translucent: structural
+= designer structural
+
+#=# python: _postprocess_sections sidebar=opaque overlay=translucent: gradient
+= designer gradient
+
+#=# python: _postprocess_sections sidebar=opaque overlay=translucent: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=opaque overlay=translucent: extra
+= designer extra
+then appends: _overlay_css()
+
+#=# python: _postprocess_css sidebar=opaque overlay=translucent
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=opaque overlay=translucent
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=opaque overlay=translucent
+= _safe_subset_css sidebar=opaque overlay=opaque
+then appends: _overlay_css()
+
+#=# python: _custom_css_fragment sidebar=opaque overlay=translucent
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections sidebar=translucent overlay=opaque: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=translucent overlay=opaque: structural
+@shared e60b86c291ef
+
+#=# python: _postprocess_sections sidebar=translucent overlay=opaque: gradient
+designer gradient, changed:
+- lines 14-15 (2): '  background-color: rgba(246, 238, 230, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
++   background-color: rgba(246, 238, 230, 0.25) !important;
++   backdrop-filter: blur(20px) saturate(1.3) !important;
+- lines 39-40 (2): '  background-color: rgba(246, 238, 230, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
++   background-color: rgba(246, 238, 230, 0.25) !important;
++   backdrop-filter: blur(20px) saturate(1.3) !important;
+- lines 65-66 (2): '  background-color: rgba(25, 23, 36, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
++   background-color: rgba(25, 23, 36, 0.25) !important;
++   backdrop-filter: blur(20px) saturate(1.3) !important;
+- lines 90-91 (2): '  background-color: rgba(25, 23, 36, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
++   background-color: rgba(25, 23, 36, 0.25) !important;
++   backdrop-filter: blur(20px) saturate(1.3) !important;
+- lines 116-117 (2): '  background-color: rgba(244, 226, 220, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
++   background-color: rgba(244, 226, 220, 0.25) !important;
++   backdrop-filter: blur(20px) saturate(1.3) !important;
+
+#=# python: _postprocess_sections sidebar=translucent overlay=opaque: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=translucent overlay=opaque: extra
+= designer extra
+then appends: _sidebar_fade_css()
+
+#=# python: _postprocess_css sidebar=translucent overlay=opaque
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=translucent overlay=opaque
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=translucent overlay=opaque
+= _safe_subset_css sidebar=opaque overlay=opaque
+
+#=# python: _custom_css_fragment sidebar=translucent overlay=opaque
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections sidebar=translucent overlay=translucent: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=translucent overlay=translucent: structural
+= structural of sidebar=translucent overlay=opaque
+
+#=# python: _postprocess_sections sidebar=translucent overlay=translucent: gradient
+= gradient of sidebar=translucent overlay=opaque
+
+#=# python: _postprocess_sections sidebar=translucent overlay=translucent: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=translucent overlay=translucent: extra
+= designer extra
+then appends: _sidebar_fade_css() + _overlay_css()
+
+#=# python: _postprocess_css sidebar=translucent overlay=translucent
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=translucent overlay=translucent
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=translucent overlay=translucent
+= _safe_subset_css sidebar=opaque overlay=translucent
+
+#=# python: _custom_css_fragment sidebar=translucent overlay=translucent
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections sidebar=transparent overlay=opaque: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=transparent overlay=opaque: structural
+@shared 25197d95e125
+
+#=# python: _postprocess_sections sidebar=transparent overlay=opaque: gradient
+designer gradient, changed:
+- lines 14-15 (2): '  background-color: rgba(246, 238, 230, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
++   background-color: transparent !important;
++   backdrop-filter: none !important;
+- lines 39-40 (2): '  background-color: rgba(246, 238, 230, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
++   background-color: transparent !important;
++   backdrop-filter: none !important;
+- lines 65-66 (2): '  background-color: rgba(25, 23, 36, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
++   background-color: transparent !important;
++   backdrop-filter: none !important;
+- lines 90-91 (2): '  background-color: rgba(25, 23, 36, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
++   background-color: transparent !important;
++   backdrop-filter: none !important;
+- lines 116-117 (2): '  background-color: rgba(244, 226, 220, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
++   background-color: transparent !important;
++   backdrop-filter: none !important;
+
+#=# python: _postprocess_sections sidebar=transparent overlay=opaque: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=transparent overlay=opaque: extra
+= designer extra
+then appends: _sidebar_fade_css() + _sidebar_mobile_css()
+
+#=# python: _postprocess_css sidebar=transparent overlay=opaque
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=transparent overlay=opaque
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=transparent overlay=opaque
+= _safe_subset_css sidebar=opaque overlay=opaque
+
+#=# python: _custom_css_fragment sidebar=transparent overlay=opaque
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections sidebar=transparent overlay=translucent: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=transparent overlay=translucent: structural
+= structural of sidebar=transparent overlay=opaque
+
+#=# python: _postprocess_sections sidebar=transparent overlay=translucent: gradient
+= gradient of sidebar=transparent overlay=opaque
+
+#=# python: _postprocess_sections sidebar=transparent overlay=translucent: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=transparent overlay=translucent: extra
+= designer extra
+then appends: _sidebar_fade_css() + _sidebar_mobile_css() + _overlay_css()
+
+#=# python: _postprocess_css sidebar=transparent overlay=translucent
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=transparent overlay=translucent
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=transparent overlay=translucent
+= _safe_subset_css sidebar=opaque overlay=translucent
+
+#=# python: _custom_css_fragment sidebar=transparent overlay=translucent
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections canvas_fx=off sidebar=opaque overlay=opaque: structural
+= structural of sidebar=opaque overlay=opaque
+
+#=# python: /theme.css canvas_fx=off sidebar=opaque overlay=opaque
+= its _postprocess_sections, joined
+
+#=# python: /state.json changes to the saved state, canvas_fx=on auth_theming=on
+state otherwise unchanged
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=opaque overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json changes to the saved state, canvas_fx=on auth_theming=off
+@shared 63ce8f0e56f6
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=opaque overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json changes to the saved state, canvas_fx=off auth_theming=on
+@shared 342ff9603851
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=opaque overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json changes to the saved state, canvas_fx=off auth_theming=off
+@shared 50cc8c97f47d
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=opaque overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=opaque overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=opaque overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=opaque overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=opaque overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=translucent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=translucent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=translucent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=translucent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=translucent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=translucent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=translucent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=translucent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=transparent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=transparent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=transparent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=transparent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=transparent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=transparent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=transparent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=transparent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: _strip_canvas_scripts
+unchanged
+
+#=# python: no sections file: _safe_subset_css sidebar=opaque overlay=opaque
+@shared 1154aa9a7cd4
+
+#=# python: no sections file: _safe_subset_css sidebar=opaque overlay=translucent
+_safe_subset_css sidebar=opaque overlay=translucent, changed:
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: light) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: dark) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
+- lines 444-484 (41): '/* --- Overlay Translucency (valve-injected) --- */' .. ''
+then appends: _overlay_css()
+
+#=# python: no sections file: _safe_subset_css sidebar=translucent overlay=opaque
+@shared cc27164d56e4
+
+#=# python: no sections file: _safe_subset_css sidebar=translucent overlay=translucent
+_safe_subset_css sidebar=translucent overlay=translucent, changed:
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: light) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: dark) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
+- lines 444-484 (41): '/* --- Overlay Translucency (valve-injected) --- */' .. ''
+then appends: _overlay_css()
+
+#=# python: no sections file: _safe_subset_css sidebar=transparent overlay=opaque
+@shared 093d43198eac
+
+#=# python: no sections file: _safe_subset_css sidebar=transparent overlay=translucent
+_safe_subset_css sidebar=transparent overlay=translucent, changed:
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: light) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
++ /* gradient rules deferred to bootloader */
++ @media (prefers-color-scheme: dark) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
++ 
+- lines 444-484 (41): '/* --- Overlay Translucency (valve-injected) --- */' .. ''
+then appends: _overlay_css()
+
+#=# python: no sections file: /state.json
+= saved state
+
+#=# bootloader: enforceTheme default valves, /auth, dark, sections
+@shared 17f6e4a78c26
+
+#=# bootloader: enforceTheme default valves, /auth, dark, flat css only
+data-theme 'dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, oled-dark, sections
+data-theme 'oled-dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, oled-dark, flat css only
+data-theme 'oled-dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, light, sections
+data-theme 'light', class 'light'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, light, flat css only
+data-theme 'light', class 'light'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, her, sections
+data-theme 'her', class 'her'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, her, flat css only
+data-theme 'her', class 'her'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, dark, sections
+data-theme 'dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, dark, flat css only
+data-theme 'dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, dark, personal theme
+data-theme 'dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, oled-dark, sections
+data-theme 'oled-dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, oled-dark, flat css only
+data-theme 'oled-dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, oled-dark, personal theme
+data-theme 'oled-dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, light, sections
+data-theme 'light', class 'light'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, light, flat css only
+data-theme 'light', class 'light'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, light, personal theme
+data-theme 'light', class 'light'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, her, sections
+data-theme 'her', class 'her'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, her, flat css only
+data-theme 'her', class 'her'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, her, personal theme
+data-theme 'her', class 'her'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /auth, dark, sections
+data-theme 'dark', class 'dark'
+/theme.css, changed:
+- lines 1-643 (643): '/*[OWUI_VARS_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
+
+#=# bootloader: enforceTheme every valve flipped, /auth, oled-dark, sections
+data-theme 'oled-dark', class 'dark'
+= the page of: every valve flipped, /auth, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /auth, light, sections
+data-theme 'light', class 'light'
+= the page of: every valve flipped, /auth, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /auth, her, sections
+data-theme 'her', class 'her'
+= the page of: every valve flipped, /auth, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /, dark, sections
+@shared 17f6e4a78c26
+
+#=# bootloader: enforceTheme every valve flipped, /, oled-dark, sections
+data-theme 'oled-dark', class 'dark'
+= the page of: every valve flipped, /, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /, light, sections
+data-theme 'light', class 'light'
+= the page of: every valve flipped, /, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /, her, sections
+data-theme 'her', class 'her'
+= the page of: every valve flipped, /, dark, sections

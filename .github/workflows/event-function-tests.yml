@@ -60,7 +60,7 @@ jobs:
       fail-fast: false
       matrix:
         # The latest release, and the oldest one the function supports
-        open-webui: ['main', 'v0.11.4']
+        open-webui: ['main', 'v0.13.4']
     services:
       open-webui:
         image: ghcr.io/open-webui/open-webui:${{ matrix.open-webui }}
@@ -99,6 +99,8 @@ jobs:
       - name: Run the tests
         env:
           BASE_URL: http://127.0.0.1:3000
+          # Signs a chat theme the way the Launcher does
+          WEBUI_SECRET_KEY: event-function-tests
         run: node tests/event-function/e2e.js
 
       - name: Open WebUI log

@@ -1,0 +1,384 @@
+# python-units.txt - written by golden.py --update, do not edit
+
+#=# _sidebar_fade_css
+
+/* Sidebar Transparency: no solid fades over a see-through sidebar */
+#sidebar .sidebar-bg-gradient-to-t,
+#sidebar .sidebar-bg-gradient-to-b { display: none !important; }
+
+
+#=# _sidebar_mobile_css
+
+/* Mobile: auto-upgrade transparent sidebar to translucent */
+@media (max-width: 768px) {
+  .dark #sidebar#sidebar,
+  [data-theme="dark"] #sidebar#sidebar,
+  [data-theme="oled-dark"] #sidebar#sidebar {
+    background-color: color-mix(in srgb, var(--color-gray-950) 20%, transparent) !important;
+    backdrop-filter: blur(20px) saturate(1.3) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;
+  }
+  :root:not(.dark):not([data-theme="dark"]):not([data-theme="oled-dark"]) #sidebar#sidebar {
+    background-color: color-mix(in srgb, var(--color-gray-50) 20%, transparent) !important;
+    backdrop-filter: blur(20px) saturate(1.3) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;
+  }
+}
+
+
+#=# _overlay_css
+
+/* --- Overlay Translucency (valve-injected) --- */
+.dark body > div:not(.app):not(#theme-designer-container):not([id^="owui-"]):not([style*="display: contents"]):not(script):not(style) :where(div[class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *)),
+[data-theme="dark"] body > div:not(.app):not(#theme-designer-container):not([id^="owui-"]):not([style*="display: contents"]):not(script):not(style) :where(div[class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *)),
+[data-theme="oled-dark"] body > div:not(.app):not(#theme-designer-container):not([id^="owui-"]):not([style*="display: contents"]):not(script):not(style) :where(div[class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *)) {
+  background-color: color-mix(in srgb, var(--color-gray-950) 25%, transparent) !important;
+  backdrop-filter: blur(20px) saturate(1.3) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;
+}
+:root:not(.dark):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) body > div:not(.app):not(#theme-designer-container):not([id^="owui-"]):not([style*="display: contents"]):not(script):not(style) :where(div[class^="bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="dark:bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" dark:bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *)),
+:root:not(.dark):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) body > div:not(.app):not(#theme-designer-container):not([id^="owui-"]):not([style*="display: contents"]):not(script):not(style) :where(div[class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *)) {
+  background-color: color-mix(in srgb, var(--color-gray-50) 25%, transparent) !important;
+  backdrop-filter: blur(20px) saturate(1.3) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;
+}
+.her body > div:not(.app):not(#theme-designer-container):not([id^="owui-"]):not([style*="display: contents"]):not(script):not(style) :where(div[class^="bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="dark:bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" dark:bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *)),
+[data-theme="her"] body > div:not(.app):not(#theme-designer-container):not([id^="owui-"]):not([style*="display: contents"]):not(script):not(style) :where(div[class^="bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="dark:bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" dark:bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *)),
+.her body > div:not(.app):not(#theme-designer-container):not([id^="owui-"]):not([style*="display: contents"]):not(script):not(style) :where(div[class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *)),
+[data-theme="her"] body > div:not(.app):not(#theme-designer-container):not([id^="owui-"]):not([style*="display: contents"]):not(script):not(style) :where(div[class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *)) {
+  background-color: color-mix(in srgb, var(--color-gray-50) 25%, transparent) !important;
+  backdrop-filter: blur(20px) saturate(1.3) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;
+}
+@media (prefers-color-scheme: dark) {
+  [data-theme="system"] body > div:not(.app):not(#theme-designer-container):not([id^="owui-"]):not([style*="display: contents"]):not(script):not(style) :where(div[class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *)) {
+  background-color: color-mix(in srgb, var(--color-gray-950) 25%, transparent) !important;
+  backdrop-filter: blur(20px) saturate(1.3) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;
+  }
+}
+@media (prefers-color-scheme: light) {
+  [data-theme="system"] body > div:not(.app):not(#theme-designer-container):not([id^="owui-"]):not([style*="display: contents"]):not(script):not(style) :where(div[class^="bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="dark:bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" dark:bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *)),
+  [data-theme="system"] body > div:not(.app):not(#theme-designer-container):not([id^="owui-"]):not([style*="display: contents"]):not(script):not(style) :where(div[class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *), div[class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *)) {
+  background-color: color-mix(in srgb, var(--color-gray-50) 25%, transparent) !important;
+  backdrop-filter: blur(20px) saturate(1.3) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;
+  }
+}
+
+/* Overlay Transparency: no fade at the top of chats */
+#navbar-bg-gradient-to-b { display: none !important; }
+
+
+#=# _css_balanced
+"" -> True
+"{" -> False
+"}" -> False
+"a { b }" -> True
+"a { /* } */ }" -> True
+"a { content: \"}\" }" -> True
+"a { content: '\\'}' }" -> True
+"\"\nx\"" -> False
+"/* open" -> False
+"a { content: \"open }" -> False
+"a {} }" -> False
+"@media x { a { b: c } }" -> True
+
+#=# _drop_canvas_clearing
+/*[OWUI_VARS_START]*/
+html.dark { --a"/*[OWUI_CLEAR_CANVAS_START]*/": red; }
+/*[OWUI_VARS_END]*/
+/*[OWUI_STRUCTURAL_START]*/
+body { a: b }
+
+/*[OWUI_CLEAR_CANVAS_GRADIENT_START]*/
+.app { e: f }
+/*[OWUI_CLEAR_CANVAS_GRADIENT_END]*/
+/*[OWUI_STRUCTURAL_END]*/
+/*[OWUI_CUSTOM_START]*/
+/*[OWUI_CLEAR_CANVAS_END]*/ .x { g: h }
+/*[OWUI_CUSTOM_END]*/
+
+
+#=# _rewrite_sidebar_fx translucent
+"#sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }" (86) -> "#sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-950) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }"
+"html.dark #sidebar { /*[FX]*/ background-color: var(--x) !important; }" (70) -> "html.dark #sidebar { /*[FX]*/ background-color: color-mix(in srgb, var(--x) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }"
+"#sidebar:not(.h-full) { /*[FX]*/\n  background-color: rgba(10, 20, 30, 0.75) !important;\n  backdrop-filter: blur(12px) !i" (131) -> "#sidebar:not(.h-full) { /*[FX]*/\n  background-color: rgba(10, 20, 30, 0.25) !important;\n  backdrop-filter: blur(20px) saturate(1.3) !important;\n}"
+".a { b: c }\nhtml #sidebar { /*[FX]*/ background-color: revert-layer; }\n.d { e: f }" (82) -> ".a { b: c }\n.d { e: f }"
+"/*[FX]*/ no rule" (16) -> "/*[FX]*/ no rule"
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" (6011) -> "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy}"
+"#sidebar { color: red }" (23) -> "#sidebar { color: red }"
+"#sidebar:not(.h-full) { /*[FX]*/\n  background-color: color-mix(in srgb, rgb(10 20 30) 75%, transparent) !important;\n  ba" (159) -> "#sidebar:not(.h-full) { /*[FX]*/\n  background-color: color-mix(in srgb, rgb(10 20 30) 25%, transparent) !important;\n  backdrop-filter: blur(20px) saturate(1.3) !important;\n}"
+"#sidebar:not(.h-full) { /*[FX]*/\n  background-color: color-mix(in srgb, oklch(0.1 0.02 260) 75%, transparent) !important" (165) -> "#sidebar:not(.h-full) { /*[FX]*/\n  background-color: color-mix(in srgb, oklch(0.1 0.02 260) 25%, transparent) !important;\n  backdrop-filter: blur(20px) saturate(1.3) !important;\n}"
+"#sidebar:not(.h-full) { /*[FX]*/\n  background-color: color-mix(in srgb, navy 75%, transparent) !important;\n  backdrop-fi" (150) -> "#sidebar:not(.h-full) { /*[FX]*/\n  background-color: color-mix(in srgb, navy 25%, transparent) !important;\n  backdrop-filter: blur(20px) saturate(1.3) !important;\n}"
+"#sidebar:not(.h-full) { /*[FX]*/\n  background-color: color-mix(in srgb, color-mix(in srgb, red 5%, transparent) 75%, tra" (185) -> "#sidebar:not(.h-full) { /*[FX]*/\n  background-color: color-mix(in srgb, color-mix(in srgb, red 5%, transparent) 25%, transparent) !important;\n  backdrop-filter: blur(20px) saturate(1.3) !important;\n}"
+
+#=# _rewrite_sidebar_fx transparent
+"#sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }" (86) -> "#sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }"
+"html.dark #sidebar { /*[FX]*/ background-color: var(--x) !important; }" (70) -> "html.dark #sidebar { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }"
+"#sidebar:not(.h-full) { /*[FX]*/\n  background-color: rgba(10, 20, 30, 0.75) !important;\n  backdrop-filter: blur(12px) !i" (131) -> "#sidebar:not(.h-full) { /*[FX]*/\n  background-color: transparent !important;\n  backdrop-filter: none !important;\n}"
+".a { b: c }\nhtml #sidebar { /*[FX]*/ background-color: revert-layer; }\n.d { e: f }" (82) -> ".a { b: c }\n.d { e: f }"
+"/*[FX]*/ no rule" (16) -> "/*[FX]*/ no rule"
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" (6011) -> "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy}"
+"#sidebar { color: red }" (23) -> "#sidebar { color: red }"
+"#sidebar:not(.h-full) { /*[FX]*/\n  background-color: color-mix(in srgb, rgb(10 20 30) 75%, transparent) !important;\n  ba" (159) -> "#sidebar:not(.h-full) { /*[FX]*/\n  background-color: transparent !important;\n  backdrop-filter: none !important;\n}"
+"#sidebar:not(.h-full) { /*[FX]*/\n  background-color: color-mix(in srgb, oklch(0.1 0.02 260) 75%, transparent) !important" (165) -> "#sidebar:not(.h-full) { /*[FX]*/\n  background-color: transparent !important;\n  backdrop-filter: none !important;\n}"
+"#sidebar:not(.h-full) { /*[FX]*/\n  background-color: color-mix(in srgb, navy 75%, transparent) !important;\n  backdrop-fi" (150) -> "#sidebar:not(.h-full) { /*[FX]*/\n  background-color: transparent !important;\n  backdrop-filter: none !important;\n}"
+"#sidebar:not(.h-full) { /*[FX]*/\n  background-color: color-mix(in srgb, color-mix(in srgb, red 5%, transparent) 75%, tra" (185) -> "#sidebar:not(.h-full) { /*[FX]*/\n  background-color: transparent !important;\n  backdrop-filter: none !important;\n}"
+
+#=# _rewrite_sidebar_fx on its own output
+translucent "#sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }" (86) -> unchanged
+translucent "html.dark #sidebar { /*[FX]*/ background-color: var(--x) !important; }" (70) -> unchanged
+translucent "#sidebar:not(.h-full) { /*[FX]*/\n  background-color: rgba(10, 20, 30, 0.75) !important;\n  backdrop-filter: blur(12px) !i" (131) -> unchanged
+translucent ".a { b: c }\nhtml #sidebar { /*[FX]*/ background-color: revert-layer; }\n.d { e: f }" (82) -> unchanged
+translucent "/*[FX]*/ no rule" (16) -> unchanged
+translucent "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" (6011) -> unchanged
+translucent "#sidebar { color: red }" (23) -> unchanged
+translucent "#sidebar:not(.h-full) { /*[FX]*/\n  background-color: color-mix(in srgb, rgb(10 20 30) 75%, transparent) !important;\n  ba" (159) -> unchanged
+translucent "#sidebar:not(.h-full) { /*[FX]*/\n  background-color: color-mix(in srgb, oklch(0.1 0.02 260) 75%, transparent) !important" (165) -> unchanged
+translucent "#sidebar:not(.h-full) { /*[FX]*/\n  background-color: color-mix(in srgb, navy 75%, transparent) !important;\n  backdrop-fi" (150) -> unchanged
+translucent "#sidebar:not(.h-full) { /*[FX]*/\n  background-color: color-mix(in srgb, color-mix(in srgb, red 5%, transparent) 75%, tra" (185) -> unchanged
+transparent "#sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }" (86) -> unchanged
+transparent "html.dark #sidebar { /*[FX]*/ background-color: var(--x) !important; }" (70) -> unchanged
+transparent "#sidebar:not(.h-full) { /*[FX]*/\n  background-color: rgba(10, 20, 30, 0.75) !important;\n  backdrop-filter: blur(12px) !i" (131) -> unchanged
+transparent ".a { b: c }\nhtml #sidebar { /*[FX]*/ background-color: revert-layer; }\n.d { e: f }" (82) -> unchanged
+transparent "/*[FX]*/ no rule" (16) -> unchanged
+transparent "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" (6011) -> unchanged
+transparent "#sidebar { color: red }" (23) -> unchanged
+transparent "#sidebar:not(.h-full) { /*[FX]*/\n  background-color: color-mix(in srgb, rgb(10 20 30) 75%, transparent) !important;\n  ba" (159) -> unchanged
+transparent "#sidebar:not(.h-full) { /*[FX]*/\n  background-color: color-mix(in srgb, oklch(0.1 0.02 260) 75%, transparent) !important" (165) -> unchanged
+transparent "#sidebar:not(.h-full) { /*[FX]*/\n  background-color: color-mix(in srgb, navy 75%, transparent) !important;\n  backdrop-fi" (150) -> unchanged
+transparent "#sidebar:not(.h-full) { /*[FX]*/\n  background-color: color-mix(in srgb, color-mix(in srgb, red 5%, transparent) 75%, tra" (185) -> unchanged
+
+#=# _strip_canvas_from_state
+"{\"dark\": {\"canvasEnabled\": true, \"canvasScript\": \"x\", \"canvasShowAuth\": true, \"canvasAuthOnly\": true" -> "{\"dark\":{\"canvasEnabled\":false},\"light\":5}"
+"not json" -> "{}"
+"[1]" -> "{}"
+"{\"her\": {\"canvasScript\": \"\"}}" -> "{\"her\":{\"canvasEnabled\":false}}"
+"[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[" -> "{}"
+"{\"dark\": {\"themeShowAuth\": true}, \"_hiddenBackgrounds\": {\"auth\": {\"url\": \"/x\"}, \"chat\": 50}}" -> "{\"dark\":{\"themeShowAuth\":true,\"canvasEnabled\":false},\"_hiddenBackgrounds\":{\"auth\":{\"url\":\"/x\"},\"chat\":50}}"
+"{\"_hiddenBackgrounds\": 5}" -> "{\"_hiddenBackgrounds\":5}"
+"{\"_cssSections\": {\"vars\": \"x\"}, \"oled\": {\"canvasScript\": \"y\"}}" -> "{\"_cssSections\":{\"vars\":\"x\"},\"oled\":{\"canvasEnabled\":false}}"
+
+#=# _strip_auth_from_state
+"{\"dark\": {\"canvasEnabled\": true, \"canvasScript\": \"x\", \"canvasShowAuth\": true, \"canvasAuthOnly\": true" -> "{\"dark\":{\"canvasEnabled\":true,\"canvasScript\":\"x\",\"canvasShowAuth\":false,\"canvasAuthOnly\":false,\"themeShowAuth\":false,\"customCssShowAuth\":false,\"gradientShowAuth\":false,\"themeAuthOnly\":false,\"customCssAuthOnly\":false,\"gradientAuthOnly\":false},\"light\":5}"
+"not json" -> "not json"
+"[1]" -> "[1]"
+"{\"her\": {\"canvasScript\": \"\"}}" -> "{\"her\":{\"canvasScript\":\"\",\"themeShowAuth\":false,\"customCssShowAuth\":false,\"canvasShowAuth\":false,\"gradientShowAuth\":false,\"themeAuthOnly\":false,\"customCssAuthOnly\":false,\"canvasAuthOnly\":false,\"gradientAuthOnly\":false}}"
+"[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[" -> "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
+"{\"dark\": {\"themeShowAuth\": true}, \"_hiddenBackgrounds\": {\"auth\": {\"url\": \"/x\"}, \"chat\": 50}}" -> "{\"dark\":{\"themeShowAuth\":false,\"customCssShowAuth\":false,\"canvasShowAuth\":false,\"gradientShowAuth\":false,\"themeAuthOnly\":false,\"customCssAuthOnly\":false,\"canvasAuthOnly\":false,\"gradientAuthOnly\":false},\"_hiddenBackgrounds\":{\"chat\":50}}"
+"{\"_hiddenBackgrounds\": 5}" -> "{\"_hiddenBackgrounds\":5}"
+"{\"_cssSections\": {\"vars\": \"x\"}, \"oled\": {\"canvasScript\": \"y\"}}" -> "{\"_cssSections\":{\"vars\":\"x\"},\"oled\":{\"canvasScript\":\"y\",\"themeShowAuth\":false,\"customCssShowAuth\":false,\"canvasShowAuth\":false,\"gradientShowAuth\":false,\"themeAuthOnly\":false,\"customCssAuthOnly\":false,\"canvasAuthOnly\":false,\"gradientAuthOnly\":false}}"
+
+#=# _strip_canvas_scripts
+"{\"dark\": {\"canvasEnabled\": true, \"canvasScript\": \"x\", \"canvasShowAuth\": true, \"canvasAuthOnly\": true" -> "{\"dark\":{\"canvasEnabled\":true,\"canvasShowAuth\":true,\"canvasAuthOnly\":true},\"light\":5}"
+"not json" -> "not json"
+"[1]" -> "[1]"
+"{\"her\": {\"canvasScript\": \"\"}}" -> "{\"her\": {\"canvasScript\": \"\"}}"
+"[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[" -> "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
+"{\"dark\": {\"themeShowAuth\": true}, \"_hiddenBackgrounds\": {\"auth\": {\"url\": \"/x\"}, \"chat\": 50}}" -> "{\"dark\": {\"themeShowAuth\": true}, \"_hiddenBackgrounds\": {\"auth\": {\"url\": \"/x\"}, \"chat\": 50}}"
+"{\"_hiddenBackgrounds\": 5}" -> "{\"_hiddenBackgrounds\": 5}"
+"{\"_cssSections\": {\"vars\": \"x\"}, \"oled\": {\"canvasScript\": \"y\"}}" -> "{\"_cssSections\":{\"vars\":\"x\"},\"oled\":{}}"
+
+#=# _postprocess_state canvas_fx=True auth_theming=False
+"{\"dark\": {\"canvasEnabled\": true, \"canvasScript\": \"x\", \"canvasShowAuth\": true, \"canvasAuthOnly\": true" -> "{\"dark\":{\"canvasEnabled\":true,\"canvasScript\":\"x\",\"canvasShowAuth\":false,\"canvasAuthOnly\":false,\"themeShowAuth\":false,\"customCssShowAuth\":false,\"gradientShowAuth\":false,\"themeAuthOnly\":false,\"customCssAuthOnly\":false,\"gradientAuthOnly\":false},\"light\":5}"
+"not json" -> "not json"
+"[1]" -> "[1]"
+"{\"her\": {\"canvasScript\": \"\"}}" -> "{\"her\":{\"canvasScript\":\"\",\"themeShowAuth\":false,\"customCssShowAuth\":false,\"canvasShowAuth\":false,\"gradientShowAuth\":false,\"themeAuthOnly\":false,\"customCssAuthOnly\":false,\"canvasAuthOnly\":false,\"gradientAuthOnly\":false}}"
+"[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[" -> "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
+"{\"dark\": {\"themeShowAuth\": true}, \"_hiddenBackgrounds\": {\"auth\": {\"url\": \"/x\"}, \"chat\": 50}}" -> "{\"dark\":{\"themeShowAuth\":false,\"customCssShowAuth\":false,\"canvasShowAuth\":false,\"gradientShowAuth\":false,\"themeAuthOnly\":false,\"customCssAuthOnly\":false,\"canvasAuthOnly\":false,\"gradientAuthOnly\":false},\"_hiddenBackgrounds\":{\"chat\":50}}"
+"{\"_hiddenBackgrounds\": 5}" -> "{\"_hiddenBackgrounds\":5}"
+"{\"_cssSections\": {\"vars\": \"x\"}, \"oled\": {\"canvasScript\": \"y\"}}" -> "{\"_cssSections\":{\"vars\":\"x\"},\"oled\":{\"canvasScript\":\"y\",\"themeShowAuth\":false,\"customCssShowAuth\":false,\"canvasShowAuth\":false,\"gradientShowAuth\":false,\"themeAuthOnly\":false,\"customCssAuthOnly\":false,\"canvasAuthOnly\":false,\"gradientAuthOnly\":false}}"
+"" -> ""
+null -> null
+
+#=# _postprocess_state canvas_fx=False auth_theming=True
+"{\"dark\": {\"canvasEnabled\": true, \"canvasScript\": \"x\", \"canvasShowAuth\": true, \"canvasAuthOnly\": true" -> "{\"dark\":{\"canvasEnabled\":false},\"light\":5}"
+"not json" -> "{}"
+"[1]" -> "{}"
+"{\"her\": {\"canvasScript\": \"\"}}" -> "{\"her\":{\"canvasEnabled\":false}}"
+"[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[" -> "{}"
+"{\"dark\": {\"themeShowAuth\": true}, \"_hiddenBackgrounds\": {\"auth\": {\"url\": \"/x\"}, \"chat\": 50}}" -> "{\"dark\":{\"themeShowAuth\":true,\"canvasEnabled\":false},\"_hiddenBackgrounds\":{\"auth\":{\"url\":\"/x\"},\"chat\":50}}"
+"{\"_hiddenBackgrounds\": 5}" -> "{\"_hiddenBackgrounds\":5}"
+"{\"_cssSections\": {\"vars\": \"x\"}, \"oled\": {\"canvasScript\": \"y\"}}" -> "{\"_cssSections\":{\"vars\":\"x\"},\"oled\":{\"canvasEnabled\":false}}"
+"" -> ""
+null -> null
+
+#=# _rebase_uploads
+"{\"_hiddenBackgrounds\": {\"auth\": {\"source\": \"url\", \"url\": \"/api/v1/old/auth-background?v=1\"}, \"pages\": {\"source\": \"url\", \"url\": \"/api/v1/a/b/page-background?v=2\"}}}" at /api/v1/theme-designer -> "{\"_hiddenBackgrounds\":{\"auth\":{\"source\":\"url\",\"url\":\"/api/v1/theme-designer/auth-background?v=1\"},\"pages\":{\"source\":\"url\",\"url\":\"/api/v1/theme-designer/page-background?v=2\"}}}"
+"{\"_hiddenBackgrounds\": {\"pages\": {\"source\": \"url\", \"url\": \"/api/v1/theme-designer/page-background?v=3\"}}}" at /api/v1/theme-designer -> "{\"_hiddenBackgrounds\": {\"pages\": {\"source\": \"url\", \"url\": \"/api/v1/theme-designer/page-background?v=3\"}}}"
+"{\"_hiddenBackgrounds\": {\"pages\": {\"source\": \"url\", \"url\": \"https://x/api/v1/a/page-background?v=4\"}, \"auth\": {\"source\": \"url\", \"url\": \"/api/v1/a/auth-background\"}}}" at /api/v1/theme-designer -> "{\"_hiddenBackgrounds\": {\"pages\": {\"source\": \"url\", \"url\": \"https://x/api/v1/a/page-background?v=4\"}, \"auth\": {\"source\": \"url\", \"url\": \"/api/v1/a/auth-background\"}}}"
+"{\"_hiddenBackgrounds\": {\"auth\": \"x-background?\"}}" at /api/v1/theme-designer -> "{\"_hiddenBackgrounds\": {\"auth\": \"x-background?\"}}"
+"[1, \"-background?\"]" at /api/v1/theme-designer -> "[1, \"-background?\"]"
+"not json -background?" at /api/v1/theme-designer -> "not json -background?"
+"{\"_hiddenBackgrounds\": {\"pages\": {\"source\": \"url\", \"url\": \"/api/v1/td/me/page-background?v=5\"}, \"auth\": {\"source\": \"url\", \"url\": \"/api/v1/td/me/auth-background?v=5\"}}}" at /api/v1/td/me -> "{\"_hiddenBackgrounds\": {\"pages\": {\"source\": \"url\", \"url\": \"/api/v1/td/me/page-background?v=5\"}, \"auth\": {\"source\": \"url\", \"url\": \"/api/v1/td/me/auth-background?v=5\"}}}"
+"{\"_hiddenBackgrounds\": {\"pages\": {\"source\": \"url\", \"url\": \"/api/v1/old/me/page-background?v=6\"}, \"auth\": {\"source\": \"url\", \"url\": \"/api/v1/old/me/auth-background?v=6\"}}}" at /api/v1/theme-designer -> "{\"_hiddenBackgrounds\":{\"pages\":{\"source\":\"url\",\"url\":\"/api/v1/theme-designer/page-background?v=6\"},\"auth\":{\"source\":\"url\",\"url\":\"/api/v1/theme-designer/auth-background?v=6\"}}}"
+"{\"_hiddenBackgrounds\": {\"pages\": {\"source\": \"url\", \"url\": \"/api/v1/a/me/page-background?v=7\"}}}" at /api/v1/theme-designer personal -> "{\"_hiddenBackgrounds\":{\"pages\":{\"source\":\"url\",\"url\":\"/api/v1/theme-designer/me/page-background?v=7\"}}}"
+"{\"_hiddenBackgrounds\": {\"pages\": {\"source\": \"url\", \"url\": \"/api/v1/td/me/me/page-background?v=8\"}}}" at /api/v1/td/me personal -> "{\"_hiddenBackgrounds\": {\"pages\": {\"source\": \"url\", \"url\": \"/api/v1/td/me/me/page-background?v=8\"}}}"
+"{\"_hiddenBackgrounds\": {\"pages\": {\"source\": \"url\", \"url\": \"/api/v1/td/me/page-background?v=9\"}}}" at /api/v1/td/me personal -> "{\"_hiddenBackgrounds\":{\"pages\":{\"source\":\"url\",\"url\":\"/api/v1/td/me/me/page-background?v=9\"}}}"
+"{\"_hiddenBackgrounds\": {\"pages\": {\"source\": \"url\", \"url\": \"/api/v1/old/me/me/page-background?v=10\"}, \"auth\": {\"source\": \"url\", \"url\": \"/api/v1/old/auth-background?v=10\"}}}" at /api/v1/theme-designer personal -> "{\"_hiddenBackgrounds\":{\"pages\":{\"source\":\"url\",\"url\":\"/api/v1/theme-designer/me/page-background?v=10\"},\"auth\":{\"source\":\"url\",\"url\":\"/api/v1/old/auth-background?v=10\"}}}"
+"{\"_hiddenBackgrounds\": {\"pages\": {\"source\": \"url\", \"url\": \"/api/v1/old/page-background?v=11\"}}}" at /api/v1/theme-designer personal -> "{\"_hiddenBackgrounds\":{\"pages\":{\"source\":\"url\",\"url\":\"/api/v1/theme-designer/page-background?v=11\"}}}"
+"{\"_hiddenBackgrounds\": {\"pages\": {\"source\": \"url\", \"url\": \"/api/v1/theme-designer/page-background?v=12\"}}}" at /api/v1/theme-designer personal -> "{\"_hiddenBackgrounds\": {\"pages\": {\"source\": \"url\", \"url\": \"/api/v1/theme-designer/page-background?v=12\"}}}"
+"{\"_hiddenBackgrounds\": {\"pages\": {\"source\": \"url\", \"url\": \"/api/v1/a/b/page-background?v=13\"}, \"auth\": {\"source\": \"url\", \"url\": \"/api/v1/a/b/auth-background?v=13\"}}}" at /api/v1/x personal -> "{\"_hiddenBackgrounds\":{\"pages\":{\"source\":\"url\",\"url\":\"/api/v1/x/page-background?v=13\"},\"auth\":{\"source\":\"url\",\"url\":\"/api/v1/a/b/auth-background?v=13\"}}}"
+
+#=# _get_route_base
+"/api/v1/theme-designer" -> "/api/v1/theme-designer"
+"/api/v1/x/" -> "/api/v1/x"
+"themes" -> "/api/v1/themes"
+"/themes" -> "/api/v1/themes"
+"/api/v1/a b<c>" -> "/api/v1/abc"
+"/api/v2/x" -> "/api/v1/api/v2/x"
+"" -> "/api/v1/"
+"/api/v1/td/me" -> "/api/v1/theme-designer"
+"/api/v1/me/" -> "/api/v1/theme-designer"
+"me" -> "/api/v1/theme-designer"
+"/api/v1/me/x" -> "/api/v1/me/x"
+"/api/v1/home" -> "/api/v1/home"
+
+#=# _user_dir_name
+"8c1e1c2a-1b2c-4d5e-9f00-123456789abc" -> 8c1e1c2a-1b2c-4d5e-9f00-123456789abc
+"a/b" -> c14cddc033f64b9dea80ea675cf280a015e672516090a5626781153dc68fea11
+"../x" -> d6b96a97d147daaae49eb87a5ca7bfbc280e79551016df8aa5edc5920d21c274
+"" -> e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" -> 9537c5fdf120482f7d58d25e9ed583f52c02b4e304ea814db1633ad565aed7e9
+"ok_id-1" -> ok_id-1
+
+#=# _strip_bootloader
+"<head>X<style id=\"owui-server-theme\">s</style><!-- /owui-server-theme -->\n<script type=\"application/json\" id=\"owui-theme-state\">{}</script><!-- /owui-theme-state -->Y<!-- OWUI Theme Pro Bootloader --><script>unclosed</head>"
+
+#=# _strip_all_theme_blocks
+"<head><!-- OWUI Theme Pro Bootloader -->\n<script>a</script>\nX<!-- OWUI Theme Pro Bootloader --><script>b</script>Y<!-- OWUI Theme Pro Bootloader --><script>unclosed</head>"
+
+#=# asset_strip_block
+"abc"
+"a"
+"plain"
+""
+
+#=# asset_compose /static/loader.js
+"disk();\n;\n/*A-S*/a()/*A-E*/\n;\n/*B-S*/b()/*B-E*/\n"
+
+#=# asset_compose /static/custom.css
+".disk{}\n\n/*A-S*/a()/*A-E*/\n\n/*B-S*/b()/*B-E*/\n"
+
+#=# _completion_text
+{'choices': [{'message': {'content': 'hi'}}]} -> "hi"
+{'choices': []} -> ""
+{'message': {'content': 5}} -> ""
+None -> ""
+'x' -> ""
+namespace(body=b'{"choices": [{"message": {"content": "b"}}]}') -> "b"
+namespace(body=b'nope') -> ""
+{'choices': ['x']} -> ""
+{'choices': [{'message': 'x'}]} -> ""
+{'choices': [None]} -> ""
+{'message': 'x'} -> ""
+{'choices': [{'message': {'content': [{'type': 'text', 'text': 'p'}, 'q', {'text': 1}, {'text': 'r'}]}}]} -> "pr"
+
+#=# _load_library_or_set_aside
+None "{\"snapshots\": [" -> null, kept as open_theme_designer_library.json.corrupt-STAMP, file gone
+None "[1]" -> null, kept as open_theme_designer_library.json.corrupt-STAMP, file gone
+None "" -> null, kept as None, file there
+None " \n" -> null, kept as None, file there
+None "{\"snapshots\": []}" -> "{\"snapshots\": []}", kept as None, file there
+None kept: ['open_theme_designer_library.json.corrupt-STAMP', 'open_theme_designer_library.json.corrupt-STAMP']
+u1 "{\"snapshots\": [" -> null, kept as open_theme_designer_library.json.corrupt-STAMP, file gone
+u1 "[1]" -> null, kept as open_theme_designer_library.json.corrupt-STAMP, file gone
+u1 "" -> null, kept as None, file there
+u1 " \n" -> null, kept as None, file there
+u1 "{\"snapshots\": []}" -> "{\"snapshots\": []}", kept as None, file there
+u1 kept: ['open_theme_designer_library.json.corrupt-STAMP', 'open_theme_designer_library.json.corrupt-STAMP']
+designer config for a bad personal library: "open_theme_designer_library.json"
+apply frame: library gone, told None
+next designer: library gone, told open_theme_designer_library.json.corrupt-STAMP
+one after: library gone, told None
+
+#=# _bind_stream
+old-cid -> True, user u1, mapped ['gone-cid', 'old-cid']
+gone-cid -> False, user None, mapped ['old-cid']
+none -> False, user None, mapped ['old-cid']
+
+#=# _is_json_object
+'{"a": 1}' -> True
+'{}' -> True
+'[1]' -> False
+'5' -> False
+'' -> False
+' ' -> False
+'{oops' -> False
+'[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[ -> False
+{'a': 1} -> False
+5 -> False
+None -> False
+
+#=# _parse_consult
+"{\"hue\": 200, \"chroma\": 30, \"lightness\": 20, \"gradient\": true, \"name\": \"Sea\"}" -> {"hue": 200, "chroma": 30, "lightness": 20, "gradient": true, "name": "Sea"}
+"<think>{\"hue\": 1}</think> here: {\"hue\": \"400\", \"chroma\": -3, \"lightness\": 70.6, \"gradient\": \"TRUE\", \"name\": \"  a \\n b  \"}" -> {"hue": 360, "chroma": 0, "lightness": 50, "gradient": true, "name": "a b"}
+"{\"hue\": null, \"chroma\": 1, \"lightness\": 1}" -> null
+"no json" -> null
+"[1, 2]" -> null
+"{\"hue\": 1, \"chroma\": 1, \"lightness\": 1, \"name\": \"nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn\"}" -> {"hue": 1, "chroma": 1, "lightness": 1, "gradient": false, "name": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"}
+"{\"hue\": 1e400, \"chroma\": 1, \"lightness\": 1}" -> null
+null -> null
+
+#=# _from_other_origin
+WEBUI_URL "" {"host": "192.168.1.5:3000", "origin": "http://192.168.1.5:3000"} -> allowed
+WEBUI_URL "" {"host": "owui.lan", "origin": "http://owui.lan:8081"} -> allowed
+WEBUI_URL "" {"host": "open-webui:8080", "origin": "http://owui.lan"} -> refused
+WEBUI_URL "" {"host": "chat.example.com", "origin": "https://chat.example.com"} -> allowed
+WEBUI_URL "" {"host": "owui.lan:80", "origin": "http://owui.lan"} -> allowed
+WEBUI_URL "" {"host": "OWUI.lan", "origin": "http://owui.lan"} -> allowed
+WEBUI_URL "" {"origin": "http://owui.lan"} -> refused
+WEBUI_URL "" {"host": "[::1]:3000", "origin": "http://[::1]:3000"} -> allowed
+WEBUI_URL "" {"host": "owui.lan", "origin": "http://evil.owui.lan"} -> refused
+WEBUI_URL "" {"host": "owui.lan", "origin": "http://lan"} -> refused
+WEBUI_URL "" {"host": "owui.lan", "origin": "null"} -> refused
+WEBUI_URL "" {"host": "owui.lan", "origin": "file://"} -> refused
+WEBUI_URL "" {"host": "owui.lan", "origin": "http://evil.lan", "x-forwarded-host": "evil.lan"} -> refused
+WEBUI_URL "" {"host": "evil.lan", "origin": "http://evil.lan", "sec-fetch-site": "same-site"} -> refused
+WEBUI_URL "" {"host": "owui.lan", "origin": "http://evil.lan", "sec-fetch-site": "cross-site"} -> refused
+WEBUI_URL "" {"host": "owui.lan", "sec-fetch-site": "none"} -> refused
+WEBUI_URL "" {"host": "owui.lan", "origin": "http://owui.lan", "sec-fetch-site": "same-origin"} -> allowed
+WEBUI_URL "" {"host": "open-webui:8080", "origin": "https://owui.lan", "sec-fetch-site": "same-origin"} -> allowed
+WEBUI_URL "" {"host": "owui.lan"} -> allowed
+WEBUI_URL "" {} -> allowed
+WEBUI_URL "https://OWUI.lan:8443/" {"host": "192.168.1.5:3000", "origin": "http://192.168.1.5:3000"} -> allowed
+WEBUI_URL "https://OWUI.lan:8443/" {"host": "owui.lan", "origin": "http://owui.lan:8081"} -> allowed
+WEBUI_URL "https://OWUI.lan:8443/" {"host": "open-webui:8080", "origin": "http://owui.lan"} -> allowed
+WEBUI_URL "https://OWUI.lan:8443/" {"host": "chat.example.com", "origin": "https://chat.example.com"} -> allowed
+WEBUI_URL "https://OWUI.lan:8443/" {"host": "owui.lan:80", "origin": "http://owui.lan"} -> allowed
+WEBUI_URL "https://OWUI.lan:8443/" {"host": "OWUI.lan", "origin": "http://owui.lan"} -> allowed
+WEBUI_URL "https://OWUI.lan:8443/" {"origin": "http://owui.lan"} -> allowed
+WEBUI_URL "https://OWUI.lan:8443/" {"host": "[::1]:3000", "origin": "http://[::1]:3000"} -> allowed
+WEBUI_URL "https://OWUI.lan:8443/" {"host": "owui.lan", "origin": "http://evil.owui.lan"} -> refused
+WEBUI_URL "https://OWUI.lan:8443/" {"host": "owui.lan", "origin": "http://lan"} -> refused
+WEBUI_URL "https://OWUI.lan:8443/" {"host": "owui.lan", "origin": "null"} -> refused
+WEBUI_URL "https://OWUI.lan:8443/" {"host": "owui.lan", "origin": "file://"} -> refused
+WEBUI_URL "https://OWUI.lan:8443/" {"host": "owui.lan", "origin": "http://evil.lan", "x-forwarded-host": "evil.lan"} -> refused
+WEBUI_URL "https://OWUI.lan:8443/" {"host": "evil.lan", "origin": "http://evil.lan", "sec-fetch-site": "same-site"} -> refused
+WEBUI_URL "https://OWUI.lan:8443/" {"host": "owui.lan", "origin": "http://evil.lan", "sec-fetch-site": "cross-site"} -> refused
+WEBUI_URL "https://OWUI.lan:8443/" {"host": "owui.lan", "sec-fetch-site": "none"} -> refused
+WEBUI_URL "https://OWUI.lan:8443/" {"host": "owui.lan", "origin": "http://owui.lan", "sec-fetch-site": "same-origin"} -> allowed
+WEBUI_URL "https://OWUI.lan:8443/" {"host": "open-webui:8080", "origin": "https://owui.lan", "sec-fetch-site": "same-origin"} -> allowed
+WEBUI_URL "https://OWUI.lan:8443/" {"host": "owui.lan"} -> allowed
+WEBUI_URL "https://OWUI.lan:8443/" {} -> allowed
+WEBUI_URL "not a url" {"host": "192.168.1.5:3000", "origin": "http://192.168.1.5:3000"} -> allowed
+WEBUI_URL "not a url" {"host": "owui.lan", "origin": "http://owui.lan:8081"} -> allowed
+WEBUI_URL "not a url" {"host": "open-webui:8080", "origin": "http://owui.lan"} -> refused
+WEBUI_URL "not a url" {"host": "chat.example.com", "origin": "https://chat.example.com"} -> allowed
+WEBUI_URL "not a url" {"host": "owui.lan:80", "origin": "http://owui.lan"} -> allowed
+WEBUI_URL "not a url" {"host": "OWUI.lan", "origin": "http://owui.lan"} -> allowed
+WEBUI_URL "not a url" {"origin": "http://owui.lan"} -> refused
+WEBUI_URL "not a url" {"host": "[::1]:3000", "origin": "http://[::1]:3000"} -> allowed
+WEBUI_URL "not a url" {"host": "owui.lan", "origin": "http://evil.owui.lan"} -> refused
+WEBUI_URL "not a url" {"host": "owui.lan", "origin": "http://lan"} -> refused
+WEBUI_URL "not a url" {"host": "owui.lan", "origin": "null"} -> refused
+WEBUI_URL "not a url" {"host": "owui.lan", "origin": "file://"} -> refused
+WEBUI_URL "not a url" {"host": "owui.lan", "origin": "http://evil.lan", "x-forwarded-host": "evil.lan"} -> refused
+WEBUI_URL "not a url" {"host": "evil.lan", "origin": "http://evil.lan", "sec-fetch-site": "same-site"} -> refused
+WEBUI_URL "not a url" {"host": "owui.lan", "origin": "http://evil.lan", "sec-fetch-site": "cross-site"} -> refused
+WEBUI_URL "not a url" {"host": "owui.lan", "sec-fetch-site": "none"} -> refused
+WEBUI_URL "not a url" {"host": "owui.lan", "origin": "http://owui.lan", "sec-fetch-site": "same-origin"} -> allowed
+WEBUI_URL "not a url" {"host": "open-webui:8080", "origin": "https://owui.lan", "sec-fetch-site": "same-origin"} -> allowed
+WEBUI_URL "not a url" {"host": "owui.lan"} -> allowed
+WEBUI_URL "not a url" {} -> allowed

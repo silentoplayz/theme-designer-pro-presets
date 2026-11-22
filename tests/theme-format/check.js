@@ -108,6 +108,17 @@ Object.entries(enums).forEach(([k, values]) => {
   }
 });
 
+// A gradient preset saved from the designer has to pass the repository's own
+// validation, which uses this schema rather than theme.schema.json
+const GRADIENT = JSON.parse(read('schemas/gradient-preset.schema.json')).properties;
+if (!same(sorted(GRADIENT.type.enum), sorted(enums.gradientType))) {
+  fail(`a gradient preset's type is ${GRADIENT.type.enum.join(', ')} in its schema, ${enums.gradientType.join(', ')} in the designer`);
+}
+const [speedLo, speedHi] = bounds.gradientAnimationSpeed;
+if (GRADIENT.speed.minimum !== speedLo || GRADIENT.speed.maximum !== speedHi) {
+  fail(`a gradient preset's speed is ${GRADIENT.speed.minimum} to ${GRADIENT.speed.maximum} in its schema, ${speedLo} to ${speedHi} in the designer`);
+}
+
 // The switches the designer reads as true or false
 const switches = /\[\s*('paletteEnabled'[\s\S]*?)\]\s*\.forEach\(k => \{ if \(d\[k\] !== undefined\) d\[k\] = !!d\[k\]/.exec(DESIGNER);
 if (!switches) fail('the designer\'s list of switches wasn\'t found');

@@ -296,7 +296,7 @@ A single `docs/catalog.json` containing metadata for every preset in the reposit
 |---|---|
 | `themes` | Name, description, author, version, per-mode OKLCH colors, feature flags (CSS, FX, gradient, overrides), import URL |
 | `canvasFx` | Name (from JSDoc `Title:` or filename), description, import URL |
-| `gradients` | Name, type (linear/radial/mesh), animated flag, color stops, and the angle, intensity, speed, radial and mesh settings the site needs to draw it exactly, import URL |
+| `gradients` | Name, type (linear/radial/conic/mesh), animated flag, color stops, and the angle, intensity, speed, radial and mesh settings the site needs to draw it exactly, import URL |
 | `bundles` | Name, description, import URL |
 
 The catalog is rebuilt automatically by CI on every push to `main`. The static site in `docs/` fetches this file at runtime to draw the gallery, the home page's preset strips and the Studio's pickers.

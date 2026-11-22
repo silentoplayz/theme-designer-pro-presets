@@ -1,0 +1,1180 @@
+# themes/gemstone_glow.txt - written by golden.py --update, do not edit
+
+#=# designer: imported theme (ensureAllModes, normalizeModeData), against the file
+sha256 ed7e561f69a1
+dark: added from DEFAULT_MODE_DATA: surfacesEnabled surfaceSidebarOpacity surfaceSidebarBlur surfaceComposerOpacity surfaceComposerBlur surfacePanelOpacity surfacePanelBlur surfaceCardsOpacity surfaceCardsBlur surfaceButtonsOpacity surfaceButtonsBlur surfaceMenuOpacity surfaceMenuBlur surfaceDialogOpacity surfaceDialogBlur surfaceBackdropOpacity surfaceBackdropBlur surfaceFadeOpacity
+light: added from DEFAULT_MODE_DATA: surfacesEnabled surfaceSidebarOpacity surfaceSidebarBlur surfaceComposerOpacity surfaceComposerBlur surfacePanelOpacity surfacePanelBlur surfaceCardsOpacity surfaceCardsBlur surfaceButtonsOpacity surfaceButtonsBlur surfaceMenuOpacity surfaceMenuBlur surfaceDialogOpacity surfaceDialogBlur surfaceBackdropOpacity surfaceBackdropBlur surfaceFadeOpacity
+oled: added from DEFAULT_MODE_DATA: surfacesEnabled surfaceSidebarOpacity surfaceSidebarBlur surfaceComposerOpacity surfaceComposerBlur surfacePanelOpacity surfacePanelBlur surfaceCardsOpacity surfaceCardsBlur surfaceButtonsOpacity surfaceButtonsBlur surfaceMenuOpacity surfaceMenuBlur surfaceDialogOpacity surfaceDialogBlur surfaceBackdropOpacity surfaceBackdropBlur surfaceFadeOpacity
+her: added from DEFAULT_MODE_DATA: surfacesEnabled surfaceSidebarOpacity surfaceSidebarBlur surfaceComposerOpacity surfaceComposerBlur surfacePanelOpacity surfacePanelBlur surfaceCardsOpacity surfaceCardsBlur surfaceButtonsOpacity surfaceButtonsBlur surfaceMenuOpacity surfaceMenuBlur surfaceDialogOpacity surfaceDialogBlur surfaceBackdropOpacity surfaceBackdropBlur surfaceFadeOpacity
+
+#=# designer: normalizeSnapshot
+same as imported
+
+#=# designer: isThemeDuplicate of itself
+true
+
+#=# designer: generateThemeSections vars
+/*[OWUI_VARS_START]*/
+/*[OWUI_PAL_LIGHT_START]*/
+/* --- LIGHT MODE VARIABLES --- */
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) {
+  --color-gray-50: oklch(0.980 0.000 0) !important;
+  --color-gray-100: oklch(0.940 0.000 0) !important;
+  --color-gray-200: oklch(0.920 0.000 0) !important;
+  --color-gray-300: oklch(0.850 0.000 0) !important;
+  --color-gray-400: oklch(0.770 0.000 0) !important;
+  --color-gray-500: oklch(0.690 0.000 0) !important;
+  --color-gray-600: oklch(0.510 0.000 0) !important;
+  --color-gray-700: oklch(0.420 0.000 0) !important;
+  --color-gray-800: oklch(0.320 0.000 0) !important;
+  --color-gray-850: oklch(0.270 0.000 0) !important;
+  --color-gray-900: oklch(0.200 0.000 0) !important;
+  --color-gray-950: oklch(0.160 0.000 0) !important;
+  --tdp-accent: oklch(0.56 0.000 250.0) !important;
+  --tdp-accent-2: oklch(0.56 0.000 290.0) !important;
+  --tdp-accent-3: oklch(0.56 0.000 210.0) !important;
+}
+@media (prefers-color-scheme: light) {
+  html[data-theme="system"], :root[data-theme="system"] {
+    --color-gray-50: oklch(0.980 0.000 0) !important;
+    --color-gray-100: oklch(0.940 0.000 0) !important;
+    --color-gray-200: oklch(0.920 0.000 0) !important;
+    --color-gray-300: oklch(0.850 0.000 0) !important;
+    --color-gray-400: oklch(0.770 0.000 0) !important;
+    --color-gray-500: oklch(0.690 0.000 0) !important;
+    --color-gray-600: oklch(0.510 0.000 0) !important;
+    --color-gray-700: oklch(0.420 0.000 0) !important;
+    --color-gray-800: oklch(0.320 0.000 0) !important;
+    --color-gray-850: oklch(0.270 0.000 0) !important;
+    --color-gray-900: oklch(0.200 0.000 0) !important;
+    --color-gray-950: oklch(0.160 0.000 0) !important;
+    --tdp-accent: oklch(0.56 0.000 250.0) !important;
+    --tdp-accent-2: oklch(0.56 0.000 290.0) !important;
+    --tdp-accent-3: oklch(0.56 0.000 210.0) !important;
+  }
+}
+
+/*[OWUI_PAL_LIGHT_END]*/
+/*[OWUI_PAL_DARK_START]*/
+/* --- DARK MODE VARIABLES --- */
+html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"] {
+  --color-gray-50: oklch(0.980 0.000 0) !important;
+  --color-gray-100: oklch(0.940 0.000 0) !important;
+  --color-gray-200: oklch(0.920 0.000 0) !important;
+  --color-gray-300: oklch(0.850 0.000 0) !important;
+  --color-gray-400: oklch(0.770 0.000 0) !important;
+  --color-gray-500: oklch(0.690 0.000 0) !important;
+  --color-gray-600: oklch(0.510 0.000 0) !important;
+  --color-gray-700: oklch(0.420 0.000 0) !important;
+  --color-gray-800: oklch(0.320 0.000 0) !important;
+  --color-gray-850: oklch(0.270 0.000 0) !important;
+  --color-gray-900: oklch(0.200 0.000 0) !important;
+  --color-gray-950: oklch(0.160 0.000 0) !important;
+  --tdp-accent: oklch(0.74 0.000 250.0) !important;
+  --tdp-accent-2: oklch(0.74 0.000 290.0) !important;
+  --tdp-accent-3: oklch(0.74 0.000 210.0) !important;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"], :root[data-theme="system"] {
+    --color-gray-50: oklch(0.980 0.000 0) !important;
+    --color-gray-100: oklch(0.940 0.000 0) !important;
+    --color-gray-200: oklch(0.920 0.000 0) !important;
+    --color-gray-300: oklch(0.850 0.000 0) !important;
+    --color-gray-400: oklch(0.770 0.000 0) !important;
+    --color-gray-500: oklch(0.690 0.000 0) !important;
+    --color-gray-600: oklch(0.510 0.000 0) !important;
+    --color-gray-700: oklch(0.420 0.000 0) !important;
+    --color-gray-800: oklch(0.320 0.000 0) !important;
+    --color-gray-850: oklch(0.270 0.000 0) !important;
+    --color-gray-900: oklch(0.200 0.000 0) !important;
+    --color-gray-950: oklch(0.160 0.000 0) !important;
+    --tdp-accent: oklch(0.74 0.000 250.0) !important;
+    --tdp-accent-2: oklch(0.74 0.000 290.0) !important;
+    --tdp-accent-3: oklch(0.74 0.000 210.0) !important;
+  }
+}
+
+/*[OWUI_PAL_DARK_END]*/
+/*[OWUI_PAL_OLED_START]*/
+/* --- OLED DARK MODE VARIABLES --- */
+html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"] {
+  --color-gray-50: oklch(0.780 0.000 0) !important;
+  --color-gray-100: oklch(0.740 0.000 0) !important;
+  --color-gray-200: oklch(0.720 0.000 0) !important;
+  --color-gray-300: oklch(0.650 0.000 0) !important;
+  --color-gray-400: oklch(0.570 0.000 0) !important;
+  --color-gray-500: oklch(0.490 0.000 0) !important;
+  --color-gray-600: oklch(0.310 0.000 0) !important;
+  --color-gray-700: oklch(0.220 0.000 0) !important;
+  --color-gray-800: oklch(0.120 0.000 0) !important;
+  --color-gray-850: oklch(0.070 0.000 0) !important;
+  --color-gray-900: oklch(0.000 0.000 0) !important;
+  --color-gray-950: oklch(0.000 0.000 0) !important;
+  --tdp-accent: oklch(0.74 0.000 250.0) !important;
+  --tdp-accent-2: oklch(0.74 0.000 290.0) !important;
+  --tdp-accent-3: oklch(0.74 0.000 210.0) !important;
+}
+
+/*[OWUI_PAL_OLED_END]*/
+/*[OWUI_PAL_HER_START]*/
+/* --- HER MODE VARIABLES --- */
+html.her, html[data-theme="her"] {
+  --color-gray-50: oklch(0.980 0.000 0) !important;
+  --color-gray-100: oklch(0.940 0.000 0) !important;
+  --color-gray-200: oklch(0.920 0.000 0) !important;
+  --color-gray-300: oklch(0.850 0.000 0) !important;
+  --color-gray-400: oklch(0.770 0.000 0) !important;
+  --color-gray-500: oklch(0.690 0.000 0) !important;
+  --color-gray-600: oklch(0.510 0.000 0) !important;
+  --color-gray-700: oklch(0.420 0.000 0) !important;
+  --color-gray-800: oklch(0.320 0.000 0) !important;
+  --color-gray-850: oklch(0.270 0.000 0) !important;
+  --color-gray-900: oklch(0.200 0.000 0) !important;
+  --color-gray-950: oklch(0.160 0.000 0) !important;
+  --tdp-accent: oklch(0.56 0.000 250.0) !important;
+  --tdp-accent-2: oklch(0.56 0.000 290.0) !important;
+  --tdp-accent-3: oklch(0.56 0.000 210.0) !important;
+}
+
+/*[OWUI_PAL_HER_END]*/
+/*[OWUI_VARS_END]*/
+
+
+
+#=# designer: generateThemeSections structural
+/*[OWUI_STRUCTURAL_START]*/
+/* --- LIGHT MODE Background Overrides --- */
+
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) body { background-color: var(--color-gray-50) !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !important; }
+@media (prefers-color-scheme: light) {
+
+html[data-theme="system"] body { background-color: var(--color-gray-50) !important; }
+html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !important; }
+
+}
+/* --- DARK MODE Background Overrides --- */
+
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body { background-color: var(--color-gray-900) !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }
+@media (prefers-color-scheme: dark) {
+
+html[data-theme="system"] body { background-color: var(--color-gray-900) !important; }
+html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }
+
+}
+/* --- OLED DARK MODE Background Overrides --- */
+
+html[data-theme="oled-dark"] body { background-color: var(--color-gray-900) !important; }
+html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }
+/* --- HER MODE Background Overrides --- */
+
+:is(html[data-theme="her"], html:where(.her)) body { background-color: var(--color-gray-50) !important; }
+:is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !important; }
+/*[OWUI_STRUCTURAL_END]*/
+
+
+#=# designer: generateThemeSections gradient
+
+
+#=# designer: generateThemeSections custom
+each mode's customCSS, changed:
+- lines 2-2 (1): ':root {' .. ':root {'
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) {
++ 
++ & {
+- lines 13-13 (1): 'html.dark {' .. 'html.dark {'
++ &.dark {
+- lines 24-24 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container {
+- lines 35-50 (16): '@keyframes gem-in {' .. '}'
++  
+- lines 52-67 (16): '@keyframes gem-breathe {' .. '}'
++  
+- lines 69-84 (16): '@keyframes gem-out {' .. '}'
++  
+- lines 94-94 (1): ':root {' .. ':root {'
++ & {
+- lines 102-102 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container {
+- lines 105-106 (2): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::before,
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::after {
+- lines 132-132 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::after {
+- lines 136-136 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container:focus-within::before {
+- lines 139-139 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container:focus-within::after {
+- lines 142-145 (4): '@keyframes gem-bar {' .. '}'
++  
+- lines 155-155 (1): '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont' .. '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont'
++ 	&:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container {
+- lines 158-159 (2): '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont' .. '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont'
++ 	&:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::before,
++ 	&:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::after {
+- lines 164-174 (11): '' .. '\t--gem-fade-out: 1.8s; /* fade-away when the chat starts */'
+- lines 176-197 (22): 'html.dark {' .. ''
+- lines 214-214 (1): '' .. ''
+- lines 231-231 (1): '' .. ''
++ @keyframes gem-bar {
++ 	from { background-position: 0% 0; }
++ 	to   { background-position: 100% 0; }
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ @media (prefers-color-scheme: light) {
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html[data-theme="system"] {
++ 
++ & {
++ 	--gem-blue: #4285f4;
++ 	--gem-purple: #9b72cb;
++ 	--gem-red: #d96570;
++ 	--gem-yellow: #f6b73c;
++ 	--gem-a: 30%;         /* glow strength, light mode */
++ 	--gem-a-low: 20%;     /* strength at the dim point of the breath */
++ 	--gem-fade-in: 4s;    /* initial fade-in */
++ 	--gem-breathe: 8s;    /* one full pulse */
++ 	--gem-fade-out: 1.8s; /* fade-away when the chat starts */
++ }
++ &.dark {
++ 	--gem-a: 42%;
++ 	--gem-a-low: 26%;
++ }
++ 
++ /* The glow only exists while the chat is EMPTY (new chat). Once any message exists
++    (existing chat opened, or first message sent) the rule below stops matching, so the
++    glow is suppressed entirely and the input is a normal, unstyled input again.
++    Open WebUI itself renders the input inside the new-chat placeholder (under the model
++    name/description) while empty, and swaps it for the bottom-docked input once the first
++    message is sent. */
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container {
++ 	box-shadow:
++ 		-14px 6px 46px -6px transparent,
++ 		0 -2px 50px -8px transparent,
++ 		14px 6px 46px -6px transparent,
++ 		0 14px 54px -4px transparent;
++ 	animation:
++ 		gem-in var(--gem-fade-in) cubic-bezier(0.25, 0.1, 0.25, 1) both,
++ 		gem-breathe var(--gem-breathe) ease-in-out var(--gem-fade-in) infinite;
++ }
++ 
++  
++ 
++  
++ 
++  
+- lines 257-257 (1): ':root {' .. ':root {'
++ & {
+- lines 265-265 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container {
+- lines 268-269 (2): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::before,
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::after {
+- lines 295-295 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::after {
+- lines 299-299 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container:focus-within::before {
+- lines 302-302 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container:focus-within::after {
+- lines 305-308 (4): '@keyframes gem-bar {' .. '}'
++  
+- lines 318-318 (1): '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont' .. '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont'
++ 	&:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container {
+- lines 321-322 (2): '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont' .. '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont'
++ 	&:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::before,
++ 	&:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::after {
+- lines 327-337 (11): '' .. '\t--gem-fade-out: 1.8s; /* fade-away when the chat starts */'
+- lines 339-360 (22): 'html.dark {' .. ''
+- lines 377-377 (1): '' .. ''
+- lines 394-394 (1): '' .. ''
++ @keyframes gem-bar {
++ 	from { background-position: 0% 0; }
++ 	to   { background-position: 100% 0; }
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ 
++ }
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"] {
++ 
++ & {
++ 	--gem-blue: #4285f4;
++ 	--gem-purple: #9b72cb;
++ 	--gem-red: #d96570;
++ 	--gem-yellow: #f6b73c;
++ 	--gem-a: 30%;         /* glow strength, light mode */
++ 	--gem-a-low: 20%;     /* strength at the dim point of the breath */
++ 	--gem-fade-in: 4s;    /* initial fade-in */
++ 	--gem-breathe: 8s;    /* one full pulse */
++ 	--gem-fade-out: 1.8s; /* fade-away when the chat starts */
++ }
++ &.dark {
++ 	--gem-a: 42%;
++ 	--gem-a-low: 26%;
++ }
++ 
++ /* The glow only exists while the chat is EMPTY (new chat). Once any message exists
++    (existing chat opened, or first message sent) the rule below stops matching, so the
++    glow is suppressed entirely and the input is a normal, unstyled input again.
++    Open WebUI itself renders the input inside the new-chat placeholder (under the model
++    name/description) while empty, and swaps it for the bottom-docked input once the first
++    message is sent. */
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container {
++ 	box-shadow:
++ 		-14px 6px 46px -6px transparent,
++ 		0 -2px 50px -8px transparent,
++ 		14px 6px 46px -6px transparent,
++ 		0 14px 54px -4px transparent;
++ 	animation:
++ 		gem-in var(--gem-fade-in) cubic-bezier(0.25, 0.1, 0.25, 1) both,
++ 		gem-breathe var(--gem-breathe) ease-in-out var(--gem-fade-in) infinite;
++ }
++ 
++  
++ 
++  
++ 
++  
+- lines 420-420 (1): ':root {' .. ':root {'
++ & {
+- lines 428-428 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container {
+- lines 431-432 (2): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::before,
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::after {
+- lines 458-458 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::after {
+- lines 462-462 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container:focus-within::before {
+- lines 465-465 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container:focus-within::after {
+- lines 468-471 (4): '@keyframes gem-bar {' .. '}'
++  
+- lines 481-481 (1): '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont' .. '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont'
++ 	&:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container {
+- lines 484-485 (2): '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont' .. '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont'
++ 	&:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::before,
++ 	&:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::after {
+- lines 490-500 (11): '' .. '\t--gem-fade-out: 1.8s; /* fade-away when the chat starts */'
+- lines 502-523 (22): 'html.dark {' .. ''
+- lines 540-540 (1): '' .. ''
+- lines 557-557 (1): '' .. ''
++ @keyframes gem-bar {
++ 	from { background-position: 0% 0; }
++ 	to   { background-position: 100% 0; }
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ @media (prefers-color-scheme: dark) {
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html[data-theme="system"] {
++ 
++ & {
++ 	--gem-blue: #4285f4;
++ 	--gem-purple: #9b72cb;
++ 	--gem-red: #d96570;
++ 	--gem-yellow: #f6b73c;
++ 	--gem-a: 30%;         /* glow strength, light mode */
++ 	--gem-a-low: 20%;     /* strength at the dim point of the breath */
++ 	--gem-fade-in: 4s;    /* initial fade-in */
++ 	--gem-breathe: 8s;    /* one full pulse */
++ 	--gem-fade-out: 1.8s; /* fade-away when the chat starts */
++ }
++ &.dark {
++ 	--gem-a: 42%;
++ 	--gem-a-low: 26%;
++ }
++ 
++ /* The glow only exists while the chat is EMPTY (new chat). Once any message exists
++    (existing chat opened, or first message sent) the rule below stops matching, so the
++    glow is suppressed entirely and the input is a normal, unstyled input again.
++    Open WebUI itself renders the input inside the new-chat placeholder (under the model
++    name/description) while empty, and swaps it for the bottom-docked input once the first
++    message is sent. */
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container {
++ 	box-shadow:
++ 		-14px 6px 46px -6px transparent,
++ 		0 -2px 50px -8px transparent,
++ 		14px 6px 46px -6px transparent,
++ 		0 14px 54px -4px transparent;
++ 	animation:
++ 		gem-in var(--gem-fade-in) cubic-bezier(0.25, 0.1, 0.25, 1) both,
++ 		gem-breathe var(--gem-breathe) ease-in-out var(--gem-fade-in) infinite;
++ }
++ 
++  
++ 
++  
++ 
++  
+- lines 583-583 (1): ':root {' .. ':root {'
++ & {
+- lines 591-591 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container {
+- lines 594-595 (2): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::before,
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::after {
+- lines 621-621 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::after {
+- lines 625-625 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container:focus-within::before {
+- lines 628-628 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container:focus-within::after {
+- lines 631-634 (4): '@keyframes gem-bar {' .. '}'
++  
+- lines 644-644 (1): '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont' .. '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont'
++ 	&:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container {
+- lines 647-648 (2): '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont' .. '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont'
++ 	&:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::before,
++ 	&:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::after {
+- lines 653-663 (11): '' .. '\t--gem-fade-out: 1.8s; /* fade-away when the chat starts */'
+- lines 665-686 (22): 'html.dark {' .. ''
+- lines 703-703 (1): '' .. ''
+- lines 720-720 (1): '' .. ''
++ @keyframes gem-bar {
++ 	from { background-position: 0% 0; }
++ 	to   { background-position: 100% 0; }
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ 
++ }
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"] {
++ 
++ & {
++ 	--gem-blue: #4285f4;
++ 	--gem-purple: #9b72cb;
++ 	--gem-red: #d96570;
++ 	--gem-yellow: #f6b73c;
++ 	--gem-a: 30%;         /* glow strength, light mode */
++ 	--gem-a-low: 20%;     /* strength at the dim point of the breath */
++ 	--gem-fade-in: 4s;    /* initial fade-in */
++ 	--gem-breathe: 8s;    /* one full pulse */
++ 	--gem-fade-out: 1.8s; /* fade-away when the chat starts */
++ }
++ &.dark {
++ 	--gem-a: 42%;
++ 	--gem-a-low: 26%;
++ }
++ 
++ /* The glow only exists while the chat is EMPTY (new chat). Once any message exists
++    (existing chat opened, or first message sent) the rule below stops matching, so the
++    glow is suppressed entirely and the input is a normal, unstyled input again.
++    Open WebUI itself renders the input inside the new-chat placeholder (under the model
++    name/description) while empty, and swaps it for the bottom-docked input once the first
++    message is sent. */
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container {
++ 	box-shadow:
++ 		-14px 6px 46px -6px transparent,
++ 		0 -2px 50px -8px transparent,
++ 		14px 6px 46px -6px transparent,
++ 		0 14px 54px -4px transparent;
++ 	animation:
++ 		gem-in var(--gem-fade-in) cubic-bezier(0.25, 0.1, 0.25, 1) both,
++ 		gem-breathe var(--gem-breathe) ease-in-out var(--gem-fade-in) infinite;
++ }
++ 
++  
++ 
++  
++ 
++  
+- lines 746-746 (1): ':root {' .. ':root {'
++ & {
+- lines 754-754 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container {
+- lines 757-758 (2): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::before,
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::after {
+- lines 784-784 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::after {
+- lines 788-788 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container:focus-within::before {
+- lines 791-791 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container:focus-within::after {
+- lines 794-797 (4): '@keyframes gem-bar {' .. '}'
++  
+- lines 807-807 (1): '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont' .. '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont'
++ 	&:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container {
+- lines 810-811 (2): '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont' .. '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont'
++ 	&:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::before,
++ 	&:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::after {
+- lines 816-826 (11): '' .. '\t--gem-fade-out: 1.8s; /* fade-away when the chat starts */'
+- lines 828-849 (22): 'html.dark {' .. ''
+- lines 866-866 (1): '' .. ''
+- lines 883-883 (1): '' .. ''
++ @keyframes gem-bar {
++ 	from { background-position: 0% 0; }
++ 	to   { background-position: 100% 0; }
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html.her, html[data-theme="her"] {
++ 
++ & {
++ 	--gem-blue: #4285f4;
++ 	--gem-purple: #9b72cb;
++ 	--gem-red: #d96570;
++ 	--gem-yellow: #f6b73c;
++ 	--gem-a: 30%;         /* glow strength, light mode */
++ 	--gem-a-low: 20%;     /* strength at the dim point of the breath */
++ 	--gem-fade-in: 4s;    /* initial fade-in */
++ 	--gem-breathe: 8s;    /* one full pulse */
++ 	--gem-fade-out: 1.8s; /* fade-away when the chat starts */
++ }
++ &.dark {
++ 	--gem-a: 42%;
++ 	--gem-a-low: 26%;
++ }
++ 
++ /* The glow only exists while the chat is EMPTY (new chat). Once any message exists
++    (existing chat opened, or first message sent) the rule below stops matching, so the
++    glow is suppressed entirely and the input is a normal, unstyled input again.
++    Open WebUI itself renders the input inside the new-chat placeholder (under the model
++    name/description) while empty, and swaps it for the bottom-docked input once the first
++    message is sent. */
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container {
++ 	box-shadow:
++ 		-14px 6px 46px -6px transparent,
++ 		0 -2px 50px -8px transparent,
++ 		14px 6px 46px -6px transparent,
++ 		0 14px 54px -4px transparent;
++ 	animation:
++ 		gem-in var(--gem-fade-in) cubic-bezier(0.25, 0.1, 0.25, 1) both,
++ 		gem-breathe var(--gem-breathe) ease-in-out var(--gem-fade-in) infinite;
++ }
++ 
++  
++ 
++  
++ 
++  
+- lines 909-909 (1): ':root {' .. ':root {'
++ & {
+- lines 917-917 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container {
+- lines 920-921 (2): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::before,
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::after {
+- lines 947-947 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::after {
+- lines 951-951 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container:focus-within::before {
+- lines 954-954 (1): 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta' .. 'html:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-conta'
++ &:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container:focus-within::after {
+- lines 957-960 (4): '@keyframes gem-bar {' .. '}'
++  
+- lines 970-970 (1): '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont' .. '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont'
++ 	&:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container {
+- lines 973-974 (2): '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont' .. '\thtml:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-cont'
++ 	&:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::before,
++ 	&:not(:has(#messages-container [id^="message-"]:not([id^="message-input"]))) #message-input-container::after {
++ }
++ @keyframes gem-in {
++ 	from {
++ 		box-shadow:
++ 			-14px 6px 46px -6px color-mix(in srgb, var(--gem-blue) 0%, transparent),
++ 			0 -2px 50px -8px color-mix(in srgb, var(--gem-purple) 0%, transparent),
++ 			14px 6px 46px -6px color-mix(in srgb, var(--gem-red) 0%, transparent),
++ 			0 14px 54px -4px color-mix(in srgb, var(--gem-yellow) 0%, transparent);
++ 	}
++ 	to {
++ 		box-shadow:
++ 			-14px 6px 46px -6px color-mix(in srgb, var(--gem-blue) var(--gem-a), transparent),
++ 			0 -2px 50px -8px color-mix(in srgb, var(--gem-purple) var(--gem-a), transparent),
++ 			14px 6px 46px -6px color-mix(in srgb, var(--gem-red) var(--gem-a), transparent),
++ 			0 14px 54px -4px color-mix(in srgb, var(--gem-yellow) calc(var(--gem-a) * 0.7), transparent);
++ 	}
++ }
++ @keyframes gem-breathe {
++ 	0%, 100% {
++ 		box-shadow:
++ 			-14px 6px 46px -6px color-mix(in srgb, var(--gem-blue) var(--gem-a), transparent),
++ 			0 -2px 50px -8px color-mix(in srgb, var(--gem-purple) var(--gem-a), transparent),
++ 			14px 6px 46px -6px color-mix(in srgb, var(--gem-red) var(--gem-a), transparent),
++ 			0 14px 54px -4px color-mix(in srgb, var(--gem-yellow) calc(var(--gem-a) * 0.7), transparent);
++ 	}
++ 	50% {
++ 		box-shadow:
++ 			-20px 8px 64px -4px color-mix(in srgb, var(--gem-blue) var(--gem-a-low), transparent),
++ 			0 -4px 70px -4px color-mix(in srgb, var(--gem-purple) var(--gem-a-low), transparent),
++ 			20px 8px 64px -4px color-mix(in srgb, var(--gem-red) var(--gem-a-low), transparent),
++ 			0 20px 74px 0 color-mix(in srgb, var(--gem-yellow) calc(var(--gem-a-low) * 0.7), transparent);
++ 	}
++ }
++ @keyframes gem-out {
++ 	from {
++ 		box-shadow:
++ 			-14px 6px 46px -6px color-mix(in srgb, var(--gem-blue) var(--gem-a), transparent),
++ 			0 -2px 50px -8px color-mix(in srgb, var(--gem-purple) var(--gem-a), transparent),
++ 			14px 6px 46px -6px color-mix(in srgb, var(--gem-red) var(--gem-a), transparent),
++ 			0 14px 54px -4px color-mix(in srgb, var(--gem-yellow) calc(var(--gem-a) * 0.7), transparent);
++ 	}
++ 	to {
++ 		box-shadow:
++ 			-14px 6px 46px -6px color-mix(in srgb, var(--gem-blue) 0%, transparent),
++ 			0 -2px 50px -8px color-mix(in srgb, var(--gem-purple) 0%, transparent),
++ 			14px 6px 46px -6px color-mix(in srgb, var(--gem-red) 0%, transparent),
++ 			0 14px 54px -4px color-mix(in srgb, var(--gem-yellow) 0%, transparent);
++ 	}
++ }
++ @keyframes gem-bar {
++ 	from { background-position: 0% 0; }
++ 	to   { background-position: 100% 0; }
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ 
+
+#=# designer: generateCoreCSS
+= vars + structural + gradient + custom
+
+#=# designer: dark mode
+_shippedVars: 0 overridden, defaults false
+accentVars: {"--tdp-accent": "oklch(0.74 0.000 250.0)", "--tdp-accent-2": "oklch(0.74 0.000 290.0)", "--tdp-accent-3": "oklch(0.74 0.000 210.0)"}
+contrast Main text on background: #f8f8f8 on #161616 = 17.04 (aaa true, aa true, aaLarge true)
+contrast Muted text on background: #b4b4b4 on #161616 = 8.73 (aaa true, aa true, aaLarge true)
+contrast Main text on elevated surfaces: #f8f8f8 on #262626 = 14.25 (aaa true, aa true, aaLarge true)
+contrast Main text on sidebar: #f8f8f8 on #0d0d0d = 18.30 (aaa true, aa true, aaLarge true)
+detectWashedOut: {"dark": false, "light": false}
+buildGradientCss(.scope): ''
+
+#=# designer: light mode
+@shared 5901760923e3
+
+#=# designer: oled mode
+@shared 978544a38129
+
+#=# designer: her mode
+@shared 5901760923e3
+
+#=# python: _css_balanced
+css True, custom section True
+
+#=# python: _postprocess_sections sidebar=opaque overlay=opaque: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=opaque overlay=opaque: structural
+= designer structural
+
+#=# python: _postprocess_sections sidebar=opaque overlay=opaque: gradient
+= designer gradient
+
+#=# python: _postprocess_sections sidebar=opaque overlay=opaque: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=opaque overlay=opaque: extra
+= designer extra
+
+#=# python: _postprocess_css sidebar=opaque overlay=opaque
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=opaque overlay=opaque
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=opaque overlay=opaque
+vars + custom, changed:
++ @supports (--tdp-instance: 1) {
++ /* structural rules deferred to bootloader */
++ /* gradient rules deferred to bootloader */
++ }
++ 
+
+#=# python: _custom_css_fragment sidebar=opaque overlay=opaque
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections sidebar=opaque overlay=translucent: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=opaque overlay=translucent: structural
+= designer structural
+
+#=# python: _postprocess_sections sidebar=opaque overlay=translucent: gradient
+= designer gradient
+
+#=# python: _postprocess_sections sidebar=opaque overlay=translucent: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=opaque overlay=translucent: extra
+= designer extra
+then appends: _overlay_css()
+
+#=# python: _postprocess_css sidebar=opaque overlay=translucent
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=opaque overlay=translucent
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=opaque overlay=translucent
+= _safe_subset_css sidebar=opaque overlay=opaque
+then appends: _overlay_css()
+
+#=# python: _custom_css_fragment sidebar=opaque overlay=translucent
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections sidebar=translucent overlay=opaque: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=translucent overlay=opaque: structural
+designer structural, changed:
+- lines 5-5 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
++ :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-50) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
+- lines 9-9 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !i' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !i'
++ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-50) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
+- lines 15-15 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) ' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) '
++ :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-950) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
+- lines 19-19 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !'
++ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-950) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
+- lines 25-25 (1): 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950' .. 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950'
++ html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-950) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
+- lines 29-29 (1): ':is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var' .. ':is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var'
++ :is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-50) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
+
+#=# python: _postprocess_sections sidebar=translucent overlay=opaque: gradient
+= designer gradient
+
+#=# python: _postprocess_sections sidebar=translucent overlay=opaque: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=translucent overlay=opaque: extra
+= designer extra
+then appends: _sidebar_fade_css()
+
+#=# python: _postprocess_css sidebar=translucent overlay=opaque
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=translucent overlay=opaque
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=translucent overlay=opaque
+= _safe_subset_css sidebar=opaque overlay=opaque
+
+#=# python: _custom_css_fragment sidebar=translucent overlay=opaque
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections sidebar=translucent overlay=translucent: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=translucent overlay=translucent: structural
+= structural of sidebar=translucent overlay=opaque
+
+#=# python: _postprocess_sections sidebar=translucent overlay=translucent: gradient
+= designer gradient
+
+#=# python: _postprocess_sections sidebar=translucent overlay=translucent: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=translucent overlay=translucent: extra
+= designer extra
+then appends: _sidebar_fade_css() + _overlay_css()
+
+#=# python: _postprocess_css sidebar=translucent overlay=translucent
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=translucent overlay=translucent
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=translucent overlay=translucent
+= _safe_subset_css sidebar=opaque overlay=translucent
+
+#=# python: _custom_css_fragment sidebar=translucent overlay=translucent
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections sidebar=transparent overlay=opaque: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=transparent overlay=opaque: structural
+designer structural, changed:
+- lines 5-5 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
++ :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+- lines 9-9 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !i' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !i'
++ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+- lines 15-15 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) ' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) '
++ :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+- lines 19-19 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !'
++ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+- lines 25-25 (1): 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950' .. 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950'
++ html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+- lines 29-29 (1): ':is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var' .. ':is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var'
++ :is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+
+#=# python: _postprocess_sections sidebar=transparent overlay=opaque: gradient
+= designer gradient
+
+#=# python: _postprocess_sections sidebar=transparent overlay=opaque: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=transparent overlay=opaque: extra
+= designer extra
+then appends: _sidebar_fade_css() + _sidebar_mobile_css()
+
+#=# python: _postprocess_css sidebar=transparent overlay=opaque
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=transparent overlay=opaque
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=transparent overlay=opaque
+= _safe_subset_css sidebar=opaque overlay=opaque
+
+#=# python: _custom_css_fragment sidebar=transparent overlay=opaque
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections sidebar=transparent overlay=translucent: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=transparent overlay=translucent: structural
+= structural of sidebar=transparent overlay=opaque
+
+#=# python: _postprocess_sections sidebar=transparent overlay=translucent: gradient
+= designer gradient
+
+#=# python: _postprocess_sections sidebar=transparent overlay=translucent: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=transparent overlay=translucent: extra
+= designer extra
+then appends: _sidebar_fade_css() + _sidebar_mobile_css() + _overlay_css()
+
+#=# python: _postprocess_css sidebar=transparent overlay=translucent
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=transparent overlay=translucent
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=transparent overlay=translucent
+= _safe_subset_css sidebar=opaque overlay=translucent
+
+#=# python: _custom_css_fragment sidebar=transparent overlay=translucent
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections canvas_fx=off sidebar=opaque overlay=opaque: structural
+= structural of sidebar=opaque overlay=opaque
+
+#=# python: /theme.css canvas_fx=off sidebar=opaque overlay=opaque
+= its _postprocess_sections, joined
+
+#=# python: /state.json changes to the saved state, canvas_fx=on auth_theming=on
+state otherwise unchanged
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=opaque overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json changes to the saved state, canvas_fx=on auth_theming=off
+@shared 63ce8f0e56f6
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=opaque overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json changes to the saved state, canvas_fx=off auth_theming=on
+@shared 342ff9603851
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=opaque overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json changes to the saved state, canvas_fx=off auth_theming=off
+@shared 50cc8c97f47d
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=opaque overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=opaque overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=opaque overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=opaque overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=opaque overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=translucent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=translucent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=translucent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=translucent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=translucent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=translucent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=translucent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=translucent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=transparent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=transparent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=transparent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=transparent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=transparent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=transparent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=transparent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=transparent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: _strip_canvas_scripts
+unchanged
+
+#=# python: no sections file: _safe_subset_css sidebar=opaque overlay=opaque
+vars + custom, changed:
++ @supports (--tdp-instance: 1) {
++ /* structural rules deferred to bootloader */
++ }
++ 
+
+#=# python: no sections file: _safe_subset_css sidebar=opaque overlay=translucent
+vars + custom, changed:
++ @supports (--tdp-instance: 1) {
++ /* structural rules deferred to bootloader */
++ }
++ 
+then appends: _overlay_css()
+
+#=# python: no sections file: _safe_subset_css sidebar=translucent overlay=opaque
+vars + custom, changed:
++ @supports (--tdp-instance: 1) {
++ /* structural rules deferred to bootloader */
++ }
++ 
+
+#=# python: no sections file: _safe_subset_css sidebar=translucent overlay=translucent
+vars + custom, changed:
++ @supports (--tdp-instance: 1) {
++ /* structural rules deferred to bootloader */
++ }
++ 
+then appends: _overlay_css()
+
+#=# python: no sections file: _safe_subset_css sidebar=transparent overlay=opaque
+vars + custom, changed:
++ @supports (--tdp-instance: 1) {
++ /* structural rules deferred to bootloader */
++ }
++ 
+
+#=# python: no sections file: _safe_subset_css sidebar=transparent overlay=translucent
+vars + custom, changed:
++ @supports (--tdp-instance: 1) {
++ /* structural rules deferred to bootloader */
++ }
++ 
+then appends: _overlay_css()
+
+#=# python: no sections file: /state.json
+= saved state
+
+#=# bootloader: enforceTheme default valves, /auth, dark, sections
+data-theme 'dark', class 'dark'
+= /theme.css
+
+#=# bootloader: enforceTheme default valves, /auth, dark, flat css only
+data-theme 'dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, oled-dark, sections
+data-theme 'oled-dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, oled-dark, flat css only
+data-theme 'oled-dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, light, sections
+data-theme 'light', class 'light'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, light, flat css only
+data-theme 'light', class 'light'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, her, sections
+data-theme 'her', class 'her'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, her, flat css only
+data-theme 'her', class 'her'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, dark, sections
+data-theme 'dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, dark, flat css only
+data-theme 'dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, dark, personal theme
+data-theme 'dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, oled-dark, sections
+data-theme 'oled-dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, oled-dark, flat css only
+data-theme 'oled-dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, oled-dark, personal theme
+data-theme 'oled-dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, light, sections
+data-theme 'light', class 'light'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, light, flat css only
+data-theme 'light', class 'light'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, light, personal theme
+data-theme 'light', class 'light'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, her, sections
+data-theme 'her', class 'her'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, her, flat css only
+data-theme 'her', class 'her'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, her, personal theme
+data-theme 'her', class 'her'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /auth, dark, sections
+data-theme 'dark', class 'dark'
+/theme.css, changed:
+- lines 1-1205 (1205): '/*[OWUI_VARS_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
+
+#=# bootloader: enforceTheme every valve flipped, /auth, oled-dark, sections
+data-theme 'oled-dark', class 'dark'
+= the page of: every valve flipped, /auth, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /auth, light, sections
+data-theme 'light', class 'light'
+= the page of: every valve flipped, /auth, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /auth, her, sections
+data-theme 'her', class 'her'
+= the page of: every valve flipped, /auth, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /, dark, sections
+data-theme 'dark', class 'dark'
+= /theme.css
+
+#=# bootloader: enforceTheme every valve flipped, /, oled-dark, sections
+data-theme 'oled-dark', class 'dark'
+= the page of: every valve flipped, /, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /, light, sections
+data-theme 'light', class 'light'
+= the page of: every valve flipped, /, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /, her, sections
+data-theme 'her', class 'her'
+= the page of: every valve flipped, /, dark, sections

@@ -386,7 +386,7 @@ function validateGradients() {
       continue;
     }
 
-    const validTypes = ['linear', 'radial', 'mesh'];
+    const validTypes = ['linear', 'radial', 'conic', 'mesh'];
     if (!validTypes.includes(data.type)) {
       fail(f, `invalid type "${data.type}" (expected: ${validTypes.join(', ')})`);
       continue;
@@ -406,7 +406,7 @@ function validateGradients() {
       continue;
     }
 
-    // Linear/radial must have stops; mesh uses meshPoints instead
+    // Linear, radial and conic must have stops; mesh uses meshPoints instead
     if (data.type !== 'mesh' && (!data.stops || data.stops.length === 0)) {
       fail(f, 'missing stops array');
       continue;

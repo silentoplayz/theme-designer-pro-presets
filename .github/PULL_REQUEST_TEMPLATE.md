@@ -36,7 +36,7 @@
 - [ ] Leaves the Surfaces layers' background and blur to the Surfaces tab
 
 ### Gradients
-- [ ] Placed in the correct subdirectory (`still`/`animated` + `linear`/`radial`/`mesh`)
+- [ ] Placed in the correct subdirectory (`still`/`animated` + `linear`/`radial`/`conic`/`mesh`)
 - [ ] Has a descriptive `name` field (not a timestamp)
 
 ## Notes

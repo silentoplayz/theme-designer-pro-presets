@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Gradient Preset",
-  "description": "A single gradient preset for Theme Designer Pro, supporting linear, radial, and mesh gradient types",
+  "description": "A single gradient preset for Theme Designer Pro, supporting linear, radial, conic, and mesh gradient types",
   "type": "object",
   "required": ["name", "type"],
   "properties": {
@@ -11,12 +11,12 @@
     },
     "type": {
       "type": "string",
-      "enum": ["linear", "radial", "mesh"],
+      "enum": ["linear", "radial", "conic", "mesh"],
       "description": "Gradient type"
     },
     "stops": {
       "type": "array",
-      "description": "Color stops for linear/radial gradients",
+      "description": "Color stops for linear, radial and conic gradients",
       "items": {
         "type": "object",
         "required": ["color", "position"],
@@ -38,7 +38,7 @@
       "type": "number",
       "minimum": 0,
       "maximum": 360,
-      "description": "Gradient angle in degrees (linear gradients)"
+      "description": "Gradient angle in degrees (linear and conic gradients)"
     },
     "intensity": {
       "type": "number",
@@ -52,8 +52,9 @@
     },
     "speed": {
       "type": "number",
-      "minimum": 0,
-      "description": "Animation speed (higher = faster)"
+      "minimum": 2,
+      "maximum": 30,
+      "description": "Seconds per animation cycle"
     },
     "radialPosX": {
       "type": "number",
@@ -107,7 +108,7 @@
   "allOf": [
     {
       "if": {
-        "properties": { "type": { "enum": ["linear", "radial"] } }
+        "properties": { "type": { "enum": ["linear", "radial", "conic"] } }
       },
       "then": {
         "required": ["stops"]

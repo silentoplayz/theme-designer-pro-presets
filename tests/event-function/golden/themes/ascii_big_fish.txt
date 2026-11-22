@@ -1,0 +1,955 @@
+# themes/ascii_big_fish.txt - written by golden.py --update, do not edit
+
+#=# designer: imported theme (ensureAllModes, normalizeModeData), against the file
+sha256 d14cdb8350c3
+dark: added from DEFAULT_MODE_DATA: themeAuthOnly customCssAuthOnly canvasAuthOnly gradientAuthOnly surfacesEnabled surfaceSidebarOpacity surfaceSidebarBlur surfaceComposerOpacity surfaceComposerBlur surfacePanelOpacity surfacePanelBlur surfaceCardsOpacity surfaceCardsBlur surfaceButtonsOpacity surfaceButtonsBlur surfaceMenuOpacity surfaceMenuBlur surfaceDialogOpacity surfaceDialogBlur surfaceBackdropOpacity surfaceBackdropBlur surfaceFadeOpacity
+light: added from DEFAULT_MODE_DATA: gradientType gradientAngle gradientStops gradientIntensity gradientAnimation gradientRadialPosX gradientRadialPosY gradientRadialShape gradientRadialSize gradientMeshPoints gradientMeshBgColor gradientAnimationSpeed themeAuthOnly customCssAuthOnly canvasAuthOnly gradientAuthOnly surfacesEnabled surfaceSidebarOpacity surfaceSidebarBlur surfaceComposerOpacity surfaceComposerBlur surfacePanelOpacity surfacePanelBlur surfaceCardsOpacity surfaceCardsBlur surfaceButtonsOpacity surfaceButtonsBlur surfaceMenuOpacity surfaceMenuBlur surfaceDialogOpacity surfaceDialogBlur surfaceBackdropOpacity surfaceBackdropBlur surfaceFadeOpacity
+oled: added from DEFAULT_MODE_DATA: gradientType gradientAngle gradientStops gradientIntensity gradientAnimation gradientRadialPosX gradientRadialPosY gradientRadialShape gradientRadialSize gradientMeshPoints gradientMeshBgColor gradientAnimationSpeed themeAuthOnly customCssAuthOnly canvasAuthOnly gradientAuthOnly surfacesEnabled surfaceSidebarOpacity surfaceSidebarBlur surfaceComposerOpacity surfaceComposerBlur surfacePanelOpacity surfacePanelBlur surfaceCardsOpacity surfaceCardsBlur surfaceButtonsOpacity surfaceButtonsBlur surfaceMenuOpacity surfaceMenuBlur surfaceDialogOpacity surfaceDialogBlur surfaceBackdropOpacity surfaceBackdropBlur surfaceFadeOpacity
+her: added from DEFAULT_MODE_DATA: gradientType gradientAngle gradientStops gradientIntensity gradientAnimation gradientRadialPosX gradientRadialPosY gradientRadialShape gradientRadialSize gradientMeshPoints gradientMeshBgColor gradientAnimationSpeed themeAuthOnly customCssAuthOnly canvasAuthOnly gradientAuthOnly surfacesEnabled surfaceSidebarOpacity surfaceSidebarBlur surfaceComposerOpacity surfaceComposerBlur surfacePanelOpacity surfacePanelBlur surfaceCardsOpacity surfaceCardsBlur surfaceButtonsOpacity surfaceButtonsBlur surfaceMenuOpacity surfaceMenuBlur surfaceDialogOpacity surfaceDialogBlur surfaceBackdropOpacity surfaceBackdropBlur surfaceFadeOpacity
+
+#=# designer: normalizeSnapshot
+same as imported
+
+#=# designer: isThemeDuplicate of itself
+true
+
+#=# designer: generateThemeSections vars
+/*[OWUI_VARS_START]*/
+/*[OWUI_PAL_LIGHT_START]*/
+/* --- LIGHT MODE VARIABLES --- */
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) {
+  --color-gray-50: oklch(0.980 0.026 200) !important;
+  --color-gray-100: oklch(0.960 0.026 200) !important;
+  --color-gray-200: oklch(0.940 0.026 200) !important;
+  --color-gray-300: oklch(0.870 0.026 200) !important;
+  --color-gray-400: oklch(0.790 0.026 200) !important;
+  --color-gray-500: oklch(0.710 0.026 200) !important;
+  --color-gray-600: oklch(0.530 0.026 200) !important;
+  --color-gray-700: oklch(0.440 0.026 200) !important;
+  --color-gray-800: oklch(0.340 0.026 200) !important;
+  --color-gray-850: oklch(0.290 0.026 200) !important;
+  --color-gray-900: oklch(0.220 0.026 200) !important;
+  --color-gray-950: oklch(0.180 0.026 200) !important;
+  --tdp-accent: #d4554a !important;
+  --tdp-accent-2: #1b8fb0 !important;
+  --tdp-accent-3: #23915f !important;
+}
+@media (prefers-color-scheme: light) {
+  html[data-theme="system"], :root[data-theme="system"] {
+    --color-gray-50: oklch(0.980 0.026 200) !important;
+    --color-gray-100: oklch(0.960 0.026 200) !important;
+    --color-gray-200: oklch(0.940 0.026 200) !important;
+    --color-gray-300: oklch(0.870 0.026 200) !important;
+    --color-gray-400: oklch(0.790 0.026 200) !important;
+    --color-gray-500: oklch(0.710 0.026 200) !important;
+    --color-gray-600: oklch(0.530 0.026 200) !important;
+    --color-gray-700: oklch(0.440 0.026 200) !important;
+    --color-gray-800: oklch(0.340 0.026 200) !important;
+    --color-gray-850: oklch(0.290 0.026 200) !important;
+    --color-gray-900: oklch(0.220 0.026 200) !important;
+    --color-gray-950: oklch(0.180 0.026 200) !important;
+    --tdp-accent: #d4554a !important;
+    --tdp-accent-2: #1b8fb0 !important;
+    --tdp-accent-3: #23915f !important;
+  }
+}
+
+/*[OWUI_PAL_LIGHT_END]*/
+/*[OWUI_PAL_DARK_START]*/
+/* --- DARK MODE VARIABLES --- */
+html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"] {
+  --color-gray-50: oklch(0.900 0.040 220) !important;
+  --color-gray-100: oklch(0.860 0.040 220) !important;
+  --color-gray-200: oklch(0.840 0.040 220) !important;
+  --color-gray-300: oklch(0.770 0.040 220) !important;
+  --color-gray-400: oklch(0.690 0.040 220) !important;
+  --color-gray-500: oklch(0.610 0.040 220) !important;
+  --color-gray-600: oklch(0.430 0.040 220) !important;
+  --color-gray-700: oklch(0.340 0.040 220) !important;
+  --color-gray-800: oklch(0.240 0.040 220) !important;
+  --color-gray-850: oklch(0.190 0.040 220) !important;
+  --color-gray-900: oklch(0.120 0.040 220) !important;
+  --color-gray-950: oklch(0.080 0.040 220) !important;
+  --tdp-accent: #ff8b80 !important;
+  --tdp-accent-2: #48cae8 !important;
+  --tdp-accent-3: #3ec48a !important;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"], :root[data-theme="system"] {
+    --color-gray-50: oklch(0.900 0.040 220) !important;
+    --color-gray-100: oklch(0.860 0.040 220) !important;
+    --color-gray-200: oklch(0.840 0.040 220) !important;
+    --color-gray-300: oklch(0.770 0.040 220) !important;
+    --color-gray-400: oklch(0.690 0.040 220) !important;
+    --color-gray-500: oklch(0.610 0.040 220) !important;
+    --color-gray-600: oklch(0.430 0.040 220) !important;
+    --color-gray-700: oklch(0.340 0.040 220) !important;
+    --color-gray-800: oklch(0.240 0.040 220) !important;
+    --color-gray-850: oklch(0.190 0.040 220) !important;
+    --color-gray-900: oklch(0.120 0.040 220) !important;
+    --color-gray-950: oklch(0.080 0.040 220) !important;
+    --tdp-accent: #ff8b80 !important;
+    --tdp-accent-2: #48cae8 !important;
+    --tdp-accent-3: #3ec48a !important;
+  }
+}
+
+/*[OWUI_PAL_DARK_END]*/
+/*[OWUI_PAL_OLED_START]*/
+/* --- OLED DARK MODE VARIABLES --- */
+html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"] {
+  --color-gray-50: oklch(0.780 0.040 220) !important;
+  --color-gray-100: oklch(0.740 0.040 220) !important;
+  --color-gray-200: oklch(0.720 0.040 220) !important;
+  --color-gray-300: oklch(0.650 0.040 220) !important;
+  --color-gray-400: oklch(0.570 0.040 220) !important;
+  --color-gray-500: oklch(0.490 0.040 220) !important;
+  --color-gray-600: oklch(0.310 0.040 220) !important;
+  --color-gray-700: oklch(0.220 0.040 220) !important;
+  --color-gray-800: oklch(0.120 0.040 220) !important;
+  --color-gray-850: oklch(0.070 0.040 220) !important;
+  --color-gray-900: oklch(0.000 0.040 220) !important;
+  --color-gray-950: oklch(0.000 0.040 220) !important;
+  --tdp-accent: #ff8b80 !important;
+  --tdp-accent-2: #48cae8 !important;
+  --tdp-accent-3: #3ec48a !important;
+}
+
+/*[OWUI_PAL_OLED_END]*/
+/*[OWUI_PAL_HER_START]*/
+/* --- HER MODE VARIABLES --- */
+html.her, html[data-theme="her"] {
+  --color-gray-50: oklch(0.980 0.020 175) !important;
+  --color-gray-100: oklch(0.940 0.020 175) !important;
+  --color-gray-200: oklch(0.920 0.020 175) !important;
+  --color-gray-300: oklch(0.850 0.020 175) !important;
+  --color-gray-400: oklch(0.770 0.020 175) !important;
+  --color-gray-500: oklch(0.690 0.020 175) !important;
+  --color-gray-600: oklch(0.510 0.020 175) !important;
+  --color-gray-700: oklch(0.420 0.020 175) !important;
+  --color-gray-800: oklch(0.320 0.020 175) !important;
+  --color-gray-850: oklch(0.270 0.020 175) !important;
+  --color-gray-900: oklch(0.200 0.020 175) !important;
+  --color-gray-950: oklch(0.160 0.020 175) !important;
+  --tdp-accent: #c8564a !important;
+  --tdp-accent-2: #1f88a6 !important;
+  --tdp-accent-3: #21865a !important;
+}
+
+/*[OWUI_PAL_HER_END]*/
+/*[OWUI_VARS_END]*/
+
+
+
+#=# designer: generateThemeSections structural
+/*[OWUI_STRUCTURAL_START]*/
+/* --- LIGHT MODE Background Overrides --- */
+
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) body { background-color: var(--color-gray-50) !important; }
+/*[OWUI_CLEAR_CANVAS_START]*/
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #owui-theme-bg-color { background-color: transparent !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app, :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #theme-designer-container, :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app > div, :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #theme-designer-container > *, :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #auth-page > div, :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) main { background-color: transparent !important; background-image: none !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_CANVAS_END]*/
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !important; }
+@media (prefers-color-scheme: light) {
+
+html[data-theme="system"] body { background-color: var(--color-gray-50) !important; }
+/*[OWUI_CLEAR_CANVAS_START]*/
+html[data-theme="system"] #owui-theme-bg-color { background-color: transparent !important; }
+html[data-theme="system"] .app, html[data-theme="system"] #theme-designer-container, html[data-theme="system"] #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+html[data-theme="system"] .app > div, html[data-theme="system"] #theme-designer-container > *, html[data-theme="system"] #auth-page > div, html[data-theme="system"] main { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_CANVAS_END]*/
+html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !important; }
+
+}
+/* --- DARK MODE Background Overrides --- */
+
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body { background-color: var(--color-gray-900) !important; }
+/*[OWUI_CLEAR_CANVAS_GRADIENT_START]*/
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #owui-theme-bg-color { background-color: transparent !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #theme-designer-container, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app > div, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #theme-designer-container > *, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #auth-page > div, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) main { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_CANVAS_GRADIENT_END]*/
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }
+@media (prefers-color-scheme: dark) {
+
+html[data-theme="system"] body { background-color: var(--color-gray-900) !important; }
+/*[OWUI_CLEAR_CANVAS_GRADIENT_START]*/
+html[data-theme="system"] #owui-theme-bg-color { background-color: transparent !important; }
+html[data-theme="system"] .app, html[data-theme="system"] #theme-designer-container, html[data-theme="system"] #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+html[data-theme="system"] .app > div, html[data-theme="system"] #theme-designer-container > *, html[data-theme="system"] #auth-page > div, html[data-theme="system"] main { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="system"] .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_CANVAS_GRADIENT_END]*/
+html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }
+
+}
+/* --- OLED DARK MODE Background Overrides --- */
+
+html[data-theme="oled-dark"] body { background-color: var(--color-gray-900) !important; }
+/*[OWUI_CLEAR_CANVAS_START]*/
+html[data-theme="oled-dark"] #owui-theme-bg-color { background-color: transparent !important; }
+html[data-theme="oled-dark"] .app, html[data-theme="oled-dark"] #theme-designer-container, html[data-theme="oled-dark"] #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+html[data-theme="oled-dark"] .app > div, html[data-theme="oled-dark"] #theme-designer-container > *, html[data-theme="oled-dark"] #auth-page > div, html[data-theme="oled-dark"] main { background-color: transparent !important; background-image: none !important; }
+html[data-theme="oled-dark"] .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="oled-dark"] #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="oled-dark"] #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="oled-dark"] .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+html[data-theme="oled-dark"] .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_CANVAS_END]*/
+html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }
+/* --- HER MODE Background Overrides --- */
+
+:is(html[data-theme="her"], html:where(.her)) body { background-color: var(--color-gray-50) !important; }
+/*[OWUI_CLEAR_CANVAS_START]*/
+:is(html[data-theme="her"], html:where(.her)) #owui-theme-bg-color { background-color: transparent !important; }
+:is(html[data-theme="her"], html:where(.her)) .app, :is(html[data-theme="her"], html:where(.her)) #theme-designer-container, :is(html[data-theme="her"], html:where(.her)) #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
+:is(html[data-theme="her"], html:where(.her)) .app > div, :is(html[data-theme="her"], html:where(.her)) #theme-designer-container > *, :is(html[data-theme="her"], html:where(.her)) #auth-page > div, :is(html[data-theme="her"], html:where(.her)) main { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="her"], html:where(.her)) .app :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="her"], html:where(.her)) #theme-designer-container :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="her"], html:where(.her)) #auth-page :where([class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *), [class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(.chat-user *):not([class*="rounded"]):not(#message-input-container *)):where(:not(#auth-login-card *)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="her"], html:where(.her)) .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
+:is(html[data-theme="her"], html:where(.her)) .app .file-code-editor { --editor-bg: transparent !important; }
+/*[OWUI_CLEAR_CANVAS_END]*/
+:is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !important; }
+/*[OWUI_STRUCTURAL_END]*/
+
+
+#=# designer: generateThemeSections gradient
+
+/*[OWUI_GRADIENT_START]*/
+/* System Gradient Background */
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body {
+  background-image: linear-gradient(180deg, #168f9c 0%, #157b94 20%, #105275 48%, #0b3659 76%, #071f39 100%) !important;
+  background-attachment: fixed !important;
+
+}
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content: none !important; display: none !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #chat-container .bg-linear-to-t:not(.bg-cover + div) {
+  background-image: linear-gradient(to top, rgba(7, 31, 57, 0.7), rgba(7, 31, 57, 0.35)) !important;
+}
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/
+  background-color: rgba(7, 31, 57, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+}
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar :is(.sidebar-bg-gradient-to-t, .sidebar-bg-gradient-to-b) {
+  --tw-gradient-from: rgba(7, 31, 57, 0.75) !important;
+}
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #navbar-bg-gradient-to-b {
+  --tw-gradient-from: rgba(7, 31, 57, 0.9) !important;
+  --tw-gradient-via: rgba(7, 31, 57, 0.5) !important;
+}
+/*[OWUI_GRADIENT_END]*/
+@media (prefers-color-scheme: dark) {
+
+/*[OWUI_GRADIENT_START]*/
+/* System Gradient Background */
+:root[data-theme="system"] body {
+  background-image: linear-gradient(180deg, #168f9c 0%, #157b94 20%, #105275 48%, #0b3659 76%, #071f39 100%) !important;
+  background-attachment: fixed !important;
+
+}
+:root[data-theme="system"] body::before { content: none !important; display: none !important; }
+:root[data-theme="system"] #chat-container .bg-linear-to-t:not(.bg-cover + div) {
+  background-image: linear-gradient(to top, rgba(7, 31, 57, 0.7), rgba(7, 31, 57, 0.35)) !important;
+}
+:root[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/
+  background-color: rgba(7, 31, 57, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+}
+:root[data-theme="system"] #sidebar :is(.sidebar-bg-gradient-to-t, .sidebar-bg-gradient-to-b) {
+  --tw-gradient-from: rgba(7, 31, 57, 0.75) !important;
+}
+:root[data-theme="system"] #navbar-bg-gradient-to-b {
+  --tw-gradient-from: rgba(7, 31, 57, 0.9) !important;
+  --tw-gradient-via: rgba(7, 31, 57, 0.5) !important;
+}
+/*[OWUI_GRADIENT_END]*/
+
+}
+
+
+#=# designer: generateThemeSections custom
+each mode's customCSS, changed:
+- lines 1-1 (1): ':root {' .. ':root {'
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) {
++ & {
+- lines 44-44 (1): 'html { scrollbar-color: var(--tank-line) transparent; }' .. 'html { scrollbar-color: var(--tank-line) transparent; }'
++ & { scrollbar-color: var(--tank-line) transparent; }
+- lines 47-47 (1): ':root {' .. ':root {'
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ @media (prefers-color-scheme: light) {
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html[data-theme="system"] {
++ & {
+- lines 90-90 (1): 'html { scrollbar-color: var(--tank-line) transparent; }' .. 'html { scrollbar-color: var(--tank-line) transparent; }'
++ & { scrollbar-color: var(--tank-line) transparent; }
+- lines 93-93 (1): ':root {' .. ':root {'
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ 
++ }
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"] {
++ & {
+- lines 136-136 (1): 'html { scrollbar-color: var(--tank-line) transparent; }' .. 'html { scrollbar-color: var(--tank-line) transparent; }'
++ & { scrollbar-color: var(--tank-line) transparent; }
+- lines 139-139 (1): ':root {' .. ':root {'
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ @media (prefers-color-scheme: dark) {
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html[data-theme="system"] {
++ & {
+- lines 182-182 (1): 'html { scrollbar-color: var(--tank-line) transparent; }' .. 'html { scrollbar-color: var(--tank-line) transparent; }'
++ & { scrollbar-color: var(--tank-line) transparent; }
+- lines 185-185 (1): ':root {' .. ':root {'
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ 
++ }
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"] {
++ & {
+- lines 228-228 (1): 'html { scrollbar-color: var(--tank-line) transparent; }' .. 'html { scrollbar-color: var(--tank-line) transparent; }'
++ & { scrollbar-color: var(--tank-line) transparent; }
+- lines 231-231 (1): ':root {' .. ':root {'
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ 
++ /*[OWUI_CUSTOM_START]*/
++ /* Custom CSS (Auto-Scoped) */
++ html.her, html[data-theme="her"] {
++ & {
+- lines 274-274 (1): 'html { scrollbar-color: var(--tank-line) transparent; }' .. 'html { scrollbar-color: var(--tank-line) transparent; }'
++ & { scrollbar-color: var(--tank-line) transparent; }
++ }
++ 
++ /*[OWUI_CUSTOM_END]*/
++ 
+
+#=# designer: generateCoreCSS
+= vars + structural + gradient + custom
+
+#=# designer: dark mode
+_shippedVars: 0 overridden, defaults false
+accentVars: {"--tdp-accent": "#ff8b80", "--tdp-accent-2": "#48cae8", "--tdp-accent-3": "#3ec48a"}
+contrast Main text on background: #c2e5f1 on #000810 = 15.13 (aaa true, aa true, aaLarge true)
+contrast Muted text on background: #80a2ad on #000810 = 7.38 (aaa true, aa true, aaLarge true)
+contrast Main text on elevated surfaces: #c2e5f1 on #001820 = 13.70 (aaa true, aa true, aaLarge true)
+contrast Main text on sidebar: #c2e5f1 on #000207 = 15.59 (aaa true, aa true, aaLarge true)
+detectWashedOut: {"dark": false, "light": false}
+buildGradientCss(.scope): 923 chars, sha256 9db9a8109c3b
+parseSettings: line 26 at 25 len 5 PLAYABLE bool false label "Playable" section "" hint "your cursor steers a fish that eats, grows and can be eaten; a tap after the results restarts"
+parseSettings: line 27 at 25 len 1 SIM_SPEED number 1 0.25..2 step 0.01 label "Sim speed" section "" hint "how fast the tank runs (0.25-2)"
+parseSettings: line 28 at 25 len 1 CELL_SIZE number 0 0..10 step 1 label "Cell size" section "" hint "width of one character cell in px; 0 sizes it like the original (0-10)"
+parseSettings: line 29 at 25 len 4 LIGHT_BEAMS bool true label "Light beams" section "" hint "the original's slow shafts of light, in dark modes"
+parseSettings: line 30 at 25 len 4 SHOW_GRID bool true label "Show grid" section "" hint "the original's faint character grid"
+parseSettings: line 31 at 25 len 2 SHARK_EVERY number 30 24..36 step 1 label "Shark every" section "" hint "average seconds between sharks passing, as the original's 24-36 s at 30 (10-120)"
+parseSettings: line 32 at 25 len 4 CURSOR_CURIOSITY bool true label "Cursor curiosity" section "" hint "fish that see the cursor turn toward it"
+parseSettings: line 33 at 25 len 4 SPLASHES bool true label "Splashes" section "" hint "a tap splashes the water and scatters the fish"
+parseSettings: line 34 at 25 len 3 RESTART_DELAY number 1.5 0.5..10 step 0.01 label "Restart delay" section "" hint "seconds the results show before a tap can restart (0.5-10)"
+parseSettings: line 35 at 25 len 2 MAX_FPS number 60 15..60 step 1 label "Max fps" section "" hint "frame cap; lower it to spare a slow machine (15-60)"
+parseSettings: line 36 at 25 len 3 CENTER_CALM number 0.5 0..1 step 0.01 label "Center calm" section "" hint "how much everything fades behind the chat column; 0 is the original's look (0-1)"
+parseSettings: line 37 at 25 len 3 BAND_WIDTH number 520 300..900 step 1 label "Band width" section "" hint "half-width of the calm band when the page has no chat column, in px (300-900)"
+
+#=# designer: light mode
+_shippedVars: 0 overridden, defaults false
+accentVars: {"--tdp-accent": "#d4554a", "--tdp-accent-2": "#1b8fb0", "--tdp-accent-3": "#23915f"}
+contrast Main text on background: #031516 on #e5feff = 17.77 (aaa true, aa true, aaLarge true)
+contrast Muted text on background: #5b7172 on #e5feff = 4.93 (aaa false, aa true, aaLarge true)
+contrast Main text on elevated surfaces: #031516 on #dff8f9 = 16.86 (aaa true, aa true, aaLarge true)
+contrast Main text on sidebar: #031516 on #e5feff = 17.77 (aaa true, aa true, aaLarge true)
+detectWashedOut: {"dark": false, "light": true}
+buildGradientCss(.scope): ''
+parseSettings: same as dark mode
+
+#=# designer: oled mode
+_shippedVars: 0 overridden, defaults false
+accentVars: {"--tdp-accent": "#ff8b80", "--tdp-accent-2": "#48cae8", "--tdp-accent-3": "#3ec48a"}
+contrast Main text on background: #9cbec9 on #000000 = 10.62 (aaa true, aa true, aaLarge true)
+contrast Muted text on background: #5d7d88 on #000000 = 4.75 (aaa false, aa true, aaLarge true)
+contrast Main text on elevated surfaces: #9cbec9 on #000206 = 10.50 (aaa true, aa true, aaLarge true)
+contrast Main text on sidebar: #9cbec9 on #000000 = 10.62 (aaa true, aa true, aaLarge true)
+detectWashedOut: {"dark": false, "light": false}
+buildGradientCss(.scope): ''
+parseSettings: same as dark mode
+
+#=# designer: her mode
+_shippedVars: 0 overridden, defaults false
+accentVars: {"--tdp-accent": "#c8564a", "--tdp-accent-2": "#1f88a6", "--tdp-accent-3": "#21865a"}
+contrast Main text on background: #04100d on #ebfdf8 = 18.37 (aaa true, aa true, aaLarge true)
+contrast Muted text on background: #5b6a65 on #ebfdf8 = 5.40 (aaa false, aa true, aaLarge true)
+contrast Main text on elevated surfaces: #04100d on #def0ea = 16.37 (aaa true, aa true, aaLarge true)
+contrast Main text on sidebar: #04100d on #ebfdf8 = 18.37 (aaa true, aa true, aaLarge true)
+detectWashedOut: {"dark": false, "light": true}
+buildGradientCss(.scope): ''
+parseSettings: same as dark mode
+
+#=# python: _css_balanced
+css True, custom section True
+
+#=# python: _postprocess_sections sidebar=opaque overlay=opaque: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=opaque overlay=opaque: structural
+= designer structural
+
+#=# python: _postprocess_sections sidebar=opaque overlay=opaque: gradient
+= designer gradient
+
+#=# python: _postprocess_sections sidebar=opaque overlay=opaque: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=opaque overlay=opaque: extra
+= designer extra
+
+#=# python: _postprocess_css sidebar=opaque overlay=opaque
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=opaque overlay=opaque
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=opaque overlay=opaque
+vars + custom, changed:
++ @supports (--tdp-instance: 1) {
++ /* structural rules deferred to bootloader */
++ /* gradient rules deferred to bootloader */
++ }
++ 
+
+#=# python: _custom_css_fragment sidebar=opaque overlay=opaque
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections sidebar=opaque overlay=translucent: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=opaque overlay=translucent: structural
+= designer structural
+
+#=# python: _postprocess_sections sidebar=opaque overlay=translucent: gradient
+= designer gradient
+
+#=# python: _postprocess_sections sidebar=opaque overlay=translucent: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=opaque overlay=translucent: extra
+= designer extra
+then appends: _overlay_css()
+
+#=# python: _postprocess_css sidebar=opaque overlay=translucent
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=opaque overlay=translucent
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=opaque overlay=translucent
+= _safe_subset_css sidebar=opaque overlay=opaque
+then appends: _overlay_css()
+
+#=# python: _custom_css_fragment sidebar=opaque overlay=translucent
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections sidebar=translucent overlay=opaque: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=translucent overlay=opaque: structural
+@shared e98ace20c493
+
+#=# python: _postprocess_sections sidebar=translucent overlay=opaque: gradient
+designer gradient, changed:
+- lines 14-15 (2): '  background-color: rgba(7, 31, 57, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
++   background-color: rgba(7, 31, 57, 0.25) !important;
++   backdrop-filter: blur(20px) saturate(1.3) !important;
+- lines 39-40 (2): '  background-color: rgba(7, 31, 57, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
++   background-color: rgba(7, 31, 57, 0.25) !important;
++   backdrop-filter: blur(20px) saturate(1.3) !important;
+
+#=# python: _postprocess_sections sidebar=translucent overlay=opaque: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=translucent overlay=opaque: extra
+= designer extra
+then appends: _sidebar_fade_css()
+
+#=# python: _postprocess_css sidebar=translucent overlay=opaque
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=translucent overlay=opaque
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=translucent overlay=opaque
+= _safe_subset_css sidebar=opaque overlay=opaque
+
+#=# python: _custom_css_fragment sidebar=translucent overlay=opaque
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections sidebar=translucent overlay=translucent: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=translucent overlay=translucent: structural
+= structural of sidebar=translucent overlay=opaque
+
+#=# python: _postprocess_sections sidebar=translucent overlay=translucent: gradient
+= gradient of sidebar=translucent overlay=opaque
+
+#=# python: _postprocess_sections sidebar=translucent overlay=translucent: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=translucent overlay=translucent: extra
+= designer extra
+then appends: _sidebar_fade_css() + _overlay_css()
+
+#=# python: _postprocess_css sidebar=translucent overlay=translucent
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=translucent overlay=translucent
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=translucent overlay=translucent
+= _safe_subset_css sidebar=opaque overlay=translucent
+
+#=# python: _custom_css_fragment sidebar=translucent overlay=translucent
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections sidebar=transparent overlay=opaque: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=transparent overlay=opaque: structural
+@shared 1bf69008a2ff
+
+#=# python: _postprocess_sections sidebar=transparent overlay=opaque: gradient
+designer gradient, changed:
+- lines 14-15 (2): '  background-color: rgba(7, 31, 57, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
++   background-color: transparent !important;
++   backdrop-filter: none !important;
+- lines 39-40 (2): '  background-color: rgba(7, 31, 57, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
++   background-color: transparent !important;
++   backdrop-filter: none !important;
+
+#=# python: _postprocess_sections sidebar=transparent overlay=opaque: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=transparent overlay=opaque: extra
+= designer extra
+then appends: _sidebar_fade_css() + _sidebar_mobile_css()
+
+#=# python: _postprocess_css sidebar=transparent overlay=opaque
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=transparent overlay=opaque
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=transparent overlay=opaque
+= _safe_subset_css sidebar=opaque overlay=opaque
+
+#=# python: _custom_css_fragment sidebar=transparent overlay=opaque
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections sidebar=transparent overlay=translucent: vars
+= designer vars
+
+#=# python: _postprocess_sections sidebar=transparent overlay=translucent: structural
+= structural of sidebar=transparent overlay=opaque
+
+#=# python: _postprocess_sections sidebar=transparent overlay=translucent: gradient
+= gradient of sidebar=transparent overlay=opaque
+
+#=# python: _postprocess_sections sidebar=transparent overlay=translucent: custom
+= designer custom
+
+#=# python: _postprocess_sections sidebar=transparent overlay=translucent: extra
+= designer extra
+then appends: _sidebar_fade_css() + _sidebar_mobile_css() + _overlay_css()
+
+#=# python: _postprocess_css sidebar=transparent overlay=translucent
+= its _postprocess_sections, joined
+
+#=# python: /theme.css sidebar=transparent overlay=translucent
+= _postprocess_css
+
+#=# python: _safe_subset_css sidebar=transparent overlay=translucent
+= _safe_subset_css sidebar=opaque overlay=translucent
+
+#=# python: _custom_css_fragment sidebar=transparent overlay=translucent
+_safe_subset_css, changed:
++ /* owui-theme-designer-pro:start */
++ /* owui-theme-designer-pro:end */
+
+#=# python: _postprocess_sections canvas_fx=off sidebar=opaque overlay=opaque: structural
+structural of sidebar=opaque overlay=opaque, changed:
+- lines 5-14 (10): '/*[OWUI_CLEAR_CANVAS_START]*/' .. '/*[OWUI_CLEAR_CANVAS_END]*/'
++ 
+- lines 19-28 (10): '/*[OWUI_CLEAR_CANVAS_START]*/' .. '/*[OWUI_CLEAR_CANVAS_END]*/'
++ 
+- lines 65-74 (10): '/*[OWUI_CLEAR_CANVAS_START]*/' .. '/*[OWUI_CLEAR_CANVAS_END]*/'
++ 
+- lines 79-88 (10): '/*[OWUI_CLEAR_CANVAS_START]*/' .. '/*[OWUI_CLEAR_CANVAS_END]*/'
++ 
+
+#=# python: /theme.css canvas_fx=off sidebar=opaque overlay=opaque
+= its _postprocess_sections, joined
+
+#=# python: /state.json changes to the saved state, canvas_fx=on auth_theming=on
+state otherwise unchanged
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=opaque overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json changes to the saved state, canvas_fx=on auth_theming=off
+@shared 63ce8f0e56f6
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=opaque overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json changes to the saved state, canvas_fx=off auth_theming=on
+@shared 1dc6abdaf939
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=opaque overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=opaque overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json changes to the saved state, canvas_fx=off auth_theming=off
+@shared 6f010f913f2d
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=opaque overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=opaque overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=opaque overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=opaque overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=opaque overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=opaque overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=opaque overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=opaque overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=opaque overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=translucent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=translucent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=translucent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=translucent overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=translucent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=translucent overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=translucent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=translucent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=translucent overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=translucent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=translucent overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=translucent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=translucent overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=transparent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=transparent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=opaque
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=transparent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=transparent overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=transparent overlay=opaque
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=transparent overlay=opaque
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: /state.json canvas_fx=on auth_theming=on sidebar=transparent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=on
+
+#=# python: /state.json canvas_fx=on auth_theming=off sidebar=transparent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections sidebar=transparent overlay=translucent
+rest = changes to the saved state, canvas_fx=on auth_theming=off
+
+#=# python: /state.json canvas_fx=off auth_theming=on sidebar=transparent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=transparent overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=on
+
+#=# python: /state.json canvas_fx=off auth_theming=off sidebar=transparent overlay=translucent
+compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
+_cssSections = _postprocess_sections canvas_fx=off sidebar=transparent overlay=translucent
+rest = changes to the saved state, canvas_fx=off auth_theming=off
+
+#=# python: _strip_canvas_scripts
+dark.canvasScript: removed
+light.canvasScript: removed
+oled.canvasScript: removed
+her.canvasScript: removed
+
+#=# python: no sections file: _safe_subset_css sidebar=opaque overlay=opaque
+_safe_subset_css sidebar=opaque overlay=opaque, changed:
++ 
++ @media (prefers-color-scheme: dark) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
+
+#=# python: no sections file: _safe_subset_css sidebar=opaque overlay=translucent
+_safe_subset_css sidebar=opaque overlay=translucent, changed:
++ 
++ @media (prefers-color-scheme: dark) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
+- lines 456-496 (41): '/* --- Overlay Translucency (valve-injected) --- */' .. ''
+then appends: _overlay_css()
+
+#=# python: no sections file: _safe_subset_css sidebar=translucent overlay=opaque
+_safe_subset_css sidebar=translucent overlay=opaque, changed:
++ 
++ @media (prefers-color-scheme: dark) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
+
+#=# python: no sections file: _safe_subset_css sidebar=translucent overlay=translucent
+_safe_subset_css sidebar=translucent overlay=translucent, changed:
++ 
++ @media (prefers-color-scheme: dark) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
+- lines 456-496 (41): '/* --- Overlay Translucency (valve-injected) --- */' .. ''
+then appends: _overlay_css()
+
+#=# python: no sections file: _safe_subset_css sidebar=transparent overlay=opaque
+_safe_subset_css sidebar=transparent overlay=opaque, changed:
++ 
++ @media (prefers-color-scheme: dark) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
+
+#=# python: no sections file: _safe_subset_css sidebar=transparent overlay=translucent
+_safe_subset_css sidebar=transparent overlay=translucent, changed:
++ 
++ @media (prefers-color-scheme: dark) {
++ 
++ /* gradient rules deferred to bootloader */
++ 
++ }
+- lines 456-496 (41): '/* --- Overlay Translucency (valve-injected) --- */' .. ''
+then appends: _overlay_css()
+
+#=# python: no sections file: /state.json
+= saved state
+
+#=# bootloader: enforceTheme default valves, /auth, dark, sections
+data-theme 'dark', class 'dark'
+/theme.css, changed:
+- lines 224-224 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
+- lines 249-249 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+
+#=# bootloader: enforceTheme default valves, /auth, dark, flat css only
+data-theme 'dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, oled-dark, sections
+data-theme 'oled-dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, oled-dark, flat css only
+data-theme 'oled-dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, light, sections
+data-theme 'light', class 'light'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, light, flat css only
+data-theme 'light', class 'light'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, her, sections
+data-theme 'her', class 'her'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /auth, her, flat css only
+data-theme 'her', class 'her'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, dark, sections
+data-theme 'dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, dark, flat css only
+data-theme 'dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, dark, personal theme
+data-theme 'dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, oled-dark, sections
+data-theme 'oled-dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, oled-dark, flat css only
+data-theme 'oled-dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, oled-dark, personal theme
+data-theme 'oled-dark', class 'dark'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, light, sections
+data-theme 'light', class 'light'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, light, flat css only
+data-theme 'light', class 'light'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, light, personal theme
+data-theme 'light', class 'light'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, her, sections
+data-theme 'her', class 'her'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, her, flat css only
+data-theme 'her', class 'her'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme default valves, /, her, personal theme
+data-theme 'her', class 'her'
+= the page of: default valves, /auth, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /auth, dark, sections
+data-theme 'dark', class 'dark'
+/theme.css, changed:
+- lines 1-554 (554): '/*[OWUI_VARS_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
+
+#=# bootloader: enforceTheme every valve flipped, /auth, oled-dark, sections
+data-theme 'oled-dark', class 'dark'
+= the page of: every valve flipped, /auth, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /auth, light, sections
+data-theme 'light', class 'light'
+= the page of: every valve flipped, /auth, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /auth, her, sections
+data-theme 'her', class 'her'
+= the page of: every valve flipped, /auth, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /, dark, sections
+data-theme 'dark', class 'dark'
+/theme.css, changed:
+- lines 188-188 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
+- lines 213-213 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+
+#=# bootloader: enforceTheme every valve flipped, /, oled-dark, sections
+data-theme 'oled-dark', class 'dark'
+= the page of: every valve flipped, /, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /, light, sections
+data-theme 'light', class 'light'
+= the page of: every valve flipped, /, dark, sections
+
+#=# bootloader: enforceTheme every valve flipped, /, her, sections
+data-theme 'her', class 'her'
+= the page of: every valve flipped, /, dark, sections

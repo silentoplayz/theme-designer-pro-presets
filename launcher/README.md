@@ -43,7 +43,7 @@ An admin can turn off **Model Written Animations** to keep to the catalog, and *
 
 ## ✅ Before you start
 
-- **Open WebUI v0.11.0 or later**, with the **Theme Designer Pro event function v1.17.0 or later** installed and turned on, and **v1.18.0 or later** to apply an animation the chat model writes.
+- **Open WebUI v0.13.4 or later**, with the **Theme Designer Pro event function v1.17.0 or later** installed and turned on, and **v1.18.0 or later** to apply an animation the chat model writes.
 - **For the skill:** Open WebUI v0.12.0 or later, and **Native** function calling on the model, so it can read the skill's files. See [Skills](../skills/README.md).
 - **For users:** the event function's **Allow Personal Themes** valve turned on. Without it, the card says personal themes are turned off. Admins can still change the instance theme.
 - **For everyone who uses it:** **Settings > Interface > iframe Sandbox Allow Same Origin** turned on, in their own settings. Open WebUI shows a Tool's output in a sandboxed frame. Without this setting, that frame has no origin of its own, so it can't sign in to the designer: the card still previews the theme, but **Apply** stays off and the card names the setting. With it on, HTML that tools and models show in your chats runs with your Open WebUI page's access, so turn it on only on an instance whose tools you trust.
@@ -73,7 +73,7 @@ A theme from a chat changes nothing until you press **Apply** on its card. **App
 - It's within 30 days of the chat building it.
 - It lands where it was meant to, so a personal theme can't change the instance theme.
 
-**Undo** works in the browser tab that applied the theme, until you close it. After that, pick your earlier theme from your Theme Gallery in the designer.
+**Undo** works in the browser tab that applied the theme, until you close it. After that, pick your earlier theme from your Theme Gallery in the designer. When the designer couldn't read the saved theme Undo would go back to, Undo refuses and says so, and you pick your earlier theme from the gallery the same way.
 
 ---
 
@@ -84,7 +84,7 @@ A theme from a chat changes nothing until you press **Apply** on its card. **App
 | **Designer Url** | `/api/v1/theme-designer` | Where the event function serves the designer. Must match the event function's own **Designer Url** valve. |
 | **Background Animations** | on | Lets a theme from a chat have an animated background from the catalog. Off, themes are palette, gradient and glass only. |
 | **Model Written Animations** | on | Lets the chat model write a new animation when the catalog has nothing that fits. It runs isolated (see above). Off, animations come from the catalog only. |
-| **Model Written Css** | on | Lets the chat model add its own CSS. It can't load anything: no `@import`, and `url()` only for `data:` URLs. |
+| **Model Written Css** | on | Lets the chat model add its own CSS. It can't load anything: no `@import`, and `url()`, `image-set()` and `src()` only with quoted `data:` URLs such as `url("data:…")`, however they're escaped, and no comment or string left open. |
 | **Canvas Catalog Url** | this repository's `bundles/canvas-fx-all.json` | The Canvas FX bundle the animated backgrounds come from. Only scripts from here ever run. |
 | **Iframe Height** | `800` | Height of the designer, in pixels, when a chat opens it. |
 | **Iframe Scale** | `1.0` | Size of the designer inside the chat. Lower values, such as `0.8`, show more of it at a smaller size. |
@@ -101,6 +101,10 @@ A theme from a chat changes nothing until you press **Apply** on its card. **App
 - **The model answers in words but no card shows.** The Launcher isn't on for this chat, or the model didn't call it. Turn the Tool on from the message box, or try **Native** function calling in the model's **Advanced Params**.
 
 ---
+
+## 📝 What's New in 2.1.2
+
+- **Custom CSS from the chat model is checked the way a browser reads it.** Escaped characters, comments and `image-set()` could hide an address the browser would fetch. The check now decodes them first, and refuses CSS that leaves a comment or string unclosed.
 
 ## 📝 What's New in 2.1.1
 
