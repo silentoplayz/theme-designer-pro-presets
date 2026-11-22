@@ -553,7 +553,7 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 
 ## 📝 Unreleased
 
-- The **Other pages** picture shows on Calendar, Notes, Workspace and the other pages Open WebUI opens as tabs, instead of being covered by the Chat Background Image. Those pages open inside the chat, and the chat's own picture stayed drawn behind them. Chats keep their Chat Background Image.
+- The Chat Background Image stays in chats. Calendar, Notes, Workspace and the other pages Open WebUI opens as tabs open inside the chat, and the chat's own picture stayed drawn behind them: it covered the **Other pages** picture, and showed on those pages when no Other pages picture was set. Those pages now show their **Other pages** picture, or none.
 
 ## 📝 What's New in 1.23.0
 
