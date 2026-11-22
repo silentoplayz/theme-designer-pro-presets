@@ -112,7 +112,7 @@
         "manualOverrides": {
           "type": "string",
           "default": "",
-          "description": "Palette steps set as text, one '--color-gray-N: value;' per line"
+          "description": "Palette steps set as text, one '--app-base-N: value;' per line (the older '--color-gray-N' names set the same steps)"
         },
         "manualOverridesEnabled": {
           "type": "boolean",

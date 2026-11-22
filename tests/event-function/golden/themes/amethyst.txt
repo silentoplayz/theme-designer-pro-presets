@@ -17,37 +17,73 @@ true
 /*[OWUI_VARS_START]*/
 /*[OWUI_PAL_LIGHT_START]*/
 /* --- LIGHT MODE VARIABLES --- */
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]):not([style*="--app-bg"]) {
+  --app-base-0: oklch(1.000 0.024 302) !important;
+  --app-base-50: oklch(0.980 0.024 302) !important;
+  --app-base-100: oklch(0.940 0.024 302) !important;
+  --app-base-200: oklch(0.920 0.024 302) !important;
+  --app-base-300: oklch(0.850 0.024 302) !important;
+  --app-base-400: oklch(0.770 0.024 302) !important;
+  --app-base-500: oklch(0.690 0.024 302) !important;
+  --app-base-600: oklch(0.510 0.024 302) !important;
+  --app-base-700: oklch(0.420 0.024 302) !important;
+  --app-base-800: oklch(0.320 0.024 302) !important;
+  --app-base-850: oklch(0.270 0.024 302) !important;
+  --app-base-900: oklch(0.200 0.024 302) !important;
+  --app-base-950: oklch(0.160 0.024 302) !important;
+  --app-base-1000: oklch(0.000 0.024 302) !important;
+  --app-bg: oklch(1.000 0.024 302) !important;
+  --app-fg: oklch(0.000 0.024 302) !important;
+  --color-gray-50: var(--app-base-50) !important;
+  --color-gray-100: var(--app-base-100) !important;
+  --color-gray-200: var(--app-base-200) !important;
+  --color-gray-300: var(--app-base-300) !important;
+  --color-gray-400: var(--app-base-400) !important;
+  --color-gray-500: var(--app-base-500) !important;
+  --color-gray-600: var(--app-base-600) !important;
+  --color-gray-700: var(--app-base-700) !important;
+  --color-gray-800: var(--app-base-800) !important;
+  --color-gray-850: var(--app-base-850) !important;
+  --color-gray-900: var(--app-base-900) !important;
+  --color-gray-950: var(--app-base-950) !important;
+}
 :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) {
-  --color-gray-50: oklch(0.980 0.024 302) !important;
-  --color-gray-100: oklch(0.940 0.024 302) !important;
-  --color-gray-200: oklch(0.920 0.024 302) !important;
-  --color-gray-300: oklch(0.850 0.024 302) !important;
-  --color-gray-400: oklch(0.770 0.024 302) !important;
-  --color-gray-500: oklch(0.690 0.024 302) !important;
-  --color-gray-600: oklch(0.510 0.024 302) !important;
-  --color-gray-700: oklch(0.420 0.024 302) !important;
-  --color-gray-800: oklch(0.320 0.024 302) !important;
-  --color-gray-850: oklch(0.270 0.024 302) !important;
-  --color-gray-900: oklch(0.200 0.024 302) !important;
-  --color-gray-950: oklch(0.160 0.024 302) !important;
   --tdp-accent: oklch(0.56 0.096 302.0) !important;
   --tdp-accent-2: oklch(0.56 0.096 342.0) !important;
   --tdp-accent-3: oklch(0.56 0.096 262.0) !important;
 }
 @media (prefers-color-scheme: light) {
+  html[data-theme="system"]:not([style*="--app-bg"]), :root[data-theme="system"]:not([style*="--app-bg"]) {
+    --app-base-0: oklch(1.000 0.024 302) !important;
+    --app-base-50: oklch(0.980 0.024 302) !important;
+    --app-base-100: oklch(0.940 0.024 302) !important;
+    --app-base-200: oklch(0.920 0.024 302) !important;
+    --app-base-300: oklch(0.850 0.024 302) !important;
+    --app-base-400: oklch(0.770 0.024 302) !important;
+    --app-base-500: oklch(0.690 0.024 302) !important;
+    --app-base-600: oklch(0.510 0.024 302) !important;
+    --app-base-700: oklch(0.420 0.024 302) !important;
+    --app-base-800: oklch(0.320 0.024 302) !important;
+    --app-base-850: oklch(0.270 0.024 302) !important;
+    --app-base-900: oklch(0.200 0.024 302) !important;
+    --app-base-950: oklch(0.160 0.024 302) !important;
+    --app-base-1000: oklch(0.000 0.024 302) !important;
+    --app-bg: oklch(1.000 0.024 302) !important;
+    --app-fg: oklch(0.000 0.024 302) !important;
+    --color-gray-50: var(--app-base-50) !important;
+    --color-gray-100: var(--app-base-100) !important;
+    --color-gray-200: var(--app-base-200) !important;
+    --color-gray-300: var(--app-base-300) !important;
+    --color-gray-400: var(--app-base-400) !important;
+    --color-gray-500: var(--app-base-500) !important;
+    --color-gray-600: var(--app-base-600) !important;
+    --color-gray-700: var(--app-base-700) !important;
+    --color-gray-800: var(--app-base-800) !important;
+    --color-gray-850: var(--app-base-850) !important;
+    --color-gray-900: var(--app-base-900) !important;
+    --color-gray-950: var(--app-base-950) !important;
+  }
   html[data-theme="system"], :root[data-theme="system"] {
-    --color-gray-50: oklch(0.980 0.024 302) !important;
-    --color-gray-100: oklch(0.940 0.024 302) !important;
-    --color-gray-200: oklch(0.920 0.024 302) !important;
-    --color-gray-300: oklch(0.850 0.024 302) !important;
-    --color-gray-400: oklch(0.770 0.024 302) !important;
-    --color-gray-500: oklch(0.690 0.024 302) !important;
-    --color-gray-600: oklch(0.510 0.024 302) !important;
-    --color-gray-700: oklch(0.420 0.024 302) !important;
-    --color-gray-800: oklch(0.320 0.024 302) !important;
-    --color-gray-850: oklch(0.270 0.024 302) !important;
-    --color-gray-900: oklch(0.200 0.024 302) !important;
-    --color-gray-950: oklch(0.160 0.024 302) !important;
     --tdp-accent: oklch(0.56 0.096 302.0) !important;
     --tdp-accent-2: oklch(0.56 0.096 342.0) !important;
     --tdp-accent-3: oklch(0.56 0.096 262.0) !important;
@@ -57,37 +93,73 @@ true
 /*[OWUI_PAL_LIGHT_END]*/
 /*[OWUI_PAL_DARK_START]*/
 /* --- DARK MODE VARIABLES --- */
+html.dark:not([data-theme="oled-dark"]):not([style*="--app-bg"]), html[data-theme="dark"]:not([style*="--app-bg"]) {
+  --app-base-0: oklch(0.980 0.034 296) !important;
+  --app-base-50: oklch(0.960 0.034 296) !important;
+  --app-base-100: oklch(0.920 0.034 296) !important;
+  --app-base-200: oklch(0.900 0.034 296) !important;
+  --app-base-300: oklch(0.830 0.034 296) !important;
+  --app-base-400: oklch(0.750 0.034 296) !important;
+  --app-base-500: oklch(0.670 0.034 296) !important;
+  --app-base-600: oklch(0.490 0.034 296) !important;
+  --app-base-700: oklch(0.400 0.034 296) !important;
+  --app-base-800: oklch(0.300 0.034 296) !important;
+  --app-base-850: oklch(0.250 0.034 296) !important;
+  --app-base-900: oklch(0.180 0.034 296) !important;
+  --app-base-950: oklch(0.140 0.034 296) !important;
+  --app-base-1000: color-mix(in oklab, oklch(0.180 0.034 296), black 60%) !important;
+  --app-bg: oklch(0.180 0.034 296) !important;
+  --app-fg: oklch(0.980 0.034 296) !important;
+  --color-gray-50: var(--app-base-50) !important;
+  --color-gray-100: var(--app-base-100) !important;
+  --color-gray-200: var(--app-base-200) !important;
+  --color-gray-300: var(--app-base-300) !important;
+  --color-gray-400: var(--app-base-400) !important;
+  --color-gray-500: var(--app-base-500) !important;
+  --color-gray-600: var(--app-base-600) !important;
+  --color-gray-700: var(--app-base-700) !important;
+  --color-gray-800: var(--app-base-800) !important;
+  --color-gray-850: var(--app-base-850) !important;
+  --color-gray-900: var(--app-base-900) !important;
+  --color-gray-950: var(--app-base-950) !important;
+}
 html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"] {
-  --color-gray-50: oklch(0.960 0.034 296) !important;
-  --color-gray-100: oklch(0.920 0.034 296) !important;
-  --color-gray-200: oklch(0.900 0.034 296) !important;
-  --color-gray-300: oklch(0.830 0.034 296) !important;
-  --color-gray-400: oklch(0.750 0.034 296) !important;
-  --color-gray-500: oklch(0.670 0.034 296) !important;
-  --color-gray-600: oklch(0.490 0.034 296) !important;
-  --color-gray-700: oklch(0.400 0.034 296) !important;
-  --color-gray-800: oklch(0.300 0.034 296) !important;
-  --color-gray-850: oklch(0.250 0.034 296) !important;
-  --color-gray-900: oklch(0.180 0.034 296) !important;
-  --color-gray-950: oklch(0.140 0.034 296) !important;
   --tdp-accent: oklch(0.74 0.136 296.0) !important;
   --tdp-accent-2: oklch(0.74 0.136 336.0) !important;
   --tdp-accent-3: oklch(0.74 0.136 256.0) !important;
 }
 @media (prefers-color-scheme: dark) {
+  html[data-theme="system"]:not([style*="--app-bg"]), :root[data-theme="system"]:not([style*="--app-bg"]) {
+    --app-base-0: oklch(0.980 0.034 296) !important;
+    --app-base-50: oklch(0.960 0.034 296) !important;
+    --app-base-100: oklch(0.920 0.034 296) !important;
+    --app-base-200: oklch(0.900 0.034 296) !important;
+    --app-base-300: oklch(0.830 0.034 296) !important;
+    --app-base-400: oklch(0.750 0.034 296) !important;
+    --app-base-500: oklch(0.670 0.034 296) !important;
+    --app-base-600: oklch(0.490 0.034 296) !important;
+    --app-base-700: oklch(0.400 0.034 296) !important;
+    --app-base-800: oklch(0.300 0.034 296) !important;
+    --app-base-850: oklch(0.250 0.034 296) !important;
+    --app-base-900: oklch(0.180 0.034 296) !important;
+    --app-base-950: oklch(0.140 0.034 296) !important;
+    --app-base-1000: color-mix(in oklab, oklch(0.180 0.034 296), black 60%) !important;
+    --app-bg: oklch(0.180 0.034 296) !important;
+    --app-fg: oklch(0.980 0.034 296) !important;
+    --color-gray-50: var(--app-base-50) !important;
+    --color-gray-100: var(--app-base-100) !important;
+    --color-gray-200: var(--app-base-200) !important;
+    --color-gray-300: var(--app-base-300) !important;
+    --color-gray-400: var(--app-base-400) !important;
+    --color-gray-500: var(--app-base-500) !important;
+    --color-gray-600: var(--app-base-600) !important;
+    --color-gray-700: var(--app-base-700) !important;
+    --color-gray-800: var(--app-base-800) !important;
+    --color-gray-850: var(--app-base-850) !important;
+    --color-gray-900: var(--app-base-900) !important;
+    --color-gray-950: var(--app-base-950) !important;
+  }
   html[data-theme="system"], :root[data-theme="system"] {
-    --color-gray-50: oklch(0.960 0.034 296) !important;
-    --color-gray-100: oklch(0.920 0.034 296) !important;
-    --color-gray-200: oklch(0.900 0.034 296) !important;
-    --color-gray-300: oklch(0.830 0.034 296) !important;
-    --color-gray-400: oklch(0.750 0.034 296) !important;
-    --color-gray-500: oklch(0.670 0.034 296) !important;
-    --color-gray-600: oklch(0.490 0.034 296) !important;
-    --color-gray-700: oklch(0.400 0.034 296) !important;
-    --color-gray-800: oklch(0.300 0.034 296) !important;
-    --color-gray-850: oklch(0.250 0.034 296) !important;
-    --color-gray-900: oklch(0.180 0.034 296) !important;
-    --color-gray-950: oklch(0.140 0.034 296) !important;
     --tdp-accent: oklch(0.74 0.136 296.0) !important;
     --tdp-accent-2: oklch(0.74 0.136 336.0) !important;
     --tdp-accent-3: oklch(0.74 0.136 256.0) !important;
@@ -97,19 +169,37 @@ html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"] {
 /*[OWUI_PAL_DARK_END]*/
 /*[OWUI_PAL_OLED_START]*/
 /* --- OLED DARK MODE VARIABLES --- */
+html.dark[data-theme="oled-dark"]:not([style*="--app-bg"]), html[data-theme="oled-dark"]:not([style*="--app-bg"]) {
+  --app-base-0: oklch(0.800 0.040 298) !important;
+  --app-base-50: oklch(0.780 0.040 298) !important;
+  --app-base-100: oklch(0.740 0.040 298) !important;
+  --app-base-200: oklch(0.720 0.040 298) !important;
+  --app-base-300: oklch(0.650 0.040 298) !important;
+  --app-base-400: oklch(0.570 0.040 298) !important;
+  --app-base-500: oklch(0.490 0.040 298) !important;
+  --app-base-600: oklch(0.310 0.040 298) !important;
+  --app-base-700: oklch(0.220 0.040 298) !important;
+  --app-base-800: oklch(0.120 0.040 298) !important;
+  --app-base-850: oklch(0.070 0.040 298) !important;
+  --app-base-900: oklch(0.000 0.040 298) !important;
+  --app-base-950: oklch(0.000 0.040 298) !important;
+  --app-base-1000: color-mix(in oklab, oklch(0.000 0.040 298), black 60%) !important;
+  --app-bg: oklch(0.000 0.040 298) !important;
+  --app-fg: oklch(0.800 0.040 298) !important;
+  --color-gray-50: var(--app-base-50) !important;
+  --color-gray-100: var(--app-base-100) !important;
+  --color-gray-200: var(--app-base-200) !important;
+  --color-gray-300: var(--app-base-300) !important;
+  --color-gray-400: var(--app-base-400) !important;
+  --color-gray-500: var(--app-base-500) !important;
+  --color-gray-600: var(--app-base-600) !important;
+  --color-gray-700: var(--app-base-700) !important;
+  --color-gray-800: var(--app-base-800) !important;
+  --color-gray-850: var(--app-base-850) !important;
+  --color-gray-900: var(--app-base-900) !important;
+  --color-gray-950: var(--app-base-950) !important;
+}
 html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"] {
-  --color-gray-50: oklch(0.780 0.040 298) !important;
-  --color-gray-100: oklch(0.740 0.040 298) !important;
-  --color-gray-200: oklch(0.720 0.040 298) !important;
-  --color-gray-300: oklch(0.650 0.040 298) !important;
-  --color-gray-400: oklch(0.570 0.040 298) !important;
-  --color-gray-500: oklch(0.490 0.040 298) !important;
-  --color-gray-600: oklch(0.310 0.040 298) !important;
-  --color-gray-700: oklch(0.220 0.040 298) !important;
-  --color-gray-800: oklch(0.120 0.040 298) !important;
-  --color-gray-850: oklch(0.070 0.040 298) !important;
-  --color-gray-900: oklch(0.000 0.040 298) !important;
-  --color-gray-950: oklch(0.000 0.040 298) !important;
   --tdp-accent: oklch(0.74 0.160 298.0) !important;
   --tdp-accent-2: oklch(0.74 0.160 338.0) !important;
   --tdp-accent-3: oklch(0.74 0.160 258.0) !important;
@@ -118,19 +208,37 @@ html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"] {
 /*[OWUI_PAL_OLED_END]*/
 /*[OWUI_PAL_HER_START]*/
 /* --- HER MODE VARIABLES --- */
+html.her:not([style*="--app-bg"]), html[data-theme="her"]:not([style*="--app-bg"]) {
+  --app-base-0: oklch(1.000 0.024 325) !important;
+  --app-base-50: oklch(0.980 0.024 325) !important;
+  --app-base-100: oklch(0.940 0.024 325) !important;
+  --app-base-200: oklch(0.920 0.024 325) !important;
+  --app-base-300: oklch(0.850 0.024 325) !important;
+  --app-base-400: oklch(0.770 0.024 325) !important;
+  --app-base-500: oklch(0.690 0.024 325) !important;
+  --app-base-600: oklch(0.510 0.024 325) !important;
+  --app-base-700: oklch(0.420 0.024 325) !important;
+  --app-base-800: oklch(0.320 0.024 325) !important;
+  --app-base-850: oklch(0.270 0.024 325) !important;
+  --app-base-900: oklch(0.200 0.024 325) !important;
+  --app-base-950: oklch(0.160 0.024 325) !important;
+  --app-base-1000: oklch(0.000 0.024 325) !important;
+  --app-bg: oklch(1.000 0.024 325) !important;
+  --app-fg: oklch(0.000 0.024 325) !important;
+  --color-gray-50: var(--app-base-50) !important;
+  --color-gray-100: var(--app-base-100) !important;
+  --color-gray-200: var(--app-base-200) !important;
+  --color-gray-300: var(--app-base-300) !important;
+  --color-gray-400: var(--app-base-400) !important;
+  --color-gray-500: var(--app-base-500) !important;
+  --color-gray-600: var(--app-base-600) !important;
+  --color-gray-700: var(--app-base-700) !important;
+  --color-gray-800: var(--app-base-800) !important;
+  --color-gray-850: var(--app-base-850) !important;
+  --color-gray-900: var(--app-base-900) !important;
+  --color-gray-950: var(--app-base-950) !important;
+}
 html.her, html[data-theme="her"] {
-  --color-gray-50: oklch(0.980 0.024 325) !important;
-  --color-gray-100: oklch(0.940 0.024 325) !important;
-  --color-gray-200: oklch(0.920 0.024 325) !important;
-  --color-gray-300: oklch(0.850 0.024 325) !important;
-  --color-gray-400: oklch(0.770 0.024 325) !important;
-  --color-gray-500: oklch(0.690 0.024 325) !important;
-  --color-gray-600: oklch(0.510 0.024 325) !important;
-  --color-gray-700: oklch(0.420 0.024 325) !important;
-  --color-gray-800: oklch(0.320 0.024 325) !important;
-  --color-gray-850: oklch(0.270 0.024 325) !important;
-  --color-gray-900: oklch(0.200 0.024 325) !important;
-  --color-gray-950: oklch(0.160 0.024 325) !important;
   --tdp-accent: oklch(0.56 0.096 325.0) !important;
   --tdp-accent-2: oklch(0.56 0.096 5.0) !important;
   --tdp-accent-3: oklch(0.56 0.096 285.0) !important;
@@ -142,7 +250,7 @@ html.her, html[data-theme="her"] {
 
 
 #=# designer: generateThemeSections structural
-@shared dd0525eea3f1
+@shared 03d32db36f15
 
 #=# designer: generateThemeSections gradient
 
@@ -415,7 +523,7 @@ _safe_subset_css, changed:
 = designer vars
 
 #=# python: _postprocess_sections sidebar=translucent overlay=opaque: structural
-@shared e98ace20c493
+@shared b666b97ab15e
 
 #=# python: _postprocess_sections sidebar=translucent overlay=opaque: gradient
 designer gradient, changed:
@@ -493,7 +601,7 @@ _safe_subset_css, changed:
 = designer vars
 
 #=# python: _postprocess_sections sidebar=transparent overlay=opaque: structural
-@shared 1bf69008a2ff
+@shared 2982a759e800
 
 #=# python: _postprocess_sections sidebar=transparent overlay=opaque: gradient
 designer gradient, changed:
@@ -712,25 +820,25 @@ unchanged
 @shared 194706685e5e
 
 #=# python: no sections file: _safe_subset_css sidebar=opaque overlay=translucent
-@shared bc1e368c810c
+@shared 5643130dfe03
 
 #=# python: no sections file: _safe_subset_css sidebar=translucent overlay=opaque
 @shared cd3f2979a56a
 
 #=# python: no sections file: _safe_subset_css sidebar=translucent overlay=translucent
-@shared 0692cfd22338
+@shared 6a4e9a7d1da7
 
 #=# python: no sections file: _safe_subset_css sidebar=transparent overlay=opaque
 @shared 8ba416f3c793
 
 #=# python: no sections file: _safe_subset_css sidebar=transparent overlay=translucent
-@shared 8e4d06c51ee4
+@shared 56a9301e2747
 
 #=# python: no sections file: /state.json
 = saved state
 
 #=# bootloader: enforceTheme default valves, /auth, dark, sections
-@shared 1ffc41e33316
+@shared e2d3e586cb7a
 
 #=# bootloader: enforceTheme default valves, /auth, dark, flat css only
 data-theme 'dark', class 'dark'
@@ -811,7 +919,7 @@ data-theme 'her', class 'her'
 #=# bootloader: enforceTheme every valve flipped, /auth, dark, sections
 data-theme 'dark', class 'dark'
 /theme.css, changed:
-- lines 1-677 (677): '/*[OWUI_VARS_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 1-785 (785): '/*[OWUI_VARS_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
 
 #=# bootloader: enforceTheme every valve flipped, /auth, oled-dark, sections
 data-theme 'oled-dark', class 'dark'
@@ -826,7 +934,7 @@ data-theme 'her', class 'her'
 = the page of: every valve flipped, /auth, dark, sections
 
 #=# bootloader: enforceTheme every valve flipped, /, dark, sections
-@shared 1ffc41e33316
+@shared e2d3e586cb7a
 
 #=# bootloader: enforceTheme every valve flipped, /, oled-dark, sections
 data-theme 'oled-dark', class 'dark'

@@ -1694,7 +1694,7 @@ test('a mesh point and a variable\'s copy button work from the keyboard', async 
   await page.keyboard.press('Enter');
   await waitFor('a variable copied', async () => {
     const text = await page.evaluate(() => navigator.clipboard.readText());
-    return /^--color-gray-50: #[0-9a-f]{6};$/i.test(text) || text;
+    return /^--app-base-50: #[0-9a-f]{6};$/i.test(text) || text;
   });
   await tabTo(page, '.tab[data-tab="lch"]', 'Shift+Tab');
   await page.keyboard.press('ArrowRight');
