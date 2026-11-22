@@ -2215,6 +2215,8 @@ class Event:
                         pageRules.push('.app :where(' + gWhere + ') { background-color: transparent !important; background-image: none !important; }');
                         // In front of the animation when the theme says so
                         if (!behind) pageRules.push('body:has(#owui-theme-canvas-bg) .app { z-index: 1 !important; }');
+                        // These pages open as tabs inside the chat, whose own background image would cover this one
+                        pageRules.push(CHAT_BG + '[style*="background-image"], ' + CHAT_BG + '[style*="background-image"] + div.pointer-events-none { display: none !important; }');
                     }
                 }
                 var style = document.getElementById('owui-tdp-hidden-bg');

@@ -551,6 +551,10 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 
 ---
 
+## 📝 Unreleased
+
+- The **Other pages** picture shows on Calendar, Notes, Workspace and the other pages Open WebUI opens as tabs, instead of being covered by the Chat Background Image. Those pages open inside the chat, and the chat's own picture stayed drawn behind them. Chats keep their Chat Background Image.
+
 ## 📝 What's New in 1.23.0
 
 **The palette now drives Open WebUI's base color system.** After 0.13.4 every grey, white and black in Open WebUI's interface is a `base-*` class reading `--app-base-0` to `--app-base-1000`, mixed by default from two seeds, `--app-bg` and `--app-fg`. Each mode's palette now sets that scale and its seeds instead of overriding Tailwind's `--color-gray-*`. The two new ends follow the palette the way Open WebUI mixes them: `base-0` is the light end (the background in Light, the brightest text in Dark), and `base-1000` the dark end (black in Light, the background 60% toward black in Dark). So the white panels and black buttons that a theme couldn't reach before now take its colors too.
