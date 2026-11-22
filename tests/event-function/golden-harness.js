@@ -103,6 +103,7 @@ function designerTheme(t) {
     });
     modes[m] = {
       variables: getVariablesMap(config),
+      base: baseScaleVars(shipped.vars, config, m),
       accents: accentVars(config, m),
       shipped: { overridden: shipped.overridden, usingDefaults: shipped.usingDefaults, vars: shipped.vars },
       contrast,
@@ -421,7 +422,8 @@ function bootloaderUnits(variables) {
     const config = v.config;
     const hue = Number(config.h) || 0;
     const chroma = config.paletteEnabled === false ? 0 : (Number(config.c) || 0);
-    return [mode, B.buildCanvasTheme((name) => v.vars[name] || '', B._colorToRgb, mode, hue, chroma, config)];
+    // The page resolves --color-base-* from the --app-base-* the theme sets
+    return [mode, B.buildCanvasTheme((name) => v.vars[name.replace('--color-base-', '--app-base-')] || '', B._colorToRgb, mode, hue, chroma, config)];
   });
   return out;
 }

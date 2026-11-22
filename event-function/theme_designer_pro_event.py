@@ -6,7 +6,7 @@ author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
 version: 1.22.0
 license: MIT
-required_open_webui_version: 0.13.4
+required_open_webui_version: 0.13.5
 """
 
 import hashlib
@@ -1295,13 +1295,15 @@ class Event:
                 var d = g.getImageData(0, 0, 1, 1).data;
                 return [d[0], d[1], d[2]];
             }
-            // The same function builds the payload on the website's previews
+            // The same function builds the payload on the website's previews.
+            // The ramp is Open WebUI's base scale as the page resolves it: the
+            // palette, or a user's own Theme Colors, or Open WebUI's greys.
             function buildCanvasTheme(readVar, toRgb, mode, hue, chroma, set) {
                 var dark = mode === 'dark' || mode === 'oled';
                 var hex = function(c) { return '#' + c.map(function(v) { return (v < 16 ? '0' : '') + v.toString(16); }).join(''); };
                 var ramp = {}, rampRgb = {};
-                [50, 100, 200, 300, 400, 500, 600, 700, 800, 850, 900, 950].forEach(function(s) {
-                    rampRgb[s] = toRgb(readVar('--color-gray-' + s) || '#808080');
+                [0, 50, 100, 200, 300, 400, 500, 600, 700, 800, 850, 900, 950, 1000].forEach(function(s) {
+                    rampRgb[s] = toRgb(readVar('--color-base-' + s) || '#808080');
                     ramp[s] = hex(rampRgb[s]);
                 });
                 // Accents in the theme's hue, as colorful as the theme itself
@@ -1315,7 +1317,7 @@ class Event:
                     return typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v) ? toRgb(v.toLowerCase()) : accent(dh);
                 };
                 var src = {
-                    background: rampRgb[dark ? 900 : 50], surface: rampRgb[dark ? 850 : 100],
+                    background: rampRgb[dark ? 900 : 0], surface: rampRgb[dark ? 850 : 100],
                     text: rampRgb[dark ? 100 : 900], muted: rampRgb[dark ? 400 : 500],
                     accent: pick('accent', 0), accent2: pick('accent2', 40), accent3: pick('accent3', -40)
                 };
@@ -2188,8 +2190,8 @@ class Event:
                             'background-size: cover !important; background-position: center !important; opacity: ' + share / 100 + ' !important;';
                     };
                     return [
-                        'html.dark ' + target + ' { ' + layer('color-mix(in oklab, var(--color-gray-900) ' + Math.round(100 * d) + '%, transparent)', 'color-mix(in oklab, var(--color-gray-900) ' + Math.round(90 * d) + '%, transparent)') + ' }',
-                        'html:not(.dark) ' + target + ' { ' + layer('rgb(255 255 255 / ' + d + ')', 'rgb(255 255 255 / ' + Math.round(85 * d) / 100 + ')') + ' }'
+                        'html.dark ' + target + ' { ' + layer('color-mix(in oklab, var(--color-base-900) ' + Math.round(100 * d) + '%, transparent)', 'color-mix(in oklab, var(--color-base-900) ' + Math.round(90 * d) + '%, transparent)') + ' }',
+                        'html:not(.dark) ' + target + ' { ' + layer('color-mix(in oklab, var(--color-base-0) ' + Math.round(100 * d) + '%, transparent)', 'color-mix(in oklab, var(--color-base-0) ' + Math.round(85 * d) + '%, transparent)') + ' }'
                     ];
                 }
                 // The sign-in page's own picture (instance theme only), drawn on
@@ -2854,14 +2856,14 @@ class Event:
         '[data-tdp-open="personal"]>.tdp-settings-panel[data-tdp-key="personal"],[data-tdp-open="admin"]>.tdp-settings-panel[data-tdp-key="admin"]{display:flex}',
         '[data-tdp-open]>:not(.tdp-settings-panel){display:none!important}',
         '.tdp-settings-panel iframe{flex:1 1 auto;width:100%;min-height:0;border:0;border-radius:.75rem;background:transparent}',
-        '.tdp-settings-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--color-gray-500,#9b9b9b);pointer-events:none}',
+        '.tdp-settings-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--color-base-500,#9b9b9b);pointer-events:none}',
         // The tab whose theme this page shows
         '.tdp-theme-dot{width:6px;height:6px;margin-left:auto;flex-shrink:0;border-radius:9999px;background:#22c55e}',
         // A ring for the instance theme, where the Admin tab isn't there to show it
         '.tdp-theme-dot.tdp-theme-dot-instance{background:transparent;box-shadow:inset 0 0 0 1.5px #22c55e}',
         // The dialog's own tab keeps its selected look while ours is open; drop it.
-        '#settings-tabs-container[data-tdp-active] [data-tdp-was]{font-weight:400;color:var(--color-gray-600,#676767);background:transparent}',
-        'html.dark #settings-tabs-container[data-tdp-active] [data-tdp-was]{color:var(--color-gray-400,#b4b4b4)}'
+        '#settings-tabs-container[data-tdp-active] [data-tdp-was]{font-weight:400;color:var(--color-base-600,#676767);background:transparent}',
+        'html.dark #settings-tabs-container[data-tdp-active] [data-tdp-was]{color:var(--color-base-400,#b4b4b4)}'
     ].join('');
     // tabButtonClass in SettingsModal.svelte, read from the dialog's own tabs when it has them.
     var activeClass = 'flex items-center gap-1.5 h-7 px-2 md:w-full shrink-0 rounded-lg text-xs text-left transition-colors duration-75 font-medium text-gray-900 dark:text-white bg-gray-50 dark:bg-white/[0.04]';
@@ -3161,7 +3163,7 @@ class Event:
         '.tdp-admin-page{display:none;position:relative;height:100%;min-height:0;flex-direction:column;padding:0 .625rem .5rem}',
         '[data-tdp-admin-open]>.tdp-admin-page{display:flex}',
         '.tdp-admin-page iframe{flex:1 1 auto;width:100%;min-height:0;border:0;border-radius:.75rem;background:transparent}',
-        '.tdp-admin-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--color-gray-500,#9b9b9b);pointer-events:none}'
+        '.tdp-admin-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--color-base-500,#9b9b9b);pointer-events:none}'
     ].join('');
     var openPath = null;
     var scheduled = false;
@@ -6418,14 +6420,14 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
            address is unchanged, and below the header it keeps its own look.
            --sk-* are dark first, light under .light-mode. */
         html.owui-skin body#tool-body {
-            --sk-strong: var(--color-gray-100, #ececec);
-            --sk-label: var(--color-gray-400, #b4b4b4);
+            --sk-strong: var(--app-base-100, #ececec);
+            --sk-label: var(--app-base-400, #b4b4b4);
             --sk-hover: rgba(255, 255, 255, 0.04);
         }
         html.owui-skin body#tool-body.light-mode {
-            --sk-strong: var(--color-gray-900, #171717);
-            --sk-label: var(--color-gray-600, #676767);
-            --sk-hover: var(--color-gray-50, #f9f9f9);
+            --sk-strong: var(--app-base-900, #171717);
+            --sk-label: var(--app-base-600, #676767);
+            --sk-hover: var(--app-base-50, #f9f9f9);
         }
         /* The dialog's tab already names the page. */
         html.owui-skin body .header h1 { display: none; }
@@ -6589,7 +6591,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         <button class="owui-code-btn copy-css-btn" data-target="manual-overrides-editor" data-tooltip="Copy Overrides to Clipboard">Copy</button>
                     </div>
                 </div>
-                <textarea id="manual-overrides-editor" spellcheck="false" style="min-height: 140px;" placeholder="/* Define raw CSS variable overrides here.&#10;   These are injected after the theme palette,&#10;   giving them final priority.&#10;   Use standard --variable-name: value; syntax.&#10;   One variable per line. */&#10;&#10;--color-gray-900: #1a1a2e;&#10;--color-gray-950: #0f0f1a;&#10;--color-gray-50: #e8e8f0;"></textarea>
+                <textarea id="manual-overrides-editor" spellcheck="false" style="min-height: 140px;" placeholder="/* Define raw CSS variable overrides here.&#10;   These are injected after the theme palette,&#10;   giving them final priority.&#10;   Use standard --variable-name: value; syntax.&#10;   One variable per line. */&#10;&#10;--app-base-900: #1a1a2e;&#10;--app-base-950: #0f0f1a;&#10;--app-base-50: #e8e8f0;"></textarea>
             </div>
         </div>
 
@@ -7056,7 +7058,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         <ul>
                             <li><b>Locking Variables:</b> Clicking the lock (🔒) icon pins a variable. Locked variables are protected and will NOT be overwritten if you change the OKLCH sliders, randomize the theme, or extract a palette from an image. Use the bulk <b>Lock All</b> / <b>Unlock All</b> buttons to quickly pin or release the entire variable set at once. Picking a color in a swatch sets that variable and locks it. Moving a palette slider clears every unlocked override.</li>
                             <li><b>Resetting:</b> Each variable&rsquo;s &#10226; unlocks it and puts back its palette color. <b>&#10226; Reset All</b> clears every unlocked override in the mode and puts Hue, Chroma and Lightness back to 250, 0 and 20 (0 in OLED); when every variable is locked, it asks first and offers <b>Unlock &amp; Reset</b>.</li>
-                            <li><b>Click-to-Copy:</b> Click any step label (e.g., <i>900</i>) to copy its CSS declaration (<code>--color-gray-900: #hex;</code>) to your clipboard.</li>
+                            <li><b>Click-to-Copy:</b> Click any step label (e.g., <i>900</i>) to copy its CSS declaration (<code>--app-base-900: #hex;</code>) to your clipboard.</li>
                             <li><b>Contrast Preview:</b> Each color swatch features an <b>Aa</b> contrast preview badge for at-a-glance legibility assessment. The badge text color automatically adjusts based on the swatch's lightness to remain readable.</li>
                         </ul>
                         <h4>Accessibility Contrast Report</h4>
@@ -7069,7 +7071,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         <h4>Manual Variable Overrides</h4>
                         <p>Below the color picker grid, you'll find the <b>Manual Variable Overrides</b> code block. This feature is inspired by the legacy Open WebUI Theming system fork and gives power users direct control over CSS custom properties.</p>
                         <ul>
-                            <li><b>Purpose:</b> Define raw CSS variable declarations (e.g., <code>--color-gray-900: #1a1a2e;</code>) that are injected <i>after</i> the generated palette, giving them final override priority.</li>
+                            <li><b>Purpose:</b> Define raw CSS variable declarations (e.g., <code>--app-base-900: #1a1a2e;</code>) that are injected <i>after</i> the generated palette, giving them final override priority. A line that names a step the old way (<code>--color-gray-900</code>) sets <code>--app-base-900</code>.</li>
                             <li><b>Mode-Specific:</b> Overrides are saved independently per mode (Dark, OLED, Light, Her). Switching modes loads that mode's specific overrides.</li>
                             <li><b>Enabled Toggle:</b> Use the checkbox to quickly enable or disable manual overrides without losing your code. <b>Clear</b> empties the editor and <b>Copy</b> copies its text.</li>
                             <li><b>Syntax:</b> Write one variable per line using standard <code>--variable-name: value;</code> syntax. Comments (<code>/* */</code> and <code>//</code>) are automatically skipped, and so are lines that don&rsquo;t start with <code>--</code> or that contain <code>{</code> or <code>}</code>. The designer appends <code>!important</code> for you.</li>
@@ -7526,7 +7528,7 @@ window.dispatchEvent(new CustomEvent('owui-canvas-context', {
     accent, accent2, accent3
   },
   rgb: { ... },          // the same colors as [r, g, b] from 0 to 1, for WebGL
-  ramp: { '50': '#...', ..., '950': '#...' }   // the --color-gray-* ramp
+  ramp: { '0': '#...', '50': '#...', ..., '950': '#...', '1000': '#...' }   // Open WebUI's base scale
 }</code></pre>
                                     <button class="owui-code-btn" style="position: absolute; top: 6px; right: 6px; font-size: 0.6rem;" onclick="navigator.clipboard.writeText(document.getElementById('doc-theme-payload').textContent).then(()=>showToast('Copied to clipboard'))">Copy</button>
                                 </div>
@@ -7867,7 +7869,7 @@ self.onmessage = (e) =&gt; {
                 <details class="doc-accordion">
                     <summary>16. Reference: Available Variables <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
-                        <p>The following variables are dynamically generated and applied to the Open WebUI root.</p>
+                        <p>The palette sets Open WebUI's base scale: every grey, white and black in its interface is a <code>base-*</code> class that reads these variables. A user who picks their own Theme Colors in Settings &gt; General keeps them; the palette steps aside for that user. Theme CSS can read the steps as <code>var(--color-base-*)</code>; <code>var(--color-gray-*)</code> still gives the same colors.</p>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
                                 <thead>
@@ -7877,22 +7879,24 @@ self.onmessage = (e) =&gt; {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td><span class="doc-code-inline">--color-gray-50</span></td><td>98% Lightness</td></tr>
-                                    <tr><td><span class="doc-code-inline">--color-gray-100</span></td><td>94% Lightness</td></tr>
-                                    <tr><td><span class="doc-code-inline">--color-gray-200</span></td><td>92% Lightness</td></tr>
-                                    <tr><td><span class="doc-code-inline">--color-gray-300</span></td><td>85% Lightness</td></tr>
-                                    <tr><td><span class="doc-code-inline">--color-gray-400</span></td><td>77% Lightness</td></tr>
-                                    <tr><td><span class="doc-code-inline">--color-gray-500</span></td><td>69% Lightness</td></tr>
-                                    <tr><td><span class="doc-code-inline">--color-gray-600</span></td><td>51% Lightness</td></tr>
-                                    <tr><td><span class="doc-code-inline">--color-gray-700</span></td><td>42% Lightness</td></tr>
-                                    <tr><td><span class="doc-code-inline">--color-gray-800</span></td><td>32% Lightness</td></tr>
-                                    <tr><td><span class="doc-code-inline">--color-gray-850</span></td><td>27% Lightness</td></tr>
-                                    <tr><td><span class="doc-code-inline">--color-gray-900</span></td><td>20% Lightness</td></tr>
-                                    <tr><td><span class="doc-code-inline">--color-gray-950</span></td><td>16% Lightness</td></tr>
+                                    <tr><td><span class="doc-code-inline">--app-base-0</span></td><td>100% Lightness, the background in Light</td></tr>
+                                    <tr><td><span class="doc-code-inline">--app-base-50</span></td><td>98% Lightness</td></tr>
+                                    <tr><td><span class="doc-code-inline">--app-base-100</span></td><td>94% Lightness</td></tr>
+                                    <tr><td><span class="doc-code-inline">--app-base-200</span></td><td>92% Lightness</td></tr>
+                                    <tr><td><span class="doc-code-inline">--app-base-300</span></td><td>85% Lightness</td></tr>
+                                    <tr><td><span class="doc-code-inline">--app-base-400</span></td><td>77% Lightness</td></tr>
+                                    <tr><td><span class="doc-code-inline">--app-base-500</span></td><td>69% Lightness</td></tr>
+                                    <tr><td><span class="doc-code-inline">--app-base-600</span></td><td>51% Lightness</td></tr>
+                                    <tr><td><span class="doc-code-inline">--app-base-700</span></td><td>42% Lightness</td></tr>
+                                    <tr><td><span class="doc-code-inline">--app-base-800</span></td><td>32% Lightness</td></tr>
+                                    <tr><td><span class="doc-code-inline">--app-base-850</span></td><td>27% Lightness</td></tr>
+                                    <tr><td><span class="doc-code-inline">--app-base-900</span></td><td>20% Lightness</td></tr>
+                                    <tr><td><span class="doc-code-inline">--app-base-950</span></td><td>16% Lightness</td></tr>
+                                    <tr><td><span class="doc-code-inline">--app-base-1000</span></td><td>0% Lightness in Light; in Dark, the background (900) 60% toward black</td></tr>
                                 </tbody>
                             </table>
                         </div>
-                        <p>These are the Dark, Light and Her defaults, at a Lightness slider of 20%. Moving the slider shifts every step by the same amount (step + slider &minus; 20), kept between 0% and 98%. OLED starts at a slider of 0%, so its 900 and 950 steps are 0%, pure black.</p>
+                        <p>These are the Dark, Light and Her defaults, at a Lightness slider of 20%. Moving the slider shifts every step by the same amount (step + slider &minus; 20), kept between 0% and 98% (0% and 100% for the two ends). With the palette off a mode sets none of these, and Open WebUI's own colors show. OLED starts at a slider of 0%, so its 900 and 950 steps are 0%, pure black.</p>
                         <p>Every mode also defines its three accents, for theme CSS: <span class="doc-code-inline">--tdp-accent</span>, <span class="doc-code-inline">--tdp-accent-2</span> and <span class="doc-code-inline">--tdp-accent-3</span>. Each is the color set under <b>Accent Colors</b>, or the generated <code>oklch(0.74 C H)</code> on Dark and OLED and <code>oklch(0.56 C H)</code> on Light and Her, where H is the hue (then 40&deg; more, and 40&deg; less) and C is four times the palette&rsquo;s chroma, kept between 0.06 and 0.18, or 0 for a neutral theme or a mode with its palette off.</p>
                     </div>
                 </details>
@@ -8087,7 +8091,7 @@ self.onmessage = (e) =&gt; {
                             <div class="doc-sub-inner">
                                 <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85;">Understanding the injection order helps debug cascade conflicts. The final CSS is assembled in this order:</p>
                                 <ol style="font-size: 0.72rem; line-height: 1.7; padding-left: 18px;">
-                                    <li><b>OKLCH Variable Declarations</b>: <code>--color-gray-*</code> palette ramps and <code>--tdp-accent*</code> accents per mode</li>
+                                    <li><b>OKLCH Variable Declarations</b>: Open WebUI's base scale (<code>--app-base-0</code> to <code>--app-base-1000</code>, its seeds <code>--app-bg</code> and <code>--app-fg</code>, and <code>--color-gray-*</code> set to the same steps for older theme CSS) and <code>--tdp-accent*</code> accents per mode</li>
                                     <li><b>Manual Variable Overrides</b>: user-defined CSS custom properties (injected after palette for priority)</li>
                                     <li><b>Structural Background Rules</b>: when Canvas FX or a gradient is active, transparency rules on the app containers plus <code>body</code>/<code>#sidebar</code> backdrops; otherwise just opaque <code>body</code>/<code>#sidebar</code> rules. The Surfaces rules follow them when the mode&rsquo;s Surfaces switch is on.</li>
                                     <li><b>Gradient Background CSS</b>: <code>background-image</code>, sidebar blur, and chat overlay rules</li>
@@ -9540,13 +9544,13 @@ location.reload();</code></pre>
     // and blurs what shows through. The backdrop is the page behind an open
     // dialog, tinted black; the top fade has opacity only.
     const SURFACE_LAYERS = [
-        { key: 'Sidebar', label: 'Sidebar', hint: 'The open sidebar. The collapsed rail stays clear.', color: ['var(--color-gray-950)', 'var(--color-gray-50)'] },
-        { key: 'Composer', label: 'Message input', hint: 'The box you type in.', color: ['var(--color-gray-850)', '#fff'] },
-        { key: 'Panel', label: 'Tabs drawer', hint: 'The drawer tabs open in on a narrow screen. On a wider one each tab looks like the page or chat it shows.', color: ['var(--color-gray-900)', '#fff'] },
-        { key: 'Cards', label: 'Cards and panels', hint: 'The rounded panels on a page: note cards, the calendar, workspace and admin cards.', color: ['var(--color-gray-900)', '#fff'] },
-        { key: 'Buttons', label: 'Buttons', hint: 'The grey buttons on a page, such as Create, single or split. Switches and the black and white action buttons keep their fill.', color: ['var(--color-gray-850)', 'var(--color-gray-50)'] },
-        { key: 'Menu', label: 'Menus and tooltips', hint: 'Dropdowns, submenus, the model picker, Model controls, tooltips and toasts.', color: ['var(--color-gray-850)', '#fff'] },
-        { key: 'Dialog', label: 'Dialogs', hint: 'Settings and the other windows that open over the page.', color: ['var(--color-gray-900)', '#fff'] },
+        { key: 'Sidebar', label: 'Sidebar', hint: 'The open sidebar. The collapsed rail stays clear.', color: ['var(--color-base-950)', 'var(--color-base-50)'] },
+        { key: 'Composer', label: 'Message input', hint: 'The box you type in.', color: ['var(--color-base-850)', 'var(--color-base-0)'] },
+        { key: 'Panel', label: 'Tabs drawer', hint: 'The drawer tabs open in on a narrow screen. On a wider one each tab looks like the page or chat it shows.', color: ['var(--color-base-900)', 'var(--color-base-0)'] },
+        { key: 'Cards', label: 'Cards and panels', hint: 'The rounded panels on a page: note cards, the calendar, workspace and admin cards.', color: ['var(--color-base-900)', 'var(--color-base-0)'] },
+        { key: 'Buttons', label: 'Buttons', hint: 'The grey buttons on a page, such as Create, single or split. Switches and the black and white action buttons keep their fill.', color: ['var(--color-base-850)', 'var(--color-base-50)'] },
+        { key: 'Menu', label: 'Menus and tooltips', hint: 'Dropdowns, submenus, the model picker, Model controls, tooltips and toasts.', color: ['var(--color-base-850)', 'var(--color-base-0)'] },
+        { key: 'Dialog', label: 'Dialogs', hint: 'Settings and the other windows that open over the page.', color: ['var(--color-base-900)', 'var(--color-base-0)'] },
         { key: 'Backdrop', label: 'Behind dialogs', hint: 'The page behind an open dialog: how much it darkens and blurs.', color: null },
         { key: 'Fade', label: 'Top fade', hint: 'The fade at the top of a chat, under the title bar.', color: null, noBlur: true }
     ];
@@ -11152,6 +11156,39 @@ self.onmessage = (e) => {
         return vars;
     }
 
+    // Open WebUI's base scale from the palette. Its UI colours are base-*
+    // utilities, each reading --app-base-0 to --app-base-1000 (src/tailwind.css
+    // on dev after 0.13.4). The ramp gives 50 to 950; the ends follow it the
+    // way Open WebUI mixes them from its two seeds, --app-bg and --app-fg: 0
+    // is the light end, 1000 the dark one, and in Dark the dark end is the
+    // background 60% toward black. The palette keeps its --color-gray-* names
+    // in saved themes; those names are set here too, to the base scale, so
+    // theme CSS that reads var(--color-gray-*) keeps the theme's colours.
+    function baseScaleVars(vars, config, mode) {
+        const h = _cssNum(config.h, 0), c = _cssNum(config.c, 0) / 1000, l = _cssNum(config.l, 0) / 100;
+        const dark = mode === 'dark' || mode === 'oled';
+        const end = (lightness) => `oklch(${Math.max(0, Math.min(1, lightness + (l - 0.20))).toFixed(3)} ${c.toFixed(3)} ${c === 0 ? 0 : h})`;
+        const out = { '--app-base-0': end(1) };
+        steps.forEach(step => { out[`--app-base-${step}`] = vars[`--color-gray-${step}`]; });
+        out['--app-base-1000'] = dark ? `color-mix(in oklab, ${vars['--color-gray-900']}, black 60%)` : end(0);
+        out['--app-bg'] = dark ? vars['--color-gray-900'] : out['--app-base-0'];
+        out['--app-fg'] = dark ? out['--app-base-0'] : out['--app-base-1000'];
+        steps.forEach(step => { out[`--color-gray-${step}`] = `var(--app-base-${step})`; });
+        return out;
+    }
+
+    // A manual override can name a step the old way (--color-gray-900) or
+    // the base scale's way (--app-base-900); both set the base scale.
+    function baseStepName(name) { return name.replace(/^--color-gray-(\d+)$/, '--app-base-$1'); }
+    function paletteStepKey(name) { return name.replace(/^--app-base-(\d+)$/, '--color-gray-$1'); }
+
+    // A user's own Theme Colors (Settings > General) win over the palette:
+    // Open WebUI sets them as --app-bg / --app-fg in <html>'s style
+    // attribute, and the base scale is then mixed from them.
+    function ownColorsYield(sel) {
+        return sel.split(',').map(s => `${s.trim()}:not([style*="--app-bg"])`).join(', ');
+    }
+
     function getDefaultColorForStep(mode, step) {
         return rampStepColor(step, DEFAULT_MODE_DATA.h, DEFAULT_MODE_DATA.c, defaultLightness(mode) / 100);
     }
@@ -11327,7 +11364,8 @@ self.onmessage = (e) => {
     //   - paletteEnabled === false emits the mode's DEFAULT ramp, not the admin's
     //     h/c/l, so scoring the sliders would describe a palette nobody receives.
     //   - manual overrides are injected after the palette with !important, so
-    //     they win outright: a --color-gray-900 set there is the colour rated.
+    //     they win outright: an --app-base-900 (or the old --color-gray-900)
+    //     set there is the colour rated.
     function _shippedVars(config, dataMode) {
         let vars;
         if (config.paletteEnabled === false) {
@@ -11343,8 +11381,9 @@ self.onmessage = (e) => {
                 _overrideDecls(line).forEach(p => {
                     // hasOwnProperty, not `in`: only real palette steps, never an
                     // inherited key like __proto__ smuggled in through an override.
-                    if (Object.prototype.hasOwnProperty.call(vars, p.name)) {
-                        vars[p.name] = p.value;
+                    const key = paletteStepKey(p.name);
+                    if (Object.prototype.hasOwnProperty.call(vars, key)) {
+                        vars[key] = p.value;
                         overridden++;
                     }
                 });
@@ -12162,8 +12201,8 @@ self.onmessage = (e) => {
                 <button type="button" class="plain-button var-name" data-control="copy" style="font-size: 0.6rem; cursor: pointer;" 
                       onmouseover="this.style.color='var(--accent)'" 
                       onmouseout="this.style.color='var(--text-muted)'" 
-                      onclick="navigator.clipboard.writeText('${name}: ${hex};').then(()=>showToast('Copied ${name}: ${hex};'))" 
-                      data-tooltip="Copy ${name}: ${hex};" aria-label="Copy ${name}: ${hex};">
+                      onclick="navigator.clipboard.writeText('${baseStepName(name)}: ${hex};').then(()=>showToast('Copied ${baseStepName(name)}: ${hex};'))" 
+                      data-tooltip="Copy ${baseStepName(name)}: ${hex};" aria-label="Copy ${baseStepName(name)}: ${hex};">
                     ${name.split('-').pop()}
                 </button>
                 <div class="var-controls">
@@ -12608,14 +12647,14 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
         // data-theme entry that matched descendants before, so precedence
         // against theme custom CSS is unchanged.
         const modes =[
-            { id: 'light', name: 'LIGHT MODE', sel: ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"])', scope: ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"])', bgBody: '--color-gray-50', bgSidebar: '--color-gray-50' },
-            { id: 'dark', name: 'DARK MODE', sel: 'html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"]', scope: ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"])))', bgBody: '--color-gray-900', bgSidebar: '--color-gray-950' },
-            { id: 'oled', name: 'OLED DARK MODE', sel: 'html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"]', scope: 'html[data-theme="oled-dark"]', bgBody: '--color-gray-900', bgSidebar: '--color-gray-950' },
-            { id: 'her', name: 'HER MODE', sel: 'html.her, html[data-theme="her"]', scope: ':is(html[data-theme="her"], html:where(.her))', bgBody: '--color-gray-50', bgSidebar: '--color-gray-50' }
+            { id: 'light', name: 'LIGHT MODE', sel: ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"])', scope: ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"])', bgBody: '--color-base-0', bgSidebar: '--color-base-50' },
+            { id: 'dark', name: 'DARK MODE', sel: 'html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"]', scope: ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"])))', bgBody: '--color-base-900', bgSidebar: '--color-base-950' },
+            { id: 'oled', name: 'OLED DARK MODE', sel: 'html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"]', scope: 'html[data-theme="oled-dark"]', bgBody: '--color-base-900', bgSidebar: '--color-base-950' },
+            { id: 'her', name: 'HER MODE', sel: 'html.her, html[data-theme="her"]', scope: ':is(html[data-theme="her"], html:where(.her))', bgBody: '--color-base-0', bgSidebar: '--color-base-50' }
         ];
 
         const formatOverrideLine = (line, indent = '  ') => {
-            return _overrideDecls(line).map(d => `${indent}${d.name}: ${d.value} !important;\n`).join('');
+            return _overrideDecls(line).map(d => `${indent}${baseStepName(d.name)}: ${d.value} !important;\n`).join('');
         };
 
         let varsCss = `/*[OWUI_VARS_START]*/\n`;
@@ -12623,30 +12662,19 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             const modeTag = m.id.toUpperCase();
             const modeData = themeData[m.id];
 
-            // Palette off still emits the mode's defaults, so OLED keeps its
-            // darker greys (l=0) and the others match Open WebUI's @theme
-            let vars;
-            if (modeData.paletteEnabled === false) {
-                vars = {};
-                steps.forEach(step => {
-                    vars[`--color-gray-${step}`] = getDefaultColorForStep(m.id, step);
-                });
-            } else {
-                vars = (varsCache && varsCache[m.id]) || getVariablesMap(modeData);
-            }
+            // Palette off sets none of the base scale, so Open WebUI's own
+            // colours apply, a user's Theme Colors included
+            const base = modeData.paletteEnabled === false ? {}
+                : baseScaleVars((varsCache && varsCache[m.id]) || getVariablesMap(modeData), modeData, m.id);
             // The accents, palette on or off, so theme CSS can always use them
-            vars = { ...vars, ...accentVars(modeData, m.id) };
+            const accents = accentVars(modeData, m.id);
+            const block = (sel, vars, indent) => Object.keys(vars).length
+                ? `${indent}${sel} {\n${Object.entries(vars).map(([k, v]) => `${indent}  ${k}: ${v} !important;\n`).join('')}${indent}}\n` : '';
 
             varsCss += `/*[OWUI_PAL_${modeTag}_START]*/\n`;
-            varsCss += `/* --- ${m.name} VARIABLES --- */\n${m.sel} {\n`;
-            Object.entries(vars).forEach(([k, v]) => { varsCss += `  ${k}: ${v} !important;\n`; });
-            varsCss += `}\n`;
-            varsCss += wrapSystemMedia(m.id, (sel) => {
-                let inner = `  ${sel} {\n`;
-                Object.entries(vars).forEach(([k, v]) => { inner += `    ${k}: ${v} !important;\n`; });
-                inner += `  }`;
-                return inner;
-            });
+            varsCss += `/* --- ${m.name} VARIABLES --- */\n`;
+            varsCss += block(ownColorsYield(m.sel), base, '') + block(m.sel, accents, '');
+            varsCss += wrapSystemMedia(m.id, (sel) => (block(ownColorsYield(sel), base, '  ') + block(sel, accents, '  ')).replace(/\n$/, ''));
             varsCss += `\n/*[OWUI_PAL_${modeTag}_END]*/\n`;
 
             // After the palette, so the overrides win
@@ -12716,16 +12744,16 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
         const isDark = dm === 'dark' || dm === 'oled';
         const dc = isDark ? chrome : null, lc = isDark ? null : chrome;
 
-        const darkTextMain = dc ? dc.textMain.hex : "var(--color-gray-50, #fafafa)";
-        const darkTextMuted = dc ? dc.textMuted.hex : "var(--color-gray-400, #a1a1aa)";
-        const darkBorder = washedOut.dark ? "rgba(0,0,0,0.2)" : "var(--color-gray-800, oklch(0.26 0 0))";
-        const darkBgSurface = dc ? dc.backgrounds.surface : "var(--color-gray-850, oklch(0.23 0 0))";
-        const darkBgElevated = dc ? dc.backgrounds.elevated : "var(--color-gray-800, oklch(0.26 0 0))";
+        const darkTextMain = dc ? dc.textMain.hex : "var(--app-base-50, #fafafa)";
+        const darkTextMuted = dc ? dc.textMuted.hex : "var(--app-base-400, #a1a1aa)";
+        const darkBorder = washedOut.dark ? "rgba(0,0,0,0.2)" : "var(--app-base-800, oklch(0.26 0 0))";
+        const darkBgSurface = dc ? dc.backgrounds.surface : "var(--app-base-850, oklch(0.23 0 0))";
+        const darkBgElevated = dc ? dc.backgrounds.elevated : "var(--app-base-800, oklch(0.26 0 0))";
 
-        const lightTextMain = lc ? lc.textMain.hex : washedOut.light ? "#18181b" : "var(--color-gray-950, #09090b)";
-        const lightTextMuted = lc ? lc.textMuted.hex : washedOut.light ? "#52525b" : "var(--color-gray-600, #52525b)";
-        const lightBorder = washedOut.light ? "rgba(0,0,0,0.2)" : "var(--color-gray-200, #e4e4e7)";
-        const lightBgElevated = washedOut.light ? "rgba(0,0,0,0.05)" : "var(--color-gray-100, #f4f4f5)";
+        const lightTextMain = lc ? lc.textMain.hex : washedOut.light ? "#18181b" : "var(--app-base-950, #09090b)";
+        const lightTextMuted = lc ? lc.textMuted.hex : washedOut.light ? "#52525b" : "var(--app-base-600, #52525b)";
+        const lightBorder = washedOut.light ? "rgba(0,0,0,0.2)" : "var(--app-base-200, #e4e4e7)";
+        const lightBgElevated = washedOut.light ? "rgba(0,0,0,0.05)" : "var(--app-base-100, #f4f4f5)";
         const lightBgSurface = lc ? lc.backgrounds.surface : "#ffffff";
         // Fallbacks are the stylesheet's own --accent, --accent-knob and --panel-tint
         const chromeAccentVars = c => c ? `--accent: ${c.accent.hex} !important; --accent-knob: ${c.knob.hex} !important; --panel-tint: ${c.tint} !important;` : '';
@@ -12774,7 +12802,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             ` : ''}
             
             body#tool-body {
-                --bg-deep: var(--color-gray-900, oklch(0.20 0 0)) !important;
+                --bg-deep: var(--app-base-900, oklch(0.20 0 0)) !important;
                 --bg-surface: ${darkBgSurface} !important;
                 --bg-elevated: ${darkBgElevated} !important;
                 --border: ${darkBorder} !important;
@@ -12783,7 +12811,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
                 ${chromeAccentVars(dc)}
             }
             body#tool-body.light-mode {
-                --bg-deep: var(--color-gray-50, #f4f4f5) !important;
+                --bg-deep: var(--app-base-50, #f4f4f5) !important;
                 --bg-surface: ${lightBgSurface} !important;
                 --bg-elevated: ${lightBgElevated} !important;
                 --border: ${lightBorder} !important;
@@ -19943,12 +19971,12 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             "  .dark #sidebar#sidebar,\n"
             '  [data-theme="dark"] #sidebar#sidebar,\n'
             '  [data-theme="oled-dark"] #sidebar#sidebar {\n'
-            "    background-color: color-mix(in srgb, var(--color-gray-950) 20%, transparent) !important;\n"
+            "    background-color: color-mix(in srgb, var(--color-base-950) 20%, transparent) !important;\n"
             "    backdrop-filter: blur(20px) saturate(1.3) !important;\n"
             "    -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;\n"
             "  }\n"
             '  :root:not(.dark):not([data-theme="dark"]):not([data-theme="oled-dark"]) #sidebar#sidebar {\n'
-            "    background-color: color-mix(in srgb, var(--color-gray-50) 20%, transparent) !important;\n"
+            "    background-color: color-mix(in srgb, var(--color-base-50) 20%, transparent) !important;\n"
             "    backdrop-filter: blur(20px) saturate(1.3) !important;\n"
             "    -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;\n"
             "  }\n"
@@ -19991,15 +20019,15 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
         light = ':root:not(.dark):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"])'
         # (theme selectors, surfaces, tint)
         rules = [
-            (('.dark', '[data-theme="dark"]', '[data-theme="oled-dark"]'), (grey,), '--color-gray-950'),
-            ((light,), (white, grey), '--color-gray-50'),
-            (('.her', '[data-theme="her"]'), (white, grey), '--color-gray-50'),
+            (('.dark', '[data-theme="dark"]', '[data-theme="oled-dark"]'), (grey,), '--color-base-950'),
+            ((light,), (white, grey), '--color-base-50'),
+            (('.her', '[data-theme="her"]'), (white, grey), '--color-base-50'),
         ]
         css = '\n/* --- Overlay Translucency (valve-injected) --- */\n'
         for themes, surfaces, color_var in rules:
             selectors = [f'{theme} body > div{portal} {s}' for s in surfaces for theme in themes]
             css += ',\n'.join(selectors) + ' {\n' + glass(color_var) + '}\n'
-        for scheme, surfaces, color_var in (('dark', (grey,), '--color-gray-950'), ('light', (white, grey), '--color-gray-50')):
+        for scheme, surfaces, color_var in (('dark', (grey,), '--color-base-950'), ('light', (white, grey), '--color-base-50')):
             selectors = [f'  [data-theme="system"] body > div{portal} {s}' for s in surfaces]
             css += f'@media (prefers-color-scheme: {scheme}) {{\n'
             css += ',\n'.join(selectors) + ' {\n' + glass(color_var) + '  }\n}\n'

@@ -17,37 +17,73 @@ true
 /*[OWUI_VARS_START]*/
 /*[OWUI_PAL_LIGHT_START]*/
 /* --- LIGHT MODE VARIABLES --- */
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]):not([style*="--app-bg"]) {
+  --app-base-0: oklch(1.000 0.037 266) !important;
+  --app-base-50: oklch(0.980 0.037 266) !important;
+  --app-base-100: oklch(0.940 0.037 266) !important;
+  --app-base-200: oklch(0.920 0.037 266) !important;
+  --app-base-300: oklch(0.850 0.037 266) !important;
+  --app-base-400: oklch(0.770 0.037 266) !important;
+  --app-base-500: oklch(0.690 0.037 266) !important;
+  --app-base-600: oklch(0.510 0.037 266) !important;
+  --app-base-700: oklch(0.420 0.037 266) !important;
+  --app-base-800: oklch(0.320 0.037 266) !important;
+  --app-base-850: oklch(0.270 0.037 266) !important;
+  --app-base-900: oklch(0.200 0.037 266) !important;
+  --app-base-950: oklch(0.160 0.037 266) !important;
+  --app-base-1000: oklch(0.000 0.037 266) !important;
+  --app-bg: oklch(1.000 0.037 266) !important;
+  --app-fg: oklch(0.000 0.037 266) !important;
+  --color-gray-50: var(--app-base-50) !important;
+  --color-gray-100: var(--app-base-100) !important;
+  --color-gray-200: var(--app-base-200) !important;
+  --color-gray-300: var(--app-base-300) !important;
+  --color-gray-400: var(--app-base-400) !important;
+  --color-gray-500: var(--app-base-500) !important;
+  --color-gray-600: var(--app-base-600) !important;
+  --color-gray-700: var(--app-base-700) !important;
+  --color-gray-800: var(--app-base-800) !important;
+  --color-gray-850: var(--app-base-850) !important;
+  --color-gray-900: var(--app-base-900) !important;
+  --color-gray-950: var(--app-base-950) !important;
+}
 :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) {
-  --color-gray-50: oklch(0.980 0.037 266) !important;
-  --color-gray-100: oklch(0.940 0.037 266) !important;
-  --color-gray-200: oklch(0.920 0.037 266) !important;
-  --color-gray-300: oklch(0.850 0.037 266) !important;
-  --color-gray-400: oklch(0.770 0.037 266) !important;
-  --color-gray-500: oklch(0.690 0.037 266) !important;
-  --color-gray-600: oklch(0.510 0.037 266) !important;
-  --color-gray-700: oklch(0.420 0.037 266) !important;
-  --color-gray-800: oklch(0.320 0.037 266) !important;
-  --color-gray-850: oklch(0.270 0.037 266) !important;
-  --color-gray-900: oklch(0.200 0.037 266) !important;
-  --color-gray-950: oklch(0.160 0.037 266) !important;
   --tdp-accent: #ff8a1e !important;
   --tdp-accent-2: #5a2a7a !important;
   --tdp-accent-3: #ffb347 !important;
 }
 @media (prefers-color-scheme: light) {
+  html[data-theme="system"]:not([style*="--app-bg"]), :root[data-theme="system"]:not([style*="--app-bg"]) {
+    --app-base-0: oklch(1.000 0.037 266) !important;
+    --app-base-50: oklch(0.980 0.037 266) !important;
+    --app-base-100: oklch(0.940 0.037 266) !important;
+    --app-base-200: oklch(0.920 0.037 266) !important;
+    --app-base-300: oklch(0.850 0.037 266) !important;
+    --app-base-400: oklch(0.770 0.037 266) !important;
+    --app-base-500: oklch(0.690 0.037 266) !important;
+    --app-base-600: oklch(0.510 0.037 266) !important;
+    --app-base-700: oklch(0.420 0.037 266) !important;
+    --app-base-800: oklch(0.320 0.037 266) !important;
+    --app-base-850: oklch(0.270 0.037 266) !important;
+    --app-base-900: oklch(0.200 0.037 266) !important;
+    --app-base-950: oklch(0.160 0.037 266) !important;
+    --app-base-1000: oklch(0.000 0.037 266) !important;
+    --app-bg: oklch(1.000 0.037 266) !important;
+    --app-fg: oklch(0.000 0.037 266) !important;
+    --color-gray-50: var(--app-base-50) !important;
+    --color-gray-100: var(--app-base-100) !important;
+    --color-gray-200: var(--app-base-200) !important;
+    --color-gray-300: var(--app-base-300) !important;
+    --color-gray-400: var(--app-base-400) !important;
+    --color-gray-500: var(--app-base-500) !important;
+    --color-gray-600: var(--app-base-600) !important;
+    --color-gray-700: var(--app-base-700) !important;
+    --color-gray-800: var(--app-base-800) !important;
+    --color-gray-850: var(--app-base-850) !important;
+    --color-gray-900: var(--app-base-900) !important;
+    --color-gray-950: var(--app-base-950) !important;
+  }
   html[data-theme="system"], :root[data-theme="system"] {
-    --color-gray-50: oklch(0.980 0.037 266) !important;
-    --color-gray-100: oklch(0.940 0.037 266) !important;
-    --color-gray-200: oklch(0.920 0.037 266) !important;
-    --color-gray-300: oklch(0.850 0.037 266) !important;
-    --color-gray-400: oklch(0.770 0.037 266) !important;
-    --color-gray-500: oklch(0.690 0.037 266) !important;
-    --color-gray-600: oklch(0.510 0.037 266) !important;
-    --color-gray-700: oklch(0.420 0.037 266) !important;
-    --color-gray-800: oklch(0.320 0.037 266) !important;
-    --color-gray-850: oklch(0.270 0.037 266) !important;
-    --color-gray-900: oklch(0.200 0.037 266) !important;
-    --color-gray-950: oklch(0.160 0.037 266) !important;
     --tdp-accent: #ff8a1e !important;
     --tdp-accent-2: #5a2a7a !important;
     --tdp-accent-3: #ffb347 !important;
@@ -57,35 +93,35 @@ true
 /*[OWUI_PAL_LIGHT_END]*/
 /* --- LIGHT MODE MANUAL OVERRIDES --- */
 :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) {
-  --color-gray-50: #10071c !important;
-  --color-gray-100: #160b24 !important;
-  --color-gray-200: #1e1030 !important;
-  --color-gray-300: #341f49 !important;
-  --color-gray-400: #4a2e62 !important;
-  --color-gray-500: #8a739c !important;
-  --color-gray-600: #b09cbf !important;
-  --color-gray-700: #c9b8d6 !important;
-  --color-gray-800: #dbcedc !important;
-  --color-gray-850: #e8dee1 !important;
-  --color-gray-900: #f6eee6 !important;
-  --color-gray-950: #faf5f0 !important;
+  --app-base-50: #10071c !important;
+  --app-base-100: #160b24 !important;
+  --app-base-200: #1e1030 !important;
+  --app-base-300: #341f49 !important;
+  --app-base-400: #4a2e62 !important;
+  --app-base-500: #8a739c !important;
+  --app-base-600: #b09cbf !important;
+  --app-base-700: #c9b8d6 !important;
+  --app-base-800: #dbcedc !important;
+  --app-base-850: #e8dee1 !important;
+  --app-base-900: #f6eee6 !important;
+  --app-base-950: #faf5f0 !important;
   --color-white: #08040e !important;
   --color-black: #fbf6f2 !important;
 }
 @media (prefers-color-scheme: light) {
   html[data-theme="system"], :root[data-theme="system"] {
-    --color-gray-50: #10071c !important;
-    --color-gray-100: #160b24 !important;
-    --color-gray-200: #1e1030 !important;
-    --color-gray-300: #341f49 !important;
-    --color-gray-400: #4a2e62 !important;
-    --color-gray-500: #8a739c !important;
-    --color-gray-600: #b09cbf !important;
-    --color-gray-700: #c9b8d6 !important;
-    --color-gray-800: #dbcedc !important;
-    --color-gray-850: #e8dee1 !important;
-    --color-gray-900: #f6eee6 !important;
-    --color-gray-950: #faf5f0 !important;
+    --app-base-50: #10071c !important;
+    --app-base-100: #160b24 !important;
+    --app-base-200: #1e1030 !important;
+    --app-base-300: #341f49 !important;
+    --app-base-400: #4a2e62 !important;
+    --app-base-500: #8a739c !important;
+    --app-base-600: #b09cbf !important;
+    --app-base-700: #c9b8d6 !important;
+    --app-base-800: #dbcedc !important;
+    --app-base-850: #e8dee1 !important;
+    --app-base-900: #f6eee6 !important;
+    --app-base-950: #faf5f0 !important;
     --color-white: #08040e !important;
     --color-black: #fbf6f2 !important;
   }
@@ -93,37 +129,73 @@ true
 
 /*[OWUI_PAL_DARK_START]*/
 /* --- DARK MODE VARIABLES --- */
+html.dark:not([data-theme="oled-dark"]):not([style*="--app-bg"]), html[data-theme="dark"]:not([style*="--app-bg"]) {
+  --app-base-0: oklch(0.950 0.037 266) !important;
+  --app-base-50: oklch(0.930 0.037 266) !important;
+  --app-base-100: oklch(0.890 0.037 266) !important;
+  --app-base-200: oklch(0.870 0.037 266) !important;
+  --app-base-300: oklch(0.800 0.037 266) !important;
+  --app-base-400: oklch(0.720 0.037 266) !important;
+  --app-base-500: oklch(0.640 0.037 266) !important;
+  --app-base-600: oklch(0.460 0.037 266) !important;
+  --app-base-700: oklch(0.370 0.037 266) !important;
+  --app-base-800: oklch(0.270 0.037 266) !important;
+  --app-base-850: oklch(0.220 0.037 266) !important;
+  --app-base-900: oklch(0.150 0.037 266) !important;
+  --app-base-950: oklch(0.110 0.037 266) !important;
+  --app-base-1000: color-mix(in oklab, oklch(0.150 0.037 266), black 60%) !important;
+  --app-bg: oklch(0.150 0.037 266) !important;
+  --app-fg: oklch(0.950 0.037 266) !important;
+  --color-gray-50: var(--app-base-50) !important;
+  --color-gray-100: var(--app-base-100) !important;
+  --color-gray-200: var(--app-base-200) !important;
+  --color-gray-300: var(--app-base-300) !important;
+  --color-gray-400: var(--app-base-400) !important;
+  --color-gray-500: var(--app-base-500) !important;
+  --color-gray-600: var(--app-base-600) !important;
+  --color-gray-700: var(--app-base-700) !important;
+  --color-gray-800: var(--app-base-800) !important;
+  --color-gray-850: var(--app-base-850) !important;
+  --color-gray-900: var(--app-base-900) !important;
+  --color-gray-950: var(--app-base-950) !important;
+}
 html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"] {
-  --color-gray-50: oklch(0.930 0.037 266) !important;
-  --color-gray-100: oklch(0.890 0.037 266) !important;
-  --color-gray-200: oklch(0.870 0.037 266) !important;
-  --color-gray-300: oklch(0.800 0.037 266) !important;
-  --color-gray-400: oklch(0.720 0.037 266) !important;
-  --color-gray-500: oklch(0.640 0.037 266) !important;
-  --color-gray-600: oklch(0.460 0.037 266) !important;
-  --color-gray-700: oklch(0.370 0.037 266) !important;
-  --color-gray-800: oklch(0.270 0.037 266) !important;
-  --color-gray-850: oklch(0.220 0.037 266) !important;
-  --color-gray-900: oklch(0.150 0.037 266) !important;
-  --color-gray-950: oklch(0.110 0.037 266) !important;
   --tdp-accent: #ff8a1e !important;
   --tdp-accent-2: #5a2a7a !important;
   --tdp-accent-3: #ffb347 !important;
 }
 @media (prefers-color-scheme: dark) {
+  html[data-theme="system"]:not([style*="--app-bg"]), :root[data-theme="system"]:not([style*="--app-bg"]) {
+    --app-base-0: oklch(0.950 0.037 266) !important;
+    --app-base-50: oklch(0.930 0.037 266) !important;
+    --app-base-100: oklch(0.890 0.037 266) !important;
+    --app-base-200: oklch(0.870 0.037 266) !important;
+    --app-base-300: oklch(0.800 0.037 266) !important;
+    --app-base-400: oklch(0.720 0.037 266) !important;
+    --app-base-500: oklch(0.640 0.037 266) !important;
+    --app-base-600: oklch(0.460 0.037 266) !important;
+    --app-base-700: oklch(0.370 0.037 266) !important;
+    --app-base-800: oklch(0.270 0.037 266) !important;
+    --app-base-850: oklch(0.220 0.037 266) !important;
+    --app-base-900: oklch(0.150 0.037 266) !important;
+    --app-base-950: oklch(0.110 0.037 266) !important;
+    --app-base-1000: color-mix(in oklab, oklch(0.150 0.037 266), black 60%) !important;
+    --app-bg: oklch(0.150 0.037 266) !important;
+    --app-fg: oklch(0.950 0.037 266) !important;
+    --color-gray-50: var(--app-base-50) !important;
+    --color-gray-100: var(--app-base-100) !important;
+    --color-gray-200: var(--app-base-200) !important;
+    --color-gray-300: var(--app-base-300) !important;
+    --color-gray-400: var(--app-base-400) !important;
+    --color-gray-500: var(--app-base-500) !important;
+    --color-gray-600: var(--app-base-600) !important;
+    --color-gray-700: var(--app-base-700) !important;
+    --color-gray-800: var(--app-base-800) !important;
+    --color-gray-850: var(--app-base-850) !important;
+    --color-gray-900: var(--app-base-900) !important;
+    --color-gray-950: var(--app-base-950) !important;
+  }
   html[data-theme="system"], :root[data-theme="system"] {
-    --color-gray-50: oklch(0.930 0.037 266) !important;
-    --color-gray-100: oklch(0.890 0.037 266) !important;
-    --color-gray-200: oklch(0.870 0.037 266) !important;
-    --color-gray-300: oklch(0.800 0.037 266) !important;
-    --color-gray-400: oklch(0.720 0.037 266) !important;
-    --color-gray-500: oklch(0.640 0.037 266) !important;
-    --color-gray-600: oklch(0.460 0.037 266) !important;
-    --color-gray-700: oklch(0.370 0.037 266) !important;
-    --color-gray-800: oklch(0.270 0.037 266) !important;
-    --color-gray-850: oklch(0.220 0.037 266) !important;
-    --color-gray-900: oklch(0.150 0.037 266) !important;
-    --color-gray-950: oklch(0.110 0.037 266) !important;
     --tdp-accent: #ff8a1e !important;
     --tdp-accent-2: #5a2a7a !important;
     --tdp-accent-3: #ffb347 !important;
@@ -133,35 +205,35 @@ html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"] {
 /*[OWUI_PAL_DARK_END]*/
 /* --- DARK MODE MANUAL OVERRIDES --- */
 html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"] {
-  --color-gray-50: #faf5f0 !important;
-  --color-gray-100: #f6eee6 !important;
-  --color-gray-200: #e8dee1 !important;
-  --color-gray-300: #dbcedc !important;
-  --color-gray-400: #c9b8d6 !important;
-  --color-gray-500: #b09cbf !important;
-  --color-gray-600: #8a739c !important;
-  --color-gray-700: #4a2e62 !important;
-  --color-gray-800: #341f49 !important;
-  --color-gray-850: #1e1030 !important;
-  --color-gray-900: #160b24 !important;
-  --color-gray-950: #10071c !important;
+  --app-base-50: #faf5f0 !important;
+  --app-base-100: #f6eee6 !important;
+  --app-base-200: #e8dee1 !important;
+  --app-base-300: #dbcedc !important;
+  --app-base-400: #c9b8d6 !important;
+  --app-base-500: #b09cbf !important;
+  --app-base-600: #8a739c !important;
+  --app-base-700: #4a2e62 !important;
+  --app-base-800: #341f49 !important;
+  --app-base-850: #1e1030 !important;
+  --app-base-900: #160b24 !important;
+  --app-base-950: #10071c !important;
   --color-white: #fbf6f2 !important;
   --color-black: #08040e !important;
 }
 @media (prefers-color-scheme: dark) {
   html[data-theme="system"], :root[data-theme="system"] {
-    --color-gray-50: #faf5f0 !important;
-    --color-gray-100: #f6eee6 !important;
-    --color-gray-200: #e8dee1 !important;
-    --color-gray-300: #dbcedc !important;
-    --color-gray-400: #c9b8d6 !important;
-    --color-gray-500: #b09cbf !important;
-    --color-gray-600: #8a739c !important;
-    --color-gray-700: #4a2e62 !important;
-    --color-gray-800: #341f49 !important;
-    --color-gray-850: #1e1030 !important;
-    --color-gray-900: #160b24 !important;
-    --color-gray-950: #10071c !important;
+    --app-base-50: #faf5f0 !important;
+    --app-base-100: #f6eee6 !important;
+    --app-base-200: #e8dee1 !important;
+    --app-base-300: #dbcedc !important;
+    --app-base-400: #c9b8d6 !important;
+    --app-base-500: #b09cbf !important;
+    --app-base-600: #8a739c !important;
+    --app-base-700: #4a2e62 !important;
+    --app-base-800: #341f49 !important;
+    --app-base-850: #1e1030 !important;
+    --app-base-900: #160b24 !important;
+    --app-base-950: #10071c !important;
     --color-white: #fbf6f2 !important;
     --color-black: #08040e !important;
   }
@@ -169,19 +241,37 @@ html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"] {
 
 /*[OWUI_PAL_OLED_START]*/
 /* --- OLED DARK MODE VARIABLES --- */
+html.dark[data-theme="oled-dark"]:not([style*="--app-bg"]), html[data-theme="oled-dark"]:not([style*="--app-bg"]) {
+  --app-base-0: oklch(0.800 0.037 266) !important;
+  --app-base-50: oklch(0.780 0.037 266) !important;
+  --app-base-100: oklch(0.740 0.037 266) !important;
+  --app-base-200: oklch(0.720 0.037 266) !important;
+  --app-base-300: oklch(0.650 0.037 266) !important;
+  --app-base-400: oklch(0.570 0.037 266) !important;
+  --app-base-500: oklch(0.490 0.037 266) !important;
+  --app-base-600: oklch(0.310 0.037 266) !important;
+  --app-base-700: oklch(0.220 0.037 266) !important;
+  --app-base-800: oklch(0.120 0.037 266) !important;
+  --app-base-850: oklch(0.070 0.037 266) !important;
+  --app-base-900: oklch(0.000 0.037 266) !important;
+  --app-base-950: oklch(0.000 0.037 266) !important;
+  --app-base-1000: color-mix(in oklab, oklch(0.000 0.037 266), black 60%) !important;
+  --app-bg: oklch(0.000 0.037 266) !important;
+  --app-fg: oklch(0.800 0.037 266) !important;
+  --color-gray-50: var(--app-base-50) !important;
+  --color-gray-100: var(--app-base-100) !important;
+  --color-gray-200: var(--app-base-200) !important;
+  --color-gray-300: var(--app-base-300) !important;
+  --color-gray-400: var(--app-base-400) !important;
+  --color-gray-500: var(--app-base-500) !important;
+  --color-gray-600: var(--app-base-600) !important;
+  --color-gray-700: var(--app-base-700) !important;
+  --color-gray-800: var(--app-base-800) !important;
+  --color-gray-850: var(--app-base-850) !important;
+  --color-gray-900: var(--app-base-900) !important;
+  --color-gray-950: var(--app-base-950) !important;
+}
 html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"] {
-  --color-gray-50: oklch(0.780 0.037 266) !important;
-  --color-gray-100: oklch(0.740 0.037 266) !important;
-  --color-gray-200: oklch(0.720 0.037 266) !important;
-  --color-gray-300: oklch(0.650 0.037 266) !important;
-  --color-gray-400: oklch(0.570 0.037 266) !important;
-  --color-gray-500: oklch(0.490 0.037 266) !important;
-  --color-gray-600: oklch(0.310 0.037 266) !important;
-  --color-gray-700: oklch(0.220 0.037 266) !important;
-  --color-gray-800: oklch(0.120 0.037 266) !important;
-  --color-gray-850: oklch(0.070 0.037 266) !important;
-  --color-gray-900: oklch(0.000 0.037 266) !important;
-  --color-gray-950: oklch(0.000 0.037 266) !important;
   --tdp-accent: #ff8a1e !important;
   --tdp-accent-2: #5a2a7a !important;
   --tdp-accent-3: #ffb347 !important;
@@ -190,37 +280,55 @@ html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"] {
 /*[OWUI_PAL_OLED_END]*/
 /* --- OLED DARK MODE MANUAL OVERRIDES --- */
 html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"] {
-  --color-gray-50: #faf5f0 !important;
-  --color-gray-100: #f6eee6 !important;
-  --color-gray-200: #e8dee1 !important;
-  --color-gray-300: #dbcedc !important;
-  --color-gray-400: #c9b8d6 !important;
-  --color-gray-500: #b09cbf !important;
-  --color-gray-600: #8a739c !important;
-  --color-gray-700: #4a2e62 !important;
-  --color-gray-800: #341f49 !important;
-  --color-gray-850: #1e1030 !important;
-  --color-gray-900: #160b24 !important;
-  --color-gray-950: #10071c !important;
+  --app-base-50: #faf5f0 !important;
+  --app-base-100: #f6eee6 !important;
+  --app-base-200: #e8dee1 !important;
+  --app-base-300: #dbcedc !important;
+  --app-base-400: #c9b8d6 !important;
+  --app-base-500: #b09cbf !important;
+  --app-base-600: #8a739c !important;
+  --app-base-700: #4a2e62 !important;
+  --app-base-800: #341f49 !important;
+  --app-base-850: #1e1030 !important;
+  --app-base-900: #160b24 !important;
+  --app-base-950: #10071c !important;
   --color-white: #fbf6f2 !important;
   --color-black: #08040e !important;
 }
 
 /*[OWUI_PAL_HER_START]*/
 /* --- HER MODE VARIABLES --- */
+html.her:not([style*="--app-bg"]), html[data-theme="her"]:not([style*="--app-bg"]) {
+  --app-base-0: oklch(1.000 0.037 266) !important;
+  --app-base-50: oklch(0.980 0.037 266) !important;
+  --app-base-100: oklch(0.940 0.037 266) !important;
+  --app-base-200: oklch(0.920 0.037 266) !important;
+  --app-base-300: oklch(0.850 0.037 266) !important;
+  --app-base-400: oklch(0.770 0.037 266) !important;
+  --app-base-500: oklch(0.690 0.037 266) !important;
+  --app-base-600: oklch(0.510 0.037 266) !important;
+  --app-base-700: oklch(0.420 0.037 266) !important;
+  --app-base-800: oklch(0.320 0.037 266) !important;
+  --app-base-850: oklch(0.270 0.037 266) !important;
+  --app-base-900: oklch(0.200 0.037 266) !important;
+  --app-base-950: oklch(0.160 0.037 266) !important;
+  --app-base-1000: oklch(0.000 0.037 266) !important;
+  --app-bg: oklch(1.000 0.037 266) !important;
+  --app-fg: oklch(0.000 0.037 266) !important;
+  --color-gray-50: var(--app-base-50) !important;
+  --color-gray-100: var(--app-base-100) !important;
+  --color-gray-200: var(--app-base-200) !important;
+  --color-gray-300: var(--app-base-300) !important;
+  --color-gray-400: var(--app-base-400) !important;
+  --color-gray-500: var(--app-base-500) !important;
+  --color-gray-600: var(--app-base-600) !important;
+  --color-gray-700: var(--app-base-700) !important;
+  --color-gray-800: var(--app-base-800) !important;
+  --color-gray-850: var(--app-base-850) !important;
+  --color-gray-900: var(--app-base-900) !important;
+  --color-gray-950: var(--app-base-950) !important;
+}
 html.her, html[data-theme="her"] {
-  --color-gray-50: oklch(0.980 0.037 266) !important;
-  --color-gray-100: oklch(0.940 0.037 266) !important;
-  --color-gray-200: oklch(0.920 0.037 266) !important;
-  --color-gray-300: oklch(0.850 0.037 266) !important;
-  --color-gray-400: oklch(0.770 0.037 266) !important;
-  --color-gray-500: oklch(0.690 0.037 266) !important;
-  --color-gray-600: oklch(0.510 0.037 266) !important;
-  --color-gray-700: oklch(0.420 0.037 266) !important;
-  --color-gray-800: oklch(0.320 0.037 266) !important;
-  --color-gray-850: oklch(0.270 0.037 266) !important;
-  --color-gray-900: oklch(0.200 0.037 266) !important;
-  --color-gray-950: oklch(0.160 0.037 266) !important;
   --tdp-accent: #ff8a1e !important;
   --tdp-accent-2: #5a2a7a !important;
   --tdp-accent-3: #ffb347 !important;
@@ -229,18 +337,18 @@ html.her, html[data-theme="her"] {
 /*[OWUI_PAL_HER_END]*/
 /* --- HER MODE MANUAL OVERRIDES --- */
 html.her, html[data-theme="her"] {
-  --color-gray-50: #10071c !important;
-  --color-gray-100: #160b24 !important;
-  --color-gray-200: #1e1030 !important;
-  --color-gray-300: #341f49 !important;
-  --color-gray-400: #4a2e62 !important;
-  --color-gray-500: #8a739c !important;
-  --color-gray-600: #b09cbf !important;
-  --color-gray-700: #c9b8d6 !important;
-  --color-gray-800: #dbcedc !important;
-  --color-gray-850: #e8dee1 !important;
-  --color-gray-900: #f6eee6 !important;
-  --color-gray-950: #faf5f0 !important;
+  --app-base-50: #10071c !important;
+  --app-base-100: #160b24 !important;
+  --app-base-200: #1e1030 !important;
+  --app-base-300: #341f49 !important;
+  --app-base-400: #4a2e62 !important;
+  --app-base-500: #8a739c !important;
+  --app-base-600: #b09cbf !important;
+  --app-base-700: #c9b8d6 !important;
+  --app-base-800: #dbcedc !important;
+  --app-base-850: #e8dee1 !important;
+  --app-base-900: #f6eee6 !important;
+  --app-base-950: #faf5f0 !important;
   --color-white: #08040e !important;
   --color-black: #fbf6f2 !important;
 }
@@ -250,7 +358,7 @@ html.her, html[data-theme="her"] {
 
 
 #=# designer: generateThemeSections structural
-@shared dfa3be5e1e15
+@shared e798e67f756c
 
 #=# designer: generateThemeSections gradient
 
@@ -445,7 +553,7 @@ _safe_subset_css, changed:
 = designer vars
 
 #=# python: _postprocess_sections sidebar=translucent overlay=opaque: structural
-@shared e98ace20c493
+@shared b666b97ab15e
 
 #=# python: _postprocess_sections sidebar=translucent overlay=opaque: gradient
 = designer gradient
@@ -505,7 +613,7 @@ _safe_subset_css, changed:
 = designer vars
 
 #=# python: _postprocess_sections sidebar=transparent overlay=opaque: structural
-@shared 1bf69008a2ff
+@shared 2982a759e800
 
 #=# python: _postprocess_sections sidebar=transparent overlay=opaque: gradient
 = designer gradient
@@ -836,7 +944,7 @@ data-theme 'her', class 'her'
 #=# bootloader: enforceTheme every valve flipped, /auth, dark, sections
 data-theme 'dark', class 'dark'
 /theme.css, changed:
-- lines 1-836 (836): '/*[OWUI_VARS_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 1-944 (944): '/*[OWUI_VARS_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
 
 #=# bootloader: enforceTheme every valve flipped, /auth, oled-dark, sections
 data-theme 'oled-dark', class 'dark'

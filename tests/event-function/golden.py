@@ -58,7 +58,7 @@ DESIGNER_NAMES = [
     "hasHiddenBackgrounds", "_repairSnapshotEntry", "_isThemeEntry", "_isLegacyTheme", "parseHex", "getLuminance",
     "relativeLuminance", "contrastRatio", "contrastVerdict", "validateModeData",
     "sanitizeGradientPreset", "sanitizeGradientPresets", "sanitizeCodePreset", "sanitizeCodePresets", "sanitizeSnapshotList", "normalizeModeData",
-    "ensureAllModes", "migrateLegacyTheme", "lightnessMap", "steps", "getVariablesMap",
+    "ensureAllModes", "migrateLegacyTheme", "lightnessMap", "steps", "getVariablesMap", "baseScaleVars", "ownColorsYield", "baseStepName", "paletteStepKey",
     "getDefaultColorForStep", "detectWashedOut", "designerChromeColors", "CHROME_TEXT_MIN", "CHROME_INDICATOR_MIN", "_overrideDecls", "_shippedVars", "_contrastPairs",
     "_expandHex", "oklchToHex", "_resolveReportColor", "getEffectiveLightness", "extractKeyframes",
     "hexToRgba", "getDarkestStop", "adjustHexIntensity", "gradientSpeed", "buildGradientCss",
@@ -913,7 +913,7 @@ def collect():
         hostile = designer["units"].pop("generateThemeSections_hostile")
         fixture = designer["themes"]["fixture-every-field"]
         for m in MODES:
-            variables[m] = {"config": json.loads(fixture["state"])[m], "vars": fixture["modes"][m]["shipped"]["vars"]}
+            variables[m] = {"config": json.loads(fixture["state"])[m], "vars": fixture["modes"][m]["base"]}
         boot = run_harness({"phase": "bootloader", "js": js_job, "required": DESIGNER_NAMES, "groups": groups, "variables": variables})
         if boot["pageErrors"]:
             raise RuntimeError("bootloader page errors: " + "; ".join(boot["pageErrors"]))

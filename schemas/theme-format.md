@@ -49,7 +49,7 @@ Each mode is an object with the fields below. Only `h`, `c` and `l` are required
 | `accent3` | `#rrggbb` or `""` | `""` | The third accent. Empty, it is generated the same way at `h` − 40. |
 | `overrides` | object | `{}` | Colors set for single palette steps, such as `"--color-gray-50": "#f8f9ff"`. Names are custom properties, values CSS colors of at most 64 characters. |
 | `locks` | object | `{}` | Palette steps kept when the palette is regenerated, each `true` or `false` |
-| `manualOverrides` | string | `""` | Palette steps written as CSS, one `--color-gray-N: value;` per line |
+| `manualOverrides` | string | `""` | Palette steps written as CSS, one `--app-base-N: value;` per line. The older `--color-gray-N` names set the same steps |
 | `manualOverridesEnabled` | boolean | false | Whether `manualOverrides` applies |
 
 The accents, set or generated, reach Canvas FX scripts as `colors.accent`, `accent2` and `accent3` in the theme payload, and the mode's CSS as `--tdp-accent`, `--tdp-accent-2` and `--tdp-accent-3`.

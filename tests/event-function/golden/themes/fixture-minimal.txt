@@ -25,37 +25,73 @@ true
 /*[OWUI_VARS_START]*/
 /*[OWUI_PAL_LIGHT_START]*/
 /* --- LIGHT MODE VARIABLES --- */
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]):not([style*="--app-bg"]) {
+  --app-base-0: oklch(1.000 0.012 40) !important;
+  --app-base-50: oklch(0.980 0.012 40) !important;
+  --app-base-100: oklch(0.980 0.012 40) !important;
+  --app-base-200: oklch(0.980 0.012 40) !important;
+  --app-base-300: oklch(0.980 0.012 40) !important;
+  --app-base-400: oklch(0.980 0.012 40) !important;
+  --app-base-500: oklch(0.980 0.012 40) !important;
+  --app-base-600: oklch(0.980 0.012 40) !important;
+  --app-base-700: oklch(0.980 0.012 40) !important;
+  --app-base-800: oklch(0.980 0.012 40) !important;
+  --app-base-850: oklch(0.980 0.012 40) !important;
+  --app-base-900: oklch(0.960 0.012 40) !important;
+  --app-base-950: oklch(0.920 0.012 40) !important;
+  --app-base-1000: oklch(0.760 0.012 40) !important;
+  --app-bg: oklch(1.000 0.012 40) !important;
+  --app-fg: oklch(0.760 0.012 40) !important;
+  --color-gray-50: var(--app-base-50) !important;
+  --color-gray-100: var(--app-base-100) !important;
+  --color-gray-200: var(--app-base-200) !important;
+  --color-gray-300: var(--app-base-300) !important;
+  --color-gray-400: var(--app-base-400) !important;
+  --color-gray-500: var(--app-base-500) !important;
+  --color-gray-600: var(--app-base-600) !important;
+  --color-gray-700: var(--app-base-700) !important;
+  --color-gray-800: var(--app-base-800) !important;
+  --color-gray-850: var(--app-base-850) !important;
+  --color-gray-900: var(--app-base-900) !important;
+  --color-gray-950: var(--app-base-950) !important;
+}
 :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) {
-  --color-gray-50: oklch(0.980 0.012 40) !important;
-  --color-gray-100: oklch(0.980 0.012 40) !important;
-  --color-gray-200: oklch(0.980 0.012 40) !important;
-  --color-gray-300: oklch(0.980 0.012 40) !important;
-  --color-gray-400: oklch(0.980 0.012 40) !important;
-  --color-gray-500: oklch(0.980 0.012 40) !important;
-  --color-gray-600: oklch(0.980 0.012 40) !important;
-  --color-gray-700: oklch(0.980 0.012 40) !important;
-  --color-gray-800: oklch(0.980 0.012 40) !important;
-  --color-gray-850: oklch(0.980 0.012 40) !important;
-  --color-gray-900: oklch(0.960 0.012 40) !important;
-  --color-gray-950: oklch(0.920 0.012 40) !important;
   --tdp-accent: oklch(0.56 0.060 40.0) !important;
   --tdp-accent-2: oklch(0.56 0.060 80.0) !important;
   --tdp-accent-3: oklch(0.56 0.060 0.0) !important;
 }
 @media (prefers-color-scheme: light) {
+  html[data-theme="system"]:not([style*="--app-bg"]), :root[data-theme="system"]:not([style*="--app-bg"]) {
+    --app-base-0: oklch(1.000 0.012 40) !important;
+    --app-base-50: oklch(0.980 0.012 40) !important;
+    --app-base-100: oklch(0.980 0.012 40) !important;
+    --app-base-200: oklch(0.980 0.012 40) !important;
+    --app-base-300: oklch(0.980 0.012 40) !important;
+    --app-base-400: oklch(0.980 0.012 40) !important;
+    --app-base-500: oklch(0.980 0.012 40) !important;
+    --app-base-600: oklch(0.980 0.012 40) !important;
+    --app-base-700: oklch(0.980 0.012 40) !important;
+    --app-base-800: oklch(0.980 0.012 40) !important;
+    --app-base-850: oklch(0.980 0.012 40) !important;
+    --app-base-900: oklch(0.960 0.012 40) !important;
+    --app-base-950: oklch(0.920 0.012 40) !important;
+    --app-base-1000: oklch(0.760 0.012 40) !important;
+    --app-bg: oklch(1.000 0.012 40) !important;
+    --app-fg: oklch(0.760 0.012 40) !important;
+    --color-gray-50: var(--app-base-50) !important;
+    --color-gray-100: var(--app-base-100) !important;
+    --color-gray-200: var(--app-base-200) !important;
+    --color-gray-300: var(--app-base-300) !important;
+    --color-gray-400: var(--app-base-400) !important;
+    --color-gray-500: var(--app-base-500) !important;
+    --color-gray-600: var(--app-base-600) !important;
+    --color-gray-700: var(--app-base-700) !important;
+    --color-gray-800: var(--app-base-800) !important;
+    --color-gray-850: var(--app-base-850) !important;
+    --color-gray-900: var(--app-base-900) !important;
+    --color-gray-950: var(--app-base-950) !important;
+  }
   html[data-theme="system"], :root[data-theme="system"] {
-    --color-gray-50: oklch(0.980 0.012 40) !important;
-    --color-gray-100: oklch(0.980 0.012 40) !important;
-    --color-gray-200: oklch(0.980 0.012 40) !important;
-    --color-gray-300: oklch(0.980 0.012 40) !important;
-    --color-gray-400: oklch(0.980 0.012 40) !important;
-    --color-gray-500: oklch(0.980 0.012 40) !important;
-    --color-gray-600: oklch(0.980 0.012 40) !important;
-    --color-gray-700: oklch(0.980 0.012 40) !important;
-    --color-gray-800: oklch(0.980 0.012 40) !important;
-    --color-gray-850: oklch(0.980 0.012 40) !important;
-    --color-gray-900: oklch(0.960 0.012 40) !important;
-    --color-gray-950: oklch(0.920 0.012 40) !important;
     --tdp-accent: oklch(0.56 0.060 40.0) !important;
     --tdp-accent-2: oklch(0.56 0.060 80.0) !important;
     --tdp-accent-3: oklch(0.56 0.060 0.0) !important;
@@ -65,37 +101,73 @@ true
 /*[OWUI_PAL_LIGHT_END]*/
 /*[OWUI_PAL_DARK_START]*/
 /* --- DARK MODE VARIABLES --- */
+html.dark:not([data-theme="oled-dark"]):not([style*="--app-bg"]), html[data-theme="dark"]:not([style*="--app-bg"]) {
+  --app-base-0: oklch(0.940 0.030 200) !important;
+  --app-base-50: oklch(0.920 0.030 200) !important;
+  --app-base-100: oklch(0.880 0.030 200) !important;
+  --app-base-200: oklch(0.860 0.030 200) !important;
+  --app-base-300: oklch(0.790 0.030 200) !important;
+  --app-base-400: oklch(0.710 0.030 200) !important;
+  --app-base-500: oklch(0.630 0.030 200) !important;
+  --app-base-600: oklch(0.450 0.030 200) !important;
+  --app-base-700: oklch(0.360 0.030 200) !important;
+  --app-base-800: oklch(0.260 0.030 200) !important;
+  --app-base-850: oklch(0.210 0.030 200) !important;
+  --app-base-900: oklch(0.140 0.030 200) !important;
+  --app-base-950: oklch(0.100 0.030 200) !important;
+  --app-base-1000: color-mix(in oklab, oklch(0.140 0.030 200), black 60%) !important;
+  --app-bg: oklch(0.140 0.030 200) !important;
+  --app-fg: oklch(0.940 0.030 200) !important;
+  --color-gray-50: var(--app-base-50) !important;
+  --color-gray-100: var(--app-base-100) !important;
+  --color-gray-200: var(--app-base-200) !important;
+  --color-gray-300: var(--app-base-300) !important;
+  --color-gray-400: var(--app-base-400) !important;
+  --color-gray-500: var(--app-base-500) !important;
+  --color-gray-600: var(--app-base-600) !important;
+  --color-gray-700: var(--app-base-700) !important;
+  --color-gray-800: var(--app-base-800) !important;
+  --color-gray-850: var(--app-base-850) !important;
+  --color-gray-900: var(--app-base-900) !important;
+  --color-gray-950: var(--app-base-950) !important;
+}
 html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"] {
-  --color-gray-50: oklch(0.920 0.030 200) !important;
-  --color-gray-100: oklch(0.880 0.030 200) !important;
-  --color-gray-200: oklch(0.860 0.030 200) !important;
-  --color-gray-300: oklch(0.790 0.030 200) !important;
-  --color-gray-400: oklch(0.710 0.030 200) !important;
-  --color-gray-500: oklch(0.630 0.030 200) !important;
-  --color-gray-600: oklch(0.450 0.030 200) !important;
-  --color-gray-700: oklch(0.360 0.030 200) !important;
-  --color-gray-800: oklch(0.260 0.030 200) !important;
-  --color-gray-850: oklch(0.210 0.030 200) !important;
-  --color-gray-900: oklch(0.140 0.030 200) !important;
-  --color-gray-950: oklch(0.100 0.030 200) !important;
   --tdp-accent: oklch(0.74 0.120 200.0) !important;
   --tdp-accent-2: oklch(0.74 0.120 240.0) !important;
   --tdp-accent-3: oklch(0.74 0.120 160.0) !important;
 }
 @media (prefers-color-scheme: dark) {
+  html[data-theme="system"]:not([style*="--app-bg"]), :root[data-theme="system"]:not([style*="--app-bg"]) {
+    --app-base-0: oklch(0.940 0.030 200) !important;
+    --app-base-50: oklch(0.920 0.030 200) !important;
+    --app-base-100: oklch(0.880 0.030 200) !important;
+    --app-base-200: oklch(0.860 0.030 200) !important;
+    --app-base-300: oklch(0.790 0.030 200) !important;
+    --app-base-400: oklch(0.710 0.030 200) !important;
+    --app-base-500: oklch(0.630 0.030 200) !important;
+    --app-base-600: oklch(0.450 0.030 200) !important;
+    --app-base-700: oklch(0.360 0.030 200) !important;
+    --app-base-800: oklch(0.260 0.030 200) !important;
+    --app-base-850: oklch(0.210 0.030 200) !important;
+    --app-base-900: oklch(0.140 0.030 200) !important;
+    --app-base-950: oklch(0.100 0.030 200) !important;
+    --app-base-1000: color-mix(in oklab, oklch(0.140 0.030 200), black 60%) !important;
+    --app-bg: oklch(0.140 0.030 200) !important;
+    --app-fg: oklch(0.940 0.030 200) !important;
+    --color-gray-50: var(--app-base-50) !important;
+    --color-gray-100: var(--app-base-100) !important;
+    --color-gray-200: var(--app-base-200) !important;
+    --color-gray-300: var(--app-base-300) !important;
+    --color-gray-400: var(--app-base-400) !important;
+    --color-gray-500: var(--app-base-500) !important;
+    --color-gray-600: var(--app-base-600) !important;
+    --color-gray-700: var(--app-base-700) !important;
+    --color-gray-800: var(--app-base-800) !important;
+    --color-gray-850: var(--app-base-850) !important;
+    --color-gray-900: var(--app-base-900) !important;
+    --color-gray-950: var(--app-base-950) !important;
+  }
   html[data-theme="system"], :root[data-theme="system"] {
-    --color-gray-50: oklch(0.920 0.030 200) !important;
-    --color-gray-100: oklch(0.880 0.030 200) !important;
-    --color-gray-200: oklch(0.860 0.030 200) !important;
-    --color-gray-300: oklch(0.790 0.030 200) !important;
-    --color-gray-400: oklch(0.710 0.030 200) !important;
-    --color-gray-500: oklch(0.630 0.030 200) !important;
-    --color-gray-600: oklch(0.450 0.030 200) !important;
-    --color-gray-700: oklch(0.360 0.030 200) !important;
-    --color-gray-800: oklch(0.260 0.030 200) !important;
-    --color-gray-850: oklch(0.210 0.030 200) !important;
-    --color-gray-900: oklch(0.140 0.030 200) !important;
-    --color-gray-950: oklch(0.100 0.030 200) !important;
     --tdp-accent: oklch(0.74 0.120 200.0) !important;
     --tdp-accent-2: oklch(0.74 0.120 240.0) !important;
     --tdp-accent-3: oklch(0.74 0.120 160.0) !important;
@@ -105,29 +177,47 @@ html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"] {
 /*[OWUI_PAL_DARK_END]*/
 /* --- DARK MODE MANUAL OVERRIDES --- */
 html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"] {
-  --color-gray-900: #0b1020 !important;
+  --app-base-900: #0b1020 !important;
 }
 @media (prefers-color-scheme: dark) {
   html[data-theme="system"], :root[data-theme="system"] {
-    --color-gray-900: #0b1020 !important;
+    --app-base-900: #0b1020 !important;
   }
 }
 
 /*[OWUI_PAL_OLED_START]*/
 /* --- OLED DARK MODE VARIABLES --- */
+html.dark[data-theme="oled-dark"]:not([style*="--app-bg"]), html[data-theme="oled-dark"]:not([style*="--app-bg"]) {
+  --app-base-0: oklch(0.800 0.030 200) !important;
+  --app-base-50: oklch(0.780 0.030 200) !important;
+  --app-base-100: oklch(0.740 0.030 200) !important;
+  --app-base-200: oklch(0.720 0.030 200) !important;
+  --app-base-300: oklch(0.650 0.030 200) !important;
+  --app-base-400: oklch(0.570 0.030 200) !important;
+  --app-base-500: oklch(0.490 0.030 200) !important;
+  --app-base-600: oklch(0.310 0.030 200) !important;
+  --app-base-700: oklch(0.220 0.030 200) !important;
+  --app-base-800: oklch(0.120 0.030 200) !important;
+  --app-base-850: oklch(0.070 0.030 200) !important;
+  --app-base-900: oklch(0.000 0.030 200) !important;
+  --app-base-950: oklch(0.000 0.030 200) !important;
+  --app-base-1000: color-mix(in oklab, oklch(0.000 0.030 200), black 60%) !important;
+  --app-bg: oklch(0.000 0.030 200) !important;
+  --app-fg: oklch(0.800 0.030 200) !important;
+  --color-gray-50: var(--app-base-50) !important;
+  --color-gray-100: var(--app-base-100) !important;
+  --color-gray-200: var(--app-base-200) !important;
+  --color-gray-300: var(--app-base-300) !important;
+  --color-gray-400: var(--app-base-400) !important;
+  --color-gray-500: var(--app-base-500) !important;
+  --color-gray-600: var(--app-base-600) !important;
+  --color-gray-700: var(--app-base-700) !important;
+  --color-gray-800: var(--app-base-800) !important;
+  --color-gray-850: var(--app-base-850) !important;
+  --color-gray-900: var(--app-base-900) !important;
+  --color-gray-950: var(--app-base-950) !important;
+}
 html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"] {
-  --color-gray-50: oklch(0.780 0.030 200) !important;
-  --color-gray-100: oklch(0.740 0.030 200) !important;
-  --color-gray-200: oklch(0.720 0.030 200) !important;
-  --color-gray-300: oklch(0.650 0.030 200) !important;
-  --color-gray-400: oklch(0.570 0.030 200) !important;
-  --color-gray-500: oklch(0.490 0.030 200) !important;
-  --color-gray-600: oklch(0.310 0.030 200) !important;
-  --color-gray-700: oklch(0.220 0.030 200) !important;
-  --color-gray-800: oklch(0.120 0.030 200) !important;
-  --color-gray-850: oklch(0.070 0.030 200) !important;
-  --color-gray-900: oklch(0.000 0.030 200) !important;
-  --color-gray-950: oklch(0.000 0.030 200) !important;
   --tdp-accent: oklch(0.74 0.120 200.0) !important;
   --tdp-accent-2: oklch(0.74 0.120 240.0) !important;
   --tdp-accent-3: oklch(0.74 0.120 160.0) !important;
@@ -136,24 +226,42 @@ html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"] {
 /*[OWUI_PAL_OLED_END]*/
 /* --- OLED DARK MODE MANUAL OVERRIDES --- */
 html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"] {
-  --color-gray-900: #0b1020 !important;
+  --app-base-900: #0b1020 !important;
 }
 
 /*[OWUI_PAL_HER_START]*/
 /* --- HER MODE VARIABLES --- */
+html.her:not([style*="--app-bg"]), html[data-theme="her"]:not([style*="--app-bg"]) {
+  --app-base-0: oklch(1.000 0.012 40) !important;
+  --app-base-50: oklch(0.980 0.012 40) !important;
+  --app-base-100: oklch(0.980 0.012 40) !important;
+  --app-base-200: oklch(0.980 0.012 40) !important;
+  --app-base-300: oklch(0.980 0.012 40) !important;
+  --app-base-400: oklch(0.980 0.012 40) !important;
+  --app-base-500: oklch(0.980 0.012 40) !important;
+  --app-base-600: oklch(0.980 0.012 40) !important;
+  --app-base-700: oklch(0.980 0.012 40) !important;
+  --app-base-800: oklch(0.980 0.012 40) !important;
+  --app-base-850: oklch(0.980 0.012 40) !important;
+  --app-base-900: oklch(0.960 0.012 40) !important;
+  --app-base-950: oklch(0.920 0.012 40) !important;
+  --app-base-1000: oklch(0.760 0.012 40) !important;
+  --app-bg: oklch(1.000 0.012 40) !important;
+  --app-fg: oklch(0.760 0.012 40) !important;
+  --color-gray-50: var(--app-base-50) !important;
+  --color-gray-100: var(--app-base-100) !important;
+  --color-gray-200: var(--app-base-200) !important;
+  --color-gray-300: var(--app-base-300) !important;
+  --color-gray-400: var(--app-base-400) !important;
+  --color-gray-500: var(--app-base-500) !important;
+  --color-gray-600: var(--app-base-600) !important;
+  --color-gray-700: var(--app-base-700) !important;
+  --color-gray-800: var(--app-base-800) !important;
+  --color-gray-850: var(--app-base-850) !important;
+  --color-gray-900: var(--app-base-900) !important;
+  --color-gray-950: var(--app-base-950) !important;
+}
 html.her, html[data-theme="her"] {
-  --color-gray-50: oklch(0.980 0.012 40) !important;
-  --color-gray-100: oklch(0.980 0.012 40) !important;
-  --color-gray-200: oklch(0.980 0.012 40) !important;
-  --color-gray-300: oklch(0.980 0.012 40) !important;
-  --color-gray-400: oklch(0.980 0.012 40) !important;
-  --color-gray-500: oklch(0.980 0.012 40) !important;
-  --color-gray-600: oklch(0.980 0.012 40) !important;
-  --color-gray-700: oklch(0.980 0.012 40) !important;
-  --color-gray-800: oklch(0.980 0.012 40) !important;
-  --color-gray-850: oklch(0.980 0.012 40) !important;
-  --color-gray-900: oklch(0.960 0.012 40) !important;
-  --color-gray-950: oklch(0.920 0.012 40) !important;
   --tdp-accent: oklch(0.56 0.060 40.0) !important;
   --tdp-accent-2: oklch(0.56 0.060 80.0) !important;
   --tdp-accent-3: oklch(0.56 0.060 0.0) !important;
@@ -168,17 +276,17 @@ html.her, html[data-theme="her"] {
 /*[OWUI_STRUCTURAL_START]*/
 /* --- LIGHT MODE Background Overrides --- */
 
-:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) body { background-color: var(--color-gray-50) !important; }
-:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) body { background-color: var(--color-base-0) !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-50) !important; }
 @media (prefers-color-scheme: light) {
 
-html[data-theme="system"] body { background-color: var(--color-gray-50) !important; }
-html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !important; }
+html[data-theme="system"] body { background-color: var(--color-base-0) !important; }
+html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-50) !important; }
 
 }
 /* --- DARK MODE Background Overrides --- */
 
-:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body { background-color: var(--color-gray-900) !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body { background-color: var(--color-base-900) !important; }
 /*[OWUI_CLEAR_GRADIENT_START]*/
 
 :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #theme-designer-container, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
@@ -189,10 +297,10 @@ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var
 :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
 :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app .file-code-editor { --editor-bg: transparent !important; }
 /*[OWUI_CLEAR_GRADIENT_END]*/
-:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950) !important; }
 @media (prefers-color-scheme: dark) {
 
-html[data-theme="system"] body { background-color: var(--color-gray-900) !important; }
+html[data-theme="system"] body { background-color: var(--color-base-900) !important; }
 /*[OWUI_CLEAR_GRADIENT_START]*/
 
 html[data-theme="system"] .app, html[data-theme="system"] #theme-designer-container, html[data-theme="system"] #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
@@ -203,12 +311,12 @@ html[data-theme="system"] #auth-page :where([class^="bg-gray-"]:not(button):not(
 html[data-theme="system"] .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
 html[data-theme="system"] .app .file-code-editor { --editor-bg: transparent !important; }
 /*[OWUI_CLEAR_GRADIENT_END]*/
-html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }
+html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950) !important; }
 
 }
 /* --- OLED DARK MODE Background Overrides --- */
 
-html[data-theme="oled-dark"] body { background-color: var(--color-gray-900) !important; }
+html[data-theme="oled-dark"] body { background-color: var(--color-base-900) !important; }
 /*[OWUI_CLEAR_GRADIENT_START]*/
 
 html[data-theme="oled-dark"] .app, html[data-theme="oled-dark"] #theme-designer-container, html[data-theme="oled-dark"] #auth-container { background-color: transparent !important; background-image: none !important; position: relative; }
@@ -219,11 +327,11 @@ html[data-theme="oled-dark"] #auth-page :where([class^="bg-gray-"]:not(button):n
 html[data-theme="oled-dark"] .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
 html[data-theme="oled-dark"] .app .file-code-editor { --editor-bg: transparent !important; }
 /*[OWUI_CLEAR_GRADIENT_END]*/
-html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }
+html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950) !important; }
 /* --- HER MODE Background Overrides --- */
 
-:is(html[data-theme="her"], html:where(.her)) body { background-color: var(--color-gray-50) !important; }
-:is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !important; }
+:is(html[data-theme="her"], html:where(.her)) body { background-color: var(--color-base-0) !important; }
+:is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-50) !important; }
 /*[OWUI_STRUCTURAL_END]*/
 
 
@@ -442,17 +550,17 @@ _safe_subset_css, changed:
 #=# python: _postprocess_sections sidebar=translucent overlay=opaque: structural
 designer structural, changed:
 - lines 5-5 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
-+ :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-50) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
-- lines 9-9 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !i' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !i'
-+ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-50) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
++ :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-base-50) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
+- lines 9-9 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-50) !i' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-50) !i'
++ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-base-50) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
 - lines 25-25 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) ' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) '
-+ :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-950) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
-- lines 39-39 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !'
-+ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-950) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
-- lines 55-55 (1): 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950' .. 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950'
-+ html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-950) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
++ :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-base-950) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
+- lines 39-39 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950) !' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950) !'
++ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-base-950) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
+- lines 55-55 (1): 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950' .. 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950'
++ html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-base-950) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
 - lines 59-59 (1): ':is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var' .. ':is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var'
-+ :is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-gray-50) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
++ :is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-base-50) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
 
 #=# python: _postprocess_sections sidebar=translucent overlay=opaque: gradient
 designer gradient, changed:
@@ -524,13 +632,13 @@ _safe_subset_css, changed:
 designer structural, changed:
 - lines 5-5 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
 + :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-- lines 9-9 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !i' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-50) !i'
+- lines 9-9 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-50) !i' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-50) !i'
 + html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 - lines 25-25 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) ' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) '
 + :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-- lines 39-39 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !'
+- lines 39-39 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950) !' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950) !'
 + html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-- lines 55-55 (1): 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950' .. 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950'
+- lines 55-55 (1): 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950' .. 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950'
 + html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 - lines 59-59 (1): ':is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var' .. ':is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var'
 + :is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
@@ -760,7 +868,7 @@ _safe_subset_css sidebar=opaque overlay=translucent, changed:
 + 
 + }
 + 
-- lines 174-214 (41): '/* --- Overlay Translucency (valve-injected) --- */' .. ''
+- lines 282-322 (41): '/* --- Overlay Translucency (valve-injected) --- */' .. ''
 then appends: _overlay_css()
 
 #=# python: no sections file: _safe_subset_css sidebar=translucent overlay=opaque
@@ -784,7 +892,7 @@ _safe_subset_css sidebar=translucent overlay=translucent, changed:
 + 
 + }
 + 
-- lines 174-214 (41): '/* --- Overlay Translucency (valve-injected) --- */' .. ''
+- lines 282-322 (41): '/* --- Overlay Translucency (valve-injected) --- */' .. ''
 then appends: _overlay_css()
 
 #=# python: no sections file: _safe_subset_css sidebar=transparent overlay=opaque
@@ -808,14 +916,14 @@ _safe_subset_css sidebar=transparent overlay=translucent, changed:
 + 
 + }
 + 
-- lines 174-214 (41): '/* --- Overlay Translucency (valve-injected) --- */' .. ''
+- lines 282-322 (41): '/* --- Overlay Translucency (valve-injected) --- */' .. ''
 then appends: _overlay_css()
 
 #=# python: no sections file: /state.json
 = saved state
 
 #=# bootloader: enforceTheme default valves, /auth, dark, sections
-@shared c4d3b083fcee
+@shared 900d551218ce
 
 #=# bootloader: enforceTheme default valves, /auth, dark, flat css only
 data-theme 'dark', class 'dark'
@@ -896,7 +1004,7 @@ data-theme 'her', class 'her'
 #=# bootloader: enforceTheme every valve flipped, /auth, dark, sections
 data-theme 'dark', class 'dark'
 /theme.css, changed:
-- lines 1-302 (302): '/*[OWUI_VARS_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 1-410 (410): '/*[OWUI_VARS_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
 
 #=# bootloader: enforceTheme every valve flipped, /auth, oled-dark, sections
 data-theme 'oled-dark', class 'dark'
@@ -911,7 +1019,7 @@ data-theme 'her', class 'her'
 = the page of: every valve flipped, /auth, dark, sections
 
 #=# bootloader: enforceTheme every valve flipped, /, dark, sections
-@shared c4d3b083fcee
+@shared 900d551218ce
 
 #=# bootloader: enforceTheme every valve flipped, /, oled-dark, sections
 data-theme 'oled-dark', class 'dark'

@@ -4,7 +4,7 @@
 
 ![Version](https://img.shields.io/badge/version-1.22.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.13.4-orange)
+![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.13.5-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
 
 ---
@@ -457,7 +457,7 @@ self.onmessage = (e) => {
 
 > **Note:** The `init` message includes an `env` object with `{ authToken, baseUrl, locale, timezone }`. `authToken` is **the token of whichever user is viewing the page**, not the admin's, and is an empty string unless the `enable_canvas_api_access` valve is enabled. A script that receives it can call the Open WebUI API with that user's permissions, so treat any script you did not write as untrusted before turning the valve on.
 
-> **Theme palette:** `init` carries `theme`, the active mode's palette, and a `theme` message brings a new one whenever it changes while the script runs (a mode switch that keeps the same script, a theme update, or a palette edit in the designer). `colors` holds `background`, `surface`, `text`, `muted`, `accent`, `accent2` and `accent3` as `'#rrggbb'`, `rgb` holds the same as `[r, g, b]` from 0 to 1, `ramp` is the `--color-gray-*` ramp, and `dark` is false on Light and Her. A script that follows it should keep its own colors as defaults, offer a `followTheme` setting, recolor without restarting, and avoid additive blending when `dark` is false. The **📖 Docs** page's **Theme-Aware Animations** section has the full pattern.
+> **Theme palette:** `init` carries `theme`, the active mode's palette, and a `theme` message brings a new one whenever it changes while the script runs (a mode switch that keeps the same script, a theme update, or a palette edit in the designer). `colors` holds `background`, `surface`, `text`, `muted`, `accent`, `accent2` and `accent3` as `'#rrggbb'`, `rgb` holds the same as `[r, g, b]` from 0 to 1, `ramp` is Open WebUI's base scale (`'0'` to `'1000'`, as the page resolves `--color-base-*`), and `dark` is false on Light and Her. A script that follows it should keep its own colors as defaults, offer a `followTheme` setting, recolor without restarting, and avoid additive blending when `dark` is false. The **📖 Docs** page's **Theme-Aware Animations** section has the full pattern.
 
 > **Taps and clicks:** answer a click or tap with `mousedown` alone, not `click`. A tap also sends a synthetic `mousedown`, and the browser can send its own, so a script that answers both acts twice.
 
@@ -557,6 +557,18 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. Since 1.7.0 the function cleans that up automatically, on its first event after each start; to check by hand, look for `<!-- OWUI Theme Pro Bootloader -->` in `/app/build/index.html`. It should be gone.
 
 ---
+
+## 📝 Unreleased: Open WebUI's base color system
+
+**The palette now drives Open WebUI's base color system.** After 0.13.4 every grey, white and black in Open WebUI's interface is a `base-*` class reading `--app-base-0` to `--app-base-1000`, mixed by default from two seeds, `--app-bg` and `--app-fg`. Each mode's palette now sets that scale and its seeds instead of overriding Tailwind's `--color-gray-*`. The two new ends follow the palette the way Open WebUI mixes them: `base-0` is the light end (the background in Light, the brightest text in Dark), and `base-1000` the dark end (black in Light, the background 60% toward black in Dark). So the white panels and black buttons that a theme couldn't reach before now take its colors too.
+
+**A user's own Theme Colors win.** Open WebUI lets each user pick a background and text color in Settings > General. While they have one for the mode in view, the palette steps aside and Open WebUI mixes the scale from their colors; the theme's accents, Canvas FX, gradient and custom CSS still apply. This is also how Open WebUI now gives OLED Dark its black background.
+
+**With the palette off, a mode sets none of the scale,** so Open WebUI's own colors show, a user's Theme Colors included.
+
+**Theme CSS that reads `var(--color-gray-*)` keeps working:** the palette sets those names to the same steps. New theme CSS can read `var(--color-base-*)`. A Manual Variable Override written as `--color-gray-900` sets `--app-base-900`, and the step labels in the Core Palette copy `--app-base-*`. Saved themes keep their stored names, so nothing needs migrating.
+
+**The Canvas FX palette** reads the base scale from the page, adds `'0'` and `'1000'` to `ramp`, and gives Light the page's `base-0` as `background`.
 
 ## 📝 What's New in 1.22.0
 
@@ -1372,7 +1384,7 @@ graph TD
 
 ## ⚠️ Important Notes & System Requirements
 
-- **Required Open WebUI Version:** v0.13.4 or higher. The function relies on the pre-toggle lifecycle events and on `/static/loader.js` + `/static/custom.css` being loaded by the frontend.
+- **Required Open WebUI Version:** the first release after v0.13.4, with Open WebUI's base color system (`base-*` classes reading `--app-base-*`). The palette sets that system; on v0.13.4 and earlier it has nothing to set. The function also relies on the pre-toggle lifecycle events and on `/static/loader.js` + `/static/custom.css` being loaded by the frontend.
 - **Admin access required for the instance theme:** the instance designer page and its save endpoint enforce admin authentication. With **Allow Personal Themes** on, any signed-in user except a pending account can open and save their own personal theme.
 - **Server write access:** only `DATA_DIR/theme/` is needed, for the persistence files, the uploaded pictures and `users/`. As of 1.7.0 the function never writes to the frontend build, so a read-only frontend is fine. (One exception: on its first event after each start it tries to remove the leftover `index.html` blocks of 1.6.2 or earlier, and logs a warning and continues if it can't.)
 - **No sandbox flags needed:** unlike the Tool variant, no "Same Origin" iframe configuration is required.
