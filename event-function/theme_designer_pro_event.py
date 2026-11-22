@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.22.0
+version: 1.23.0
 license: MIT
 required_open_webui_version: 0.13.4
 """
@@ -22,7 +22,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.22.0"
+VERSION = "1.23.0"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -6149,6 +6149,8 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         .canvas-settings-body .fx-set-text .fx-set-hint { margin-top: 0; }
         .canvas-settings-reset { margin: 12px 0 10px; border: 1px solid var(--border); }
         .canvas-settings-reset:disabled { opacity: 0.4; cursor: default; }
+        #surfaces-reset-btn { padding: 4px 12px; font-size: 0.72rem; }
+        #surfaces-reset-btn:disabled { opacity: 0.4; cursor: default; }
         .canvas-settings-body input[type="color"] { flex: none; width: 34px; height: 24px; padding: 0; border: 1px solid var(--border); border-radius: 6px; background: transparent; cursor: pointer; }
         .doc-inner { padding: 0 0 32px; color: var(--text-muted); font-size: 1.05rem; line-height: 1.85; }
 
@@ -6780,6 +6782,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                 <div>Surfaces</div>
                 <div class="flex-center">
                     <label class="toggle-label" data-tooltip="Set how see-through this mode's sidebar, message input, menus and dialogs are"><input type="checkbox" id="toggle-surfaces" class="cb-input"> Enabled</label>
+                    <button type="button" class="btn" id="surfaces-reset-btn" data-tooltip="Put every slider in this mode back to its default">⟲ Reset all</button>
                 </div>
             </div>
             <div class="control-group">
@@ -8039,7 +8042,7 @@ self.onmessage = (e) =&gt; {
                         <details class="doc-sub-accordion">
                             <summary>Surfaces: Each Layer's Opacity and Blur <i data-icon="chevron"></i></summary>
                             <div class="doc-sub-inner">
-                                <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85;">The <b>Surfaces</b> tab sets, per mode, how see-through each layer over the background is. <b>Opacity</b> is how much of the color Open WebUI paints that layer covers it, from 0% (clear) to 100% (solid). <b>Blur</b> softens whatever shows through it, up to 40px. For the backdrop behind a dialog, the first slider is how dark it gets. Double-click a slider&rsquo;s label to reset it to its default. A row at its defaults keeps Open WebUI&rsquo;s own look, so turning the switch on changes nothing until you move a slider.</p>
+                                <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85;">The <b>Surfaces</b> tab sets, per mode, how see-through each layer over the background is. <b>Opacity</b> is how much of the color Open WebUI paints that layer covers it, from 0% (clear) to 100% (solid). <b>Blur</b> softens whatever shows through it, up to 40px. For the backdrop behind a dialog, the first slider is how dark it gets. Double-click a slider&rsquo;s label to reset it to its default, or press <b>Reset all</b> beside the switch to put every slider in the mode back at once. A row at its defaults keeps Open WebUI&rsquo;s own look, so turning the switch on changes nothing until you move a slider.</p>
                                 <ul style="font-size: 0.72rem; line-height: 1.7; padding-left: 18px;">
                                     <li><b>Sidebar</b>: the open sidebar; its top and bottom fades show only at 100%</li>
                                     <li><b>Message input</b>: <code>#message-input-container</code></li>
@@ -14539,6 +14542,14 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
         slider.dispatchEvent(new Event('change'));
     };
 
+    // Every slider in this mode back to its default, in one Undo step
+    $('surfaces-reset-btn')?.addEventListener('click', () => {
+        const d = themeData[getActiveDataMode()];
+        if (!d || !d.surfacesEnabled) return;
+        SURFACE_FIELDS.slice(1).forEach(k => { d[k] = DEFAULT_MODE_DATA[k]; });
+        commitChange();
+    });
+
     $('toggle-surfaces')?.addEventListener('change', (e) => {
         const d = themeData[getActiveDataMode()];
         d.surfacesEnabled = e.target.checked;
@@ -14551,6 +14562,8 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
         const on = !!d.surfacesEnabled;
         const toggle = $('toggle-surfaces');
         if (toggle) toggle.checked = on;
+        const reset = $('surfaces-reset-btn');
+        if (reset) reset.disabled = !on || SURFACE_FIELDS.slice(1).every(k => (d[k] ?? DEFAULT_MODE_DATA[k]) === DEFAULT_MODE_DATA[k]);
         $('surfaces-list')?.classList.toggle('off', !on);
         document.querySelectorAll('#surfaces-list input[type="range"]').forEach(slider => {
             const k = slider.dataset.field;

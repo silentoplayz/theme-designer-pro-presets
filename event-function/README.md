@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI: an admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, optional personal themes for every user, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.22.0-blue)
+![Version](https://img.shields.io/badge/version-1.23.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.13.4-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -55,7 +55,7 @@ Unlike the [Tool variant](../tools/) which runs inside an AI chat iframe, this v
 - 🔊 **Context-Aware Animations:** Canvas FX scripts can react to conversation data in real time. A DOM observer scans chat messages for DOM-based token estimation (at most every 2 seconds, during streaming too), while a Socket.IO WebSocket interceptor extracts exact token counts from `chat:completion` responses. Both feed a `context` message to the animation for data-driven visual effects. External scripts can also dispatch custom context data via the `owui-canvas-context` CustomEvent API, which reaches scripts that read `context`.
 - 🎭 **Community Themes Browser:** Browse and install curated community themes directly from the Themes tab. The grid reads the [presets repository](https://github.com/silentoplayz/theme-designer-pro-presets)'s `docs/catalog.json` and supports one-click install, install-all, and search. With **Enable Theme Update Checks** on, it also reads `manifest.json` to offer updates. The **Enable Community Themes** valve hides the grid and skips its catalog fetch.
 - 🪟 **Sidebar & Overlay Transparency:** The **Surfaces** tab sets how see-through the sidebar, menus, dialogs and the other layers over the background are, per mode, with an opacity and a blur for each. With its switch off, a mode keeps Open WebUI's own solid look.
-- 🪟 **Surfaces Tab:** Set, per mode, how see-through each layer over the background is, with an **Opacity** slider (0% clear to 100% solid) and a **Blur** slider (up to 40px) per row: **Sidebar**, **Message input**, **Tabs drawer**, **Cards and panels**, **Buttons**, **Menus and tooltips**, **Dialogs**, **Behind dialogs** (how much the page behind a dialog darkens and blurs) and **Top fade** (opacity only; 0% hides it). Double-click a slider's label to reset it to its default. A row at its defaults keeps Open WebUI's own look, so turning the switch on changes nothing until you move a slider; with the switch off, every layer keeps it. Surfaces export with the theme and sync between modes.
+- 🪟 **Surfaces Tab:** Set, per mode, how see-through each layer over the background is, with an **Opacity** slider (0% clear to 100% solid) and a **Blur** slider (up to 40px) per row: **Sidebar**, **Message input**, **Tabs drawer**, **Cards and panels**, **Buttons**, **Menus and tooltips**, **Dialogs**, **Behind dialogs** (how much the page behind a dialog darkens and blurs) and **Top fade** (opacity only; 0% hides it). Double-click a slider's label to reset it to its default, or press **Reset all** beside the switch to put every slider in the mode back at once. A row at its defaults keeps Open WebUI's own look, so turning the switch on changes nothing until you move a slider; with the switch off, every layer keeps it. Surfaces export with the theme and sync between modes.
 - 🖼️ **Backgrounds Tab:** Fade Open WebUI's own background images into the theme: the **Chat Background Image** from Settings > Interface, every model with a background image, and in a personal theme every folder of yours with one. **Dimming** sets how much of Open WebUI's dimming layer covers them, and a switch decides whether the Canvas FX animation draws over them. **Sign-in page** (instance theme only) and **Other pages** (Workspace, Notes, the admin pages and the other pages without a chat) take an uploaded PNG, JPEG, GIF or WebP of up to 5 MB, or an `https://` address, and Other pages can also show each viewer's own Chat Background Image.
 - 🤖 **AI Consultant:** The **AI** header button turns a few words, such as "warm copper", into a palette and, when it suits, a matching gradient. A model on your instance answers: the one in the **AI Consultant Model** valve, or the task model.
 - 👤 **Personal Themes:** With **Allow Personal Themes** on, every user, admins included, gets a **Themes** tab in the *Personal* section of Settings for a theme only they see. It's saved with their account, so it follows them to every browser, and their saves update only their own open pages.
@@ -551,7 +551,7 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 
 ---
 
-## 📝 Unreleased: Open WebUI's base color system
+## 📝 What's New in 1.23.0
 
 **The palette now drives Open WebUI's base color system.** After 0.13.4 every grey, white and black in Open WebUI's interface is a `base-*` class reading `--app-base-0` to `--app-base-1000`, mixed by default from two seeds, `--app-bg` and `--app-fg`. Each mode's palette now sets that scale and its seeds instead of overriding Tailwind's `--color-gray-*`. The two new ends follow the palette the way Open WebUI mixes them: `base-0` is the light end (the background in Light, the brightest text in Dark), and `base-1000` the dark end (black in Light, the background 60% toward black in Dark). So the white panels and black buttons that a theme couldn't reach before now take its colors too.
 
@@ -574,6 +574,8 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 In Settings, the designer's own page is now always clear, so the dialog behind it shows as the **Dialogs** row draws it.
 
 **Turning Surfaces on changes nothing by itself.** A row still at its defaults writes no CSS, so Open WebUI keeps its own look for that layer until you move one of its sliders. Before, switching Surfaces on repainted the sidebar, message input, menus, dialogs and the backdrop with the theme's colors even with every slider untouched.
+
+**Reset all.** A **Reset all** button beside the Surfaces switch puts every slider in the mode back to its default in one step, which Undo takes back like any other change. It is greyed out while the switch is off or nothing has moved.
 
 **Personal themes and Auto Sync start on.** **Allow Personal Themes** and **Auto Sync** now default to on. An instance that saved its valves keeps the values it saved.
 
