@@ -93,7 +93,7 @@ async function installFunction(admin) {
 
 async function setValves(admin, valves) {
   const res = await api('POST', `/api/v1/functions/id/${FUNCTION_ID}/valves/update`,
-    { allow_personal_themes: true, ...valves }, admin);
+    { allow_personal_themes: true, auto_sync: false, ...valves }, admin);
   if (res.status !== 200) throw new Error('Could not set valves: ' + res.status);
 }
 
@@ -413,9 +413,16 @@ test('Enable Auth Page Theming off keeps the sign-in page on Open WebUI\'s look'
   }
 });
 
-test('Overlay Transparency glazes the Settings window but not a shared chat\'s messages', async ({ admin }) => {
+test('Surfaces glaze the Settings window but not a shared chat\'s messages', async ({ admin }) => {
   await saveTheme(admin, markerTheme('instance'));
-  await setValves(admin, { overlay_transparency: 'translucent' });
+  const designer = await openDesigner(admin);
+  await designer.evaluate(() => {
+    document.getElementById('toggle-surfaces').click();
+    ['surfaceMenuOpacity', 'surfaceDialogOpacity'].forEach((f) => { const s = document.getElementById('sl-' + f); s.value = '25'; s.dispatchEvent(new Event('input', { bubbles: true })); s.dispatchEvent(new Event('change', { bubbles: true })); });
+    ['surfaceMenuBlur', 'surfaceDialogBlur'].forEach((f) => { const s = document.getElementById('sl-' + f); s.value = '20'; s.dispatchEvent(new Event('input', { bubbles: true })); s.dispatchEvent(new Event('change', { bubbles: true })); });
+  });
+  await waitFor('the glass saved', async () => (await savedState(admin)).dark?.surfaceDialogBlur === 20 || 'not yet');
+  await designer.context().close();
   try {
     const now = Math.floor(Date.now() / 1000);
     const message = { id: 'm1', parentId: null, childrenIds: [], role: 'user', content: 'A shared message', timestamp: now };

@@ -250,7 +250,7 @@ html.her, html[data-theme="her"] {
 
 
 #=# designer: generateThemeSections structural
-@shared e798e67f756c
+@shared bcb5005888e6
 
 #=# designer: generateThemeSections gradient
 
@@ -415,28 +415,25 @@ parseSettings: same as light mode
 #=# python: _css_balanced
 css True, custom section True
 
-#=# python: _postprocess_sections sidebar=opaque overlay=opaque: vars
+#=# python: _postprocess_sections default valves: vars
 = designer vars
 
-#=# python: _postprocess_sections sidebar=opaque overlay=opaque: structural
+#=# python: _postprocess_sections default valves: structural
 = designer structural
 
-#=# python: _postprocess_sections sidebar=opaque overlay=opaque: gradient
+#=# python: _postprocess_sections default valves: gradient
 = designer gradient
 
-#=# python: _postprocess_sections sidebar=opaque overlay=opaque: custom
+#=# python: _postprocess_sections default valves: custom
 = designer custom
 
-#=# python: _postprocess_sections sidebar=opaque overlay=opaque: extra
-= designer extra
-
-#=# python: _postprocess_css sidebar=opaque overlay=opaque
+#=# python: _postprocess_css default valves
 = its _postprocess_sections, joined
 
-#=# python: /theme.css sidebar=opaque overlay=opaque
+#=# python: /theme.css default valves
 = _postprocess_css
 
-#=# python: _safe_subset_css sidebar=opaque overlay=opaque
+#=# python: _safe_subset_css default valves
 vars + custom, changed:
 + @supports (--tdp-instance: 1) {
 + /* structural rules deferred to bootloader */
@@ -444,298 +441,47 @@ vars + custom, changed:
 + }
 + 
 
-#=# python: _custom_css_fragment sidebar=opaque overlay=opaque
+#=# python: _custom_css_fragment default valves
 _safe_subset_css, changed:
 + /* owui-theme-designer-pro:start */
 + /* owui-theme-designer-pro:end */
 
-#=# python: _postprocess_sections sidebar=opaque overlay=translucent: vars
-= designer vars
+#=# python: _postprocess_sections canvas_fx=off default valves: structural
+@shared b031ffa2563d
 
-#=# python: _postprocess_sections sidebar=opaque overlay=translucent: structural
-= designer structural
-
-#=# python: _postprocess_sections sidebar=opaque overlay=translucent: gradient
-= designer gradient
-
-#=# python: _postprocess_sections sidebar=opaque overlay=translucent: custom
-= designer custom
-
-#=# python: _postprocess_sections sidebar=opaque overlay=translucent: extra
-= designer extra
-then appends: _overlay_css()
-
-#=# python: _postprocess_css sidebar=opaque overlay=translucent
-= its _postprocess_sections, joined
-
-#=# python: /theme.css sidebar=opaque overlay=translucent
-= _postprocess_css
-
-#=# python: _safe_subset_css sidebar=opaque overlay=translucent
-= _safe_subset_css sidebar=opaque overlay=opaque
-then appends: _overlay_css()
-
-#=# python: _custom_css_fragment sidebar=opaque overlay=translucent
-_safe_subset_css, changed:
-+ /* owui-theme-designer-pro:start */
-+ /* owui-theme-designer-pro:end */
-
-#=# python: _postprocess_sections sidebar=translucent overlay=opaque: vars
-= designer vars
-
-#=# python: _postprocess_sections sidebar=translucent overlay=opaque: structural
-@shared b666b97ab15e
-
-#=# python: _postprocess_sections sidebar=translucent overlay=opaque: gradient
-= designer gradient
-
-#=# python: _postprocess_sections sidebar=translucent overlay=opaque: custom
-= designer custom
-
-#=# python: _postprocess_sections sidebar=translucent overlay=opaque: extra
-= designer extra
-then appends: _sidebar_fade_css()
-
-#=# python: _postprocess_css sidebar=translucent overlay=opaque
-= its _postprocess_sections, joined
-
-#=# python: /theme.css sidebar=translucent overlay=opaque
-= _postprocess_css
-
-#=# python: _safe_subset_css sidebar=translucent overlay=opaque
-= _safe_subset_css sidebar=opaque overlay=opaque
-
-#=# python: _custom_css_fragment sidebar=translucent overlay=opaque
-_safe_subset_css, changed:
-+ /* owui-theme-designer-pro:start */
-+ /* owui-theme-designer-pro:end */
-
-#=# python: _postprocess_sections sidebar=translucent overlay=translucent: vars
-= designer vars
-
-#=# python: _postprocess_sections sidebar=translucent overlay=translucent: structural
-= structural of sidebar=translucent overlay=opaque
-
-#=# python: _postprocess_sections sidebar=translucent overlay=translucent: gradient
-= designer gradient
-
-#=# python: _postprocess_sections sidebar=translucent overlay=translucent: custom
-= designer custom
-
-#=# python: _postprocess_sections sidebar=translucent overlay=translucent: extra
-= designer extra
-then appends: _sidebar_fade_css() + _overlay_css()
-
-#=# python: _postprocess_css sidebar=translucent overlay=translucent
-= its _postprocess_sections, joined
-
-#=# python: /theme.css sidebar=translucent overlay=translucent
-= _postprocess_css
-
-#=# python: _safe_subset_css sidebar=translucent overlay=translucent
-= _safe_subset_css sidebar=opaque overlay=translucent
-
-#=# python: _custom_css_fragment sidebar=translucent overlay=translucent
-_safe_subset_css, changed:
-+ /* owui-theme-designer-pro:start */
-+ /* owui-theme-designer-pro:end */
-
-#=# python: _postprocess_sections sidebar=transparent overlay=opaque: vars
-= designer vars
-
-#=# python: _postprocess_sections sidebar=transparent overlay=opaque: structural
-@shared 2982a759e800
-
-#=# python: _postprocess_sections sidebar=transparent overlay=opaque: gradient
-= designer gradient
-
-#=# python: _postprocess_sections sidebar=transparent overlay=opaque: custom
-= designer custom
-
-#=# python: _postprocess_sections sidebar=transparent overlay=opaque: extra
-= designer extra
-then appends: _sidebar_fade_css() + _sidebar_mobile_css()
-
-#=# python: _postprocess_css sidebar=transparent overlay=opaque
-= its _postprocess_sections, joined
-
-#=# python: /theme.css sidebar=transparent overlay=opaque
-= _postprocess_css
-
-#=# python: _safe_subset_css sidebar=transparent overlay=opaque
-= _safe_subset_css sidebar=opaque overlay=opaque
-
-#=# python: _custom_css_fragment sidebar=transparent overlay=opaque
-_safe_subset_css, changed:
-+ /* owui-theme-designer-pro:start */
-+ /* owui-theme-designer-pro:end */
-
-#=# python: _postprocess_sections sidebar=transparent overlay=translucent: vars
-= designer vars
-
-#=# python: _postprocess_sections sidebar=transparent overlay=translucent: structural
-= structural of sidebar=transparent overlay=opaque
-
-#=# python: _postprocess_sections sidebar=transparent overlay=translucent: gradient
-= designer gradient
-
-#=# python: _postprocess_sections sidebar=transparent overlay=translucent: custom
-= designer custom
-
-#=# python: _postprocess_sections sidebar=transparent overlay=translucent: extra
-= designer extra
-then appends: _sidebar_fade_css() + _sidebar_mobile_css() + _overlay_css()
-
-#=# python: _postprocess_css sidebar=transparent overlay=translucent
-= its _postprocess_sections, joined
-
-#=# python: /theme.css sidebar=transparent overlay=translucent
-= _postprocess_css
-
-#=# python: _safe_subset_css sidebar=transparent overlay=translucent
-= _safe_subset_css sidebar=opaque overlay=translucent
-
-#=# python: _custom_css_fragment sidebar=transparent overlay=translucent
-_safe_subset_css, changed:
-+ /* owui-theme-designer-pro:start */
-+ /* owui-theme-designer-pro:end */
-
-#=# python: _postprocess_sections canvas_fx=off sidebar=opaque overlay=opaque: structural
-@shared 7715faf20c9f
-
-#=# python: /theme.css canvas_fx=off sidebar=opaque overlay=opaque
+#=# python: /theme.css canvas_fx=off default valves
 = its _postprocess_sections, joined
 
 #=# python: /state.json changes to the saved state, canvas_fx=on auth_theming=on
 state otherwise unchanged
 
-#=# python: /state.json canvas_fx=on auth_theming=on sidebar=opaque overlay=opaque
+#=# python: /state.json canvas_fx=on auth_theming=on default valves
 compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=opaque overlay=opaque
+_cssSections = _postprocess_sections default valves
 rest = changes to the saved state, canvas_fx=on auth_theming=on
 
 #=# python: /state.json changes to the saved state, canvas_fx=on auth_theming=off
 @shared 63ce8f0e56f6
 
-#=# python: /state.json canvas_fx=on auth_theming=off sidebar=opaque overlay=opaque
+#=# python: /state.json canvas_fx=on auth_theming=off default valves
 compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=opaque overlay=opaque
+_cssSections = _postprocess_sections default valves
 rest = changes to the saved state, canvas_fx=on auth_theming=off
 
 #=# python: /state.json changes to the saved state, canvas_fx=off auth_theming=on
 @shared 1dc6abdaf939
 
-#=# python: /state.json canvas_fx=off auth_theming=on sidebar=opaque overlay=opaque
+#=# python: /state.json canvas_fx=off auth_theming=on default valves
 compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections canvas_fx=off sidebar=opaque overlay=opaque
+_cssSections = _postprocess_sections canvas_fx=off default valves
 rest = changes to the saved state, canvas_fx=off auth_theming=on
 
 #=# python: /state.json changes to the saved state, canvas_fx=off auth_theming=off
 @shared 6f010f913f2d
 
-#=# python: /state.json canvas_fx=off auth_theming=off sidebar=opaque overlay=opaque
+#=# python: /state.json canvas_fx=off auth_theming=off default valves
 compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections canvas_fx=off sidebar=opaque overlay=opaque
-rest = changes to the saved state, canvas_fx=off auth_theming=off
-
-#=# python: /state.json canvas_fx=on auth_theming=on sidebar=opaque overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=opaque overlay=translucent
-rest = changes to the saved state, canvas_fx=on auth_theming=on
-
-#=# python: /state.json canvas_fx=on auth_theming=off sidebar=opaque overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=opaque overlay=translucent
-rest = changes to the saved state, canvas_fx=on auth_theming=off
-
-#=# python: /state.json canvas_fx=off auth_theming=on sidebar=opaque overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections canvas_fx=off sidebar=opaque overlay=translucent
-rest = changes to the saved state, canvas_fx=off auth_theming=on
-
-#=# python: /state.json canvas_fx=off auth_theming=off sidebar=opaque overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections canvas_fx=off sidebar=opaque overlay=translucent
-rest = changes to the saved state, canvas_fx=off auth_theming=off
-
-#=# python: /state.json canvas_fx=on auth_theming=on sidebar=translucent overlay=opaque
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=translucent overlay=opaque
-rest = changes to the saved state, canvas_fx=on auth_theming=on
-
-#=# python: /state.json canvas_fx=on auth_theming=off sidebar=translucent overlay=opaque
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=translucent overlay=opaque
-rest = changes to the saved state, canvas_fx=on auth_theming=off
-
-#=# python: /state.json canvas_fx=off auth_theming=on sidebar=translucent overlay=opaque
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections canvas_fx=off sidebar=translucent overlay=opaque
-rest = changes to the saved state, canvas_fx=off auth_theming=on
-
-#=# python: /state.json canvas_fx=off auth_theming=off sidebar=translucent overlay=opaque
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections canvas_fx=off sidebar=translucent overlay=opaque
-rest = changes to the saved state, canvas_fx=off auth_theming=off
-
-#=# python: /state.json canvas_fx=on auth_theming=on sidebar=translucent overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=translucent overlay=translucent
-rest = changes to the saved state, canvas_fx=on auth_theming=on
-
-#=# python: /state.json canvas_fx=on auth_theming=off sidebar=translucent overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=translucent overlay=translucent
-rest = changes to the saved state, canvas_fx=on auth_theming=off
-
-#=# python: /state.json canvas_fx=off auth_theming=on sidebar=translucent overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections canvas_fx=off sidebar=translucent overlay=translucent
-rest = changes to the saved state, canvas_fx=off auth_theming=on
-
-#=# python: /state.json canvas_fx=off auth_theming=off sidebar=translucent overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections canvas_fx=off sidebar=translucent overlay=translucent
-rest = changes to the saved state, canvas_fx=off auth_theming=off
-
-#=# python: /state.json canvas_fx=on auth_theming=on sidebar=transparent overlay=opaque
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=transparent overlay=opaque
-rest = changes to the saved state, canvas_fx=on auth_theming=on
-
-#=# python: /state.json canvas_fx=on auth_theming=off sidebar=transparent overlay=opaque
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=transparent overlay=opaque
-rest = changes to the saved state, canvas_fx=on auth_theming=off
-
-#=# python: /state.json canvas_fx=off auth_theming=on sidebar=transparent overlay=opaque
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections canvas_fx=off sidebar=transparent overlay=opaque
-rest = changes to the saved state, canvas_fx=off auth_theming=on
-
-#=# python: /state.json canvas_fx=off auth_theming=off sidebar=transparent overlay=opaque
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections canvas_fx=off sidebar=transparent overlay=opaque
-rest = changes to the saved state, canvas_fx=off auth_theming=off
-
-#=# python: /state.json canvas_fx=on auth_theming=on sidebar=transparent overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=transparent overlay=translucent
-rest = changes to the saved state, canvas_fx=on auth_theming=on
-
-#=# python: /state.json canvas_fx=on auth_theming=off sidebar=transparent overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=transparent overlay=translucent
-rest = changes to the saved state, canvas_fx=on auth_theming=off
-
-#=# python: /state.json canvas_fx=off auth_theming=on sidebar=transparent overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections canvas_fx=off sidebar=transparent overlay=translucent
-rest = changes to the saved state, canvas_fx=off auth_theming=on
-
-#=# python: /state.json canvas_fx=off auth_theming=off sidebar=transparent overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections canvas_fx=off sidebar=transparent overlay=translucent
+_cssSections = _postprocess_sections canvas_fx=off default valves
 rest = changes to the saved state, canvas_fx=off auth_theming=off
 
 #=# python: _strip_canvas_scripts
@@ -744,50 +490,12 @@ light.canvasScript: removed
 oled.canvasScript: removed
 her.canvasScript: removed
 
-#=# python: no sections file: _safe_subset_css sidebar=opaque overlay=opaque
+#=# python: no sections file: _safe_subset_css default valves
 vars + custom, changed:
 + @supports (--tdp-instance: 1) {
 + /* structural rules deferred to bootloader */
 + }
 + 
-
-#=# python: no sections file: _safe_subset_css sidebar=opaque overlay=translucent
-vars + custom, changed:
-+ @supports (--tdp-instance: 1) {
-+ /* structural rules deferred to bootloader */
-+ }
-+ 
-then appends: _overlay_css()
-
-#=# python: no sections file: _safe_subset_css sidebar=translucent overlay=opaque
-vars + custom, changed:
-+ @supports (--tdp-instance: 1) {
-+ /* structural rules deferred to bootloader */
-+ }
-+ 
-
-#=# python: no sections file: _safe_subset_css sidebar=translucent overlay=translucent
-vars + custom, changed:
-+ @supports (--tdp-instance: 1) {
-+ /* structural rules deferred to bootloader */
-+ }
-+ 
-then appends: _overlay_css()
-
-#=# python: no sections file: _safe_subset_css sidebar=transparent overlay=opaque
-vars + custom, changed:
-+ @supports (--tdp-instance: 1) {
-+ /* structural rules deferred to bootloader */
-+ }
-+ 
-
-#=# python: no sections file: _safe_subset_css sidebar=transparent overlay=translucent
-vars + custom, changed:
-+ @supports (--tdp-instance: 1) {
-+ /* structural rules deferred to bootloader */
-+ }
-+ 
-then appends: _overlay_css()
 
 #=# python: no sections file: /state.json
 = saved state
@@ -875,7 +583,8 @@ data-theme 'her', class 'her'
 #=# bootloader: enforceTheme every valve flipped, /auth, dark, sections
 data-theme 'dark', class 'dark'
 /theme.css, changed:
-- lines 1-593 (593): '/*[OWUI_VARS_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 1-75 (75): '/*[OWUI_VARS_START]*/' .. '}'
+- lines 77-594 (518): '/*[OWUI_PAL_LIGHT_END]*/' .. ''
 
 #=# bootloader: enforceTheme every valve flipped, /auth, oled-dark, sections
 data-theme 'oled-dark', class 'dark'

@@ -88,7 +88,7 @@ How see-through the layers over the background are. Each layer is tinted with th
 
 | Field | Type | Default | Meaning |
 |---|---|---|---|
-| `surfacesEnabled` | boolean | false | The mode sets its own surfaces. Off, the instance's Sidebar Transparency and Overlay Transparency settings apply |
+| `surfacesEnabled` | boolean | false | The mode sets its own surfaces. Off, Open WebUI's own look stays |
 | `surfaceSidebarOpacity` | number, 0 to 100 | 100 | How solid the open sidebar is, in percent |
 | `surfaceSidebarBlur` | number, 0 to 40 | 0 | How much the open sidebar blurs what shows through it, in px |
 | `surfaceComposerOpacity` | number, 0 to 100 | 5 | How solid the message input is, in percent |

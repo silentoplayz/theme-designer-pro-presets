@@ -6,7 +6,7 @@ author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
 version: 1.22.0
 license: MIT
-required_open_webui_version: 0.13.5
+required_open_webui_version: 0.13.4
 """
 
 import hashlib
@@ -18,7 +18,7 @@ import asyncio
 
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -482,34 +482,12 @@ class Event:
             description="Add a Themes page to the Admin Panel's top bar, between Functions and Settings, that opens the instance designer there. The designer stays available at its own URL, and in Settings, either way.",
         )
         allow_personal_themes: bool = Field(
-            default=False,
+            default=True,
             description="Let every user design a personal theme from a Themes tab in their own Settings. A personal theme replaces the instance theme for that user only and follows them to every browser, within the limits the other valves set. Off: everyone sees the instance theme.",
         )
         auto_sync: bool = Field(
-            default=False,
-            description="Skip the Selective Sync modal when loading presets or syncing. When enabled, a 'Sync All' toggle appears in the designer footer — turn it on to propagate changes to all modes, or leave it off to apply only to the active mode.\n\n---\n\n#### 🎨 Visual Style",
-        )
-        # ── Visual Style ──
-        sidebar_transparency: Literal["opaque", "translucent", "transparent"] = Field(
-            default="opaque",
-            description=(
-                "Controls sidebar background style. "
-                "'opaque' (default) — solid background for best readability. "
-                "'translucent' — frosted glass effect (backdrop-blur) that lets backgrounds show through. "
-                "'transparent' — fully see-through sidebar with no blur "
-                "(automatically uses translucent on mobile for readability). "
-                "Open WebUI's fades at the top and bottom of the sidebar show only while it's 'opaque'."
-            ),
-        )
-        overlay_transparency: Literal["opaque", "translucent"] = Field(
-            default="opaque",
-            description=(
-                "Controls overlay UI (settings modal, dropdowns, integration menus) background style. "
-                "'opaque' (default) — solid background for best readability. "
-                "'translucent' — frosted glass effect (backdrop-blur) that lets backgrounds show through. "
-                "The fade at the top of chats shows only while it's 'opaque'."
-                "\n\n---\n\n#### 🔒 Security"
-            ),
+            default=True,
+            description="Skip the Selective Sync modal when loading presets or syncing. When enabled, a 'Sync All' toggle appears in the designer footer — turn it on to propagate changes to all modes, or leave it off to apply only to the active mode.\n\n---\n\n#### 🔒 Security",
         )
         # ── Security ──
         enable_canvas_api_access: bool = Field(
@@ -1049,7 +1027,6 @@ class Event:
                                         if (vis.canvas || vis.gradient) parts.push(dropHiddenClearing(sec.structural || ''));
                                         if (vis.gradient) parts.push(sec.gradient || '');
                                         if (vis.custom) parts.push(sec.custom || '');
-                                        parts.push(sec.extra || ''); // valve-appended rules — never auth-gated
                                         // Re-apply the body::before sanitizer (assembly replaced finalCss)
                                         finalCss = parts.join('').replace(/[^{}]*body\\s*::before\\s*\\{[^}]*\\}/g, '');
                                     } else {
@@ -3455,10 +3432,6 @@ class Event:
             sections_mtime = Event._file_sig(self._get_sections_path())
         except OSError:
             sections_mtime = None
-        # sidebar_transparency cannot reach this subset today (it rewrites
-        # /*[FX]*/ rules inside structural + gradient, both dropped here) but is
-        # keyed on anyway — a stale safe subset is a far worse failure than an
-        # occasional extra recompute on a valve nobody changes at runtime.
         cache_key = (css_mtime, sections_mtime, *self._css_valve_key())
         cached = Event._safe_css_cache
         if cached and cached[0] == cache_key:
@@ -3473,12 +3446,6 @@ class Event:
 
         sections = self._load_sections()
         if sections:
-            # Raw sections, not _postprocess_sections(): the sidebar valve only
-            # rewrites structural + gradient, and the synthetic 'extra' section
-            # bundles the mobile sidebar upgrade in with the overlay glass. That
-            # sidebar rule is itself a transparency rule and belongs with the
-            # deferred structural block, so only the overlay part is applied
-            # below — matching what the pre-1.7.0 embedded subset shipped.
             safe_css = (
                 sections["vars"]
                 + "/* structural rules deferred to bootloader */\n"
@@ -3528,13 +3495,6 @@ class Event:
         # CSS. The condition is always true; it marks the block so the
         # bootloader can switch it off in that page's copy of the stylesheet.
         safe_css = f"@supports ({self.INSTANCE_CSS_MARK}) {{\n{safe_css}\n}}\n"
-
-        # The overlay valve APPENDS glass rules for portaled overlays, so unlike
-        # the sidebar valve it has to be baked in here or overlays pop from
-        # opaque to glass the moment the bootloader's /theme.css fetch lands.
-        # They're the admin's for every page, so they stay outside the block.
-        if self.valves.overlay_transparency != "opaque":
-            safe_css += self._overlay_css()
 
         Event._safe_css_cache = (cache_key, safe_css)
         return safe_css
@@ -5601,8 +5561,8 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
             if (!embed) return;
             var root = document.documentElement;
             root.classList.add('owui-skin');
-            // Overlay Transparency: a clear page lets the dialog's glass show through.
-            if (embed !== 'settings' || '{OVERLAY_TRANSPARENCY}' === 'opaque') return;
+            // A clear page shows the dialog behind it, as Surfaces' Dialogs row draws it
+            if (embed !== 'settings') return;
             root.classList.add('owui-skin-glass');
             // A frame whose color scheme differs from the page around it gets an
             // opaque backdrop, so take the dialog's, and whether it is dark.
@@ -6449,9 +6409,8 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         html.owui-skin body .mode-btn.active { font-weight: 500; color: var(--sk-strong); background: var(--sk-hover); border: 0; box-shadow: none; }
         html.owui-skin body .header-json-btn { font-family: inherit; font-size: 0.75rem; font-weight: 400; padding: 0.25rem 0.625rem; border: 0; border-radius: 0.5rem; background: transparent; color: var(--sk-label); }
         html.owui-skin body .header-json-btn:hover { background: var(--sk-hover); color: var(--sk-strong); border: 0; }
-        /* Overlay Transparency set to translucent: the page is clear, so the
-           dialog's frosted glass shows through, as it does on Open WebUI's
-           other overlays. Only while the designer's light or dark look matches
+        /* In Settings the page is clear, so the dialog shows through as
+           Surfaces' Dialogs row draws it, glass or solid. Only while the designer's light or dark look matches
            the dialog's; editing the other mode keeps the solid page, so its
            text stays readable. The designer paints its root element too. */
         html#tool-html.owui-skin-glass.owui-parent-dark:has(> body#tool-body:not(.light-mode)),
@@ -6910,7 +6869,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                 <details class="doc-accordion">
                     <summary>2. Valves <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
-                        <p>Valves are set in <b>Admin Panel &gt; Functions &gt; Theme Designer Pro &gt; ⚙️</b>. They take effect as soon as you save them: Open WebUI runs the function on save, and other workers pick the change up over Redis. Changes to <b>Enable Canvas FX</b>, <b>Sidebar Transparency</b> and <b>Overlay Transparency</b> are pushed to open pages right away. Other valve changes apply on each page&rsquo;s next load. The designer reads the valves when its page loads, so reload an open designer to see a change there.</p>
+                        <p>Valves are set in <b>Admin Panel &gt; Functions &gt; Theme Designer Pro &gt; ⚙️</b>. They take effect as soon as you save them: Open WebUI runs the function on save, and other workers pick the change up over Redis. Changes to <b>Enable Canvas FX</b> are pushed to open pages right away. Other valve changes apply on each page&rsquo;s next load. The designer reads the valves when its page loads, so reload an open designer to see a change there.</p>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
                                 <thead>
@@ -6928,10 +6887,8 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                                     <tr><td><b>Draft Mode Default</b></td><td>Off</td><td>On: the instance designer opens in Draft mode on every load, reloads included, even after you publish (see Section 9).</td></tr>
                                     <tr><td><b>Show In Admin Settings</b></td><td>On</td><td>Adds a <b>Themes</b> tab to the Admin section of Settings (see Section 3).</td></tr>
                                     <tr><td><b>Show In Admin Panel</b></td><td>Off</td><td>Adds a <b>Themes</b> page to the Admin Panel&rsquo;s top bar, between <b>Functions</b> and <b>Settings</b> (see Section 3).</td></tr>
-                                    <tr><td><b>Allow Personal Themes</b></td><td>Off</td><td>On: every user gets a <b>Themes</b> tab in their own Settings for a personal theme (see Section 4). Off again: everyone is back on the instance theme, and personal themes are kept.</td></tr>
-                                    <tr><td><b>Auto Sync</b></td><td>Off</td><td>On: <b>Sync</b> copies every part of the current mode to all the other modes without asking, and a gallery theme applies without the Apply Library Theme dialog. A <b>Sync All</b> switch in the footer then decides whether loading a theme or preset changes all four modes or only the current one.</td></tr>
-                                    <tr><td><b>Sidebar Transparency</b></td><td><code>opaque</code></td><td>The chat sidebar&rsquo;s background: <code>opaque</code>, <code>translucent</code> (frosted glass) or <code>transparent</code> (turned into <code>translucent</code> on phones). Open WebUI&rsquo;s fades at the top and bottom of the sidebar, above the user menu, show only while it&rsquo;s <code>opaque</code>, with or without Canvas FX.</td></tr>
-                                    <tr><td><b>Overlay Transparency</b></td><td><code>opaque</code></td><td>Settings, menus and dialogs: <code>opaque</code> or <code>translucent</code> (frosted glass). The fade at the top of chats, under the chat title, shows only while it&rsquo;s <code>opaque</code>, with or without Canvas FX.</td></tr>
+                                    <tr><td><b>Allow Personal Themes</b></td><td>On</td><td>On: every user gets a <b>Themes</b> tab in their own Settings for a personal theme (see Section 4). Off again: everyone is back on the instance theme, and personal themes are kept.</td></tr>
+                                    <tr><td><b>Auto Sync</b></td><td>On</td><td>On: <b>Sync</b> copies every part of the current mode to all the other modes without asking, and a gallery theme applies without the Apply Library Theme dialog. A <b>Sync All</b> switch in the footer then decides whether loading a theme or preset changes all four modes or only the current one.</td></tr>
                                     <tr><td><b>Enable Canvas Api Access</b></td><td>Off</td><td>On: gives every Canvas FX script the viewing user&rsquo;s Open WebUI token, so it can call the API as them. Leave it off unless you wrote or fully reviewed every script.</td></tr>
                                     <tr><td><b>Enable Url Import</b></td><td>On</td><td>Shows the URL field and <b>Load URL</b> button in the import dialogs. A convenience switch in the browser, not a security boundary.</td></tr>
                                     <tr><td><b>Allowed Import Domains</b></td><td>Empty</td><td>Comma-separated domains that URL imports, update checks and Community Themes may fetch from, each one with its subdomains. Empty allows any. Enforced in the browser as a guardrail, not a security boundary.</td></tr>
@@ -6951,7 +6908,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                             <li><b>Styled Like Open WebUI:</b> In Settings, the designer&rsquo;s header row takes Open WebUI&rsquo;s look: the page title is left to the tab, and the mode and header buttons are smaller and borderless. Everything below the header looks as it does at the designer&rsquo;s own URL. The Admin Panel&rsquo;s <b>Themes</b> page uses the same header.</li>
                             <li><b>Live Around You:</b> Edits save live as usual, so Settings restyles around the designer while you work. Switching to another Settings tab and back keeps the designer where you left it.</li>
                             <li><b>Searchable:</b> The Settings search box finds the tab by words such as &ldquo;theme&rdquo;, &ldquo;designer&rdquo;, &ldquo;palette&rdquo; or &ldquo;canvas&rdquo;. While the search holds words that don&rsquo;t match, the tab is hidden like any other.</li>
-                            <li><b>Frosted Glass:</b> With <b>Overlay Transparency</b> set to <code>translucent</code>, the designer&rsquo;s page turns clear, so Settings&rsquo; frosted glass shows behind it. It stays solid while you edit a mode whose light or dark look differs from Open WebUI&rsquo;s, so its text stays readable.</li>
+                            <li><b>Frosted Glass:</b> In the <b>Themes</b> tab of Settings the designer&rsquo;s page is clear, so the dialog behind it shows as the <b>Surfaces</b> tab&rsquo;s <b>Dialogs</b> row draws it, glass or solid. It stays solid while you edit a mode whose light or dark look differs from Open WebUI&rsquo;s, so its text stays readable.</li>
                             <li><b>Personal Tab:</b> With <b>Allow Personal Themes</b> on, every user, admins included, also gets a <b>Themes</b> tab in the <i>Personal</i> section, after <b>Interface</b>, for their own theme (see Section 4). Users see it after their next page load.</li>
                             <li><b>Which One Is In Use:</b> A green dot marks the <b>Themes</b> tab whose theme the page is showing: the Admin one for the instance theme, the Personal one for your own. While your own theme is showing, hovering the Admin tab says it replaces the instance theme for you. A user without the Admin tab sees a green ring on their own tab while the instance theme is showing, and a dot once they save a theme of their own.</li>
                             <li><b>A Page in the Admin Panel:</b> With the <b>Show In Admin Panel</b> valve on, the Admin Panel&rsquo;s top bar gets a <b>Themes</b> page between <b>Functions</b> and <b>Settings</b>, with the same designer filling the page. <b>Settings</b> opens its dialog over it, and any other page of the bar, or navigating elsewhere, closes it. A reload shows the page you were on before you opened <b>Themes</b>.</li>
@@ -8028,8 +7985,8 @@ self.onmessage = (e) =&gt; {
                                             <tr><td><b>3. Pictures</b></td><td>-1</td><td>The Backgrounds tab&rsquo;s <b>Other pages</b> picture, on a fixed layer behind the app, and Open WebUI&rsquo;s own background images with their dimming layer, which move under the canvas while <b>Draw the Canvas FX animation over these images</b> is on.</td></tr>
                                             <tr><td><b>4. Canvas Element</b></td><td>0</td><td>A full-viewport <code>&lt;canvas id="owui-theme-canvas-bg"&gt;</code> where your Canvas FX animation renders. Has <code>pointer-events: none</code> so it never intercepts clicks.</td></tr>
                                             <tr><td><b>5. Structural Transparency</b></td><td>none</td><td>CSS rules that set <code>background-color: transparent</code> on <code>.app</code>, <code>.app&nbsp;&gt;&nbsp;div</code>, <code>main</code>, <code>nav</code>, sticky bars, the designer&rsquo;s and the sign-in page&rsquo;s containers, wrappers painted with a gradient class (apart from the sidebar fades, the top fade and the chat background&rsquo;s dimming layer), and layout wrappers whose classes begin with <code>bg-gray-</code>, <code>bg-base-</code>, <code>dark:bg-gray-</code> or <code>dark:bg-base-</code> (not hover or other variants). Interactive elements (<code>button</code>, <code>a</code>, <code>input</code>, <code>select</code>, <code>label</code>, <code>span</code>), your own message bubble, rounded controls such as the message input and pill buttons, everything inside the message input, and the login card are excluded, so they keep Open WebUI&rsquo;s own look. The rules use <code>!important</code> and are scoped to the mode&rsquo;s selector plus <code>.app</code>, so overriding one takes <code>!important</code> and at least that specificity. See <i>Overlay UI Protection</i> below for how portaled overlay UI stays opaque.</td></tr>
-                                            <tr><td><b>6. Glass Panels</b></td><td>none</td><td>A semi-opaque overlay with <code>backdrop-filter: blur()</code> on the <b>sidebar</b>, keeping navigation readable while letting the background show through. The Gradient Builder auto-calculates the RGBA value from the darkest gradient stop (or the mesh background color for Mesh gradients). The sidebar&rsquo;s glass behavior is controlled by the <b>Sidebar Transparency</b> valve: <code>opaque</code> (default) uses a solid background, except that with a gradient active the sidebar takes the darkest gradient color at 75% opacity with a 12px blur, <code>translucent</code> applies a tinted glass effect with <code>backdrop-filter: blur(20px) saturate(1.3)</code>, and <code>transparent</code> removes the background entirely (auto-upgraded to translucent on mobile for readability). Open WebUI&rsquo;s fades at the top and bottom of the sidebar follow the same valve: they stay while it&rsquo;s <code>opaque</code>, in the gradient&rsquo;s sidebar color while a gradient is active, and go away with <code>translucent</code> or <code>transparent</code>, where they would read as solid bands. Both sidebar and overlay transparency valves work independently of Canvas FX and gradient state. In a mode with its Surfaces switch on, the Surfaces rows set the sidebar and overlays instead of these valves.</td></tr>
-                                            <tr><td><b>7. Overlay Glass</b></td><td>none</td><td>Portaled UI elements (settings modal, dropdown menus, user menus, integration menus) that live outside <code>.app</code> on <code>&lt;body&gt;</code>. Controlled by the <b>Overlay Transparency</b> valve: <code>opaque</code> (default) keeps solid backgrounds for readability, <code>translucent</code> applies frosted glass with <code>backdrop-filter: blur(20px) saturate(1.3)</code>. Uses CSS <code>:not(.app *)</code> exclusions to avoid affecting elements inside the main app container. <code>translucent</code> also hides the fade at the top of chats.</td></tr>
+                                            <tr><td><b>6. Glass Panels</b></td><td>none</td><td>With a gradient active, the <b>sidebar</b> takes the darkest gradient stop (or the mesh background color for Mesh gradients) at 75% opacity with a 12px <code>backdrop-filter: blur()</code>, keeping navigation readable while letting the background show through, and Open WebUI&rsquo;s fades at the top and bottom of the sidebar take the same color. Otherwise the sidebar keeps its solid background. In a mode with its Surfaces switch on, the <b>Sidebar</b> row sets how see-through it is instead.</td></tr>
+                                            <tr><td><b>7. Overlay Glass</b></td><td>none</td><td>Portaled UI elements (settings modal, dropdown menus, user menus, integration menus) that live outside <code>.app</code> on <code>&lt;body&gt;</code>. They keep Open WebUI&rsquo;s solid backgrounds unless the mode&rsquo;s Surfaces switch is on; then the <b>Menus and tooltips</b>, <b>Dialogs</b>, <b>Behind dialogs</b> and <b>Top fade</b> rows set them.</td></tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -8044,8 +8001,8 @@ self.onmessage = (e) =&gt; {
                                 <ul>
                                     <li><b>Low-specificity transparency:</b> The broad <code>bg-gray-</code> and <code>bg-base-</code> transparency rule is wrapped in CSS <code>:where()</code>, so it adds nothing to the specificity beyond the mode selector and <code>.app</code>. Its declarations are <code>!important</code>, though, so only an <code>!important</code> rule of equal or higher specificity overrides them.</li>
                                     <li><b>Element exclusions:</b> Interactive elements like <code>button</code>, <code>a</code>, <code>input</code>, <code>select</code>, <code>label</code>, and <code>span</code> are excluded from transparency entirely via <code>:not()</code> filters, and so is anything with a <code>rounded</code> class, the message input and everything inside it. This protects toggle knobs (<code>bg-white</code> circles), styled buttons, the message input&rsquo;s own tint and other small UI widgets: they hide almost none of the background, so clearing them only changed their look. Dropdown menus, modal dialogs, and listbox selectors, which are <b>portaled</b> outside the <code>.app</code> wrapper, are naturally unaffected because the transparency rules only target elements within <code>.app</code>, <code>#theme-designer-container</code>, and <code>#auth-page</code> scope.</li>
-                                    <li><b>Sidebar backdrop:</b> Nested <code>bg-gray-*</code> and <code>bg-base-*</code> elements inside <code>#sidebar</code> become transparent like the rest of the app, but stay readable because the sidebar itself keeps its own background: <code>--color-gray-950</code> in Dark and OLED, <code>--color-gray-50</code> in Light and Her, or the darkest gradient color at 75% opacity with a blur while a gradient is active. The <b>Sidebar Transparency</b> valve controls that backdrop: <code>opaque</code> (the default) keeps it as described, while <code>translucent</code> and <code>transparent</code> swap it for a frosted-glass or fully see-through backdrop so Canvas FX and gradient backgrounds show through.</li>
-                                    <li><b>Overlay translucency:</b> Portaled overlay elements (settings modal, dropdown menus, user menus) can optionally use a frosted glass effect via the <b>Overlay Transparency</b> valve. When set to <code>translucent</code>, the system appends CSS rules targeting <code>div[class*="bg-gray-"]</code>, <code>div[class*="bg-base-"]</code> and <code>div[class*="bg-white"]</code> elements inside portals using <code>color-mix()</code> and <code>backdrop-filter</code>. Elements inside <code>.app</code> and <code>#theme-designer-container</code> are explicitly excluded via <code>:not(.app *)</code> to prevent regressions in the main UI. When the designer is open in the <b>Themes</b> tab of Settings, its own page turns clear too, so the glass shows behind it, as long as the designer&rsquo;s light or dark look matches Open WebUI&rsquo;s. Editing the other mode keeps the page solid so its text stays readable.</li>
+                                    <li><b>Sidebar backdrop:</b> Nested <code>bg-gray-*</code> and <code>bg-base-*</code> elements inside <code>#sidebar</code> become transparent like the rest of the app, but stay readable because the sidebar itself keeps its own background: <code>--color-gray-950</code> in Dark and OLED, <code>--color-gray-50</code> in Light and Her, or the darkest gradient color at 75% opacity with a blur while a gradient is active. In a mode with its Surfaces switch on, the <b>Sidebar</b> row makes that backdrop see-through so Canvas FX and gradient backgrounds show through.</li>
+                                    <li><b>Overlay surfaces:</b> Portaled overlay elements (settings modal, dropdown menus, user menus) keep their solid backgrounds unless the mode&rsquo;s Surfaces switch is on; then the <b>Menus and tooltips</b> and <b>Dialogs</b> rows tint them with <code>color-mix()</code> and <code>backdrop-filter</code>. Elements inside <code>.app</code> and <code>#theme-designer-container</code> are excluded. When the designer is open in the <b>Themes</b> tab of Settings, its own page is clear, so the dialog shows behind it, as long as the designer&rsquo;s light or dark look matches Open WebUI&rsquo;s. Editing the other mode keeps the page solid so its text stays readable.</li>
                                 </ul>
                                 <p style="font-size: 0.7rem; color: var(--text-muted); line-height: 1.5;"><b>Note:</b> The <code>[class*="bg-white"]</code> attribute selector is intentionally <b>not</b> included in the structural transparency rules. Elements with <code>bg-white</code> classes in Open WebUI are almost always interactive widgets (toggle indicators, button styling, card backgrounds), not structural layout wrappers. However, it <b>is</b> included in the overlay translucency rules since overlay panels in light mode use <code>bg-white</code> as their primary background class.</p>
 
@@ -8082,7 +8039,7 @@ self.onmessage = (e) =&gt; {
                         <details class="doc-sub-accordion">
                             <summary>Surfaces: Each Layer's Opacity and Blur <i data-icon="chevron"></i></summary>
                             <div class="doc-sub-inner">
-                                <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85;">The <b>Surfaces</b> tab sets, per mode, how see-through each layer over the background is. <b>Opacity</b> is how much of the color Open WebUI paints that layer covers it, from 0% (clear) to 100% (solid). <b>Blur</b> softens whatever shows through it, up to 40px. For the backdrop behind a dialog, the first slider is how dark it gets. Double-click a slider&rsquo;s label to reset it to its default.</p>
+                                <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85;">The <b>Surfaces</b> tab sets, per mode, how see-through each layer over the background is. <b>Opacity</b> is how much of the color Open WebUI paints that layer covers it, from 0% (clear) to 100% (solid). <b>Blur</b> softens whatever shows through it, up to 40px. For the backdrop behind a dialog, the first slider is how dark it gets. Double-click a slider&rsquo;s label to reset it to its default. A row at its defaults keeps Open WebUI&rsquo;s own look, so turning the switch on changes nothing until you move a slider.</p>
                                 <ul style="font-size: 0.72rem; line-height: 1.7; padding-left: 18px;">
                                     <li><b>Sidebar</b>: the open sidebar; its top and bottom fades show only at 100%</li>
                                     <li><b>Message input</b>: <code>#message-input-container</code></li>
@@ -8093,7 +8050,7 @@ self.onmessage = (e) =&gt; {
                                     <li><b>Dialogs</b> and <b>Behind dialogs</b>: the window itself and the page behind it</li>
                                     <li><b>Top fade</b>: the fade at the top of a chat; 0% hides it</li>
                                 </ul>
-                                <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85;">With the tab's switch off, a mode follows the <b>Sidebar Transparency</b> and <b>Overlay Transparency</b> valves. On, the mode's own values win over both. Turning it on the first time starts from what those valves draw. Surfaces travel with the theme: they export, sync between modes under their own Sync category, and Reset Mode clears them.</p>
+                                <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85;">With the tab's switch off, a mode keeps Open WebUI's own look for every layer. Surfaces travel with the theme: they export, sync between modes under their own Sync category, and Reset Mode clears them.</p>
                             </div>
                         </details>
 
@@ -8107,10 +8064,9 @@ self.onmessage = (e) =&gt; {
                                     <li><b>Structural Background Rules</b>: when Canvas FX or a gradient is active, transparency rules on the app containers plus <code>body</code>/<code>#sidebar</code> backdrops; otherwise just opaque <code>body</code>/<code>#sidebar</code> rules. The Surfaces rules follow them when the mode&rsquo;s Surfaces switch is on.</li>
                                     <li><b>Gradient Background CSS</b>: <code>background-image</code>, sidebar blur, and chat overlay rules</li>
                                     <li><b>Custom CSS Snippet</b>: your raw CSS</li>
-                                    <li><b>Valve rules</b>: the Sidebar Transparency valve rewrites the sidebar&rsquo;s own rules in place, then appends a rule hiding the sidebar fades (<code>translucent</code> or <code>transparent</code>) and the mobile fix (<code>transparent</code> only). Overlay Transparency <code>translucent</code> appends the overlay glass and hides the top fade. All of these come after Custom CSS.</li>
                                 </ol>
                                 <p style="font-size: 0.68rem; color: var(--text-muted); margin-top: 6px;">A later rule wins a tie of equal specificity and importance. Many of the designer&rsquo;s own rules use <code>!important</code>, so a Custom CSS rule needs <code>!important</code> too to override them, as with a gradient <code>background-image</code> over the Gradient Builder&rsquo;s.</p>
-                                <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85; margin-top: 10px;"><b>Structured sections:</b> Internally the CSS is generated as four separate sections: <code>vars</code> (palette + manual overrides), <code>structural</code>, <code>gradient</code>, and <code>custom</code>. They are saved to the server both as the flat blob above (served at <code>/theme.css</code> and shown by the header&rsquo;s <b>CSS</b> button) and as a sections JSON file. Consumers assemble only the sections they need: the bootloader picks sections per the "Show on Auth Pages" toggles (delivered inside <code>state.json</code> under the <code>_cssSections</code> key, plus an <code>extra</code> section holding valve-appended rules that are never auth-gated), and the server composes only <code>vars</code> + <code>custom</code> into <code>/static/custom.css</code> as the flash-free safe subset, plus the overlay glass rules when Overlay Transparency is <code>translucent</code>. The <code>/*[OWUI_*]*/</code> marker comments still appear in the flat output and remain the fallback slicing mechanism for themes saved by older versions.</p>
+                                <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85; margin-top: 10px;"><b>Structured sections:</b> Internally the CSS is generated as four separate sections: <code>vars</code> (palette + manual overrides), <code>structural</code>, <code>gradient</code>, and <code>custom</code>. They are saved to the server both as the flat blob above (served at <code>/theme.css</code> and shown by the header&rsquo;s <b>CSS</b> button) and as a sections JSON file. Consumers assemble only the sections they need: the bootloader picks sections per the "Show on Auth Pages" toggles (delivered inside <code>state.json</code> under the <code>_cssSections</code> key), and the server composes only <code>vars</code> + <code>custom</code> into <code>/static/custom.css</code> as the flash-free safe subset. The <code>/*[OWUI_*]*/</code> marker comments still appear in the flat output and remain the fallback slicing mechanism for themes saved by older versions.</p>
                             </div>
                         </details>
                     </div>
@@ -12329,10 +12285,8 @@ self.onmessage = (e) => {
     function buildCustomCss(modeData, selector) {
         if (!modeData.customCSS || modeData.customCssEnabled === false) return '';
         // Sanitize: neutralize any marker comment sequences to prevent
-        // spoofing the /*[OWUI_*]*/ markers used for auth-page CSS stripping,
-        // and /*[FX]*/, which the sidebar valve would rewrite in /theme.css
-        // but not in the sections sign-in pages are built from
-        const cssText = modeData.customCSS.replace(/\/\*\[(OWUI_|FX\])/g, '/* [$1');
+        // spoofing the /*[OWUI_*]*/ markers used for auth-page CSS stripping
+        const cssText = modeData.customCSS.replace(/\/\*\[OWUI_/g, '/* [OWUI_');
         if (modeData.autoScope) {
             const { keyframes, cleanedCss } = extractKeyframes(cssText);
             // :root and html both mean the page root, which the scope
@@ -12444,7 +12398,7 @@ self.onmessage = (e) => {
         const sidebarBlur = 'blur(12px)';
         const overlayFrom = hexToRgba(baseColor, 0.7);
         const overlayTo = hexToRgba(baseColor, 0.35);
-        return `\n/*[OWUI_GRADIENT_START]*/\n/* ${comment} */\n${selector} body {\n${bodyBg}\n  background-attachment: fixed !important;\n${animCss}\n}\n${selector} body::before { content: none !important; display: none !important; }\n${selector} #chat-container .bg-linear-to-t:not(.bg-cover + div) {\n  background-image: linear-gradient(to top, ${overlayFrom}, ${overlayTo}) !important;\n}\n${selector} #sidebar:not(.h-full) { /*[FX]*/\n  background-color: ${sidebarRgba} !important;\n  backdrop-filter: ${sidebarBlur} !important;\n}\n${selector} #sidebar :is(.sidebar-bg-gradient-to-t, .sidebar-bg-gradient-to-b) {\n  --tw-gradient-from: ${sidebarRgba} !important;\n}\n${selector} #navbar-bg-gradient-to-b {\n  --tw-gradient-from: ${hexToRgba(baseColor, 0.9)} !important;\n  --tw-gradient-via: ${hexToRgba(baseColor, 0.5)} !important;\n}\n${keyframesCss}/*[OWUI_GRADIENT_END]*/\n`;
+        return `\n/*[OWUI_GRADIENT_START]*/\n/* ${comment} */\n${selector} body {\n${bodyBg}\n  background-attachment: fixed !important;\n${animCss}\n}\n${selector} body::before { content: none !important; display: none !important; }\n${selector} #chat-container .bg-linear-to-t:not(.bg-cover + div) {\n  background-image: linear-gradient(to top, ${overlayFrom}, ${overlayTo}) !important;\n}\n${selector} #sidebar:not(.h-full) {\n  background-color: ${sidebarRgba} !important;\n  backdrop-filter: ${sidebarBlur} !important;\n}\n${selector} #sidebar :is(.sidebar-bg-gradient-to-t, .sidebar-bg-gradient-to-b) {\n  --tw-gradient-from: ${sidebarRgba} !important;\n}\n${selector} #navbar-bg-gradient-to-b {\n  --tw-gradient-from: ${hexToRgba(baseColor, 0.9)} !important;\n  --tw-gradient-via: ${hexToRgba(baseColor, 0.5)} !important;\n}\n${keyframesCss}/*[OWUI_GRADIENT_END]*/\n`;
     }
 
     function buildGradientCss(modeData, selector) {
@@ -12507,9 +12461,8 @@ self.onmessage = (e) => {
 
     // The flat CSS (the CSS viewer, /theme.css, localStorage cache). Each
     // section carries its own /*[OWUI_*]*/ markers, so concatenation is enough.
-    // 'extra' holds the server's valve-appended rules and is empty here.
     function assembleThemeCss(s) {
-        return s.vars + s.structural + s.gradient + s.custom + (s.extra || '');
+        return s.vars + s.structural + s.gradient + s.custom;
     }
 
     function generateCoreCSS(varsCache) {
@@ -12531,10 +12484,9 @@ self.onmessage = (e) => {
         const withUtilClass = (elements, ex, utils) => utils.flatMap(u => elements.flatMap(el =>
             [`${el}[class^="${u}"]${ex}`, `${el}[class*=" ${u}"]${ex}`])).join(', ');
 
-        // The Surfaces tab. Off: nothing, and the instance's Sidebar and
-        // Overlay Transparency settings apply. On: these rules, which outrank
-        // those settings' rules through the :not() of three IDs no element
-        // has (specificity only, it matches everything).
+        // The Surfaces tab. Off: nothing, and Open WebUI's own look stays. On:
+        // these rules, which outrank the theme's other rules through the :not()
+        // of three IDs no element has (specificity only, it matches everything).
         const buildSurfaceCss = (modeData, scope, dark) => {
             if (!modeData.surfacesEnabled) return '';
             const at = scope + ':not(#tdp-surface#tdp-surface#tdp-surface)';
@@ -12552,23 +12504,33 @@ self.onmessage = (e) => {
             const onPage = `:not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not(${pageTab} *)):not(#auth-page *)`;
             // Below 768px the Tabs drawer is a dialog outside .app
             const onPages = (sel, tail = '') => `${at} .app :where(${sel})${tail}, ${at} #controls-container ${pageTab} :where(${sel})${tail}`;
-            const so = num('surfaceSidebarOpacity');
-            let css = `/* --- Surfaces --- */\n`;
-            css += `${at} #sidebar:not(.h-full) { ${decl(fill(color('Sidebar'), so), num('surfaceSidebarBlur'))} }\n`;
-            css += `${at} #sidebar .sidebar-bg-gradient-to-t, ${at} #sidebar .sidebar-bg-gradient-to-b { display: ${so >= 100 ? 'block' : 'none'} !important; }\n`;
-            css += `${at} #message-input-container { ${decl(fill(color('Composer'), num('surfaceComposerOpacity')), num('surfaceComposerBlur'))} }\n`;
+            // A layer left at its defaults writes nothing, so it keeps Open
+            // WebUI's own look and turning the switch on changes nothing yet
+            const moved = (key) => ['Opacity', 'Blur'].some(part => {
+                const k = `surface${key}${part}`;
+                return k in DEFAULT_MODE_DATA && num(k) !== DEFAULT_MODE_DATA[k];
+            });
+            let css = '';
+            if (moved('Sidebar')) {
+                const so = num('surfaceSidebarOpacity');
+                css += `${at} #sidebar:not(.h-full) { ${decl(fill(color('Sidebar'), so), num('surfaceSidebarBlur'))} }\n`;
+                css += `${at} #sidebar .sidebar-bg-gradient-to-t, ${at} #sidebar .sidebar-bg-gradient-to-b { display: ${so >= 100 ? 'block' : 'none'} !important; }\n`;
+            }
+            if (moved('Composer')) {
+                css += `${at} #message-input-container { ${decl(fill(color('Composer'), num('surfaceComposerOpacity')), num('surfaceComposerBlur'))} }\n`;
+            }
             // From 768px each tab, alone or in a split, is the page or chat it
             // shows. Below that the fill goes to the Tabs drawer, whose own
             // solid panel clears so the fill shows.
-            const panel = decl(fill(color('Panel'), num('surfacePanelOpacity')), num('surfacePanelBlur'));
-            css += `${at} #controls-container:not(.absolute) { ${panel} }\n`;
-            css += `${at} :has(> div > #controls-container:not(.absolute)) { background-color: transparent !important; }\n`;
+            if (moved('Panel')) {
+                css += `${at} #controls-container:not(.absolute) { ${decl(fill(color('Panel'), num('surfacePanelOpacity')), num('surfacePanelBlur'))} }\n`;
+                css += `${at} :has(> div > #controls-container:not(.absolute)) { background-color: transparent !important; }\n`;
+            }
             // Rounded panels on a page stay solid under the background
-            // clearing; at 100% and no blur they keep Open WebUI's own look.
-            // A chat's messages, the sidebar, the message input and the side
-            // panel have their own layers or stay as they are.
+            // clearing. A chat's messages, the sidebar, the message input and
+            // the side panel have their own layers or stay as they are.
             const co = num('surfaceCardsOpacity'), cb = num('surfaceCardsBlur');
-            if (co < 100 || cb > 0) {
+            if (moved('Cards')) {
                 // A group of buttons, such as the split Create button, keeps its look
                 const cex = ':not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(:has(> button:first-child))' + onPage;
                 const cards = withUtilClass(['div[class*="rounded"]'], cex, PANEL_UTILS);
@@ -12576,28 +12538,32 @@ self.onmessage = (e) => {
                 // Cards that light up under the pointer still do
                 css += `${onPages(cards, '[class*="hover:bg-"]:hover')} { background-color: ${fill(color('Cards'), Math.min(100, co + 10))} !important; }\n`;
             }
-            // Grey buttons and button groups on a page, at 100% and no blur
-            // Open WebUI's own. Switches show on and off by their fill. Black
-            // and white action buttons (Save, Send) can carry grey classes
-            // too; their text gives them away: white in Light mode, dark in Dark.
+            // Grey buttons and button groups on a page. Switches show on and
+            // off by their fill. Black and white action buttons (Save, Send)
+            // can carry grey classes too; their text gives them away: white in
+            // Light mode, dark in Dark.
             const bo = num('surfaceButtonsOpacity'), bb = num('surfaceButtonsBlur');
-            if (bo < 100 || bb > 0) {
+            if (moved('Buttons')) {
                 const bex = '[class*="rounded"]:not([role="switch"]):not([role="checkbox"])' +
                     ':not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"])' + onPage;
                 const btn = withUtilClass(['button', 'div:has(> button:first-child)'], bex, GREY_UTILS);
                 css += `${onPages(btn)} { ${decl(fill(color('Buttons'), bo), bb)} }\n`;
                 css += `${onPages(btn, '[class*="hover:bg-"]:hover')} { background-color: ${fill(color('Buttons'), Math.min(100, bo + 15))} !important; }\n`;
             }
-            css += `${at} .app-dropdown-menu, ${at} .tippy-box, ${at} [data-sonner-toast], ${at} body > div${pex} :where(${tokens}) { ${decl(fill(color('Menu'), num('surfaceMenuOpacity')), num('surfaceMenuBlur'))} }\n`;
-            css += `${at} .modal > div:where([class*="bg-white"], [class*="bg-gray-"], [class*="bg-base-"]) { ${decl(fill(color('Dialog'), num('surfaceDialogOpacity')), num('surfaceDialogBlur'))} }\n`;
-            // Overlay Transparency also tints the pieces inside a dialog; hand
-            // them back to Open WebUI's own classes, which sit in a cascade layer
-            const inner = withUtilClass(['div'], '', PANEL_UTILS);
-            css += `${at} .modal > div :where(${inner}) { background-color: revert-layer !important; backdrop-filter: revert-layer !important; -webkit-backdrop-filter: revert-layer !important; }\n`;
-            css += `${at} .modal { ${decl(`rgb(0 0 0 / ${num('surfaceBackdropOpacity')}%)`, num('surfaceBackdropBlur'))} }\n`;
-            const fo = num('surfaceFadeOpacity');
-            css += `${at} #navbar-bg-gradient-to-b { display: ${fo > 0 ? 'block' : 'none'} !important; opacity: ${fo / 100} !important; }\n`;
-            return css;
+            if (moved('Menu')) {
+                css += `${at} .app-dropdown-menu, ${at} .tippy-box, ${at} [data-sonner-toast], ${at} body > div${pex} :where(${tokens}) { ${decl(fill(color('Menu'), num('surfaceMenuOpacity')), num('surfaceMenuBlur'))} }\n`;
+            }
+            if (moved('Dialog')) {
+                css += `${at} .modal > div:where([class*="bg-white"], [class*="bg-gray-"], [class*="bg-base-"]) { ${decl(fill(color('Dialog'), num('surfaceDialogOpacity')), num('surfaceDialogBlur'))} }\n`;
+            }
+            if (moved('Backdrop')) {
+                css += `${at} .modal { ${decl(`rgb(0 0 0 / ${num('surfaceBackdropOpacity')}%)`, num('surfaceBackdropBlur'))} }\n`;
+            }
+            if (moved('Fade')) {
+                const fo = num('surfaceFadeOpacity');
+                css += `${at} #navbar-bg-gradient-to-b { display: ${fo > 0 ? 'block' : 'none'} !important; opacity: ${fo / 100} !important; }\n`;
+            }
+            return css && `/* --- Surfaces --- */\n${css}`;
         };
 
         const getBgRules = (mode, selector, bgBody, bgSidebar) => {
@@ -12634,12 +12600,12 @@ ${selector} #auth-page :where(${gWhere}):where(:not(#auth-login-card *)) { backg
 ${selector} .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
 ${selector} .app .file-code-editor { --editor-bg: transparent !important; }
 /*[${clear}_END]*/
-${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar}) !important; }
+${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !important; }
 `;
             } else {
                 return `
 ${selector} body { background-color: var(${bgBody}) !important; }
-${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar}) !important; }
+${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !important; }
 `;
             }
         };
@@ -12909,10 +12875,10 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
                     liveStyle.textContent = css;
                 }
                 // Live mode leaves the cross-tab css_cache write to the POST
-                // response in syncToServer(): the server returns the
-                // valve-postprocessed CSS, and the raw CSS here would make other
-                // tabs' 'storage' listeners apply opaque /*[FX]*/ sidebar rules
-                // for a couple of seconds until the SSE refetch. A draft writes
+                // response in syncToServer(): the server returns the CSS as the
+                // Enable Canvas FX valve delivers it, and the raw CSS here would
+                // make other tabs' 'storage' listeners apply rules that valve
+                // drops for a couple of seconds until the SSE refetch. A draft writes
                 // now, since Storage routes it to this tab's sessionStorage.
                 if (_draftMode) Storage.setRaw('css_cache', css);
                 const stateStr = themeStateStr();
@@ -14536,8 +14502,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
 
     // === SURFACES TAB ===
     // One row per layer, built from SURFACE_LAYERS. The values are the mode's
-    // own; with the switch off the theme leaves the layers to the instance's
-    // Sidebar and Overlay Transparency settings.
+    // own; with the switch off the layers keep Open WebUI's own look.
     (function buildSurfacesTab() {
         const list = $('surfaces-list');
         if (!list) return;
@@ -14574,23 +14539,8 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
         slider.dispatchEvent(new Event('change'));
     };
 
-    // Turning Surfaces on for the first time starts from what the instance
-    // settings draw today, so nothing jumps
-    function seedSurfacesFromValves(d) {
-        if (!SURFACE_FIELDS.slice(1).every(k => d[k] === DEFAULT_MODE_DATA[k])) return;
-        const cfg = window.__THEME_PRO_CONFIG__ || {};
-        if (cfg.sidebarTransparency === 'translucent') { d.surfaceSidebarOpacity = 20; d.surfaceSidebarBlur = 20; }
-        else if (cfg.sidebarTransparency === 'transparent') { d.surfaceSidebarOpacity = 0; d.surfaceSidebarBlur = 0; }
-        if (cfg.overlayTransparency === 'translucent') {
-            d.surfaceMenuOpacity = 25; d.surfaceMenuBlur = 20;
-            d.surfaceDialogOpacity = 25; d.surfaceDialogBlur = 20;
-            d.surfaceFadeOpacity = 0;
-        }
-    }
-
     $('toggle-surfaces')?.addEventListener('change', (e) => {
         const d = themeData[getActiveDataMode()];
-        if (e.target.checked) seedSurfacesFromValves(d);
         d.surfacesEnabled = e.target.checked;
         commitChange();
     });
@@ -14611,10 +14561,9 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
         });
         const note = $('surfaces-note');
         if (note) {
-            const cfg = window.__THEME_PRO_CONFIG__ || {};
             note.innerText = on
-                ? "Opacity is how much of Open WebUI's own color covers each layer: 100% is solid, 0% is clear. Blur softens whatever shows through it. These win over the instance's Sidebar and Overlay Transparency settings in this mode."
-                : `Off: this mode follows the instance's Sidebar Transparency (${cfg.sidebarTransparency || 'opaque'}) and Overlay Transparency (${cfg.overlayTransparency || 'opaque'}) settings. Turn it on to set each layer yourself.`;
+                ? "Opacity is how much of Open WebUI's own color covers each layer: 100% is solid, 0% is clear. Blur softens whatever shows through it."
+                : "Off: this mode keeps Open WebUI's own look for each layer. Turn it on to set each layer yourself.";
         }
     }
 
@@ -19603,8 +19552,6 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             "enableThemeUpdateChecks": self.valves.enable_theme_update_checks,
             "draftModeDefault": self.valves.draft_mode_default,
             "autoSync": self.valves.auto_sync,
-            "sidebarTransparency": self.valves.sidebar_transparency,
-            "overlayTransparency": self.valves.overlay_transparency,
             # "me": the signed-in user's personal theme; "instance": everyone's.
             "scope": "me" if user_id else "instance",
             # Who an instance save reaches: with personal themes on, only
@@ -19814,7 +19761,6 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             html_content.replace("{VERSION}", VERSION)
             .replace("{BOOTLOADER_SRC}", bootloader_js)
             .replace("{ROUTE_BASE}", route_base)
-            .replace("{OVERLAY_TRANSPARENCY}", self.valves.overlay_transparency)
             .replace("{SAVE_METADATA_GRID}", save_meta)
             .replace("{RENAME_METADATA_GRID}", rename_meta)
             .replace("{SYNC_OPTIONS}", sync_html)
@@ -19839,8 +19785,6 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
     _routes_registered_url = None  # Route base the routes were registered under
     _last_designer_url = None  # Track URL changes to re-register routes
     _last_enable_canvas_fx = None  # Track Canvas FX valve to broadcast changes
-    _last_sidebar_transparency = None  # Track sidebar transparency valve to broadcast changes
-    _last_overlay_transparency = None  # Track overlay transparency valve to broadcast changes
     # Cross-worker valve convergence (multi-container / Redis only).
     instance = None  # Live instance the producers and peer valve sync read
     _last_valves_snapshot = None  # All valve values at the last event(), to detect ANY change
@@ -19875,191 +19819,6 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             # which would then run the script the admin switched off.
             return "{}"
 
-    @staticmethod
-    def _rewrite_sidebar_fx(css: str, mode: str) -> str:
-        """Rewrite the opaque /*[FX]*/ sidebar rules (Canvas FX and gradient
-        blocks) for the Sidebar Transparency valve: tinted glass for
-        'translucent', see-through with no blur for 'transparent'.
-
-        Unmarked sidebar rules are left alone. Works rule by rule, so it runs
-        on the flat CSS or on the structural and gradient sections alike.
-        """
-        rule_open = r'#sidebar(?::not\(\.h-full\))?\s*\{\s*/\*\[FX\]\*/'
-        # The designer tints a gradient's hex base colour as rgba() and any
-        # other colour as color-mix(in srgb, <colour> NN%, transparent), with
-        # a lone blur(). Only that lone blur matches, never the -webkit-
-        # property, so CSS this already rewrote (a copy kept aside and saved
-        # back as a personal theme) passes unchanged.
-        lone_blur = r'blur\([^)]*\)(?=\s*!important)'
-
-        def rewrite(rule: str) -> str:
-            if mode == 'translucent':
-                blur = 'blur(20px) saturate(1.3)'
-                rule = _re.sub(
-                    r'(' + rule_open + r'\s*background-color:\s*)(var\(--[^)]+\))(\s*!important\s*;)\s*\}',
-                    rf'\1color-mix(in srgb, \2 20%, transparent)\3 backdrop-filter: {blur} !important; -webkit-backdrop-filter: {blur} !important; }}',
-                    rule,
-                )
-                rule = _re.sub(
-                    r'(' + rule_open + r'[^}]*background-color:\s*)rgba\(([^,]+,[^,]+,[^,]+),\s*[\d.]+\)(\s*!important\s*;[^}]*(?<![\w-])backdrop-filter:\s*)' + lone_blur,
-                    rf'\1rgba(\2, 0.25)\3{blur}',
-                    rule,
-                )
-                rule = _re.sub(
-                    r'(' + rule_open + r'[^}]*background-color:\s*color-mix\(in srgb,\s*[^;{}]+\s)\d+%(,\s*transparent\)\s*!important\s*;[^}]*(?<![\w-])backdrop-filter:\s*)' + lone_blur,
-                    rf'\g<1>25%\2{blur}',
-                    rule,
-                )
-            else:
-                blur = 'none'
-                rule = _re.sub(
-                    r'(' + rule_open + r'\s*background-color:\s*)var\(--[^)]+\)(\s*!important\s*;)\s*\}',
-                    rf'\1transparent\2 backdrop-filter: {blur} !important; -webkit-backdrop-filter: {blur} !important; }}',
-                    rule,
-                )
-                rule = _re.sub(
-                    r'(' + rule_open + r'[^}]*background-color:\s*)(?:rgba\([^)]+\)|color-mix\([^;{}]+\))(\s*!important\s*;[^}]*(?<![\w-])backdrop-filter:\s*)' + lone_blur,
-                    rf'\1transparent\2{blur}',
-                    rule,
-                )
-            return _re.sub(
-                r'[^\n]*#sidebar[^{]*\{\s*/\*\[FX\]\*/\s*background-color:\s*revert-layer\s*;?\s*\}',
-                '',
-                rule,
-            )
-
-        # Each marked rule on its own. Run over the whole CSS, these patterns
-        # backtracked in quadratic to cubic time on a long line (custom CSS
-        # with an inline font is one), freezing the worker for seconds to
-        # minutes. A rule starts on the marker's line and ends at its '}'.
-        marker, window = "/*[FX]*/", 2000
-        out, pos = [], 0
-        while True:
-            at = css.find(marker, pos)
-            if at < 0:
-                break
-            line_break = css.rfind("\n", max(pos, at - window), at)
-            start = line_break + 1 if line_break >= 0 else (pos if at - pos <= window else at)
-            end = css.find("}", at, at + window)
-            if end < 0:
-                out.append(css[pos:at + len(marker)])
-                pos = at + len(marker)
-                continue
-            out.append(css[pos:start])
-            rewritten = rewrite(css[start:end + 1])
-            out.append(rewritten)
-            pos = end + 1
-            if not rewritten.strip():
-                # A removed rule takes its line with it
-                line_break = css.find("\n", pos)
-                if line_break >= 0 and not css[pos:line_break].strip():
-                    pos = line_break + 1
-        out.append(css[pos:])
-        return "".join(out)
-
-    @staticmethod
-    def _sidebar_fade_css() -> str:
-        """Hide Open WebUI's fades at the top and bottom of the sidebar.
-
-        They are solid gradients in the sidebar's own color, so over a
-        translucent or transparent sidebar they read as opaque bands.
-        """
-        return (
-            "\n/* Sidebar Transparency: no solid fades over a see-through sidebar */\n"
-            "#sidebar .sidebar-bg-gradient-to-t,\n"
-            "#sidebar .sidebar-bg-gradient-to-b { display: none !important; }\n"
-        )
-
-    @staticmethod
-    def _sidebar_mobile_css() -> str:
-        """Turn a transparent sidebar translucent on phones.
-
-        #sidebar#sidebar outranks the transparent rules.
-        """
-        return (
-            "\n/* Mobile: auto-upgrade transparent sidebar to translucent */\n"
-            "@media (max-width: 768px) {\n"
-            "  .dark #sidebar#sidebar,\n"
-            '  [data-theme="dark"] #sidebar#sidebar,\n'
-            '  [data-theme="oled-dark"] #sidebar#sidebar {\n'
-            "    background-color: color-mix(in srgb, var(--color-base-950) 20%, transparent) !important;\n"
-            "    backdrop-filter: blur(20px) saturate(1.3) !important;\n"
-            "    -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;\n"
-            "  }\n"
-            '  :root:not(.dark):not([data-theme="dark"]):not([data-theme="oled-dark"]) #sidebar#sidebar {\n'
-            "    background-color: color-mix(in srgb, var(--color-base-50) 20%, transparent) !important;\n"
-            "    backdrop-filter: blur(20px) saturate(1.3) !important;\n"
-            "    -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;\n"
-            "  }\n"
-            "}\n"
-        )
-
-    @staticmethod
-    def _overlay_css() -> str:
-        """Translucent glass for the overlays Open WebUI portals onto <body>,
-        outside .app: the settings modal and the dropdown, user and
-        integration menus. Descendant selectors, because the portals nest
-        their surfaces at varying depths.
-        """
-        blur = 'blur(20px) saturate(1.3)'
-        # A portal: a direct child of body that isn't the app or the theme
-        # system's own. SvelteKit's page wrapper is a body > div too; pages
-        # outside .app, such as a shared chat, sit in it.
-        portal = ':not(.app):not(#theme-designer-container):not([id^="owui-"]):not([style*="display: contents"]):not(script):not(style)'
-        # A surface inside it: not an interactive widget or the app's own
-        surface = ':not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.app *):not(#theme-designer-container *)'
-
-        def surfaces_with(*utilities):
-            """Divs carrying one of these background utilities, plain or dark:."""
-            selectors = [s for utility in utilities for s in (
-                f'div[class^="{utility}"]', f'div[class*=" {utility}"]',
-                f'div[class^="dark:{utility}"]', f'div[class*=" dark:{utility}"]')]
-            return ':where(' + ', '.join(s + surface for s in selectors) + ')'
-
-        # Open WebUI's UI greys are bg-base-* after 0.13.4 (bg-gray-* through 0.13.4)
-        grey = surfaces_with('bg-gray-', 'bg-base-')
-        white = surfaces_with('bg-white')
-
-        def glass(color_var):
-            return (
-                f'  background-color: color-mix(in srgb, var({color_var}) 25%, transparent) !important;\n'
-                f'  backdrop-filter: {blur} !important;\n'
-                f'  -webkit-backdrop-filter: {blur} !important;\n'
-            )
-
-        light = ':root:not(.dark):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"])'
-        # (theme selectors, surfaces, tint)
-        rules = [
-            (('.dark', '[data-theme="dark"]', '[data-theme="oled-dark"]'), (grey,), '--color-base-950'),
-            ((light,), (white, grey), '--color-base-50'),
-            (('.her', '[data-theme="her"]'), (white, grey), '--color-base-50'),
-        ]
-        css = '\n/* --- Overlay Translucency (valve-injected) --- */\n'
-        for themes, surfaces, color_var in rules:
-            selectors = [f'{theme} body > div{portal} {s}' for s in surfaces for theme in themes]
-            css += ',\n'.join(selectors) + ' {\n' + glass(color_var) + '}\n'
-        for scheme, surfaces, color_var in (('dark', (grey,), '--color-base-950'), ('light', (white, grey), '--color-base-50')):
-            selectors = [f'  [data-theme="system"] body > div{portal} {s}' for s in surfaces]
-            css += f'@media (prefers-color-scheme: {scheme}) {{\n'
-            css += ',\n'.join(selectors) + ' {\n' + glass(color_var) + '  }\n}\n'
-        # The fade at the top of a chat goes with the solid overlays
-        css += '\n/* Overlay Transparency: no fade at the top of chats */\n#navbar-bg-gradient-to-b { display: none !important; }\n'
-        return css
-
-    def _valve_appended_css(self) -> str:
-        """The rules the transparency valves add once, at the end of the
-        delivered CSS: the 'extra' section when it is assembled from
-        sections."""
-        css = ""
-        sidebar_mode = self.valves.sidebar_transparency
-        if sidebar_mode != "opaque":
-            css += self._sidebar_fade_css()
-            if sidebar_mode == "transparent":
-                css += self._sidebar_mobile_css()
-        if self.valves.overlay_transparency != "opaque":
-            css += self._overlay_css()
-        return css
-
     _CANVAS_CLEARING = _re.compile(r"/\*\[OWUI_CLEAR_CANVAS_START\]\*/.*?/\*\[OWUI_CLEAR_CANVAS_END\]\*/", _re.DOTALL)
     _STRUCTURAL = _re.compile(r"/\*\[OWUI_STRUCTURAL_START\]\*/.*?/\*\[OWUI_STRUCTURAL_END\]\*/", _re.DOTALL)
 
@@ -20071,31 +19830,17 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
 
     def _postprocess_css(self, css):
         """The flat CSS as the valves deliver it: Enable Canvas FX off drops
-        the clearing of modes whose only background is the canvas, and the
-        transparency valves rewrite and add their rules."""
+        the clearing of modes whose only background is the canvas."""
         if not self.valves.enable_canvas_fx:
             css = self._drop_canvas_clearing(css)
-        if self.valves.sidebar_transparency != "opaque":
-            css = self._rewrite_sidebar_fx(css, self.valves.sidebar_transparency)
-        return css + self._valve_appended_css()
+        return css
 
     def _postprocess_sections(self, sections: dict) -> dict:
-        """Per-section mirror of _postprocess_css.
-
-        The /*[FX]*/ rules the sidebar valve rewrites live only in the
-        structural and gradient sections. The appended rules go into a
-        synthetic 'extra' section, so consumers assembling from sections
-        deliver the same CSS as /theme.css. The bootloader never auth-gates
-        'extra'.
-        """
+        """Per-section mirror of _postprocess_css: the clearing lives only in
+        the structural section."""
         out = dict(sections)
         if not self.valves.enable_canvas_fx:
             out["structural"] = self._drop_canvas_clearing(out["structural"])
-        sidebar_mode = self.valves.sidebar_transparency
-        if sidebar_mode != "opaque":
-            out["structural"] = self._rewrite_sidebar_fx(out["structural"], sidebar_mode)
-            out["gradient"] = self._rewrite_sidebar_fx(out["gradient"], sidebar_mode)
-        out["extra"] = self._valve_appended_css()
         return out
 
     def _state_with_sections(self, state: str, user_id: str | None = None) -> str:
@@ -20121,7 +19866,7 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
 
     def _css_valve_key(self) -> tuple:
         """The valves _postprocess_css reads, for the delivery cache keys."""
-        return (self.valves.enable_canvas_fx, self.valves.sidebar_transparency, self.valves.overlay_transparency)
+        return (self.valves.enable_canvas_fx,)
 
     def _state_valve_key(self) -> tuple:
         """The valves _postprocess_state and _state_with_sections read, for
@@ -21029,8 +20774,6 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
             f"{label} → {now}"
             for label, before, now in (
                 ("Canvas FX", Event._last_enable_canvas_fx, self.valves.enable_canvas_fx),
-                ("sidebar", Event._last_sidebar_transparency, self.valves.sidebar_transparency),
-                ("overlay", Event._last_overlay_transparency, self.valves.overlay_transparency),
             )
             if before is not None and before != now
         ]
@@ -21083,8 +20826,6 @@ ${selector} #sidebar:not(.h-full) { /*[FX]*/ background-color: var(${bgSidebar})
 
         Event._last_designer_url = self.valves.designer_url
         Event._last_enable_canvas_fx = self.valves.enable_canvas_fx
-        Event._last_sidebar_transparency = self.valves.sidebar_transparency
-        Event._last_overlay_transparency = self.valves.overlay_transparency
         Event._last_valves_snapshot = valves_now
 
 

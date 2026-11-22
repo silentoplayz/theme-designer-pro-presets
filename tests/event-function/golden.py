@@ -77,8 +77,6 @@ BOOT_STUBBED = ["announceThemeSource", "syncHiddenBackgrounds", "pushCanvasTheme
 BOOT_VARS = ["_themeActive", "_personalEnabled", "_owuiThemeState", "_owuiThemeCss", "_parsedState", "_cachedCanvasOk",
              "_personal", "_strippedFrom", "_strippedCss", "_disabled", "_paletteCtx", "_rootModeSet"]
 
-SIDEBAR = ("opaque", "translucent", "transparent")
-OVERLAY = ("opaque", "translucent")
 
 
 class Missing(Exception):
@@ -450,8 +448,7 @@ def patch(old, new, path=""):
 # ── The Python half ──
 
 def valve_combos():
-    for s, o in itertools.product(SIDEBAR, OVERLAY):
-        yield f"sidebar={s} overlay={o}", {"sidebar_transparency": s, "overlay_transparency": o}
+    yield "default valves", {}
 
 
 def state_combos():
@@ -475,8 +472,7 @@ def python_theme(module, data_dir, theme):
     E = module.Event
     out = {}
     css, sections, state = theme["css"], theme["sections"], theme["state"]
-    blocks = [("_overlay_css()", E._overlay_css()), ("_sidebar_mobile_css()", E._sidebar_mobile_css()),
-              ("_sidebar_fade_css()", E._sidebar_fade_css())]
+    blocks = []
     base = new_event(module)
     shutil.rmtree(Path(data_dir) / "theme", ignore_errors=True)
     save_theme(base, css, sections, state)
@@ -487,12 +483,12 @@ def python_theme(module, data_dir, theme):
         # Each combination against the designer's output and the
         # combinations before it, whichever reads shorter
         ps = ev._postprocess_sections(dict(sections))
-        for k in list(E.SECTION_KEYS) + ["extra"]:
+        for k in E.SECTION_KEYS:
             refs = [(f"designer {k}", sections.get(k, ""))] + [(f"{k} of {pk}", pv[k]) for pk, pv in post_sections.items()]
             out[f"python: _postprocess_sections {key}: {k}"] = delta(ps[k], refs, blocks)
         post_sections[key] = ps
         processed = ev._postprocess_css(css)
-        joined = "".join(ps[k] for k in list(E.SECTION_KEYS) + ["extra"])
+        joined = "".join(ps[k] for k in E.SECTION_KEYS)
         out[f"python: _postprocess_css {key}"] = delta(
             processed, [("its _postprocess_sections, joined", joined), ("designer css", css)], blocks)
         delivered = ev._get_css_delivery()
@@ -510,7 +506,7 @@ def python_theme(module, data_dir, theme):
     out[f"python: _postprocess_sections canvas_fx=off {key}: structural"] = delta(
         no_fx["structural"], [(f"structural of {key}", post_sections[key]["structural"])])
     out[f"python: /theme.css canvas_fx=off {key}"] = delta(
-        ev._get_css_delivery()[0], [("its _postprocess_sections, joined", "".join(no_fx[k] for k in list(E.SECTION_KEYS) + ["extra"]))])
+        ev._get_css_delivery()[0], [("its _postprocess_sections, joined", "".join(no_fx[k] for k in E.SECTION_KEYS))])
     patches = {}
     for key, vk, valves in state_combos():
         ev = new_event(module, **valves)
@@ -531,7 +527,7 @@ def python_theme(module, data_dir, theme):
             lines.append("_cssSections = _postprocess_sections " + label if got == want
                          else "_cssSections differs from _postprocess_sections " + label + ": " + js(patch(want, got)))
         # The rest of the state, against what was saved, once per canvas/auth pair
-        pair = key.split(" sidebar=")[0]
+        pair = key.split(" default valves")[0]
         changes = "\n".join(patch(json.loads(state), data)) or "state otherwise unchanged"
         name = f"python: /state.json changes to the saved state, {pair}"
         if name not in patches:
@@ -555,9 +551,6 @@ def python_units(module, data_dir):
     E = module.Event
     out = {}
     ev = new_event(module)
-    out["_sidebar_fade_css"] = E._sidebar_fade_css()
-    out["_sidebar_mobile_css"] = E._sidebar_mobile_css()
-    out["_overlay_css"] = E._overlay_css()
     cases = ["", "{", "}", "a { b }", "a { /* } */ }", 'a { content: "}" }', "a { content: '\\'}' }", '"\nx"', "/* open",
              'a { content: "open }', "a {} }", "@media x { a { b: c } }"]
     out["_css_balanced"] = "\n".join(f"{js(c)} -> {E._css_balanced(c)}" for c in cases)
@@ -567,26 +560,6 @@ def python_units(module, data_dir):
             '/*[OWUI_CLEAR_CANVAS_GRADIENT_START]*/\n.app { e: f }\n/*[OWUI_CLEAR_CANVAS_GRADIENT_END]*/\n/*[OWUI_STRUCTURAL_END]*/\n'
             '/*[OWUI_CUSTOM_START]*/\n/*[OWUI_CLEAR_CANVAS_END]*/ .x { g: h }\n/*[OWUI_CUSTOM_END]*/\n')
     out["_drop_canvas_clearing"] = E._drop_canvas_clearing(flat)
-    fx = [
-        "#sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-gray-950) !important; }",
-        "html.dark #sidebar { /*[FX]*/ background-color: var(--x) !important; }",
-        "#sidebar:not(.h-full) { /*[FX]*/\n  background-color: rgba(10, 20, 30, 0.75) !important;\n  backdrop-filter: blur(12px) !important;\n}",
-        ".a { b: c }\nhtml #sidebar { /*[FX]*/ background-color: revert-layer; }\n.d { e: f }",
-        "/*[FX]*/ no rule", "x" * 3000 + " /*[FX]*/ " + "y" * 3000 + "}", "#sidebar { color: red }",
-    ]
-    # hexToRgba's shape for a gradient base colour that isn't hex
-    fx += [f"#sidebar:not(.h-full) {{ /*[FX]*/\n  background-color: color-mix(in srgb, {c} 75%, transparent) !important;\n"
-           "  backdrop-filter: blur(12px) !important;\n}"
-           for c in ("rgb(10 20 30)", "oklch(0.1 0.02 260)", "navy", "color-mix(in srgb, red 5%, transparent)")]
-    for mode in ("translucent", "transparent"):
-        out[f"_rewrite_sidebar_fx {mode}"] = "\n".join(f"{js(c[:120])} ({len(c)}) -> {js(E._rewrite_sidebar_fx(c, mode)[-400:])}" for c in fx)
-    # CSS this already rewrote comes back (a copy kept aside, saved back as a personal theme)
-    def again(c, mode):
-        once = E._rewrite_sidebar_fx(c, mode)
-        twice = E._rewrite_sidebar_fx(once, mode)
-        return "unchanged" if twice == once else f"changed to {js(twice[-400:])}"
-    out["_rewrite_sidebar_fx on its own output"] = "\n".join(
-        f"{mode} {js(c[:120])} ({len(c)}) -> {again(c, mode)}" for mode in ("translucent", "transparent") for c in fx)
     states = ['{"dark": {"canvasEnabled": true, "canvasScript": "x", "canvasShowAuth": true, "canvasAuthOnly": true}, "light": 5}',
               "not json", "[1]", '{"her": {"canvasScript": ""}}', "[" * 5000 + "]" * 5000,
               '{"dark": {"themeShowAuth": true}, "_hiddenBackgrounds": {"auth": {"url": "/x"}, "chat": 50}}',
@@ -764,7 +737,6 @@ def bootloader_job(module, data_dir, theme):
         blobs[key] = text
         return key
     for label, valves in (("default valves", {}), ("every valve flipped", {
-            "sidebar_transparency": "transparent", "overlay_transparency": "translucent",
             "enable_canvas_fx": False, "enable_auth_page_theming": False})):
         ev = new_event(module, **valves)
         css = blob(ev._get_css_delivery()[0])

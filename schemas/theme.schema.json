@@ -276,7 +276,7 @@
         "surfacesEnabled": {
           "type": "boolean",
           "default": false,
-          "description": "Use this mode's own surface opacity and blur; off follows the instance's Sidebar and Overlay Transparency settings"
+          "description": "Use this mode's own surface opacity and blur; off keeps Open WebUI's own look"
         },
         "surfaceSidebarOpacity": { "$ref": "#/$defs/percent", "default": 100, "description": "How solid the open sidebar is, in percent" },
         "surfaceSidebarBlur": { "type": "number", "minimum": 0, "maximum": 40, "default": 0, "description": "How much the open sidebar blurs what shows through it, in px" },

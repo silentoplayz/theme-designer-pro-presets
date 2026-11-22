@@ -201,7 +201,7 @@ html.her, html[data-theme="her"] {
 :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
 :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) .app .file-code-editor { --editor-bg: transparent !important; }
 /*[OWUI_CLEAR_GRADIENT_END]*/
-:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-50) !important; }
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { background-color: var(--color-base-50) !important; }
 @media (prefers-color-scheme: light) {
 
 html[data-theme="system"] body { background-color: var(--color-base-0) !important; }
@@ -215,7 +215,7 @@ html[data-theme="system"] #auth-page :where([class^="bg-gray-"]:not(button):not(
 html[data-theme="system"] .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
 html[data-theme="system"] .app .file-code-editor { --editor-bg: transparent !important; }
 /*[OWUI_CLEAR_GRADIENT_END]*/
-html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-50) !important; }
+html[data-theme="system"] #sidebar:not(.h-full) { background-color: var(--color-base-50) !important; }
 
 }
 /* --- DARK MODE Background Overrides --- */
@@ -231,7 +231,7 @@ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var
 :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
 :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) .app .file-code-editor { --editor-bg: transparent !important; }
 /*[OWUI_CLEAR_CANVAS_GRADIENT_END]*/
-:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950) !important; }
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { background-color: var(--color-base-950) !important; }
 @media (prefers-color-scheme: dark) {
 
 html[data-theme="system"] body { background-color: var(--color-base-900) !important; }
@@ -245,7 +245,7 @@ html[data-theme="system"] #auth-page :where([class^="bg-gray-"]:not(button):not(
 html[data-theme="system"] .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
 html[data-theme="system"] .app .file-code-editor { --editor-bg: transparent !important; }
 /*[OWUI_CLEAR_CANVAS_GRADIENT_END]*/
-html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950) !important; }
+html[data-theme="system"] #sidebar:not(.h-full) { background-color: var(--color-base-950) !important; }
 
 }
 /* --- Surfaces --- */
@@ -260,7 +260,6 @@ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var
 :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))):not(#tdp-surface#tdp-surface#tdp-surface) .app :where(button[class^="bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *))[class*="hover:bg-"]:hover, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))):not(#tdp-surface#tdp-surface#tdp-surface) #controls-container [id^="chat-panel-page%3A"] :where(button[class^="bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *))[class*="hover:bg-"]:hover { background-color: color-mix(in srgb, var(--color-base-850) 75%, transparent) !important; }
 :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))):not(#tdp-surface#tdp-surface#tdp-surface) .app-dropdown-menu, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))):not(#tdp-surface#tdp-surface#tdp-surface) .tippy-box, :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))):not(#tdp-surface#tdp-surface#tdp-surface) [data-sonner-toast], :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))):not(#tdp-surface#tdp-surface#tdp-surface) body > div:not(.app):not(.modal):not(#theme-designer-container):not([id^="owui-"]):not([style*="display: contents"]):not(script):not(style) :where(div[class^="bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class*=" bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *)) { background-color: color-mix(in srgb, var(--color-base-850) 30%, transparent) !important; backdrop-filter: blur(24px) saturate(1.2) !important; -webkit-backdrop-filter: blur(24px) saturate(1.2) !important; }
 :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))):not(#tdp-surface#tdp-surface#tdp-surface) .modal > div:where([class*="bg-white"], [class*="bg-gray-"], [class*="bg-base-"]) { background-color: color-mix(in srgb, var(--color-base-900) 35%, transparent) !important; backdrop-filter: blur(20px) saturate(1.2) !important; -webkit-backdrop-filter: blur(20px) saturate(1.2) !important; }
-:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))):not(#tdp-surface#tdp-surface#tdp-surface) .modal > div :where(div[class^="bg-white"], div[class*=" bg-white"], div[class^="bg-gray-"], div[class*=" bg-gray-"], div[class^="dark:bg-gray-"], div[class*=" dark:bg-gray-"], div[class^="bg-base-"], div[class*=" bg-base-"], div[class^="dark:bg-base-"], div[class*=" dark:bg-base-"]) { background-color: revert-layer !important; backdrop-filter: revert-layer !important; -webkit-backdrop-filter: revert-layer !important; }
 :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))):not(#tdp-surface#tdp-surface#tdp-surface) .modal { background-color: rgb(0 0 0 / 50%) !important; backdrop-filter: blur(6px) saturate(1.2) !important; -webkit-backdrop-filter: blur(6px) saturate(1.2) !important; }
 :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))):not(#tdp-surface#tdp-surface#tdp-surface) #navbar-bg-gradient-to-b { display: none !important; opacity: 0 !important; }
 @media (prefers-color-scheme: dark) {
@@ -276,7 +275,6 @@ html[data-theme="system"]:not(#tdp-surface#tdp-surface#tdp-surface) .app :where(
 html[data-theme="system"]:not(#tdp-surface#tdp-surface#tdp-surface) .app :where(button[class^="bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *))[class*="hover:bg-"]:hover, html[data-theme="system"]:not(#tdp-surface#tdp-surface#tdp-surface) #controls-container [id^="chat-panel-page%3A"] :where(button[class^="bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *))[class*="hover:bg-"]:hover { background-color: color-mix(in srgb, var(--color-base-850) 75%, transparent) !important; }
 html[data-theme="system"]:not(#tdp-surface#tdp-surface#tdp-surface) .app-dropdown-menu, html[data-theme="system"]:not(#tdp-surface#tdp-surface#tdp-surface) .tippy-box, html[data-theme="system"]:not(#tdp-surface#tdp-surface#tdp-surface) [data-sonner-toast], html[data-theme="system"]:not(#tdp-surface#tdp-surface#tdp-surface) body > div:not(.app):not(.modal):not(#theme-designer-container):not([id^="owui-"]):not([style*="display: contents"]):not(script):not(style) :where(div[class^="bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class*=" bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *)) { background-color: color-mix(in srgb, var(--color-base-850) 30%, transparent) !important; backdrop-filter: blur(24px) saturate(1.2) !important; -webkit-backdrop-filter: blur(24px) saturate(1.2) !important; }
 html[data-theme="system"]:not(#tdp-surface#tdp-surface#tdp-surface) .modal > div:where([class*="bg-white"], [class*="bg-gray-"], [class*="bg-base-"]) { background-color: color-mix(in srgb, var(--color-base-900) 35%, transparent) !important; backdrop-filter: blur(20px) saturate(1.2) !important; -webkit-backdrop-filter: blur(20px) saturate(1.2) !important; }
-html[data-theme="system"]:not(#tdp-surface#tdp-surface#tdp-surface) .modal > div :where(div[class^="bg-white"], div[class*=" bg-white"], div[class^="bg-gray-"], div[class*=" bg-gray-"], div[class^="dark:bg-gray-"], div[class*=" dark:bg-gray-"], div[class^="bg-base-"], div[class*=" bg-base-"], div[class^="dark:bg-base-"], div[class*=" dark:bg-base-"]) { background-color: revert-layer !important; backdrop-filter: revert-layer !important; -webkit-backdrop-filter: revert-layer !important; }
 html[data-theme="system"]:not(#tdp-surface#tdp-surface#tdp-surface) .modal { background-color: rgb(0 0 0 / 50%) !important; backdrop-filter: blur(6px) saturate(1.2) !important; -webkit-backdrop-filter: blur(6px) saturate(1.2) !important; }
 html[data-theme="system"]:not(#tdp-surface#tdp-surface#tdp-surface) #navbar-bg-gradient-to-b { display: none !important; opacity: 0 !important; }
 
@@ -294,7 +292,7 @@ html[data-theme="oled-dark"] #auth-page :where([class^="bg-gray-"]:not(button):n
 html[data-theme="oled-dark"] .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
 html[data-theme="oled-dark"] .app .file-code-editor { --editor-bg: transparent !important; }
 /*[OWUI_CLEAR_CANVAS_GRADIENT_END]*/
-html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950) !important; }
+html[data-theme="oled-dark"] #sidebar:not(.h-full) { background-color: var(--color-base-950) !important; }
 /* --- Surfaces --- */
 html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) #sidebar:not(.h-full) { background-color: color-mix(in srgb, var(--color-base-950) 0%, transparent) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) #sidebar .sidebar-bg-gradient-to-t, html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) #sidebar .sidebar-bg-gradient-to-b { display: none !important; }
@@ -307,7 +305,6 @@ html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) .app :whe
 html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) .app :where(button[class^="bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *))[class*="hover:bg-"]:hover, html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) #controls-container [id^="chat-panel-page%3A"] :where(button[class^="bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *))[class*="hover:bg-"]:hover { background-color: color-mix(in srgb, var(--color-base-850) 85%, transparent) !important; }
 html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) .app-dropdown-menu, html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) .tippy-box, html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) [data-sonner-toast], html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) body > div:not(.app):not(.modal):not(#theme-designer-container):not([id^="owui-"]):not([style*="display: contents"]):not(script):not(style) :where(div[class^="bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class*=" bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *)) { background-color: color-mix(in srgb, var(--color-base-850) 80%, transparent) !important; backdrop-filter: blur(12px) saturate(1.2) !important; -webkit-backdrop-filter: blur(12px) saturate(1.2) !important; }
 html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) .modal > div:where([class*="bg-white"], [class*="bg-gray-"], [class*="bg-base-"]) { background-color: color-mix(in srgb, var(--color-base-900) 90%, transparent) !important; backdrop-filter: blur(4px) saturate(1.2) !important; -webkit-backdrop-filter: blur(4px) saturate(1.2) !important; }
-html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) .modal > div :where(div[class^="bg-white"], div[class*=" bg-white"], div[class^="bg-gray-"], div[class*=" bg-gray-"], div[class^="dark:bg-gray-"], div[class*=" dark:bg-gray-"], div[class^="bg-base-"], div[class*=" bg-base-"], div[class^="dark:bg-base-"], div[class*=" dark:bg-base-"]) { background-color: revert-layer !important; backdrop-filter: revert-layer !important; -webkit-backdrop-filter: revert-layer !important; }
 html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) .modal { background-color: rgb(0 0 0 / 70%) !important; backdrop-filter: blur(2px) saturate(1.2) !important; -webkit-backdrop-filter: blur(2px) saturate(1.2) !important; }
 html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) #navbar-bg-gradient-to-b { display: block !important; opacity: 0.4 !important; }
 /* --- HER MODE Background Overrides --- */
@@ -323,7 +320,7 @@ html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) #navbar-b
 :is(html[data-theme="her"], html:where(.her)) .app :where(nav, .sticky:not([class*="bg-black"]), [class*="bg-gradient"]:not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b), [class*="bg-linear-to"]:not(.bg-cover + div):not(.sidebar-bg-gradient-to-t):not(.sidebar-bg-gradient-to-b):not(#navbar-bg-gradient-to-b)) { background-color: transparent !important; background-image: none !important; }
 :is(html[data-theme="her"], html:where(.her)) .app .file-code-editor { --editor-bg: transparent !important; }
 /*[OWUI_CLEAR_GRADIENT_END]*/
-:is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-50) !important; }
+:is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { background-color: var(--color-base-50) !important; }
 /* --- Surfaces --- */
 :is(html[data-theme="her"], html:where(.her)):not(#tdp-surface#tdp-surface#tdp-surface) #sidebar:not(.h-full) { background-color: color-mix(in srgb, var(--color-base-50) 85%, transparent) !important; backdrop-filter: blur(6px) saturate(1.2) !important; -webkit-backdrop-filter: blur(6px) saturate(1.2) !important; }
 :is(html[data-theme="her"], html:where(.her)):not(#tdp-surface#tdp-surface#tdp-surface) #sidebar .sidebar-bg-gradient-to-t, :is(html[data-theme="her"], html:where(.her)):not(#tdp-surface#tdp-surface#tdp-surface) #sidebar .sidebar-bg-gradient-to-b { display: none !important; }
@@ -336,7 +333,6 @@ html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) #navbar-b
 :is(html[data-theme="her"], html:where(.her)):not(#tdp-surface#tdp-surface#tdp-surface) .app :where(button[class^="bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *))[class*="hover:bg-"]:hover, :is(html[data-theme="her"], html:where(.her)):not(#tdp-surface#tdp-surface#tdp-surface) #controls-container [id^="chat-panel-page%3A"] :where(button[class^="bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" dark:bg-gray-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class^="dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), button[class*=" dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class^="dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *), div:has(> button:first-child)[class*=" dark:bg-base-"][class*="rounded"]:not([role="switch"]):not([role="checkbox"]):not([class^="text-white"]):not([class*=" text-white"]):not([class*="dark:text-black"]):not([class*="dark:text-gray-9"]):not([class*="dark:text-gray-8"]):not([class*="dark:text-base-9"]):not([class*="dark:text-base-8"]):not(#sidebar *):not(#messages-container *):not(#message-input-container *):not(#controls-container *:not([id^="chat-panel-page%3A"] *)):not(#auth-page *))[class*="hover:bg-"]:hover { background-color: color-mix(in srgb, var(--color-base-50) 70%, transparent) !important; }
 :is(html[data-theme="her"], html:where(.her)):not(#tdp-surface#tdp-surface#tdp-surface) .app-dropdown-menu, :is(html[data-theme="her"], html:where(.her)):not(#tdp-surface#tdp-surface#tdp-surface) .tippy-box, :is(html[data-theme="her"], html:where(.her)):not(#tdp-surface#tdp-surface#tdp-surface) [data-sonner-toast], :is(html[data-theme="her"], html:where(.her)):not(#tdp-surface#tdp-surface#tdp-surface) body > div:not(.app):not(.modal):not(#theme-designer-container):not([id^="owui-"]):not([style*="display: contents"]):not(script):not(style) :where(div[class^="bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class*=" bg-white"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class^="bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class*=" bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class^="dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class*=" dark:bg-gray-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class^="bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class*=" bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class^="dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *), div[class*=" dark:bg-base-"]:not(button):not(a):not(input):not(select):not(label):not(span):not(svg):not(img):not(.modal *)) { background-color: color-mix(in srgb, var(--color-base-0) 45%, transparent) !important; backdrop-filter: blur(16px) saturate(1.2) !important; -webkit-backdrop-filter: blur(16px) saturate(1.2) !important; }
 :is(html[data-theme="her"], html:where(.her)):not(#tdp-surface#tdp-surface#tdp-surface) .modal > div:where([class*="bg-white"], [class*="bg-gray-"], [class*="bg-base-"]) { background-color: color-mix(in srgb, var(--color-base-0) 65%, transparent) !important; backdrop-filter: blur(10px) saturate(1.2) !important; -webkit-backdrop-filter: blur(10px) saturate(1.2) !important; }
-:is(html[data-theme="her"], html:where(.her)):not(#tdp-surface#tdp-surface#tdp-surface) .modal > div :where(div[class^="bg-white"], div[class*=" bg-white"], div[class^="bg-gray-"], div[class*=" bg-gray-"], div[class^="dark:bg-gray-"], div[class*=" dark:bg-gray-"], div[class^="bg-base-"], div[class*=" bg-base-"], div[class^="dark:bg-base-"], div[class*=" dark:bg-base-"]) { background-color: revert-layer !important; backdrop-filter: revert-layer !important; -webkit-backdrop-filter: revert-layer !important; }
 :is(html[data-theme="her"], html:where(.her)):not(#tdp-surface#tdp-surface#tdp-surface) .modal { background-color: rgb(0 0 0 / 35%) !important; backdrop-filter: blur(8px) saturate(1.2) !important; -webkit-backdrop-filter: blur(8px) saturate(1.2) !important; }
 :is(html[data-theme="her"], html:where(.her)):not(#tdp-surface#tdp-surface#tdp-surface) #navbar-bg-gradient-to-b { display: block !important; opacity: 0.7 !important; }
 /*[OWUI_STRUCTURAL_END]*/
@@ -356,7 +352,7 @@ html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) #navbar-b
 :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #chat-container .bg-linear-to-t:not(.bg-cover + div) {
   background-image: linear-gradient(to top, rgba(17, 34, 51, 0.7), rgba(17, 34, 51, 0.35)) !important;
 }
-:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { /*[FX]*/
+:root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) {
   background-color: rgba(17, 34, 51, 0.75) !important;
   backdrop-filter: blur(12px) !important;
 }
@@ -388,7 +384,7 @@ html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) #navbar-b
 :root[data-theme="system"] #chat-container .bg-linear-to-t:not(.bg-cover + div) {
   background-image: linear-gradient(to top, rgba(17, 34, 51, 0.7), rgba(17, 34, 51, 0.35)) !important;
 }
-:root[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/
+:root[data-theme="system"] #sidebar:not(.h-full) {
   background-color: rgba(17, 34, 51, 0.75) !important;
   backdrop-filter: blur(12px) !important;
 }
@@ -421,7 +417,7 @@ html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) #navbar-b
 :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #chat-container .bg-linear-to-t:not(.bg-cover + div) {
   background-image: linear-gradient(to top, rgba(17, 34, 51, 0.7), rgba(17, 34, 51, 0.35)) !important;
 }
-:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/
+:is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) {
   background-color: rgba(17, 34, 51, 0.75) !important;
   backdrop-filter: blur(12px) !important;
 }
@@ -453,7 +449,7 @@ html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) #navbar-b
 :root[data-theme="system"] #chat-container .bg-linear-to-t:not(.bg-cover + div) {
   background-image: linear-gradient(to top, rgba(17, 34, 51, 0.7), rgba(17, 34, 51, 0.35)) !important;
 }
-:root[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/
+:root[data-theme="system"] #sidebar:not(.h-full) {
   background-color: rgba(17, 34, 51, 0.75) !important;
   backdrop-filter: blur(12px) !important;
 }
@@ -487,7 +483,7 @@ html[data-theme="oled-dark"] body::before { content: none !important; display: n
 html[data-theme="oled-dark"] #chat-container .bg-linear-to-t:not(.bg-cover + div) {
   background-image: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.35)) !important;
 }
-html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/
+html[data-theme="oled-dark"] #sidebar:not(.h-full) {
   background-color: rgba(0, 0, 0, 0.75) !important;
   backdrop-filter: blur(12px) !important;
 }
@@ -518,7 +514,7 @@ html[data-theme="oled-dark"] #navbar-bg-gradient-to-b {
 :is(html[data-theme="her"], html:where(.her)) #chat-container .bg-linear-to-t:not(.bg-cover + div) {
   background-image: linear-gradient(to top, rgba(17, 34, 51, 0.7), rgba(17, 34, 51, 0.35)) !important;
 }
-:is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/
+:is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) {
   background-color: rgba(17, 34, 51, 0.75) !important;
   backdrop-filter: blur(12px) !important;
 }
@@ -599,7 +595,7 @@ contrast Muted text on background: #b4b4b4 on #121218 = 9.00 (aaa true, aa true,
 contrast Main text on elevated surfaces: #f8f8f8 on #262626 = 14.25 (aaa true, aa true, aaLarge true)
 contrast Main text on sidebar: #f8f8f8 on #0d0d0d = 18.30 (aaa true, aa true, aaLarge true)
 detectWashedOut: {"dark": false, "light": false}
-buildGradientCss(.scope): 1163 chars, sha256 e5ec52bfa9c7
+buildGradientCss(.scope): 1154 chars, sha256 ca1013284231
 
 #=# designer: light mode
 _shippedVars: 1 overridden, defaults false
@@ -610,7 +606,7 @@ contrast Muted text on background: #ebffe6 on #fefefe = 1.04 (aaa false, aa fals
 contrast Main text on elevated surfaces: #101018 on #ebffe6 = 18.01 (aaa true, aa true, aaLarge true)
 contrast Main text on sidebar: #101018 on #fefefe = 18.77 (aaa true, aa true, aaLarge true)
 detectWashedOut: {"dark": false, "light": true}
-buildGradientCss(.scope): 1187 chars, sha256 f3d0f1766264
+buildGradientCss(.scope): 1178 chars, sha256 e9720f714f25
 
 #=# designer: oled mode
 _shippedVars: 1 overridden, defaults true
@@ -621,7 +617,7 @@ contrast Muted text on background: #777777 on #0a0a0a = 4.42 (aaa false, aa fals
 contrast Main text on elevated surfaces: #b7b7b7 on #010101 = 10.41 (aaa true, aa true, aaLarge true)
 contrast Main text on sidebar: #b7b7b7 on #000000 = 10.47 (aaa true, aa true, aaLarge true)
 detectWashedOut: {"dark": false, "light": false}
-buildGradientCss(.scope): 1233 chars, sha256 11b7333c2d9d
+buildGradientCss(.scope): 1224 chars, sha256 d3a027c78851
 
 #=# designer: her mode
 _shippedVars: 1 overridden, defaults false
@@ -632,33 +628,30 @@ contrast Muted text on background: #ffee99 on #fff0f5 = 1.06 (aaa false, aa fals
 contrast Main text on elevated surfaces: #1a0010 on #ffee99 = 17.06 (aaa true, aa true, aaLarge true)
 contrast Main text on sidebar: #1a0010 on #fff0f5 = 18.10 (aaa true, aa true, aaLarge true)
 detectWashedOut: {"dark": false, "light": true}
-buildGradientCss(.scope): 1160 chars, sha256 c16401ca1e46
+buildGradientCss(.scope): 1151 chars, sha256 1a50c35902ac
 
 #=# python: _css_balanced
 css True, custom section True
 
-#=# python: _postprocess_sections sidebar=opaque overlay=opaque: vars
+#=# python: _postprocess_sections default valves: vars
 = designer vars
 
-#=# python: _postprocess_sections sidebar=opaque overlay=opaque: structural
+#=# python: _postprocess_sections default valves: structural
 = designer structural
 
-#=# python: _postprocess_sections sidebar=opaque overlay=opaque: gradient
+#=# python: _postprocess_sections default valves: gradient
 = designer gradient
 
-#=# python: _postprocess_sections sidebar=opaque overlay=opaque: custom
+#=# python: _postprocess_sections default valves: custom
 = designer custom
 
-#=# python: _postprocess_sections sidebar=opaque overlay=opaque: extra
-= designer extra
-
-#=# python: _postprocess_css sidebar=opaque overlay=opaque
+#=# python: _postprocess_css default valves
 = its _postprocess_sections, joined
 
-#=# python: /theme.css sidebar=opaque overlay=opaque
+#=# python: /theme.css default valves
 = _postprocess_css
 
-#=# python: _safe_subset_css sidebar=opaque overlay=opaque
+#=# python: _safe_subset_css default valves
 vars + custom, changed:
 + @supports (--tdp-instance: 1) {
 + /* structural rules deferred to bootloader */
@@ -666,234 +659,23 @@ vars + custom, changed:
 + }
 + 
 
-#=# python: _custom_css_fragment sidebar=opaque overlay=opaque
+#=# python: _custom_css_fragment default valves
 _safe_subset_css, changed:
 + /* owui-theme-designer-pro:start */
 + /* owui-theme-designer-pro:end */
 
-#=# python: _postprocess_sections sidebar=opaque overlay=translucent: vars
-= designer vars
+#=# python: _postprocess_sections canvas_fx=off default valves: structural
+= structural of default valves
 
-#=# python: _postprocess_sections sidebar=opaque overlay=translucent: structural
-= designer structural
-
-#=# python: _postprocess_sections sidebar=opaque overlay=translucent: gradient
-= designer gradient
-
-#=# python: _postprocess_sections sidebar=opaque overlay=translucent: custom
-= designer custom
-
-#=# python: _postprocess_sections sidebar=opaque overlay=translucent: extra
-= designer extra
-then appends: _overlay_css()
-
-#=# python: _postprocess_css sidebar=opaque overlay=translucent
-= its _postprocess_sections, joined
-
-#=# python: /theme.css sidebar=opaque overlay=translucent
-= _postprocess_css
-
-#=# python: _safe_subset_css sidebar=opaque overlay=translucent
-= _safe_subset_css sidebar=opaque overlay=opaque
-then appends: _overlay_css()
-
-#=# python: _custom_css_fragment sidebar=opaque overlay=translucent
-_safe_subset_css, changed:
-+ /* owui-theme-designer-pro:start */
-+ /* owui-theme-designer-pro:end */
-
-#=# python: _postprocess_sections sidebar=translucent overlay=opaque: vars
-= designer vars
-
-#=# python: _postprocess_sections sidebar=translucent overlay=opaque: structural
-designer structural, changed:
-- lines 15-15 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
-+ :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-base-50) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
-- lines 29-29 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-50) !i' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-50) !i'
-+ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-base-50) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
-- lines 45-45 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) ' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) '
-+ :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-base-950) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
-- lines 59-59 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950) !' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950) !'
-+ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-base-950) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
-- lines 108-108 (1): 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950' .. 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950'
-+ html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-base-950) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
-- lines 137-137 (1): ':is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var' .. ':is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var'
-+ :is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: color-mix(in srgb, var(--color-base-50) 20%, transparent) !important; backdrop-filter: blur(20px) saturate(1.3) !important; -webkit-backdrop-filter: blur(20px) saturate(1.3) !important; }
-
-#=# python: _postprocess_sections sidebar=translucent overlay=opaque: gradient
-designer gradient, changed:
-- lines 15-16 (2): '  background-color: rgba(17, 34, 51, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
-+   background-color: rgba(17, 34, 51, 0.25) !important;
-+   backdrop-filter: blur(20px) saturate(1.3) !important;
-- lines 47-48 (2): '  background-color: rgba(17, 34, 51, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
-+   background-color: rgba(17, 34, 51, 0.25) !important;
-+   backdrop-filter: blur(20px) saturate(1.3) !important;
-- lines 80-81 (2): '  background-color: rgba(17, 34, 51, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
-+   background-color: rgba(17, 34, 51, 0.25) !important;
-+   backdrop-filter: blur(20px) saturate(1.3) !important;
-- lines 112-113 (2): '  background-color: rgba(17, 34, 51, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
-+   background-color: rgba(17, 34, 51, 0.25) !important;
-+   backdrop-filter: blur(20px) saturate(1.3) !important;
-- lines 146-147 (2): '  background-color: rgba(0, 0, 0, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
-+   background-color: rgba(0, 0, 0, 0.25) !important;
-+   backdrop-filter: blur(20px) saturate(1.3) !important;
-- lines 177-178 (2): '  background-color: rgba(17, 34, 51, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
-+   background-color: rgba(17, 34, 51, 0.25) !important;
-+   backdrop-filter: blur(20px) saturate(1.3) !important;
-
-#=# python: _postprocess_sections sidebar=translucent overlay=opaque: custom
-= designer custom
-
-#=# python: _postprocess_sections sidebar=translucent overlay=opaque: extra
-= designer extra
-then appends: _sidebar_fade_css()
-
-#=# python: _postprocess_css sidebar=translucent overlay=opaque
-= its _postprocess_sections, joined
-
-#=# python: /theme.css sidebar=translucent overlay=opaque
-= _postprocess_css
-
-#=# python: _safe_subset_css sidebar=translucent overlay=opaque
-= _safe_subset_css sidebar=opaque overlay=opaque
-
-#=# python: _custom_css_fragment sidebar=translucent overlay=opaque
-_safe_subset_css, changed:
-+ /* owui-theme-designer-pro:start */
-+ /* owui-theme-designer-pro:end */
-
-#=# python: _postprocess_sections sidebar=translucent overlay=translucent: vars
-= designer vars
-
-#=# python: _postprocess_sections sidebar=translucent overlay=translucent: structural
-= structural of sidebar=translucent overlay=opaque
-
-#=# python: _postprocess_sections sidebar=translucent overlay=translucent: gradient
-= gradient of sidebar=translucent overlay=opaque
-
-#=# python: _postprocess_sections sidebar=translucent overlay=translucent: custom
-= designer custom
-
-#=# python: _postprocess_sections sidebar=translucent overlay=translucent: extra
-= designer extra
-then appends: _sidebar_fade_css() + _overlay_css()
-
-#=# python: _postprocess_css sidebar=translucent overlay=translucent
-= its _postprocess_sections, joined
-
-#=# python: /theme.css sidebar=translucent overlay=translucent
-= _postprocess_css
-
-#=# python: _safe_subset_css sidebar=translucent overlay=translucent
-= _safe_subset_css sidebar=opaque overlay=translucent
-
-#=# python: _custom_css_fragment sidebar=translucent overlay=translucent
-_safe_subset_css, changed:
-+ /* owui-theme-designer-pro:start */
-+ /* owui-theme-designer-pro:end */
-
-#=# python: _postprocess_sections sidebar=transparent overlay=opaque: vars
-= designer vars
-
-#=# python: _postprocess_sections sidebar=transparent overlay=opaque: structural
-designer structural, changed:
-- lines 15-15 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
-+ :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-- lines 29-29 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-50) !i' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-50) !i'
-+ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-- lines 45-45 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) ' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) '
-+ :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-- lines 59-59 (1): 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950) !' .. 'html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950) !'
-+ html[data-theme="system"] #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-- lines 108-108 (1): 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950' .. 'html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: var(--color-base-950'
-+ html[data-theme="oled-dark"] #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-- lines 137-137 (1): ':is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var' .. ':is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: var'
-+ :is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { /*[FX]*/ background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-
-#=# python: _postprocess_sections sidebar=transparent overlay=opaque: gradient
-designer gradient, changed:
-- lines 15-16 (2): '  background-color: rgba(17, 34, 51, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
-+   background-color: transparent !important;
-+   backdrop-filter: none !important;
-- lines 47-48 (2): '  background-color: rgba(17, 34, 51, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
-+   background-color: transparent !important;
-+   backdrop-filter: none !important;
-- lines 80-81 (2): '  background-color: rgba(17, 34, 51, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
-+   background-color: transparent !important;
-+   backdrop-filter: none !important;
-- lines 112-113 (2): '  background-color: rgba(17, 34, 51, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
-+   background-color: transparent !important;
-+   backdrop-filter: none !important;
-- lines 146-147 (2): '  background-color: rgba(0, 0, 0, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
-+   background-color: transparent !important;
-+   backdrop-filter: none !important;
-- lines 177-178 (2): '  background-color: rgba(17, 34, 51, 0.75) !important;' .. '  backdrop-filter: blur(12px) !important;'
-+   background-color: transparent !important;
-+   backdrop-filter: none !important;
-
-#=# python: _postprocess_sections sidebar=transparent overlay=opaque: custom
-= designer custom
-
-#=# python: _postprocess_sections sidebar=transparent overlay=opaque: extra
-= designer extra
-then appends: _sidebar_fade_css() + _sidebar_mobile_css()
-
-#=# python: _postprocess_css sidebar=transparent overlay=opaque
-= its _postprocess_sections, joined
-
-#=# python: /theme.css sidebar=transparent overlay=opaque
-= _postprocess_css
-
-#=# python: _safe_subset_css sidebar=transparent overlay=opaque
-= _safe_subset_css sidebar=opaque overlay=opaque
-
-#=# python: _custom_css_fragment sidebar=transparent overlay=opaque
-_safe_subset_css, changed:
-+ /* owui-theme-designer-pro:start */
-+ /* owui-theme-designer-pro:end */
-
-#=# python: _postprocess_sections sidebar=transparent overlay=translucent: vars
-= designer vars
-
-#=# python: _postprocess_sections sidebar=transparent overlay=translucent: structural
-= structural of sidebar=transparent overlay=opaque
-
-#=# python: _postprocess_sections sidebar=transparent overlay=translucent: gradient
-= gradient of sidebar=transparent overlay=opaque
-
-#=# python: _postprocess_sections sidebar=transparent overlay=translucent: custom
-= designer custom
-
-#=# python: _postprocess_sections sidebar=transparent overlay=translucent: extra
-= designer extra
-then appends: _sidebar_fade_css() + _sidebar_mobile_css() + _overlay_css()
-
-#=# python: _postprocess_css sidebar=transparent overlay=translucent
-= its _postprocess_sections, joined
-
-#=# python: /theme.css sidebar=transparent overlay=translucent
-= _postprocess_css
-
-#=# python: _safe_subset_css sidebar=transparent overlay=translucent
-= _safe_subset_css sidebar=opaque overlay=translucent
-
-#=# python: _custom_css_fragment sidebar=transparent overlay=translucent
-_safe_subset_css, changed:
-+ /* owui-theme-designer-pro:start */
-+ /* owui-theme-designer-pro:end */
-
-#=# python: _postprocess_sections canvas_fx=off sidebar=opaque overlay=opaque: structural
-= structural of sidebar=opaque overlay=opaque
-
-#=# python: /theme.css canvas_fx=off sidebar=opaque overlay=opaque
+#=# python: /theme.css canvas_fx=off default valves
 = its _postprocess_sections, joined
 
 #=# python: /state.json changes to the saved state, canvas_fx=on auth_theming=on
 state otherwise unchanged
 
-#=# python: /state.json canvas_fx=on auth_theming=on sidebar=opaque overlay=opaque
+#=# python: /state.json canvas_fx=on auth_theming=on default valves
 compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=opaque overlay=opaque
+_cssSections = _postprocess_sections default valves
 rest = changes to the saved state, canvas_fx=on auth_theming=on
 
 #=# python: /state.json changes to the saved state, canvas_fx=on auth_theming=off
@@ -915,9 +697,9 @@ her.customCssAuthOnly: true -> false
 her.canvasAuthOnly: true -> false
 _hiddenBackgrounds.auth: removed
 
-#=# python: /state.json canvas_fx=on auth_theming=off sidebar=opaque overlay=opaque
+#=# python: /state.json canvas_fx=on auth_theming=off default valves
 compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=opaque overlay=opaque
+_cssSections = _postprocess_sections default valves
 rest = changes to the saved state, canvas_fx=on auth_theming=off
 
 #=# python: /state.json changes to the saved state, canvas_fx=off auth_theming=on
@@ -936,9 +718,9 @@ her.canvasScript: removed
 her.canvasShowAuth: removed
 her.canvasAuthOnly: removed
 
-#=# python: /state.json canvas_fx=off auth_theming=on sidebar=opaque overlay=opaque
+#=# python: /state.json canvas_fx=off auth_theming=on default valves
 compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=opaque overlay=opaque
+_cssSections = _postprocess_sections default valves
 rest = changes to the saved state, canvas_fx=off auth_theming=on
 
 #=# python: /state.json changes to the saved state, canvas_fx=off auth_theming=off
@@ -966,109 +748,9 @@ her.customCssAuthOnly: true -> false
 her.canvasAuthOnly: true -> false
 _hiddenBackgrounds.auth: removed
 
-#=# python: /state.json canvas_fx=off auth_theming=off sidebar=opaque overlay=opaque
+#=# python: /state.json canvas_fx=off auth_theming=off default valves
 compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=opaque overlay=opaque
-rest = changes to the saved state, canvas_fx=off auth_theming=off
-
-#=# python: /state.json canvas_fx=on auth_theming=on sidebar=opaque overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=opaque overlay=translucent
-rest = changes to the saved state, canvas_fx=on auth_theming=on
-
-#=# python: /state.json canvas_fx=on auth_theming=off sidebar=opaque overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=opaque overlay=translucent
-rest = changes to the saved state, canvas_fx=on auth_theming=off
-
-#=# python: /state.json canvas_fx=off auth_theming=on sidebar=opaque overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=opaque overlay=translucent
-rest = changes to the saved state, canvas_fx=off auth_theming=on
-
-#=# python: /state.json canvas_fx=off auth_theming=off sidebar=opaque overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=opaque overlay=translucent
-rest = changes to the saved state, canvas_fx=off auth_theming=off
-
-#=# python: /state.json canvas_fx=on auth_theming=on sidebar=translucent overlay=opaque
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=translucent overlay=opaque
-rest = changes to the saved state, canvas_fx=on auth_theming=on
-
-#=# python: /state.json canvas_fx=on auth_theming=off sidebar=translucent overlay=opaque
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=translucent overlay=opaque
-rest = changes to the saved state, canvas_fx=on auth_theming=off
-
-#=# python: /state.json canvas_fx=off auth_theming=on sidebar=translucent overlay=opaque
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=translucent overlay=opaque
-rest = changes to the saved state, canvas_fx=off auth_theming=on
-
-#=# python: /state.json canvas_fx=off auth_theming=off sidebar=translucent overlay=opaque
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=translucent overlay=opaque
-rest = changes to the saved state, canvas_fx=off auth_theming=off
-
-#=# python: /state.json canvas_fx=on auth_theming=on sidebar=translucent overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=translucent overlay=translucent
-rest = changes to the saved state, canvas_fx=on auth_theming=on
-
-#=# python: /state.json canvas_fx=on auth_theming=off sidebar=translucent overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=translucent overlay=translucent
-rest = changes to the saved state, canvas_fx=on auth_theming=off
-
-#=# python: /state.json canvas_fx=off auth_theming=on sidebar=translucent overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=translucent overlay=translucent
-rest = changes to the saved state, canvas_fx=off auth_theming=on
-
-#=# python: /state.json canvas_fx=off auth_theming=off sidebar=translucent overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=translucent overlay=translucent
-rest = changes to the saved state, canvas_fx=off auth_theming=off
-
-#=# python: /state.json canvas_fx=on auth_theming=on sidebar=transparent overlay=opaque
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=transparent overlay=opaque
-rest = changes to the saved state, canvas_fx=on auth_theming=on
-
-#=# python: /state.json canvas_fx=on auth_theming=off sidebar=transparent overlay=opaque
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=transparent overlay=opaque
-rest = changes to the saved state, canvas_fx=on auth_theming=off
-
-#=# python: /state.json canvas_fx=off auth_theming=on sidebar=transparent overlay=opaque
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=transparent overlay=opaque
-rest = changes to the saved state, canvas_fx=off auth_theming=on
-
-#=# python: /state.json canvas_fx=off auth_theming=off sidebar=transparent overlay=opaque
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=transparent overlay=opaque
-rest = changes to the saved state, canvas_fx=off auth_theming=off
-
-#=# python: /state.json canvas_fx=on auth_theming=on sidebar=transparent overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=transparent overlay=translucent
-rest = changes to the saved state, canvas_fx=on auth_theming=on
-
-#=# python: /state.json canvas_fx=on auth_theming=off sidebar=transparent overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=transparent overlay=translucent
-rest = changes to the saved state, canvas_fx=on auth_theming=off
-
-#=# python: /state.json canvas_fx=off auth_theming=on sidebar=transparent overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=transparent overlay=translucent
-rest = changes to the saved state, canvas_fx=off auth_theming=on
-
-#=# python: /state.json canvas_fx=off auth_theming=off sidebar=transparent overlay=translucent
-compact JSON, keys dark light oled her _activeThemeRef _activeCanvasRef _activeCssRef _activeGradientRef _hiddenBackgrounds _cssSections
-_cssSections = _postprocess_sections sidebar=transparent overlay=translucent
+_cssSections = _postprocess_sections default valves
 rest = changes to the saved state, canvas_fx=off auth_theming=off
 
 #=# python: _strip_canvas_scripts
@@ -1077,80 +759,8 @@ light.canvasScript: removed
 oled.canvasScript: removed
 her.canvasScript: removed
 
-#=# python: no sections file: _safe_subset_css sidebar=opaque overlay=opaque
-@shared 194706685e5e
-
-#=# python: no sections file: _safe_subset_css sidebar=opaque overlay=translucent
-_safe_subset_css sidebar=opaque overlay=translucent, changed:
-+ 
-+ /* gradient rules deferred to bootloader */
-+ @media (prefers-color-scheme: light) {
-+ 
-+ /* gradient rules deferred to bootloader */
-+ 
-+ }
-+ 
-+ /* gradient rules deferred to bootloader */
-+ @media (prefers-color-scheme: dark) {
-+ 
-+ /* gradient rules deferred to bootloader */
-+ 
-+ }
-+ 
-+ /* gradient rules deferred to bootloader */
-+ 
-- lines 231-271 (41): '/* --- Overlay Translucency (valve-injected) --- */' .. ''
-then appends: _overlay_css()
-
-#=# python: no sections file: _safe_subset_css sidebar=translucent overlay=opaque
-@shared cd3f2979a56a
-
-#=# python: no sections file: _safe_subset_css sidebar=translucent overlay=translucent
-_safe_subset_css sidebar=translucent overlay=translucent, changed:
-+ 
-+ /* gradient rules deferred to bootloader */
-+ @media (prefers-color-scheme: light) {
-+ 
-+ /* gradient rules deferred to bootloader */
-+ 
-+ }
-+ 
-+ /* gradient rules deferred to bootloader */
-+ @media (prefers-color-scheme: dark) {
-+ 
-+ /* gradient rules deferred to bootloader */
-+ 
-+ }
-+ 
-+ /* gradient rules deferred to bootloader */
-+ 
-- lines 231-271 (41): '/* --- Overlay Translucency (valve-injected) --- */' .. ''
-then appends: _overlay_css()
-
-#=# python: no sections file: _safe_subset_css sidebar=transparent overlay=opaque
-@shared 8ba416f3c793
-
-#=# python: no sections file: _safe_subset_css sidebar=transparent overlay=translucent
-_safe_subset_css sidebar=transparent overlay=translucent, changed:
-+ 
-+ /* gradient rules deferred to bootloader */
-+ @media (prefers-color-scheme: light) {
-+ 
-+ /* gradient rules deferred to bootloader */
-+ 
-+ }
-+ 
-+ /* gradient rules deferred to bootloader */
-+ @media (prefers-color-scheme: dark) {
-+ 
-+ /* gradient rules deferred to bootloader */
-+ 
-+ }
-+ 
-+ /* gradient rules deferred to bootloader */
-+ 
-- lines 231-271 (41): '/* --- Overlay Translucency (valve-injected) --- */' .. ''
-then appends: _overlay_css()
+#=# python: no sections file: _safe_subset_css default valves
+@shared 265fdf659fd8
 
 #=# python: no sections file: /state.json
 = saved state
@@ -1162,9 +772,9 @@ data-theme 'dark', class 'dark'
 - lines 180-187 (8): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
 - lines 192-192 (1): '/*[OWUI_CLEAR_GRADIENT_START]*/' .. '/*[OWUI_CLEAR_GRADIENT_START]*/'
 - lines 194-201 (8): 'html[data-theme="system"] .app, html[data-theme="system"] #theme-designer-container, html[data-theme' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
-- lines 300-300 (1): '/*[OWUI_CLEAR_GRADIENT_START]*/' .. '/*[OWUI_CLEAR_GRADIENT_START]*/'
-- lines 302-309 (8): ':is(html[data-theme="her"], html:where(.her)) .app, :is(html[data-theme="her"], html:where(.her)) #t' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
-- lines 328-571 (244): '/*[OWUI_GRADIENT_START]*/' .. ''
+- lines 297-297 (1): '/*[OWUI_CLEAR_GRADIENT_START]*/' .. '/*[OWUI_CLEAR_GRADIENT_START]*/'
+- lines 299-306 (8): ':is(html[data-theme="her"], html:where(.her)) .app, :is(html[data-theme="her"], html:where(.her)) #t' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
+- lines 324-567 (244): '/*[OWUI_GRADIENT_START]*/' .. ''
 
 #=# bootloader: enforceTheme default valves, /auth, dark, flat css only
 data-theme 'dark', class 'dark'
@@ -1173,31 +783,31 @@ data-theme 'dark', class 'dark'
 - lines 180-187 (8): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
 - lines 192-192 (1): '/*[OWUI_CLEAR_GRADIENT_START]*/' .. '/*[OWUI_CLEAR_GRADIENT_START]*/'
 - lines 194-201 (8): 'html[data-theme="system"] .app, html[data-theme="system"] #theme-designer-container, html[data-theme' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
-- lines 300-300 (1): '/*[OWUI_CLEAR_GRADIENT_START]*/' .. '/*[OWUI_CLEAR_GRADIENT_START]*/'
-- lines 302-309 (8): ':is(html[data-theme="her"], html:where(.her)) .app, :is(html[data-theme="her"], html:where(.her)) #t' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
-- lines 328-350 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 352-357 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 360-382 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 384-389 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 393-415 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 417-422 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 425-447 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 449-454 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 458-481 (24): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 483-488 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 490-512 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 514-519 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 521-526 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
-- lines 528-528 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
-- lines 531-536 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
-- lines 538-538 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
-- lines 542-546 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 297-297 (1): '/*[OWUI_CLEAR_GRADIENT_START]*/' .. '/*[OWUI_CLEAR_GRADIENT_START]*/'
+- lines 299-306 (8): ':is(html[data-theme="her"], html:where(.her)) .app, :is(html[data-theme="her"], html:where(.her)) #t' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
+- lines 324-346 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 348-353 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
+- lines 356-378 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 380-385 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
+- lines 389-411 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 413-418 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
+- lines 421-443 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 445-450 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
+- lines 454-477 (24): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 479-484 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
+- lines 486-508 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 510-515 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
+- lines 517-522 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
+- lines 524-524 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 527-532 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
+- lines 534-534 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 538-542 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
 + 
-- lines 549-553 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 545-549 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
 + 
-- lines 557-561 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
-- lines 563-568 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
-- lines 570-570 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 553-557 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 559-564 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
+- lines 566-566 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
 + 
 
 #=# bootloader: enforceTheme default valves, /auth, oled-dark, sections
@@ -1212,24 +822,24 @@ data-theme 'oled-dark', class 'dark'
 data-theme 'light', class 'light'
 /theme.css, changed:
 - lines 1-173 (173): '/*[OWUI_VARS_START]*/' .. ''
-- lines 336-336 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
-- lines 368-368 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
-- lines 401-401 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
-- lines 433-433 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
-- lines 467-467 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
-- lines 498-498 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
+- lines 332-332 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
+- lines 364-364 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 397-397 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
+- lines 429-429 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 463-463 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
+- lines 494-494 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
 
 #=# bootloader: enforceTheme default valves, /auth, light, flat css only
 data-theme 'light', class 'light'
 /theme.css, changed:
 - lines 1-75 (75): '/*[OWUI_VARS_START]*/' .. '}'
 - lines 77-172 (96): '/*[OWUI_PAL_LIGHT_END]*/' .. '/*[OWUI_VARS_END]*/'
-- lines 336-336 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
-- lines 368-368 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
-- lines 401-401 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
-- lines 433-433 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
-- lines 467-467 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
-- lines 498-498 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
+- lines 332-332 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
+- lines 364-364 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 397-397 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
+- lines 429-429 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 463-463 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
+- lines 494-494 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
 
 #=# bootloader: enforceTheme default valves, /auth, her, sections
 data-theme 'her', class 'her'
@@ -1247,9 +857,9 @@ data-theme 'dark', class 'dark'
 - lines 180-187 (8): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
 - lines 192-192 (1): '/*[OWUI_CLEAR_GRADIENT_START]*/' .. '/*[OWUI_CLEAR_GRADIENT_START]*/'
 - lines 194-201 (8): 'html[data-theme="system"] .app, html[data-theme="system"] #theme-designer-container, html[data-theme' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
-- lines 300-300 (1): '/*[OWUI_CLEAR_GRADIENT_START]*/' .. '/*[OWUI_CLEAR_GRADIENT_START]*/'
-- lines 302-309 (8): ':is(html[data-theme="her"], html:where(.her)) .app, :is(html[data-theme="her"], html:where(.her)) #t' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
-- lines 327-519 (193): '' .. '/*[OWUI_GRADIENT_END]*/'
+- lines 297-297 (1): '/*[OWUI_CLEAR_GRADIENT_START]*/' .. '/*[OWUI_CLEAR_GRADIENT_START]*/'
+- lines 299-306 (8): ':is(html[data-theme="her"], html:where(.her)) .app, :is(html[data-theme="her"], html:where(.her)) #t' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
+- lines 323-515 (193): '' .. '/*[OWUI_GRADIENT_END]*/'
 
 #=# bootloader: enforceTheme default valves, /, dark, flat css only
 data-theme 'dark', class 'dark'
@@ -1260,23 +870,30 @@ data-theme 'dark', class 'dark'
 - lines 180-187 (8): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
 - lines 192-192 (1): '/*[OWUI_CLEAR_GRADIENT_START]*/' .. '/*[OWUI_CLEAR_GRADIENT_START]*/'
 - lines 194-201 (8): 'html[data-theme="system"] .app, html[data-theme="system"] #theme-designer-container, html[data-theme' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
-- lines 300-300 (1): '/*[OWUI_CLEAR_GRADIENT_START]*/' .. '/*[OWUI_CLEAR_GRADIENT_START]*/'
-- lines 302-309 (8): ':is(html[data-theme="her"], html:where(.her)) .app, :is(html[data-theme="her"], html:where(.her)) #t' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
-- lines 328-350 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 352-357 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 360-382 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 384-389 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 393-415 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 417-422 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 425-447 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 449-454 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 458-481 (24): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 483-488 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 490-512 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 514-519 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
+- lines 297-297 (1): '/*[OWUI_CLEAR_GRADIENT_START]*/' .. '/*[OWUI_CLEAR_GRADIENT_START]*/'
+- lines 299-306 (8): ':is(html[data-theme="her"], html:where(.her)) .app, :is(html[data-theme="her"], html:where(.her)) #t' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
+- lines 324-346 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 348-353 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
+- lines 356-378 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 380-385 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
+- lines 389-411 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 413-418 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
+- lines 421-443 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 445-450 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
+- lines 454-477 (24): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 479-484 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
+- lines 486-508 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 510-515 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
 
 #=# bootloader: enforceTheme default valves, /, dark, personal theme
-@shared 5eeb980ccfc7
+data-theme 'dark', class 'dark'
+/theme.css, changed:
+- lines 332-332 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
+- lines 364-364 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 397-397 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
+- lines 429-429 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 463-463 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
+- lines 494-494 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
 
 #=# bootloader: enforceTheme default valves, /, oled-dark, sections
 data-theme 'oled-dark', class 'dark'
@@ -1293,34 +910,34 @@ data-theme 'oled-dark', class 'dark'
 #=# bootloader: enforceTheme default valves, /, light, sections
 data-theme 'light', class 'light'
 /theme.css, changed:
-- lines 336-336 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
-- lines 368-368 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
-- lines 401-401 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
-- lines 433-433 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
-- lines 467-467 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
-- lines 498-498 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
-- lines 521-571 (51): '/*[OWUI_CUSTOM_START]*/' .. ''
+- lines 332-332 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
+- lines 364-364 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 397-397 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
+- lines 429-429 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 463-463 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
+- lines 494-494 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
+- lines 517-567 (51): '/*[OWUI_CUSTOM_START]*/' .. ''
 
 #=# bootloader: enforceTheme default valves, /, light, flat css only
 data-theme 'light', class 'light'
 /theme.css, changed:
-- lines 336-336 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
-- lines 368-368 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
-- lines 401-401 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
-- lines 433-433 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
-- lines 467-467 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
-- lines 498-498 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
-- lines 521-526 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
-- lines 528-528 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
-- lines 531-536 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
-- lines 538-538 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
-- lines 542-546 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 332-332 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
+- lines 364-364 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 397-397 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
+- lines 429-429 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 463-463 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
+- lines 494-494 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
+- lines 517-522 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
+- lines 524-524 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 527-532 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
+- lines 534-534 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 538-542 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
 + 
-- lines 549-553 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 545-549 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
 + 
-- lines 557-561 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
-- lines 563-568 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
-- lines 570-570 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 553-557 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 559-564 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
+- lines 566-566 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
 + 
 
 #=# bootloader: enforceTheme default valves, /, light, personal theme
@@ -1342,7 +959,8 @@ data-theme 'her', class 'her'
 #=# bootloader: enforceTheme every valve flipped, /auth, dark, sections
 data-theme 'dark', class 'dark'
 /theme.css, changed:
-- lines 1-570 (570): '/*[OWUI_VARS_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 1-75 (75): '/*[OWUI_VARS_START]*/' .. '}'
+- lines 77-567 (491): '/*[OWUI_PAL_LIGHT_END]*/' .. ''
 
 #=# bootloader: enforceTheme every valve flipped, /auth, oled-dark, sections
 data-theme 'oled-dark', class 'dark'
@@ -1357,16 +975,17 @@ data-theme 'her', class 'her'
 = the page of: every valve flipped, /auth, dark, sections
 
 #=# bootloader: enforceTheme every valve flipped, /, dark, sections
-@shared 5eeb980ccfc7
+data-theme 'dark', class 'dark'
+= the page of: default valves, /, dark, personal theme
 
 #=# bootloader: enforceTheme every valve flipped, /, oled-dark, sections
 data-theme 'oled-dark', class 'dark'
-= the page of: every valve flipped, /, dark, sections
+= the page of: default valves, /, dark, personal theme
 
 #=# bootloader: enforceTheme every valve flipped, /, light, sections
 data-theme 'light', class 'light'
-= the page of: every valve flipped, /, dark, sections
+= the page of: default valves, /, dark, personal theme
 
 #=# bootloader: enforceTheme every valve flipped, /, her, sections
 data-theme 'her', class 'her'
-= the page of: every valve flipped, /, dark, sections
+= the page of: default valves, /, dark, personal theme

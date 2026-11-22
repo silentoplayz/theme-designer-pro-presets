@@ -538,7 +538,7 @@
       '<p>A theme with a Canvas FX script asks before it runs, since the script runs for everyone who sees the theme.</p>'],
     ['Which presets look best with structural transparency enabled?',
       '<p>The ones with something behind the interface to show: a Canvas FX animation or a gradient. Turning either on brings in the structural layer, which makes the layout containers see-through so the background reaches the chat.</p>' +
-      '<p>Dark, low-chroma palettes carry it best, because text stays readable over a busy background. The <b>Sidebar Transparency</b> and <b>Overlay Transparency</b> valves set how much of it shows through the sidebar and the menus.</p>'],
+      '<p>Dark, low-chroma palettes carry it best, because text stays readable over a busy background. The designer&rsquo;s <b>Surfaces</b> tab sets how much of it shows through the sidebar and the menus.</p>'],
     ['Can I combine a Canvas FX script with a gradient background?',
       '<p>Yes. Each mode has its own gradient and its own Canvas FX, and both can be on. The gradient paints the page, and the animation draws on a canvas above it.</p>' +
       '<p>A script that clears its canvas each frame, rather than filling it, lets the gradient show through between its shapes. One that paints a full background covers it.</p>'],
@@ -594,7 +594,7 @@
       '<p>The effect still shows around them, and the code reads on a calm surface.</p>'],
     ['Does the frosted sidebar cost much performance?',
       '<p>Some. A backdrop blur redraws whatever moves behind it, so it costs the most over an animation. On most devices it\'s fine.</p>' +
-      '<p>If scrolling or the animation stutters, the <b>Sidebar Transparency</b> valve can make the sidebar solid.</p>'],
+      '<p>If scrolling or the animation stutters, set the <b>Sidebar</b> row of the <b>Surfaces</b> tab to 100% to make the sidebar solid.</p>'],
     ['How do I submit a preset to this gallery?',
       '<p>For a theme, <b>Submit to the gallery</b> in the Studio opens the submission form with your theme filled in. A bot checks it, screenshots it in every mode and links a preview of it, and it opens the pull request for you.</p>' +
       '<p>Canvas FX scripts, CSS snippets and gradients go in through a pull request on GitHub.</p>'],
