@@ -2181,8 +2181,10 @@ class Event:
                         });
                     }
                 }
-                // An image under a wash like the chat's dimming layer, so the
-                // shared Dimming means the same on every page, in dark and light
+                // An image under the wash Open WebUI lays over a chat's
+                // background image (Chat.svelte: from-base-0/90 to-base-0/55,
+                // dark:from-base-900/90 dark:to-base-900/65), so the shared
+                // Dimming means the same on every page, in dark and light
                 function washedImage(target, lead, url, share) {
                     var d = dimming / 100;
                     var layer = function(from, to) {
@@ -2190,8 +2192,8 @@ class Event:
                             'background-size: cover !important; background-position: center !important; opacity: ' + share / 100 + ' !important;';
                     };
                     return [
-                        'html.dark ' + target + ' { ' + layer('color-mix(in oklab, var(--color-base-900) ' + Math.round(100 * d) + '%, transparent)', 'color-mix(in oklab, var(--color-base-900) ' + Math.round(90 * d) + '%, transparent)') + ' }',
-                        'html:not(.dark) ' + target + ' { ' + layer('color-mix(in oklab, var(--color-base-0) ' + Math.round(100 * d) + '%, transparent)', 'color-mix(in oklab, var(--color-base-0) ' + Math.round(85 * d) + '%, transparent)') + ' }'
+                        'html.dark ' + target + ' { ' + layer('color-mix(in oklab, var(--color-base-900) ' + Math.round(90 * d) + '%, transparent)', 'color-mix(in oklab, var(--color-base-900) ' + Math.round(65 * d) + '%, transparent)') + ' }',
+                        'html:not(.dark) ' + target + ' { ' + layer('color-mix(in oklab, var(--color-base-0) ' + Math.round(90 * d) + '%, transparent)', 'color-mix(in oklab, var(--color-base-0) ' + Math.round(55 * d) + '%, transparent)') + ' }'
                     ];
                 }
                 // The sign-in page's own picture (instance theme only), drawn on
