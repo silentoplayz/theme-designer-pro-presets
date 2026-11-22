@@ -3215,7 +3215,7 @@ test('the sign-in page shows the instance theme\'s picture, which only an admin 
     throw new Error('the picture isn\'t served to a signed-out visitor: ' + served.status + ' ' + served.headers.get('content-type'));
   }
   const backdrop = (page) => page.evaluate(() => {
-    const el = document.querySelector('#auth-page > div.absolute.bg-white');
+    const el = document.querySelector('#auth-page > div.absolute.h-full');
     if (!el) return 'no backdrop';
     const cs = getComputedStyle(el);
     return (cs.backgroundImage.includes('auth-background') ? 'picture' : 'none') + ' at ' + cs.opacity;

@@ -2197,12 +2197,13 @@ class Event:
                     ];
                 }
                 // The sign-in page's own picture (instance theme only), drawn on
-                // Open WebUI's backdrop there
+                // Open WebUI's backdrop there: its full-height layer, picked by
+                // shape since its color classes changed after 0.13.4
                 var authRules = [];
                 var auth = hidden && typeof hidden === 'object' && hidden.auth && typeof hidden.auth === 'object' ? hidden.auth : null;
                 var authShare = auth ? bgShare(auth.share) : 0;
                 if (auth && authShare > 0 && typeof auth.url === 'string' && /^(https:\\/\\/|\\/)[^\\s"'()\\\\<>]{1,2048}$/.test(auth.url)) {
-                    var back = '#auth-page#auth-page > div.absolute.bg-white';
+                    var back = '#auth-page#auth-page > div.absolute.h-full';
                     authRules = washedImage(back, 'background-color: transparent !important; ', auth.url, authShare);
                     if (behind) authRules.push('html:has(#owui-theme-canvas-bg) ' + back + ' { z-index: -1 !important; }');
                 }
