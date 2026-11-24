@@ -12523,7 +12523,7 @@ self.onmessage = (e) => {
                 css += `${at} #sidebar .sidebar-bg-gradient-to-t, ${at} #sidebar .sidebar-bg-gradient-to-b { display: ${so >= 100 ? 'block' : 'none'} !important; }\n`;
             }
             if (moved('Composer')) {
-                css += `${at} #message-input-container { ${decl(fill(color('Composer'), num('surfaceComposerOpacity')), num('surfaceComposerBlur'))} }\n`;
+                css += `${at} :is(#message-input-container, [data-composer-id^="note-chat-input-"]) { ${decl(fill(color('Composer'), num('surfaceComposerOpacity')), num('surfaceComposerBlur'))} }\n`;
             }
             // From 768px each tab, alone or in a split, is the page or chat it
             // shows. Below that the fill goes to the Tabs drawer, whose own
