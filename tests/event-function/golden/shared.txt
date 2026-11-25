@@ -1,5 +1,15 @@
 # shared.txt - long outputs that repeat across themes, by sha256 - written by golden.py --update
 
+#=# 16a3c7ccfb3b
+_shippedVars: 0 overridden, defaults false
+accentVars: {"--tdp-accent": "oklch(0.56 0.060 40.0)", "--tdp-accent-2": "oklch(0.56 0.060 80.0)", "--tdp-accent-3": "oklch(0.56 0.060 0.0)"}
+contrast Main text on background: #544c49 on #fff6f2 = 7.86 (aaa true, aa true, aaLarge true)
+contrast Muted text on background: #99908d on #fff6f2 = 2.93 (aaa false, aa false, aaLarge false)
+contrast Main text on elevated surfaces: #544c49 on #f7ede9 = 7.28 (aaa true, aa true, aaLarge true)
+contrast Main text on sidebar: #544c49 on #fff6f2 = 7.86 (aaa true, aa true, aaLarge true)
+detectWashedOut: {"dark": false, "light": true}
+buildGradientCss(.scope): ''
+
 #=# 1dc6abdaf939
 dark.canvasEnabled: true -> false
 dark.canvasScript: removed
@@ -446,16 +456,6 @@ html[data-theme="oled-dark"] #sidebar:not(.h-full) { background-color: var(--col
 :is(html[data-theme="her"], html:where(.her)) #sidebar:not(.h-full) { background-color: var(--color-base-50) !important; }
 /*[OWUI_STRUCTURAL_END]*/
 
-
-#=# e2c7f9e1f5c7
-_shippedVars: 0 overridden, defaults false
-accentVars: {"--tdp-accent": "oklch(0.56 0.060 40.0)", "--tdp-accent-2": "oklch(0.56 0.060 80.0)", "--tdp-accent-3": "oklch(0.56 0.060 0.0)"}
-contrast Main text on background: #ece2df on #fff6f2 = 1.19 (aaa false, aa false, aaLarge false)
-contrast Muted text on background: #fff6f2 on #fff6f2 = 1.00 (aaa false, aa false, aaLarge false)
-contrast Main text on elevated surfaces: #ece2df on #fff6f2 = 1.19 (aaa false, aa false, aaLarge false)
-contrast Main text on sidebar: #ece2df on #fff6f2 = 1.19 (aaa false, aa false, aaLarge false)
-detectWashedOut: {"dark": false, "light": true}
-buildGradientCss(.scope): ''
 
 #=# e2d3e586cb7a
 data-theme 'dark', class 'dark'

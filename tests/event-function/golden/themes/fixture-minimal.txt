@@ -26,22 +26,22 @@ true
 /*[OWUI_PAL_LIGHT_START]*/
 /* --- LIGHT MODE VARIABLES --- */
 :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]):not([style*="--app-bg"]) {
-  --app-base-0: oklch(1.000 0.012 40) !important;
+  --app-base-0: oklch(0.994 0.012 40) !important;
   --app-base-50: oklch(0.980 0.012 40) !important;
-  --app-base-100: oklch(0.980 0.012 40) !important;
-  --app-base-200: oklch(0.980 0.012 40) !important;
-  --app-base-300: oklch(0.980 0.012 40) !important;
-  --app-base-400: oklch(0.980 0.012 40) !important;
-  --app-base-500: oklch(0.980 0.012 40) !important;
-  --app-base-600: oklch(0.980 0.012 40) !important;
-  --app-base-700: oklch(0.980 0.012 40) !important;
-  --app-base-800: oklch(0.980 0.012 40) !important;
-  --app-base-850: oklch(0.980 0.012 40) !important;
-  --app-base-900: oklch(0.960 0.012 40) !important;
-  --app-base-950: oklch(0.920 0.012 40) !important;
-  --app-base-1000: oklch(0.760 0.012 40) !important;
-  --app-bg: oklch(1.000 0.012 40) !important;
-  --app-fg: oklch(0.760 0.012 40) !important;
+  --app-base-100: oklch(0.953 0.012 40) !important;
+  --app-base-200: oklch(0.939 0.012 40) !important;
+  --app-base-300: oklch(0.892 0.012 40) !important;
+  --app-base-400: oklch(0.837 0.012 40) !important;
+  --app-base-500: oklch(0.783 0.012 40) !important;
+  --app-base-600: oklch(0.660 0.012 40) !important;
+  --app-base-700: oklch(0.599 0.012 40) !important;
+  --app-base-800: oklch(0.531 0.012 40) !important;
+  --app-base-850: oklch(0.497 0.012 40) !important;
+  --app-base-900: oklch(0.449 0.012 40) !important;
+  --app-base-950: oklch(0.422 0.012 40) !important;
+  --app-base-1000: oklch(0.313 0.012 40) !important;
+  --app-bg: oklch(0.994 0.012 40) !important;
+  --app-fg: oklch(0.313 0.012 40) !important;
   --color-gray-50: var(--app-base-50) !important;
   --color-gray-100: var(--app-base-100) !important;
   --color-gray-200: var(--app-base-200) !important;
@@ -62,22 +62,22 @@ true
 }
 @media (prefers-color-scheme: light) {
   html[data-theme="system"]:not([style*="--app-bg"]), :root[data-theme="system"]:not([style*="--app-bg"]) {
-    --app-base-0: oklch(1.000 0.012 40) !important;
+    --app-base-0: oklch(0.994 0.012 40) !important;
     --app-base-50: oklch(0.980 0.012 40) !important;
-    --app-base-100: oklch(0.980 0.012 40) !important;
-    --app-base-200: oklch(0.980 0.012 40) !important;
-    --app-base-300: oklch(0.980 0.012 40) !important;
-    --app-base-400: oklch(0.980 0.012 40) !important;
-    --app-base-500: oklch(0.980 0.012 40) !important;
-    --app-base-600: oklch(0.980 0.012 40) !important;
-    --app-base-700: oklch(0.980 0.012 40) !important;
-    --app-base-800: oklch(0.980 0.012 40) !important;
-    --app-base-850: oklch(0.980 0.012 40) !important;
-    --app-base-900: oklch(0.960 0.012 40) !important;
-    --app-base-950: oklch(0.920 0.012 40) !important;
-    --app-base-1000: oklch(0.760 0.012 40) !important;
-    --app-bg: oklch(1.000 0.012 40) !important;
-    --app-fg: oklch(0.760 0.012 40) !important;
+    --app-base-100: oklch(0.953 0.012 40) !important;
+    --app-base-200: oklch(0.939 0.012 40) !important;
+    --app-base-300: oklch(0.892 0.012 40) !important;
+    --app-base-400: oklch(0.837 0.012 40) !important;
+    --app-base-500: oklch(0.783 0.012 40) !important;
+    --app-base-600: oklch(0.660 0.012 40) !important;
+    --app-base-700: oklch(0.599 0.012 40) !important;
+    --app-base-800: oklch(0.531 0.012 40) !important;
+    --app-base-850: oklch(0.497 0.012 40) !important;
+    --app-base-900: oklch(0.449 0.012 40) !important;
+    --app-base-950: oklch(0.422 0.012 40) !important;
+    --app-base-1000: oklch(0.313 0.012 40) !important;
+    --app-bg: oklch(0.994 0.012 40) !important;
+    --app-fg: oklch(0.313 0.012 40) !important;
     --color-gray-50: var(--app-base-50) !important;
     --color-gray-100: var(--app-base-100) !important;
     --color-gray-200: var(--app-base-200) !important;
@@ -232,22 +232,22 @@ html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"] {
 /*[OWUI_PAL_HER_START]*/
 /* --- HER MODE VARIABLES --- */
 html.her:not([style*="--app-bg"]), html[data-theme="her"]:not([style*="--app-bg"]) {
-  --app-base-0: oklch(1.000 0.012 40) !important;
+  --app-base-0: oklch(0.994 0.012 40) !important;
   --app-base-50: oklch(0.980 0.012 40) !important;
-  --app-base-100: oklch(0.980 0.012 40) !important;
-  --app-base-200: oklch(0.980 0.012 40) !important;
-  --app-base-300: oklch(0.980 0.012 40) !important;
-  --app-base-400: oklch(0.980 0.012 40) !important;
-  --app-base-500: oklch(0.980 0.012 40) !important;
-  --app-base-600: oklch(0.980 0.012 40) !important;
-  --app-base-700: oklch(0.980 0.012 40) !important;
-  --app-base-800: oklch(0.980 0.012 40) !important;
-  --app-base-850: oklch(0.980 0.012 40) !important;
-  --app-base-900: oklch(0.960 0.012 40) !important;
-  --app-base-950: oklch(0.920 0.012 40) !important;
-  --app-base-1000: oklch(0.760 0.012 40) !important;
-  --app-bg: oklch(1.000 0.012 40) !important;
-  --app-fg: oklch(0.760 0.012 40) !important;
+  --app-base-100: oklch(0.953 0.012 40) !important;
+  --app-base-200: oklch(0.939 0.012 40) !important;
+  --app-base-300: oklch(0.892 0.012 40) !important;
+  --app-base-400: oklch(0.837 0.012 40) !important;
+  --app-base-500: oklch(0.783 0.012 40) !important;
+  --app-base-600: oklch(0.660 0.012 40) !important;
+  --app-base-700: oklch(0.599 0.012 40) !important;
+  --app-base-800: oklch(0.531 0.012 40) !important;
+  --app-base-850: oklch(0.497 0.012 40) !important;
+  --app-base-900: oklch(0.449 0.012 40) !important;
+  --app-base-950: oklch(0.422 0.012 40) !important;
+  --app-base-1000: oklch(0.313 0.012 40) !important;
+  --app-bg: oklch(0.994 0.012 40) !important;
+  --app-fg: oklch(0.313 0.012 40) !important;
   --color-gray-50: var(--app-base-50) !important;
   --color-gray-100: var(--app-base-100) !important;
   --color-gray-200: var(--app-base-200) !important;
@@ -460,7 +460,7 @@ detectWashedOut: {"dark": false, "light": false}
 buildGradientCss(.scope): 863 chars, sha256 1e9b4fcb3c32
 
 #=# designer: light mode
-@shared e2c7f9e1f5c7
+@shared 16a3c7ccfb3b
 
 #=# designer: oled mode
 _shippedVars: 1 overridden, defaults false
@@ -474,7 +474,7 @@ detectWashedOut: {"dark": false, "light": false}
 buildGradientCss(.scope): 863 chars, sha256 1e9b4fcb3c32
 
 #=# designer: her mode
-@shared e2c7f9e1f5c7
+@shared 16a3c7ccfb3b
 
 #=# python: _css_balanced
 css True, custom section True

@@ -20,20 +20,20 @@ true
 :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]):not([style*="--app-bg"]) {
   --app-base-0: oklch(1.000 0.026 200) !important;
   --app-base-50: oklch(0.980 0.026 200) !important;
-  --app-base-100: oklch(0.960 0.026 200) !important;
-  --app-base-200: oklch(0.940 0.026 200) !important;
-  --app-base-300: oklch(0.870 0.026 200) !important;
-  --app-base-400: oklch(0.790 0.026 200) !important;
-  --app-base-500: oklch(0.710 0.026 200) !important;
-  --app-base-600: oklch(0.530 0.026 200) !important;
-  --app-base-700: oklch(0.440 0.026 200) !important;
-  --app-base-800: oklch(0.340 0.026 200) !important;
-  --app-base-850: oklch(0.290 0.026 200) !important;
-  --app-base-900: oklch(0.220 0.026 200) !important;
-  --app-base-950: oklch(0.180 0.026 200) !important;
-  --app-base-1000: oklch(0.020 0.026 200) !important;
+  --app-base-100: oklch(0.941 0.026 200) !important;
+  --app-base-200: oklch(0.921 0.026 200) !important;
+  --app-base-300: oklch(0.852 0.026 200) !important;
+  --app-base-400: oklch(0.773 0.026 200) !important;
+  --app-base-500: oklch(0.695 0.026 200) !important;
+  --app-base-600: oklch(0.517 0.026 200) !important;
+  --app-base-700: oklch(0.429 0.026 200) !important;
+  --app-base-800: oklch(0.330 0.026 200) !important;
+  --app-base-850: oklch(0.281 0.026 200) !important;
+  --app-base-900: oklch(0.212 0.026 200) !important;
+  --app-base-950: oklch(0.173 0.026 200) !important;
+  --app-base-1000: oklch(0.016 0.026 200) !important;
   --app-bg: oklch(1.000 0.026 200) !important;
-  --app-fg: oklch(0.020 0.026 200) !important;
+  --app-fg: oklch(0.016 0.026 200) !important;
   --color-gray-50: var(--app-base-50) !important;
   --color-gray-100: var(--app-base-100) !important;
   --color-gray-200: var(--app-base-200) !important;
@@ -56,20 +56,20 @@ true
   html[data-theme="system"]:not([style*="--app-bg"]), :root[data-theme="system"]:not([style*="--app-bg"]) {
     --app-base-0: oklch(1.000 0.026 200) !important;
     --app-base-50: oklch(0.980 0.026 200) !important;
-    --app-base-100: oklch(0.960 0.026 200) !important;
-    --app-base-200: oklch(0.940 0.026 200) !important;
-    --app-base-300: oklch(0.870 0.026 200) !important;
-    --app-base-400: oklch(0.790 0.026 200) !important;
-    --app-base-500: oklch(0.710 0.026 200) !important;
-    --app-base-600: oklch(0.530 0.026 200) !important;
-    --app-base-700: oklch(0.440 0.026 200) !important;
-    --app-base-800: oklch(0.340 0.026 200) !important;
-    --app-base-850: oklch(0.290 0.026 200) !important;
-    --app-base-900: oklch(0.220 0.026 200) !important;
-    --app-base-950: oklch(0.180 0.026 200) !important;
-    --app-base-1000: oklch(0.020 0.026 200) !important;
+    --app-base-100: oklch(0.941 0.026 200) !important;
+    --app-base-200: oklch(0.921 0.026 200) !important;
+    --app-base-300: oklch(0.852 0.026 200) !important;
+    --app-base-400: oklch(0.773 0.026 200) !important;
+    --app-base-500: oklch(0.695 0.026 200) !important;
+    --app-base-600: oklch(0.517 0.026 200) !important;
+    --app-base-700: oklch(0.429 0.026 200) !important;
+    --app-base-800: oklch(0.330 0.026 200) !important;
+    --app-base-850: oklch(0.281 0.026 200) !important;
+    --app-base-900: oklch(0.212 0.026 200) !important;
+    --app-base-950: oklch(0.173 0.026 200) !important;
+    --app-base-1000: oklch(0.016 0.026 200) !important;
     --app-bg: oklch(1.000 0.026 200) !important;
-    --app-fg: oklch(0.020 0.026 200) !important;
+    --app-fg: oklch(0.016 0.026 200) !important;
     --color-gray-50: var(--app-base-50) !important;
     --color-gray-100: var(--app-base-100) !important;
     --color-gray-200: var(--app-base-200) !important;
@@ -500,10 +500,10 @@ parseSettings: line 37 at 25 len 3 BAND_WIDTH number 520 300..900 step 1 label "
 #=# designer: light mode
 _shippedVars: 0 overridden, defaults false
 accentVars: {"--tdp-accent": "#d4554a", "--tdp-accent-2": "#1b8fb0", "--tdp-accent-3": "#23915f"}
-contrast Main text on background: #031516 on #e5feff = 17.77 (aaa true, aa true, aaLarge true)
-contrast Muted text on background: #5b7172 on #e5feff = 4.93 (aaa false, aa true, aaLarge true)
-contrast Main text on elevated surfaces: #031516 on #dff8f9 = 16.86 (aaa true, aa true, aaLarge true)
-contrast Main text on sidebar: #031516 on #e5feff = 17.77 (aaa true, aa true, aaLarge true)
+contrast Main text on background: #021315 on #e5feff = 18.03 (aaa true, aa true, aaLarge true)
+contrast Muted text on background: #576d6e on #e5feff = 5.23 (aaa false, aa true, aaLarge true)
+contrast Main text on elevated surfaces: #021315 on #d8f1f2 = 16.07 (aaa true, aa true, aaLarge true)
+contrast Main text on sidebar: #021315 on #e5feff = 18.03 (aaa true, aa true, aaLarge true)
 detectWashedOut: {"dark": false, "light": true}
 buildGradientCss(.scope): ''
 parseSettings: same as dark mode

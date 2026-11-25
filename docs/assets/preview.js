@@ -18,6 +18,15 @@
     600: 0.51, 700: 0.42, 800: 0.32, 850: 0.27, 900: 0.2, 950: 0.16,
   };
 
+  // The designer's rampLightness: up to the 20% default the slider slides the
+  // whole ramp; above it step 50 stays put and the rest close in on it
+  function rampLightness(baseL, l) {
+    if (!(l > 0.2)) return baseL + (l - 0.2);
+    const u = Math.min(1, (l - 0.2) / 0.8);
+    const rise = 0.25 * (1 - (1 - u) * (1 - u));
+    return 0.98 - (0.98 - baseL) / 0.78 * (0.78 - rise);
+  }
+
   // The accents a theme's CSS reads: [mode field, custom property, hue shift]
   const ACCENTS = [['accent', '--tdp-accent', 0], ['accent2', '--tdp-accent-2', 40], ['accent3', '--tdp-accent-3', -40]];
 
@@ -35,14 +44,14 @@
     const h = mode && mode.h != null ? mode.h : 250;
     const c = paletteOn && mode ? (mode.c || 0) / 1000 : 0;
     const l = mode && mode.l != null ? mode.l / 100 : 0.2;
-    const deltaL = paletteOn ? l - 0.2 : 0;
+    const rampL = paletteOn ? l : 0.2;
     const ov = (paletteOn && mode && mode.overrides) || {};
 
     // Not colors: the frame reads these to give Canvas FX the theme's accents
     vars['--tdp-hue'] = String(h);
     vars['--tdp-chroma'] = String(paletteOn && mode ? (mode.c || 0) : 0);
     STEPS.forEach((step) => {
-      const targetL = Math.max(0, Math.min(0.98, LIGHTNESS_MAP[step] + deltaL));
+      const targetL = Math.max(0, Math.min(0.98, rampLightness(LIGHTNESS_MAP[step], rampL)));
       const computed = `oklch(${targetL.toFixed(3)} ${c.toFixed(3)} ${c === 0 ? 0 : h})`;
       vars[`--color-gray-${step}`] = ov[`--color-gray-${step}`] || computed;
     });
@@ -83,6 +92,19 @@
   }
 
 
+  // The designer's gradientDrift: an animated gradient sways around its
+  // layout through custom properties the keyframes move
+  const GRADIENT_KEYFRAMES = "@property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; } " +
+    "@property --owui-gradient-dx { syntax: '<percentage>'; inherits: false; initial-value: 0%; } " +
+    "@property --owui-gradient-dy { syntax: '<percentage>'; inherits: false; initial-value: 0%; } " +
+    '@keyframes tdp-preview-gradient-shift { 0%, 100% { --owui-gradient-turn: -20deg; --owui-gradient-dx: -6%; --owui-gradient-dy: 6%; } ' +
+    '50% { --owui-gradient-turn: 20deg; --owui-gradient-dx: 6%; --owui-gradient-dy: -6%; } }';
+  function gradientAt(value, animated, axis, i) {
+    if (!animated) return `${value}%`;
+    const sign = (axis === 'x' ? i % 2 : (i >> 1) % 2) ? '-' : '+';
+    return `calc(${value}% ${sign} var(--owui-gradient-d${axis}, 0%))`;
+  }
+
   // Accepts a full gradient preset object (raw file) or a theme mode's gradient* fields.
   // light: draw it for a Light or Her mode, which fades toward white.
   function gradientLayers(g, light) {
@@ -97,7 +119,7 @@
       if (points.length < 2) return null;
       const bg = g.meshBgColor || g.gradientMeshBgColor || '#0a0a12';
       const layers = points
-        .map((p) => `radial-gradient(at ${p.x}% ${p.y}%, ${gradientStrengthColor(p.color, intensity, bg)} 0%, transparent ${p.spread}%)`)
+        .map((p, i) => `radial-gradient(at ${gradientAt(p.x, animated, 'x', i)} ${gradientAt(p.y, animated, 'y', i)}, ${gradientStrengthColor(p.color, intensity, bg)} 0%, transparent ${p.spread}%)`)
         .join(', ');
       return { background: bg, backgroundImage: layers, animated, speed };
     }
@@ -115,10 +137,10 @@
       const size = firstOf(g.radialSize, g.gradientRadialSize, 'farthest-corner');
       const x = firstOf(g.radialPosX, g.gradientRadialPosX, 50);
       const y = firstOf(g.radialPosY, g.gradientRadialPosY, 50);
-      fn = `radial-gradient(${shape} ${size} at ${x}% ${y}%, ${stopsStr})`;
+      fn = `radial-gradient(${shape} ${size} at ${gradientAt(x, animated, 'x', 0)} ${gradientAt(y, animated, 'y', 0)}, ${stopsStr})`;
     } else {
       const angle = firstOf(g.angle, g.gradientAngle, 135);
-      fn = `linear-gradient(${angle}deg, ${stopsStr})`;
+      fn = `linear-gradient(${animated ? `calc(${angle}deg + var(--owui-gradient-turn, 0deg))` : `${angle}deg`}, ${stopsStr})`;
     }
     return { background: null, backgroundImage: fn, animated, speed };
   }
@@ -132,10 +154,7 @@
     el.style.animation = '';
     if (layers.background) el.style.backgroundColor = layers.background;
     el.style.backgroundImage = layers.backgroundImage;
-    if (layers.animated) {
-      el.style.backgroundSize = '300% 300%';
-      el.style.animation = `tdp-preview-gradient-shift ${layers.speed}s ease infinite`;
-    }
+    if (layers.animated) el.style.animation = `tdp-preview-gradient-shift ${layers.speed}s ease-in-out infinite`;
   }
 
   // ---- Canvas FX engine (Worker-only, mirrors the designer's protocol) ----
@@ -686,8 +705,8 @@
     // gradient section (emitted before custom CSS so cascade order matches)
     const g = opts.gradient;
     const gradientCSS = g
-      ? `body { ${g.background ? `background-color: ${g.background} !important;` : ''} background-image: ${g.backgroundImage} !important; background-attachment: fixed !important; ${g.animated ? `background-size: 300% 300% !important; animation: tdp-preview-gradient-shift ${g.speed}s ease infinite;` : ''} }
-${g.animated ? '@keyframes tdp-preview-gradient-shift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }' : ''}`
+      ? `body { ${g.background ? `background-color: ${g.background} !important;` : ''} background-image: ${g.backgroundImage} !important; background-attachment: fixed !important; ${g.animated ? `animation: tdp-preview-gradient-shift ${g.speed}s ease-in-out infinite;` : ''} }
+${g.animated ? GRADIENT_KEYFRAMES : ''}`
       : '';
 
     return `<!DOCTYPE html>
@@ -1742,7 +1761,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
           '<tr><td><code>850</code></td><td>27%</td><td>Bubbles, panels</td></tr>' +
           '<tr><td><code>950</code></td><td>16%</td><td>Sidebar</td></tr>' +
           '</tbody></table>' +
-          '<p>Shifting the base <b>lightness</b> slides the whole ramp while keeping the perceptual spacing intact.</p>',
+          '<p>Lowering the <b>lightness</b> below its 20% default slides the whole ramp darker. Raising it lifts the background while the lightest step stays put, so text keeps its contrast all the way up.</p>',
           ['Why OKLCH instead of HSL for the ramp?',
            'How do I keep contrast accessible across all twelve steps?',
            'Can I pin a single step and regenerate the rest?'])

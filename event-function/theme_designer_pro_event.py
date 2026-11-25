@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.24.0
+version: 1.25.0
 license: MIT
 required_open_webui_version: 0.13.4
 """
@@ -22,7 +22,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.24.0"
+VERSION = "1.25.0"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -467,7 +467,7 @@ class Event:
         # ── UX Policy ──
         enable_auth_page_theming: bool = Field(
             default=True,
-            description="Allow theming the login/signup pages. When disabled, all auth visibility toggles are hidden and forced off.",
+            description="Allow theming the login/signup pages. When disabled, every 'Shows on' choice is hidden and set to App.",
         )
         draft_mode_default: bool = Field(
             default=False,
@@ -5782,12 +5782,12 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         .radial-xy-dot { position: absolute; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: 2px solid rgba(255,255,255,0.9); box-shadow: 0 2px 8px rgba(0,0,0,0.4); transform: translate(-50%, -50%); pointer-events: none; z-index: 1; transition: box-shadow 0.15s; }
         .radial-xy-pad:active .radial-xy-dot { box-shadow: 0 0 0 4px rgba(59,130,246,0.3), 0 2px 8px rgba(0,0,0,0.4); }
         .radial-xy-label { text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; font-weight: 700; color: var(--accent); margin-top: 6px; }
-        .radial-shape-pills { display: flex; gap: 4px; background: var(--bg-deep); padding: 3px; border-radius: 8px; border: 1px solid var(--border); }
-        .radial-shape-pill { flex: 1; padding: 6px 8px; border-radius: 6px; border: none; background: transparent; color: var(--text-muted); font-size: 0.62rem; font-weight: 700; cursor: pointer; transition: 0.2s; text-align: center; font-family: inherit; }
+        .radial-shape-pills, .where-pills { display: flex; gap: 4px; background: var(--bg-deep); padding: 3px; border-radius: 8px; border: 1px solid var(--border); }
+        .radial-shape-pill, .where-pill { flex: 1; padding: 6px 8px; border-radius: 6px; border: none; background: transparent; color: var(--text-muted); font-size: 0.62rem; font-weight: 700; cursor: pointer; transition: 0.2s; text-align: center; font-family: inherit; }
         .radial-size-pills { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--bg-deep); padding: 3px; border-radius: 8px; border: 1px solid var(--border); }
         .radial-size-pill { padding: 6px 6px; border-radius: 6px; border: none; background: transparent; color: var(--text-muted); font-size: 0.58rem; font-weight: 700; cursor: pointer; transition: 0.2s; text-align: center; font-family: inherit; white-space: nowrap; }
-        .radial-shape-pill.active, .radial-size-pill.active { background: var(--bg-elevated); color: var(--text-main); box-shadow: 0 3px 8px rgba(0,0,0,0.3); }
-        body.light-mode .radial-shape-pill.active, body.light-mode .radial-size-pill.active { background: var(--bg-surface); box-shadow: 0 3px 8px var(--lm-shadow); }
+        .radial-shape-pill.active, .radial-size-pill.active, .where-pill.active { background: var(--bg-elevated); color: var(--text-main); box-shadow: 0 3px 8px rgba(0,0,0,0.3); }
+        body.light-mode .radial-shape-pill.active, body.light-mode .radial-size-pill.active, body.light-mode .where-pill.active { background: var(--bg-surface); box-shadow: 0 3px 8px var(--lm-shadow); }
         body.light-mode .radial-xy-pad { border-color: var(--border); }
         body.light-mode .radial-xy-dot { border-color: rgba(0,0,0,0.2); }
 
@@ -6268,6 +6268,9 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
             .metadata-grid { grid-template-columns: 1fr !important; }
 
             .flex-center-gap6 { flex-wrap: wrap; gap: 4px; }
+            /* A section's switches and its Shows on pills wrap under its title */
+            .section-title-bar { flex-wrap: wrap; gap: 8px; }
+            .section-title-bar .flex-center { flex-wrap: wrap; gap: 8px 12px; }
             .btn-icon { width: 30px; height: 30px; min-width: 30px; min-height: 30px; }
 
             .var-action-btn { font-size: 0.65rem; padding: 6px 10px; }
@@ -6315,6 +6318,8 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         /* Utility classes */
         .toggle-label, .toggle-label-gap5, .toggle-label-ml { display: flex; align-items: center; gap: 7px; font-size: 0.65rem; color: var(--text-main); cursor: pointer; }
         .toggle-label-gap5 { gap: 5px; }
+        .auth-where { cursor: default; }
+        .where-pill { flex: none; padding: 4px 8px; white-space: nowrap; }
         .toggle-label-ml { margin-left: 8px; }
         .cb-input { -webkit-appearance: none; appearance: none; position: relative; width: 34px; height: 18px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.08); border-radius: 9px; cursor: pointer; transition: background 0.3s, border-color 0.3s; flex-shrink: 0; margin: 0; }
         .cb-input::after { content: ''; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; background: white; border-radius: 50%; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
@@ -6495,8 +6500,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                 <div>Core Palette</div>
                 <div class="flex-center">
                     <label class="toggle-label" data-tooltip="Enable or disable the generated color palette for this mode"><input type="checkbox" id="toggle-palette-enabled" class="cb-input"> Enabled</label>
-                    <label class="toggle-label" data-tooltip="Show theme colors on Login/Signup pages (Default: Visible)"><input type="checkbox" id="toggle-theme-auth" class="cb-input"> Show on Auth Pages</label>
-                    <label class="toggle-label" data-tooltip="Show theme colors only on Login/Signup pages, not in the app (needs Show on Auth Pages)"><input type="checkbox" id="toggle-theme-authonly" class="cb-input"> Only on Auth Pages</label>
+                    <div class="toggle-label auth-where" data-tooltip="Theme colors for this mode can show in the app, on the Login/Signup pages, or both">Shows on <div class="where-pills" role="group" aria-label="Where the theme colors shows" data-where="theme"><button type="button" class="where-pill" data-where-value="app" aria-pressed="false">App</button><button type="button" class="where-pill" data-where-value="both" aria-pressed="false">App + sign-in</button><button type="button" class="where-pill" data-where-value="auth" aria-pressed="false">Sign-in only</button></div><input type="checkbox" id="toggle-theme-auth" class="cb-input" hidden><input type="checkbox" id="toggle-theme-authonly" class="cb-input" hidden></div>
                 </div>
             </div>
             <div class="control-group">
@@ -6577,8 +6581,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                     <div class="flex-center">
                         <label class="toggle-label" data-tooltip="Toggle custom CSS for this mode"><input type="checkbox" id="toggle-custom-css" class="cb-input"> Enabled</label>
                         <label class="toggle-label" data-tooltip="Wraps your CSS in mode selectors. Uncheck if your code uses manual mode prefixes."><input type="checkbox" id="toggle-auto-scope" checked class="cb-input"> Auto-Scope</label>
-                        <label class="toggle-label" data-tooltip="Show custom CSS on Login/Signup pages (Default: Visible)"><input type="checkbox" id="toggle-custom-auth" class="cb-input"> Show on Auth Pages</label>
-                        <label class="toggle-label" data-tooltip="Show custom CSS only on Login/Signup pages, not in the app (needs Show on Auth Pages)"><input type="checkbox" id="toggle-custom-authonly" class="cb-input"> Only on Auth Pages</label>
+                        <div class="toggle-label auth-where" data-tooltip="Custom CSS for this mode can show in the app, on the Login/Signup pages, or both">Shows on <div class="where-pills" role="group" aria-label="Where the custom CSS shows" data-where="custom"><button type="button" class="where-pill" data-where-value="app" aria-pressed="false">App</button><button type="button" class="where-pill" data-where-value="both" aria-pressed="false">App + sign-in</button><button type="button" class="where-pill" data-where-value="auth" aria-pressed="false">Sign-in only</button></div><input type="checkbox" id="toggle-custom-auth" class="cb-input" hidden><input type="checkbox" id="toggle-custom-authonly" class="cb-input" hidden></div>
                     </div>
                 </div>
 
@@ -6604,8 +6607,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                     <div>Canvas FX <span id="canvas-worker-badge" style="display:none; font-size: 0.55rem; font-weight: 800; padding: 2px 6px; border-radius: 12px; margin-left: 8px; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.05em;"></span><span id="canvas-webgl-badge" style="display:none; font-size: 0.55rem; font-weight: 800; padding: 2px 6px; border-radius: 12px; margin-left: 6px; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.05em; color:#a78bfa; background-color: rgba(167, 139, 250, 0.1);">WebGL</span><span id="canvas-context-badge" style="display:none; font-size: 0.55rem; font-weight: 800; padding: 2px 6px; border-radius: 12px; margin-left: 6px; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.05em; color:#2dd4bf; background-color: rgba(45, 212, 191, 0.1);">Context</span><span id="canvas-theme-badge" style="display:none; font-size: 0.55rem; font-weight: 800; padding: 2px 6px; border-radius: 12px; margin-left: 6px; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.05em; color:#f472b6; background-color: rgba(244, 114, 182, 0.1);">Follows Theme</span></div>
                     <div class="flex-center">
                         <label class="toggle-label" data-tooltip="Run animation script in background for this mode"><input type="checkbox" id="toggle-canvas-fx" class="cb-input"> Enabled</label>
-                        <label class="toggle-label" data-tooltip="Show animations on Login/Signup pages (Default: Visible)"><input type="checkbox" id="toggle-canvas-auth" class="cb-input"> Show on Auth Pages</label>
-                        <label class="toggle-label" data-tooltip="Show animations only on Login/Signup pages, not in the app (needs Show on Auth Pages)"><input type="checkbox" id="toggle-canvas-authonly" class="cb-input"> Only on Auth Pages</label>
+                        <div class="toggle-label auth-where" data-tooltip="Animations for this mode can show in the app, on the Login/Signup pages, or both">Shows on <div class="where-pills" role="group" aria-label="Where the animations shows" data-where="canvas"><button type="button" class="where-pill" data-where-value="app" aria-pressed="false">App</button><button type="button" class="where-pill" data-where-value="both" aria-pressed="false">App + sign-in</button><button type="button" class="where-pill" data-where-value="auth" aria-pressed="false">Sign-in only</button></div><input type="checkbox" id="toggle-canvas-auth" class="cb-input" hidden><input type="checkbox" id="toggle-canvas-authonly" class="cb-input" hidden></div>
                     </div>
                 </div>
 
@@ -6639,9 +6641,8 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                 <div>Gradient Background</div>
                 <div class="flex-center">
                     <label class="toggle-label" data-tooltip="Enable gradient background for this mode"><input type="checkbox" id="toggle-gradient-bg" class="cb-input"> Enabled</label>
-                    <label class="toggle-label" data-tooltip="Slowly shift gradient position with a looping animation"><input type="checkbox" id="toggle-gradient-animation" class="cb-input"> Animate</label>
-                    <label class="toggle-label" data-tooltip="Show gradient on Login/Signup pages (Default: Visible)"><input type="checkbox" id="toggle-gradient-auth" checked class="cb-input"> Show on Auth Pages</label>
-                    <label class="toggle-label" data-tooltip="Show gradient only on Login/Signup pages, not in the app (needs Show on Auth Pages)"><input type="checkbox" id="toggle-gradient-authonly" class="cb-input"> Only on Auth Pages</label>
+                    <label class="toggle-label" data-tooltip="Slowly sway the gradient around the layout you set, in a loop"><input type="checkbox" id="toggle-gradient-animation" class="cb-input"> Animate</label>
+                    <div class="toggle-label auth-where" data-tooltip="Gradient for this mode can show in the app, on the Login/Signup pages, or both">Shows on <div class="where-pills" role="group" aria-label="Where the gradient shows" data-where="gradient"><button type="button" class="where-pill" data-where-value="app" aria-pressed="false">App</button><button type="button" class="where-pill" data-where-value="both" aria-pressed="false">App + sign-in</button><button type="button" class="where-pill" data-where-value="auth" aria-pressed="false">Sign-in only</button></div><input type="checkbox" id="toggle-gradient-auth" class="cb-input" hidden checked><input type="checkbox" id="toggle-gradient-authonly" class="cb-input" hidden></div>
                 </div>
             </div>
 
@@ -6858,7 +6859,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                             <li><b>Hot Reload:</b> The function hot-reloads when updated in the admin panel; no server restart is needed. The theme&rsquo;s CSS is built in the designer page, so CSS changes a new version brings reach Open WebUI pages once an admin opens the instance designer in Live mode, which saves the theme as it opens. A personal theme is rebuilt when its owner opens their own designer.</li>
                             <li><b>Auto-Save:</b> Your active theme configuration is saved automatically after every change. Use the <b>Save (+)</b> button only to create named snapshots in your theme gallery.</li>
                             <li><b>Core Palette:</b> The OKLCH color palette is enabled by default for all modes. Use the <b>Enabled</b> toggle in the Core Palette section to disable palette generation for a specific mode if you prefer to manage colors entirely through manual overrides.</li>
-                            <li><b>Auth Pages:</b> You can selectively toggle theme components (Colors, Custom CSS, Canvas FX, and Gradient Background) for the Login/Signup screens using the individual <b>Show on Auth Pages</b> checkboxes. By default, all four components are visible on auth pages. Beside each one, <b>Only on Auth Pages</b> keeps that component off the rest of Open WebUI, so it shows on the Login/Signup screens alone: a gradient or an animation for the sign-in page that stays out of your chats, for example. It needs <b>Show on Auth Pages</b>. The <b>Enable Auth Page Theming</b> valve hides every one of these checkboxes and turns them off. A personal theme never reaches the auth pages, which always show the instance theme, so the designer in a user&rsquo;s own Settings hides these checkboxes.</li>
+                            <li><b>Auth Pages:</b> You can selectively toggle theme components (Colors, Custom CSS, Canvas FX, and Gradient Background) for the Login/Signup screens using each one&rsquo;s <b>Shows on</b> choice: <b>App</b>, <b>App + sign-in</b> or <b>Sign-in only</b>. By default, all four components show on both. <b>Sign-in only</b> keeps that component off the rest of Open WebUI, so it shows on the Login/Signup screens alone: a gradient or an animation for the sign-in page that stays out of your chats, for example. It needs <b>Show on Auth Pages</b>. The <b>Enable Auth Page Theming</b> valve hides every one of these checkboxes and turns them off. A personal theme never reaches the auth pages, which always show the instance theme, so the designer in a user&rsquo;s own Settings hides these checkboxes.</li>
                             <li><b>Layer Order:</b> The generated CSS applies in this order: <i>OKLCH Palette &rarr; Manual Variable Overrides &rarr; Structural Rules (with the Surfaces rules when that tab is on) &rarr; Gradient Background &rarr; Custom CSS &rarr; valve rules</i> (overlay glass, the hidden sidebar fades and the mobile sidebar fix, when those valves are on). Each layer can override the one before it.</li>
                             <li><b>Session Persistence:</b> The designer uses <code>sessionStorage</code> to remember which tab you were working in, and restores it when you come back.</li>
                             <li><b>Legacy Data Migration:</b> Upgrading from an older version? The designer detects legacy data structures and migrates your saved snapshots and active themes to the latest format without data loss. A theme in the single-palette format from before modes (a top-level <code>h</code>, <code>c</code> and <code>l</code>, and neither a <code>dark</code> nor a <code>light</code> mode) is read the same way from a file, a paste, a library backup or an install link.</li>
@@ -6889,7 +6890,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                                     <tr><td><b>Enable AI Consultant</b></td><td>On</td><td>Shows the <b>AI</b> button in the designer (see Section 5).</td></tr>
                                     <tr><td><b>Enable Theme Update Checks</b></td><td>On</td><td>Off: hides the <b>Updates</b> button and each theme&rsquo;s update check, and the designer makes no update requests (see Section 15).</td></tr>
                                     <tr><td><b>Enable Community Themes</b></td><td>On</td><td>Off: hides the Community Themes browser and skips its catalog fetch (see Section 20).</td></tr>
-                                    <tr><td><b>Enable Auth Page Theming</b></td><td>On</td><td>Off: hides every <b>Show on Auth Pages</b> and <b>Only on Auth Pages</b> checkbox and turns them off, so login pages keep Open WebUI&rsquo;s own look. Opening the designer while it&rsquo;s off saves those checkboxes as off, so turning the valve back on leaves them off until you tick them again.</td></tr>
+                                    <tr><td><b>Enable Auth Page Theming</b></td><td>On</td><td>Off: hides every <b>Shows on</b> choice and sets each to <b>App</b>, so login pages keep Open WebUI&rsquo;s own look. Opening the designer while it&rsquo;s off saves them as <b>App</b>, so turning the valve back on leaves them there until you pick again.</td></tr>
                                     <tr><td><b>Draft Mode Default</b></td><td>Off</td><td>On: the instance designer opens in Draft mode on every load, reloads included, even after you publish (see Section 9).</td></tr>
                                     <tr><td><b>Show In Admin Settings</b></td><td>On</td><td>Adds a <b>Themes</b> tab to the Admin section of Settings (see Section 3).</td></tr>
                                     <tr><td><b>Show In Admin Panel</b></td><td>Off</td><td>Adds a <b>Themes</b> page to the Admin Panel&rsquo;s top bar, between <b>Functions</b> and <b>Settings</b> (see Section 3).</td></tr>
@@ -6977,7 +6978,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         <p>Unlike standard hex-based themes, this designer uses the <b>OKLCH</b> color space to generate perceptually uniform palettes. This means the visual "weight" of colors remains identical as you shift hues.</p>
                         <ul>
                             <li><b>Global Modes:</b> Easily switch between <b>Dark</b>, <b>OLED</b> (pure black), <b>Light</b>, <b>Her</b>, and <b>System</b> modes using the segmented toggle. Settings, variables, and CSS are managed entirely separately for each mode. System mode proxies to your OS preference (see Section 8). In Live mode, picking a mode tab also switches Open WebUI itself, in your other tabs and in Settings around the embedded designer; in Draft mode it switches only the designer. <i>Note: when the page loads, the designer reads Open WebUI&rsquo;s <code>enable_easter_eggs</code> setting from <code>/api/config</code> and shows the Her tab if it&rsquo;s on, or if Open WebUI is already in Her mode.</i></li>
-                            <li><b>Hue / Chroma / Lightness:</b> Control the base angle, intensity, and brightness. Double-click a slider&rsquo;s label to reset it to its default.</li>
+                            <li><b>Hue / Chroma / Lightness:</b> Control the base angle, intensity, and brightness. Lightness keeps text readable across its whole range: above the 20% default it lifts Dark&rsquo;s background and softens Light&rsquo;s text without letting the two meet. Double-click a slider&rsquo;s label to reset it to its default.</li>
                             <li><b>Accent Colors:</b> Under the sliders, three swatches show the mode&rsquo;s accents. Each starts on <b>Auto</b>: the palette&rsquo;s hue, lighter on dark modes and deeper on light ones, with the second and third 40&deg; to either side, so they follow the sliders. At Chroma 0, the default, the automatic accents are gray. Pick a color to set one for this mode, for a theme whose look is two colors the hue can&rsquo;t give, and click &#10226; to set it back to automatic (double-click the row&rsquo;s label for all three). Canvas FX scripts that follow the theme draw in them, and theme CSS reads them as <code>var(--tdp-accent)</code>, <code>var(--tdp-accent-2)</code> and <code>var(--tdp-accent-3)</code>; click an accent&rsquo;s name to copy its variable. Sync copies them with the palette.</li>
                             <li><b>Tonal Ramp:</b> Below the sliders, the OKLCH Tonal Ramp visualizes the generated 12-step color scale. Click any block in the ramp to copy its hex value to your clipboard.</li>
 
@@ -7064,7 +7065,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                             <li><b>Raw Mode:</b> Disable Auto-Scope if you prefer to write global rules or your own target selectors. In this mode, <code>:root</code> references become <code>:is(&lt;mode selector&gt;)</code>.</li>
                             <li><b>System Mode:</b> Dark and Light custom CSS is also emitted inside <code>@media (prefers-color-scheme)</code> blocks for people on System.</li>
                             <li><b>Accent Colors:</b> Use <code>var(--tdp-accent)</code>, <code>var(--tdp-accent-2)</code> and <code>var(--tdp-accent-3)</code> for highlights instead of hex values. Every mode defines them, with the colors set under <b>Accent Colors</b> in the Core Palette tab or the ones generated from the palette, so one rule follows each mode and every later palette change.</li>
-                            <li><b>Show on Auth Pages:</b> Toggle whether your custom CSS applies on Login/Signup screens. Enabled by default. <b>Only on Auth Pages</b> beside it keeps the CSS off the rest of Open WebUI. The <b>Enable Auth Page Theming</b> valve hides both and turns them off.</li>
+                            <li><b>Shows on:</b> Choose whether your custom CSS applies in the app, on Login/Signup screens too (the default), or on those screens only. The <b>Enable Auth Page Theming</b> valve hides the choice and sets it to <b>App</b>.</li>
                             <li><b>Personal Themes:</b> Custom CSS in a personal theme affects only its owner.</li>
                             <li><b>Import/Export:</b> Drop <code>.css</code> files (up to 16 MB each) onto the designer to add them to the Preset Gallery as snippets, then load one to use it. Export your snippets to share them.</li>
                             <li><b>Editor Features:</b> The code editor traps the <b>Tab</b> key to insert 2-space indents, includes a synced <b>line number gutter</b>, and auto-closes matching brackets and quotes as you type. The editor&rsquo;s <b>Save</b> button adds the CSS to the Preset Gallery, <b>Clear</b> empties it and <b>Copy</b> copies it.</li>
@@ -7136,7 +7137,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                         <ul>
                             <li><b>Background Worker Execution:</b> By default, scripts run in a true background Web Worker using <code>OffscreenCanvas</code> (if supported by your browser) to ensure high-performance rendering without blocking the UI thread. Both <b>Canvas 2D</b> and <b>WebGL/WebGL2</b> contexts are supported: call <code>canvas.getContext('2d')</code> for standard drawing or <code>canvas.getContext('webgl2')</code> for GPU-accelerated shader rendering (see <i>WebGL Rendering</i> below). A script that uses the word <code>document</code> in its code, outside comments, is sent straight to the main thread. The status badge in the designer shows the <i>predicted</i> execution mode, from the browser&rsquo;s capabilities and that text check: <b style="color:#10b981">Background Worker</b> (OffscreenCanvas), <b style="color:#60a5fa">Main Thread (DOM Access)</b> (the script contains <code>document</code>), <b style="color:#f59e0b">Main Thread (Fallback)</b> (the browser lacks <code>OffscreenCanvas</code>), <b style="color:#818cf8">Isolated Frame</b> (the script starts with <code>/* tdp:isolated */</code>), or <b style="color:#f87171">Won&rsquo;t Run (No OffscreenCanvas)</b> (an isolated script in a browser without <code>OffscreenCanvas</code>). If the Worker reports an uncaught error, the engine also moves the script to the main thread; the badge doesn&rsquo;t change in that case, because it shows the prediction, not the live path. A script whose first characters are <code>/* tdp:isolated */</code> is the exception to all of this: it always runs in a sandboxed frame (see Section 1, Canvas FX Security), even when it says <code>document</code>, and a Worker error stops it instead of moving it. Next to the status badge, a <b>WebGL</b> badge appears when the script asks for a WebGL context, a <b>Context</b> badge when it handles <code>context</code> messages, and a <b>Follows Theme</b> badge when it handles <code>theme</code> messages.</li>
                             <li><b>Event Handling:</b> Thirteen message types are sent to your script via <code>self.onmessage</code>: <code>init</code>, <code>resize</code>, <code>mousemove</code>, <code>click</code>, <code>mousedown</code>, <code>mouseup</code>, <code>touchstart</code>, <code>touchmove</code>, <code>touchend</code>, <code>context</code>, <code>theme</code>, <code>motion</code> and <code>layout</code>. Touch events also generate synthetic mouse equivalents for cross-device compatibility.</li>
-                            <li><b>Show on Auth Pages:</b> Toggle whether canvas animations appear on Login/Signup screens. Enabled by default. <b>Only on Auth Pages</b> beside it keeps the animation off the rest of Open WebUI. When the <b>Enable Auth Page Theming</b> valve is off, both are hidden and off in every mode, and a personal theme&rsquo;s designer hides them too.</li>
+                            <li><b>Shows on:</b> Choose whether canvas animations appear in the app, on Login/Signup screens too (the default), or on those screens only. When the <b>Enable Auth Page Theming</b> valve is off, the choice is hidden and set to <b>App</b> in every mode, and a personal theme&rsquo;s designer hides it too.</li>
                             <li><b>Animation Settings:</b> Under the editor, the script&rsquo;s own settings appear as sliders, switches and color pickers, read from its <code>CONFIG</code> (or <code>CFG</code>) object or the constants at its top. A constant counts when its name is in capitals, it sits on a line of its own above the first <code>function</code>, <code>class</code> or <code>onmessage</code> line, and its value is a number, <code>true</code>/<code>false</code>, or a quoted <code>'#rgb'</code> or <code>'#rrggbb'</code> color. A comment line such as <code>// &#9472;&#9472; Colors &#9472;&#9472;</code> becomes a heading over the settings below it. A change rewrites that one value in the script, as if you had typed it, so the animation restarts with it. <b>Reset to the script&rsquo;s values</b> puts back the script as it was before your first change, as long as you haven&rsquo;t changed the script another way since, and <b>Undo</b> works too. A range written in the setting&rsquo;s comment, such as <code>(0.5-3)</code>, sets the slider&rsquo;s range. While the <b>Calm Chat Column</b> valve is off, Open WebUI pages run every script with <code>CENTER_CALM</code> at 0, whatever its slider says.</li>
                             <li><b>Preset Gallery:</b> Save, rename, overwrite with the editor&rsquo;s script, delete, and export individual animations, and import native <code>.js</code> animation files by dragging them into the designer. The gallery has search, a sort, and a type filter (All, WebGL, Context, Follows Theme, DOM Access).</li>
                             <li><b>The Enable Canvas FX valve:</b> turning it off hides this tab, stops animations that are running, and serves every theme with its Canvas FX left out. The scripts stay saved, so turning the valve back on restores them.</li>
@@ -7234,7 +7235,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                                 <p><code>requestAnimationFrame()</code> is available inside Web Workers that hold an <code>OffscreenCanvas</code>. Use it for your render loop. Avoid using <code>setInterval</code> for rendering: <code>requestAnimationFrame</code> syncs to the display refresh rate, and whenever the page stops getting frames, because its tab is hidden or its window is covered, the runtime holds its callbacks until frames come back. Firefox doesn&rsquo;t pause a worker&rsquo;s frames on its own, and a page that keeps drawing unseen can fill the GPU&rsquo;s memory. A <code>setInterval</code> loop keeps drawing all the same.</p>
 
                                 <p class="doc-subheading">Lifecycle &amp; Cleanup</p>
-                                <p>The runtime terminates the worker and revokes its Blob URL when the script or its enabled state changes: switching to a mode with a different script, turning Canvas FX off, or opening a login page where <b>Show on Auth Pages</b> is off; entering Open WebUI while <b>Only on Auth Pages</b> is on; or removing the theme. Switching between modes that use the same script keeps the running worker. In a Worker, termination is immediate, so your script doesn&rsquo;t need to clean up after itself. On the main thread nothing is terminated: only the engine&rsquo;s own listeners and the script&rsquo;s bare timer and frame calls are cleared, so a script that adds its own listeners or elements there must remove them itself.</p>
+                                <p>The runtime terminates the worker and revokes its Blob URL when the script or its enabled state changes: switching to a mode with a different script, turning Canvas FX off, or opening a login page while <b>Shows on</b> is <b>App</b>; entering Open WebUI while it is <b>Sign-in only</b>; or removing the theme. Switching between modes that use the same script keeps the running worker. In a Worker, termination is immediate, so your script doesn&rsquo;t need to clean up after itself. On the main thread nothing is terminated: only the engine&rsquo;s own listeners and the script&rsquo;s bare timer and frame calls are cleared, so a script that adds its own listeners or elements there must remove them itself.</p>
 
                                 <p class="doc-subheading">Main Thread Fallback</p>
                                 <p>Your script runs on the main thread in three cases: (1) the browser doesn&rsquo;t support <code>OffscreenCanvas</code>, (2) the script uses the word <code>document</code> outside comments, or (3) the Worker reports an uncaught error. This is <b>not a sandbox</b>: the script runs inside a function on the page itself, with full access to <code>window</code>, <code>document</code>, cookies and <code>localStorage</code>. In this mode:</p>
@@ -7783,7 +7784,7 @@ self.onmessage = (e) =&gt; {
                             <li><b>Tag Filter:</b> Click the filter icon to narrow the gallery by feature: show only themes that contain Custom CSS, Canvas FX, Gradient, Overrides, or those that are Linked to an update URL.</li>
                             <li><b>Sort:</b> Click the sort icon to cycle through <b>Default</b> (newest first), <b>A&rarr;Z</b>, or <b>Z&rarr;A</b> alphabetical sorting.</li>
                             <li><b>Card Actions:</b> Hovering a theme card shows ✎ edit details, 💾 overwrite with your current settings, × delete, ↓ export, and ⟳ check for an update when the theme has an Update URL and update checks are on.</li>
-                            <li><b>Applying a Theme:</b> Clicking a theme card opens <b>Apply Library Theme</b>, where you pick the modes to change (all ticked at first) and the parts to apply: OKLCH Palette, Variable Overrides, Custom CSS Snippet, Canvas FX Script, Gradient Background, Surfaces and Auth Page Visibility. A mode the theme doesn&rsquo;t have is filled from another: OLED from Dark at lightness 0, Her from Light, and any other from Dark, or Light when there&rsquo;s no Dark. A setting the theme leaves out is applied as its default, and Auth Page Visibility covers only the Show on Auth Pages and Only on Auth Pages switches, not whether the palette is on. With the <b>Auto Sync</b> valve on, the dialog is skipped and the footer&rsquo;s <b>Sync All</b> switch decides between all four modes and the current one.</li>
+                            <li><b>Applying a Theme:</b> Clicking a theme card opens <b>Apply Library Theme</b>, where you pick the modes to change (all ticked at first) and the parts to apply: OKLCH Palette, Variable Overrides, Custom CSS Snippet, Canvas FX Script, Gradient Background, Surfaces and Auth Page Visibility. A mode the theme doesn&rsquo;t have is filled from another: OLED from Dark at lightness 0, Her from Light, and any other from Dark, or Light when there&rsquo;s no Dark. A setting the theme leaves out is applied as its default, and Auth Page Visibility covers only each part&rsquo;s <b>Shows on</b> choice, not whether the palette is on. With the <b>Auto Sync</b> valve on, the dialog is skipped and the footer&rsquo;s <b>Sync All</b> switch decides between all four modes and the current one.</li>
                             <li><b>Manual Editor:</b> The save and edit dialogs have a <b>{ } Manual Editor</b> that edits the theme as JSON, with live validation.</li>
                             <li><b>Import from URL:</b> Click the Import button to open a modal where you can paste a direct URL to a theme JSON file (e.g., a GitHub raw link). The tool fetches it, adds it to your library, and applies it right away, which outside Draft mode means live for every user. If the theme runs a Canvas FX script, it asks first, and the theme stays in your gallery if you say no. You can also import local <code>.json</code> files from the same modal, or drop them onto the designer, with the same check.</li>
                             <li><b>Duplicate Detection:</b> When importing themes from a file, a URL or the clipboard, the tool checks for duplicates and skips a theme your gallery already has under the same name with the same settings in every mode. A theme that differs in any part Apply Library Theme can apply, including Surfaces, Auth Page Visibility or the palette&rsquo;s on/off switch, is imported as a new entry.</li>
@@ -7870,7 +7871,7 @@ self.onmessage = (e) =&gt; {
                                 </tbody>
                             </table>
                         </div>
-                        <p>These are the Dark, Light and Her defaults, at a Lightness slider of 20%. Moving the slider shifts every step by the same amount (step + slider &minus; 20), kept between 0% and 98% (0% and 100% for the two ends). With the palette off a mode sets none of these, and Open WebUI's own colors show. OLED starts at a slider of 0%, so its 900 and 950 steps are 0%, pure black.</p>
+                        <p>These are the Dark, Light and Her defaults, at a Lightness slider of 20%. Below 20%, the slider shifts every step by the same amount (step + slider &minus; 20), kept between 0% and 98% (0% and 100% for the two ends). Above 20%, step 50 stays at 98% and the other steps close in on it, so text never runs into the background: at 100%, Dark&rsquo;s 900 step (its background) reaches 45%, with body text still at about 7:1 contrast, and Light&rsquo;s darkest text stays at about 12:1 on white. With the palette off a mode sets none of these, and Open WebUI's own colors show. OLED starts at a slider of 0%, so its 900 and 950 steps are 0%, pure black.</p>
                         <p>Every mode also defines its three accents, for theme CSS: <span class="doc-code-inline">--tdp-accent</span>, <span class="doc-code-inline">--tdp-accent-2</span> and <span class="doc-code-inline">--tdp-accent-3</span>. Each is the color set under <b>Accent Colors</b>, or the generated <code>oklch(0.74 C H)</code> on Dark and OLED and <code>oklch(0.56 C H)</code> on Light and Her, where H is the hue (then 40&deg; more, and 40&deg; less) and C is four times the palette&rsquo;s chroma, kept between 0.06 and 0.18, or 0 for a neutral theme or a mode with its palette off.</p>
                     </div>
                 </details>
@@ -7878,7 +7879,7 @@ self.onmessage = (e) =&gt; {
                 <details class="doc-accordion">
                     <summary>17. Gradient Backgrounds <i data-icon="chevron"></i></summary>
                     <div class="doc-inner">
-                        <p>The <b>Gradient</b> tab provides a dedicated visual gradient builder for applying CSS gradient backgrounds to your Open WebUI instance. The builder generates all the CSS it needs: the structural transparency rules, the sidebar&rsquo;s backdrop blur, the chat overlay blending, and the colors of Open WebUI&rsquo;s sidebar and top fades, so you don&rsquo;t need to write any CSS yourself. Beside <b>Enabled</b> and <b>Animate</b>, the <b>Show on Auth Pages</b> and <b>Only on Auth Pages</b> checkboxes decide whether the gradient also shows on, or only on, the sign-in page.</p>
+                        <p>The <b>Gradient</b> tab provides a dedicated visual gradient builder for applying CSS gradient backgrounds to your Open WebUI instance. The builder generates all the CSS it needs: the structural transparency rules, the sidebar&rsquo;s backdrop blur, the chat overlay blending, and the colors of Open WebUI&rsquo;s sidebar and top fades, so you don&rsquo;t need to write any CSS yourself. Beside <b>Enabled</b> and <b>Animate</b>, <b>Shows on</b> decides whether the gradient shows in the app, on the sign-in page too, or only there.</p>
 
                         <details class="doc-sub-accordion">
                             <summary>Gradient Builder Controls <i data-icon="chevron"></i></summary>
@@ -7891,9 +7892,9 @@ self.onmessage = (e) =&gt; {
                                     <li><b>Quick Actions:</b> <b>Reverse</b> flips the stop order, <b>Distribute</b> spaces the stops evenly, and <b>Transfer Colors</b> copies the current colors to the other gradient types. On a mesh, Reverse mirrors the points through the center and Distribute lays them out on an even grid. A linear or radial gradient takes up to 16 stops, and each stop has a duplicate button beside its remove button.</li>
                                     <li><b>Direction (Linear):</b> A slider controls the gradient angle (0° to 360°). Double-click the label to reset to the default 135°.</li>
                                     <li><b>Strength:</b> A slider sets how strongly the gradient shows (0 to 100%). Below 100% each color fades toward what lies behind the gradient: the mode&rsquo;s background, or a mesh&rsquo;s base color. At 100% the colors show exactly as picked, and at 0% only that background is left. Double-click to reset to 100%.</li>
-                                    <li><b>Animate Gradient:</b> Enable a looping CSS animation that slowly shifts the gradient position. An additional speed slider (2 to 30 seconds, 8 by default) controls the animation duration.</li>
+                                    <li><b>Animate Gradient:</b> Enable a looping animation that sways the gradient around the layout you set, so every color stays on screen: a linear or conic gradient&rsquo;s direction swings 20&deg; each way, a radial gradient&rsquo;s center drifts, and each mesh point drifts near where you placed it, neighbors in opposite directions. An additional speed slider (2 to 30 seconds, 8 by default) sets how long one sway takes. Browsers without CSS <code>@property</code> show the gradient still.</li>
                                     <li><b>Enabled Toggle:</b> Turn the gradient on/off without losing your stop configuration.</li>
-                                    <li><b>Show on Auth Pages:</b> Controls whether the gradient appears on Login/Signup screens. Enabled by default. The <b>Enable Auth Page Theming</b> valve hides it and turns it off.</li>
+                                    <li><b>Shows on:</b> Controls whether the gradient appears in the app, on Login/Signup screens too (the default), or on those screens only. The <b>Enable Auth Page Theming</b> valve hides it and sets it to <b>App</b>.</li>
                                     <li><b>Reset / Random:</b> <b>Reset</b> turns the gradient off and returns every gradient setting to its default. <b>Random</b> turns it on with a random type, direction and colors.</li>
                                     <li><b>Saving Your Own:</b> The <b>+</b> button above the preset gallery saves the current gradient as a preset of your own.</li>
                                 </ul>
@@ -8024,7 +8025,7 @@ self.onmessage = (e) =&gt; {
                                     <li><b>Gradient Background</b> is enabled and has at least 2 color stops (or 2 mesh points for Mesh gradients).</li>
                                 </ul>
                                 <p>If neither is active, the structural rules are just opaque <code>background-color</code> rules for <code>body</code> and <code>#sidebar</code>, and textareas keep Open WebUI's native styling (recolored by the palette variables) so intentionally transparent fields are left alone. The Surfaces tab and an <b>Other pages</b> picture can still make layers see-through without either.</p>
-                                <p>The see-through rules apply only where their background shows. On a sign-in page with the background's <b>Show on Auth Pages</b> off, and on the other pages with its <b>Only on Auth Pages</b> on, Open WebUI's panels keep their fill. With the <b>Enable Canvas FX</b> valve off, so do the panels of a mode whose only background is Canvas FX; a gradient beside it keeps them see-through. The Surfaces rules stay either way.</p>
+                                <p>The see-through rules apply only where their background shows. On a sign-in page with the background's <b>Shows on</b> set to <b>App</b>, and on the other pages with it set to <b>Sign-in only</b>, Open WebUI's panels keep their fill. With the <b>Enable Canvas FX</b> valve off, so do the panels of a mode whose only background is Canvas FX; a gradient beside it keeps them see-through. The Surfaces rules stay either way.</p>
 
                             </div>
                         </details>
@@ -8072,7 +8073,7 @@ self.onmessage = (e) =&gt; {
                                     <li><b>Custom CSS Snippet</b>: your raw CSS</li>
                                 </ol>
                                 <p style="font-size: 0.68rem; color: var(--text-muted); margin-top: 6px;">A later rule wins a tie of equal specificity and importance. Many of the designer&rsquo;s own rules use <code>!important</code>, so a Custom CSS rule needs <code>!important</code> too to override them, as with a gradient <code>background-image</code> over the Gradient Builder&rsquo;s.</p>
-                                <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85; margin-top: 10px;"><b>Structured sections:</b> Internally the CSS is generated as four separate sections: <code>vars</code> (palette + manual overrides), <code>structural</code>, <code>gradient</code>, and <code>custom</code>. They are saved to the server both as the flat blob above (served at <code>/theme.css</code> and shown by the header&rsquo;s <b>CSS</b> button) and as a sections JSON file. Consumers assemble only the sections they need: the bootloader picks sections per the "Show on Auth Pages" toggles (delivered inside <code>state.json</code> under the <code>_cssSections</code> key), and the server composes only <code>vars</code> + <code>custom</code> into <code>/static/custom.css</code> as the flash-free safe subset. The <code>/*[OWUI_*]*/</code> marker comments still appear in the flat output and remain the fallback slicing mechanism for themes saved by older versions.</p>
+                                <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85; margin-top: 10px;"><b>Structured sections:</b> Internally the CSS is generated as four separate sections: <code>vars</code> (palette + manual overrides), <code>structural</code>, <code>gradient</code>, and <code>custom</code>. They are saved to the server both as the flat blob above (served at <code>/theme.css</code> and shown by the header&rsquo;s <b>CSS</b> button) and as a sections JSON file. Consumers assemble only the sections they need: the bootloader picks sections per each part&rsquo;s <b>Shows on</b> choice (delivered inside <code>state.json</code> under the <code>_cssSections</code> key), and the server composes only <code>vars</code> + <code>custom</code> into <code>/static/custom.css</code> as the flash-free safe subset. The <code>/*[OWUI_*]*/</code> marker comments still appear in the flat output and remain the fallback slicing mechanism for themes saved by older versions.</p>
                             </div>
                         </details>
                     </div>
@@ -10093,20 +10094,30 @@ location.reload();</code></pre>
         }
     }
 
-    // 'Only on Auth Pages' needs 'Show on Auth Pages': off with it, and
-    // dimmed while its part is off, like the switch beside it
+    // Each part's "Shows on" pills: App (shown on the sign-in pages off),
+    // App + sign-in, or Sign-in only (Only on Auth Pages, which needs the
+    // first). Dimmed while the part is off, like the switch beside it.
+    function whereValue(config, key, showKey) {
+        if (config[showKey] === false) return 'app';
+        return config[key] === true ? 'auth' : 'both';
+    }
     function syncAuthOnlyToggles() {
         const config = themeData[getActiveDataMode()];
         if (!config) return;
         AUTH_ONLY.forEach(([key, showKey, enabledKey, id]) => {
             const el = document.getElementById(id);
             if (!el) return;
-            const shown = config[showKey] !== false;
-            el.checked = shown && config[key] === true;
-            el.disabled = !shown;
+            const value = whereValue(config, key, showKey);
+            el.checked = value === 'auth';
+            const wrap = el.closest('.auth-where');
+            if (!wrap) return;
+            wrap.querySelectorAll('.where-pill').forEach(p => {
+                const on = p.dataset.whereValue === value;
+                p.classList.toggle('active', on);
+                p.setAttribute('aria-pressed', on ? 'true' : 'false');
+            });
             const on = enabledKey === 'customCssEnabled' ? config[enabledKey] !== false : !!config[enabledKey];
-            const label = el.closest('label');
-            if (label) label.style.opacity = on && shown ? '1' : '0.35';
+            wrap.style.opacity = on ? '1' : '0.35';
         });
     }
 
@@ -10417,9 +10428,23 @@ self.onmessage = (e) => {
     // reproduces its default colours exactly
     const lightnessMap = { 50: 0.98, 100: 0.94, 200: 0.92, 300: 0.85, 400: 0.77, 500: 0.69, 600: 0.51, 700: 0.42, 800: 0.32, 850: 0.27, 900: 0.20, 950: 0.16 };
 
+    // Where the Lightness slider (l, 0-1) puts a lightness that sits at
+    // baseL in the default ramp. Up to the 20% default it slides the whole
+    // ramp, as it always has. Above it, step 50 stays put and the rest close
+    // in on it, so text keeps its distance from the background: Dark's
+    // background (step 900) rises to at most 0.45, Light's text (base-1000)
+    // falls to at most about 0.31, and nothing runs together at the ends.
+    const RAMP_LIGHTEST = 0.98, RAMP_SPAN = 0.78, RAMP_RISE = 0.25;
+    function rampLightness(baseL, l) {
+        if (!(l > 0.20)) return baseL + (l - 0.20);
+        const u = Math.min(1, (l - 0.20) / 0.80);
+        const rise = RAMP_RISE * (1 - (1 - u) * (1 - u));
+        return RAMP_LIGHTEST - (RAMP_LIGHTEST - baseL) / RAMP_SPAN * (RAMP_SPAN - rise);
+    }
+
     // One ramp step, with chroma and lightness already scaled to 0-1
     function rampStepColor(step, h, c, l) {
-        const targetL = Math.max(0.00, Math.min(0.98, lightnessMap[step] + (l - 0.20)));
+        const targetL = Math.max(0.00, Math.min(0.98, rampLightness(lightnessMap[step], l)));
         return `oklch(${targetL.toFixed(3)} ${c.toFixed(3)} ${c === 0 ? 0 : h})`;
     }
 
@@ -11140,7 +11165,7 @@ self.onmessage = (e) => {
     function baseScaleVars(vars, config, mode) {
         const h = _cssNum(config.h, 0), c = _cssNum(config.c, 0) / 1000, l = _cssNum(config.l, 0) / 100;
         const dark = mode === 'dark' || mode === 'oled';
-        const end = (lightness) => `oklch(${Math.max(0, Math.min(1, lightness + (l - 0.20))).toFixed(3)} ${c.toFixed(3)} ${c === 0 ? 0 : h})`;
+        const end = (lightness) => `oklch(${Math.max(0, Math.min(1, rampLightness(lightness, l))).toFixed(3)} ${c.toFixed(3)} ${c === 0 ? 0 : h})`;
         const out = { '--app-base-0': end(1) };
         steps.forEach(step => { out[`--app-base-${step}`] = vars[`--color-gray-${step}`]; });
         out['--app-base-1000'] = dark ? `color-mix(in oklab, ${vars['--color-gray-900']}, black 60%)` : end(0);
@@ -11599,6 +11624,19 @@ self.onmessage = (e) => {
             const m = btn.dataset.mode;
             btn.classList.toggle('system-active', activeMode === 'system' && m !== 'system' && m === dm);
         });
+        // System has no colors of its own. The highlighted mode shows which
+        // one it edits; its tooltip and accessible name say so in words.
+        const systemBtn = document.querySelector('.mode-btn[data-mode="system"]');
+        if (systemBtn) {
+            if (activeMode === 'system') {
+                const name = dm === 'light' ? 'Light' : 'Dark';
+                systemBtn.setAttribute('data-tooltip', `System follows your device, which is set to ${name}, so you're editing ${name}`);
+                systemBtn.setAttribute('aria-label', `System, editing ${name}`);
+            } else {
+                systemBtn.setAttribute('data-tooltip', 'Follows your device: Dark or Light');
+                systemBtn.removeAttribute('aria-label');
+            }
+        }
     }
 
     function renderPresetGallery({ presets, galleryId, scrollAreaId, searchInputId, countWrapId, countId,
@@ -12392,11 +12430,32 @@ self.onmessage = (e) => {
         return _num(modeData.gradientAnimationSpeed, lo, hi, DEFAULT_MODE_DATA.gradientAnimationSpeed);
     }
 
+    // Animate moves the gradient around the layout you set, never past the
+    // page: a linear or conic gradient's direction swings 20deg each way, a
+    // radial's center and each mesh point drift 6%. The offsets are custom
+    // properties registered with @property so they can animate; a browser
+    // without it shows the gradient still.
+    const GRADIENT_DRIFT = { turn: 20, shift: 6 };
+    function gradientDrift(animated) {
+        if (!animated) return { turn: '', x: () => '', y: () => '' };
+        return {
+            turn: ' + var(--owui-gradient-turn, 0deg)',
+            // Neighbouring mesh points drift in opposite directions
+            x: (i = 0) => ` ${i % 2 ? '-' : '+'} var(--owui-gradient-dx, 0%)`,
+            y: (i = 0) => ` ${(i >> 1) % 2 ? '-' : '+'} var(--owui-gradient-dy, 0%)`
+        };
+    }
+    function gradientAt(value, offset) {
+        return offset ? `calc(${value}%${offset})` : `${value}%`;
+    }
+
     function gradientAnimationCss(modeData) {
         if (!modeData.gradientAnimation) return { animCss: '', keyframesCss: '' };
+        const { turn, shift } = GRADIENT_DRIFT;
+        const prop = (name, syntax, initial) => `@property ${name} { syntax: '${syntax}'; inherits: false; initial-value: ${initial}; }\n`;
         return {
-            animCss: `  background-size: 300% 300% !important;\n  animation: owui-gradient-shift ${gradientSpeed(modeData)}s ease infinite !important;`,
-            keyframesCss: `\n@keyframes owui-gradient-shift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n`
+            animCss: `  animation: owui-gradient-shift ${gradientSpeed(modeData)}s ease-in-out infinite !important;`,
+            keyframesCss: `\n${prop('--owui-gradient-turn', '<angle>', '0deg')}${prop('--owui-gradient-dx', '<percentage>', '0%')}${prop('--owui-gradient-dy', '<percentage>', '0%')}@keyframes owui-gradient-shift {\n  0%, 100% { --owui-gradient-turn: -${turn}deg; --owui-gradient-dx: -${shift}%; --owui-gradient-dy: ${shift}%; }\n  50% { --owui-gradient-turn: ${turn}deg; --owui-gradient-dx: ${shift}%; --owui-gradient-dy: -${shift}%; }\n}\n`
         };
     }
 
@@ -12430,9 +12489,10 @@ self.onmessage = (e) => {
             // theme and lands in instance-wide CSS.
             const bgColor = _cssTok(modeData.gradientMeshBgColor, def.gradientMeshBgColor);
             // A mesh's points fade toward its own base color
-            const meshLayers = points.map(p => {
+            const drift = gradientDrift(!!modeData.gradientAnimation);
+            const meshLayers = points.map((p, i) => {
                 const c = gradientStrengthColor(p.color, strength, bgColor);
-                return `radial-gradient(at ${_cssNum(p.x, 50)}% ${_cssNum(p.y, 50)}%, ${c} 0%, transparent ${_cssNum(p.spread, 50)}%)`;
+                return `radial-gradient(at ${gradientAt(_cssNum(p.x, 50), drift.x(i))} ${gradientAt(_cssNum(p.y, 50), drift.y(i))}, ${c} 0%, transparent ${_cssNum(p.spread, 50)}%)`;
             }).join(', ');
             return buildGradientStructuralCss({
                 selector, baseColor: bgColor, ...gradientAnimationCss(modeData),
@@ -12454,16 +12514,18 @@ self.onmessage = (e) => {
 
         let gradientFunc;
         const angle = _cssNum(modeData.gradientAngle, def.gradientAngle);
+        const drift = gradientDrift(!!modeData.gradientAnimation);
+        const direction = drift.turn ? `calc(${angle}deg${drift.turn})` : `${angle}deg`;
         if (gType === 'radial') {
             const rShape = _cssTok(modeData.gradientRadialShape, def.gradientRadialShape);
             const rSize = _cssTok(modeData.gradientRadialSize, def.gradientRadialSize);
             const rPosX = _cssNum(modeData.gradientRadialPosX, def.gradientRadialPosX);
             const rPosY = _cssNum(modeData.gradientRadialPosY, def.gradientRadialPosY);
-            gradientFunc = `radial-gradient(${rShape} ${rSize} at ${rPosX}% ${rPosY}%, ${stopsStr})`;
+            gradientFunc = `radial-gradient(${rShape} ${rSize} at ${gradientAt(rPosX, drift.x())} ${gradientAt(rPosY, drift.y())}, ${stopsStr})`;
         } else if (gType === 'conic') {
-            gradientFunc = `conic-gradient(from ${angle}deg, ${stopsStr})`;
+            gradientFunc = `conic-gradient(from ${direction}, ${stopsStr})`;
         } else {
-            gradientFunc = `linear-gradient(${angle}deg, ${stopsStr})`;
+            gradientFunc = `linear-gradient(${direction}, ${stopsStr})`;
         }
 
         return buildGradientStructuralCss({
@@ -13371,7 +13433,7 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
 
     function dimLabel(id, on) {
         const el = $(id);
-        const label = el && el.closest('label');
+        const label = el && el.closest('label, .auth-where');
         if (label) label.style.opacity = on ? '1' : '0.35';
     }
 
@@ -13387,6 +13449,21 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
             if (pair && !e.target.checked) themeData[dm][pair[0]] = false;
             if (id === 'toggle-palette-enabled') dimLabel('toggle-theme-auth', e.target.checked);
             if (id === 'toggle-custom-css') ['toggle-auto-scope', 'toggle-custom-auth'].forEach(did => dimLabel(did, e.target.checked));
+            commitChange();
+        });
+    });
+
+    document.querySelectorAll('.where-pills').forEach(group => {
+        const entry = AUTH_ONLY.find(a => a[3] === `toggle-${group.dataset.where}-authonly`);
+        if (!entry) return;
+        group.addEventListener('click', (e) => {
+            const pill = e.target.closest('.where-pill');
+            if (!pill) return;
+            const dm = getActiveDataMode();
+            const value = pill.dataset.whereValue;
+            themeData[dm][entry[1]] = value !== 'app';
+            themeData[dm][entry[0]] = value === 'auth';
+            syncAuthOnlyToggles();
             commitChange();
         });
     });
@@ -14874,10 +14951,8 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
         // this REMOTE data, so h and override values are attacker-influenced.
         const h = _cssNum(config.h, 0), c = _cssNum(config.c, 0) / 1000, l = _cssNum(config.l, 0) / 100;
         const ov = config.overrides || {};
-        const deltaL = l - 0.20;
         return steps.map(step => {
-            const baseL = lightnessMap[step];
-            const targetL = Math.max(0.00, Math.min(0.98, baseL + deltaL));
+            const targetL = Math.max(0.00, Math.min(0.98, rampLightness(lightnessMap[step], l)));
             const computedVal = _cssTok(ov[`--color-gray-${step}`], '') || `oklch(${targetL.toFixed(3)} ${c.toFixed(3)} ${c === 0 ? 0 : h})`;
             return `<div class="swatch" style="background:${computedVal}"></div>`;
         }).join('');
@@ -18766,7 +18841,7 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
                 const el = document.getElementById(id);
                 if (el) {
                     el.checked = false;
-                    const label = el.closest('label');
+                    const label = el.closest('label, .auth-where');
                     if (label) label.style.display = 'none';
                 }
             });
@@ -18789,7 +18864,7 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
         // instance theme keeps its auth choices. ──
         if (cfg.scope === 'me') {
             authToggleIds.forEach(id => {
-                const label = document.getElementById(id)?.closest('label');
+                const label = document.getElementById(id)?.closest('label, .auth-where');
                 if (label) label.style.display = 'none';
             });
             const syncAuth = document.getElementById('sync-opt-auth')?.closest('.sync-option');
@@ -19684,7 +19759,7 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
             ('canvas', 'Canvas FX Script', 'Background animation code &amp; state'),
             ('gradient', 'Gradient Background', 'Color stops, direction, type &amp; animation'),
             ('surfaces', 'Surfaces', 'Opacity &amp; blur of the sidebar, input, menus &amp; dialogs'),
-            ('auth', 'Auth Page Visibility', "'Show on Auth Pages' and 'Only on Auth Pages' toggles for all tabs"),
+            ('auth', 'Auth Page Visibility', "Each part's 'Shows on' choice (App, App + sign-in, Sign-in only)"),
         ]
         sync_html = '\n\n'.join(
             f'                <div class="sync-option">\n'

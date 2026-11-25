@@ -686,22 +686,22 @@ null -> null
 "dark" -> 10 -> "page #030303, panel #020202, dialog #0f0f0f, raised #1b1b1b, tint rgba(0, 0, 0, 0.45) | text #d7d7d7 11.97 | muted #959595 6.40 | accent #3b82f6 5.21, as text 5.61, knob #ffffff 3.68 | meets targets"
 "dark" -> 15 -> "page #0b0b0b, panel #060606, dialog #1b1b1b, raised #262626, tint rgba(0, 0, 0, 0.45) | text #e8e8e8 12.35 | muted #a4a4a4 6.91 | accent #3b82f6 4.68, as text 5.35, knob #ffffff 3.68 | meets targets"
 "dark" -> 20 -> "page #161616, panel #0c0c0c, dialog #262626, raised #333333, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 11.90 | muted #b4b4b4 7.30 | accent #3b82f6 4.11, as text 4.92, knob #ffffff 3.68 | meets targets"
-"dark" -> 25 -> "page #222222, panel #131313, dialog #333333, raised #404040, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 9.76 | muted #c4c4c4 7.24 | accent #60a5fa 4.97, as text 6.26, knob #18181b 6.97 | meets targets"
-"dark" -> 30 -> "page #2e2e2e, panel #191919, dialog #404040, raised #4d4d4d, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 7.96 | muted #d4d4d4 6.99 | accent #60a5fa 4.08, as text 5.34, knob #18181b 6.97 | meets targets"
-"dark" -> 35 -> "page #3a3a3a, panel #202020, dialog #4d4d4d, raised #5b5b5b, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 6.39 | muted #e4e4e4 6.65 | accent #93c5fd 4.69, as text 6.31, knob #18181b 9.82 | meets targets"
-"dark" -> 40 -> "page #484848, panel #282828, dialog #5b5b5b, raised #696969, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 5.17 | muted #f5f5f5 6.23 | accent #93c5fd 3.77, as text 5.07, knob #18181b 9.82 | meets targets"
-"dark" -> 45 -> "page #555555, panel #2f2f2f, dialog #696969, raised #696969, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 5.17 | muted #f8f8f8 5.17 | accent #bfdbfe 3.86, as text 5.25, knob #18181b 12.47 | meets targets"
-"dark" -> 50 -> "page #636363, panel #363636, dialog #636363, raised #636363, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 5.66 | muted #f8f8f8 5.66 | accent #93c5fd 3.33, as text 3.33, knob #18181b 9.82 | meets targets"
-"dark" -> 55 -> "page #717171, panel #3e3e3e, dialog #717171, raised #717171, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 4.60 | muted #f8f8f8 4.60 | accent #bfdbfe 3.43, as text 3.43, knob #18181b 12.47 | meets targets"
-"dark" -> 60 -> "page #808080, panel #c6c6c6, dialog #959595, raised #a4a4a4, tint rgba(255, 255, 255, 0.55) | text #000000 5.32 | muted #000000 5.32 | accent #172554 3.72, as text 3.72, knob #ffffff 14.69 | meets targets"
-"dark" -> 65 -> "page #8f8f8f, panel #cdcdcd, dialog #a4a4a4, raised #b4b4b4, tint rgba(255, 255, 255, 0.55) | text #18181b 5.48 | muted #27272a 4.61 | accent #172554 4.54, as text 4.54, knob #ffffff 14.69 | meets targets"
-"dark" -> 70 -> "page #9e9e9e, panel #d3d3d3, dialog #b4b4b4, raised #c4c4c4, tint rgba(255, 255, 255, 0.55) | text #18181b 6.61 | muted #27272a 5.56 | accent #172554 5.48, as text 5.48, knob #ffffff 14.69 | meets targets"
-"dark" -> 75 -> "page #aeaeae, panel #dbdbdb, dialog #c4c4c4, raised #d4d4d4, tint rgba(255, 255, 255, 0.55) | text #18181b 7.99 | muted #3f3f46 4.71 | accent #1e3a8a 4.67, as text 4.67, knob #ffffff 10.36 | meets targets"
-"dark" -> 80 -> "page #bdbebe, panel #e1e2e2, dialog #d4d4d4, raised #e4e4e4, tint rgba(255, 255, 255, 0.55) | text #18181b 9.51 | muted #3f3f46 5.61 | accent #1e40af 4.68, as text 4.68, knob #ffffff 8.72 | meets targets"
-"dark" -> 85 -> "page #cecece, panel #e9e9e9, dialog #e4e4e4, raised #f5f5f5, tint rgba(255, 255, 255, 0.55) | text #18181b 11.26 | muted #52525b 4.91 | accent #1e40af 5.54, as text 5.54, knob #ffffff 8.72 | meets targets"
-"dark" -> 90 -> "page #dedede, panel #f0f0f0, dialog #f5f5f5, raised #f8f8f8, tint rgba(255, 255, 255, 0.55) | text #18181b 13.17 | muted #52525b 5.75 | accent #1d4ed8 4.98, as text 4.98, knob #ffffff 6.70 | meets targets"
-"dark" -> 95 -> "page #eeeeee, panel #f7f7f7, dialog #f8f8f8, raised #f8f8f8, tint rgba(255, 255, 255, 0.55) | text #18181b 15.27 | muted #52525b 6.66 | accent #1d4ed8 5.78, as text 5.78, knob #ffffff 6.70 | meets targets"
-"dark" -> 100 -> "page #f8f8f8, panel #fcfcfc, dialog #f8f8f8, raised #f8f8f8, tint rgba(255, 255, 255, 0.55) | text #18181b 16.68 | muted #52525b 7.28 | accent #2563eb 4.87, as text 4.87, knob #ffffff 5.17 | meets targets"
+"dark" -> 25 -> "page #1d1d1d, panel #101010, dialog #2d2d2d, raised #393939, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 10.87 | muted #b7b7b7 6.87 | accent #3b82f6 3.74, as text 4.58, knob #ffffff 3.68 | meets targets"
+"dark" -> 30 -> "page #242424, panel #141414, dialog #333333, raised #404040, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 9.76 | muted #b9b9b9 6.44 | accent #60a5fa 4.97, as text 6.11, knob #18181b 6.97 | meets targets"
+"dark" -> 35 -> "page #2a2a2a, panel #171717, dialog #3a3a3a, raised #454545, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 9.03 | muted #bbbbbb 5.92 | accent #60a5fa 4.47, as text 5.65, knob #18181b 6.97 | meets targets"
+"dark" -> 40 -> "page #303030, panel #1a1a1a, dialog #404040, raised #4b4b4b, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 8.21 | muted #bdbdbd 5.52 | accent #60a5fa 4.08, as text 5.19, knob #18181b 6.97 | meets targets"
+"dark" -> 45 -> "page #363636, panel #1e1e1e, dialog #454545, raised #505050, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 7.59 | muted #bfbfbf 5.21 | accent #60a5fa 3.77, as text 4.75, knob #18181b 6.97 | meets targets"
+"dark" -> 50 -> "page #3b3b3b, panel #202020, dialog #4a4a4a, raised #555555, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 7.02 | muted #c1c1c1 4.92 | accent #93c5fd 4.91, as text 6.21, knob #18181b 9.82 | meets targets"
+"dark" -> 55 -> "page #404040, panel #232323, dialog #4f4f4f, raised #595959, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 6.60 | muted #c3c3c3 4.65 | accent #93c5fd 4.54, as text 5.75, knob #18181b 9.82 | meets targets"
+"dark" -> 60 -> "page #444444, panel #252525, dialog #535353, raised #5d5d5d, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 6.20 | muted #d4d4d8 5.20 | accent #93c5fd 4.27, as text 5.40, knob #18181b 9.82 | meets targets"
+"dark" -> 65 -> "page #484848, panel #282828, dialog #565656, raised #616161, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 5.83 | muted #d4d4d8 4.97 | accent #93c5fd 4.07, as text 5.07, knob #18181b 9.82 | meets targets"
+"dark" -> 70 -> "page #4c4c4c, panel #2a2a2a, dialog #5a5a5a, raised #646464, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 5.57 | muted #d4d4d8 4.67 | accent #93c5fd 3.82, as text 4.76, knob #18181b 9.82 | meets targets"
+"dark" -> 75 -> "page #4f4f4f, panel #2b2b2b, dialog #5c5c5c, raised #666666, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 5.41 | muted #d4d4d8 4.52 | accent #93c5fd 3.71, as text 4.54, knob #18181b 9.82 | meets targets"
+"dark" -> 80 -> "page #515151, panel #2d2d2d, dialog #5e5e5e, raised #686868, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 5.25 | muted #e4e4e7 5.11 | accent #bfdbfe 4.56, as text 5.59, knob #18181b 12.47 | meets targets"
+"dark" -> 85 -> "page #535353, panel #2e2e2e, dialog #606060, raised #6a6a6a, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 5.09 | muted #e4e4e7 4.96 | accent #bfdbfe 4.43, as text 5.41, knob #18181b 12.47 | meets targets"
+"dark" -> 90 -> "page #545454, panel #2e2e2e, dialog #616161, raised #6b6b6b, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 5.02 | muted #e4e4e7 4.88 | accent #bfdbfe 4.36, as text 5.33, knob #18181b 12.47 | meets targets"
+"dark" -> 95 -> "page #555555, panel #2f2f2f, dialog #626262, raised #6c6c6c, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 4.94 | muted #e4e4e7 4.81 | accent #bfdbfe 4.29, as text 5.25, knob #18181b 12.47 | meets targets"
+"dark" -> 100 -> "page #555555, panel #2f2f2f, dialog #636363, raised #6c6c6c, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 4.94 | muted #e4e4e7 4.73 | accent #bfdbfe 4.23, as text 5.25, knob #18181b 12.47 | meets targets"
 "light" -> 0 -> "page #b7b7b7, panel #dfdfdf, dialog #ffffff, tint rgba(255, 255, 255, 0.55) | text #18181b 8.83 | muted #3f3f46 5.21 | accent #1e3a8a 5.16, as text 5.16, knob #ffffff 10.36 | meets targets"
 "light" -> 5 -> "page #c7c7c7, panel #e6e6e6, dialog #ffffff, tint rgba(255, 255, 255, 0.55) | text #18181b 10.48 | muted #52525b 4.57 | accent #1e40af 5.16, as text 5.16, knob #ffffff 8.72 | meets targets"
 "light" -> 10 -> "page #d7d7d7, panel #ededed, dialog #ffffff, tint rgba(255, 255, 255, 0.55) | text #18181b 12.31 | muted #52525b 5.37 | accent #1d4ed8 4.66, as text 4.66, knob #ffffff 6.70 | meets targets"
@@ -728,22 +728,22 @@ null -> null
 "oled" -> 10 -> "page #030303, panel #020202, dialog #0f0f0f, raised #1b1b1b, tint rgba(0, 0, 0, 0.45) | text #d7d7d7 11.97 | muted #959595 6.40 | accent #3b82f6 5.21, as text 5.61, knob #ffffff 3.68 | meets targets"
 "oled" -> 15 -> "page #0b0b0b, panel #060606, dialog #1b1b1b, raised #262626, tint rgba(0, 0, 0, 0.45) | text #e8e8e8 12.35 | muted #a4a4a4 6.91 | accent #3b82f6 4.68, as text 5.35, knob #ffffff 3.68 | meets targets"
 "oled" -> 20 -> "page #161616, panel #0c0c0c, dialog #262626, raised #333333, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 11.90 | muted #b4b4b4 7.30 | accent #3b82f6 4.11, as text 4.92, knob #ffffff 3.68 | meets targets"
-"oled" -> 25 -> "page #222222, panel #131313, dialog #333333, raised #404040, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 9.76 | muted #c4c4c4 7.24 | accent #60a5fa 4.97, as text 6.26, knob #18181b 6.97 | meets targets"
-"oled" -> 30 -> "page #2e2e2e, panel #191919, dialog #404040, raised #4d4d4d, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 7.96 | muted #d4d4d4 6.99 | accent #60a5fa 4.08, as text 5.34, knob #18181b 6.97 | meets targets"
-"oled" -> 35 -> "page #3a3a3a, panel #202020, dialog #4d4d4d, raised #5b5b5b, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 6.39 | muted #e4e4e4 6.65 | accent #93c5fd 4.69, as text 6.31, knob #18181b 9.82 | meets targets"
-"oled" -> 40 -> "page #484848, panel #282828, dialog #5b5b5b, raised #696969, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 5.17 | muted #f5f5f5 6.23 | accent #93c5fd 3.77, as text 5.07, knob #18181b 9.82 | meets targets"
-"oled" -> 45 -> "page #555555, panel #2f2f2f, dialog #696969, raised #696969, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 5.17 | muted #f8f8f8 5.17 | accent #bfdbfe 3.86, as text 5.25, knob #18181b 12.47 | meets targets"
-"oled" -> 50 -> "page #636363, panel #363636, dialog #636363, raised #636363, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 5.66 | muted #f8f8f8 5.66 | accent #93c5fd 3.33, as text 3.33, knob #18181b 9.82 | meets targets"
-"oled" -> 55 -> "page #717171, panel #3e3e3e, dialog #717171, raised #717171, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 4.60 | muted #f8f8f8 4.60 | accent #bfdbfe 3.43, as text 3.43, knob #18181b 12.47 | meets targets"
-"oled" -> 60 -> "page #808080, panel #c6c6c6, dialog #959595, raised #a4a4a4, tint rgba(255, 255, 255, 0.55) | text #000000 5.32 | muted #000000 5.32 | accent #172554 3.72, as text 3.72, knob #ffffff 14.69 | meets targets"
-"oled" -> 65 -> "page #8f8f8f, panel #cdcdcd, dialog #a4a4a4, raised #b4b4b4, tint rgba(255, 255, 255, 0.55) | text #18181b 5.48 | muted #27272a 4.61 | accent #172554 4.54, as text 4.54, knob #ffffff 14.69 | meets targets"
-"oled" -> 70 -> "page #9e9e9e, panel #d3d3d3, dialog #b4b4b4, raised #c4c4c4, tint rgba(255, 255, 255, 0.55) | text #18181b 6.61 | muted #27272a 5.56 | accent #172554 5.48, as text 5.48, knob #ffffff 14.69 | meets targets"
-"oled" -> 75 -> "page #aeaeae, panel #dbdbdb, dialog #c4c4c4, raised #d4d4d4, tint rgba(255, 255, 255, 0.55) | text #18181b 7.99 | muted #3f3f46 4.71 | accent #1e3a8a 4.67, as text 4.67, knob #ffffff 10.36 | meets targets"
-"oled" -> 80 -> "page #bdbebe, panel #e1e2e2, dialog #d4d4d4, raised #e4e4e4, tint rgba(255, 255, 255, 0.55) | text #18181b 9.51 | muted #3f3f46 5.61 | accent #1e40af 4.68, as text 4.68, knob #ffffff 8.72 | meets targets"
-"oled" -> 85 -> "page #cecece, panel #e9e9e9, dialog #e4e4e4, raised #f5f5f5, tint rgba(255, 255, 255, 0.55) | text #18181b 11.26 | muted #52525b 4.91 | accent #1e40af 5.54, as text 5.54, knob #ffffff 8.72 | meets targets"
-"oled" -> 90 -> "page #dedede, panel #f0f0f0, dialog #f5f5f5, raised #f8f8f8, tint rgba(255, 255, 255, 0.55) | text #18181b 13.17 | muted #52525b 5.75 | accent #1d4ed8 4.98, as text 4.98, knob #ffffff 6.70 | meets targets"
-"oled" -> 95 -> "page #eeeeee, panel #f7f7f7, dialog #f8f8f8, raised #f8f8f8, tint rgba(255, 255, 255, 0.55) | text #18181b 15.27 | muted #52525b 6.66 | accent #1d4ed8 5.78, as text 5.78, knob #ffffff 6.70 | meets targets"
-"oled" -> 100 -> "page #f8f8f8, panel #fcfcfc, dialog #f8f8f8, raised #f8f8f8, tint rgba(255, 255, 255, 0.55) | text #18181b 16.68 | muted #52525b 7.28 | accent #2563eb 4.87, as text 4.87, knob #ffffff 5.17 | meets targets"
+"oled" -> 25 -> "page #1d1d1d, panel #101010, dialog #2d2d2d, raised #393939, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 10.87 | muted #b7b7b7 6.87 | accent #3b82f6 3.74, as text 4.58, knob #ffffff 3.68 | meets targets"
+"oled" -> 30 -> "page #242424, panel #141414, dialog #333333, raised #404040, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 9.76 | muted #b9b9b9 6.44 | accent #60a5fa 4.97, as text 6.11, knob #18181b 6.97 | meets targets"
+"oled" -> 35 -> "page #2a2a2a, panel #171717, dialog #3a3a3a, raised #454545, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 9.03 | muted #bbbbbb 5.92 | accent #60a5fa 4.47, as text 5.65, knob #18181b 6.97 | meets targets"
+"oled" -> 40 -> "page #303030, panel #1a1a1a, dialog #404040, raised #4b4b4b, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 8.21 | muted #bdbdbd 5.52 | accent #60a5fa 4.08, as text 5.19, knob #18181b 6.97 | meets targets"
+"oled" -> 45 -> "page #363636, panel #1e1e1e, dialog #454545, raised #505050, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 7.59 | muted #bfbfbf 5.21 | accent #60a5fa 3.77, as text 4.75, knob #18181b 6.97 | meets targets"
+"oled" -> 50 -> "page #3b3b3b, panel #202020, dialog #4a4a4a, raised #555555, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 7.02 | muted #c1c1c1 4.92 | accent #93c5fd 4.91, as text 6.21, knob #18181b 9.82 | meets targets"
+"oled" -> 55 -> "page #404040, panel #232323, dialog #4f4f4f, raised #595959, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 6.60 | muted #c3c3c3 4.65 | accent #93c5fd 4.54, as text 5.75, knob #18181b 9.82 | meets targets"
+"oled" -> 60 -> "page #444444, panel #252525, dialog #535353, raised #5d5d5d, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 6.20 | muted #d4d4d8 5.20 | accent #93c5fd 4.27, as text 5.40, knob #18181b 9.82 | meets targets"
+"oled" -> 65 -> "page #484848, panel #282828, dialog #565656, raised #616161, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 5.83 | muted #d4d4d8 4.97 | accent #93c5fd 4.07, as text 5.07, knob #18181b 9.82 | meets targets"
+"oled" -> 70 -> "page #4c4c4c, panel #2a2a2a, dialog #5a5a5a, raised #646464, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 5.57 | muted #d4d4d8 4.67 | accent #93c5fd 3.82, as text 4.76, knob #18181b 9.82 | meets targets"
+"oled" -> 75 -> "page #4f4f4f, panel #2b2b2b, dialog #5c5c5c, raised #666666, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 5.41 | muted #d4d4d8 4.52 | accent #93c5fd 3.71, as text 4.54, knob #18181b 9.82 | meets targets"
+"oled" -> 80 -> "page #515151, panel #2d2d2d, dialog #5e5e5e, raised #686868, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 5.25 | muted #e4e4e7 5.11 | accent #bfdbfe 4.56, as text 5.59, knob #18181b 12.47 | meets targets"
+"oled" -> 85 -> "page #535353, panel #2e2e2e, dialog #606060, raised #6a6a6a, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 5.09 | muted #e4e4e7 4.96 | accent #bfdbfe 4.43, as text 5.41, knob #18181b 12.47 | meets targets"
+"oled" -> 90 -> "page #545454, panel #2e2e2e, dialog #616161, raised #6b6b6b, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 5.02 | muted #e4e4e7 4.88 | accent #bfdbfe 4.36, as text 5.33, knob #18181b 12.47 | meets targets"
+"oled" -> 95 -> "page #555555, panel #2f2f2f, dialog #626262, raised #6c6c6c, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 4.94 | muted #e4e4e7 4.81 | accent #bfdbfe 4.29, as text 5.25, knob #18181b 12.47 | meets targets"
+"oled" -> 100 -> "page #555555, panel #2f2f2f, dialog #636363, raised #6c6c6c, tint rgba(0, 0, 0, 0.45) | text #f8f8f8 4.94 | muted #e4e4e7 4.73 | accent #bfdbfe 4.23, as text 5.25, knob #18181b 12.47 | meets targets"
 "her" -> 0 -> "page #b7b7b7, panel #dfdfdf, dialog #ffffff, tint rgba(255, 255, 255, 0.55) | text #18181b 8.83 | muted #3f3f46 5.21 | accent #1e3a8a 5.16, as text 5.16, knob #ffffff 10.36 | meets targets"
 "her" -> 5 -> "page #c7c7c7, panel #e6e6e6, dialog #ffffff, tint rgba(255, 255, 255, 0.55) | text #18181b 10.48 | muted #52525b 4.57 | accent #1e40af 5.16, as text 5.16, knob #ffffff 8.72 | meets targets"
 "her" -> 10 -> "page #d7d7d7, panel #ededed, dialog #ffffff, tint rgba(255, 255, 255, 0.55) | text #18181b 12.31 | muted #52525b 5.37 | accent #1d4ed8 4.66, as text 4.66, knob #ffffff 6.70 | meets targets"
@@ -1074,15 +1074,14 @@ null -> []
   | }
   | /*[OWUI_GRADIENT_END]*/
   | 
-{"gradientEnabled": true, "gradientType": "conic", "gradientAnimation": true, "gradientAnimationSpeed": 600, "gradientStops": [{"color": "#111111", "position": 0}, {"color": "#eeeeee", "position": 100}]} -> "\n/*[OWUI_GRADIENT_START]*/\n/* System Gradient Background */\n.scope body {\n  background-image: conic-gradient(from 135deg, #111111 0%, #eeeeee 100%) !important;\n  background-attachment: fixed !important;\n  background-size: 300% 300% !important;\n  animation: owui-gradient-shift 30s ease infinite !important;\n}\n.scope body::before { content: none !important; display: none !important; }\n.scope #chat-container .bg-linear-to-t:not(.bg-cover + div) {\n  background-image: linear-gradient(to top, rgba(17, 17, 17, 0.7), rgba(17, 17, 17, 0.35)) !important;\n}\n.scope #sidebar:not(.h-full) {\n  background-color: rgba(17, 17, 17, 0.75) !important;\n  backdrop-filter: blur(12px) !important;\n}\n.scope #sidebar :is(.sidebar-bg-gradient-to-t, .sidebar-bg-gradient-to-b) {\n  --tw-gradient-from: rgba(17, 17, 17, 0.75) !important;\n}\n.scope #navbar-bg-gradient-to-b {\n  --tw-gradient-from: rgba(17, 17, 17, 0.9) !important;\n  --tw-gradient-via: rgba(17, 17, 17, 0.5) !important;\n}\n\n@keyframes owui-gradient-shift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n/*[OWUI_GRADIENT_END]*/\n" ->
+{"gradientEnabled": true, "gradientType": "conic", "gradientAnimation": true, "gradientAnimationSpeed": 600, "gradientStops": [{"color": "#111111", "position": 0}, {"color": "#eeeeee", "position": 100}]} -> "\n/*[OWUI_GRADIENT_START]*/\n/* System Gradient Background */\n.scope body {\n  background-image: conic-gradient(from calc(135deg + var(--owui-gradient-turn, 0deg)), #111111 0%, #eeeeee 100%) !important;\n  background-attachment: fixed !important;\n  animation: owui-gradient-shift 30s ease-in-out infinite !important;\n}\n.scope body::before { content: none !important; display: none !important; }\n.scope #chat-container .bg-linear-to-t:not(.bg-cover + div) {\n  background-image: linear-gradient(to top, rgba(17, 17, 17, 0.7), rgba(17, 17, 17, 0.35)) !important;\n}\n.scope #sidebar:not(.h-full) {\n  background-color: rgba(17, 17, 17, 0.75) !important;\n  backdrop-filter: blur(12px) !important;\n}\n.scope #sidebar :is(.sidebar-bg-gradient-to-t, .sidebar-bg-gradient-to-b) {\n  --tw-gradient-from: rgba(17, 17, 17, 0.75) !important;\n}\n.scope #navbar-bg-gradient-to-b {\n  --tw-gradient-from: rgba(17, 17, 17, 0.9) !important;\n  --tw-gradient-via: rgba(17, 17, 17, 0.5) !important;\n}\n\n@property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; }\n@property --owui-gradient-dx { syntax: '<percentage>'; inherits: false; initial-value: 0%; }\n@property --owui-gradient-dy { syntax: '<percentage>'; inherits: false; initial-value: 0%; }\n@keyframes owui-gradient-shift {\n  0%, 100% { --owui-gradient-turn: -20deg; --owui-gradient-dx: -6%; --owui-gradient-dy: 6%; }\n  50% { --owui-gradient-turn: 20deg; --owui-gradient-dx: 6%; --owui-gradient-dy: -6%; }\n}\n/*[OWUI_GRADIENT_END]*/\n" ->
   | 
   | /*[OWUI_GRADIENT_START]*/
   | /* System Gradient Background */
   | .scope body {
-  |   background-image: conic-gradient(from 135deg, #111111 0%, #eeeeee 100%) !important;
+  |   background-image: conic-gradient(from calc(135deg + var(--owui-gradient-turn, 0deg)), #111111 0%, #eeeeee 100%) !important;
   |   background-attachment: fixed !important;
-  |   background-size: 300% 300% !important;
-  |   animation: owui-gradient-shift 30s ease infinite !important;
+  |   animation: owui-gradient-shift 30s ease-in-out infinite !important;
   | }
   | .scope body::before { content: none !important; display: none !important; }
   | .scope #chat-container .bg-linear-to-t:not(.bg-cover + div) {
@@ -1100,10 +1099,12 @@ null -> []
   |   --tw-gradient-via: rgba(17, 17, 17, 0.5) !important;
   | }
   | 
+  | @property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+  | @property --owui-gradient-dx { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+  | @property --owui-gradient-dy { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
   | @keyframes owui-gradient-shift {
-  |   0% { background-position: 0% 50%; }
-  |   50% { background-position: 100% 50%; }
-  |   100% { background-position: 0% 50%; }
+  |   0%, 100% { --owui-gradient-turn: -20deg; --owui-gradient-dx: -6%; --owui-gradient-dy: 6%; }
+  |   50% { --owui-gradient-turn: 20deg; --owui-gradient-dx: 6%; --owui-gradient-dy: -6%; }
   | }
   | /*[OWUI_GRADIENT_END]*/
   | 

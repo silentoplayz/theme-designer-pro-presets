@@ -159,7 +159,7 @@
     if (!layers) return 'background:linear-gradient(135deg,#27272a,#18181b)';
     let s = `background-image:${layers.backgroundImage};`;
     if (layers.background) s += `background-color:${layers.background};`;
-    if (layers.animated) s += `background-size:300% 300%;animation:tdp-preview-gradient-shift ${layers.speed}s ease infinite;`;
+    if (layers.animated) s += `animation:tdp-preview-gradient-shift ${layers.speed}s ease-in-out infinite;`;
     return s;
   }
 

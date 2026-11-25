@@ -824,10 +824,13 @@ a.stat:hover { background: oklch(1 0 0 / 0.025); }
 }
 .grad-strip a:hover .grad { translate: 0 -3px; }
 
+/* The designer's gradient animation: it sways around its layout */
+@property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@property --owui-gradient-dx { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+@property --owui-gradient-dy { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
 @keyframes tdp-preview-gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0%, 100% { --owui-gradient-turn: -20deg; --owui-gradient-dx: -6%; --owui-gradient-dy: 6%; }
+  50% { --owui-gradient-turn: 20deg; --owui-gradient-dx: 6%; --owui-gradient-dy: -6%; }
 }
 @media (prefers-reduced-motion: reduce) {
   .grad, .thumb-grad { animation: none !important; }

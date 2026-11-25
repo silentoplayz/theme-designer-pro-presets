@@ -94,22 +94,22 @@ true
 /*[OWUI_PAL_DARK_START]*/
 /* --- DARK MODE VARIABLES --- */
 html.dark:not([data-theme="oled-dark"]):not([style*="--app-bg"]), html[data-theme="dark"]:not([style*="--app-bg"]) {
-  --app-base-0: oklch(1.000 0.070 248) !important;
+  --app-base-0: oklch(0.999 0.070 248) !important;
   --app-base-50: oklch(0.980 0.070 248) !important;
-  --app-base-100: oklch(0.980 0.070 248) !important;
-  --app-base-200: oklch(0.960 0.070 248) !important;
-  --app-base-300: oklch(0.890 0.070 248) !important;
-  --app-base-400: oklch(0.810 0.070 248) !important;
-  --app-base-500: oklch(0.730 0.070 248) !important;
-  --app-base-600: oklch(0.550 0.070 248) !important;
-  --app-base-700: oklch(0.460 0.070 248) !important;
-  --app-base-800: oklch(0.360 0.070 248) !important;
-  --app-base-850: oklch(0.310 0.070 248) !important;
-  --app-base-900: oklch(0.240 0.070 248) !important;
-  --app-base-950: oklch(0.200 0.070 248) !important;
-  --app-base-1000: color-mix(in oklab, oklch(0.240 0.070 248), black 60%) !important;
-  --app-bg: oklch(0.240 0.070 248) !important;
-  --app-fg: oklch(1.000 0.070 248) !important;
+  --app-base-100: oklch(0.941 0.070 248) !important;
+  --app-base-200: oklch(0.922 0.070 248) !important;
+  --app-base-300: oklch(0.854 0.070 248) !important;
+  --app-base-400: oklch(0.777 0.070 248) !important;
+  --app-base-500: oklch(0.699 0.070 248) !important;
+  --app-base-600: oklch(0.525 0.070 248) !important;
+  --app-base-700: oklch(0.438 0.070 248) !important;
+  --app-base-800: oklch(0.341 0.070 248) !important;
+  --app-base-850: oklch(0.292 0.070 248) !important;
+  --app-base-900: oklch(0.224 0.070 248) !important;
+  --app-base-950: oklch(0.186 0.070 248) !important;
+  --app-base-1000: color-mix(in oklab, oklch(0.224 0.070 248), black 60%) !important;
+  --app-bg: oklch(0.224 0.070 248) !important;
+  --app-fg: oklch(0.999 0.070 248) !important;
   --color-gray-50: var(--app-base-50) !important;
   --color-gray-100: var(--app-base-100) !important;
   --color-gray-200: var(--app-base-200) !important;
@@ -130,22 +130,22 @@ html.dark:not([data-theme="oled-dark"]), html[data-theme="dark"] {
 }
 @media (prefers-color-scheme: dark) {
   html[data-theme="system"]:not([style*="--app-bg"]), :root[data-theme="system"]:not([style*="--app-bg"]) {
-    --app-base-0: oklch(1.000 0.070 248) !important;
+    --app-base-0: oklch(0.999 0.070 248) !important;
     --app-base-50: oklch(0.980 0.070 248) !important;
-    --app-base-100: oklch(0.980 0.070 248) !important;
-    --app-base-200: oklch(0.960 0.070 248) !important;
-    --app-base-300: oklch(0.890 0.070 248) !important;
-    --app-base-400: oklch(0.810 0.070 248) !important;
-    --app-base-500: oklch(0.730 0.070 248) !important;
-    --app-base-600: oklch(0.550 0.070 248) !important;
-    --app-base-700: oklch(0.460 0.070 248) !important;
-    --app-base-800: oklch(0.360 0.070 248) !important;
-    --app-base-850: oklch(0.310 0.070 248) !important;
-    --app-base-900: oklch(0.240 0.070 248) !important;
-    --app-base-950: oklch(0.200 0.070 248) !important;
-    --app-base-1000: color-mix(in oklab, oklch(0.240 0.070 248), black 60%) !important;
-    --app-bg: oklch(0.240 0.070 248) !important;
-    --app-fg: oklch(1.000 0.070 248) !important;
+    --app-base-100: oklch(0.941 0.070 248) !important;
+    --app-base-200: oklch(0.922 0.070 248) !important;
+    --app-base-300: oklch(0.854 0.070 248) !important;
+    --app-base-400: oklch(0.777 0.070 248) !important;
+    --app-base-500: oklch(0.699 0.070 248) !important;
+    --app-base-600: oklch(0.525 0.070 248) !important;
+    --app-base-700: oklch(0.438 0.070 248) !important;
+    --app-base-800: oklch(0.341 0.070 248) !important;
+    --app-base-850: oklch(0.292 0.070 248) !important;
+    --app-base-900: oklch(0.224 0.070 248) !important;
+    --app-base-950: oklch(0.186 0.070 248) !important;
+    --app-base-1000: color-mix(in oklab, oklch(0.224 0.070 248), black 60%) !important;
+    --app-bg: oklch(0.224 0.070 248) !important;
+    --app-fg: oklch(0.999 0.070 248) !important;
     --color-gray-50: var(--app-base-50) !important;
     --color-gray-100: var(--app-base-100) !important;
     --color-gray-200: var(--app-base-200) !important;
@@ -337,10 +337,10 @@ each mode's customCSS, changed:
 #=# designer: dark mode
 _shippedVars: 0 overridden, defaults false
 accentVars: {"--tdp-accent": "#f9fcff", "--tdp-accent-2": "#ffffff", "--tdp-accent-3": "#9fd6ff"}
-contrast Main text on background: #d4feff on #00203e = 15.22 (aaa true, aa true, aaLarge true)
-contrast Muted text on background: #9dc6ed on #00203e = 9.19 (aaa true, aa true, aaLarge true)
-contrast Main text on elevated surfaces: #d4feff on #0d3252 = 12.17 (aaa true, aa true, aaLarge true)
-contrast Main text on sidebar: #d4feff on #001634 = 16.68 (aaa true, aa true, aaLarge true)
+contrast Main text on background: #d4feff on #001c3a = 15.82 (aaa true, aa true, aaLarge true)
+contrast Muted text on background: #93bbe2 on #001c3a = 8.51 (aaa true, aa true, aaLarge true)
+contrast Main text on elevated surfaces: #d4feff on #072e4d = 12.89 (aaa true, aa true, aaLarge true)
+contrast Main text on sidebar: #d4feff on #001330 = 17.10 (aaa true, aa true, aaLarge true)
 detectWashedOut: {"dark": false, "light": false}
 buildGradientCss(.scope): ''
 parseSettings: line 6 at 22 len 2 GRID number 20 10..40 step 1 label "Grid" section "" hint "grid the traces follow, in px (10-40)"

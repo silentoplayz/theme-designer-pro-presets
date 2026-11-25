@@ -15,22 +15,22 @@ true
 /*[OWUI_PAL_LIGHT_START]*/
 /* --- LIGHT MODE VARIABLES --- */
 :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]):not([style*="--app-bg"]) {
-  --app-base-0: oklch(1.000 0.040 140) !important;
+  --app-base-0: oklch(0.994 0.040 140) !important;
   --app-base-50: #fefefe !important;
-  --app-base-100: oklch(0.980 0.040 140) !important;
-  --app-base-200: oklch(0.980 0.040 140) !important;
-  --app-base-300: oklch(0.980 0.040 140) !important;
-  --app-base-400: oklch(0.980 0.040 140) !important;
-  --app-base-500: oklch(0.980 0.040 140) !important;
-  --app-base-600: oklch(0.980 0.040 140) !important;
-  --app-base-700: oklch(0.980 0.040 140) !important;
-  --app-base-800: oklch(0.980 0.040 140) !important;
-  --app-base-850: oklch(0.980 0.040 140) !important;
-  --app-base-900: oklch(0.920 0.040 140) !important;
+  --app-base-100: oklch(0.953 0.040 140) !important;
+  --app-base-200: oklch(0.939 0.040 140) !important;
+  --app-base-300: oklch(0.891 0.040 140) !important;
+  --app-base-400: oklch(0.837 0.040 140) !important;
+  --app-base-500: oklch(0.782 0.040 140) !important;
+  --app-base-600: oklch(0.659 0.040 140) !important;
+  --app-base-700: oklch(0.598 0.040 140) !important;
+  --app-base-800: oklch(0.529 0.040 140) !important;
+  --app-base-850: oklch(0.495 0.040 140) !important;
+  --app-base-900: oklch(0.448 0.040 140) !important;
   --app-base-950: #101018 !important;
-  --app-base-1000: oklch(0.720 0.040 140) !important;
-  --app-bg: oklch(1.000 0.040 140) !important;
-  --app-fg: oklch(0.720 0.040 140) !important;
+  --app-base-1000: oklch(0.311 0.040 140) !important;
+  --app-bg: oklch(0.994 0.040 140) !important;
+  --app-fg: oklch(0.311 0.040 140) !important;
   --color-gray-50: var(--app-base-50) !important;
   --color-gray-100: var(--app-base-100) !important;
   --color-gray-200: var(--app-base-200) !important;
@@ -51,22 +51,22 @@ true
 }
 @media (prefers-color-scheme: light) {
   html[data-theme="system"]:not([style*="--app-bg"]), :root[data-theme="system"]:not([style*="--app-bg"]) {
-    --app-base-0: oklch(1.000 0.040 140) !important;
+    --app-base-0: oklch(0.994 0.040 140) !important;
     --app-base-50: #fefefe !important;
-    --app-base-100: oklch(0.980 0.040 140) !important;
-    --app-base-200: oklch(0.980 0.040 140) !important;
-    --app-base-300: oklch(0.980 0.040 140) !important;
-    --app-base-400: oklch(0.980 0.040 140) !important;
-    --app-base-500: oklch(0.980 0.040 140) !important;
-    --app-base-600: oklch(0.980 0.040 140) !important;
-    --app-base-700: oklch(0.980 0.040 140) !important;
-    --app-base-800: oklch(0.980 0.040 140) !important;
-    --app-base-850: oklch(0.980 0.040 140) !important;
-    --app-base-900: oklch(0.920 0.040 140) !important;
+    --app-base-100: oklch(0.953 0.040 140) !important;
+    --app-base-200: oklch(0.939 0.040 140) !important;
+    --app-base-300: oklch(0.891 0.040 140) !important;
+    --app-base-400: oklch(0.837 0.040 140) !important;
+    --app-base-500: oklch(0.782 0.040 140) !important;
+    --app-base-600: oklch(0.659 0.040 140) !important;
+    --app-base-700: oklch(0.598 0.040 140) !important;
+    --app-base-800: oklch(0.529 0.040 140) !important;
+    --app-base-850: oklch(0.495 0.040 140) !important;
+    --app-base-900: oklch(0.448 0.040 140) !important;
     --app-base-950: #101018 !important;
-    --app-base-1000: oklch(0.720 0.040 140) !important;
-    --app-bg: oklch(1.000 0.040 140) !important;
-    --app-fg: oklch(0.720 0.040 140) !important;
+    --app-base-1000: oklch(0.311 0.040 140) !important;
+    --app-bg: oklch(0.994 0.040 140) !important;
+    --app-fg: oklch(0.311 0.040 140) !important;
     --color-gray-50: var(--app-base-50) !important;
     --color-gray-100: var(--app-base-100) !important;
     --color-gray-200: var(--app-base-200) !important;
@@ -141,22 +141,22 @@ html.dark[data-theme="oled-dark"], html[data-theme="oled-dark"] {
 /*[OWUI_PAL_HER_START]*/
 /* --- HER MODE VARIABLES --- */
 html.her:not([style*="--app-bg"]), html[data-theme="her"]:not([style*="--app-bg"]) {
-  --app-base-0: oklch(1.000 0.120 77) !important;
+  --app-base-0: oklch(0.994 0.120 77) !important;
   --app-base-50: #fff0f5 !important;
-  --app-base-100: oklch(0.980 0.120 77) !important;
-  --app-base-200: oklch(0.980 0.120 77) !important;
-  --app-base-300: oklch(0.980 0.120 77) !important;
-  --app-base-400: oklch(0.980 0.120 77) !important;
-  --app-base-500: oklch(0.980 0.120 77) !important;
-  --app-base-600: oklch(0.980 0.120 77) !important;
-  --app-base-700: oklch(0.980 0.120 77) !important;
-  --app-base-800: oklch(0.970 0.120 77) !important;
-  --app-base-850: oklch(0.920 0.120 77) !important;
-  --app-base-900: oklch(0.850 0.120 77) !important;
+  --app-base-100: oklch(0.952 0.120 77) !important;
+  --app-base-200: oklch(0.939 0.120 77) !important;
+  --app-base-300: oklch(0.890 0.120 77) !important;
+  --app-base-400: oklch(0.835 0.120 77) !important;
+  --app-base-500: oklch(0.780 0.120 77) !important;
+  --app-base-600: oklch(0.655 0.120 77) !important;
+  --app-base-700: oklch(0.593 0.120 77) !important;
+  --app-base-800: oklch(0.524 0.120 77) !important;
+  --app-base-850: oklch(0.490 0.120 77) !important;
+  --app-base-900: oklch(0.441 0.120 77) !important;
   --app-base-950: #1a0010 !important;
-  --app-base-1000: oklch(0.650 0.120 77) !important;
-  --app-bg: oklch(1.000 0.120 77) !important;
-  --app-fg: oklch(0.650 0.120 77) !important;
+  --app-base-1000: oklch(0.303 0.120 77) !important;
+  --app-bg: oklch(0.994 0.120 77) !important;
+  --app-fg: oklch(0.303 0.120 77) !important;
   --color-gray-50: var(--app-base-50) !important;
   --color-gray-100: var(--app-base-100) !important;
   --color-gray-200: var(--app-base-200) !important;
@@ -343,10 +343,9 @@ html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) #navbar-b
 /*[OWUI_GRADIENT_START]*/
 /* System Gradient Background */
 :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) body {
-  background-image: radial-gradient(circle closest-corner at 25% 10%, color-mix(in oklab, #ff0055 64%, var(--color-base-0, #ffffff)) 0%, color-mix(in oklab, #00ccff 64%, var(--color-base-0, #ffffff)) 55%, color-mix(in oklab, #112233 64%, var(--color-base-0, #ffffff)) 100%) !important;
+  background-image: radial-gradient(circle closest-corner at calc(25% + var(--owui-gradient-dx, 0%)) calc(10% + var(--owui-gradient-dy, 0%)), color-mix(in oklab, #ff0055 64%, var(--color-base-0, #ffffff)) 0%, color-mix(in oklab, #00ccff 64%, var(--color-base-0, #ffffff)) 55%, color-mix(in oklab, #112233 64%, var(--color-base-0, #ffffff)) 100%) !important;
   background-attachment: fixed !important;
-  background-size: 300% 300% !important;
-  animation: owui-gradient-shift 30s ease infinite !important;
+  animation: owui-gradient-shift 30s ease-in-out infinite !important;
 }
 :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) body::before { content: none !important; display: none !important; }
 :root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="her"]) #chat-container .bg-linear-to-t:not(.bg-cover + div) {
@@ -364,10 +363,12 @@ html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) #navbar-b
   --tw-gradient-via: color-mix(in srgb, color-mix(in oklab, #112233 64%, var(--color-base-0, #ffffff)) 50%, transparent) !important;
 }
 
+@property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@property --owui-gradient-dx { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+@property --owui-gradient-dy { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
 @keyframes owui-gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0%, 100% { --owui-gradient-turn: -20deg; --owui-gradient-dx: -6%; --owui-gradient-dy: 6%; }
+  50% { --owui-gradient-turn: 20deg; --owui-gradient-dx: 6%; --owui-gradient-dy: -6%; }
 }
 /*[OWUI_GRADIENT_END]*/
 @media (prefers-color-scheme: light) {
@@ -375,10 +376,9 @@ html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) #navbar-b
 /*[OWUI_GRADIENT_START]*/
 /* System Gradient Background */
 :root[data-theme="system"] body {
-  background-image: radial-gradient(circle closest-corner at 25% 10%, color-mix(in oklab, #ff0055 64%, var(--color-base-0, #ffffff)) 0%, color-mix(in oklab, #00ccff 64%, var(--color-base-0, #ffffff)) 55%, color-mix(in oklab, #112233 64%, var(--color-base-0, #ffffff)) 100%) !important;
+  background-image: radial-gradient(circle closest-corner at calc(25% + var(--owui-gradient-dx, 0%)) calc(10% + var(--owui-gradient-dy, 0%)), color-mix(in oklab, #ff0055 64%, var(--color-base-0, #ffffff)) 0%, color-mix(in oklab, #00ccff 64%, var(--color-base-0, #ffffff)) 55%, color-mix(in oklab, #112233 64%, var(--color-base-0, #ffffff)) 100%) !important;
   background-attachment: fixed !important;
-  background-size: 300% 300% !important;
-  animation: owui-gradient-shift 30s ease infinite !important;
+  animation: owui-gradient-shift 30s ease-in-out infinite !important;
 }
 :root[data-theme="system"] body::before { content: none !important; display: none !important; }
 :root[data-theme="system"] #chat-container .bg-linear-to-t:not(.bg-cover + div) {
@@ -396,10 +396,12 @@ html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) #navbar-b
   --tw-gradient-via: color-mix(in srgb, color-mix(in oklab, #112233 64%, var(--color-base-0, #ffffff)) 50%, transparent) !important;
 }
 
+@property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@property --owui-gradient-dx { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+@property --owui-gradient-dy { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
 @keyframes owui-gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0%, 100% { --owui-gradient-turn: -20deg; --owui-gradient-dx: -6%; --owui-gradient-dy: 6%; }
+  50% { --owui-gradient-turn: 20deg; --owui-gradient-dx: 6%; --owui-gradient-dy: -6%; }
 }
 /*[OWUI_GRADIENT_END]*/
 
@@ -408,10 +410,9 @@ html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) #navbar-b
 /*[OWUI_GRADIENT_START]*/
 /* System Gradient Background */
 :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body {
-  background-image: conic-gradient(from 10deg, color-mix(in oklab, #ff0055 12%, var(--color-base-900, var(--color-gray-900, #171717))) 0%, color-mix(in oklab, #00ccff 12%, var(--color-base-900, var(--color-gray-900, #171717))) 30%, color-mix(in oklab, #112233 12%, var(--color-base-900, var(--color-gray-900, #171717))) 100%) !important;
+  background-image: conic-gradient(from calc(10deg + var(--owui-gradient-turn, 0deg)), color-mix(in oklab, #ff0055 12%, var(--color-base-900, var(--color-gray-900, #171717))) 0%, color-mix(in oklab, #00ccff 12%, var(--color-base-900, var(--color-gray-900, #171717))) 30%, color-mix(in oklab, #112233 12%, var(--color-base-900, var(--color-gray-900, #171717))) 100%) !important;
   background-attachment: fixed !important;
-  background-size: 300% 300% !important;
-  animation: owui-gradient-shift 2s ease infinite !important;
+  animation: owui-gradient-shift 2s ease-in-out infinite !important;
 }
 :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content: none !important; display: none !important; }
 :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) #chat-container .bg-linear-to-t:not(.bg-cover + div) {
@@ -429,10 +430,12 @@ html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) #navbar-b
   --tw-gradient-via: color-mix(in srgb, color-mix(in oklab, #112233 12%, var(--color-base-900, var(--color-gray-900, #171717))) 50%, transparent) !important;
 }
 
+@property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@property --owui-gradient-dx { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+@property --owui-gradient-dy { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
 @keyframes owui-gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0%, 100% { --owui-gradient-turn: -20deg; --owui-gradient-dx: -6%; --owui-gradient-dy: 6%; }
+  50% { --owui-gradient-turn: 20deg; --owui-gradient-dx: 6%; --owui-gradient-dy: -6%; }
 }
 /*[OWUI_GRADIENT_END]*/
 @media (prefers-color-scheme: dark) {
@@ -440,10 +443,9 @@ html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) #navbar-b
 /*[OWUI_GRADIENT_START]*/
 /* System Gradient Background */
 :root[data-theme="system"] body {
-  background-image: conic-gradient(from 10deg, color-mix(in oklab, #ff0055 12%, var(--color-base-900, var(--color-gray-900, #171717))) 0%, color-mix(in oklab, #00ccff 12%, var(--color-base-900, var(--color-gray-900, #171717))) 30%, color-mix(in oklab, #112233 12%, var(--color-base-900, var(--color-gray-900, #171717))) 100%) !important;
+  background-image: conic-gradient(from calc(10deg + var(--owui-gradient-turn, 0deg)), color-mix(in oklab, #ff0055 12%, var(--color-base-900, var(--color-gray-900, #171717))) 0%, color-mix(in oklab, #00ccff 12%, var(--color-base-900, var(--color-gray-900, #171717))) 30%, color-mix(in oklab, #112233 12%, var(--color-base-900, var(--color-gray-900, #171717))) 100%) !important;
   background-attachment: fixed !important;
-  background-size: 300% 300% !important;
-  animation: owui-gradient-shift 2s ease infinite !important;
+  animation: owui-gradient-shift 2s ease-in-out infinite !important;
 }
 :root[data-theme="system"] body::before { content: none !important; display: none !important; }
 :root[data-theme="system"] #chat-container .bg-linear-to-t:not(.bg-cover + div) {
@@ -461,10 +463,12 @@ html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) #navbar-b
   --tw-gradient-via: color-mix(in srgb, color-mix(in oklab, #112233 12%, var(--color-base-900, var(--color-gray-900, #171717))) 50%, transparent) !important;
 }
 
+@property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@property --owui-gradient-dx { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+@property --owui-gradient-dy { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
 @keyframes owui-gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0%, 100% { --owui-gradient-turn: -20deg; --owui-gradient-dx: -6%; --owui-gradient-dy: 6%; }
+  50% { --owui-gradient-turn: 20deg; --owui-gradient-dx: 6%; --owui-gradient-dy: -6%; }
 }
 /*[OWUI_GRADIENT_END]*/
 
@@ -474,10 +478,9 @@ html[data-theme="oled-dark"]:not(#tdp-surface#tdp-surface#tdp-surface) #navbar-b
 /* Mesh Gradient Background */
 html[data-theme="oled-dark"] body {
   background-color: #000000 !important;
-  background-image: radial-gradient(at 10% 20%, #6366f1 0%, transparent 30%), radial-gradient(at 40% 80%, #ec4899 0%, transparent 65%) !important;
+  background-image: radial-gradient(at calc(10% + var(--owui-gradient-dx, 0%)) calc(20% + var(--owui-gradient-dy, 0%)), #6366f1 0%, transparent 30%), radial-gradient(at calc(40% - var(--owui-gradient-dx, 0%)) calc(80% + var(--owui-gradient-dy, 0%)), #ec4899 0%, transparent 65%) !important;
   background-attachment: fixed !important;
-  background-size: 300% 300% !important;
-  animation: owui-gradient-shift 14s ease infinite !important;
+  animation: owui-gradient-shift 14s ease-in-out infinite !important;
 }
 html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }
 html[data-theme="oled-dark"] #chat-container .bg-linear-to-t:not(.bg-cover + div) {
@@ -495,20 +498,21 @@ html[data-theme="oled-dark"] #navbar-bg-gradient-to-b {
   --tw-gradient-via: rgba(0, 0, 0, 0.5) !important;
 }
 
+@property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@property --owui-gradient-dx { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+@property --owui-gradient-dy { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
 @keyframes owui-gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0%, 100% { --owui-gradient-turn: -20deg; --owui-gradient-dx: -6%; --owui-gradient-dy: 6%; }
+  50% { --owui-gradient-turn: 20deg; --owui-gradient-dx: 6%; --owui-gradient-dy: -6%; }
 }
 /*[OWUI_GRADIENT_END]*/
 
 /*[OWUI_GRADIENT_START]*/
 /* System Gradient Background */
 :is(html[data-theme="her"], html:where(.her)) body {
-  background-image: linear-gradient(45deg, color-mix(in oklab, #ff0055 0%, var(--color-base-0, #ffffff)) 0%, color-mix(in oklab, #00ccff 0%, var(--color-base-0, #ffffff)) 90%, color-mix(in oklab, #112233 0%, var(--color-base-0, #ffffff)) 100%) !important;
+  background-image: linear-gradient(calc(45deg + var(--owui-gradient-turn, 0deg)), color-mix(in oklab, #ff0055 0%, var(--color-base-0, #ffffff)) 0%, color-mix(in oklab, #00ccff 0%, var(--color-base-0, #ffffff)) 90%, color-mix(in oklab, #112233 0%, var(--color-base-0, #ffffff)) 100%) !important;
   background-attachment: fixed !important;
-  background-size: 300% 300% !important;
-  animation: owui-gradient-shift 21s ease infinite !important;
+  animation: owui-gradient-shift 21s ease-in-out infinite !important;
 }
 :is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none !important; }
 :is(html[data-theme="her"], html:where(.her)) #chat-container .bg-linear-to-t:not(.bg-cover + div) {
@@ -526,10 +530,12 @@ html[data-theme="oled-dark"] #navbar-bg-gradient-to-b {
   --tw-gradient-via: color-mix(in srgb, color-mix(in oklab, #112233 0%, var(--color-base-0, #ffffff)) 50%, transparent) !important;
 }
 
+@property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@property --owui-gradient-dx { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+@property --owui-gradient-dy { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
 @keyframes owui-gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0%, 100% { --owui-gradient-turn: -20deg; --owui-gradient-dx: -6%; --owui-gradient-dy: 6%; }
+  50% { --owui-gradient-turn: 20deg; --owui-gradient-dx: 6%; --owui-gradient-dy: -6%; }
 }
 /*[OWUI_GRADIENT_END]*/
 
@@ -595,18 +601,18 @@ contrast Muted text on background: #b4b4b4 on #121218 = 9.00 (aaa true, aa true,
 contrast Main text on elevated surfaces: #f8f8f8 on #262626 = 14.25 (aaa true, aa true, aaLarge true)
 contrast Main text on sidebar: #f8f8f8 on #0d0d0d = 18.30 (aaa true, aa true, aaLarge true)
 detectWashedOut: {"dark": false, "light": false}
-buildGradientCss(.scope): 1784 chars, sha256 47530a438992
+buildGradientCss(.scope): 2131 chars, sha256 ae0e3a8a92eb
 
 #=# designer: light mode
 _shippedVars: 1 overridden, defaults false
-getVariablesMap before overrides: {"--color-gray-50": "#fefefe", "--color-gray-100": "oklch(0.980 0.040 140)", "--color-gray-200": "oklch(0.980 0.040 140)", "--color-gray-300": "oklch(0.980 0.040 140)", "--color-gray-400": "oklch(0.980 0.040 140)", "--color-gray-500": "oklch(0.980 0.040 140)", "--color-gray-600": "oklch(0.980 0.040 140)", "--color-gray-700": "oklch(0.980 0.040 140)", "--color-gray-800": "oklch(0.980 0.040 140)", "--color-gray-850": "oklch(0.980 0.040 140)", "--color-gray-900": "oklch(0.920 0.040 140)", "--color-gray-950": "#101018"}
+getVariablesMap before overrides: {"--color-gray-50": "#fefefe", "--color-gray-100": "oklch(0.953 0.040 140)", "--color-gray-200": "oklch(0.939 0.040 140)", "--color-gray-300": "oklch(0.891 0.040 140)", "--color-gray-400": "oklch(0.837 0.040 140)", "--color-gray-500": "oklch(0.782 0.040 140)", "--color-gray-600": "oklch(0.659 0.040 140)", "--color-gray-700": "oklch(0.598 0.040 140)", "--color-gray-800": "oklch(0.529 0.040 140)", "--color-gray-850": "oklch(0.495 0.040 140)", "--color-gray-900": "oklch(0.448 0.040 140)", "--color-gray-950": "#101018"}
 accentVars: {"--tdp-accent": "#b45309", "--tdp-accent-2": "oklch(0.56 0.160 180.0)", "--tdp-accent-3": "oklch(0.56 0.160 100.0)"}
 contrast Main text on background: #101018 on #fefefe = 18.77 (aaa true, aa true, aaLarge true)
-contrast Muted text on background: #ebffe6 on #fefefe = 1.04 (aaa false, aa false, aaLarge false)
-contrast Main text on elevated surfaces: #101018 on #ebffe6 = 18.01 (aaa true, aa true, aaLarge true)
+contrast Muted text on background: #859881 on #fefefe = 3.06 (aaa false, aa false, aaLarge true)
+contrast Main text on elevated surfaces: #101018 on #e2f7dd = 16.75 (aaa true, aa true, aaLarge true)
 contrast Main text on sidebar: #101018 on #fefefe = 18.77 (aaa true, aa true, aaLarge true)
 detectWashedOut: {"dark": false, "light": true}
-buildGradientCss(.scope): 1808 chars, sha256 d461744cf83a
+buildGradientCss(.scope): 2187 chars, sha256 e8fc06523c99
 
 #=# designer: oled mode
 _shippedVars: 1 overridden, defaults true
@@ -617,18 +623,18 @@ contrast Muted text on background: #777777 on #0a0a0a = 4.42 (aaa false, aa fals
 contrast Main text on elevated surfaces: #b7b7b7 on #010101 = 10.41 (aaa true, aa true, aaLarge true)
 contrast Main text on sidebar: #b7b7b7 on #000000 = 10.47 (aaa true, aa true, aaLarge true)
 detectWashedOut: {"dark": false, "light": false}
-buildGradientCss(.scope): 1224 chars, sha256 d3a027c78851
+buildGradientCss(.scope): 1675 chars, sha256 187417339cdc
 
 #=# designer: her mode
 _shippedVars: 1 overridden, defaults false
-getVariablesMap before overrides: {"--color-gray-50": "#fff0f5", "--color-gray-100": "oklch(0.980 0.120 77)", "--color-gray-200": "oklch(0.980 0.120 77)", "--color-gray-300": "oklch(0.980 0.120 77)", "--color-gray-400": "oklch(0.980 0.120 77)", "--color-gray-500": "oklch(0.980 0.120 77)", "--color-gray-600": "oklch(0.980 0.120 77)", "--color-gray-700": "oklch(0.980 0.120 77)", "--color-gray-800": "oklch(0.970 0.120 77)", "--color-gray-850": "oklch(0.920 0.120 77)", "--color-gray-900": "oklch(0.850 0.120 77)", "--color-gray-950": "#1a0010"}
+getVariablesMap before overrides: {"--color-gray-50": "#fff0f5", "--color-gray-100": "oklch(0.952 0.120 77)", "--color-gray-200": "oklch(0.939 0.120 77)", "--color-gray-300": "oklch(0.890 0.120 77)", "--color-gray-400": "oklch(0.835 0.120 77)", "--color-gray-500": "oklch(0.780 0.120 77)", "--color-gray-600": "oklch(0.655 0.120 77)", "--color-gray-700": "oklch(0.593 0.120 77)", "--color-gray-800": "oklch(0.524 0.120 77)", "--color-gray-850": "oklch(0.490 0.120 77)", "--color-gray-900": "oklch(0.441 0.120 77)", "--color-gray-950": "#1a0010"}
 accentVars: {"--tdp-accent": "oklch(0.56 0.180 77.0)", "--tdp-accent-2": "oklch(0.56 0.180 117.0)", "--tdp-accent-3": "oklch(0.56 0.180 37.0)"}
 contrast Main text on background: #1a0010 on #fff0f5 = 18.10 (aaa true, aa true, aaLarge true)
-contrast Muted text on background: #ffee99 on #fff0f5 = 1.06 (aaa false, aa false, aaLarge false)
-contrast Main text on elevated surfaces: #1a0010 on #ffee99 = 17.06 (aaa true, aa true, aaLarge true)
+contrast Muted text on background: #b9862c on #fff0f5 = 2.92 (aaa false, aa false, aaLarge false)
+contrast Main text on elevated surfaces: #1a0010 on #ffe590 = 16.04 (aaa true, aa true, aaLarge true)
 contrast Main text on sidebar: #1a0010 on #fff0f5 = 18.10 (aaa true, aa true, aaLarge true)
 detectWashedOut: {"dark": false, "light": true}
-buildGradientCss(.scope): 1772 chars, sha256 01f1db9e7dee
+buildGradientCss(.scope): 2119 chars, sha256 4e2e2d7b3ddc
 
 #=# python: _css_balanced
 css True, custom section True
@@ -774,7 +780,7 @@ data-theme 'dark', class 'dark'
 - lines 194-201 (8): 'html[data-theme="system"] .app, html[data-theme="system"] #theme-designer-container, html[data-theme' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
 - lines 297-297 (1): '/*[OWUI_CLEAR_GRADIENT_START]*/' .. '/*[OWUI_CLEAR_GRADIENT_START]*/'
 - lines 299-306 (8): ':is(html[data-theme="her"], html:where(.her)) .app, :is(html[data-theme="her"], html:where(.her)) #t' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
-- lines 324-567 (244): '/*[OWUI_GRADIENT_START]*/' .. ''
+- lines 324-573 (250): '/*[OWUI_GRADIENT_START]*/' .. ''
 
 #=# bootloader: enforceTheme default valves, /auth, dark, flat css only
 data-theme 'dark', class 'dark'
@@ -785,29 +791,29 @@ data-theme 'dark', class 'dark'
 - lines 194-201 (8): 'html[data-theme="system"] .app, html[data-theme="system"] #theme-designer-container, html[data-theme' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
 - lines 297-297 (1): '/*[OWUI_CLEAR_GRADIENT_START]*/' .. '/*[OWUI_CLEAR_GRADIENT_START]*/'
 - lines 299-306 (8): ':is(html[data-theme="her"], html:where(.her)) .app, :is(html[data-theme="her"], html:where(.her)) #t' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
-- lines 324-346 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 348-353 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 356-378 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 380-385 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 389-411 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 413-418 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 421-443 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 445-450 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 454-477 (24): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 479-484 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 486-508 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 510-515 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 517-522 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
-- lines 524-524 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
-- lines 527-532 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
-- lines 534-534 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
-- lines 538-542 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 324-345 (22): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 347-354 (8): "@property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; }" .. '/*[OWUI_GRADIENT_END]*/'
+- lines 357-378 (22): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 380-387 (8): "@property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; }" .. '/*[OWUI_GRADIENT_END]*/'
+- lines 391-412 (22): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 414-421 (8): "@property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; }" .. '/*[OWUI_GRADIENT_END]*/'
+- lines 424-445 (22): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 447-454 (8): "@property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; }" .. '/*[OWUI_GRADIENT_END]*/'
+- lines 458-480 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 482-489 (8): "@property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; }" .. '/*[OWUI_GRADIENT_END]*/'
+- lines 491-512 (22): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 514-521 (8): "@property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; }" .. '/*[OWUI_GRADIENT_END]*/'
+- lines 523-528 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
+- lines 530-530 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 533-538 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
+- lines 540-540 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 544-548 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
 + 
-- lines 545-549 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 551-555 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
 + 
-- lines 553-557 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
-- lines 559-564 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
-- lines 566-566 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 559-563 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 565-570 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
+- lines 572-572 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
 + 
 
 #=# bootloader: enforceTheme default valves, /auth, oled-dark, sections
@@ -822,24 +828,24 @@ data-theme 'oled-dark', class 'dark'
 data-theme 'light', class 'light'
 /theme.css, changed:
 - lines 1-173 (173): '/*[OWUI_VARS_START]*/' .. ''
-- lines 332-332 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
+- lines 331-331 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
 - lines 364-364 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
-- lines 397-397 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
-- lines 429-429 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
-- lines 463-463 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
-- lines 494-494 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
+- lines 398-398 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
+- lines 431-431 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 466-466 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
+- lines 498-498 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
 
 #=# bootloader: enforceTheme default valves, /auth, light, flat css only
 data-theme 'light', class 'light'
 /theme.css, changed:
 - lines 1-75 (75): '/*[OWUI_VARS_START]*/' .. '}'
 - lines 77-172 (96): '/*[OWUI_PAL_LIGHT_END]*/' .. '/*[OWUI_VARS_END]*/'
-- lines 332-332 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
+- lines 331-331 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
 - lines 364-364 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
-- lines 397-397 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
-- lines 429-429 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
-- lines 463-463 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
-- lines 494-494 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
+- lines 398-398 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
+- lines 431-431 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 466-466 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
+- lines 498-498 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
 
 #=# bootloader: enforceTheme default valves, /auth, her, sections
 data-theme 'her', class 'her'
@@ -859,7 +865,7 @@ data-theme 'dark', class 'dark'
 - lines 194-201 (8): 'html[data-theme="system"] .app, html[data-theme="system"] #theme-designer-container, html[data-theme' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
 - lines 297-297 (1): '/*[OWUI_CLEAR_GRADIENT_START]*/' .. '/*[OWUI_CLEAR_GRADIENT_START]*/'
 - lines 299-306 (8): ':is(html[data-theme="her"], html:where(.her)) .app, :is(html[data-theme="her"], html:where(.her)) #t' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
-- lines 323-515 (193): '' .. '/*[OWUI_GRADIENT_END]*/'
+- lines 323-521 (199): '' .. '/*[OWUI_GRADIENT_END]*/'
 
 #=# bootloader: enforceTheme default valves, /, dark, flat css only
 data-theme 'dark', class 'dark'
@@ -872,28 +878,28 @@ data-theme 'dark', class 'dark'
 - lines 194-201 (8): 'html[data-theme="system"] .app, html[data-theme="system"] #theme-designer-container, html[data-theme' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
 - lines 297-297 (1): '/*[OWUI_CLEAR_GRADIENT_START]*/' .. '/*[OWUI_CLEAR_GRADIENT_START]*/'
 - lines 299-306 (8): ':is(html[data-theme="her"], html:where(.her)) .app, :is(html[data-theme="her"], html:where(.her)) #t' .. '/*[OWUI_CLEAR_GRADIENT_END]*/'
-- lines 324-346 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 348-353 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 356-378 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 380-385 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 389-411 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 413-418 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 421-443 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 445-450 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 454-477 (24): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 479-484 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
-- lines 486-508 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
-- lines 510-515 (6): '@keyframes owui-gradient-shift {' .. '/*[OWUI_GRADIENT_END]*/'
+- lines 324-345 (22): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 347-354 (8): "@property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; }" .. '/*[OWUI_GRADIENT_END]*/'
+- lines 357-378 (22): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 380-387 (8): "@property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; }" .. '/*[OWUI_GRADIENT_END]*/'
+- lines 391-412 (22): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 414-421 (8): "@property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; }" .. '/*[OWUI_GRADIENT_END]*/'
+- lines 424-445 (22): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 447-454 (8): "@property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; }" .. '/*[OWUI_GRADIENT_END]*/'
+- lines 458-480 (23): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 482-489 (8): "@property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; }" .. '/*[OWUI_GRADIENT_END]*/'
+- lines 491-512 (22): '/*[OWUI_GRADIENT_START]*/' .. '}'
+- lines 514-521 (8): "@property --owui-gradient-turn { syntax: '<angle>'; inherits: false; initial-value: 0deg; }" .. '/*[OWUI_GRADIENT_END]*/'
 
 #=# bootloader: enforceTheme default valves, /, dark, personal theme
 data-theme 'dark', class 'dark'
 /theme.css, changed:
-- lines 332-332 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
+- lines 331-331 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
 - lines 364-364 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
-- lines 397-397 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
-- lines 429-429 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
-- lines 463-463 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
-- lines 494-494 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
+- lines 398-398 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
+- lines 431-431 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 466-466 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
+- lines 498-498 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
 
 #=# bootloader: enforceTheme default valves, /, oled-dark, sections
 data-theme 'oled-dark', class 'dark'
@@ -910,34 +916,34 @@ data-theme 'oled-dark', class 'dark'
 #=# bootloader: enforceTheme default valves, /, light, sections
 data-theme 'light', class 'light'
 /theme.css, changed:
-- lines 332-332 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
+- lines 331-331 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
 - lines 364-364 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
-- lines 397-397 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
-- lines 429-429 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
-- lines 463-463 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
-- lines 494-494 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
-- lines 517-567 (51): '/*[OWUI_CUSTOM_START]*/' .. ''
+- lines 398-398 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
+- lines 431-431 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 466-466 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
+- lines 498-498 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
+- lines 523-573 (51): '/*[OWUI_CUSTOM_START]*/' .. ''
 
 #=# bootloader: enforceTheme default valves, /, light, flat css only
 data-theme 'light', class 'light'
 /theme.css, changed:
-- lines 332-332 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
+- lines 331-331 (1): ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h' .. ':root:not(.dark):not(.her):not([data-theme="dark"]):not([data-theme="oled-dark"]):not([data-theme="h'
 - lines 364-364 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
-- lines 397-397 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
-- lines 429-429 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
-- lines 463-463 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
-- lines 494-494 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
-- lines 517-522 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
-- lines 524-524 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
-- lines 527-532 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
-- lines 534-534 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
-- lines 538-542 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 398-398 (1): ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content' .. ':is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body::before { content'
+- lines 431-431 (1): ':root[data-theme="system"] body::before { content: none !important; display: none !important; }' .. ':root[data-theme="system"] body::before { content: none !important; display: none !important; }'
+- lines 466-466 (1): 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }' .. 'html[data-theme="oled-dark"] body::before { content: none !important; display: none !important; }'
+- lines 498-498 (1): ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none' .. ':is(html[data-theme="her"], html:where(.her)) body::before { content: none !important; display: none'
+- lines 523-528 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
+- lines 530-530 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 533-538 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
+- lines 540-540 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 544-548 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
 + 
-- lines 545-549 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 551-555 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
 + 
-- lines 553-557 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
-- lines 559-564 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
-- lines 566-566 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 559-563 (5): '/*[OWUI_CUSTOM_START]*/' .. '/*[OWUI_CUSTOM_END]*/'
+- lines 565-570 (6): '/*[OWUI_CUSTOM_START]*/' .. '}'
+- lines 572-572 (1): '/*[OWUI_CUSTOM_END]*/' .. '/*[OWUI_CUSTOM_END]*/'
 + 
 
 #=# bootloader: enforceTheme default valves, /, light, personal theme
@@ -960,7 +966,7 @@ data-theme 'her', class 'her'
 data-theme 'dark', class 'dark'
 /theme.css, changed:
 - lines 1-75 (75): '/*[OWUI_VARS_START]*/' .. '}'
-- lines 77-567 (491): '/*[OWUI_PAL_LIGHT_END]*/' .. ''
+- lines 77-573 (497): '/*[OWUI_PAL_LIGHT_END]*/' .. ''
 
 #=# bootloader: enforceTheme every valve flipped, /auth, oled-dark, sections
 data-theme 'oled-dark', class 'dark'
