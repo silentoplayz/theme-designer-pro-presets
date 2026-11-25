@@ -66,7 +66,7 @@ Unlike the [Tool variant](../tools/) which runs inside an AI chat iframe, this v
 - 📋 **Smart Clipboard Parsing & Image Extraction:** Upload an image or press `Ctrl+V` to paste one from your clipboard to calculate dominant colors. The tool also features a Smart JSON paste listener: paste a Theme Designer JSON configuration, or a Canvas FX, CSS or gradient preset backup, and the tool will parse and prompt you to apply it (with a security warning if untrusted Canvas FX scripts are detected).
 - 🎨 **Gradient Background Builder:** Design rich CSS gradient backgrounds using the dedicated Gradient tab. Choose between linear, radial, and mesh gradient types (conic ones come in through imported themes and presets), add and position color stops visually, control direction and strength, and enable smooth gradient animation with configurable speed. Ships with 12 built-in gradient presets: Midnight, Emerald, Amethyst, Sapphire, Aurora (animated), Sunset, Ocean, Neon, Nebula (mesh), Lagoon (mesh), Ember (mesh), and Arctic (mesh). Save, import, and export custom gradient presets. The gradient layer applies the same structural transparency rules as Canvas FX.
 
-- 📋 **Theme Metadata & Versioning:** Attach rich metadata when saving: Name, Description, Author, Theme Version, Target WebUI Version, Repository URL, and Theme Update URL. Metadata is embedded in exported `.json` files and preserved through imports.
+- 📋 **Theme Metadata & Versioning:** Attach rich metadata when saving: Name, Description, Author, Theme Version, Target Open WebUI Version, Repository URL, and Theme Update URL. Metadata is embedded in exported `.json` files and preserved through imports.
 - 🔄 **OTA Theme Update Checking:** Themes with a Theme Update URL can be checked for updates against a remote JSON endpoint. Use the per-snapshot ⟳ button or the global "Updates" header button to check all themes at once. Shows a detailed update modal with version comparison. The **Enable Theme Update Checks** valve turns all of these requests off.
 - 🌐 **Community Theme Import via URL:** Import themes directly from the web. The Import button opens a dual-mode dialog where you can paste a URL to a remote `theme.json` file, or use the classic file picker. Theme Designer Pro auto-converts `github.com` URLs to raw content.
 - 📦 **JSON Viewer:** Inspect your current theme state at any time. The JSON Viewer modal displays your full configuration in a read-only, formatted code block with Copy and Collapse buttons.
@@ -550,6 +550,11 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. Since 1.7.0 the function cleans that up automatically, on its first event after each start; to check by hand, look for `<!-- OWUI Theme Pro Bootloader -->` in `/app/build/index.html`. It should be gone.
 
 ---
+
+## 📝 Unreleased
+
+- **Rough edges smoothed.** Canvas FX and CSS gallery cards show what they hold, such as "WebGL · Worker · Follows theme · 214 lines" or "12 rules · 40 lines", instead of an empty bar. Every tab's title sits at the same height and the same distance from what follows, the Custom CSS and Canvas FX editors included. On a phone, **Shows on** takes a row of its own instead of breaking or running off the edge. The empty Theme Gallery points to the **+** button and the Community Themes below it, not to a Snapshot button that doesn't exist. Selective Sync leaves out OLED where Open WebUI has retired it and keeps its buttons apart from the list scrolling above them. The AI Consultant's switch reads **Change only Dark** (or the mode you're editing), and the Save dialog's **Target Open WebUI Version** suggests the version your instance runs.
+- **The designer's notices stay clear of its buttons.** A notice such as "Theme applied!" was centered on the footer, where a wide row of buttons on the left, as in Settings, ran under it, Undo and Redo included. It now sits in the free space between Undo and Redo and the Live/Draft switch, and floats just above the footer when that space is too narrow.
 
 ## 📝 What's New in 1.25.1
 

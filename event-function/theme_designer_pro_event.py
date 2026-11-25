@@ -6021,6 +6021,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
            clicked button keeps focus, which would leave them showing */
         .preset-btn:hover .delete-snapshot, .preset-btn:hover .update-snapshot, .preset-btn:hover .edit-snapshot, .preset-btn:hover .export-snapshot,
         .preset-btn:has(:focus-visible) .snapshot-action { opacity: 1; transform: scale(1); }
+        .preset-summary { display: flex; align-items: center; justify-content: center; width: 100%; height: 32px; padding: 0 8px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-deep); color: var(--text-muted); font-size: 9px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .preset-dots { display: flex; gap: 1px; width: 100%; height: 32px; border-radius: 10px; overflow: hidden; background: rgba(255,255,255,0.02); padding: 2px; border: 1px solid rgba(255,255,255,0.05); }
 
         .snapshot-action { position: absolute; width: 22px; height: 22px; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; border: 3px solid var(--bg-surface); z-index: 10; opacity: 0; transform: scale(0.5); transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -6093,6 +6094,8 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         .var-action-btn:hover { background: var(--accent-fill); border-color: var(--accent-fill); color: white; }
 
         .code-container { display: flex; flex-direction: column; gap: 20px; height: 100%; }
+        /* The column's gap already spaces the title from the editor below it */
+        .code-container > .section-title { margin-bottom: 4px; }
 
         /* Code blocks, styled like Open WebUI's */
         .owui-code-block { display: flex; flex-direction: column; background: #000000; border-radius: 12px; border: none; overflow: hidden; flex: 1; box-shadow: 0 4px 12px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(255,255,255,0.1); }
@@ -6175,6 +6178,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
 
         .action-toast { position: absolute; left: 50%; transform: translateX(-50%) scale(0.95); background: var(--accent-fill); color: white; padding: 8px 20px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; opacity: 0; pointer-events: none; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9999; box-shadow: 0 4px 15px rgba(59,130,246,0.4); white-space: nowrap; }
         .action-toast.show { opacity: 1; transform: translateX(-50%) scale(1); }
+        .action-toast.above { bottom: calc(100% + 6px); }
 
         /* Draft switch and status badge */
         .draft-toggle { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; font-weight: 600; flex-shrink: 0; }
@@ -6271,6 +6275,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
             /* A section's switches and its Shows on pills wrap under its title */
             .section-title-bar { flex-wrap: wrap; gap: 8px; }
             .section-title-bar .flex-center { flex-wrap: wrap; gap: 8px 12px; }
+            .section-title-bar .auth-where { flex-basis: 100%; }
             .btn-icon { width: 30px; height: 30px; min-width: 30px; min-height: 30px; }
 
             .var-action-btn { font-size: 0.65rem; padding: 6px 10px; }
@@ -6318,7 +6323,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         /* Utility classes */
         .toggle-label, .toggle-label-gap5, .toggle-label-ml { display: flex; align-items: center; gap: 7px; font-size: 0.65rem; color: var(--text-main); cursor: pointer; }
         .toggle-label-gap5 { gap: 5px; }
-        .auth-where { cursor: default; }
+        .auth-where { cursor: default; white-space: nowrap; }
         .where-pill { flex: none; padding: 4px 8px; white-space: nowrap; }
         .toggle-label-ml { margin-left: 8px; }
         .cb-input { -webkit-appearance: none; appearance: none; position: relative; width: 34px; height: 18px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.08); border-radius: 9px; cursor: pointer; transition: background 0.3s, border-color 0.3s; flex-shrink: 0; margin: 0; }
@@ -6390,7 +6395,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         .flex-center-gap6 { display: flex; gap: 6px; align-items: center; flex-shrink: 0; flex-wrap: nowrap; }
         .flex-center-gap8 { display: flex; gap: 8px; align-items: center; }
         .flex-end { display: flex; gap: 12px; justify-content: flex-end; }
-        .section-title-bar { align-items: center; display: flex; justify-content: space-between; }
+        .section-title-bar { align-items: center; display: flex; justify-content: space-between; min-height: 28px; }
         .doc-table-compact { width: 100%; border-collapse: collapse; font-size: 0.68rem; margin: 8px 0 16px; }
         .doc-table-compact th { text-align: left; padding: 8px 10px; font-weight: 800; color: var(--text-main); }
         .doc-table-compact td { padding: 8px 10px; }
@@ -6496,7 +6501,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
     <div class="content-area">
 
         <div id="tab-lch" class="tab-content" role="tabpanel" aria-labelledby="tab-btn-lch" style="display:none;">
-            <div class="section-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="section-title section-title-bar">
                 <div>Core Palette</div>
                 <div class="flex-center">
                     <label class="toggle-label" data-tooltip="Enable or disable the generated color palette for this mode"><input type="checkbox" id="toggle-palette-enabled" class="cb-input"> Enabled</label>
@@ -6796,7 +6801,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         </div>
 
         <div id="tab-backgrounds" class="tab-content" role="tabpanel" aria-labelledby="tab-btn-backgrounds" style="display:none;">
-            <div class="section-title">
+            <div class="section-title section-title-bar">
                 <div>Open WebUI Backgrounds</div>
             </div>
             <div class="control-group">
@@ -7778,7 +7783,7 @@ self.onmessage = (e) =&gt; {
                         <h4>Theme Gallery</h4>
                         <ul>
                             <li><b>Snapshot Coverage:</b> When saving a theme snapshot, all associated data is captured: OKLCH sliders, variable locks &amp; overrides, Manual Variable Overrides, Custom CSS, Canvas FX scripts, Gradient Background, Surfaces, accent colors and the auth page settings, across all 4 modes. The Backgrounds tab belongs to the live theme and isn&rsquo;t saved in a snapshot. The Manual Variable Overrides switch is saved with the text, and a theme saved before 1.11.0, which has no switch, loads its overrides switched on when it has any. Loading a snapshot locks every variable it overrides.</li>
-                            <li><b>Theme Metadata:</b> When saving a snapshot, you can attach metadata: <b>Name</b>, <b>Description</b>, <b>Author</b>, <b>Theme Version</b>, <b>Target WebUI Version</b>, <b>Repository URL</b>, and a <b>Theme Update URL</b>. Metadata is embedded in exported <code>.json</code> files and preserved through imports, so a shared theme keeps its name, author and update address.</li>
+                            <li><b>Theme Metadata:</b> When saving a snapshot, you can attach metadata: <b>Name</b>, <b>Description</b>, <b>Author</b>, <b>Theme Version</b>, <b>Target Open WebUI Version</b>, <b>Repository URL</b>, and a <b>Theme Update URL</b>. Metadata is embedded in exported <code>.json</code> files and preserved through imports, so a shared theme keeps its name, author and update address.</li>
                             <li><b>Visual Indicators:</b> Hovering over a theme card displays a rich tooltip showing the name, version, author, description, and color-coded feature tags: <span style="color:#6ee7b7;">Custom CSS</span>, <span style="color:#fdba74;">Canvas FX</span>, <span style="color:#f9a8d4;">Gradient</span>, <span style="color:#c4b5fd;">Overrides</span>, and <span style="color:#67e8f9;">Linked</span> (URL-linked themes).</li>
                             <li><b>Search:</b> Click the 🔍 icon to search themes by name, author, or description. Press Escape to close the search bar.</li>
                             <li><b>Tag Filter:</b> Click the filter icon to narrow the gallery by feature: show only themes that contain Custom CSS, Canvas FX, Gradient, Overrides, or those that are Linked to an update URL.</li>
@@ -8516,7 +8521,7 @@ location.reload();</code></pre>
                 </div>
             </div>
 
-            <div style="display:flex; gap:12px; justify-content:center;">
+            <div style="display:flex; gap:12px; justify-content:center; flex-shrink:0; margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
                 <button class="btn" id="sync-cancel-btn" style="flex:1;" data-dismiss="sync-modal">Do Not Sync</button>
                 <button class="btn btn-primary" id="confirm-sync-btn" style="flex:1;">Sync Selected</button>
             </div>
@@ -10859,10 +10864,29 @@ self.onmessage = (e) => {
         }
     }
 
+    // The toast sits in the footer's free space, between Undo and Redo on the
+    // left and the Live/Draft switch on the right, so it covers neither.
+    // Where that space is too narrow or the footer wraps, it floats centered
+    // just above the footer.
+    function placeToast(toast) {
+        toast.style.left = '';
+        toast.classList.remove('above');
+        const footer = toast.parentElement;
+        const left = footer && footer.querySelector('.footer-left');
+        const right = footer && footer.querySelector('.footer-right');
+        if (!left || !right) return;
+        const f = footer.getBoundingClientRect(), l = left.getBoundingClientRect(), r = right.getBoundingClientRect();
+        const sameRow = r.top < l.bottom && l.top < r.bottom;
+        const room = r.left - l.right - 24;
+        if (sameRow && room >= toast.offsetWidth) toast.style.left = `${(l.right + r.left) / 2 - f.left}px`;
+        else toast.classList.add('above');
+    }
+
     function showToast(msg, duration = TIMING.toastDuration) {
         const toast = document.getElementById('action-toast');
         if (toast) {
             toast.innerText = msg;
+            placeToast(toast);
             toast.classList.add('show');
             clearTimeout(toast._hideTimer);
             toast._hideTimer = setTimeout(() => {
@@ -11017,7 +11041,8 @@ self.onmessage = (e) => {
         function open() {
             if (!modal) build();
             const label = modal.querySelector('#ai-consult-one-mode-label');
-            label.textContent = 'Only the ' + getActiveDataMode() + ' mode';
+            const names = { dark: 'Dark', oled: 'OLED', light: 'Light', her: 'Her' };
+            label.textContent = 'Change only ' + (names[getActiveDataMode()] || 'this mode');
             modal.querySelector('#ai-consult-status').textContent = '';
             showModal(modal.id);
             modal.querySelector('#ai-consult-input').focus();
@@ -11701,12 +11726,26 @@ self.onmessage = (e) => {
             <div class="preset-btn ${isActive ? 'active-theme' : ''}" style="padding: 12px 8px;" data-item="${i}" role="group" aria-label="${_escAttr(p.name)}">
                 <button type="button" class="plain-button card-apply" data-control="apply" onclick="${loadFnName}(${i})" aria-label="Load ${_escAttr(p.name)}"></button>
                 ${actions}
-                <div class="preset-dots" style="background: var(--border); opacity: 0.5;"></div>
+                <div class="preset-summary">${_esc(presetSummary(p[contentField], contentField))}</div>
                 <span style="font-size: 10px; width: 100%; overflow: hidden; text-overflow: ellipsis; text-align: center; white-space: nowrap; display: block;">${_esc(p.name)}</span>
                 <div class="selected-check">✓</div>
             </div>
             `;
         }).join(''));
+    }
+
+    // A short line on a script or snippet card in place of a theme's colors:
+    // how a Canvas FX script runs, or how much CSS a snippet holds
+    function presetSummary(text, kind) {
+        const src = typeof text === 'string' ? text : '';
+        const lines = src ? src.split('\n').length : 0;
+        const size = `${lines} ${lines === 1 ? 'line' : 'lines'}`;
+        if (kind === 'script') {
+            const t = getCanvasScriptTags(src);
+            return [t.webgl ? 'WebGL' : '2D', t.isolated ? 'Isolated' : t.dom ? 'Main thread' : 'Worker', t.theme ? 'Follows theme' : '', size].filter(Boolean).join(' · ');
+        }
+        const rules = (src.replace(/\/\*[\s\S]*?\*\//g, '').match(/\{/g) || []).length;
+        return `${rules} ${rules === 1 ? 'rule' : 'rules'} · ${size}`;
     }
 
     // A gallery's markup, written only when it changed: the galleries are
@@ -15332,7 +15371,8 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
 
         const container = $('sync-target-container');
         container.innerHTML = '';
-        MODES.forEach(m => {
+        // Where Open WebUI retired OLED Dark there is nothing to sync it to
+        MODES.filter(m => !(m === 'oled' && _oledRetired)).forEach(m => {
             const isSource = (sourceType === 'active-mode' && m === dm);
             const isChecked = !isSource;
 
@@ -18382,6 +18422,10 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
                     if (res.ok) {
                         const data = await res.json();
                         if (typeof data?.version === 'string' && semverCompare(data.version, '0.13.5') >= 0) _oledRetired = true;
+                        // The Save dialog suggests the version this instance runs
+                        if (typeof data?.version === 'string' && /^[\w.+-]{1,32}$/.test(data.version)) {
+                            ['theme-target-input', 'rename-target-input'].forEach(id => { const el = document.getElementById(id); if (el) el.placeholder = data.version; });
+                        }
                         if (data?.features?.enable_easter_eggs === true) {
                             showHer = true;
                         } else if (currentTheme !== 'her' && !hasHerClass) {
@@ -18969,7 +19013,7 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
             if (snapshots.length === 0) { 
                 scrollArea.style.display = 'block';
                 container.style.display = 'block';
-                container.innerHTML = `<div class="empty-state-lg"><div style="margin-bottom:8px;">Your theme gallery is empty.</div><div style="font-size:0.65rem; line-height:1.6;">Save your current theme using the <b>📸 Snapshot</b> button, or import community presets from <a href="https://silentoplayz.github.io/theme-designer-pro-presets/" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:underline;">the preset gallery</a>.</div></div>`;
+                container.innerHTML = `<div class="empty-state-lg"><div style="margin-bottom:8px;">Your theme gallery is empty.</div><div style="font-size:0.65rem; line-height:1.6;">Save your current theme with the <b>+</b> button above, or install one from <b>Community Themes</b> below.</div></div>`;
                 return; 
             }
 
@@ -19755,7 +19799,7 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
             ('desc-input', 'Description', 'A short description', False),
             ('author-input', 'Author', 'Your name', False),
             ('version-input', 'Theme Version', '1.0.0', False),
-            ('target-input', 'Target WebUI Version', '0.9.0', False),
+            ('target-input', 'Target Open WebUI Version', '0.13.5', False),
             ('repo-input', 'Repository URL', 'https://github.com/...', False),
             ('update-input', 'Theme Update URL', 'https://...', True),
         ]
