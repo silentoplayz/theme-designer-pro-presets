@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI: an admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, optional personal themes for every user, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.25.0-blue)
+![Version](https://img.shields.io/badge/version-1.25.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.13.4-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -550,6 +550,10 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 > Upgrading from 1.6.2 or earlier? Those versions did patch `index.html`. Since 1.7.0 the function cleans that up automatically, on its first event after each start; to check by hand, look for `<!-- OWUI Theme Pro Bootloader -->` in `/app/build/index.html`. It should be gone.
 
 ---
+
+## 📝 What's New in 1.25.1
+
+- **No more OLED tab on Open WebUI 0.13.5 and later.** Open WebUI 0.13.5 retired OLED Dark: it turns a saved OLED choice into Dark with the user's own Theme Colors set to black and white, and a user's own Theme Colors hide the palette from them. Clicking the designer's OLED tab in Live mode saved that choice, so on the next page load the admin lost the instance theme's Dark palette. From 0.13.5 the tab is hidden and the designer never switches anyone to OLED; on older versions nothing changes. A theme's OLED settings are kept for older instances and theme files.
 
 ## 📝 What's New in 1.25.0
 

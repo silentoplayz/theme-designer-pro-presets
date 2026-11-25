@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.25.0
+version: 1.25.1
 license: MIT
 required_open_webui_version: 0.13.4
 """
@@ -22,7 +22,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.25.0"
+VERSION = "1.25.1"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -6977,7 +6977,7 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                     <div class="doc-inner">
                         <p>Unlike standard hex-based themes, this designer uses the <b>OKLCH</b> color space to generate perceptually uniform palettes. This means the visual "weight" of colors remains identical as you shift hues.</p>
                         <ul>
-                            <li><b>Global Modes:</b> Easily switch between <b>Dark</b>, <b>OLED</b> (pure black), <b>Light</b>, <b>Her</b>, and <b>System</b> modes using the segmented toggle. Settings, variables, and CSS are managed entirely separately for each mode. System mode proxies to your OS preference (see Section 8). In Live mode, picking a mode tab also switches Open WebUI itself, in your other tabs and in Settings around the embedded designer; in Draft mode it switches only the designer. <i>Note: when the page loads, the designer reads Open WebUI&rsquo;s <code>enable_easter_eggs</code> setting from <code>/api/config</code> and shows the Her tab if it&rsquo;s on, or if Open WebUI is already in Her mode.</i></li>
+                            <li><b>Global Modes:</b> Easily switch between <b>Dark</b>, <b>OLED</b> (pure black), <b>Light</b>, <b>Her</b>, and <b>System</b> modes using the segmented toggle. Settings, variables, and CSS are managed entirely separately for each mode. System mode proxies to your OS preference (see Section 8). Open WebUI 0.13.5 retired OLED Dark: it turns a saved OLED choice into Dark with the user&rsquo;s own Theme Colors set to black. From that version the designer hides its OLED tab, so it never switches you to OLED and leaves you with black Theme Colors; a theme&rsquo;s OLED settings are kept for older instances and theme files. In Live mode, picking a mode tab also switches Open WebUI itself, in your other tabs and in Settings around the embedded designer; in Draft mode it switches only the designer. <i>Note: when the page loads, the designer reads Open WebUI&rsquo;s <code>enable_easter_eggs</code> setting from <code>/api/config</code> and shows the Her tab if it&rsquo;s on, or if Open WebUI is already in Her mode.</i></li>
                             <li><b>Hue / Chroma / Lightness:</b> Control the base angle, intensity, and brightness. Lightness keeps text readable across its whole range: above the 20% default it lifts Dark&rsquo;s background and softens Light&rsquo;s text without letting the two meet. Double-click a slider&rsquo;s label to reset it to its default.</li>
                             <li><b>Accent Colors:</b> Under the sliders, three swatches show the mode&rsquo;s accents. Each starts on <b>Auto</b>: the palette&rsquo;s hue, lighter on dark modes and deeper on light ones, with the second and third 40&deg; to either side, so they follow the sliders. At Chroma 0, the default, the automatic accents are gray. Pick a color to set one for this mode, for a theme whose look is two colors the hue can&rsquo;t give, and click &#10226; to set it back to automatic (double-click the row&rsquo;s label for all three). Canvas FX scripts that follow the theme draw in them, and theme CSS reads them as <code>var(--tdp-accent)</code>, <code>var(--tdp-accent-2)</code> and <code>var(--tdp-accent-3)</code>; click an accent&rsquo;s name to copy its variable. Sync copies them with the palette.</li>
                             <li><b>Tonal Ramp:</b> Below the sliders, the OKLCH Tonal Ramp visualizes the generated 12-step color scale. Click any block in the ramp to copy its hex value to your clipboard.</li>
@@ -10490,6 +10490,10 @@ self.onmessage = (e) => {
     })();
 
     let activeMode = 'dark'; // 'dark', 'oled', 'light', 'her' or 'system'
+    // Open WebUI 0.13.5 retired OLED Dark: it turns a saved 'oled-dark' into
+    // Dark with the user's own Theme Colors set to black, which then hide the
+    // palette from them. Set from /api/config's version once it arrives.
+    let _oledRetired = false;
 
     // Auto-detect OWUI theme to match designer appearance
     (function() {
@@ -12908,8 +12912,9 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
                 applyModeToElement(html, mode);
             }
             // A draft previews the mode in this tab only, never in other tabs
-            // or the admin's live session
-            if (!_draftMode) {
+            // or the admin's live session. Where OLED Dark is retired, writing
+            // it would give the admin black Theme Colors on their next load.
+            if (!_draftMode && !(mode === 'oled' && _oledRetired)) {
                 localStorage.setItem('theme', MODE_CONFIG[mode]?.dataTheme || mode);
             }
         } catch(e) { console.warn('Theme Pro:', e); }
@@ -18376,6 +18381,7 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
                     const res = await fetch(baseUrl + '/api/config', { headers });
                     if (res.ok) {
                         const data = await res.json();
+                        if (typeof data?.version === 'string' && semverCompare(data.version, '0.13.5') >= 0) _oledRetired = true;
                         if (data?.features?.enable_easter_eggs === true) {
                             showHer = true;
                         } else if (currentTheme !== 'her' && !hasHerClass) {
@@ -18386,6 +18392,14 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
 
                 // Her mode's defaults above may have changed the theme
                 if (historyIndex === 0) resetHistoryBaseline(); else pushState();
+
+                // OLED's settings stay in the theme for older instances and
+                // theme files; only its tab goes
+                if (_oledRetired) {
+                    const oledBtn = document.querySelector('.mode-btn[data-mode="oled"]');
+                    if (oledBtn) oledBtn.style.display = 'none';
+                    if (activeMode === 'oled') document.querySelector('.mode-btn[data-mode="dark"]')?.click();
+                }
 
                 const herBtn = document.getElementById('mode-btn-her');
                 if (showHer) {

@@ -11,11 +11,12 @@ They cover how a theme reaches each page:
 - a personal theme replacing the instance theme, its custom CSS included, and **Use instance theme** reaching an open page live
 - a Canvas FX animation starting on app pages and staying off where it's hidden
 - a running Canvas FX reading no layout and running no timers on an idle chat or Workspace page, the calm column following a sidebar toggle within 300 ms and Widescreen Mode, and a script's message count leaving out an open edit box and following the chat in view
-- a mode switch from Open WebUI's Settings (OLED Dark included) and from `window.applyTheme` alone repainting, another tab's switch reaching the page, and a mode another script writes to `<html>` being put back
+- a mode switch from Open WebUI's Settings (OLED Dark where it still exists, Dark from 0.13.5) and from `window.applyTheme` alone repainting, another tab's switch reaching the page, and a mode another script writes to `<html>` being put back
 - deleting a gallery theme, **Wipe CSS Snippets** and **Wipe Canvas Presets** leaving the live theme alone
 - the dot in Settings on the **Themes** tab whose theme is in use, and the ring a user without the Admin tab sees for the instance theme
 - the Settings tabs and the Admin Panel's **Themes** link scheduling no work while a chat page's content changes, and that link opening the designer, closing for another page of the bar or Back, and coming back after a client-side trip out of the Admin Panel
 - the designer opening without errors, with nothing to undo
+- the designer hiding its OLED tab where Open WebUI retired OLED Dark (0.13.5 and later), and never switching anyone to it
 - a chat theme signed the way the Launcher signs one refused when its custom CSS fetches (escaped `url()`, `image-set()`, `@import`, `src:`), and applied when it uses only quoted `data:` URLs
 - Undo right after typing in an editor or turning a slider with the wheel undoing just that step, and Redo bringing it back
 - an Animation Settings control changed right after typing in the Canvas FX editor keeping its value and focus

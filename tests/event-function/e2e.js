@@ -826,9 +826,16 @@ test('a mode switch in Settings repaints through window.applyTheme', async ({ ad
   const mode = () => page.evaluate(() => ({ attr: document.documentElement.getAttribute('data-theme'), cls: ['dark', 'light', 'her'].filter((c) => document.documentElement.classList.contains(c)).join() }));
   // Open WebUI's own Theme setting
   await openSettings(page);
-  // OLED Dark leaves <html>'s classes as Dark had them
-  await page.selectOption('select[aria-label="Theme"]', 'oled-dark');
-  await waitFor('OLED Dark from Settings', async () => { const m = await mode(); return (m.attr === 'oled-dark' && m.cls === 'dark') || m; });
+  // OLED Dark leaves <html>'s classes as Dark had them. Open WebUI 0.13.5
+  // retired it, so from there Settings offers Dark in its place.
+  const hasOled = await page.locator('select[aria-label="Theme"] option[value="oled-dark"]').count() > 0;
+  if (hasOled) {
+    await page.selectOption('select[aria-label="Theme"]', 'oled-dark');
+    await waitFor('OLED Dark from Settings', async () => { const m = await mode(); return (m.attr === 'oled-dark' && m.cls === 'dark') || m; });
+  } else {
+    await page.selectOption('select[aria-label="Theme"]', 'dark');
+    await waitFor('Dark from Settings', async () => { const m = await mode(); return (m.attr === 'dark' && m.cls === 'dark') || m; });
+  }
   await page.selectOption('select[aria-label="Theme"]', 'light');
   await waitFor('Light from Settings', async () => { const m = await mode(); return (m.attr === 'light' && m.cls === 'light') || m; });
   // The hook alone repaints: nothing else on the page changes here
@@ -1423,6 +1430,24 @@ test('the designer opens without errors and with nothing to undo', async ({ admi
   // With personal themes on, an instance save reaches only people without one
   const tip = await page.$eval('#inactive-badge', (b) => b.getAttribute('data-tooltip') || '');
   if (!/using a theme of their own/.test(tip)) throw new Error('the badge says a save reaches: ' + tip);
+  if (page.errors.length) throw new Error('page errors: ' + page.errors.join(' | '));
+});
+
+test('the designer hides OLED where Open WebUI retired it, and never switches anyone to it', async ({ admin }) => {
+  // Open WebUI 0.13.5 turns a saved 'oled-dark' into Dark with black Theme
+  // Colors, which hide the palette from that user
+  const { version } = await (await fetch(BASE + '/api/config')).json();
+  const [major, minor, patch] = String(version).split(/[.-]/).map((n) => parseInt(n, 10) || 0);
+  const retired = major > 0 || minor > 13 || (minor === 13 && patch >= 5);
+  const page = await openDesigner(admin);
+  const shown = await page.$eval('.mode-btn[data-mode="oled"]', (b) => getComputedStyle(b).display !== 'none');
+  if (shown === retired) throw new Error(`the OLED tab is ${shown ? 'shown' : 'hidden'} on Open WebUI ${version}`);
+  if (retired) {
+    await page.evaluate(() => document.querySelector('.mode-btn[data-mode="oled"]').click());
+    await new Promise((r) => setTimeout(r, 500));
+    const theme = await page.evaluate(() => localStorage.getItem('theme'));
+    if (theme === 'oled-dark') throw new Error('the designer switched Open WebUI to the retired OLED Dark');
+  }
   if (page.errors.length) throw new Error('page errors: ' + page.errors.join(' | '));
 });
 
