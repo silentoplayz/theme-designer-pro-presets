@@ -19,7 +19,7 @@
     autoScope: true, canvasEnabled: false, canvasScript: '',
     manualOverrides: '', manualOverridesEnabled: false,
     gradientEnabled: false, gradientType: 'linear', gradientAngle: 135,
-    gradientStops: [], gradientIntensity: 85, gradientAnimation: false,
+    gradientStops: [], gradientIntensity: 100, gradientAnimation: false,
     gradientRadialPosX: 50, gradientRadialPosY: 50, gradientRadialShape: 'ellipse', gradientRadialSize: 'farthest-corner',
     gradientMeshPoints: [], gradientMeshBgColor: '#0a0a12',
     gradientAnimationSpeed: 8, gradientShowAuth: true, themeShowAuth: true,
@@ -77,7 +77,7 @@
       vars: E.modeVars(m, key),
       customCSS: m.customCssEnabled ? m.customCSS || '' : '',
       canvasScript: m.canvasEnabled && m.canvasScript ? m.canvasScript : null,
-      gradient: m.gradientEnabled ? E.gradientLayers(m) : null,
+      gradient: m.gradientEnabled ? E.gradientLayers(m, key === 'light' || key === 'her') : null,
       transparent: false,
     };
   }
@@ -191,7 +191,7 @@
         gradientType: g.type || 'linear',
         gradientAngle: g.angle != null ? g.angle : 135,
         gradientStops: clone(g.stops || []),
-        gradientIntensity: g.intensity != null ? g.intensity : 85,
+        gradientIntensity: g.intensity != null ? g.intensity : 100,
         gradientAnimation: !!g.animated,
         gradientAnimationSpeed: clamp(g.speed, 2, 30, 8),
         gradientRadialPosX: g.radialPosX != null ? g.radialPosX : 50,

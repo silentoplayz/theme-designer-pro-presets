@@ -1,7 +1,7 @@
 # themes/fixture-minimal.txt - written by golden.py --update, do not edit
 
 #=# designer: imported theme (ensureAllModes, normalizeModeData), against the file
-sha256 0fccb9df84a0
+sha256 107277d441ed
 dark: added from DEFAULT_MODE_DATA: overrides locks paletteEnabled accent accent2 accent3 customCSS customCssEnabled autoScope canvasEnabled canvasScript gradientType gradientAngle gradientIntensity gradientRadialPosX gradientRadialPosY gradientRadialShape gradientRadialSize gradientMeshPoints gradientMeshBgColor gradientAnimationSpeed gradientShowAuth themeShowAuth customCssShowAuth canvasShowAuth themeAuthOnly customCssAuthOnly canvasAuthOnly gradientAuthOnly surfacesEnabled surfaceSidebarOpacity surfaceSidebarBlur surfaceComposerOpacity surfaceComposerBlur surfacePanelOpacity surfacePanelBlur surfaceCardsOpacity surfaceCardsBlur surfaceButtonsOpacity surfaceButtonsBlur surfaceMenuOpacity surfaceMenuBlur surfaceDialogOpacity surfaceDialogBlur surfaceBackdropOpacity surfaceBackdropBlur surfaceFadeOpacity
 light: added from DEFAULT_MODE_DATA: overrides locks paletteEnabled accent accent2 accent3 autoScope canvasEnabled canvasScript manualOverrides manualOverridesEnabled gradientEnabled gradientType gradientAngle gradientStops gradientIntensity gradientAnimation gradientRadialPosX gradientRadialPosY gradientRadialShape gradientRadialSize gradientMeshPoints gradientMeshBgColor gradientAnimationSpeed gradientShowAuth themeShowAuth customCssShowAuth canvasShowAuth themeAuthOnly customCssAuthOnly canvasAuthOnly gradientAuthOnly surfacesEnabled surfaceSidebarOpacity surfaceSidebarBlur surfaceComposerOpacity surfaceComposerBlur surfacePanelOpacity surfacePanelBlur surfaceCardsOpacity surfaceCardsBlur surfaceButtonsOpacity surfaceButtonsBlur surfaceMenuOpacity surfaceMenuBlur surfaceDialogOpacity surfaceDialogBlur surfaceBackdropOpacity surfaceBackdropBlur surfaceFadeOpacity
 dark.gradientAnimation: null -> false
@@ -12,8 +12,8 @@ version: added "1.0.0"
 targetVersion: added ""
 repositoryUrl: added ""
 updateUrl: added ""
-oled: added {"h": 200, "c": 30, "l": 0, "overrides": {}, "locks": {}, "paletteEnabled": true, "accent": "", "accent2": "", "accent3": "", "customCSS": "", "customCssEnabled": false, "autoScope": true, "canvasEnabled": false, "canvasScript": "", "manualOverrides": "--color-gray-900: #0b1020;", "manualOverridesEnabled": true, "gradientEnabled": true, "gradientType": "linear", "gradientAngle": 135, "gradientStops": [{"color": "#000000", "position": 0}, {"color": "#334455", "position": 100}], "gradientIntensity": 85, "gradientAnimation": false, "gradientRadialPosX": 50, "gradientRadialPosY": 50, "gradientRadialShape": "ellipse", "gradientRadialSize": "farthest-corner", "gradientMeshPoints": [], "gradientMeshBgColor": "#0a0a12", "gradientAnimationSpeed": 8, "gradientShowAuth": true, "themeShowAuth": true, "customCssShowAuth": true, "canvasShowAuth": true, "themeAuthOnly": false, "customCssAuthOnly": false, "canvasAuthOnly": false, "gradientAuthOnly": false, "surfacesEnabled": false, "surfaceSidebarOpacity": 100, "surfaceSidebarBlur": 0, "surfaceComposerOpacity": 5, "surfaceComposerBlur": 8, "surfacePanelOpacity": 100, "surfacePanelBlur": 0, "surfaceCardsOpacity": 100, "surfaceCardsBlur": 0, "surfaceButtonsOpacity": 100, "surfaceButtonsBlur": 0, "surfaceMenuOpacity": 100, "surfaceMenuBlur": 0, "surfaceDialogOpacity": 100, "surfaceDialogBlur": 0, "surfaceBackdropOpacity": 60, "surfaceBackdropBlur": 0, "surfaceFadeOpacity": 100}
-her: added {"h": 40, "c": 12, "l": 96, "overrides": {}, "locks": {}, "paletteEnabled": true, "accent": "", "accent2": "", "accent3": "", "customCSS": "html { --fixture-light: 1; }", "customCssEnabled": true, "autoScope": true, "canvasEnabled": false, "canvasScript": "", "manualOverrides": "", "manualOverridesEnabled": false, "gradientEnabled": false, "gradientType": "linear", "gradientAngle": 135, "gradientStops": [], "gradientIntensity": 85, "gradientAnimation": false, "gradientRadialPosX": 50, "gradientRadialPosY": 50, "gradientRadialShape": "ellipse", "gradientRadialSize": "farthest-corner", "gradientMeshPoints": [], "gradientMeshBgColor": "#0a0a12", "gradientAnimationSpeed": 8, "gradientShowAuth": true, "themeShowAuth": true, "customCssShowAuth": true, "canvasShowAuth": true, "themeAuthOnly": false, "customCssAuthOnly": false, "canvasAuthOnly": false, "gradientAuthOnly": false, "surfacesEnabled": false, "surfaceSidebarOpacity": 100, "surfaceSidebarBlur": 0, "surfaceComposerOpacity": 5, "surfaceComposerBlur": 8, "surfacePanelOpacity": 100, "surfacePanelBlur": 0, "surfaceCardsOpacity": 100, "surfaceCardsBlur": 0, "surfaceButtonsOpacity": 100, "surfaceButtonsBlur": 0, "surfaceMenuOpacity": 100, "surfaceMenuBlur": 0, "surfaceDialogOpacity": 100, "surfaceDialogBlur": 0, "surfaceBackdropOpacity": 60, "surfaceBackdropBlur": 0, "surfaceFadeOpacity": 100}
+oled: added {"h": 200, "c": 30, "l": 0, "overrides": {}, "locks": {}, "paletteEnabled": true, "accent": "", "accent2": "", "accent3": "", "customCSS": "", "customCssEnabled": false, "autoScope": true, "canvasEnabled": false, "canvasScript": "", "manualOverrides": "--color-gray-900: #0b1020;", "manualOverridesEnabled": true, "gradientEnabled": true, "gradientType": "linear", "gradientAngle": 135, "gradientStops": [{"color": "#000000", "position": 0}, {"color": "#334455", "position": 100}], "gradientIntensity": 100, "gradientAnimation": false, "gradientRadialPosX": 50, "gradientRadialPosY": 50, "gradientRadialShape": "ellipse", "gradientRadialSize": "farthest-corner", "gradientMeshPoints": [], "gradientMeshBgColor": "#0a0a12", "gradientAnimationSpeed": 8, "gradientShowAuth": true, "themeShowAuth": true, "customCssShowAuth": true, "canvasShowAuth": true, "themeAuthOnly": false, "customCssAuthOnly": false, "canvasAuthOnly": false, "gradientAuthOnly": false, "surfacesEnabled": false, "surfaceSidebarOpacity": 100, "surfaceSidebarBlur": 0, "surfaceComposerOpacity": 5, "surfaceComposerBlur": 8, "surfacePanelOpacity": 100, "surfacePanelBlur": 0, "surfaceCardsOpacity": 100, "surfaceCardsBlur": 0, "surfaceButtonsOpacity": 100, "surfaceButtonsBlur": 0, "surfaceMenuOpacity": 100, "surfaceMenuBlur": 0, "surfaceDialogOpacity": 100, "surfaceDialogBlur": 0, "surfaceBackdropOpacity": 60, "surfaceBackdropBlur": 0, "surfaceFadeOpacity": 100}
+her: added {"h": 40, "c": 12, "l": 96, "overrides": {}, "locks": {}, "paletteEnabled": true, "accent": "", "accent2": "", "accent3": "", "customCSS": "html { --fixture-light: 1; }", "customCssEnabled": true, "autoScope": true, "canvasEnabled": false, "canvasScript": "", "manualOverrides": "", "manualOverridesEnabled": false, "gradientEnabled": false, "gradientType": "linear", "gradientAngle": 135, "gradientStops": [], "gradientIntensity": 100, "gradientAnimation": false, "gradientRadialPosX": 50, "gradientRadialPosY": 50, "gradientRadialShape": "ellipse", "gradientRadialSize": "farthest-corner", "gradientMeshPoints": [], "gradientMeshBgColor": "#0a0a12", "gradientAnimationSpeed": 8, "gradientShowAuth": true, "themeShowAuth": true, "customCssShowAuth": true, "canvasShowAuth": true, "themeAuthOnly": false, "customCssAuthOnly": false, "canvasAuthOnly": false, "gradientAuthOnly": false, "surfacesEnabled": false, "surfaceSidebarOpacity": 100, "surfaceSidebarBlur": 0, "surfaceComposerOpacity": 5, "surfaceComposerBlur": 8, "surfacePanelOpacity": 100, "surfacePanelBlur": 0, "surfaceCardsOpacity": 100, "surfaceCardsBlur": 0, "surfaceButtonsOpacity": 100, "surfaceButtonsBlur": 0, "surfaceMenuOpacity": 100, "surfaceMenuBlur": 0, "surfaceDialogOpacity": 100, "surfaceDialogBlur": 0, "surfaceBackdropOpacity": 60, "surfaceBackdropBlur": 0, "surfaceFadeOpacity": 100}
 
 #=# designer: normalizeSnapshot
 same as imported
@@ -340,7 +340,7 @@ html[data-theme="oled-dark"] #sidebar:not(.h-full) { background-color: var(--col
 /*[OWUI_GRADIENT_START]*/
 /* System Gradient Background */
 :is(html[data-theme="dark"], html:where(.dark:not([data-theme="oled-dark"]))) body {
-  background-image: linear-gradient(135deg, #131313 0%, #3f4d5b 100%) !important;
+  background-image: linear-gradient(135deg, #000000 0%, #334455 100%) !important;
   background-attachment: fixed !important;
 
 }
@@ -365,7 +365,7 @@ html[data-theme="oled-dark"] #sidebar:not(.h-full) { background-color: var(--col
 /*[OWUI_GRADIENT_START]*/
 /* System Gradient Background */
 :root[data-theme="system"] body {
-  background-image: linear-gradient(135deg, #131313 0%, #3f4d5b 100%) !important;
+  background-image: linear-gradient(135deg, #000000 0%, #334455 100%) !important;
   background-attachment: fixed !important;
 
 }
@@ -391,7 +391,7 @@ html[data-theme="oled-dark"] #sidebar:not(.h-full) { background-color: var(--col
 /*[OWUI_GRADIENT_START]*/
 /* System Gradient Background */
 html[data-theme="oled-dark"] body {
-  background-image: linear-gradient(135deg, #131313 0%, #3f4d5b 100%) !important;
+  background-image: linear-gradient(135deg, #000000 0%, #334455 100%) !important;
   background-attachment: fixed !important;
 
 }
@@ -457,7 +457,7 @@ contrast Muted text on background: #8ca8a9 on #0b1020 = 7.47 (aaa true, aa true,
 contrast Main text on elevated surfaces: #cfebec on #051c1e = 14.06 (aaa true, aa true, aaLarge true)
 contrast Main text on sidebar: #cfebec on #000506 = 16.35 (aaa true, aa true, aaLarge true)
 detectWashedOut: {"dark": false, "light": false}
-buildGradientCss(.scope): 863 chars, sha256 47863847794f
+buildGradientCss(.scope): 863 chars, sha256 1e9b4fcb3c32
 
 #=# designer: light mode
 @shared e2c7f9e1f5c7
@@ -471,7 +471,7 @@ contrast Muted text on background: #637d7e on #0b1020 = 4.30 (aaa false, aa fals
 contrast Main text on elevated surfaces: #a2bebf on #000203 = 10.55 (aaa true, aa true, aaLarge true)
 contrast Main text on sidebar: #a2bebf on #000000 = 10.65 (aaa true, aa true, aaLarge true)
 detectWashedOut: {"dark": false, "light": false}
-buildGradientCss(.scope): 863 chars, sha256 47863847794f
+buildGradientCss(.scope): 863 chars, sha256 1e9b4fcb3c32
 
 #=# designer: her mode
 @shared e2c7f9e1f5c7

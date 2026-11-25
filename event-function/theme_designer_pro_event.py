@@ -4,7 +4,7 @@ description: Instance-wide theme designer for Open WebUI. Replaces the built-in 
 author: @G30
 author_url: https://openwebui.com/u/g30
 funding_url: https://buymeacoffee.com/iamg30
-version: 1.23.0
+version: 1.24.0
 license: MIT
 required_open_webui_version: 0.13.4
 """
@@ -22,7 +22,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-VERSION = "1.23.0"
+VERSION = "1.24.0"
 ROUTE_PATH = "/api/v1/theme-designer"
 CSS_FILE_NAME = "open_theme_designer.css"
 
@@ -6739,8 +6739,8 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
                             <input type="range" id="sl-gradient-angle" min="0" max="360" value="135" aria-label="Gradient direction">
                         </div>
                         <div class="slider-row">
-                            <label data-reset="gradient-intensity"><span data-tooltip="Double-click to reset to 85%" style="cursor:pointer">Color Intensity</span> <span class="slider-val" id="val-gradient-intensity">85%</span></label>
-                            <input type="range" id="sl-gradient-intensity" min="0" max="100" value="85" aria-label="Color intensity">
+                            <label data-reset="gradient-intensity"><span data-tooltip="How strongly the gradient shows over the background. Double-click to reset to 100%" style="cursor:pointer">Strength</span> <span class="slider-val" id="val-gradient-intensity">100%</span></label>
+                            <input type="range" id="sl-gradient-intensity" min="0" max="100" value="100" aria-label="Strength">
                         </div>
                     </div>
                     <div id="gradient-speed-row-wrapper">
@@ -7890,7 +7890,7 @@ self.onmessage = (e) =&gt; {
                                     <li><b>Radial Options:</b> A center pad sets where a radial gradient starts (arrow keys nudge it, Shift for bigger steps, Home recenters it), with a shape (Ellipse or Circle) and four size options.</li>
                                     <li><b>Quick Actions:</b> <b>Reverse</b> flips the stop order, <b>Distribute</b> spaces the stops evenly, and <b>Transfer Colors</b> copies the current colors to the other gradient types. On a mesh, Reverse mirrors the points through the center and Distribute lays them out on an even grid. A linear or radial gradient takes up to 16 stops, and each stop has a duplicate button beside its remove button.</li>
                                     <li><b>Direction (Linear):</b> A slider controls the gradient angle (0° to 360°). Double-click the label to reset to the default 135°.</li>
-                                    <li><b>Color Intensity:</b> A slider scales the overall vibrancy of the gradient (0 to 100%). Double-click to reset to 85%.</li>
+                                    <li><b>Strength:</b> A slider sets how strongly the gradient shows (0 to 100%). Below 100% each color fades toward what lies behind the gradient: the mode&rsquo;s background, or a mesh&rsquo;s base color. At 100% the colors show exactly as picked, and at 0% only that background is left. Double-click to reset to 100%.</li>
                                     <li><b>Animate Gradient:</b> Enable a looping CSS animation that slowly shifts the gradient position. An additional speed slider (2 to 30 seconds, 8 by default) controls the animation duration.</li>
                                     <li><b>Enabled Toggle:</b> Turn the gradient on/off without losing your stop configuration.</li>
                                     <li><b>Show on Auth Pages:</b> Controls whether the gradient appears on Login/Signup screens. Enabled by default. The <b>Enable Auth Page Theming</b> valve hides it and turns it off.</li>
@@ -7914,7 +7914,7 @@ self.onmessage = (e) =&gt; {
                         <details class="doc-sub-accordion">
                             <summary>Quick Presets <i data-icon="chevron"></i></summary>
                             <div class="doc-sub-inner">
-                                <p>The builder includes 12 ready-to-use gradient presets. Clicking a preset turns the gradient on and applies its colors, type and direction, sets the intensity to 85% and the animation speed to 8 seconds, and for a mesh preset, places its own points and base color:</p>
+                                <p>The builder includes 12 ready-to-use gradient presets. Clicking a preset turns the gradient on and applies its colors, type and direction, sets its strength and the animation speed to 8 seconds, and for a mesh preset, places its own points and base color:</p>
                                 <div class="doc-table-wrap">
                                     <table class="doc-table">
                                         <thead>
@@ -8103,7 +8103,7 @@ self.onmessage = (e) =&gt; {
                                     <tr><td><span class="doc-code-inline">Tab</span></td><td>In a gallery, reaches each card (Enter or Space applies it, as a click does) and then the card&rsquo;s own buttons (Edit, Overwrite, Delete, Export); a card&rsquo;s buttons show while one of them has keyboard focus. A toolbar&rsquo;s search box is in the Tab order only while it is open, and a button&rsquo;s tooltip shows while it has keyboard focus</td></tr>
                                     <tr><td><span class="doc-code-inline">Arrow keys</span>, <span class="doc-code-inline">Home</span></td><td>Move the radial gradient&rsquo;s center (Shift for bigger steps); Home recenters it</td></tr>
                                     <tr><td><span class="doc-code-inline">Arrow keys</span>, <span class="doc-code-inline">Delete</span>, <span class="doc-code-inline">Tab</span></td><td>With the mesh pad focused: move the selected point (Shift for 5 steps), remove it with Delete or Backspace (a mesh keeps 2 points), or switch points with Tab and Shift+Tab, which leave the pad after the last point or before the first</td></tr>
-                                    <tr><td><span class="doc-code-inline">Double-click</span> slider label</td><td>Reset the Hue, Chroma, Lightness, Gradient Direction, Color Intensity, Animation Speed or a Surfaces slider to its default; on the Accent Colors label, set all three accents back to automatic</td></tr>
+                                    <tr><td><span class="doc-code-inline">Double-click</span> slider label</td><td>Reset the Hue, Chroma, Lightness, Gradient Direction, Strength, Animation Speed or a Surfaces slider to its default; on the Accent Colors label, set all three accents back to automatic</td></tr>
                                     <tr><td><span class="doc-code-inline">Double-click</span> on a gradient pad</td><td>On the radial pad, recenter it; on a mesh point, remove it</td></tr>
                                     <tr><td><span class="doc-code-inline">Escape</span></td><td>Close the Documentation panel</td></tr>
                                 </tbody>
@@ -9490,7 +9490,7 @@ location.reload();</code></pre>
         autoScope: true, canvasEnabled: false, canvasScript: "",
         manualOverrides: "", manualOverridesEnabled: false,
         gradientEnabled: false, gradientType: 'linear', gradientAngle: 135,
-        gradientStops: [], gradientIntensity: 85, gradientAnimation: false,
+        gradientStops: [], gradientIntensity: 100, gradientAnimation: false,
         gradientRadialPosX: 50, gradientRadialPosY: 50, gradientRadialShape: 'ellipse', gradientRadialSize: 'farthest-corner',
         gradientMeshPoints: [], gradientMeshBgColor: '#0a0a12',
         gradientAnimationSpeed: 8, gradientShowAuth: true, themeShowAuth: true,
@@ -12368,20 +12368,21 @@ self.onmessage = (e) => {
         return darkest;
     }
 
-    function adjustHexIntensity(hex, intensity) {
-        // Stop colors come straight from theme data, so they can be any
-        // value. Intensity only means anything for hex; everything else
-        // passes through, sanitized by _cssTok.
-        const tok = _cssTok(hex, '#000000');
-        let h = tok.replace('#', '');
-        if (h.length === 3) h = h.split('').map(c => c + c).join('');
-        if (!/^[0-9a-fA-F]{6}$/.test(h)) return tok;
-        let [r, g, b] = parseHex(h);
-        const factor = _cssNum(intensity, 100) / 100;
-        r = Math.max(0, Math.min(255, Math.round(128 + (r - 128) * factor)));
-        g = Math.max(0, Math.min(255, Math.round(128 + (g - 128) * factor)));
-        b = Math.max(0, Math.min(255, Math.round(128 + (b - 128) * factor)));
-        return '#' + [r, g, b].map(c => c.toString(16).padStart(2, '0')).join('');
+    // What lies behind a linear or radial gradient: the page's own background,
+    // the variable each mode paints <body> with (bgBody in generateThemeSections),
+    // which follows the palette and the user's own Theme Colors
+    function gradientBackdrop(dark) {
+        return dark ? 'var(--color-base-900, var(--color-gray-900, #171717))' : 'var(--color-base-0, #ffffff)';
+    }
+
+    // Strength (saved as gradientIntensity) fades a gradient color toward
+    // what lies behind it. Stop colors come straight from theme data, so
+    // _cssTok sanitizes them; 100% leaves the color as picked.
+    function gradientStrengthColor(color, strength, behind) {
+        const tok = _cssTok(color, '#000000');
+        const pct = Math.max(0, Math.min(100, _cssNum(strength, 100)));
+        if (pct >= 100) return tok;
+        return `color-mix(in oklab, ${tok} ${pct}%, ${behind})`;
     }
 
     // The bounds validateModeData enforces, so a value that skipped
@@ -12399,32 +12400,38 @@ self.onmessage = (e) => {
         };
     }
 
-    function buildGradientStructuralCss({ selector, baseColor, animCss, keyframesCss, comment, bodyBg }) {
-        const sidebarRgba = hexToRgba(baseColor, 0.75);
+    function buildGradientStructuralCss({ selector, baseColor, strength, behind, animCss, keyframesCss, comment, bodyBg }) {
+        // With Strength below 100% the tints fade with the gradient. The mix
+        // is longer than _cssTok allows, so it is built from sanitized parts.
+        const faded = behind && _cssNum(strength, 100) < 100;
+        const tint = (alpha) => faded
+            ? `color-mix(in srgb, ${gradientStrengthColor(baseColor, strength, behind)} ${Math.round(alpha * 100)}%, transparent)`
+            : hexToRgba(baseColor, alpha);
+        const sidebarRgba = tint(0.75);
         const sidebarBlur = 'blur(12px)';
-        const overlayFrom = hexToRgba(baseColor, 0.7);
-        const overlayTo = hexToRgba(baseColor, 0.35);
-        return `\n/*[OWUI_GRADIENT_START]*/\n/* ${comment} */\n${selector} body {\n${bodyBg}\n  background-attachment: fixed !important;\n${animCss}\n}\n${selector} body::before { content: none !important; display: none !important; }\n${selector} #chat-container .bg-linear-to-t:not(.bg-cover + div) {\n  background-image: linear-gradient(to top, ${overlayFrom}, ${overlayTo}) !important;\n}\n${selector} #sidebar:not(.h-full) {\n  background-color: ${sidebarRgba} !important;\n  backdrop-filter: ${sidebarBlur} !important;\n}\n${selector} #sidebar :is(.sidebar-bg-gradient-to-t, .sidebar-bg-gradient-to-b) {\n  --tw-gradient-from: ${sidebarRgba} !important;\n}\n${selector} #navbar-bg-gradient-to-b {\n  --tw-gradient-from: ${hexToRgba(baseColor, 0.9)} !important;\n  --tw-gradient-via: ${hexToRgba(baseColor, 0.5)} !important;\n}\n${keyframesCss}/*[OWUI_GRADIENT_END]*/\n`;
+        const overlayFrom = tint(0.7);
+        const overlayTo = tint(0.35);
+        return `\n/*[OWUI_GRADIENT_START]*/\n/* ${comment} */\n${selector} body {\n${bodyBg}\n  background-attachment: fixed !important;\n${animCss}\n}\n${selector} body::before { content: none !important; display: none !important; }\n${selector} #chat-container .bg-linear-to-t:not(.bg-cover + div) {\n  background-image: linear-gradient(to top, ${overlayFrom}, ${overlayTo}) !important;\n}\n${selector} #sidebar:not(.h-full) {\n  background-color: ${sidebarRgba} !important;\n  backdrop-filter: ${sidebarBlur} !important;\n}\n${selector} #sidebar :is(.sidebar-bg-gradient-to-t, .sidebar-bg-gradient-to-b) {\n  --tw-gradient-from: ${sidebarRgba} !important;\n}\n${selector} #navbar-bg-gradient-to-b {\n  --tw-gradient-from: ${tint(0.9)} !important;\n  --tw-gradient-via: ${tint(0.5)} !important;\n}\n${keyframesCss}/*[OWUI_GRADIENT_END]*/\n`;
     }
 
-    function buildGradientCss(modeData, selector) {
+    function buildGradientCss(modeData, selector, dark) {
         if (!modeData.gradientEnabled) return '';
         const def = DEFAULT_MODE_DATA;
 
         const gType = modeData.gradientType || def.gradientType;
-        const intensity = _cssNum(modeData.gradientIntensity, def.gradientIntensity);
+        const strength = _cssNum(modeData.gradientIntensity, def.gradientIntensity);
 
         // === MESH GRADIENT ===
         if (gType === 'mesh') {
             const points = modeData.gradientMeshPoints || [];
             if (points.length < 2) return '';
-            // bgColor bypasses adjustHexIntensity (which would normalize it via
-            // hex parsing), so it needs sanitizing on its own; the geometry
-            // fields are interpolated raw. All of it can come from an imported
+            // bgColor is not faded, so it needs sanitizing on its own; the
+            // geometry fields are interpolated raw. All of it can come from an imported
             // theme and lands in instance-wide CSS.
             const bgColor = _cssTok(modeData.gradientMeshBgColor, def.gradientMeshBgColor);
+            // A mesh's points fade toward its own base color
             const meshLayers = points.map(p => {
-                const c = adjustHexIntensity(p.color, intensity);
+                const c = gradientStrengthColor(p.color, strength, bgColor);
                 return `radial-gradient(at ${_cssNum(p.x, 50)}% ${_cssNum(p.y, 50)}%, ${c} 0%, transparent ${_cssNum(p.spread, 50)}%)`;
             }).join(', ');
             return buildGradientStructuralCss({
@@ -12437,11 +12444,12 @@ self.onmessage = (e) => {
         if (!modeData.gradientStops || modeData.gradientStops.length < 2) return '';
 
         const sortedStops = [...modeData.gradientStops].sort((a, b) => a.position - b.position);
-        // adjustHexIntensity sanitizes the stop colors; positions and the
+        // gradientStrengthColor sanitizes the stop colors; positions and the
         // shape and size keywords need it here, since they can come from an
         // imported theme too
+        const behind = gradientBackdrop(dark);
         const stopsStr = sortedStops
-            .map(s => `${adjustHexIntensity(s.color, intensity)} ${_cssNum(s.position, 0)}%`)
+            .map(s => `${gradientStrengthColor(s.color, strength, behind)} ${_cssNum(s.position, 0)}%`)
             .join(', ');
 
         let gradientFunc;
@@ -12459,7 +12467,7 @@ self.onmessage = (e) => {
         }
 
         return buildGradientStructuralCss({
-            selector, baseColor: getDarkestStop(sortedStops), ...gradientAnimationCss(modeData),
+            selector, baseColor: getDarkestStop(sortedStops), strength, behind, ...gradientAnimationCss(modeData),
             comment: 'System Gradient Background',
             bodyBg: `  background-image: ${gradientFunc} !important;`
         });
@@ -12690,8 +12698,8 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
             structuralCss += buildSurfaceCss(modeData, m.scope, darkMode);
             structuralCss += wrapSystemMedia(m.id, () => buildSurfaceCss(modeData, 'html[data-theme="system"]', darkMode));
 
-            gradientCss += buildGradientCss(modeData, m.scope);
-            gradientCss += wrapSystemMedia(m.id, () => buildGradientCss(modeData, ':root[data-theme="system"]'));
+            gradientCss += buildGradientCss(modeData, m.scope, darkMode);
+            gradientCss += wrapSystemMedia(m.id, () => buildGradientCss(modeData, ':root[data-theme="system"]', darkMode));
             customCss += buildCustomCss(modeData, m.sel);
             customCss += wrapSystemMedia(m.id, () => buildCustomCss(modeData, 'html[data-theme="system"]'));
         });
@@ -12754,7 +12762,7 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
             }
             if (config && config.gradientEnabled) {
                 toolNeedsTransparentContainer = true;
-                const gradCss = buildGradientCss(config, '');
+                const gradCss = buildGradientCss(config, '', isDark);
                 const bodyMatch = gradCss.match(/body\s*\{([^}]*background-image[^}]*)\}/);
                 if (bodyMatch) {
                     toolGradientCss = `body#tool-body { ${bodyMatch[1]} }`;
@@ -13445,6 +13453,7 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
 
         const angle = config.gradientAngle != null ? config.gradientAngle : def.gradientAngle;
         const intensity = config.gradientIntensity != null ? config.gradientIntensity : def.gradientIntensity;
+        const behind = gradientBackdrop(dm === 'dark' || dm === 'oled');
         const speed = config.gradientAnimationSpeed || def.gradientAnimationSpeed;
         if ($('sl-gradient-angle')) $('sl-gradient-angle').value = angle;
         if ($('val-gradient-angle')) $('val-gradient-angle').innerText = angle + '°';
@@ -13481,9 +13490,8 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
                 document.querySelectorAll('.radial-size-pill').forEach(p => p.classList.toggle('active', p.dataset.size === rSize));
                 const xyPad = $('radial-xy-pad');
                 if (xyPad && config.gradientStops && config.gradientStops.length >= 2) {
-                    const rdIntensity = config.gradientIntensity != null ? config.gradientIntensity : def.gradientIntensity;
                     const sorted = [...config.gradientStops].sort((a, b) => a.position - b.position);
-                    const xyStopsStr = sorted.map(s => `${adjustHexIntensity(s.color, rdIntensity)} ${s.position}%`).join(', ');
+                    const xyStopsStr = sorted.map(s => `${gradientStrengthColor(s.color, intensity, behind)} ${s.position}%`).join(', ');
                     xyPad.style.backgroundImage = `radial-gradient(${rShape} ${rSize} at ${posX}% ${posY}%, ${xyStopsStr})`;
                 } else if (xyPad) {
                     xyPad.style.backgroundImage = '';
@@ -13497,13 +13505,11 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
             if (isMesh) {
                 const meshPad = $('mesh-editor-pad');
                 const points = config.gradientMeshPoints || [];
-                const rdIntensity = config.gradientIntensity != null ? config.gradientIntensity : def.gradientIntensity;
-
                 if (meshPad) {
                     if (points.length >= 2) {
                         const bgColor = config.gradientMeshBgColor || def.gradientMeshBgColor;
                         const layers = points.map(p => {
-                            const c = adjustHexIntensity(p.color, rdIntensity);
+                            const c = gradientStrengthColor(p.color, intensity, _cssTok(bgColor, def.gradientMeshBgColor));
                             return `radial-gradient(at ${p.x}% ${p.y}%, ${c} 0%, transparent ${p.spread}%)`;
                         }).join(', ');
                         meshPad.style.backgroundImage = layers;
@@ -13597,7 +13603,7 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
                 if (points.length >= 2) {
                     const bgColor = config.gradientMeshBgColor || def.gradientMeshBgColor;
                     const layers = points.map(p => {
-                        const c = adjustHexIntensity(p.color, intensity);
+                        const c = gradientStrengthColor(p.color, intensity, _cssTok(bgColor, def.gradientMeshBgColor));
                         return `radial-gradient(at ${p.x}% ${p.y}%, ${c} 0%, transparent ${p.spread}%)`;
                     }).join(', ');
                     previewBar.style.backgroundImage = layers;
@@ -13613,7 +13619,7 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
                 const stops = config.gradientStops || [];
                 if (stops.length >= 2) {
                     const sorted = [...stops].sort((a, b) => a.position - b.position);
-                    const stopsStr = sorted.map(s => `${adjustHexIntensity(s.color, intensity)} ${s.position}%`).join(', ');
+                    const stopsStr = sorted.map(s => `${gradientStrengthColor(s.color, intensity, behind)} ${s.position}%`).join(', ');
                     let gradFunc;
                     if (gType === 'radial') {
                         const rShape = config.gradientRadialShape || def.gradientRadialShape;
@@ -15104,7 +15110,7 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
         const props = [
             ['Type', d => d.type, d => d.type],
             ['Angle', d => d.angle, d => d.angle + '°'],
-            ['Intensity', d => d.intensity, d => d.intensity + '%'],
+            ['Strength', d => d.intensity, d => d.intensity + '%'],
             ['Stops', d => d.stops, d => stops(d.stops)],
             ['Animated', d => d.anim, d => d.anim ? 'Yes' : 'No'],
             ['Radial position', d => [d.radialPosX, d.radialPosY], d => `${d.radialPosX}% ${d.radialPosY}%`],

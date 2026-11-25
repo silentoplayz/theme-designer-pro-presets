@@ -44,7 +44,7 @@
       "type": "number",
       "minimum": 0,
       "maximum": 100,
-      "description": "Gradient intensity/opacity percentage"
+      "description": "Strength: how strongly the gradient shows over the background, in percent. Below 100 each color fades toward the background, or a mesh's base color"
     },
     "animation": {
       "type": "boolean",

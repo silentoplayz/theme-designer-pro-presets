@@ -78,7 +78,7 @@ The accents, set or generated, reach Canvas FX scripts as `colors.accent`, `acce
 | `gradientRadialSize` | `closest-side`, `closest-corner`, `farthest-side` or `farthest-corner` | `farthest-corner` | How far a radial gradient reaches |
 | `gradientMeshPoints` | list of up to 32 `{ "color", "x", "y", "spread" }` | `[]` | Colors of a mesh gradient, each value 0 to 100 |
 | `gradientMeshBgColor` | CSS color | `#0a0a12` | The color behind a mesh gradient's points |
-| `gradientIntensity` | number, 0 to 100 | 85 | How strongly the gradient shows, in percent |
+| `gradientIntensity` | number, 0 to 100 | 100 | Strength: how strongly the gradient shows, in percent. Below 100 each color fades toward the mode's background, or a mesh's base color |
 | `gradientAnimation` | boolean | false | Whether the gradient moves |
 | `gradientAnimationSpeed` | number, 2 to 30 | 8 | Seconds for one cycle of the movement |
 

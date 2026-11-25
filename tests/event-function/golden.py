@@ -61,7 +61,7 @@ DESIGNER_NAMES = [
     "ensureAllModes", "migrateLegacyTheme", "lightnessMap", "steps", "getVariablesMap", "baseScaleVars", "ownColorsYield", "baseStepName", "paletteStepKey",
     "getDefaultColorForStep", "detectWashedOut", "designerChromeColors", "CHROME_TEXT_MIN", "CHROME_INDICATOR_MIN", "_overrideDecls", "_shippedVars", "_contrastPairs",
     "_expandHex", "oklchToHex", "_resolveReportColor", "getEffectiveLightness", "extractKeyframes",
-    "hexToRgba", "getDarkestStop", "adjustHexIntensity", "gradientSpeed", "buildGradientCss",
+    "hexToRgba", "getDarkestStop", "gradientBackdrop", "gradientStrengthColor", "gradientSpeed", "buildGradientCss",
     "assembleThemeCss", "generateCoreCSS", "generateThemeSections", "normalizeSnapshot",
     "isThemeDuplicate", "isModeMatch", "buildUpdateDiffHtml", "parseSettings", "applySettings", "labelOf", "numberRange", "toRawGitHub",
     "semverCompare", "themeData", "createNullModeMap", "chatCssProblem", "buildCustomCss", "themeCssProblem", "linkedImportProblem", "themeFromFile", "themeFromEntry",

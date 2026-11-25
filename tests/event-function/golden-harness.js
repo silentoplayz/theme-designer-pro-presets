@@ -140,7 +140,7 @@ function designerUnits(themes) {
   out._escAttr = each(_escAttr);
   out._objArr = each(_objArr);
   out.hexToRgba = each((v) => hexToRgba(v, 0.5));
-  out.adjustHexIntensity = each((v) => [adjustHexIntensity(v, 50), adjustHexIntensity(v, 150), adjustHexIntensity(v, null)]);
+  out.gradientStrengthColor = each((v) => [gradientStrengthColor(v, 50, gradientBackdrop(true)), gradientStrengthColor(v, 150, gradientBackdrop(false)), gradientStrengthColor(v, null, '#000')]);
   out._resolveReportColor = each(_resolveReportColor);
   out._resolveReportColor_hexForms = ['#abcd', '#ABCD', '#a1b2c3d4', '#a1b2c3', '#abc', '#abcde', '#a1b2c3d'].map((s) => { const hex = _resolveReportColor(s); return [s, hex, hex ? contrastRatio(hex, '#ffffff').toFixed(2) : null]; });
   out.getEffectiveLightness = each(getEffectiveLightness);
@@ -292,8 +292,10 @@ function designerUnits(themes) {
     { gradientEnabled: true, gradientType: 'conic', gradientAnimation: true, gradientAnimationSpeed: 600, gradientStops: [{ color: '#111111', position: 0 }, { color: '#eeeeee', position: 100 }] },
     { gradientEnabled: true, gradientType: 'mesh', gradientMeshBgColor: 'x(', gradientMeshPoints: [{ color: '#f00', x: 'a', y: 5, spread: null }, { color: 'oklch(0.5 0.1 20)', x: 1, y: 2, spread: 3 }] },
     { gradientEnabled: true, gradientType: 'mesh', gradientMeshPoints: [{ color: '#f00' }] },
-    { gradientEnabled: false, gradientStops: [{ color: '#000', position: 0 }, { color: '#fff', position: 100 }] }
-  ].map((d) => [d, buildGradientCss(d, '.scope')]);
+    { gradientEnabled: false, gradientStops: [{ color: '#000', position: 0 }, { color: '#fff', position: 100 }] },
+    { gradientEnabled: true, gradientIntensity: 40, gradientStops: [{ color: '#202040', position: 0 }, { color: '#ff8800', position: 100 }] },
+    { gradientEnabled: true, gradientType: 'mesh', gradientIntensity: 0, gradientMeshBgColor: '#101010', gradientMeshPoints: [{ color: '#f00', x: 10, y: 10, spread: 50 }, { color: '#00f', x: 90, y: 90, spread: 50 }] }
+  ].map((d) => [d, buildGradientCss(d, '.scope', true), buildGradientCss(d, '.scope', false)]);
   // generateThemeSections over hostile mode data, as validateModeData leaves it
   const hostile = createDefaultModeData({
     customCSS: '/*[OWUI_VARS_END]*/ :root { --a: 1 } html.dark { --b: 2 } @keyframes k { from { x: 1 } }', customCssEnabled: true, autoScope: true,

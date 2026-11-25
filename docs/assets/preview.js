@@ -70,22 +70,25 @@
 
   // ---- Gradient CSS (mirrors the designer's buildGradientCss) ----
 
-  function adjustHexIntensity(hex, intensity) {
-    hex = String(hex || '').replace('#', '');
-    if (hex.length === 3) hex = hex.split('').map((ch) => ch + ch).join('');
-    if (!/^[0-9a-fA-F]{6}$/.test(hex)) return '#' + (hex || '000000');
-    const factor = intensity / 100;
-    const rgb = [0, 2, 4].map((i) => {
-      const v = parseInt(hex.slice(i, i + 2), 16);
-      return Math.max(0, Math.min(255, Math.round(128 + (v - 128) * factor)));
-    });
-    return '#' + rgb.map((v) => v.toString(16).padStart(2, '0')).join('');
+  // Strength (saved as intensity / gradientIntensity) fades a color toward
+  // what lies behind the gradient; 100 leaves it as picked
+  function gradientBackdrop(dark) {
+    return dark ? 'var(--color-base-900, var(--color-gray-900, #171717))' : 'var(--color-base-0, #ffffff)';
   }
 
-  // Accepts a full gradient preset object (raw file) or a theme mode's gradient* fields
-  function gradientLayers(g) {
+  function gradientStrengthColor(color, strength, behind) {
+    const pct = Math.max(0, Math.min(100, Number(strength)));
+    if (!(pct < 100)) return color;
+    return `color-mix(in oklab, ${color} ${pct}%, ${behind})`;
+  }
+
+
+  // Accepts a full gradient preset object (raw file) or a theme mode's gradient* fields.
+  // light: draw it for a Light or Her mode, which fades toward white.
+  function gradientLayers(g, light) {
     const type = g.type || g.gradientType || 'linear';
-    const intensity = firstOf(g.intensity, g.gradientIntensity, 85);
+    const intensity = firstOf(g.intensity, g.gradientIntensity, 100);
+    const behind = gradientBackdrop(!light);
     const animated = !!(g.animation || g.gradientAnimation || g.animated);
     const speed = firstOf(g.speed, g.gradientAnimationSpeed, 8);
 
@@ -94,7 +97,7 @@
       if (points.length < 2) return null;
       const bg = g.meshBgColor || g.gradientMeshBgColor || '#0a0a12';
       const layers = points
-        .map((p) => `radial-gradient(at ${p.x}% ${p.y}%, ${adjustHexIntensity(p.color, intensity)} 0%, transparent ${p.spread}%)`)
+        .map((p) => `radial-gradient(at ${p.x}% ${p.y}%, ${gradientStrengthColor(p.color, intensity, bg)} 0%, transparent ${p.spread}%)`)
         .join(', ');
       return { background: bg, backgroundImage: layers, animated, speed };
     }
@@ -103,7 +106,7 @@
     if (stops.length < 2) return null;
     const stopsStr = [...stops]
       .sort((a, b) => (a.position || 0) - (b.position || 0))
-      .map((s) => `${adjustHexIntensity(s.color, intensity)} ${s.position || 0}%`)
+      .map((s) => `${gradientStrengthColor(s.color, intensity, behind)} ${s.position || 0}%`)
       .join(', ');
 
     let fn;
@@ -574,15 +577,15 @@
       '<p>Leave that valve off unless you trust every script you install.</p>'],
     ['How do I animate a gradient without it feeling busy?',
       '<p>Slow it down and narrow it. A longer animation speed (the slider is in seconds per cycle) and stops close together in hue read as a slow drift rather than motion.</p>' +
-      '<p>Lowering the intensity helps too: the gradient stays behind the chat instead of competing with it.</p>'],
+      '<p>Lowering its Strength helps too: the gradient stays behind the chat instead of competing with it.</p>'],
     ['Which gradients hold up in light mode?',
       '<p>Pale ones with little chroma. In Light, the surfaces are near white, so a saturated gradient shows through as a tint on everything, text included.</p>' +
-      '<p>Keep a separate gradient for Light, or lower its intensity there. Each mode has its own.</p>'],
+      '<p>Keep a separate gradient for Light, or lower its Strength there. Each mode has its own.</p>'],
     ['Can I export a gradient I built back out as a preset?',
       '<p>Yes. Save it to the gradient gallery from the Gradient tab, and its export button downloads it as a preset file anyone can import. The whole gallery exports at once too.</p>'],
-    ['What intensity works best for mesh gradients?',
-      '<p>Lower than you\'d think. A mesh stacks several soft color points, so it reads stronger than a linear gradient at the same intensity.</p>' +
-      '<p>Start in the middle of the slider and raise it until the colors reach the corners, then stop.</p>'],
+    ['What Strength works best for mesh gradients?',
+      '<p>Lower than you\'d think. A mesh stacks several soft color points, so it reads stronger than a linear gradient at the same Strength.</p>' +
+      '<p>Start in the middle of the slider and raise it until the colors are as strong as you want.</p>'],
     ['Can the gradient animate only when the chat is idle?',
       '<p>Not the gradient itself: once it animates, it runs all the time. A Canvas FX script can, though, since it hears about the chat through <code>context</code> messages. It can pause while the count is changing and drift once it settles.</p>'],
     ['Which containers get transparency applied?',
@@ -1777,7 +1780,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
             stats: 'Response Speed: 97.8 t/s | Total Duration: 2.6s | Eval Count: 214 | Session: 1602 tokens',
             body: '<p>Regenerated take: anchor a <b>radial glow</b> behind the input bar first, then layer a slow mesh drift over it for depth without motion sickness.</p>' +
               '<p>Keep the darkest stop near the sidebar so text stays readable, and preview both <code>dark</code> and <code>light</code> before committing.</p>',
-            fups: ['What intensity works best for mesh gradients?',
+            fups: ['What Strength works best for mesh gradients?',
               'Can the gradient animate only when the chat is idle?'],
           },
         ])
@@ -3656,7 +3659,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
 
         const mode = theme[modeKey];
         const hasCanvas = mode.canvasEnabled && mode.canvasScript && mode.canvasScript.trim();
-        const gLayers = mode.gradientEnabled ? gradientLayers(mode) : null;
+        const gLayers = mode.gradientEnabled ? gradientLayers(mode, modeKey === 'light' || modeKey === 'her') : null;
 
         frame = mountMockFrame(
           stage,

@@ -177,8 +177,8 @@
         },
         "gradientIntensity": {
           "$ref": "#/$defs/percent",
-          "default": 85,
-          "description": "How strongly the gradient shows, in percent"
+          "default": 100,
+          "description": "Strength: how strongly the gradient shows over the background, in percent. Below 100 each color fades toward the mode's background, or a mesh's base color"
         },
         "gradientAnimation": {
           "type": ["boolean", "null"],
