@@ -6003,6 +6003,8 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         .community-card .community-author-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 
         .community-card .community-badges { display: flex; gap: 4px; flex-wrap: wrap; width: 100%; }
+        .community-card .community-preview-link { font-size: 0.6rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+        .community-card .community-preview-link:hover, .community-card .community-preview-link:focus-visible { text-decoration: underline; }
         .community-badge-feat { font-size: 0.45rem; font-weight: 700; padding: 2px 6px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
         .community-badge-feat.badge-css { background: rgba(16,185,129,0.2); color: #6ee7b7; }
         .community-badge-feat.badge-fx { background: rgba(251,146,60,0.2); color: #fdba74; }
@@ -6366,7 +6368,27 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
         .hidden-bg-label { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; }
         .hidden-bg-dimming { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
         .surfaces-list { margin-top: 8px; transition: opacity 0.2s; }
-        .surfaces-list.off { opacity: 0.4; }
+        .surfaces-list.off, .surface-layers-title.off { display: none; }
+        .surface-looks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 8px; }
+        @media (max-width: 700px) { .surface-looks { grid-template-columns: repeat(2, 1fr); } }
+        .surface-look { display: flex; flex-direction: column; gap: 8px; padding: 8px; text-align: left; border: 1px solid var(--border); border-radius: var(--radius-md); background: transparent; color: var(--text-main); cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
+        .surface-look:hover { border-color: var(--text-muted); }
+        .surface-look.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+        .surface-look:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .look-preview { position: relative; height: 72px; border-radius: 8px; overflow: hidden; background:
+            radial-gradient(circle at 22% 30%, #f472b6 0 14%, transparent 15%),
+            radial-gradient(circle at 70% 65%, #38bdf8 0 18%, transparent 19%),
+            radial-gradient(circle at 50% 15%, #facc15 0 9%, transparent 10%),
+            linear-gradient(135deg, #4c1d95, #0f766e); }
+        .look-pane { position: absolute; border-radius: 5px; }
+        .look-pane.side { left: 6px; top: 6px; bottom: 6px; width: 30%; }
+        .look-pane.input { left: calc(30% + 14px); right: 8px; bottom: 8px; height: 14px; border-radius: 7px; }
+        .look-pane.menu { right: 10px; top: 8px; width: 34%; height: 30px; }
+        .look-name { font-size: 0.85rem; font-weight: 700; }
+        .look-desc { font-size: 0.68rem; color: var(--text-muted); line-height: 1.4; }
+        .surface-look-custom { display: none; font-size: 0.7rem; color: var(--text-muted); margin: 4px 0 0; }
+        .surface-look-custom.show { display: block; }
+        .surface-layers-title { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-top: 18px; }
         .surface-row { padding: 14px 0; border-top: 1px solid var(--border); }
         .surface-row-name { font-size: 0.95rem; font-weight: 700; color: var(--text-main); }
         .surface-sliders .slider-row label { font-size: 0.8rem; }
@@ -6796,6 +6818,9 @@ html[data-tdp-scope="me"] #nuclear-btn { display: none !important; }
             </div>
             <div class="control-group">
                 <div class="hidden-bg-note" id="surfaces-note"></div>
+                <div class="surface-looks" id="surface-looks" role="radiogroup" aria-label="Look"></div>
+                <div class="surface-look-custom" id="surface-look-custom">Custom: your own mix of the sliders below. Pick a look to start over from it.</div>
+                <div class="surface-layers-title" id="surface-layers-title">Fine-tune each layer</div>
                 <div class="surfaces-list" id="surfaces-list"></div>
             </div>
         </div>
@@ -8051,6 +8076,7 @@ self.onmessage = (e) =&gt; {
                         <details class="doc-sub-accordion">
                             <summary>Surfaces: Each Layer's Opacity and Blur <i data-icon="chevron"></i></summary>
                             <div class="doc-sub-inner">
+                                <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85;">Start from a look: <b>Solid</b> is Open WebUI's own look, with the switch off. <b>Frosted</b>, <b>Glass</b> and <b>Clear</b> each set every layer at once and turn the switch on, from softly blurred panels to a see-through page, with menus and dialogs kept the most solid so their text reads. The sliders appear under <b>Fine-tune each layer</b> once a look is on, and moving one marks the mix <b>Custom</b>. Picking a look is one Undo step.</p>
                                 <p style="font-size: 0.7rem; line-height: 1.6; opacity: 0.85;">The <b>Surfaces</b> tab sets, per mode, how see-through each layer over the background is. <b>Opacity</b> is how much of the color Open WebUI paints that layer covers it, from 0% (clear) to 100% (solid). <b>Blur</b> softens whatever shows through it, up to 40px. For the backdrop behind a dialog, the first slider is how dark it gets. Double-click a slider&rsquo;s label to reset it to its default, or press <b>Reset all</b> beside the switch to put every slider in the mode back at once. A row at its defaults keeps Open WebUI&rsquo;s own look, so turning the switch on changes nothing until you move a slider.</p>
                                 <ul style="font-size: 0.72rem; line-height: 1.7; padding-left: 18px;">
                                     <li><b>Sidebar</b>: the open sidebar; its top and bottom fades show only at 100%</li>
@@ -8143,7 +8169,7 @@ self.onmessage = (e) =&gt; {
                         <p>Import any preset directly into Theme Designer Pro using the built-in Import button, URL import, or drag-and-drop.</p>
 
                         <div class="doc-subheading">🎭 Built-in Community Themes Browser</div>
-                        <p>The <b>Themes</b> area includes a curated <b>Community Themes</b> grid, fetched from the presets repository&rsquo;s <code>docs/catalog.json</code> on GitHub. Each card shows the theme&rsquo;s preview colors and metadata with a one-click <b>Install</b> button, which adds the theme to your Theme Gallery; installed themes are marked. When <b>Enable Theme Update Checks</b> is on, the grid also reads <code>manifest.json</code> and a card offers an update if the remote version is newer than your installed copy. An <b>Install All</b> button appears when at least one theme isn&rsquo;t installed, alongside <b>Refresh</b>, search (name, description, author) and a sort that cycles A to Z, Z to A and the catalog&rsquo;s order. The <b>Enable Community Themes</b> valve hides the whole browser and skips its catalog fetch. If you set <b>Allowed Import Domains</b>, include <code>raw.githubusercontent.com</code>, or the grid shows &ldquo;Could not load community themes.&rdquo;</p>
+                        <p>The <b>Themes</b> area includes a curated <b>Community Themes</b> grid, fetched from the presets repository&rsquo;s <code>docs/catalog.json</code> on GitHub. Each card shows the theme&rsquo;s preview colors and metadata, a <b>Preview on the gallery site</b> link that opens the theme&rsquo;s live preview there in a new tab, and a one-click <b>Install</b> button, which adds the theme to your Theme Gallery; installed themes are marked. When <b>Enable Theme Update Checks</b> is on, the grid also reads <code>manifest.json</code> and a card offers an update if the remote version is newer than your installed copy. An <b>Install All</b> button appears when at least one theme isn&rsquo;t installed, alongside <b>Refresh</b>, search (name, description, author) and a sort that cycles A to Z, Z to A and the catalog&rsquo;s order. The <b>Enable Community Themes</b> valve hides the whole browser and skips its catalog fetch. If you set <b>Allowed Import Domains</b>, include <code>raw.githubusercontent.com</code>, or the grid shows &ldquo;Could not load community themes.&rdquo;</p>
 
                         <div class="doc-subheading">🔗 Install Links From the Website</div>
                         <p>Every preset in the <a href="https://silentoplayz.github.io/theme-designer-pro-presets/gallery/" target="_blank" rel="noopener noreferrer">preset gallery</a>, and every theme made in its <a href="https://silentoplayz.github.io/theme-designer-pro-presets/studio/" target="_blank" rel="noopener noreferrer">Studio</a>, has an <b>Install on my Open WebUI</b> button. After a visitor tells the site their Open WebUI address once, the button opens this designer with an address ending in <code>#tdp-import=</code>. A preset opens its own Import dialog with its address filled in, and you choose <b>Load URL</b>, so <b>Enable URL Import</b> and <b>Allowed Import Domains</b> apply as they do to an address typed in by hand. A Studio theme travels inside the link and is offered the way a pasted theme is, with the Canvas FX warning when it has a script. Anyone can write such a link, a chat model included, so what it brings, in the link or from the address it fills in, gets the check a chat theme gets: custom CSS, Manual Overrides or a CSS snippet that fetches is refused with a message saying why. Nothing installs until you confirm, the link leaves the address bar once read, and a preset type whose valve is off is refused.</p>
@@ -9534,6 +9560,16 @@ location.reload();</code></pre>
         { key: 'Fade', label: 'Top fade', hint: 'The fade at the top of a chat, under the title bar.', color: null, noBlur: true }
     ];
     const SURFACE_FIELDS = ['surfacesEnabled'].concat(...SURFACE_LAYERS.map(l => l.noBlur ? [`surface${l.key}Opacity`] : [`surface${l.key}Opacity`, `surface${l.key}Blur`]));
+
+    // The Surfaces tab's looks: [opacity, blur] for every layer at once.
+    // Solid has none, since it is the switch off: Open WebUI's own look.
+    // Menus and dialogs stay the most solid in each, so their text reads.
+    const SURFACE_LOOKS = [
+        { key: 'solid', name: 'Solid', desc: "Open WebUI's own look", layers: null },
+        { key: 'frosted', name: 'Frosted', desc: 'Panels soften what is behind them', layers: { Sidebar: [70, 16], Composer: [35, 16], Panel: [75, 16], Cards: [65, 12], Buttons: [70, 8], Menu: [80, 20], Dialog: [85, 24], Backdrop: [45, 6], Fade: [70] } },
+        { key: 'glass', name: 'Glass', desc: 'The background shows through, blurred', layers: { Sidebar: [40, 24], Composer: [20, 20], Panel: [50, 24], Cards: [35, 16], Buttons: [45, 12], Menu: [65, 28], Dialog: [70, 32], Backdrop: [35, 10], Fade: [40] } },
+        { key: 'clear', name: 'Clear', desc: 'The page is see-through; menus and dialogs stay readable', layers: { Sidebar: [0, 0], Composer: [0, 4], Panel: [20, 8], Cards: [15, 0], Buttons: [25, 0], Menu: [55, 20], Dialog: [60, 24], Backdrop: [25, 4], Fade: [0] } }
+    ];
 
     // The theme's three accents. A mode field set to '#rrggbb' sets one; ''
     // leaves it generated from the palette's hue, the same color the Canvas
@@ -14662,6 +14698,68 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
         });
     })();
 
+    (function buildSurfaceLooks() {
+        const box = $('surface-looks');
+        if (!box) return;
+        box.innerHTML = SURFACE_LOOKS.map(look =>
+            `<button type="button" class="surface-look" role="radio" aria-checked="false" data-look="${look.key}">` +
+            `<span class="look-preview" aria-hidden="true"><span class="look-pane side"></span><span class="look-pane menu"></span><span class="look-pane input"></span></span>` +
+            `<span class="look-name">${look.name}</span><span class="look-desc">${look.desc}</span></button>`).join('');
+        box.addEventListener('click', (e) => {
+            const btn = e.target.closest('.surface-look');
+            if (!btn) return;
+            const look = SURFACE_LOOKS.find(l => l.key === btn.dataset.look);
+            const d = themeData[getActiveDataMode()];
+            if (!look || !d) return;
+            if (!look.layers) {
+                if (!d.surfacesEnabled) return;
+                d.surfacesEnabled = false;
+            } else {
+                d.surfacesEnabled = true;
+                Object.entries(look.layers).forEach(([key, [opacity, blur]]) => {
+                    d[`surface${key}Opacity`] = opacity;
+                    if (blur !== undefined) d[`surface${key}Blur`] = blur;
+                });
+            }
+            commitChange();
+        });
+    })();
+
+    // The look a mode's values match: Solid while the switch is off,
+    // custom ('') when the sliders match no look.
+    function currentSurfaceLook(d) {
+        if (!d.surfacesEnabled) return 'solid';
+        const match = SURFACE_LOOKS.find(look => look.layers && SURFACE_FIELDS.slice(1).every(k => {
+            const [, key, part] = k.match(/^surface(\w+?)(Opacity|Blur)$/);
+            const want = look.layers[key]?.[part === 'Opacity' ? 0 : 1];
+            return (d[k] ?? DEFAULT_MODE_DATA[k]) === want;
+        }));
+        return match ? match.key : '';
+    }
+
+    // Each card's preview panes: the look's sidebar, menu and message input
+    // over a colorful backdrop, in the color Open WebUI paints them in this mode.
+    function renderSurfaceLooks(d) {
+        const dark = getActiveDataMode() === 'dark' || getActiveDataMode() === 'oled';
+        const current = currentSurfaceLook(d);
+        document.querySelectorAll('#surface-looks .surface-look').forEach(btn => {
+            const look = SURFACE_LOOKS.find(l => l.key === btn.dataset.look);
+            const on = look.key === current;
+            btn.classList.toggle('active', on);
+            btn.setAttribute('aria-checked', String(on));
+            const panes = { side: 'Sidebar', menu: 'Menu', input: 'Composer' };
+            btn.querySelectorAll('.look-pane').forEach(pane => {
+                const key = panes[[...pane.classList].find(c => panes[c])];
+                const [opacity, blur] = look.layers ? look.layers[key] : [DEFAULT_MODE_DATA[`surface${key}Opacity`], DEFAULT_MODE_DATA[`surface${key}Blur`]];
+                const shade = key === 'Sidebar' ? (dark ? '#0d0d0d' : '#f9f9f9') : (dark ? '#262626' : '#ffffff');
+                pane.style.background = `color-mix(in srgb, ${shade} ${key === 'Composer' && !look.layers ? 100 : opacity}%, transparent)`;
+                pane.style.backdropFilter = pane.style.webkitBackdropFilter = blur ? `blur(${Math.round(blur / 2)}px)` : '';
+                pane.style.border = `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)'}`;
+            });
+        });
+        $('surface-look-custom')?.classList.toggle('show', current === '');
+    }
+
     // Double-click on a slider's label: back to the default. Does nothing
     // while the switch is off, the same as dragging.
     window.resetSurfaceSlider = (field) => {
@@ -14695,6 +14793,8 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
         const reset = $('surfaces-reset-btn');
         if (reset) reset.disabled = !on || SURFACE_FIELDS.slice(1).every(k => (d[k] ?? DEFAULT_MODE_DATA[k]) === DEFAULT_MODE_DATA[k]);
         $('surfaces-list')?.classList.toggle('off', !on);
+        $('surface-layers-title')?.classList.toggle('off', !on);
+        renderSurfaceLooks(d);
         document.querySelectorAll('#surfaces-list input[type="range"]').forEach(slider => {
             const k = slider.dataset.field;
             const v = d[k] ?? DEFAULT_MODE_DATA[k];
@@ -14705,8 +14805,8 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
         const note = $('surfaces-note');
         if (note) {
             note.innerText = on
-                ? "Opacity is how much of Open WebUI's own color covers each layer: 100% is solid, 0% is clear. Blur softens whatever shows through it."
-                : "Off: this mode keeps Open WebUI's own look for each layer. Turn it on to set each layer yourself.";
+                ? "Pick a look to set every layer at once, then fine-tune any layer below. Opacity is how much of Open WebUI's own color covers a layer: 100% is solid, 0% is clear. Blur softens whatever shows through it."
+                : "Pick a look to let your gradient, Canvas FX or picture show through the sidebar, message input, menus and dialogs. Solid keeps Open WebUI's own look.";
         }
     }
 
@@ -17492,6 +17592,8 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
     let _communityManifest = null;
     let _communityCatalog = null;
     const CATALOG_URL = 'https://raw.githubusercontent.com/silentoplayz/theme-designer-pro-presets/main/docs/catalog.json';
+    // The gallery site's live preview of a catalog theme, by its file name
+    const COMMUNITY_GALLERY_URL = 'https://silentoplayz.github.io/theme-designer-pro-presets/gallery/';
     const COMMUNITY_BADGE_CLASS = { CSS: 'badge-css', FX: 'badge-fx', Gradient: 'badge-gradient', Overrides: 'badge-overrides' };
 
     // The catalog's c is on a 0-100 scale; oklch() takes 0-1. Coerced because
@@ -17638,6 +17740,7 @@ ${selector} #sidebar:not(.h-full) { background-color: var(${bgSidebar}) !importa
                 <div class="community-desc">${_esc(t.description || '')}</div>
                 <div class="community-author"><span class="community-author-dot" style="background:${dotColor}"></span>${_esc(t.author || 'Unknown')}</div>
                 ${badgesHTML}
+                ${t.file ? `<a class="community-preview-link" href="${COMMUNITY_GALLERY_URL}#themes?p=${encodeURIComponent(t.file)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" aria-label="Preview ${_escAttr(t.name || '')} on the gallery site (opens in a new tab)">Preview on the gallery site ↗</a>` : ''}
                 <button class="community-install-btn ${btnClass}" onclick="event.stopPropagation(); installCommunityTheme(${t._origIdx})">${btnLabel}</button>
             </div>`;
         });
