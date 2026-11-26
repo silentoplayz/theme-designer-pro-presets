@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docs · Theme Designer Pro</title>
+  <meta name="description" content="How to install, use and configure Theme Designer Pro for Open WebUI, the theme file format, writing Canvas FX scripts, the Launcher Tool and making presets.">
+  <meta name="theme-color" content="#121218">
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="canonical" href="https://silentoplayz.github.io/theme-designer-pro-presets/docs/">
+  <meta property="og:title" content="Theme Designer Pro Docs">
+  <meta property="og:description" content="Install, use and configure Theme Designer Pro for Open WebUI.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://silentoplayz.github.io/theme-designer-pro-presets/docs/">
+  <meta property="og:image" content="https://silentoplayz.github.io/theme-designer-pro-presets/og-preview.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <script src="../assets/palette.js"></script>
+  <link rel="stylesheet" href="../assets/site.css">
+</head>
+<body data-root="../" data-page="docs">
+  <a class="skip-link" href="#doc-content">Skip to the documentation</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="../" class="brand" aria-label="Theme Designer Pro home">
+        <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 7.5l9 4.5 9-4.5L12 3z"/><path d="m3 16.5 9 4.5 9-4.5"/><path d="m3 12 9 4.5 9-4.5"/></svg></span>
+        <span>Theme Designer Pro</span>
+      </a>
+      <nav class="nav" aria-label="Main">
+        <a href="../">Home</a>
+        <a href="../gallery/">Gallery</a>
+        <a href="../studio/">Studio</a>
+        <a href="./" aria-current="page">Docs</a>
+      </nav>
+      <div class="header-actions">
+        <a class="btn btn-primary btn-sm btn-get" href="../#install">Get it</a>
+        <button class="icon-btn menu-btn" type="button" aria-label="Menu" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="docs container">
+    <aside class="docs-side" aria-label="Documentation">
+      <button type="button" class="docs-side-toggle" aria-expanded="false" aria-controls="docs-side-body">
+        <span>Contents</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="docs-side-body" id="docs-side-body">
+        <nav class="docs-pages" id="docs-pages" aria-label="Documents"></nav>
+        <label class="docs-filter">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <span class="sr-only">Filter sections</span>
+          <input type="search" id="docs-filter" placeholder="Filter sections" autocomplete="off">
+        </label>
+        <nav class="docs-toc" id="docs-toc" aria-label="On this page"></nav>
+      </div>
+    </aside>
+
+    <article class="docs-main">
+      <div class="docs-meta" id="docs-meta"></div>
+      <div class="doc-body" id="doc-content" tabindex="-1">
+        <p class="muted">Loading the documentation…</p>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-base">
+        <span>© 2026 silentoplayz. MIT License.</span>
+        <a href="https://github.com/silentoplayz/theme-designer-pro-presets">github.com/silentoplayz/theme-designer-pro-presets</a>
+      </div>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+  <script src="../assets/ui.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>
