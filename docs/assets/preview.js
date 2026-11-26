@@ -326,6 +326,14 @@
       shapes.map(function (s) { return s.charAt(0) === '<' ? s : '<path d="' + s + '"/>'; }).join('') + '</svg>';
   }
 
+  // Icons the mock's dialogs and newer menus use, copied from the DOM of
+  // Open WebUI's dev branch (Settings nav, user menu, tab menus, toasts)
+  // The Admin pages of Settings on dev, row by row: title, control (a
+  // switch's state, a value, or none) and description, as an admin sees
+  // them on a fresh instance
+  const ADMIN_SETTINGS = {"General": [{"t": "Community Sharing", "c": true, "d": "Allow users to share chats with the Open WebUI community."}, {"t": "Message Rating", "c": true, "d": "Let users rate assistant responses."}, {"t": "Folders", "c": true, "d": "Allow users to organize chats into folders."}, {"t": "Memories", "c": true, "d": "Allow users to save memories for more personalized responses."}, {"t": "Memory System Context", "c": true, "d": "Include saved memories in the system context."}, {"t": "Load selected skills on demand", "c": false, "d": "Load selected and model-attached skills when needed instead of including instructions upfront. Explicit skill mentions still load immediately. Requires built-in skill tools; otherwise instructions load upfront."}, {"t": "Notes", "c": true, "d": "Allow users to create and manage notes."}, {"t": "Comments", "c": false, "d": "Allow users to comment on workspace items, notes, and chats they can access."}, {"t": "Notifications", "c": true, "d": "Enable in-app notifications for all users. Webhook delivery is configured separately."}, {"t": "Channels", "c": true, "d": "Allow users to use channels for shared conversations."}, {"t": "Encrypted channels", "c": false, "d": "Allow temporary end-to-end encrypted chats in direct messages and private groups. Messages are not saved."}, {"t": "Model Response Mode", "c": "Thread", "d": "Choose where model responses to root-level channel mentions are posted."}, {"t": "Apps", "c": false, "d": "Allow admins to connect external apps to Open WebUI."}, {"t": "Calendar", "c": true, "d": "Allow users to access calendar features."}, {"t": "Automations", "c": true, "d": "Allow users to create and run automations."}, {"t": "Automation Webhooks", "c": true, "d": "Allow automations to be started by a webhook URL. Anyone with the URL can start the automation and send it text."}, {"t": "User Webhooks", "c": false, "d": "Allow users to configure webhooks from their account."}, {"t": "User Status", "c": true, "d": "Show user status information in the app."}], "Authentication": [{"t": "Default User Role", "c": "pending", "d": "Role assigned to new users when they create an account."}, {"t": "Default Group", "c": "None", "d": "Group assigned to new users by default."}, {"t": "Login Form", "c": true, "d": "Show email and password sign-in on the login page. Set up SSO or LDAP before disabling. Disabling also blocks local sign-ups; password API access is unchanged."}, {"t": "New Sign Ups", "c": false, "d": "Allow new users to create accounts."}, {"t": "API Keys", "c": false, "d": "Allow users to create API keys for programmatic access."}, {"t": "Require an authenticator for all users", "c": false, "d": "Changes sign out all devices. Users enroll on their next sign-in."}, {"t": "Admin Details", "c": true, "d": "Show admin contact details while an account waits for approval."}, {"t": "LDAP", "c": false, "d": "Allow users to authenticate with an LDAP directory."}, {"t": "OAuth / OIDC", "c": true, "d": "Allow users to authenticate with an OAuth / OIDC provider."}, {"t": "OAuth Signup", "c": false, "d": "Allow users to create accounts through OAuth."}, {"t": "Merge Accounts by Email", "c": false, "d": "Link OAuth sign-ins to existing accounts with the same email."}, {"t": "Auto Redirect", "c": false, "d": "Send users directly to the OAuth provider from the sign-in page."}, {"t": "Role Mapping", "c": false, "d": "Map OAuth claims to Open WebUI roles."}, {"t": "Group Mapping", "c": false, "d": "Map OAuth claims to Open WebUI groups."}, {"t": "Update Email", "c": false, "d": "Refresh the account email from OAuth on sign-in."}, {"t": "Update Name", "c": false, "d": "Refresh the account name from OAuth on sign-in."}, {"t": "Update Picture", "c": false, "d": "Refresh the profile picture from OAuth on sign-in."}], "Interface": [{"t": "Visible controls", "c": "Show", "d": "Choose which controls appear for users. Hiding a control keeps its current setting and underlying feature available. Administrators always see available controls."}, {"t": "Context Compaction", "c": false, "d": "Summarize older chat history when the conversation context grows large."}, {"t": "Tool Call Labels", "c": false, "d": "Ask the model to include short labels for running and completed tool calls."}, {"t": "Tool Permissions Experimental", "c": false, "d": "Show tool permission choices in the chat input menu."}, {"t": "Tool Search Experimental", "c": false, "d": "Leave large tool definitions out of the request and let the model look them up on demand. Reduces prompt size when many tools are enabled."}, {"t": "Title Generation", "c": true, "d": "Allow automatic names for new chats."}, {"t": "Voice Mode Prompt", "c": true, "d": "Apply voice-specific instructions while voice mode is active."}, {"t": "Follow Up Generation", "c": true, "d": "Show suggested next questions after assistant responses."}, {"t": "Tags Generation", "c": true, "d": "Create chat tags from conversation content."}, {"t": "Retrieval Query Generation", "c": true, "d": "Rewrite user requests for knowledge retrieval."}, {"t": "Web Search Query Generation", "c": true, "d": "Rewrite user requests into web-search queries."}, {"t": "Autocomplete Generation", "c": false, "d": "Suggest completions while users type chat messages."}], "Connections": [{"t": "OpenAI API", "c": false, "d": ""}, {"t": "Ollama API", "c": false, "d": ""}, {"t": "Cache Base Model List", "c": false, "d": "Base Model List Cache speeds up access by fetching base models only at startup or on settings save—faster, but may not show recent base model changes."}], "Sub-agents": [{"t": "Enable sub-agents", "c": false, "d": "Allow the AI to delegate tasks to sub-agents. Each sub-agent creates a real chat with full tool access. Uses additional LLM calls."}], "Documents": [{"t": "Content Extraction Engine", "c": "Default", "d": "Choose how uploaded documents are parsed before indexing."}, {"t": "PDF Extract Images (OCR)", "c": false, "d": "Extract images from PDFs so OCR can process image-only pages."}, {"t": "PDF Loader Mode", "c": "Page", "d": "Page mode creates one document per page. Single mode keeps pages together for chunking across boundaries."}, {"t": "Bypass Embedding and Retrieval", "c": false, "d": "Use segmented retrieval for focused and relevant context."}, {"t": "Text Splitter", "c": "Default (Character)", "d": "Choose how extracted text is split before indexing."}, {"t": "Markdown Header Text Splitter", "c": true, "d": "Split documents by markdown headers before character or token splitting."}, {"t": "Embedding Model Engine", "c": "Default (SentenceTransformers)", "d": "Provider used to generate document embeddings."}, {"t": "Embedding Batch Size", "c": null, "d": "Number of items processed per embedding batch."}, {"t": "Full Text Threshold Type", "c": "Default (Character)", "d": "Choose how file size is measured."}, {"t": "Always Use Full Text", "c": false, "d": "Include complete documents regardless of the full text threshold."}, {"t": "Hybrid Search", "c": false, "d": "Combine semantic and keyword retrieval."}, {"t": "Reranking Batch Size", "c": null, "d": "Number of results processed per reranking batch."}, {"t": "Google Drive", "c": false, "d": "Allow Google Drive as a document source."}, {"t": "OneDrive", "c": false, "d": "Allow OneDrive as a document source."}, {"t": "Reset Upload Directory", "c": "Reset", "d": "Delete uploaded files from the upload directory."}, {"t": "Reset Vector Storage/Knowledge", "c": "Reset", "d": "Clear vector storage and knowledge indexing data."}, {"t": "Reindex Knowledge and Memory Vectors", "c": "Reindex", "d": "Rebuild vectors for existing knowledge files, knowledge search, and memories."}], "Web Search": [{"t": "Web Search", "c": true, "d": "Allow users to search the web from chats."}, {"t": "Web Search Confirmation", "c": false, "d": "Require users to confirm before using Web Search."}, {"t": "Web Search Engine", "c": "Select a engine", "d": "Choose the provider used for web search queries."}, {"t": "Bypass Embedding and Retrieval", "c": false, "d": "Use segmented retrieval for focused and relevant content extraction."}, {"t": "Bypass Web Loader", "c": false, "d": "Use search results without fetching page contents."}, {"t": "Trust Proxy Environment", "c": true, "d": "Use proxy environment variables to fetch page contents."}, {"t": "Web Loader Engine", "c": "Default", "d": "Choose how web result pages are fetched and read."}, {"t": "Verify SSL Certificate", "c": true, "d": "Validate SSL certificates when fetching web content."}], "Audio": [{"t": "Call mode", "c": "Standard", "d": ""}, {"t": "Speech-to-Text Engine", "c": "Whisper (Local)", "d": "Choose the transcription provider used for audio input."}, {"t": "Text-to-Speech Engine", "c": "Web API", "d": "Choose the speech provider used for assistant audio output."}, {"t": "Response Splitting", "c": "Punctuation", "d": "Control how message text is split for TTS requests. 'Punctuation' splits into sentences, 'paragraphs' splits into paragraphs, and 'none' keeps the message as a single string."}], "Images & Videos": [{"t": "Image Generation", "c": true, "d": "Allow users to generate images from prompts."}, {"t": "Image Edit", "c": false, "d": "Allow users to edit existing images."}, {"t": "OpenAI gpt-image-2", "c": true, "d": ""}, {"t": "Default Generation Model", "c": "First available", "d": "Used when the chat or model doesn't pick an image model."}, {"t": "Image Prompt Generation", "c": true, "d": "Only for models using legacy function calling: rewrites the chat into an image prompt. With native function calling, the model writes the prompt itself."}, {"t": "Video Generation", "c": false, "d": "Allow users to generate videos from prompts."}], "Database": [{"t": "Import Config", "c": "Import", "d": "Import admin configuration from a JSON export file."}, {"t": "Export Config", "c": "Export", "d": "Download the current admin configuration as JSON."}, {"t": "Database", "c": null, "d": "Download the application database when supported."}, {"t": "All Chats", "c": "Export", "d": "Download every user's chat history as JSON."}, {"t": "Users", "c": "Export", "d": "Download all users as CSV."}]};
+  const DEV_ICONS = {"set:back": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M15.75 19.5 8.25 12l7.5-7.5\"></path></svg>", "set:search": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z\"></path></svg>", "set:p:General": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M19.6224 10.3954L18.5247 7.7448L20 6L18 4L16.2647 5.48295L13.5578 4.36974L12.9353 2H10.981L10.3491 4.40113L7.70441 5.51596L6 4L4 6L5.45337 7.78885L4.3725 10.4463L2 11V13L4.40111 13.6555L5.51575 16.2997L4 18L6 20L7.79116 18.5403L10.397 19.6123L11 22H13L13.6045 19.6132L16.2551 18.5155C16.6969 18.8313 18 20 18 20L20 18L18.5159 16.2494L19.6139 13.598L21.9999 12.9772L22 11L19.6224 10.3954Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:p:Interface": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75\"></path></svg>", "set:p:Notifications": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M19 8C20.6569 8 22 6.65685 22 5C22 3.34315 20.6569 2 19 2C17.3431 2 16 3.34315 16 5C16 6.65685 17.3431 8 19 8Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M21 12V15C21 18.3137 18.3137 21 15 21H9C5.68629 21 3 18.3137 3 15V9C3 5.68629 5.68629 3 9 3H12\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:p:Keyboard": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M3 19V5C3 3.89543 3.89543 3 5 3H19C20.1046 3 21 3.89543 21 5V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19Z\"></path><path d=\"M8 14L12 10L16 14\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:p:Personalization": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M16 8L16 10\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M8 8L8 10\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M9 16C9 16 10 17 12 17C14 17 15 16 15 16\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M12 8L12 13L11 13\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:p:Audio": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M1 13.8571V10.1429C1 9.03829 1.89543 8.14286 3 8.14286H5.9C6.09569 8.14286 6.28708 8.08544 6.45046 7.97772L12.4495 4.02228C13.1144 3.5839 14 4.06075 14 4.85714V19.1429C14 19.9392 13.1144 20.4161 12.4495 19.9777L6.45046 16.0223C6.28708 15.9146 6.09569 15.8571 5.9 15.8571H3C1.89543 15.8571 1 14.9617 1 13.8571Z\"></path><path d=\"M17.5 7.5C17.5 7.5 19 9 19 11.5C19 14 17.5 15.5 17.5 15.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M20.5 4.5C20.5 4.5 23 7 23 11.5C23 16 20.5 18.5 20.5 18.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:p:Data Controls": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M4 6V12C4 12 4 15 11 15C18 15 18 12 18 12V6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M11 3C18 3 18 6 18 6C18 6 18 9 11 9C4 9 4 6 4 6C4 6 4 3 11 3Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M11 21C4 21 4 18 4 18V12\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M19 21C20.1046 21 21 20.1046 21 19C21 17.8954 20.1046 17 19 17C18.6357 17 18.2942 17.0974 18 17.2676C17.4022 17.6134 17 18.2597 17 19C17 19.7403 17.4022 20.3866 18 20.7324C18.2942 20.9026 18.6357 21 19 21Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M19 22C20.6569 22 22 20.6569 22 19C22 17.3431 20.6569 16 19 16C17.3431 16 16 17.3431 16 19C16 20.6569 17.3431 22 19 22Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"0.3 2\"></path></svg>", "set:p:Usage": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M20 20H4V4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M4 16.5L12 9L15 12L19.5 7.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:p:Archived Chats": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z\"></path></svg>", "set:p:Account": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M4.271 18.3457C4.271 18.3457 6.50002 15.5 12 15.5C17.5 15.5 19.7291 18.3457 19.7291 18.3457\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M12 12C13.6569 12 15 10.6569 15 9C15 7.34315 13.6569 6 12 6C10.3431 6 9 7.34315 9 9C9 10.6569 10.3431 12 12 12Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:p:About": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M12 11.5V16.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M12 7.51L12.01 7.49889\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:a:General": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M19.6224 10.3954L18.5247 7.7448L20 6L18 4L16.2647 5.48295L13.5578 4.36974L12.9353 2H10.981L10.3491 4.40113L7.70441 5.51596L6 4L4 6L5.45337 7.78885L4.3725 10.4463L2 11V13L4.40111 13.6555L5.51575 16.2997L4 18L6 20L7.79116 18.5403L10.397 19.6123L11 22H13L13.6045 19.6132L16.2551 18.5155C16.6969 18.8313 18 20 18 20L20 18L18.5159 16.2494L19.6139 13.598L21.9999 12.9772L22 11L19.6224 10.3954Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:a:Authentication": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M16 12H17.4C17.7314 12 18 12.2686 18 12.6V19.4C18 19.7314 17.7314 20 17.4 20H6.6C6.26863 20 6 19.7314 6 19.4V12.6C6 12.2686 6.26863 12 6.6 12H8M16 12V8C16 6.66667 15.2 4 12 4C8.8 4 8 6.66667 8 8V12M16 12H8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:a:Interface": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M2 21L17 21\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M21 21L22 21\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M2 16.4V3.6C2 3.26863 2.26863 3 2.6 3H21.4C21.7314 3 22 3.26863 22 3.6V16.4C22 16.7314 21.7314 17 21.4 17H2.6C2.26863 17 2 16.7314 2 16.4Z\"></path></svg>", "set:a:Connections": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 11.9976C14 9.5059 11.683 7 8.85714 7C8.52241 7 7.41904 7.00001 7.14286 7.00001C4.30254 7.00001 2 9.23752 2 11.9976C2 14.376 3.70973 16.3664 6 16.8714C6.36756 16.9525 6.75006 16.9952 7.14286 16.9952\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M10 11.9976C10 14.4893 12.317 16.9952 15.1429 16.9952C15.4776 16.9952 16.581 16.9952 16.8571 16.9952C19.6975 16.9952 22 14.7577 22 11.9976C22 9.6192 20.2903 7.62884 18 7.12383C17.6324 7.04278 17.2499 6.99999 16.8571 6.99999\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:a:Models": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M4 7.5C4 5.57 7.58 4 12 4s8 1.57 8 3.5S16.42 11 12 11 4 9.43 4 7.5Z\"></path><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M4 7.5v4C4 13.43 7.58 15 12 15s8-1.57 8-3.5v-4\"></path><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M4 11.5v4C4 17.43 7.58 19 12 19s8-1.57 8-3.5v-4\"></path></svg>", "set:a:Sub-agents": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M4.271 18.3457C4.271 18.3457 6.50002 15.5 12 15.5C17.5 15.5 19.7291 18.3457 19.7291 18.3457\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M12 12C13.6569 12 15 10.6569 15 9C15 7.34315 13.6569 6 12 6C10.3431 6 9 7.34315 9 9C9 10.6569 10.3431 12 12 12Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:a:Integrations": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M10.0503 10.6066L2.97923 17.6777C2.19818 18.4587 2.19818 19.725 2.97923 20.5061V20.5061C3.76027 21.2871 5.0266 21.2871 5.80765 20.5061L12.8787 13.435\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M10.0502 10.6066C9.20638 8.45358 9.37134 5.6286 11.1109 3.88909C12.8504 2.14957 16.0606 1.76777 17.8284 2.82843L14.7877 5.8691L14.5051 8.98014L17.6161 8.69753L20.6568 5.65685C21.7175 7.42462 21.3357 10.6349 19.5961 12.3744C17.8566 14.1139 15.0316 14.2789 12.8786 13.435\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:a:Documents": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z\"></path></svg>", "set:a:Web Search": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418\"></path></svg>", "set:a:Audio": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M1 13.8571V10.1429C1 9.03829 1.89543 8.14286 3 8.14286H5.9C6.09569 8.14286 6.28708 8.08544 6.45046 7.97772L12.4495 4.02228C13.1144 3.5839 14 4.06075 14 4.85714V19.1429C14 19.9392 13.1144 20.4161 12.4495 19.9777L6.45046 16.0223C6.28708 15.9146 6.09569 15.8571 5.9 15.8571H3C1.89543 15.8571 1 14.9617 1 13.8571Z\"></path><path d=\"M17.5 7.5C17.5 7.5 19 9 19 11.5C19 14 17.5 15.5 17.5 15.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M20.5 4.5C20.5 4.5 23 7 23 11.5C23 16 20.5 18.5 20.5 18.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:a:Images & Videos": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 7.6V20.4C21 20.7314 20.7314 21 20.4 21H7.6C7.26863 21 7 20.7314 7 20.4V7.6C7 7.26863 7.26863 7 7.6 7H20.4C20.7314 7 21 7.26863 21 7.6Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M18 4H4.6C4.26863 4 4 4.26863 4 4.6V18\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M7 16.8L12.4444 15L21 18\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M16.5 13C15.6716 13 15 12.3284 15 11.5C15 10.6716 15.6716 10 16.5 10C17.3284 10 18 10.6716 18 11.5C18 12.3284 17.3284 13 16.5 13Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:a:Legacy": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2.5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m8.25 4.5 7.5 7.5-7.5 7.5\"></path></svg>", "set:a:Analytics": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M3 4.5h14.25M3 9h9.75M3 13.5h5.25m5.25-.75L17.25 9m0 0L21 12.75M17.25 9v12\"></path></svg>", "set:a:Database": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M5 12V18C5 18 5 21 12 21C19 21 19 18 19 18V12\"></path><path d=\"M5 6V12C5 12 5 15 12 15C19 15 19 12 19 12V6\"></path><path d=\"M12 3C19 3 19 6 19 6C19 6 19 9 12 9C5 9 5 6 5 6C5 6 5 3 12 3Z\"></path></svg>", "user:Update your status": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\"><path d=\"M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22Z\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M16.5 14.5C16.5 14.5 15 16.5 12 16.5C9 16.5 7.5 14.5 7.5 14.5\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M15.5 9C15.2239 9 15 8.77614 15 8.5C15 8.22386 15.2239 8 15.5 8C15.7761 8 16 8.22386 16 8.5C16 8.77614 15.7761 9 15.5 9Z\" fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M8.5 9C8.22386 9 8 8.77614 8 8.5C8 8.22386 8.22386 8 8.5 8C8.77614 8 9 8.22386 9 8.5C9 8.77614 8.77614 9 8.5 9Z\" fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "user:Workspace": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\"><path d=\"M13.9922 17H16.9922M19.9922 17H16.9922M16.9922 17V14M16.9922 17V20\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M4 9.4V4.6C4 4.26863 4.26863 4 4.6 4H9.4C9.73137 4 10 4.26863 10 4.6V9.4C10 9.73137 9.73137 10 9.4 10H4.6C4.26863 10 4 9.73137 4 9.4Z\" stroke=\"currentColor\" stroke-width=\"1.5\"></path><path d=\"M4 19.4V14.6C4 14.2686 4.26863 14 4.6 14H9.4C9.73137 14 10 14.2686 10 14.6V19.4C10 19.7314 9.73137 20 9.4 20H4.6C4.26863 20 4 19.7314 4 19.4Z\" stroke=\"currentColor\" stroke-width=\"1.5\"></path><path d=\"M14 9.4V4.6C14 4.26863 14.2686 4 14.6 4H19.4C19.7314 4 20 4.26863 20 4.6V9.4C20 9.73137 19.7314 10 19.4 10H14.6C14.2686 10 14 9.73137 14 9.4Z\" stroke=\"currentColor\" stroke-width=\"1.5\"></path></svg>", "user:Notes": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" stroke=\"currentColor\" stroke-linecap=\"round\"></path><path d=\"M6 17L20 17\" stroke=\"currentColor\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" stroke=\"currentColor\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M9 7L15 7\" stroke=\"currentColor\" stroke-linecap=\"round\"></path></svg>", "user:Calendar": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\"><path d=\"M15 4V2M15 4V6M15 4H10.5M3 10V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V10H3Z\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M3 10V6C3 4.89543 3.89543 4 5 4H7\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M7 2V6\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M21 10V6C21 4.89543 20.1046 4 19 4H18.5\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "user:Automations": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\"><path d=\"M12 6L12 12L18 12\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "user:Playground": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\"><path d=\"M13.5 6L10 18.5\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6.5 8.5L3 12L6.5 15.5\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M17.5 8.5L21 12L17.5 15.5\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "user:Admin Panel": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\"><path d=\"M5 20V19C5 15.134 8.13401 12 12 12V12C15.866 12 19 15.134 19 19V20\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M12 12C14.2091 12 16 10.2091 16 8C16 5.79086 14.2091 4 12 4C9.79086 4 8 5.79086 8 8C8 10.2091 9.79086 12 12 12Z\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "user:Settings": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z\"></path><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\"></path></svg>", "user:Sign Out": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\"><path d=\"M12 12H19M19 12L16 15M19 12L16 9\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M19 6V5C19 3.89543 18.1046 3 17 3H7C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V18\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "newtab:New Chat": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.5\"><!----><path d=\"M8 10L12 10L16 10\"></path><path d=\"M8 14L10 14L12 14\"></path><!----><path d=\"M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.8214 2.48697 15.5291 3.33782 17L2.5 21.5L7 20.6622C8.47087 21.513 10.1786 22 12 22Z\"></path><!----></svg>", "newtab:Overview": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z\"></path></svg>", "tabchat:Share": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\"><path d=\"M20 13V19C20 20.1046 19.1046 21 18 21H6C4.89543 21 4 20.1046 4 19V13\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M12 15V3M12 3L8.5 6.5M12 3L15.5 6.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "tabchat:Download": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\"><path d=\"M6 20L18 20\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M12 4V16M12 16L15.5 12.5M12 16L8.5 12.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "tabchat:Rename": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\"><path d=\"M14.3632 5.65156L15.8431 4.17157C16.6242 3.39052 17.8905 3.39052 18.6716 4.17157L20.0858 5.58579C20.8668 6.36683 20.8668 7.63316 20.0858 8.41421L18.6058 9.8942M14.3632 5.65156L4.74749 15.2672C4.41542 15.5993 4.21079 16.0376 4.16947 16.5054L3.92738 19.2459C3.87261 19.8659 4.39148 20.3848 5.0115 20.33L7.75191 20.0879C8.21972 20.0466 8.65806 19.8419 8.99013 19.5099L18.6058 9.8942M14.3632 5.65156L18.6058 9.8942\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "tabchat:Copy": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184\"></path></svg>", "tabchat:Archive": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z\"></path></svg>", "tabchat:Delete": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0\"></path></svg>", "tabchat:Tags": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\"><path d=\"M4 12 L8 7 H21 V17 H8 L4 12 Z\" stroke=\"currentColor\" fill=\"none\"></path><circle cx=\"10\" cy=\"12\" r=\"0.75\" fill=\"currentColor\" stroke=\"currentColor\"></circle></svg>", "toast:check": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z\"></path></svg>", "toast:x": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\"></line><line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"></line></svg>"};
+
   const SVG = {
     // Sidebar/icons/EditPencil.svelte — sidebar "New Chat"
     editPencil: icon(['M14.3632 5.65156L15.8431 4.17157C16.6242 3.39052 17.8905 3.39052 18.6716 4.17157L20.0858 5.58579C20.8668 6.36683 20.8668 7.63316 20.0858 8.41421L18.6058 9.8942M14.3632 5.65156L4.74749 15.2672C4.41542 15.5993 4.21079 16.0376 4.16947 16.5054L3.92738 19.2459C3.87261 19.8659 4.39148 20.3848 5.0115 20.33L7.75191 20.0879C8.21972 20.0466 8.65806 19.8419 8.99013 19.5099L18.6058 9.8942M14.3632 5.65156L18.6058 9.8942']),
@@ -1128,6 +1136,143 @@ nav.is-new .nav-chat-menu { display: none; }
 .tdp-menu.in { opacity: 1; transform: none; }
 /* InputMenu w-70 max-h-72; IntegrationsMenu min-w-70 max-w-70 max-h-72 */
 .tdp-menu.input-menu { width: 17.5rem; max-height: 18rem; }
+/* Shortcut pills in menus: rounded-full bg-base-100 dark:bg-base-0/6 text-[0.625rem] */
+.kbd { display: inline-flex; align-items: center; min-height: 1.125rem; padding: 2px 5px; border-radius: 9999px; font-size: 0.625rem; font-weight: 500; line-height: 1; white-space: nowrap; color: var(--color-base-500); background: ${isLight ? 'var(--color-base-100)' : 'color-mix(in oklab, var(--color-base-0) 6%, transparent)'}; }
+.tdp-menu .mi .kbd { margin-left: auto; }
+.tdp-menu .mi .chev { display: flex; margin-left: auto; color: var(--color-base-500); }
+.tdp-menu.newtab-menu { min-width: 14rem; }
+/* ChatStatus.svelte: Status, the context size and the chat's id */
+.tdp-menu.status-menu { width: 20rem; padding: 10px 12px; gap: 6px; font-size: 0.75rem; }
+.status-menu .st-head { color: var(--color-base-500); }
+.status-menu .st-row { display: flex; justify-content: space-between; gap: 12px; color: ${isLight ? 'var(--color-base-700)' : 'var(--color-base-200)'}; }
+.status-menu .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.625rem; color: var(--color-base-500); }
+/* the sidebar's inbox: the bell swaps the rows for the notifications */
+#sidebar.inbox > :not(.brand):not(.side-user):not(.side-inbox) { display: none; }
+.side-inbox { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: ${isLight ? 'var(--color-base-600)' : 'var(--color-base-300)'}; }
+.side-inbox[hidden] { display: none; }
+.brand .brand-bell.on { background: ${navHover}; }
+/* the code block folded by Collapse, and feedback that was given */
+.code-block.folded .cb-editor { display: none; }
+.msg-action.on { color: ${isLight ? 'var(--color-base-900)' : 'var(--color-base-0)'}; }
+/* ModelControls.svelte: a w-70 dropdown, at most 21rem tall */
+#controls-pane.controls-pop { position: fixed; z-index: 9999; width: 17.5rem; max-width: calc(100vw - 2rem); max-height: min(21rem, calc(100dvh - 2rem)); overflow-y: auto; padding: 2px; border-radius: 12px; border: 1px solid var(--color-base-${isLight ? '100' : '800'}); background: var(--color-base-${isLight ? '0' : '850'}); color: ${isLight ? 'var(--color-base-900)' : 'var(--color-base-0)'}; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); scrollbar-width: thin; }
+#controls-pane.controls-pop[hidden] { display: none; }
+.controls-pop .cc-top { display: flex; align-items: center; gap: 8px; width: 100%; height: 1.6875rem; padding: 0 8px; border: 0; border-radius: 12px; background: transparent; color: inherit; font: inherit; font-size: 0.8125rem; cursor: pointer; }
+.controls-pop .cc-top span:first-child { flex: 1; text-align: left; }
+.controls-pop .cc-top svg { width: 0.625rem; height: 0.625rem; }
+.controls-pop .cc-top .down, .controls-pop.folded .cc-top .up { display: none; }
+.controls-pop.folded .cc-top .down { display: flex; }
+.controls-pop.folded .cc-body { display: none; }
+.controls-pop .cc-body { flex: none; overflow: visible; padding: 2px 6px 4px; }
+/* svelte-sonner, top right: rounded-2xl border p-3 text-[0.8125rem] */
+.tdp-toasts { position: fixed; top: 32px; right: 32px; z-index: 10000; display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; width: 356px; max-width: calc(100vw - 32px); pointer-events: none; }
+.tdp-toast { pointer-events: auto; display: flex; align-items: flex-start; gap: 10px; padding: 12px; border-radius: 16px; border: 1px solid var(--color-base-${isLight ? '100' : '800'}); background: var(--color-base-${isLight ? '0' : '850'}); color: var(--color-base-${isLight ? '800' : '100'}); font-size: 0.8125rem; font-weight: 500; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); animation: tdp-toast-in 0.2s ease-out; transition: opacity 0.2s, transform 0.2s; }
+.tdp-toast.out { opacity: 0; transform: translateY(-6px); }
+.tdp-toast .ok { display: flex; color: oklch(0.723 0.219 149.579); }
+.tdp-toast .ok svg { width: 1rem; height: 1rem; }
+.tdp-toast .t { flex: 1; }
+.tdp-toast .x { display: flex; padding: 2px; color: var(--color-base-500); cursor: pointer; }
+.tdp-toast .x svg { width: 12px; height: 12px; }
+@keyframes tdp-toast-in { from { opacity: 0; transform: translateY(-8px); } }
+/* common/Modal.svelte: modal fixed inset-0 bg-base-1000/45 dark:bg-base-1000/60 */
+.modal.tdp-modal { position: fixed; inset: 0; z-index: 9999; display: flex; justify-content: center; overflow-y: auto; padding: 12px; --tdp-modal-gap: 1.5rem; background: color-mix(in oklab, var(--color-base-1000) ${isLight ? '45' : '60'}%, transparent); }
+/* SearchModal.svelte: w-[70rem] rounded-2xl bg-base-0 dark:bg-base-850 */
+.search-panel { margin: auto; width: 70rem; max-width: 100%; height: min(654px, 85dvh); display: flex; flex-direction: column; border-radius: 16px; border: 1px solid var(--color-base-${isLight ? '100' : '800'}); background: var(--color-base-${isLight ? '0' : '850'}); color: var(--color-base-${isLight ? '700' : '100'}); font-size: 0.8125rem; overflow: hidden; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); }
+.sm-top { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px; flex-shrink: 0; }
+.sm-top > svg { width: 1rem; height: 1rem; color: var(--color-base-500); }
+.sm-top input { flex: 1; min-width: 0; height: 32px; border: 0; outline: none; background: transparent; color: inherit; font: inherit; }
+.sm-top input::placeholder { color: var(--color-base-${isLight ? '400' : '500'}); }
+.sm-filter { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--color-base-${isLight ? '600' : '300'}); white-space: nowrap; cursor: pointer; }
+.sm-filter svg { width: 0.625rem; height: 0.625rem; }
+.sm-ico { display: flex; padding: 4px; border-radius: 6px; color: var(--color-base-${isLight ? '600' : '300'}); cursor: pointer; }
+.sm-ico svg { width: 0.875rem; height: 0.875rem; }
+.sm-body { flex: 1; min-height: 0; display: flex; border-top: 1px solid color-mix(in oklab, var(--color-base-${isLight ? '100' : '800'}) 60%, transparent); border-bottom: 1px solid color-mix(in oklab, var(--color-base-${isLight ? '100' : '800'}) 60%, transparent); }
+.sm-list { flex: 1; min-width: 0; overflow-y: auto; padding: 6px; border-right: 1px solid color-mix(in oklab, var(--color-base-${isLight ? '100' : '800'}) 60%, transparent); }
+.sm-label { display: flex; justify-content: space-between; padding: 6px 6px 4px; font-size: 0.6875rem; color: var(--color-base-${isLight ? '500' : '300'}); }
+.sm-row { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; border-radius: 8px; cursor: pointer; }
+.sm-row.sel { background: color-mix(in oklab, var(--color-base-${isLight ? '100' : '800'}) 60%, transparent); }
+.sm-row svg { width: 12px; height: 12px; color: var(--color-base-500); flex-shrink: 0; }
+.sm-row .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: ${isLight ? 'var(--color-base-900)' : 'var(--color-base-0)'}; }
+.sm-row .k { font-size: 0.6875rem; color: var(--color-base-500); }
+.sm-row mark { background: #ff0; color: #000; }
+.sm-empty { padding: 12px 8px; color: var(--color-base-500); }
+.sm-preview { flex: 1; min-width: 0; overflow-y: auto; padding: 12px 14px; }
+.sp-head { display: flex; justify-content: space-between; font-size: 0.6875rem; color: var(--color-base-500); }
+.sp-title { margin: 10px 0 18px; color: ${isLight ? 'var(--color-base-900)' : 'var(--color-base-0)'}; }
+.sp-user { display: flex; justify-content: flex-end; }
+.sp-user span { max-width: 85%; padding: 6px 12px; border-radius: 16px; background: var(--color-base-${isLight ? '50' : '800'}); }
+.sp-ai { font-size: 0.75rem; }
+.sp-ai .code-block { margin: 6px 0; }
+.sp-time { margin: 4px 6px 12px; font-size: 0.6875rem; color: var(--color-base-500); }
+.sp-time.r { text-align: right; }
+.sm-foot { display: flex; justify-content: space-between; align-items: center; height: 32px; padding: 0 12px; font-size: 0.6875rem; color: var(--color-base-500); flex-shrink: 0; }
+.sm-keys { display: flex; gap: 14px; }
+/* SettingsModal.svelte: rounded-4xl bg-base-0 dark:bg-base-900, a 15rem nav */
+@media (min-width: 640px) { .modal.tdp-modal { padding: 16px; --tdp-modal-gap: 2rem; } }
+@media (min-width: 1024px) { .modal.tdp-modal { padding: 24px; --tdp-modal-gap: 3rem; } }
+.set-panel { margin: auto; width: 100%; height: calc(100dvh - var(--tdp-modal-gap)); display: flex; border-radius: 32px; border: 1px solid var(--color-base-${isLight ? '100' : '850'}); background: var(--color-base-${isLight ? '0' : '900'}); color: ${isLight ? 'var(--color-base-900)' : 'var(--color-base-100)'}; overflow: hidden; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); }
+.set-nav { width: 15rem; flex-shrink: 0; display: flex; flex-direction: column; min-height: 0; border-right: 1px solid ${isLight ? 'color-mix(in oklab, var(--color-base-100) 30%, transparent)' : 'color-mix(in oklab, var(--color-base-0) 2%, transparent)'}; }
+.set-back, .set-search { display: flex; align-items: center; gap: 6px; height: 28px; margin: 4px 4px 0; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; font: inherit; font-size: 0.75rem; color: var(--color-base-${isLight ? '600' : '500'}); cursor: pointer; flex-shrink: 0; }
+.set-back svg, .set-search svg { width: 12px; height: 12px; }
+.set-search { background: ${isLight ? 'color-mix(in oklab, var(--color-base-50) 70%, transparent)' : 'color-mix(in oklab, var(--color-base-0) 3%, transparent)'}; cursor: text; margin-bottom: 2px; }
+.set-search input { flex: 1; min-width: 0; border: 0; outline: none; background: transparent; color: ${isLight ? 'var(--color-base-900)' : 'var(--color-base-0)'}; font: inherit; }
+.set-items { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 8px; scrollbar-width: none; }
+.set-group { margin: 6px 4px 2px; padding: 0 8px; font-size: 0.625rem; color: var(--color-base-${isLight ? '600' : '500'}); }
+.set-group.admin { margin-top: 14px; padding-top: 10px; border-top: 1px solid ${isLight ? 'color-mix(in oklab, var(--color-base-100) 50%, transparent)' : 'color-mix(in oklab, var(--color-base-0) 4%, transparent)'}; }
+.set-sub { margin: 2px 4px; padding: 0 8px; font-size: 0.625rem; color: var(--color-base-${isLight ? '600' : '500'}); }
+.set-item { display: flex; align-items: center; gap: 6px; width: calc(100% - 8px); height: 28px; margin: 0 4px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; font: inherit; font-size: 0.75rem; text-align: left; color: var(--color-base-${isLight ? '600' : '400'}); cursor: pointer; transition: color 0.075s; }
+.set-item:hover { color: var(--color-base-${isLight ? '700' : '300'}); }
+.set-item.active { font-weight: 500; color: ${isLight ? 'var(--color-base-900)' : 'var(--color-base-0)'}; background: ${isLight ? 'var(--color-base-50)' : 'color-mix(in oklab, var(--color-base-0) 4%, transparent)'}; }
+.set-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+.set-legacy[hidden] { display: none; }
+.set-legacy .set-item { padding-left: 22px; }
+.set-main { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 16px 20px 16px; }
+.set-scroll { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; }
+.set-title { margin-bottom: 16px; font-size: 0.875rem; font-weight: 500; color: ${isLight ? 'var(--color-base-900)' : 'var(--color-base-0)'}; }
+.set-rows { display: flex; flex-direction: column; gap: 10px; }
+.set-sec { margin-top: 6px; font-size: 0.75rem; color: var(--color-base-${isLight ? '600' : '500'}); }
+.set-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.set-t { font-size: 0.75rem; color: var(--color-base-${isLight ? '600' : '400'}); }
+.set-d { margin-top: 6px; font-size: 0.6875rem; color: ${isLight ? 'var(--color-base-500)' : 'color-mix(in oklab, var(--color-base-500) 80%, transparent)'}; }
+.set-v { margin-top: 4px; font-size: 0.75rem; color: var(--color-base-${isLight ? '700' : '300'}); }
+.set-val { font-size: 0.75rem; color: var(--color-base-${isLight ? '600' : '400'}); cursor: pointer; white-space: nowrap; }
+.set-val:hover { color: var(--color-base-${isLight ? '900' : '100'}); }
+.set-val.danger { color: oklch(0.637 0.237 25.331); }
+.set-select { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--color-base-${isLight ? '100' : '800'}); font-size: 0.75rem; color: var(--color-base-${isLight ? '700' : '200'}); white-space: nowrap; cursor: pointer; }
+.set-select svg { width: 0.625rem; height: 0.625rem; }
+.set-colors { display: flex; gap: 8px; }
+.set-colors i { width: 20px; height: 20px; border-radius: 9999px; border: 1px solid var(--color-base-${isLight ? '200' : '700'}); }
+.set-colors .bg { background: var(--app-bg, var(--color-base-900)); }
+.set-colors .fg { background: var(--app-fg, var(--color-base-0)); }
+.set-input { display: block; width: 100%; margin-top: 8px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--color-base-${isLight ? '100' : '800'}); outline: none; background: transparent; color: inherit; font: inherit; font-size: 0.75rem; }
+.set-input::placeholder { color: var(--color-base-${isLight ? '400' : '500'}); }
+.set-badge { margin-left: 6px; padding: 1px 6px; border-radius: 6px; font-size: 0.5625rem; font-weight: 600; letter-spacing: 0.04em; color: oklch(0.795 0.184 86.047); background: color-mix(in oklab, oklch(0.795 0.184 86.047) 15%, transparent); }
+.set-count { margin-left: 4px; color: var(--color-base-500); }
+.set-empty { padding: 28px 0; text-align: center; font-size: 0.75rem; color: var(--color-base-500); }
+.set-keys { margin-top: 6px; font-size: 0.75rem; }
+.set-keyhead, .set-key { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; }
+.set-keyhead { color: var(--color-base-500); border-bottom: 1px solid var(--color-base-${isLight ? '100' : '800'}); }
+.set-keygroup { margin: 10px 0 2px; color: var(--color-base-500); font-size: 0.6875rem; }
+.set-key span:first-child { color: var(--color-base-${isLight ? '700' : '300'}); }
+.set-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.set-stats div { padding: 10px; border-radius: 12px; border: 1px solid var(--color-base-${isLight ? '100' : '800'}); }
+.set-stats b { display: block; font-size: 1rem; font-weight: 500; color: ${isLight ? 'var(--color-base-900)' : 'var(--color-base-0)'}; }
+.set-stats span { font-size: 0.6875rem; color: var(--color-base-500); }
+.set-model { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 0.8125rem; }
+.set-model img { width: 1.5rem; height: 1.5rem; border-radius: 9999px; }
+.set-model span:nth-child(2) { flex: 1; }
+.set-tag { font-size: 0.625rem; padding: 2px 6px; border-radius: 6px; color: var(--color-base-500); background: color-mix(in oklab, var(--color-base-500) 12%, transparent); }
+.set-profile { display: flex; align-items: center; gap: 12px; }
+.set-profile .avatar { width: 3.5rem; height: 3.5rem; }
+.set-links { font-size: 0.6875rem; color: var(--color-base-500); }
+.set-foot { display: flex; justify-content: flex-end; padding-top: 10px; flex-shrink: 0; }
+.set-save { height: 28px; padding: 0 10px; border: 0; border-radius: 8px; font: inherit; font-size: 0.75rem; cursor: pointer; background: var(--color-base-${isLight ? '900' : '100'}); color: var(--color-base-${isLight ? '0' : '900'}); }
+@media (max-width: 767px) {
+  .set-panel { flex-direction: column; }
+  .set-nav { width: 100%; max-height: 40%; border-right: 0; border-bottom: 1px solid var(--color-base-${isLight ? '100' : '800'}); }
+  .sm-preview { display: none; }
+  .set-stats { grid-template-columns: repeat(2, 1fr); }
+}
 /* the rule between the attach rows and the integrations: h-px mx-1 my-1 */
 .tdp-divider { height: 1px; margin: 4px; flex-shrink: 0; background: var(--color-base-${isLight ? '100' : '800'}); }
 .tdp-head { display: flex; align-items: center; }
@@ -1501,7 +1646,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
     <div class="rail-group">
       <span class="rail-btn lg rail-logo" data-tip="Open Sidebar" data-tip-placement="right"><span><img src="${LOGO}" alt="">${SVG.panel}</span></span>
       <span class="rail-btn rail-action" data-chat="new" data-tip="New Chat" data-tip-placement="right" style="margin-top:4px"><span>${SVG.editPencil}</span></span>
-      <span class="rail-btn rail-action" data-tip="Search" data-tip-placement="right"><span>${SVG.search}</span></span>
+      <span class="rail-btn rail-action" id="rail-search-button" data-tip="Search" data-tip-placement="right"><span>${SVG.search}</span></span>
       <span class="rail-btn rail-action" data-tip="Notes" data-tip-placement="right"><span>${SVG.notes}</span></span>
       <span class="rail-btn rail-action" data-tip="Workspace" data-tip-placement="right"><span>${SVG.workspace}</span></span>
       <span class="rail-btn rail-action" data-tip="Playground" data-tip-placement="right"><span>${SVG.code}</span></span>
@@ -1512,7 +1657,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
   <div class="sidebar-panel" id="sidebar">
     <div class="brand"><div class="brand-dot"><img src="${LOGO}" alt=""></div><span class="brand-name">Open WebUI</span><span class="brand-bell" role="button" aria-label="Notifications" data-tip="Notifications">${SVG.bell}</span><span class="panel-icon" data-tip="Close Sidebar">${SVG.panel}</span></div>
     <div class="side-item" data-chat="new">${SVG.editPencil} <span class="label">New Chat</span></div>
-    <div class="side-item">${SVG.search} <span class="label">Search</span></div>
+    <div class="side-item" id="sidebar-search-button" role="button">${SVG.search} <span class="label">Search</span></div>
     <div class="side-item">${SVG.notes} <span class="label">Notes</span></div>
     <div class="side-item">${SVG.workspace} <span class="label">Workspace</span></div>
     <div class="side-item">${SVG.code} <span class="label">Playground</span></div>
@@ -1566,6 +1711,7 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
         </div>
       </div>
     </div>
+    <div class="side-inbox" id="side-inbox" hidden>No notifications found.</div>
     <div class="side-user" id="side-user" role="button" aria-label="User menu"><span class="avatar-wrap"><span class="avatar"></span><span class="status-dot"></span></span> You</div>
   </div>
   <main>
@@ -2054,6 +2200,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     openChat(el.getAttribute('data-chat'));
   });
   window.__tdpOpenChat = openChat;
+  window.__tdpChats = CHATS;
 
   // Branch pager: show the previous/next regenerated variant. Bounds are
   // guarded like showPreviousMessage/showNextMessage upstream.
@@ -2351,6 +2498,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   if (!moreBtn || !modelBtn || !pills) return;
   var I = ${JSON.stringify({ captureFrame: SVG.captureFrame, attachments: SVG.attachments, captureAudio: SVG.captureAudio, cog6: SVG.cog6, mic: SVG.mic, share: SVG.share, download: SVG.download, editPencil: SVG.editPencil, chatCheck: SVG.chatCheck, pin: SVG.pin, pinSlash: SVG.pinSlash, copy: SVG.copy, folder: SVG.folder, archiveBox: SVG.archiveBox, trash: SVG.trash, cog: SVG.cog, logOut: SVG.logOut, emojiFace: SVG.emojiFace, user: SVG.user, workspace: SVG.workspace, notes: SVG.notes, code: SVG.code, checkAlt: SVG.check, clip: SVG.clip, camera: SVG.camera, globeAlt: SVG.globeAlt, documentArrowUp: SVG.documentArrowUp, pageEdit: SVG.pageEdit, database: SVG.database, clockRotateRight: SVG.clockRotateRight, chevronRightAlt: SVG.chevronRightAlt, chevronLeft: SVG.chevronLeft, chevronDown: SVG.chevronDown, wrench: SVG.wrench, searchAlt: SVG.searchAlt, photo: SVG.photo, terminal: SVG.terminal, check: SVG.check, keyframes: SVG.keyframes, documentPage: SVG.documentPage, dots: SVG.dots, globePill: SVG.globePill, photoPill: SVG.photoPill, terminalPill: SVG.terminalPill, wrenchPill: SVG.wrenchPill, xMark: SVG.xMark })};
   var LOGO_SRC = ${JSON.stringify(LOGO)};
+  var D = ${JSON.stringify(DEV_ICONS)};
 
   var TOOLS = ['Web Scraper', 'Calculator', 'Weather'];
   var FILES = ['palette-notes.md', 'brand-guidelines.pdf', 'dark-mode-screenshot.png', 'theme-export.json'];
@@ -2690,9 +2838,12 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
           ? '<button type="button" class="mi status" data-act="close"><span class="ico">' + st.emoji + '</span><span class="label">' + st.text + '</span><span class="clear" data-act="do:clear-status" data-tip="Clear status">' + I.xMark + '</span></button>'
           : '<button type="button" class="mi status" data-act="do:status"><span class="ico">' + I.emojiFace + '</span><span class="label">Update your status</span></button>') +
         '<hr>' +
-        mi('none', I.workspace, 'Workspace') + mi('none', I.notes, 'Notes') + mi('none', I.code, 'Playground') +
+        mi('none', D['user:Workspace'], 'Workspace') + mi('none', D['user:Notes'], 'Notes') + mi('none', D['user:Calendar'], 'Calendar') +
+        mi('none', D['user:Automations'], 'Automations') + mi('none', D['user:Playground'], 'Playground') +
         '<hr>' +
-        mi('none', I.user, 'Admin Panel') + mi('none', I.cog, 'Settings') + mi('none', I.logOut, 'Sign Out');
+        mi('none', D['user:Admin Panel'], 'Admin Panel') +
+        mi('settings', D['user:Settings'], 'Settings', '<span class="kbd">Ctrl+.</span>') +
+        mi('none', D['user:Sign Out'], 'Sign Out');
     },
     chatsMore: function (el) {
       el.className = 'tdp-menu chats-more app-dropdown-menu rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-850 dark:text-white shadow-lg';
@@ -2705,7 +2856,11 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       }).join('');
     }
   };
-  window.__tdpMenus = { show: show, close: close, item: mi };
+  window.__tdpMenus = {
+    show: show, close: close, item: mi,
+    // spec places it (align, gap, pad), render fills it, as the menus above
+    register: function (kind, spec, render) { SPECS[kind] = spec; RENDER[kind] = render; }
+  };
 
   // ---- Clicks inside a menu ----
 
@@ -2933,6 +3088,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       onAct: function (act) {
         if (act === 'status') status = { emoji: '🎨', text: 'Designing a theme' };
         if (act === 'clear-status') status = null;
+        if (act === 'settings' && window.__tdpDialogs) window.__tdpDialogs.settings();
         ST.save();
       }
     });
@@ -3015,11 +3171,11 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       return '<div class="ap-row" data-p="' + i + '"><div class="ap-line"><div class="ap-label">' + esc(p[0]) + '</div><span class="ap-btn" role="button">Default</span></div><div class="ap-extra"></div></div>';
     }).join('');
     pane.innerHTML =
-      '<div class="cc-tabs"><div class="cc-tab">Controls</div><span class="pane-close" role="button" aria-label="Close">' + I.close + '</span></div>' +
+      '<button type="button" class="cc-top" aria-expanded="true"><span>Controls</span><span class="up">' + I.chevronUpSm + '</span><span class="down">' + I.chevronDownSm + '</span></button>' +
       '<div class="cc-body">' +
       section('valves', 'Valves', false, '<div class="cc-valves"><select><option>Tools</option><option>Functions</option></select><select><option disabled selected>Select a tool</option><option>Web Scraper</option><option>Calculator</option><option>Weather</option></select></div>') +
       section('system', 'System Prompt', true, '<textarea rows="3" placeholder="Enter system prompt"></textarea>') +
-      section('params', 'Advanced Params', true, '<div class="ap">' + rows + '<div class="ap-add" role="button">' + I.plusAlt + '<span>Add Custom Parameter</span></div></div>') +
+      section('params', 'Advanced Params', false, '<div class="ap">' + rows + '<div class="ap-add" role="button">' + I.plusAlt + '<span>Add Custom Parameter</span></div></div>') +
       '</div>';
   }
 
@@ -3059,10 +3215,37 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     return copy.innerHTML;
   }
 
+  // MessageInput.svelte on dev: Model controls opens ModelControls.svelte
+  // as a w-70 dropdown above the button, its right edge by the button's,
+  // not the side pane it used to be
+  function placeControls() {
+    if (pane.hidden) return;
+    var r = ctrlBtn.getBoundingClientRect();
+    var w = pane.offsetWidth, h = pane.offsetHeight;
+    var left = Math.max(16, Math.min(r.right + 8 - w, window.innerWidth - w - 16));
+    var top = r.top - 4 - h;
+    if (top < 8) top = Math.min(r.bottom + 4, window.innerHeight - h - 8);
+    pane.style.left = left + 'px';
+    pane.style.top = Math.max(8, top) + 'px';
+  }
+  function setControls(open) {
+    pane.hidden = !open;
+    ctrlBtn.setAttribute('aria-expanded', open);
+    if (open) { if (thread) thread.hidden = true; placeControls(); }
+  }
   if (pane && ctrlBtn) {
-    if (ST.saved.controls && ST.saved.controls.html) pane.innerHTML = ST.saved.controls.html;
+    pane.className = 'controls-pop app-dropdown-menu rounded-xl p-0.5 border border-base-100 dark:border-base-800 z-50 bg-base-0 dark:bg-base-850 dark:text-base-0 shadow-lg w-70';
+    pane.setAttribute('role', 'dialog');
+    if (ST.saved.controls && ST.saved.controls.html && ST.saved.controls.html.indexOf('cc-top') !== -1) pane.innerHTML = ST.saved.controls.html;
     else buildControls();
-    if (ST.saved.controls && ST.saved.controls.open) pane.hidden = false;
+    if (ST.saved.controls && ST.saved.controls.open) requestAnimationFrame(function () { setControls(true); });
+    window.addEventListener('resize', placeControls);
+    document.addEventListener('mousedown', function (e) {
+      if (!pane.hidden && !pane.contains(e.target) && !ctrlBtn.contains(e.target)) setControls(false);
+    }, true);
+    window.addEventListener('keydown', function (e) {
+      if (!pane.hidden && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); setControls(false); }
+    }, true);
     ST.add('controls', function () { return { open: !pane.hidden, html: controlsHtml() }; });
     new MutationObserver(ST.save).observe(pane, { subtree: true, childList: true, attributes: true, characterData: true });
     pane.addEventListener('change', ST.save);
@@ -3073,12 +3256,10 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       if (other) other.value = t.value;
       ST.save();
     });
-    ctrlBtn.addEventListener('click', function () {
-      pane.hidden = !pane.hidden;
-      if (thread) thread.hidden = true;
-    });
+    ctrlBtn.addEventListener('click', function () { setControls(pane.hidden); });
     pane.addEventListener('click', function (e) {
-      if (closest(e, '.pane-close')) { pane.hidden = true; return; }
+      var top = closest(e, '.cc-top');
+      if (top) { var on0 = !pane.classList.contains('folded'); pane.classList.toggle('folded', on0); top.setAttribute('aria-expanded', !on0); placeControls(); return; }
       var head = closest(e, '.cc-head');
       if (head) { var sec = head.parentElement; var on = !sec.classList.contains('open'); sec.classList.toggle('open', on); head.setAttribute('aria-expanded', on); return; }
       var b = closest(e, '.ap-btn');
@@ -3090,8 +3271,348 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
         sw.setAttribute('aria-checked', on2);
         sw.previousElementSibling.textContent = on2 ? 'Enabled' : 'Disabled';
       }
+      placeControls();
     });
   }
+})();
+
+// Dialogs and smaller menus that work, as on Open WebUI's dev branch: the
+// tab bar's Status, New tab and Chat actions menus, the sidebar's
+// notifications, Search (SearchModal.svelte), Settings (SettingsModal.svelte)
+// and toasts. They carry the upstream class names so a preset's CSS that
+// styles .modal or .app-dropdown-menu reaches them too.
+(function () {
+  var M = window.__tdpMenus;
+  if (!M) return;
+  var D = ${JSON.stringify(DEV_ICONS)};
+  var I = ${JSON.stringify({ chatBubble: SVG.tabChat, search: SVG.search, xMark: SVG.xMark, sliders: SVG.knobsInput, chevronDown: SVG.chevronDown, chevronRight: SVG.chevronRightAlt, terminal: SVG.terminal, code: SVG.code })};
+  var LOGO = ${JSON.stringify(LOGO)};
+  function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function isNew() { var n = document.querySelector('nav'); return !!(n && n.classList.contains('is-new')); }
+
+  // ---- Toasts: svelte-sonner, top right, a check and a close button ----
+  var toasts = document.createElement('ol');
+  toasts.className = 'tdp-toasts';
+  document.body.appendChild(toasts);
+  function toast(text) {
+    var li = document.createElement('li');
+    li.className = 'tdp-toast';
+    li.innerHTML = '<span class="ok">' + D['toast:check'] + '</span><span class="t">' + esc(text) + '</span><span class="x" role="button" aria-label="Close">' + D['toast:x'] + '</span>';
+    toasts.appendChild(li);
+    var gone = function () { li.classList.add('out'); setTimeout(function () { li.remove(); }, 200); };
+    li.querySelector('.x').addEventListener('click', gone);
+    setTimeout(gone, 4000);
+  }
+
+  // ---- The tab bar: Status, New tab and the tab's Chat actions ----
+  M.register('status', { align: 'end', gap: 4, pad: 16 }, function (el) {
+    el.className = 'tdp-menu status-menu app-dropdown-menu rounded-xl border border-base-100 dark:border-base-800 bg-base-0 dark:bg-base-850 shadow-lg';
+    var msgs = document.querySelectorAll('#messages-container .message-listitem').length;
+    el.innerHTML = '<div class="st-head">Status</div>' +
+      '<div class="st-row"><span>Context</span><span>' + (msgs * 412 + 186).toLocaleString('en-US') + ' tokens</span></div>' +
+      '<div class="st-row"><span>Chat ID</span><span class="mono">3f2a9c1e-7b4d-4e8a-9c21-5d6e7f8a9b0c</span></div>';
+  });
+  M.register('newtab', { align: 'start', gap: 4, pad: 16 }, function (el) {
+    el.className = 'tdp-menu newtab-menu app-dropdown-menu rounded-xl border border-base-100 dark:border-base-800 bg-base-0 dark:bg-base-850 shadow-lg min-w-56';
+    el.innerHTML = M.item('new', D['newtab:New Chat'], 'New Chat', '<span class="kbd">Ctrl+Alt+O</span>') + M.item('none', D['newtab:Overview'], 'Overview');
+  });
+  M.register('tabchat', { align: 'start', gap: 4, pad: 16 }, function (el) {
+    el.className = 'tdp-menu chat-menu app-dropdown-menu select-none rounded-xl border border-base-100 dark:border-base-800 bg-base-0 dark:bg-base-850 shadow-lg';
+    el.innerHTML = M.item('none', D['tabchat:Share'], 'Share') + M.item('none', D['tabchat:Download'], 'Download') +
+      M.item('none', D['tabchat:Rename'], 'Rename') + M.item('copy', D['tabchat:Copy'], 'Copy') + '<hr>' +
+      M.item('none', D['tabchat:Archive'], 'Archive') + M.item('none', D['tabchat:Delete'], 'Delete') + '<hr>' +
+      M.item('none', D['tabchat:Tags'], 'Tags', '<span class="chev">' + I.chevronRight + '</span>');
+  });
+  function onAct(act) {
+    if (act === 'new' && window.__tdpOpenChat) window.__tdpOpenChat('new');
+    if (act === 'copy') toast('Copying to clipboard was successful!');
+  }
+  var statusBtn = document.querySelector('.nav-status');
+  if (statusBtn) statusBtn.addEventListener('click', function () { M.show('status', statusBtn); });
+  var newTab = document.querySelector('.tab-new');
+  if (newTab) newTab.addEventListener('click', function () { M.show('newtab', newTab, null, { onAct: onAct }); });
+  var tabMenu = document.getElementById('chat-context-menu-button');
+  if (tabMenu) tabMenu.addEventListener('click', function (e) { e.stopPropagation(); M.show('tabchat', tabMenu, null, { onAct: onAct }); });
+
+  // ---- Notifications: the bell swaps the sidebar for the inbox ----
+  var bell = document.querySelector('.brand-bell');
+  var sidebar = document.getElementById('sidebar');
+  if (bell && sidebar) bell.addEventListener('click', function () {
+    var on = !sidebar.classList.contains('inbox');
+    sidebar.classList.toggle('inbox', on);
+    bell.classList.toggle('on', on);
+    document.getElementById('side-inbox').hidden = !on;
+  });
+
+  // ---- Copy, Collapse and feedback in the chat ----
+  var msgs = document.getElementById('messages-container');
+  if (msgs) msgs.addEventListener('click', function (e) {
+    var a = e.target.closest('.cb-action');
+    if (a) {
+      var label = a.textContent.trim();
+      if (label === 'Copy') toast('Copying to clipboard was successful!');
+      if (label === 'Collapse' || label === 'Expand') {
+        var block = a.closest('.code-block');
+        var folded = block.classList.toggle('folded');
+        a.lastChild.textContent = folded ? 'Expand' : 'Collapse';
+      }
+      return;
+    }
+    var act = e.target.closest('.msg-action');
+    if (!act) return;
+    var tip = act.getAttribute('data-tip');
+    if (tip === 'Copy') toast('Copying to clipboard was successful!');
+    if (tip === 'Good Response' || tip === 'Bad Response') {
+      var row = act.parentElement;
+      var on = !act.classList.contains('on');
+      row.querySelectorAll('.msg-action.on').forEach(function (b) { b.classList.remove('on'); });
+      act.classList.toggle('on', on);
+    }
+  });
+
+  // ---- Modals: modal fixed inset-0 bg-base-1000/45 dark:bg-base-1000/60 ----
+  var openModal = null;
+  function modal(cls, html) {
+    closeModal();
+    var m = document.createElement('div');
+    m.className = 'modal tdp-modal';
+    m.setAttribute('role', 'dialog');
+    m.setAttribute('aria-modal', 'true');
+    m.innerHTML = '<div class="' + cls + '">' + html + '</div>';
+    document.body.appendChild(m);
+    m.addEventListener('mousedown', function (e) { if (e.target === m) closeModal(); });
+    openModal = m;
+    M.close();
+    return m;
+  }
+  function closeModal() { if (openModal) { openModal.remove(); openModal = null; } }
+  window.addEventListener('keydown', function (e) {
+    if (openModal && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeModal(); }
+  }, true);
+
+  // ---- Search: every chat, a preview of the one picked, and its footer ----
+  function chatList() {
+    var out = [];
+    document.querySelectorAll('.side-scroll .side-item[data-chat]').forEach(function (it) {
+      var key = it.getAttribute('data-chat'), label = it.querySelector('.label');
+      if (key === 'new' || !label || out.some(function (c) { return c.key === key; })) return;
+      out.push({ key: key, title: label.textContent });
+    });
+    return out;
+  }
+  function preview(key) {
+    var chat = window.__tdpChats && window.__tdpChats[key];
+    if (!chat) return '';
+    var box = document.createElement('div');
+    box.innerHTML = chat.html;
+    var html = '';
+    box.querySelectorAll('.message-listitem').forEach(function (li) {
+      var u = li.querySelector('.chat-user .bubble');
+      var a = li.querySelector('.branch.active .chat-assistant > .markdown-prose, .chat-assistant > .markdown-prose');
+      if (u) html += '<div class="sp-user"><span>' + u.textContent + '</span></div><div class="sp-time r">Today, 9:41 AM</div>';
+      if (a) html += '<div class="sp-ai markdown-prose">' + a.innerHTML + '</div><div class="sp-time">Today, 9:41 AM</div>';
+    });
+    return html;
+  }
+  function mark(text, q) {
+    if (!q) return esc(text);
+    var i = text.toLowerCase().indexOf(q.toLowerCase());
+    if (i < 0) return esc(text);
+    return esc(text.slice(0, i)) + '<mark>' + esc(text.slice(i, i + q.length)) + '</mark>' + esc(text.slice(i + q.length));
+  }
+  function search() {
+    var m = modal('search-panel', '<div class="sm-top">' + I.search + '<input placeholder="Search workspace…" autocomplete="off"><span class="sm-filter">Everything' + I.chevronDown + '</span><span class="sm-ico" aria-label="Filters">' + I.sliders + '</span><span class="sm-ico sm-close" role="button" aria-label="Close">' + I.xMark + '</span></div>' +
+      '<div class="sm-body"><div class="sm-list"></div><div class="sm-preview"></div></div>' +
+      '<div class="sm-foot"><span>Personal chat</span><span class="sm-keys"><span>Open ↵</span><span>Preview</span><span>Actions ⌘K</span></span></div>');
+    var input = m.querySelector('input'), list = m.querySelector('.sm-list'), pv = m.querySelector('.sm-preview');
+    var sel = 0, items = [];
+    function render() {
+      var q = input.value.trim();
+      items = chatList().filter(function (c) { return !q || c.title.toLowerCase().indexOf(q.toLowerCase()) !== -1; });
+      sel = Math.min(sel, Math.max(0, items.length - 1));
+      list.innerHTML = '<div class="sm-label"><span>' + (q ? 'Results' : 'Pinned & recent') + '</span><span>' + items.length + '</span></div>' +
+        (items.length ? items.map(function (c, i) {
+          return '<div class="sm-row' + (i === sel ? ' sel' : '') + '" data-i="' + i + '">' + I.chatBubble + '<span class="t">' + mark(c.title, q) + '</span><span class="k">Personal chat</span></div>';
+        }).join('') : '<div class="sm-empty">No results found</div>');
+      pv.innerHTML = items[sel] ? '<div class="sp-head"><span>← Back</span><span>Chats</span></div><div class="sp-title">' + esc(items[sel].title) + '</div><div class="sp-msgs">' + preview(items[sel].key) + '</div>' : '';
+    }
+    function openSel() { if (items[sel] && window.__tdpOpenChat) { closeModal(); window.__tdpOpenChat(items[sel].key); } }
+    input.addEventListener('input', function () { sel = 0; render(); });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); sel = Math.min(sel + 1, items.length - 1); render(); }
+      if (e.key === 'ArrowUp') { e.preventDefault(); sel = Math.max(sel - 1, 0); render(); }
+      if (e.key === 'Enter') { e.preventDefault(); openSel(); }
+    });
+    list.addEventListener('mousemove', function (e) { var r = e.target.closest('.sm-row'); if (r && Number(r.dataset.i) !== sel) { sel = Number(r.dataset.i); render(); } });
+    list.addEventListener('click', function (e) { if (e.target.closest('.sm-row')) openSel(); });
+    m.querySelector('.sm-close').addEventListener('click', closeModal);
+    render();
+    input.focus();
+  }
+  ['sidebar-search-button', 'rail-search-button'].forEach(function (id) {
+    var b = document.getElementById(id);
+    if (b) b.addEventListener('click', function (e) { e.stopPropagation(); search(); });
+  });
+
+  // ---- Settings: the grouped nav and each personal page's rows ----
+  var NAV = [
+    ['Personal', [['Basics', ['General', 'Interface', 'Notifications', 'Keyboard']], ['Preferences', ['Personalization', 'Audio']], ['Data', ['Data Controls', 'Usage', 'Archived Chats']], ['Profile', ['Account', 'About']]]],
+    ['Admin', [['System', ['General', 'Authentication', 'Interface']], ['AI', ['Connections', 'Models', 'Sub-agents']], ['Tools', ['Integrations', 'Documents', 'Web Search', 'Audio', 'Images & Videos', 'Legacy']], ['Quality', ['Analytics']], ['Data', ['Database']]]]
+  ];
+  var LEGACY = ['Code Execution', 'Pipelines'];
+  var ADMIN = ${JSON.stringify(ADMIN_SETTINGS)};
+  function adminPage(name) {
+    if (name === 'Models') return row('Models <span class="set-count">1</span>', '', val('Actions')) + '<div class="set-model"><img src="' + LOGO + '" alt=""><span>Preview Model</span><span class="set-tag">Private</span>' + sw(true) + '</div>' + sec('Router Models') + sec('Model Defaults');
+    if (name === 'Integrations') return sec('Tools') + row('External Tool Servers', '', val('+')) + '<div class="set-empty">No tool server connections configured.</div>' +
+      sec('Machines') + row('Open Terminal', '', val('+')) + '<div class="set-empty">No machines configured.</div>' +
+      sec('Knowledge') + row('External Knowledge Sources <span class="set-badge">EXPERIMENTAL</span>', '', val('+')) + '<div class="set-empty">No external knowledge sources configured.</div>';
+    if (name === 'Analytics') return row('Overview', '', '<span class="set-select">Last 7 days' + I.chevronDown + '</span>') +
+      '<div class="set-stats">' + [['1,834', 'Tokens'], ['28', 'Messages'], ['9', 'Chats'], ['1', 'Users'], ['1', 'Models']].map(function (x) { return '<div><b>' + x[0] + '</b><span>' + x[1] + '</span></div>'; }).join('') + '</div>';
+    var list = ADMIN[name];
+    if (!list) return '<div class="set-d">Kept for existing setups.</div>';
+    return list.map(function (r) { return row(esc(r.t), esc(r.d), r.c === true || r.c === false ? sw(r.c) : (r.c ? val(esc(r.c)) : '')); }).join('');
+  }
+  function sw(on) { return '<span class="tdp-switch' + (on ? ' on' : '') + '" role="switch" aria-checked="' + !!on + '"></span>'; }
+  function row(t, d, ctl) { return '<div class="set-row"><div class="set-line"><div class="set-t">' + t + '</div>' + (ctl || '') + '</div>' + (d ? '<div class="set-d">' + d + '</div>' : '') + '</div>'; }
+  function val(v) { return '<span class="set-val" role="button">' + v + '</span>'; }
+  function sec(t) { return '<div class="set-sec">' + t + '</div>'; }
+  function themeLabel() {
+    var h = document.documentElement;
+    if (h.classList.contains('her')) return '🌷 Her';
+    if (h.classList.contains('light')) return '☀️ Light';
+    return '🌑 Dark';
+  }
+  var PAGES = {
+    'p:General': function () {
+      return sec('WebUI Settings') +
+        row('Theme', 'Choose the color theme used by the interface.', '<span class="set-select">' + themeLabel() + I.chevronDown + '</span>') +
+        row('Colors', 'Pick a background and text color for the current mode. The rest of the palette is mixed from them.', '<span class="set-colors"><i class="bg"></i><i class="fg"></i></span>') +
+        row('Language', 'Choose the language used for interface text.<br>Couldn\\'t find your language? <u>Help us translate Open WebUI!</u>', '<span class="set-select">English (US)' + I.chevronDown + '</span>') +
+        '<div class="set-row"><div class="set-t">System Prompt</div><input class="set-input" placeholder="Enter system prompt here"><div class="set-d">Set the default system prompt for new chats.</div></div>' +
+        sec('Advanced Parameters') + row('Model parameters', 'Show or hide custom generation parameters.', val('Show'));
+    },
+    'p:Interface': function () {
+      var rows = [['UI', null], ['UI Scale', 'Set a local zoom level for the app interface.', 'Default'], ['Font Family', 'Use a local font family for the app interface.', 'Default'],
+        ['Accessibility Mode', 'Enable accessibility-focused visual enhancements.', false], ['Display Chat Title in Tab', 'Use the active chat title as the browser tab title.', true],
+        ['Allow User Location', 'Share your current location with features that can use it.', false], ['Haptic Feedback (Android)', 'Use device vibration feedback on supported Android devices.', false],
+        ['Copy Formatted Text', 'Copy rich formatted content instead of plain text.', false], ['Toast Notifications for New Updates', 'Show update toasts to admins when new versions are available.', true],
+        ['Show "What\\'s New" Modal on Login', 'Open the changelog modal after sign-in when enabled.', true], ['Chat', null],
+        ['Enable Message Queue', 'Queue outgoing messages instead of interrupting active responses.', true], ['Chat Direction', 'Choose automatic, left-to-right, or right-to-left text flow.', 'Auto'],
+        ['Landing Page Mode', 'Choose whether the app opens to the default home or chat view.', 'Default'], ['Chat Background Image', 'Upload or reset the image shown behind chat content.', 'Upload'],
+        ['Chat Bubble UI', 'Render messages in compact bubble containers.', true], ['Widescreen Mode', 'Use a wider chat layout on large displays.', false],
+        ['Temporary Chat by Default', 'Start new chats as temporary unless changed.', false], ['Fade Effect for Streaming Text', 'Fade streaming text as it arrives.', true],
+        ['Render Markdown in User Messages', 'Format Markdown syntax in your own messages.', true], ['Render Markdown in Assistant Messages', 'Format Markdown syntax in assistant responses.', true]];
+      return rows.map(function (r) { return r[1] === null ? sec(r[0]) : row(r[0], r[1], typeof r[2] === 'boolean' ? sw(r[2]) : val(r[2])); }).join('');
+    },
+    'p:Notifications': function () {
+      return row('Browser Notifications', 'Allow browser notifications for completed responses.', sw(false)) +
+        row('Notification Sound', 'Play a sound when a response is ready.', sw(true)) +
+        row('Notification sound style', 'Choose a sound and use the play button to preview it.', '<span class="set-select">Chime' + I.chevronDown + '</span>');
+    },
+    'p:Keyboard': function () {
+      var groups = [['Tabs', [['New Chat Tab', 'Ctrl+Alt+O'], ['Close Tab', 'Ctrl+W'], ['Next Tab', 'Ctrl+Shift+]'], ['Previous Tab', 'Ctrl+Shift+['], ['Toggle Split', 'Ctrl+\\\\']]],
+        ['Chat', [['New Chat', 'Ctrl+Shift+O'], ['New Temporary Chat', "Ctrl+Shift+'"], ['Delete Chat', 'Ctrl+Shift+Backspace'], ['Open Model Selector', 'Ctrl+Shift+M']]],
+        ['Global', [['Search', 'Ctrl+K'], ['Open Settings', 'Ctrl+.'], ['Show Shortcuts', 'Ctrl+/'], ['Toggle Sidebar', 'Ctrl+Shift+S'], ['Close Modal', 'Esc']]]];
+      return row('Enable Keyboard Shortcuts', 'When disabled, keyboard shortcuts will not trigger any actions.', sw(true)) +
+        '<div class="set-keys"><div class="set-keyhead"><span>Command</span><span>Key</span></div>' +
+        groups.map(function (g) { return '<div class="set-keygroup">' + g[0] + '</div>' + g[1].map(function (k) { return '<div class="set-key"><span>' + esc(k[0]) + '</span><span class="kbd">' + esc(k[1]) + '</span></div>'; }).join(''); }).join('') + '</div>';
+    },
+    'p:Personalization': function () {
+      return sec('Memory') + row('Memory <span class="set-badge">EXPERIMENTAL</span>', 'You can personalize your interactions with LLMs by adding memories through the \\'Add Memory\\' button below, making them more helpful and tailored to you.', sw(true)) +
+        row('Saved Memories <span class="set-count">0</span>', '', val('Actions')) + '<div class="set-empty">Memories accessible by LLMs will be shown here.</div>';
+    },
+    'p:Audio': function () {
+      return sec('STT Settings') + row('Speech-to-Text Engine', 'Choose the engine used to transcribe voice input.', '<span class="set-select">Default' + I.chevronDown + '</span>') +
+        '<div class="set-row"><div class="set-t">Language</div><input class="set-input" placeholder="e.g. en"><div class="set-d">Set a speech recognition language or leave it blank to detect automatically.</div></div>' +
+        row('Instant Auto-Send After Voice Transcription', 'Send transcribed voice input immediately after speech recognition finishes.', sw(false)) +
+        sec('TTS Settings') + row('Text-to-Speech Engine', 'Choose the engine used to read assistant responses aloud.', '<span class="set-select">Default' + I.chevronDown + '</span>') +
+        row('Auto-Playback Response', 'Play assistant responses aloud automatically.', sw(false)) +
+        row('Speech Playback Speed', 'Adjust how quickly spoken responses are played.', val('1x')) +
+        row('Set Voice', 'Choose the browser voice used for speech output.', '<span class="set-select">Default' + I.chevronDown + '</span>') +
+        row('Allow non-local voices', 'Include voices that are not provided by a local speech service.', sw(false));
+    },
+    'p:Data Controls': function () {
+      return sec('Chats') + row('Import Chats', 'Import chat history from a JSON export file.', val('Import')) + row('Export Chats', 'Download your chat history as a JSON export.', val('Export')) +
+        row('Shared Chats', 'Review and manage chats you have shared.', val('Manage')) + row('Archive All Chats', 'Move every chat into the archive after confirmation.', val('Archive All')) +
+        row('Delete All Chats', 'Permanently delete every chat after confirmation.', '<span class="set-val danger" role="button">Delete All</span>') +
+        sec('Files') + row('Manage Files', 'Open the file manager for uploaded files.', val('Manage'));
+    },
+    'p:Usage': function () {
+      var stats = [['12,480', 'Lifetime tokens'], ['2,418', 'Peak tokens'], ['18m', 'Longest active chat'], ['3', 'Current streak'], ['9', 'Longest streak']];
+      return sec('Overview') + '<div class="set-stats">' + stats.map(function (s) { return '<div><b>' + s[0] + '</b><span>' + s[1] + '</span></div>'; }).join('') + '</div>' +
+        sec('Activity insights') + row('Models', '', val('1')) + row('User messages', '', val('14 · 50%')) + row('Assistant messages', '', val('14 · 50%')) + row('Total chats', '', val('9')) +
+        '<div class="set-d">Token counts are estimates and may not reflect actual API usage</div>';
+    },
+    'p:Archived Chats': function () { return row('Archived Chats <span class="set-count">0</span>', '', val('Actions')) + '<div class="set-empty">You have no archived conversations.</div>'; },
+    'p:Account': function () {
+      return sec('Profile') + '<div class="set-profile"><span class="avatar"></span><div><div class="set-t">You</div><div class="set-links">Upload Photo · Remove · Initials · Gravatar</div></div></div>' +
+        '<div class="set-row"><div class="set-t">Name</div><input class="set-input" value="You"><div class="set-d">Set the display name shown across your account.</div></div>' +
+        '<div class="set-row"><div class="set-t">Bio</div><input class="set-input" placeholder="Share your background and interests"><div class="set-d">Add optional profile context visible where profiles are shown.</div></div>' +
+        row('Gender', 'Choose the gender value stored on your profile.', '<span class="set-select">Prefer not to say' + I.chevronDown + '</span>') +
+        row('User Variables <span class="set-count">0</span>', 'Use these in model system prompts as {{user.variables.key_name}}.', val('Add')) +
+        sec('Password') + row('Change Password', 'Update the password used for email and password sign-in.', val('Show'));
+    },
+    'p:About': function () {
+      return '<div class="set-row"><div class="set-t">Open WebUI Version</div><div class="set-v">v0.13.5</div><div class="set-v"><u>See what\\'s new</u></div><div class="set-d">View the installed version and check release updates.</div></div>' +
+        '<div class="set-d set-links">GitHub · Enterprise · Careers · Sponsor · Discord · Reddit · X</div>' +
+        '<div class="set-v">Emoji graphics provided by Twemoji, licensed under CC-BY 4.0.</div><div class="set-v">Copyright (c) 2026 <u>Open WebUI Inc.</u> All rights reserved.</div>';
+    }
+  };
+  function navHtml(sel, q) {
+    var out = '';
+    NAV.forEach(function (top, ti) {
+      var scope = ti === 0 ? 'p' : 'a', block = '';
+      top[1].forEach(function (g) {
+        var items = g[1].filter(function (n) { return !q || n.toLowerCase().indexOf(q) !== -1 || (n === 'Legacy' && LEGACY.some(function (l) { return l.toLowerCase().indexOf(q) !== -1; })); });
+        if (!items.length) return;
+        block += '<div class="set-sub">' + g[0] + '</div>' + items.map(function (n) {
+          var id = scope + ':' + n;
+          if (n === 'Legacy') {
+            return '<button type="button" class="set-item legacy" data-legacy>' + D['set:a:Legacy'] + '<span>Legacy</span></button>' +
+              '<div class="set-legacy"' + (q || sel.indexOf('a:Code') === 0 || sel === 'a:Pipelines' ? '' : ' hidden') + '>' + LEGACY.map(function (l) {
+                return '<button type="button" class="set-item' + (sel === 'a:' + l ? ' active' : '') + '" data-tab="a:' + l + '">' + (l === 'Pipelines' ? I.code : I.terminal) + '<span>' + l + '</span></button>';
+              }).join('') + '</div>';
+          }
+          return '<button type="button" class="set-item' + (sel === id ? ' active' : '') + '" data-tab="' + id + '">' + (D['set:' + id] || '') + '<span>' + n + '</span></button>';
+        }).join('');
+      });
+      if (block) out += '<div class="set-group' + (ti ? ' admin' : '') + '">' + top[0] + '</div>' + block;
+    });
+    return out;
+  }
+  function settings(tab) {
+    var sel = tab || 'p:General';
+    var m = modal('set-panel', '<div class="set-nav"><button type="button" class="set-back">' + D['set:back'] + '<span>Back</span></button>' +
+      '<label class="set-search">' + D['set:search'] + '<input placeholder="Search" autocomplete="off"></label><div class="set-items"></div></div>' +
+      '<div class="set-main"><div class="set-scroll"></div><div class="set-foot"><button type="button" class="set-save">Save</button></div></div>');
+    var items = m.querySelector('.set-items'), main = m.querySelector('.set-scroll'), q = m.querySelector('.set-search input');
+    function draw() {
+      items.innerHTML = navHtml(sel, q.value.trim().toLowerCase());
+      var title = sel.slice(2);
+      var page = PAGES[sel];
+      main.innerHTML = '<div class="set-title">' + title + '</div><div class="set-rows">' +
+        (page ? page() : adminPage(title)) + '</div>';
+      m.querySelector('.set-foot').style.display = /^p:(General|Interface|Notifications|Personalization|Audio|Account)$/.test(sel) || sel[0] === 'a' ? '' : 'none';
+    }
+    items.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-tab]');
+      if (b) { sel = b.dataset.tab; draw(); main.scrollTop = 0; return; }
+      if (e.target.closest('[data-legacy]')) { var l = items.querySelector('.set-legacy'); l.hidden = !l.hidden; }
+    });
+    main.addEventListener('click', function (e) {
+      var s = e.target.closest('.tdp-switch');
+      if (s) { var on = !s.classList.contains('on'); s.classList.toggle('on', on); s.setAttribute('aria-checked', on); }
+    });
+    q.addEventListener('input', draw);
+    m.querySelector('.set-back').addEventListener('click', closeModal);
+    m.querySelector('.set-save').addEventListener('click', function () { toast('Settings saved successfully!'); });
+    draw();
+  }
+  window.addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === '.') { e.preventDefault(); settings(); }
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); search(); }
+  });
+  window.__tdpDialogs = { settings: settings, search: search, toast: toast };
 })();
 
 // Channels (channel/Channel.svelte, Navbar.svelte, Messages.svelte,
