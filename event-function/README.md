@@ -2,7 +2,7 @@
 
 > Instance-wide theme designer for Open WebUI: an admin page in Settings or at its own URL, with server-side persistence, SSE live push, draft mode, optional personal themes for every user, and real-time theme enforcement across all users.
 
-![Version](https://img.shields.io/badge/version-1.25.1-blue)
+![Version](https://img.shields.io/badge/version-1.26.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-≥0.13.4-orange)
 ![Type](https://img.shields.io/badge/type-Event_Function-teal)
@@ -551,11 +551,11 @@ Delete the function from the Admin Panel under **Functions**. Nothing is left on
 
 ---
 
-## 📝 Unreleased
+## 📝 What's New in 1.26.0
 
-- **Pictures, Surfaces and theme-following animations work on Open WebUI 0.13.4 again.** Since 1.23.0 their colors read Open WebUI's `--color-base-*` scale, which only exists from 0.13.5, so on 0.13.4 the browser dropped them: the Other pages, Chat Background Image and sign-in pictures didn't show, the Surfaces fills didn't apply, and Canvas FX scripts that follow the theme drew in grey. Each now falls back to the grey scale where the base scale is missing, as Open WebUI itself does.
-- **Preview a Community Theme before installing it.** Each Community Themes card has a **Preview on the gallery site** link that opens that theme's live preview on the [preset gallery](https://silentoplayz.github.io/theme-designer-pro-presets/gallery/) in a new tab, Canvas FX and gradient included, so you can see it before you install it.
 - **Surfaces starts from a look.** The tab opened on nine rows of greyed-out sliders, some showing values like 5% and 8px that did nothing while it was off. It now opens on four looks with a preview of each: **Solid** (Open WebUI's own look, the switch off), **Frosted**, **Glass** and **Clear**. One click sets every layer and turns the switch on, and menus and dialogs stay the most solid in each so their text reads. The sliders appear under **Fine-tune each layer** once a look is on, and moving one shows **Custom**. A look is one Undo step and saves nothing new, so themes and theme files are unchanged.
+- **Preview a Community Theme before installing it.** Each Community Themes card has a **Preview on the gallery site** link that opens that theme's live preview on the [preset gallery](https://silentoplayz.github.io/theme-designer-pro-presets/gallery/) in a new tab, Canvas FX and gradient included, so you can see it before you install it.
+- **Pictures, Surfaces and theme-following animations work on Open WebUI 0.13.4 again.** Since 1.23.0 their colors read Open WebUI's `--color-base-*` scale, which only exists from 0.13.5, so on 0.13.4 the browser dropped them: the Other pages, Chat Background Image and sign-in pictures didn't show, the Surfaces fills didn't apply, and Canvas FX scripts that follow the theme drew in grey. Each now falls back to the grey scale where the base scale is missing, as Open WebUI itself does.
 - **Rough edges smoothed.** Canvas FX and CSS gallery cards show what they hold, such as "WebGL · Worker · Follows theme · 214 lines" or "12 rules · 40 lines", instead of an empty bar. Every tab's title sits at the same height and the same distance from what follows, the Custom CSS and Canvas FX editors included. On a phone, **Shows on** takes a row of its own instead of breaking or running off the edge. The empty Theme Gallery points to the **+** button and the Community Themes below it, not to a Snapshot button that doesn't exist. Selective Sync leaves out OLED where Open WebUI has retired it and keeps its buttons apart from the list scrolling above them. The AI Consultant's switch reads **Change only Dark** (or the mode you're editing), and the Save dialog's **Target Open WebUI Version** suggests the version your instance runs.
 - **The designer's notices stay clear of its buttons.** A notice such as "Theme applied!" was centered on the footer, where a wide row of buttons on the left, as in Settings, ran under it, Undo and Redo included. It now sits in the free space between Undo and Redo and the Live/Draft switch, and floats just above the footer when that space is too narrow.
 
