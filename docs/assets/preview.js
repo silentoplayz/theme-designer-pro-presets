@@ -346,6 +346,12 @@
     // icons/Sidebar.svelte — sidebar collapse toggle
     panel: icon(['M19 21L5 21C3.89543 21 3 20.1046 3 19L3 5C3 3.89543 3.89543 3 5 3L19 3C20.1046 3 21 3.89543 21 5L21 19C21 20.1046 20.1046 21 19 21Z', 'M9.5 21V3', 'M5.5 10L7.25 12L5.5 14']),
     // icons/EllipsisHorizontal.svelte
+    // InputMenu.svelte on dev: Capture, Attachments and Capture Audio
+    captureFrame: icon(['M3.75 8.25V6a2.25 2.25 0 0 1 2.25-2.25h2.25M15.75 3.75H18A2.25 2.25 0 0 1 20.25 6v2.25M20.25 15.75V18A2.25 2.25 0 0 1 18 20.25h-2.25M8.25 20.25H6A2.25 2.25 0 0 1 3.75 18v-2.25', '<circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"></circle>']),
+    attachments: icon(['M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75']),
+    captureAudio: icon(['M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243-1.59-1.59']),
+    // IntegrationsMenu.svelte: the Tools page's settings gear (Cog6)
+    cog6: icon(['M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z', 'M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z']),
     // layout/InboxPanel.svelte: Notifications, beside the sidebar toggle
     bell: icon(['M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0']),
     // chat/Tabs.svelte: the tab's chat glyph and New tab, both 14px
@@ -1118,10 +1124,17 @@ nav.is-new .nav-chat-menu { display: none; }
 /* DropdownMenu.svelte, portaled to <body> by Dropdown.svelte: rounded-xl p-0.5
    border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-850
    dark:text-white shadow-lg, fixed at z-9999, flyAndScale in over 200ms */
-.tdp-menu { position: fixed; z-index: 9999; display: flex; flex-direction: column; padding: 2px; border-radius: 12px; border: 1px solid ${border}; background: ${isLight ? '#fff' : 'var(--color-base-850)'}; color: ${isLight ? textMain : '#fff'}; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); overflow: hidden; font-size: 0.8125rem; opacity: 0; transform: translateY(-8px) scale(0.95); transition: opacity 0.2s cubic-bezier(0.33, 1, 0.68, 1), transform 0.2s cubic-bezier(0.33, 1, 0.68, 1); }
+.tdp-menu { position: fixed; z-index: 9999; display: flex; flex-direction: column; padding: 2px; border-radius: 12px; border: 1px solid ${border}; background: ${isLight ? 'var(--color-base-0)' : 'var(--color-base-850)'}; color: ${isLight ? textMain : 'var(--color-base-0)'}; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); overflow: hidden; font-size: 0.8125rem; opacity: 0; transform: translateY(-8px) scale(0.95); transition: opacity 0.2s cubic-bezier(0.33, 1, 0.68, 1), transform 0.2s cubic-bezier(0.33, 1, 0.68, 1); }
 .tdp-menu.in { opacity: 1; transform: none; }
 /* InputMenu w-70 max-h-72; IntegrationsMenu min-w-70 max-w-70 max-h-72 */
-.tdp-menu.input-menu, .tdp-menu.integrations-menu { width: 17.5rem; max-height: 18rem; }
+.tdp-menu.input-menu { width: 17.5rem; max-height: 18rem; }
+/* the rule between the attach rows and the integrations: h-px mx-1 my-1 */
+.tdp-divider { height: 1px; margin: 4px; flex-shrink: 0; background: var(--color-base-${isLight ? '100' : '800'}); }
+.tdp-head { display: flex; align-items: center; }
+.tdp-head .tdp-row { flex: 1; min-width: 0; }
+.tdp-gear { display: flex; margin-right: 6px; padding: 2px; border-radius: 6px; cursor: pointer; color: var(--color-base-${isLight ? '400' : '500'}); transition: color 0.15s; }
+.tdp-gear:hover { color: var(--color-base-${isLight ? '600' : '300'}); }
+.tdp-gear svg { width: 0.875rem; height: 0.875rem; }
 .tdp-view { display: flex; flex-direction: column; min-height: 0; max-height: calc(18rem - 4px); overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; }
 .tdp-view.from-left { animation: tdp-fly-left 0.15s cubic-bezier(0.33, 1, 0.68, 1); }
 .tdp-view.from-right { animation: tdp-fly-right 0.15s cubic-bezier(0.33, 1, 0.68, 1); }
@@ -1140,7 +1153,7 @@ nav.is-new .nav-chat-menu { display: none; }
 .tdp-row .chev svg { width: 1rem; height: 1rem; }
 .tdp-row.back { justify-content: flex-start; }
 .tdp-row .doc svg { width: 0.875rem; height: 0.875rem; }
-.tdp-row.item .label { color: ${isLight ? '#000' : 'var(--color-base-100)'}; }
+.tdp-row.item .label { color: ${isLight ? 'var(--color-base-1000)' : 'var(--color-base-100)'}; }
 /* SearchInput.svelte: my-0.5 ml-2 mr-0.5 h-[1.6875rem] gap-2, Search size-3.5 */
 .tdp-search { display: flex; align-items: center; gap: 8px; height: 1.6875rem; margin: 2px 2px 2px 8px; flex-shrink: 0; }
 .tdp-search svg { width: 0.875rem; height: 0.875rem; flex-shrink: 0; }
@@ -1154,8 +1167,8 @@ nav.is-new .nav-chat-menu { display: none; }
 /* Switch.svelte: a 28x16 track, bg-gray-900 dark:bg-white when on and
    bg-gray-300 dark:bg-gray-700 when off, with a 12px thumb at 2px or 14px */
 .tdp-switch { position: relative; width: 28px; height: 16px; margin: 0 1px; flex-shrink: 0; border-radius: 9999px; background: ${isLight ? 'var(--color-base-300)' : 'var(--color-base-700)'}; transition: background-color 0.15s; }
-.tdp-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 9999px; background: ${isLight ? '#fff' : 'var(--color-base-500)'}; transition: left 0.15s, background-color 0.15s; }
-.tdp-switch.on { background: ${isLight ? 'var(--color-base-900)' : '#fff'}; }
+.tdp-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 9999px; background: ${isLight ? 'var(--color-base-0)' : 'var(--color-base-500)'}; transition: left 0.15s, background-color 0.15s; }
+.tdp-switch.on { background: ${isLight ? 'var(--color-base-900)' : 'var(--color-base-0)'}; }
 .tdp-switch.on::after { left: 14px; background: ${isLight ? 'var(--color-base-0)' : 'var(--color-base-1000)'}; }
 
 /* ModelSelector/Selector.svelte: w-[20rem] rounded-xl border p-0.5 shadow-lg,
@@ -1321,7 +1334,7 @@ body.temp-chat .input-wrap > #message-input-container:hover { border-color: ${is
 .ap-btn { padding: 4px 12px; font-size: 0.75rem; border-radius: 4px; flex-shrink: 0; cursor: pointer; }
 .ap-custom { display: flex; gap: 8px; margin-top: 2px; align-items: center; }
 .ap-custom input[type=range] { flex: 1; height: 8px; border-radius: 8px; appearance: none; -webkit-appearance: none; background: ${isLight ? 'var(--color-base-200)' : 'var(--color-base-700)'}; cursor: pointer; }
-.ap-custom input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 9999px; background: ${isLight ? 'var(--color-base-900)' : '#fff'}; }
+.ap-custom input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 9999px; background: ${isLight ? 'var(--color-base-900)' : 'var(--color-base-0)'}; }
 .ap-custom input[type=number], .ap-custom input[type=text] { background: transparent; border: 0; outline: none; color: inherit; font: inherit; font-size: 0.75rem; }
 .ap-custom input[type=number] { width: 3.5rem; text-align: center; }
 .ap-custom input[type=text] { width: 100%; font-size: 0.875rem; }
@@ -1362,7 +1375,7 @@ main.channel-mode > nav, main.channel-mode > #messages-container, main.channel-m
 .cm-name { font-size: 0.8125rem; font-weight: 500; color: ${isLight ? 'var(--color-base-900)' : 'var(--color-base-100)'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cm-time { font-size: 0.6875rem; line-height: 1rem; color: ${isLight ? 'var(--color-base-500)' : 'var(--color-base-400)'}; transform: translateY(1px); flex-shrink: 0; }
 .cm-text { font-size: 0.875rem; line-height: 1.375rem; color: ${proseText}; overflow-wrap: anywhere; }
-.cm-text b { color: ${isLight ? 'var(--color-base-900)' : '#fff'}; font-weight: 600; }
+.cm-text b { color: ${isLight ? 'var(--color-base-900)' : 'var(--color-base-0)'}; font-weight: 600; }
 .cm-text code { font-size: 0.8125rem; padding: 1px 4px; border-radius: 6px; background: ${codeBg}; }
 .cm-text .mention { color: ${isLight ? 'oklch(58.8% 0.158 241.966)' : 'oklch(82.8% 0.111 230.318)'}; }
 .cm-text .edited { font-size: 0.625rem; color: var(--color-base-500); padding-left: 4px; }
@@ -1370,7 +1383,7 @@ main.channel-mode > nav, main.channel-mode > #messages-container, main.channel-m
 .cm-edit .btns { display: flex; justify-content: flex-end; gap: 6px; margin: 8px 0 4px; font-size: 0.875rem; }
 .cm-edit .btns span { padding: 6px 14px; border-radius: 24px; cursor: pointer; }
 .cm-edit .cancel { background: ${isLight ? 'var(--color-base-0)' : 'var(--color-base-900)'}; color: ${isLight ? 'var(--color-base-800)' : 'var(--color-base-100)'}; }
-.cm-edit .save { background: ${isLight ? 'var(--color-base-900)' : '#fff'}; color: ${isLight ? 'var(--color-base-100)' : 'var(--color-base-800)'}; }
+.cm-edit .save { background: ${isLight ? 'var(--color-base-900)' : 'var(--color-base-0)'}; color: ${isLight ? 'var(--color-base-100)' : 'var(--color-base-800)'}; }
 /* Reply-to quote above a reply */
 .cm-quote { position: relative; font-size: 0.75rem; margin-bottom: 4px; }
 .cm-quote::before { content: ''; position: absolute; left: 12px; top: 8px; width: 24px; height: 12px; border-top: 1.5px solid; border-left: 1.5px solid; border-top-left-radius: 8px; border-color: ${isLight ? 'var(--color-base-200)' : 'var(--color-base-700)'}; }
@@ -1379,7 +1392,7 @@ main.channel-mode > nav, main.channel-mode > #messages-container, main.channel-m
 .cm-quote .q .who { flex-shrink: 0; color: ${textMain}; }
 .cm-quote .q .what { color: ${isLight ? 'var(--color-base-500)' : 'var(--color-base-400)'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* The hover toolbar: rounded-lg bg-white dark:bg-gray-850 shadow-md p-0.5 */
-.cm-tools { position: absolute; right: 4px; top: -12px; z-index: 30; display: flex; gap: 4px; padding: 2px; border-radius: 8px; background: ${isLight ? '#fff' : 'var(--color-base-850)'}; border: 1px solid color-mix(in srgb, var(--color-base-${isLight ? '100' : '850'}) 30%, transparent); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); opacity: 0; pointer-events: none; transition: opacity 0.1s; color: ${textMain}; }
+.cm-tools { position: absolute; right: 4px; top: -12px; z-index: 30; display: flex; gap: 4px; padding: 2px; border-radius: 8px; background: ${isLight ? 'var(--color-base-0)' : 'var(--color-base-850)'}; border: 1px solid color-mix(in srgb, var(--color-base-${isLight ? '100' : '850'}) 30%, transparent); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); opacity: 0; pointer-events: none; transition: opacity 0.1s; color: ${textMain}; }
 .cm:hover .cm-tools, .cm.tools-open .cm-tools { opacity: 1; pointer-events: auto; }
 .cm-tools span { display: flex; padding: 4px; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
 .cm-tools span:hover { background: ${isLight ? 'var(--color-base-100)' : 'var(--color-base-800)'}; }
@@ -1409,7 +1422,7 @@ main.channel-mode > nav, main.channel-mode > #messages-container, main.channel-m
 .ch-typing .dots i:nth-child(2) { animation-delay: 0.15s; }
 .ch-typing .dots i:nth-child(3) { animation-delay: 0.3s; }
 @keyframes tdp-typing { 0%, 60%, 100% { opacity: 0.25; } 30% { opacity: 1; } }
-.ch-input { display: flex; flex-direction: column; border-radius: 16px; border: 1px solid color-mix(in srgb, var(--color-base-${isLight ? '100' : '800'}) ${isLight ? '60' : '50'}%, transparent); background: ${isLight ? '#fff' : 'color-mix(in srgb, var(--color-base-400) 5%, transparent)'}; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); color: ${isLight ? 'inherit' : 'var(--color-base-100)'}; transition: border-color 0.15s; }
+.ch-input { display: flex; flex-direction: column; border-radius: 16px; border: 1px solid color-mix(in srgb, var(--color-base-${isLight ? '100' : '800'}) ${isLight ? '60' : '50'}%, transparent); background: ${isLight ? 'var(--color-base-0)' : 'color-mix(in srgb, var(--color-base-400) 5%, transparent)'}; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); color: ${isLight ? 'inherit' : 'var(--color-base-100)'}; transition: border-color 0.15s; }
 .ch-input:hover, .ch-input:focus-within { border-color: ${isLight ? 'var(--color-base-100)' : 'var(--color-base-800)'}; }
 .ch-reply-bar { display: none; align-items: center; justify-content: space-between; padding: 8px 12px 0; font-size: 0.75rem; color: ${isLight ? 'var(--color-base-500)' : 'var(--color-base-400)'}; }
 .ch-input.replying .ch-reply-bar { display: flex; }
@@ -1595,7 +1608,6 @@ ${opts.canvasScript ? '<canvas id="owui-theme-canvas-bg" style="position:fixed;t
         <div class="input-row">
           <span class="icon-btn" id="input-menu-button" role="button" aria-label="More" aria-haspopup="true" data-tip="More">${SVG.plusAlt}</span>
           <span class="input-divider"></span>
-          <span class="icon-btn" id="integration-menu-button" role="button" aria-label="Integrations" aria-haspopup="true" data-tip="Integrations">${SVG.component}</span>
           <span class="input-pills" id="input-pills"></span>
           <span class="spacer"></span>
           <span class="model-select" id="model-selector-model-button" role="button" aria-haspopup="listbox"><span class="name">Preview Model</span>${SVG.chevronDown}</span>
@@ -2325,8 +2337,8 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   document.addEventListener('mouseleave', function () { current = null; tip.classList.remove('show'); }, true);
 })();
 
-// The input bar's menus as mocks that work: More (InputMenu.svelte),
-// Integrations (IntegrationsMenu.svelte) and the model selector
+// The input bar's menus as mocks that work: More (InputMenu.svelte, which
+// on dev also holds what IntegrationsMenu.svelte shows) and the model selector
 // (ModelSelector/Selector.svelte). Each is portaled to <body> and opens above
 // its button, as Dropdown.svelte flips up at the bottom of the screen, and
 // carries the upstream class names so a preset's CSS reaches it too. They
@@ -2334,11 +2346,10 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
 // set up; a row that would upload, capture or fetch just closes the menu.
 (function () {
   var moreBtn = document.getElementById('input-menu-button');
-  var intBtn = document.getElementById('integration-menu-button');
   var modelBtn = document.getElementById('model-selector-model-button');
   var pills = document.getElementById('input-pills');
-  if (!moreBtn || !intBtn || !modelBtn || !pills) return;
-  var I = ${JSON.stringify({ share: SVG.share, download: SVG.download, editPencil: SVG.editPencil, chatCheck: SVG.chatCheck, pin: SVG.pin, pinSlash: SVG.pinSlash, copy: SVG.copy, folder: SVG.folder, archiveBox: SVG.archiveBox, trash: SVG.trash, cog: SVG.cog, logOut: SVG.logOut, emojiFace: SVG.emojiFace, user: SVG.user, workspace: SVG.workspace, notes: SVG.notes, code: SVG.code, checkAlt: SVG.check, clip: SVG.clip, camera: SVG.camera, globeAlt: SVG.globeAlt, documentArrowUp: SVG.documentArrowUp, pageEdit: SVG.pageEdit, database: SVG.database, clockRotateRight: SVG.clockRotateRight, chevronRightAlt: SVG.chevronRightAlt, chevronLeft: SVG.chevronLeft, chevronDown: SVG.chevronDown, wrench: SVG.wrench, searchAlt: SVG.searchAlt, photo: SVG.photo, terminal: SVG.terminal, check: SVG.check, keyframes: SVG.keyframes, documentPage: SVG.documentPage, dots: SVG.dots, globePill: SVG.globePill, photoPill: SVG.photoPill, terminalPill: SVG.terminalPill, wrenchPill: SVG.wrenchPill, xMark: SVG.xMark })};
+  if (!moreBtn || !modelBtn || !pills) return;
+  var I = ${JSON.stringify({ captureFrame: SVG.captureFrame, attachments: SVG.attachments, captureAudio: SVG.captureAudio, cog6: SVG.cog6, mic: SVG.mic, share: SVG.share, download: SVG.download, editPencil: SVG.editPencil, chatCheck: SVG.chatCheck, pin: SVG.pin, pinSlash: SVG.pinSlash, copy: SVG.copy, folder: SVG.folder, archiveBox: SVG.archiveBox, trash: SVG.trash, cog: SVG.cog, logOut: SVG.logOut, emojiFace: SVG.emojiFace, user: SVG.user, workspace: SVG.workspace, notes: SVG.notes, code: SVG.code, checkAlt: SVG.check, clip: SVG.clip, camera: SVG.camera, globeAlt: SVG.globeAlt, documentArrowUp: SVG.documentArrowUp, pageEdit: SVG.pageEdit, database: SVG.database, clockRotateRight: SVG.clockRotateRight, chevronRightAlt: SVG.chevronRightAlt, chevronLeft: SVG.chevronLeft, chevronDown: SVG.chevronDown, wrench: SVG.wrench, searchAlt: SVG.searchAlt, photo: SVG.photo, terminal: SVG.terminal, check: SVG.check, keyframes: SVG.keyframes, documentPage: SVG.documentPage, dots: SVG.dots, globePill: SVG.globePill, photoPill: SVG.photoPill, terminalPill: SVG.terminalPill, wrenchPill: SVG.wrenchPill, xMark: SVG.xMark })};
   var LOGO_SRC = ${JSON.stringify(LOGO)};
 
   var TOOLS = ['Web Scraper', 'Calculator', 'Weather'];
@@ -2391,7 +2402,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   // right edge (end) on its trigger, 4px off it and 16px from the window's
   // edges; Selector.svelte uses end, 2px and 8px
   var SPECS = {
-    more: { align: 'start', gap: 4, pad: 16 }, integrations: { align: 'start', gap: 4, pad: 16 },
+    more: { align: 'start', gap: 4, pad: 16 },
     model: { align: 'end', gap: 2, pad: 8 }, chat: { align: 'start', gap: 4, pad: 16 },
     user: { align: 'end', gap: 4, pad: 16 }, chatsMore: { align: 'end', gap: 4, pad: 16 },
     emoji: { align: 'start', gap: 4, pad: 16 }
@@ -2407,7 +2418,6 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     trigger.setAttribute('aria-expanded', 'true');
     document.body.appendChild(el);
     if (kind === 'more') renderMore(view || 'root', 'from-left');
-    else if (kind === 'integrations') renderIntegrations(view || 'root', 'from-left');
     else if (kind === 'model') renderModels();
     else RENDER[kind](el, open.ctx);
     place();
@@ -2475,36 +2485,56 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
   window.addEventListener('resize', place);
 
   moreBtn.addEventListener('click', function () { show('more', moreBtn); });
-  intBtn.addEventListener('click', function () { show('integrations', intBtn); });
   modelBtn.addEventListener('click', function () { show('model', modelBtn); });
 
   // ---- More ----
 
+  // InputMenu.svelte on dev: one w-70 menu whose rows open their page in
+  // place. The first page has Upload Files, Capture and Attachments, then,
+  // under a rule, what IntegrationsMenu.svelte used to hold in a menu of its
+  // own: Tools and the Image, Web Search and Code Interpreter switches.
+  var PARENT = { capture: 'root', attachments: 'root', tools: 'root', files: 'attachments', notes: 'attachments', knowledge: 'attachments', chats: 'attachments' };
+  function back(title, extra) {
+    return '<div class="tdp-head"><button type="button" class="tdp-row back" data-act="back">' + I.chevronLeft + '<span class="label">' + title + '</span></button>' + (extra || '') + '</div>';
+  }
   function renderMore(view, fly) {
     var el = open.el;
-    el.className = 'tdp-menu input-menu app-dropdown-menu rounded-xl border border-gray-100 dark:border-gray-800 z-50 bg-white dark:bg-gray-850 dark:text-white shadow-lg' + (open.el.classList.contains('in') ? ' in' : '');
+    el.className = 'tdp-menu input-menu app-dropdown-menu rounded-xl p-0.5 border border-base-100 dark:border-base-800 z-50 bg-base-0 dark:bg-base-850 dark:text-base-0 shadow-lg w-70' + (open.el.classList.contains('in') ? ' in' : '');
     el.setAttribute('role', 'menu');
     open.view = view;
+    var html;
     if (view === 'root') {
-      el.innerHTML = '<div class="tdp-view ' + fly + '">' +
-        row('close', I.clip, 'Upload Files') +
-        row('close', I.camera, 'Capture') +
+      html = row('close', I.clip, 'Upload Files') +
+        row('tab:capture', I.captureFrame, 'Capture', chev()) +
+        row('tab:attachments', I.attachments, 'Attachments', chev()) +
+        '<div class="tdp-divider" role="separator"></div>' +
+        row('tab:tools', I.wrench, 'Tools <span class="count">' + TOOLS.length + '</span>', chev()) +
+        toggleRow('image', I.photo, 'Image') +
+        toggleRow('webSearch', I.globeAlt, 'Web Search') +
+        toggleRow('code', I.terminal, 'Code Interpreter');
+    } else if (view === 'capture') {
+      html = back('Capture') + row('close', I.mic, 'Record') + row('close', I.captureAudio, 'Capture Audio') + row('close', I.camera, 'Screenshot');
+    } else if (view === 'attachments') {
+      html = back('Attachments') +
         row('close', I.globeAlt, 'Attach Webpage') +
         row('tab:files', I.documentArrowUp, 'Attach Files', chev()) +
         row('tab:notes', I.pageEdit, 'Attach Notes', chev()) +
         row('tab:knowledge', I.database, 'Attach Knowledge', chev()) +
-        row('tab:chats', I.clockRotateRight, 'Reference Chats', chev()) +
-        '</div>';
+        row('tab:chats', I.clockRotateRight, 'Reference Chats', chev());
+    } else if (view === 'tools') {
+      html = back('Tools <span class="count">' + TOOLS.length + '</span>', '<span class="tdp-gear" data-act="close" role="button" aria-label="Manage tools">' + I.cog6 + '</span>') +
+        '<div class="tdp-search">' + I.searchAlt + '<input placeholder="Search tools" autocomplete="off"></div>' +
+        '<div class="tdp-list"></div>';
     } else {
       var t = SUBTABS[view];
-      el.innerHTML = '<div class="tdp-view ' + fly + '">' +
-        '<button type="button" class="tdp-row back" data-act="back">' + I.chevronLeft + '<span class="label">' + t.title + '</span></button>' +
+      html = back(t.title) +
         '<div class="tdp-search">' + I.searchAlt + '<input placeholder="' + t.placeholder + '" autocomplete="off"></div>' +
-        '<div class="tdp-list"></div></div>';
-      var input = el.querySelector('input');
-      input.addEventListener('input', function () { fillList(view, input.value); });
-      fillList(view, '');
+        '<div class="tdp-list"></div>';
     }
+    el.innerHTML = '<div class="tdp-view ' + fly + '">' + html + '</div>';
+    var input = el.querySelector('input');
+    if (input && view === 'tools') { input.addEventListener('input', function () { fillTools(input.value); }); fillTools(''); }
+    else if (input) { input.addEventListener('input', function () { fillList(view, input.value); }); fillList(view, ''); }
     place();
   }
 
@@ -2536,32 +2566,6 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     place();
   }
 
-  // ---- Integrations ----
-
-  function renderIntegrations(view, fly) {
-    var el = open.el;
-    el.className = 'tdp-menu integrations-menu app-dropdown-menu rounded-xl border border-gray-100 dark:border-gray-800 z-50 bg-white dark:bg-gray-850 dark:text-white shadow-lg' + (open.el.classList.contains('in') ? ' in' : '');
-    el.setAttribute('role', 'menu');
-    open.view = view;
-    if (view === 'root') {
-      el.innerHTML = '<div class="tdp-view ' + fly + '">' +
-        row('tab:tools', I.wrench, 'Tools <span class="count">' + TOOLS.length + '</span>', chev()) +
-        toggleRow('webSearch', I.globeAlt, 'Web Search') +
-        toggleRow('image', I.photo, 'Image') +
-        toggleRow('code', I.terminal, 'Code Interpreter') +
-        '</div>';
-    } else {
-      el.innerHTML = '<div class="tdp-view ' + fly + '">' +
-        '<button type="button" class="tdp-row back" data-act="back">' + I.chevronLeft + '<span class="label">Tools <span class="count">' + TOOLS.length + '</span></span></button>' +
-        '<div class="tdp-search">' + I.searchAlt + '<input placeholder="Search tools" autocomplete="off"></div>' +
-        '<div class="tdp-list"></div></div>';
-      var input = el.querySelector('input');
-      input.addEventListener('input', function () { fillTools(input.value); });
-      fillTools('');
-    }
-    place();
-  }
-
   function fillTools(q) {
     var list = open.el.querySelector('.tdp-list');
     var rows = TOOLS.map(function (name, i) {
@@ -2572,8 +2576,12 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     place();
   }
 
-  // The pills after Integrations: selected tools, then each feature that is on
+  // The pills beside the + menu: selected tools, then each feature that is
+  // on. dev shows them only with Settings > Interface > Show Input
+  // Selections, which is off by default, so the mock leaves them out too.
+  var SHOW_INPUT_SELECTIONS = false;
   function renderPills() {
+    if (!SHOW_INPUT_SELECTIONS) { pills.innerHTML = ''; return; }
     var n = state.tools.filter(Boolean).length, h = '';
     if (n) h += '<span class="tools-pill" data-pill="tools" role="button" aria-label="Available Tools" data-tip="' + n + ' Available Tools">' + I.wrenchPill + '<span>' + n + '</span></span>';
     if (state.webSearch) h += pill('webSearch', 'Web Search', I.globePill);
@@ -2588,10 +2596,10 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     var p = e.target.closest('[data-pill]');
     if (!p) return;
     hideTip();
-    if (p.dataset.pill === 'tools') { show('integrations', intBtn, 'tools'); return; }
+    if (p.dataset.pill === 'tools') { show('more', moreBtn, 'tools'); return; }
     state[p.dataset.pill] = false;
     renderPills();
-    if (open && open.kind === 'integrations' && open.view === 'root') renderIntegrations('root', '');
+    if (open && open.kind === 'more' && open.view === 'root') renderMore('root', '');
   });
 
   // ---- Model selector ----
@@ -2737,12 +2745,12 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     }
     if (act === 'compare') { state.compare = !state.compare; a.classList.toggle('on', state.compare); return; }
     if (act === 'back') {
-      if (open.kind === 'more') renderMore('root', 'from-left'); else renderIntegrations('root', 'from-left');
+      renderMore(PARENT[open.view] || 'root', 'from-left');
       return;
     }
     if (act.indexOf('tab:') === 0) {
       var view = act.slice(4);
-      if (open.kind === 'more') renderMore(view, 'from-right'); else renderIntegrations(view, 'from-right');
+      renderMore(view, 'from-right');
       var input = open.el.querySelector('input');
       if (input) input.focus();
       return;
