@@ -1675,22 +1675,29 @@ test('a page open as a tab is a page under Surfaces: Cards and panels reaches th
     return page.evaluate(() => {
       const bg = (el) => getComputedStyle(el).backgroundColor;
       const pane = document.querySelector('[id^="chat-panel-page%3A"][role="tabpanel"]');
+      const grid = pane.querySelector('div.rounded-2xl');
+      // The drawer's fill is its panel's, the dialog's child, not the list inside it
+      const drawer = document.getElementById('controls-container').closest('.modal > div');
       return {
         pane: bg(pane),
-        grid: bg(pane.querySelector('div.rounded-2xl')),
-        drawer: bg(document.getElementById('controls-container')),
+        grid: bg(grid),
+        // Open WebUI 0.13.4 fills the calendar grid; from 0.13.5 it draws only a border
+        gridFilled: /(^| )(dark:)?bg-/.test(grid.className),
+        drawer: drawer ? bg(drawer) : 'no drawer',
         tab: bg(document.querySelector('#controls-container .panel-tab')),
       };
     });
   };
+  // Cards and panels tints the fill Open WebUI gives a panel, and adds none
+  const gridTook = (v) => v.gridFilled ? /\/ 0\.2\)$/.test(v.grid) : v.grid === 'rgba(0, 0, 0, 0)';
   const wide = await look(1280);
   if (wide.pane !== 'rgba(0, 0, 0, 0)') throw new Error('a fill covers the calendar page: ' + wide.pane);
-  if (!/\/ 0\.2\)$/.test(wide.grid)) throw new Error('the calendar grid ignores Cards and panels: ' + wide.grid);
+  if (!gridTook(wide)) throw new Error('the calendar grid ignores Cards and panels: ' + wide.grid + (wide.gridFilled ? '' : ' (Open WebUI gives it no fill)'));
   if (/\/ 0\.2\)$/.test(wide.tab)) throw new Error('a tab in the tab strip took the Cards fill: ' + wide.tab);
   // Below 768px pages open in the Tabs drawer, which keeps its fill
   const narrow = await look(600);
-  if (narrow.drawer === 'rgba(0, 0, 0, 0)') throw new Error('the Tabs drawer lost its fill');
-  if (!/\/ 0\.2\)$/.test(narrow.grid)) throw new Error('the calendar grid in the drawer ignores Cards and panels: ' + narrow.grid);
+  if (narrow.drawer === 'rgba(0, 0, 0, 0)' || narrow.drawer === 'no drawer') throw new Error('the Tabs drawer lost its fill: ' + narrow.drawer);
+  if (!gridTook(narrow)) throw new Error('the calendar grid in the drawer ignores Cards and panels: ' + narrow.grid);
 });
 
 test('a tab shows the background, alone or in a split view', async ({ admin }) => {

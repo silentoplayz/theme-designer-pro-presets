@@ -1288,7 +1288,7 @@ class Event:
                 var hex = function(c) { return '#' + c.map(function(v) { return (v < 16 ? '0' : '') + v.toString(16); }).join(''); };
                 var ramp = {}, rampRgb = {};
                 [0, 50, 100, 200, 300, 400, 500, 600, 700, 800, 850, 900, 950, 1000].forEach(function(s) {
-                    rampRgb[s] = toRgb(readVar('--color-base-' + s) || '#808080');
+                    rampRgb[s] = toRgb(readVar('--color-base-' + s) || readVar('--color-gray-' + s) || (s === 0 ? '#ffffff' : s === 1000 ? '#000000' : '#808080'));
                     ramp[s] = hex(rampRgb[s]);
                 });
                 // Accents in the theme's hue, as colorful as the theme itself
@@ -2177,8 +2177,8 @@ class Event:
                             'background-size: cover !important; background-position: center !important; opacity: ' + share / 100 + ' !important;';
                     };
                     return [
-                        'html.dark ' + target + ' { ' + layer('color-mix(in oklab, var(--color-base-900) ' + Math.round(90 * d) + '%, transparent)', 'color-mix(in oklab, var(--color-base-900) ' + Math.round(65 * d) + '%, transparent)') + ' }',
-                        'html:not(.dark) ' + target + ' { ' + layer('color-mix(in oklab, var(--color-base-0) ' + Math.round(90 * d) + '%, transparent)', 'color-mix(in oklab, var(--color-base-0) ' + Math.round(55 * d) + '%, transparent)') + ' }'
+                        'html.dark ' + target + ' { ' + layer('color-mix(in oklab, var(--color-base-900, var(--color-gray-900)) ' + Math.round(90 * d) + '%, transparent)', 'color-mix(in oklab, var(--color-base-900, var(--color-gray-900)) ' + Math.round(65 * d) + '%, transparent)') + ' }',
+                        'html:not(.dark) ' + target + ' { ' + layer('color-mix(in oklab, var(--color-base-0, #fff) ' + Math.round(90 * d) + '%, transparent)', 'color-mix(in oklab, var(--color-base-0, #fff) ' + Math.round(55 * d) + '%, transparent)') + ' }'
                     ];
                 }
                 // The sign-in page's own picture (instance theme only), drawn on
@@ -9549,13 +9549,13 @@ location.reload();</code></pre>
     // and blurs what shows through. The backdrop is the page behind an open
     // dialog, tinted black; the top fade has opacity only.
     const SURFACE_LAYERS = [
-        { key: 'Sidebar', label: 'Sidebar', hint: 'The open sidebar. The collapsed rail stays clear.', color: ['var(--color-base-950)', 'var(--color-base-50)'] },
-        { key: 'Composer', label: 'Message input', hint: 'The box you type in.', color: ['var(--color-base-850)', 'var(--color-base-0)'] },
-        { key: 'Panel', label: 'Tabs drawer', hint: 'The drawer tabs open in on a narrow screen. On a wider one each tab looks like the page or chat it shows.', color: ['var(--color-base-900)', 'var(--color-base-0)'] },
-        { key: 'Cards', label: 'Cards and panels', hint: 'The rounded panels on a page: note cards, the calendar, workspace and admin cards.', color: ['var(--color-base-900)', 'var(--color-base-0)'] },
-        { key: 'Buttons', label: 'Buttons', hint: 'The grey buttons on a page, such as Create, single or split. Switches and the black and white action buttons keep their fill.', color: ['var(--color-base-850)', 'var(--color-base-50)'] },
-        { key: 'Menu', label: 'Menus and tooltips', hint: 'Dropdowns, submenus, the model picker, Model controls, tooltips and toasts.', color: ['var(--color-base-850)', 'var(--color-base-0)'] },
-        { key: 'Dialog', label: 'Dialogs', hint: 'Settings and the other windows that open over the page.', color: ['var(--color-base-900)', 'var(--color-base-0)'] },
+        { key: 'Sidebar', label: 'Sidebar', hint: 'The open sidebar. The collapsed rail stays clear.', color: ['var(--color-base-950, var(--color-gray-950))', 'var(--color-base-50, var(--color-gray-50))'] },
+        { key: 'Composer', label: 'Message input', hint: 'The box you type in.', color: ['var(--color-base-850, var(--color-gray-850))', 'var(--color-base-0, #fff)'] },
+        { key: 'Panel', label: 'Tabs drawer', hint: 'The drawer tabs open in on a narrow screen. On a wider one each tab looks like the page or chat it shows.', color: ['var(--color-base-900, var(--color-gray-900))', 'var(--color-base-0, #fff)'] },
+        { key: 'Cards', label: 'Cards and panels', hint: 'The rounded panels on a page: note cards, the calendar, workspace and admin cards.', color: ['var(--color-base-900, var(--color-gray-900))', 'var(--color-base-0, #fff)'] },
+        { key: 'Buttons', label: 'Buttons', hint: 'The grey buttons on a page, such as Create, single or split. Switches and the black and white action buttons keep their fill.', color: ['var(--color-base-850, var(--color-gray-850))', 'var(--color-base-50, var(--color-gray-50))'] },
+        { key: 'Menu', label: 'Menus and tooltips', hint: 'Dropdowns, submenus, the model picker, Model controls, tooltips and toasts.', color: ['var(--color-base-850, var(--color-gray-850))', 'var(--color-base-0, #fff)'] },
+        { key: 'Dialog', label: 'Dialogs', hint: 'Settings and the other windows that open over the page.', color: ['var(--color-base-900, var(--color-gray-900))', 'var(--color-base-0, #fff)'] },
         { key: 'Backdrop', label: 'Behind dialogs', hint: 'The page behind an open dialog: how much it darkens and blurs.', color: null },
         { key: 'Fade', label: 'Top fade', hint: 'The fade at the top of a chat, under the title bar.', color: null, noBlur: true }
     ];
