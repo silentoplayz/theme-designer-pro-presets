@@ -332,6 +332,10 @@
   // switch's state, a value, or none) and description, as an admin sees
   // them on a fresh instance
   const ADMIN_SETTINGS = {"General": [{"t": "Community Sharing", "c": true, "d": "Allow users to share chats with the Open WebUI community."}, {"t": "Message Rating", "c": true, "d": "Let users rate assistant responses."}, {"t": "Folders", "c": true, "d": "Allow users to organize chats into folders."}, {"t": "Memories", "c": true, "d": "Allow users to save memories for more personalized responses."}, {"t": "Memory System Context", "c": true, "d": "Include saved memories in the system context."}, {"t": "Load selected skills on demand", "c": false, "d": "Load selected and model-attached skills when needed instead of including instructions upfront. Explicit skill mentions still load immediately. Requires built-in skill tools; otherwise instructions load upfront."}, {"t": "Notes", "c": true, "d": "Allow users to create and manage notes."}, {"t": "Comments", "c": false, "d": "Allow users to comment on workspace items, notes, and chats they can access."}, {"t": "Notifications", "c": true, "d": "Enable in-app notifications for all users. Webhook delivery is configured separately."}, {"t": "Channels", "c": true, "d": "Allow users to use channels for shared conversations."}, {"t": "Encrypted channels", "c": false, "d": "Allow temporary end-to-end encrypted chats in direct messages and private groups. Messages are not saved."}, {"t": "Model Response Mode", "c": "Thread", "d": "Choose where model responses to root-level channel mentions are posted."}, {"t": "Apps", "c": false, "d": "Allow admins to connect external apps to Open WebUI."}, {"t": "Calendar", "c": true, "d": "Allow users to access calendar features."}, {"t": "Automations", "c": true, "d": "Allow users to create and run automations."}, {"t": "Automation Webhooks", "c": true, "d": "Allow automations to be started by a webhook URL. Anyone with the URL can start the automation and send it text."}, {"t": "User Webhooks", "c": false, "d": "Allow users to configure webhooks from their account."}, {"t": "User Status", "c": true, "d": "Show user status information in the app."}], "Authentication": [{"t": "Default User Role", "c": "pending", "d": "Role assigned to new users when they create an account."}, {"t": "Default Group", "c": "None", "d": "Group assigned to new users by default."}, {"t": "Login Form", "c": true, "d": "Show email and password sign-in on the login page. Set up SSO or LDAP before disabling. Disabling also blocks local sign-ups; password API access is unchanged."}, {"t": "New Sign Ups", "c": false, "d": "Allow new users to create accounts."}, {"t": "API Keys", "c": false, "d": "Allow users to create API keys for programmatic access."}, {"t": "Require an authenticator for all users", "c": false, "d": "Changes sign out all devices. Users enroll on their next sign-in."}, {"t": "Admin Details", "c": true, "d": "Show admin contact details while an account waits for approval."}, {"t": "LDAP", "c": false, "d": "Allow users to authenticate with an LDAP directory."}, {"t": "OAuth / OIDC", "c": true, "d": "Allow users to authenticate with an OAuth / OIDC provider."}, {"t": "OAuth Signup", "c": false, "d": "Allow users to create accounts through OAuth."}, {"t": "Merge Accounts by Email", "c": false, "d": "Link OAuth sign-ins to existing accounts with the same email."}, {"t": "Auto Redirect", "c": false, "d": "Send users directly to the OAuth provider from the sign-in page."}, {"t": "Role Mapping", "c": false, "d": "Map OAuth claims to Open WebUI roles."}, {"t": "Group Mapping", "c": false, "d": "Map OAuth claims to Open WebUI groups."}, {"t": "Update Email", "c": false, "d": "Refresh the account email from OAuth on sign-in."}, {"t": "Update Name", "c": false, "d": "Refresh the account name from OAuth on sign-in."}, {"t": "Update Picture", "c": false, "d": "Refresh the profile picture from OAuth on sign-in."}], "Interface": [{"t": "Visible controls", "c": "Show", "d": "Choose which controls appear for users. Hiding a control keeps its current setting and underlying feature available. Administrators always see available controls."}, {"t": "Context Compaction", "c": false, "d": "Summarize older chat history when the conversation context grows large."}, {"t": "Tool Call Labels", "c": false, "d": "Ask the model to include short labels for running and completed tool calls."}, {"t": "Tool Permissions Experimental", "c": false, "d": "Show tool permission choices in the chat input menu."}, {"t": "Tool Search Experimental", "c": false, "d": "Leave large tool definitions out of the request and let the model look them up on demand. Reduces prompt size when many tools are enabled."}, {"t": "Title Generation", "c": true, "d": "Allow automatic names for new chats."}, {"t": "Voice Mode Prompt", "c": true, "d": "Apply voice-specific instructions while voice mode is active."}, {"t": "Follow Up Generation", "c": true, "d": "Show suggested next questions after assistant responses."}, {"t": "Tags Generation", "c": true, "d": "Create chat tags from conversation content."}, {"t": "Retrieval Query Generation", "c": true, "d": "Rewrite user requests for knowledge retrieval."}, {"t": "Web Search Query Generation", "c": true, "d": "Rewrite user requests into web-search queries."}, {"t": "Autocomplete Generation", "c": false, "d": "Suggest completions while users type chat messages."}], "Connections": [{"t": "OpenAI API", "c": false, "d": ""}, {"t": "Ollama API", "c": false, "d": ""}, {"t": "Cache Base Model List", "c": false, "d": "Base Model List Cache speeds up access by fetching base models only at startup or on settings save—faster, but may not show recent base model changes."}], "Sub-agents": [{"t": "Enable sub-agents", "c": false, "d": "Allow the AI to delegate tasks to sub-agents. Each sub-agent creates a real chat with full tool access. Uses additional LLM calls."}], "Documents": [{"t": "Content Extraction Engine", "c": "Default", "d": "Choose how uploaded documents are parsed before indexing."}, {"t": "PDF Extract Images (OCR)", "c": false, "d": "Extract images from PDFs so OCR can process image-only pages."}, {"t": "PDF Loader Mode", "c": "Page", "d": "Page mode creates one document per page. Single mode keeps pages together for chunking across boundaries."}, {"t": "Bypass Embedding and Retrieval", "c": false, "d": "Use segmented retrieval for focused and relevant context."}, {"t": "Text Splitter", "c": "Default (Character)", "d": "Choose how extracted text is split before indexing."}, {"t": "Markdown Header Text Splitter", "c": true, "d": "Split documents by markdown headers before character or token splitting."}, {"t": "Embedding Model Engine", "c": "Default (SentenceTransformers)", "d": "Provider used to generate document embeddings."}, {"t": "Embedding Batch Size", "c": null, "d": "Number of items processed per embedding batch."}, {"t": "Full Text Threshold Type", "c": "Default (Character)", "d": "Choose how file size is measured."}, {"t": "Always Use Full Text", "c": false, "d": "Include complete documents regardless of the full text threshold."}, {"t": "Hybrid Search", "c": false, "d": "Combine semantic and keyword retrieval."}, {"t": "Reranking Batch Size", "c": null, "d": "Number of results processed per reranking batch."}, {"t": "Google Drive", "c": false, "d": "Allow Google Drive as a document source."}, {"t": "OneDrive", "c": false, "d": "Allow OneDrive as a document source."}, {"t": "Reset Upload Directory", "c": "Reset", "d": "Delete uploaded files from the upload directory."}, {"t": "Reset Vector Storage/Knowledge", "c": "Reset", "d": "Clear vector storage and knowledge indexing data."}, {"t": "Reindex Knowledge and Memory Vectors", "c": "Reindex", "d": "Rebuild vectors for existing knowledge files, knowledge search, and memories."}], "Web Search": [{"t": "Web Search", "c": true, "d": "Allow users to search the web from chats."}, {"t": "Web Search Confirmation", "c": false, "d": "Require users to confirm before using Web Search."}, {"t": "Web Search Engine", "c": "Select a engine", "d": "Choose the provider used for web search queries."}, {"t": "Bypass Embedding and Retrieval", "c": false, "d": "Use segmented retrieval for focused and relevant content extraction."}, {"t": "Bypass Web Loader", "c": false, "d": "Use search results without fetching page contents."}, {"t": "Trust Proxy Environment", "c": true, "d": "Use proxy environment variables to fetch page contents."}, {"t": "Web Loader Engine", "c": "Default", "d": "Choose how web result pages are fetched and read."}, {"t": "Verify SSL Certificate", "c": true, "d": "Validate SSL certificates when fetching web content."}], "Audio": [{"t": "Call mode", "c": "Standard", "d": ""}, {"t": "Speech-to-Text Engine", "c": "Whisper (Local)", "d": "Choose the transcription provider used for audio input."}, {"t": "Text-to-Speech Engine", "c": "Web API", "d": "Choose the speech provider used for assistant audio output."}, {"t": "Response Splitting", "c": "Punctuation", "d": "Control how message text is split for TTS requests. 'Punctuation' splits into sentences, 'paragraphs' splits into paragraphs, and 'none' keeps the message as a single string."}], "Images & Videos": [{"t": "Image Generation", "c": true, "d": "Allow users to generate images from prompts."}, {"t": "Image Edit", "c": false, "d": "Allow users to edit existing images."}, {"t": "OpenAI gpt-image-2", "c": true, "d": ""}, {"t": "Default Generation Model", "c": "First available", "d": "Used when the chat or model doesn't pick an image model."}, {"t": "Image Prompt Generation", "c": true, "d": "Only for models using legacy function calling: rewrites the chat into an image prompt. With native function calling, the model writes the prompt itself."}, {"t": "Video Generation", "c": false, "d": "Allow users to generate videos from prompts."}], "Database": [{"t": "Import Config", "c": "Import", "d": "Import admin configuration from a JSON export file."}, {"t": "Export Config", "c": "Export", "d": "Download the current admin configuration as JSON."}, {"t": "Database", "c": null, "d": "Download the application database when supported."}, {"t": "All Chats", "c": "Export", "d": "Download every user's chat history as JSON."}, {"t": "Users", "c": "Export", "d": "Download all users as CSV."}]};
+  const SHARE_ICONS = {
+    'share:lock': '<svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>',
+    'share:link': '<svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"/></svg>'
+  };
   const DEV_ICONS = {"set:back": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M15.75 19.5 8.25 12l7.5-7.5\"></path></svg>", "set:search": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z\"></path></svg>", "set:p:General": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M19.6224 10.3954L18.5247 7.7448L20 6L18 4L16.2647 5.48295L13.5578 4.36974L12.9353 2H10.981L10.3491 4.40113L7.70441 5.51596L6 4L4 6L5.45337 7.78885L4.3725 10.4463L2 11V13L4.40111 13.6555L5.51575 16.2997L4 18L6 20L7.79116 18.5403L10.397 19.6123L11 22H13L13.6045 19.6132L16.2551 18.5155C16.6969 18.8313 18 20 18 20L20 18L18.5159 16.2494L19.6139 13.598L21.9999 12.9772L22 11L19.6224 10.3954Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:p:Interface": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75\"></path></svg>", "set:p:Notifications": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M19 8C20.6569 8 22 6.65685 22 5C22 3.34315 20.6569 2 19 2C17.3431 2 16 3.34315 16 5C16 6.65685 17.3431 8 19 8Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M21 12V15C21 18.3137 18.3137 21 15 21H9C5.68629 21 3 18.3137 3 15V9C3 5.68629 5.68629 3 9 3H12\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:p:Keyboard": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M3 19V5C3 3.89543 3.89543 3 5 3H19C20.1046 3 21 3.89543 21 5V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19Z\"></path><path d=\"M8 14L12 10L16 14\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:p:Personalization": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M16 8L16 10\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M8 8L8 10\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M9 16C9 16 10 17 12 17C14 17 15 16 15 16\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M12 8L12 13L11 13\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:p:Audio": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M1 13.8571V10.1429C1 9.03829 1.89543 8.14286 3 8.14286H5.9C6.09569 8.14286 6.28708 8.08544 6.45046 7.97772L12.4495 4.02228C13.1144 3.5839 14 4.06075 14 4.85714V19.1429C14 19.9392 13.1144 20.4161 12.4495 19.9777L6.45046 16.0223C6.28708 15.9146 6.09569 15.8571 5.9 15.8571H3C1.89543 15.8571 1 14.9617 1 13.8571Z\"></path><path d=\"M17.5 7.5C17.5 7.5 19 9 19 11.5C19 14 17.5 15.5 17.5 15.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M20.5 4.5C20.5 4.5 23 7 23 11.5C23 16 20.5 18.5 20.5 18.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:p:Data Controls": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M4 6V12C4 12 4 15 11 15C18 15 18 12 18 12V6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M11 3C18 3 18 6 18 6C18 6 18 9 11 9C4 9 4 6 4 6C4 6 4 3 11 3Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M11 21C4 21 4 18 4 18V12\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M19 21C20.1046 21 21 20.1046 21 19C21 17.8954 20.1046 17 19 17C18.6357 17 18.2942 17.0974 18 17.2676C17.4022 17.6134 17 18.2597 17 19C17 19.7403 17.4022 20.3866 18 20.7324C18.2942 20.9026 18.6357 21 19 21Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M19 22C20.6569 22 22 20.6569 22 19C22 17.3431 20.6569 16 19 16C17.3431 16 16 17.3431 16 19C16 20.6569 17.3431 22 19 22Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"0.3 2\"></path></svg>", "set:p:Usage": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M20 20H4V4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M4 16.5L12 9L15 12L19.5 7.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:p:Archived Chats": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z\"></path></svg>", "set:p:Account": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M4.271 18.3457C4.271 18.3457 6.50002 15.5 12 15.5C17.5 15.5 19.7291 18.3457 19.7291 18.3457\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M12 12C13.6569 12 15 10.6569 15 9C15 7.34315 13.6569 6 12 6C10.3431 6 9 7.34315 9 9C9 10.6569 10.3431 12 12 12Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:p:About": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M12 11.5V16.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M12 7.51L12.01 7.49889\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:a:General": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M19.6224 10.3954L18.5247 7.7448L20 6L18 4L16.2647 5.48295L13.5578 4.36974L12.9353 2H10.981L10.3491 4.40113L7.70441 5.51596L6 4L4 6L5.45337 7.78885L4.3725 10.4463L2 11V13L4.40111 13.6555L5.51575 16.2997L4 18L6 20L7.79116 18.5403L10.397 19.6123L11 22H13L13.6045 19.6132L16.2551 18.5155C16.6969 18.8313 18 20 18 20L20 18L18.5159 16.2494L19.6139 13.598L21.9999 12.9772L22 11L19.6224 10.3954Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:a:Authentication": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M16 12H17.4C17.7314 12 18 12.2686 18 12.6V19.4C18 19.7314 17.7314 20 17.4 20H6.6C6.26863 20 6 19.7314 6 19.4V12.6C6 12.2686 6.26863 12 6.6 12H8M16 12V8C16 6.66667 15.2 4 12 4C8.8 4 8 6.66667 8 8V12M16 12H8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:a:Interface": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M2 21L17 21\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M21 21L22 21\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M2 16.4V3.6C2 3.26863 2.26863 3 2.6 3H21.4C21.7314 3 22 3.26863 22 3.6V16.4C22 16.7314 21.7314 17 21.4 17H2.6C2.26863 17 2 16.7314 2 16.4Z\"></path></svg>", "set:a:Connections": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 11.9976C14 9.5059 11.683 7 8.85714 7C8.52241 7 7.41904 7.00001 7.14286 7.00001C4.30254 7.00001 2 9.23752 2 11.9976C2 14.376 3.70973 16.3664 6 16.8714C6.36756 16.9525 6.75006 16.9952 7.14286 16.9952\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M10 11.9976C10 14.4893 12.317 16.9952 15.1429 16.9952C15.4776 16.9952 16.581 16.9952 16.8571 16.9952C19.6975 16.9952 22 14.7577 22 11.9976C22 9.6192 20.2903 7.62884 18 7.12383C17.6324 7.04278 17.2499 6.99999 16.8571 6.99999\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:a:Models": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M4 7.5C4 5.57 7.58 4 12 4s8 1.57 8 3.5S16.42 11 12 11 4 9.43 4 7.5Z\"></path><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M4 7.5v4C4 13.43 7.58 15 12 15s8-1.57 8-3.5v-4\"></path><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M4 11.5v4C4 17.43 7.58 19 12 19s8-1.57 8-3.5v-4\"></path></svg>", "set:a:Sub-agents": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M4.271 18.3457C4.271 18.3457 6.50002 15.5 12 15.5C17.5 15.5 19.7291 18.3457 19.7291 18.3457\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M12 12C13.6569 12 15 10.6569 15 9C15 7.34315 13.6569 6 12 6C10.3431 6 9 7.34315 9 9C9 10.6569 10.3431 12 12 12Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:a:Integrations": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M10.0503 10.6066L2.97923 17.6777C2.19818 18.4587 2.19818 19.725 2.97923 20.5061V20.5061C3.76027 21.2871 5.0266 21.2871 5.80765 20.5061L12.8787 13.435\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M10.0502 10.6066C9.20638 8.45358 9.37134 5.6286 11.1109 3.88909C12.8504 2.14957 16.0606 1.76777 17.8284 2.82843L14.7877 5.8691L14.5051 8.98014L17.6161 8.69753L20.6568 5.65685C21.7175 7.42462 21.3357 10.6349 19.5961 12.3744C17.8566 14.1139 15.0316 14.2789 12.8786 13.435\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:a:Documents": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z\"></path></svg>", "set:a:Web Search": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418\"></path></svg>", "set:a:Audio": "<svg aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M1 13.8571V10.1429C1 9.03829 1.89543 8.14286 3 8.14286H5.9C6.09569 8.14286 6.28708 8.08544 6.45046 7.97772L12.4495 4.02228C13.1144 3.5839 14 4.06075 14 4.85714V19.1429C14 19.9392 13.1144 20.4161 12.4495 19.9777L6.45046 16.0223C6.28708 15.9146 6.09569 15.8571 5.9 15.8571H3C1.89543 15.8571 1 14.9617 1 13.8571Z\"></path><path d=\"M17.5 7.5C17.5 7.5 19 9 19 11.5C19 14 17.5 15.5 17.5 15.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M20.5 4.5C20.5 4.5 23 7 23 11.5C23 16 20.5 18.5 20.5 18.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:a:Images & Videos": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 7.6V20.4C21 20.7314 20.7314 21 20.4 21H7.6C7.26863 21 7 20.7314 7 20.4V7.6C7 7.26863 7.26863 7 7.6 7H20.4C20.7314 7 21 7.26863 21 7.6Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M18 4H4.6C4.26863 4 4 4.26863 4 4.6V18\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M7 16.8L12.4444 15L21 18\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M16.5 13C15.6716 13 15 12.3284 15 11.5C15 10.6716 15.6716 10 16.5 10C17.3284 10 18 10.6716 18 11.5C18 12.3284 17.3284 13 16.5 13Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "set:a:Legacy": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2.5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m8.25 4.5 7.5 7.5-7.5 7.5\"></path></svg>", "set:a:Analytics": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M3 4.5h14.25M3 9h9.75M3 13.5h5.25m5.25-.75L17.25 9m0 0L21 12.75M17.25 9v12\"></path></svg>", "set:a:Database": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M5 12V18C5 18 5 21 12 21C19 21 19 18 19 18V12\"></path><path d=\"M5 6V12C5 12 5 15 12 15C19 15 19 12 19 12V6\"></path><path d=\"M12 3C19 3 19 6 19 6C19 6 19 9 12 9C5 9 5 6 5 6C5 6 5 3 12 3Z\"></path></svg>", "user:Update your status": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\"><path d=\"M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22Z\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M16.5 14.5C16.5 14.5 15 16.5 12 16.5C9 16.5 7.5 14.5 7.5 14.5\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M15.5 9C15.2239 9 15 8.77614 15 8.5C15 8.22386 15.2239 8 15.5 8C15.7761 8 16 8.22386 16 8.5C16 8.77614 15.7761 9 15.5 9Z\" fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M8.5 9C8.22386 9 8 8.77614 8 8.5C8 8.22386 8.22386 8 8.5 8C8.77614 8 9 8.22386 9 8.5C9 8.77614 8.77614 9 8.5 9Z\" fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "user:Workspace": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\"><path d=\"M13.9922 17H16.9922M19.9922 17H16.9922M16.9922 17V14M16.9922 17V20\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M4 9.4V4.6C4 4.26863 4.26863 4 4.6 4H9.4C9.73137 4 10 4.26863 10 4.6V9.4C10 9.73137 9.73137 10 9.4 10H4.6C4.26863 10 4 9.73137 4 9.4Z\" stroke=\"currentColor\" stroke-width=\"1.5\"></path><path d=\"M4 19.4V14.6C4 14.2686 4.26863 14 4.6 14H9.4C9.73137 14 10 14.2686 10 14.6V19.4C10 19.7314 9.73137 20 9.4 20H4.6C4.26863 20 4 19.7314 4 19.4Z\" stroke=\"currentColor\" stroke-width=\"1.5\"></path><path d=\"M14 9.4V4.6C14 4.26863 14.2686 4 14.6 4H19.4C19.7314 4 20 4.26863 20 4.6V9.4C20 9.73137 19.7314 10 19.4 10H14.6C14.2686 10 14 9.73137 14 9.4Z\" stroke=\"currentColor\" stroke-width=\"1.5\"></path></svg>", "user:Notes": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" stroke=\"currentColor\" stroke-linecap=\"round\"></path><path d=\"M6 17L20 17\" stroke=\"currentColor\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" stroke=\"currentColor\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M9 7L15 7\" stroke=\"currentColor\" stroke-linecap=\"round\"></path></svg>", "user:Calendar": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\"><path d=\"M15 4V2M15 4V6M15 4H10.5M3 10V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V10H3Z\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M3 10V6C3 4.89543 3.89543 4 5 4H7\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M7 2V6\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M21 10V6C21 4.89543 20.1046 4 19 4H18.5\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "user:Automations": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\"><path d=\"M12 6L12 12L18 12\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "user:Playground": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\"><path d=\"M13.5 6L10 18.5\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6.5 8.5L3 12L6.5 15.5\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M17.5 8.5L21 12L17.5 15.5\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "user:Admin Panel": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\"><path d=\"M5 20V19C5 15.134 8.13401 12 12 12V12C15.866 12 19 15.134 19 19V20\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M12 12C14.2091 12 16 10.2091 16 8C16 5.79086 14.2091 4 12 4C9.79086 4 8 5.79086 8 8C8 10.2091 9.79086 12 12 12Z\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "user:Settings": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z\"></path><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\"></path></svg>", "user:Sign Out": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\"><path d=\"M12 12H19M19 12L16 15M19 12L16 9\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M19 6V5C19 3.89543 18.1046 3 17 3H7C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V18\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "newtab:New Chat": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.5\"><!----><path d=\"M8 10L12 10L16 10\"></path><path d=\"M8 14L10 14L12 14\"></path><!----><path d=\"M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.8214 2.48697 15.5291 3.33782 17L2.5 21.5L7 20.6622C8.47087 21.513 10.1786 22 12 22Z\"></path><!----></svg>", "newtab:Overview": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z\"></path></svg>", "tabchat:Share": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\"><path d=\"M20 13V19C20 20.1046 19.1046 21 18 21H6C4.89543 21 4 20.1046 4 19V13\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M12 15V3M12 3L8.5 6.5M12 3L15.5 6.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "tabchat:Download": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\"><path d=\"M6 20L18 20\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M12 4V16M12 16L15.5 12.5M12 16L8.5 12.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "tabchat:Rename": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\"><path d=\"M14.3632 5.65156L15.8431 4.17157C16.6242 3.39052 17.8905 3.39052 18.6716 4.17157L20.0858 5.58579C20.8668 6.36683 20.8668 7.63316 20.0858 8.41421L18.6058 9.8942M14.3632 5.65156L4.74749 15.2672C4.41542 15.5993 4.21079 16.0376 4.16947 16.5054L3.92738 19.2459C3.87261 19.8659 4.39148 20.3848 5.0115 20.33L7.75191 20.0879C8.21972 20.0466 8.65806 19.8419 8.99013 19.5099L18.6058 9.8942M14.3632 5.65156L18.6058 9.8942\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "tabchat:Copy": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184\"></path></svg>", "tabchat:Archive": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z\"></path></svg>", "tabchat:Delete": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0\"></path></svg>", "tabchat:Tags": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\"><path d=\"M4 12 L8 7 H21 V17 H8 L4 12 Z\" stroke=\"currentColor\" fill=\"none\"></path><circle cx=\"10\" cy=\"12\" r=\"0.75\" fill=\"currentColor\" stroke=\"currentColor\"></circle></svg>", "toast:check": "<svg aria-hidden=\"true\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z\"></path></svg>", "toast:x": "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\"></line><line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"></line></svg>"};
 
   const SVG = {
@@ -1174,6 +1178,49 @@ nav.is-new .nav-chat-menu { display: none; }
 .tdp-toast .x { display: flex; padding: 2px; color: var(--color-base-500); cursor: pointer; }
 .tdp-toast .x svg { width: 12px; height: 12px; }
 @keyframes tdp-toast-in { from { opacity: 0; transform: translateY(-8px); } }
+/* the tab title while it's renamed, and Tags in the tab's menu */
+.panel-tab.renaming { padding-right: 10px; }
+.tab-rename { width: 13rem; min-width: 0; border: 0; outline: none; background: transparent; color: inherit; font: inherit; font-size: 0.875rem; }
+.tdp-tags { width: 13rem; padding: 4px 6px; font-size: 0.8125rem; }
+.tdp-tags input { width: 100%; height: 1.6875rem; border: 0; outline: none; background: transparent; color: inherit; font: inherit; }
+.tdp-tags input::placeholder { color: var(--color-base-${isLight ? '400' : '500'}); }
+.tdp-tags-empty { padding: 4px 0 6px; font-size: 0.75rem; color: var(--color-base-500); }
+.tdp-tag-list { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px 0 6px; }
+.tdp-tag { padding: 2px 8px; border-radius: 9999px; font-size: 0.6875rem; background: var(--color-base-${isLight ? '100' : '800'}); }
+/* the message editor: bg-base-50 dark:bg-base-800 rounded-3xl px-4 py-3 */
+.msg-editor { margin-bottom: 8px; padding: 12px 16px; border-radius: 24px; background: var(--color-base-${isLight ? '50' : '800'}); }
+.msg-editor textarea { display: block; width: 100%; resize: none; border: 0; outline: none; background: transparent; color: ${isLight ? 'var(--color-base-900)' : 'var(--color-base-100)'}; font: inherit; font-size: 0.90625rem; line-height: 1.6; }
+.me-bar { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
+.me-gap { flex: 1; }
+.me-btn { height: 28px; padding: 0 10px; border: 0; border-radius: 8px; font: inherit; font-size: 0.75rem; cursor: pointer; background: var(--color-base-${isLight ? '100' : '850'}); color: ${isLight ? 'var(--color-base-800)' : 'var(--color-base-0)'}; }
+.me-btn.plain { background: transparent; color: var(--color-base-${isLight ? '600' : '400'}); }
+.me-btn.solid { background: var(--color-base-${isLight ? '900' : '100'}); color: var(--color-base-${isLight ? '0' : '900'}); }
+/* ConfirmDialog: w-[32rem] rounded-3xl bg-base-0 dark:bg-base-950 */
+.modal.tdp-modal.bare { padding: 0; }
+.confirm-panel { margin: auto 8px; width: 32rem; max-width: calc(100% - 16px); padding: 20px; border-radius: 24px; border: 1px solid var(--color-base-${isLight ? '0' : '900'}); background: var(--color-base-${isLight ? '0' : '950'}); box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); }
+.cf-title { margin-bottom: 10px; font-size: 0.875rem; font-weight: 500; color: ${isLight ? 'var(--color-base-900)' : 'var(--color-base-200)'}; }
+.cf-text { font-size: 0.875rem; color: ${isLight ? 'var(--color-base-500)' : 'var(--color-base-300)'}; }
+.cf-bar { display: flex; gap: 6px; margin-top: 20px; }
+.cf-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; height: 28px; padding: 0 10px; border: 0; border-radius: 8px; font: inherit; font-size: 0.75rem; cursor: pointer; background: var(--color-base-${isLight ? '100' : '850'}); color: ${isLight ? 'var(--color-base-800)' : 'var(--color-base-0)'}; }
+.cf-btn.yes { background: var(--color-base-${isLight ? '900' : '100'}); color: var(--color-base-${isLight ? '0' : '900'}); }
+.cf-btn svg { width: 0.875rem; height: 0.875rem; }
+/* ShareChatModal: w-[42rem] rounded-4xl bg-base-0 dark:bg-base-900 */
+.share-panel { margin: auto 8px; width: 42rem; max-width: 100%; padding: 14px 18px 18px; border-radius: 32px; border: 1px solid var(--color-base-${isLight ? '0' : '850'}); background: var(--color-base-${isLight ? '0' : '900'}); color: ${isLight ? 'var(--color-base-900)' : 'var(--color-base-100)'}; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); font-size: 0.75rem; }
+.sh-head { display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem; font-weight: 500; color: ${isLight ? 'var(--color-base-900)' : 'var(--color-base-300)'}; }
+.sh-x { display: flex; padding: 4px; border-radius: 9999px; cursor: pointer; color: var(--color-base-500); }
+.sh-x svg { width: 0.875rem; height: 0.875rem; }
+.sh-sub { margin: 10px 4px 12px; color: var(--color-base-${isLight ? '700' : '300'}); }
+.sh-card { padding: 8px 12px 10px; border-radius: 12px; background: var(--color-base-${isLight ? '50' : '850'}); }
+.sh-vis { display: inline-flex; align-items: center; gap: 8px; height: 24px; font-size: 0.8125rem; cursor: pointer; color: var(--color-base-${isLight ? '800' : '200'}); }
+.sh-vis b { font-weight: 500; }
+.sh-vis svg { width: 0.875rem; height: 0.875rem; }
+.sh-note { margin-top: 2px; line-height: 1.25rem; color: var(--color-base-${isLight ? '500' : '400'}); }
+.sh-list { display: flex; justify-content: space-between; align-items: center; margin: 14px 4px 0; color: var(--color-base-500); }
+.sh-add { padding: 4px 8px; border-radius: 8px; cursor: pointer; }
+.sh-add:hover { background: var(--color-base-${isLight ? '100' : '800'}); }
+.sh-empty { padding: 12px 0; text-align: center; color: var(--color-base-500); }
+.sh-bar { display: flex; justify-content: flex-end; gap: 6px; margin-top: 6px; }
+.sh-bar .cf-btn { flex: none; }
 /* common/Modal.svelte: modal fixed inset-0 bg-base-1000/45 dark:bg-base-1000/60 */
 .modal.tdp-modal { position: fixed; inset: 0; z-index: 9999; display: flex; justify-content: center; overflow-y: auto; padding: 12px; --tdp-modal-gap: 1.5rem; background: color-mix(in oklab, var(--color-base-1000) ${isLight ? '45' : '60'}%, transparent); }
 /* SearchModal.svelte: w-[70rem] rounded-2xl bg-base-0 dark:bg-base-850 */
@@ -2815,7 +2862,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       el.setAttribute('role', 'menu');
       var pinned = ctx.pinned();
       el.innerHTML =
-        mi('none', I.share, 'Share') +
+        mi('share', I.share, 'Share') +
         '<button type="button" class="mi sub" data-act="do:download" data-sub="download">' + I.download + '<span class="label">Download</span></button>' +
         mi('rename', I.editPencil, 'Rename') +
         mi('unread', I.chatCheck, 'Mark as unread') +
@@ -3028,11 +3075,24 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       fold(sec, sec.querySelector('[data-section-toggle]'), true);
       syncPinned();
     } else if (act === 'archive' || act === 'delete') {
-      if (row.classList.contains('active') && window.__tdpOpenChat) window.__tdpOpenChat('new');
-      row.remove();
-      syncPinned();
+      var gone = function () {
+        if (row.classList.contains('active') && window.__tdpOpenChat) window.__tdpOpenChat('new');
+        row.remove();
+        syncPinned();
+      };
+      // DeleteConfirmDialog.svelte: Delete asks first, Archive doesn't
+      if (act === 'delete' && window.__tdpDialogs) window.__tdpDialogs.confirm('Delete chat?', 'This will delete ' + row.querySelector('.label').textContent + '.', gone);
+      else gone();
+    } else if (act === 'share' && window.__tdpDialogs) {
+      window.__tdpDialogs.share();
     }
   }
+  // The tab bar's Chat actions act on the chat that is open
+  window.__tdpChatAct = function (act) {
+    var row = side.querySelector('.side-item.active');
+    if (row) chatAct(row, act);
+    return row;
+  };
 
   // ChatItem.svelte: the title becomes an input in place; Enter or leaving
   // it saves, Escape cancels
@@ -3284,7 +3344,7 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
 (function () {
   var M = window.__tdpMenus;
   if (!M) return;
-  var D = ${JSON.stringify(DEV_ICONS)};
+  var D = ${JSON.stringify(Object.assign({}, DEV_ICONS, SHARE_ICONS))};
   var I = ${JSON.stringify({ chatBubble: SVG.tabChat, search: SVG.search, xMark: SVG.xMark, sliders: SVG.knobsInput, chevronDown: SVG.chevronDown, chevronRight: SVG.chevronRightAlt, terminal: SVG.terminal, code: SVG.code })};
   var LOGO = ${JSON.stringify(LOGO)};
   function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
@@ -3316,23 +3376,85 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     el.className = 'tdp-menu newtab-menu app-dropdown-menu rounded-xl border border-base-100 dark:border-base-800 bg-base-0 dark:bg-base-850 shadow-lg min-w-56';
     el.innerHTML = M.item('new', D['newtab:New Chat'], 'New Chat', '<span class="kbd">Ctrl+Alt+O</span>') + M.item('none', D['newtab:Overview'], 'Overview');
   });
+  function subItem(key, ico, label) {
+    return '<button type="button" class="mi sub" data-act="do:' + key + '" data-sub="' + key + '">' + ico + '<span class="label">' + label + '</span><span class="chev">' + I.chevronRight + '</span></button>';
+  }
   M.register('tabchat', { align: 'start', gap: 4, pad: 16 }, function (el) {
     el.className = 'tdp-menu chat-menu app-dropdown-menu select-none rounded-xl border border-base-100 dark:border-base-800 bg-base-0 dark:bg-base-850 shadow-lg';
-    el.innerHTML = M.item('none', D['tabchat:Share'], 'Share') + M.item('none', D['tabchat:Download'], 'Download') +
-      M.item('none', D['tabchat:Rename'], 'Rename') + M.item('copy', D['tabchat:Copy'], 'Copy') + '<hr>' +
-      M.item('none', D['tabchat:Archive'], 'Archive') + M.item('none', D['tabchat:Delete'], 'Delete') + '<hr>' +
-      M.item('none', D['tabchat:Tags'], 'Tags', '<span class="chev">' + I.chevronRight + '</span>');
+    el.innerHTML = M.item('share', D['tabchat:Share'], 'Share') + subItem('download', D['tabchat:Download'], 'Download') +
+      M.item('rename', D['tabchat:Rename'], 'Rename') + M.item('copy', D['tabchat:Copy'], 'Copy') + '<hr>' +
+      M.item('archive', D['tabchat:Archive'], 'Archive') + M.item('delete', D['tabchat:Delete'], 'Delete') + '<hr>' +
+      subItem('tags', D['tabchat:Tags'], 'Tags');
   });
+  // Tags.svelte: the chat's tags, an input that adds one on Enter
+  var TAGS = {};
+  function tagsHtml() {
+    var key = document.getElementById('nav-title').textContent, list = TAGS[key] || [];
+    return '<div class="tdp-tags"><input placeholder="Add tags..." autocomplete="off">' +
+      (list.length ? '<div class="tdp-tag-list">' + list.map(function (t) { return '<span class="tdp-tag">' + esc(t) + '</span>'; }).join('') + '</div>'
+        : '<div class="tdp-tags-empty">No tags yet. Type to create one.</div>') + '</div>';
+  }
+  document.addEventListener('keydown', function (e) {
+    var input = e.target.closest && e.target.closest('.tdp-tags input');
+    if (!input || e.key !== 'Enter' || !input.value.trim()) return;
+    e.preventDefault();
+    var key = document.getElementById('nav-title').textContent;
+    (TAGS[key] = TAGS[key] || []).push(input.value.trim());
+    var box = input.closest('.tdp-tags');
+    box.outerHTML = tagsHtml();
+    var next = document.querySelector('.tdp-tags input');
+    if (next) next.focus();
+  }, true);
+  var TAB_SUBS = {
+    download: function () { return M.item('close-only', '', 'Export chat (.json)') + M.item('close-only', '', 'Plain text (.txt)') + M.item('close-only', '', 'PDF document (.pdf)'); },
+    tags: tagsHtml
+  };
   function onAct(act) {
     if (act === 'new' && window.__tdpOpenChat) window.__tdpOpenChat('new');
     if (act === 'copy') toast('Copying to clipboard was successful!');
+    if (act === 'share') share();
+    if (act === 'rename') renameTab();
+    if ((act === 'archive' || act === 'delete') && window.__tdpChatAct) window.__tdpChatAct(act);
+  }
+
+  // Tabs.svelte: Rename turns the tab's title into an input, selected;
+  // Enter or leaving it saves, Escape cancels, and the sidebar row follows
+  function renameTab() {
+    var title = document.getElementById('nav-title'), tab = title.closest('.panel-tab');
+    var input = document.createElement('input');
+    input.className = 'tab-rename';
+    input.value = title.textContent;
+    tab.classList.add('renaming');
+    title.hidden = true;
+    title.after(input);
+    input.focus();
+    input.select();
+    var done = false;
+    function finish(save) {
+      if (done) return;
+      done = true;
+      var v = input.value.trim();
+      if (save && v && v !== title.textContent) {
+        title.textContent = v;
+        var row = document.querySelector('.side-scroll .side-item.active .label');
+        if (row) row.textContent = v;
+      }
+      input.remove();
+      title.hidden = false;
+      tab.classList.remove('renaming');
+    }
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); finish(false); }
+    });
+    input.addEventListener('blur', function () { finish(true); });
   }
   var statusBtn = document.querySelector('.nav-status');
   if (statusBtn) statusBtn.addEventListener('click', function () { M.show('status', statusBtn); });
   var newTab = document.querySelector('.tab-new');
   if (newTab) newTab.addEventListener('click', function () { M.show('newtab', newTab, null, { onAct: onAct }); });
   var tabMenu = document.getElementById('chat-context-menu-button');
-  if (tabMenu) tabMenu.addEventListener('click', function (e) { e.stopPropagation(); M.show('tabchat', tabMenu, null, { onAct: onAct }); });
+  if (tabMenu) tabMenu.addEventListener('click', function (e) { e.stopPropagation(); M.show('tabchat', tabMenu, null, { onAct: onAct, subs: TAB_SUBS }); });
 
   // ---- Notifications: the bell swaps the sidebar for the inbox ----
   var bell = document.querySelector('.brand-bell');
@@ -3358,9 +3480,12 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       }
       return;
     }
+    var ed = e.target.closest('.msg-editor button');
+    if (ed) { finishEdit(ed.closest('.msg-editor'), ed.dataset.do); return; }
     var act = e.target.closest('.msg-action');
     if (!act) return;
     var tip = act.getAttribute('data-tip');
+    if (tip === 'Edit') { editMessage(act.closest('.message-listitem')); return; }
     if (tip === 'Copy') toast('Copying to clipboard was successful!');
     if (tip === 'Good Response' || tip === 'Bad Response') {
       var row = act.parentElement;
@@ -3369,6 +3494,38 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
       act.classList.toggle('on', on);
     }
   });
+
+  // UserMessage.svelte and ResponseMessage.svelte: Edit swaps the message
+  // for a rounded-3xl textarea with Save, Cancel and Send (a reply: Cancel
+  // and Save); saving writes the text back
+  function editMessage(li) {
+    if (!li || li.querySelector('.msg-editor')) return;
+    var user = li.querySelector('.chat-user .bubble .markdown-prose');
+    var target = user || li.querySelector('.branch.active .chat-assistant > .markdown-prose') || li.querySelector('.chat-assistant > .markdown-prose');
+    if (!target) return;
+    var hide = user ? [li.querySelector('.bubble-row'), li.querySelector('.user-actions')] : [target, li.querySelector('.branch.active .msg-actions') || li.querySelector('.msg-actions')];
+    var box = document.createElement('div');
+    box.className = 'msg-editor w-full bg-base-50 dark:bg-base-800 rounded-3xl' + (user ? '' : ' reply');
+    box.innerHTML = '<textarea rows="' + (user ? 2 : 5) + '"></textarea><div class="me-bar">' +
+      (user ? '<button type="button" class="me-btn" data-do="save">Save</button><span class="me-gap"></span><button type="button" class="me-btn plain" data-do="cancel">Cancel</button><button type="button" class="me-btn solid" data-do="send">Send</button>'
+        : '<span class="me-gap"></span><button type="button" class="me-btn plain" data-do="cancel">Cancel</button><button type="button" class="me-btn solid" data-do="save">Save</button>') + '</div>';
+    box.querySelector('textarea').value = target.innerText.trim();
+    box._target = target;
+    box._hidden = hide.filter(Boolean);
+    box._hidden.forEach(function (h) { h.style.display = 'none'; });
+    (user ? li.querySelector('.chat-user') : target.parentElement).insertBefore(box, user ? li.querySelector('.bubble-row') : target);
+    var ta = box.querySelector('textarea');
+    ta.focus();
+    ta.setSelectionRange(ta.value.length, ta.value.length);
+  }
+  function finishEdit(box, how) {
+    if (how !== 'cancel') {
+      var v = box.querySelector('textarea').value.trim();
+      if (v) box._target.innerHTML = v.split(/\\n\\s*\\n/).map(function (p) { return '<p>' + esc(p).replace(/\\n/g, '<br>') + '</p>'; }).join('');
+    }
+    box._hidden.forEach(function (h) { h.style.display = ''; });
+    box.remove();
+  }
 
   // ---- Modals: modal fixed inset-0 bg-base-1000/45 dark:bg-base-1000/60 ----
   var openModal = null;
@@ -3612,7 +3769,37 @@ ${opts.canvasScript ? `<script type="application/json" id="cfx-src">${JSON.strin
     if ((e.ctrlKey || e.metaKey) && e.key === '.') { e.preventDefault(); settings(); }
     if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); search(); }
   });
-  window.__tdpDialogs = { settings: settings, search: search, toast: toast };
+  // common/ConfirmDialog.svelte: a w-[32rem] rounded-3xl box, Cancel and Confirm
+  function confirmBox(title, text, onYes) {
+    var m = modal('confirm-panel', '<div class="cf-title">' + esc(title) + '</div><div class="cf-text">' + esc(text) + '</div>' +
+      '<div class="cf-bar"><button type="button" class="cf-btn" data-do="no">Cancel</button><button type="button" class="cf-btn yes" data-do="yes">Confirm</button></div>');
+    m.classList.add('bare');
+    m.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-do]');
+      if (!b) return;
+      closeModal();
+      if (b.dataset.do === 'yes') onYes();
+    });
+    m.querySelector('.cf-btn.yes').focus();
+  }
+  // chat/ShareChatModal.svelte: private by default, an access list and the links
+  function share() {
+    var m = modal('share-panel', '<div class="sh-head"><span>Share Chat</span><span class="sh-x" role="button" aria-label="Close">' + I.xMark + '</span></div>' +
+      '<div class="sh-sub">Your link is private until you choose who can view it.</div>' +
+      '<div class="sh-card"><span class="sh-vis" role="button">' + D['share:lock'] + '<b>Private</b>' + I.chevronDown + '</span><div class="sh-note">Only select users and groups with permission can access</div></div>' +
+      '<div class="sh-list"><span>Access List</span><span class="sh-add" role="button">+ Add Access</span></div>' +
+      '<div class="sh-empty">No access grants. Private to you.</div>' +
+      '<div class="sh-bar"><button type="button" class="cf-btn">Share to Open WebUI Community</button><button type="button" class="cf-btn yes sh-copy">' + D['share:link'] + 'Copy Link</button></div>');
+    m.querySelector('.sh-x').addEventListener('click', closeModal);
+    var vis = m.querySelector('.sh-vis');
+    vis.addEventListener('click', function () {
+      var pub = vis.querySelector('b').textContent === 'Private';
+      vis.querySelector('b').textContent = pub ? 'Public' : 'Private';
+      m.querySelector('.sh-note').textContent = pub ? 'Anyone with the link can view this chat' : 'Only select users and groups with permission can access';
+    });
+    m.querySelector('.sh-copy').addEventListener('click', function () { closeModal(); toast('Copying to clipboard was successful!'); });
+  }
+  window.__tdpDialogs = { settings: settings, search: search, toast: toast, confirm: confirmBox, share: share };
 })();
 
 // Channels (channel/Channel.svelte, Navbar.svelte, Messages.svelte,
